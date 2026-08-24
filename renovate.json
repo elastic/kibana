@@ -5,7 +5,11 @@
     "helpers:pinGitHubActionDigests",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
-  "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
+  "ignorePaths": [
+    "**/__fixtures__/**",
+    "**/fixtures/**",
+    ".github/workflows/*.lock.yml"
+  ],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "9.5", "9.4", "8.19"],
   "labels": ["release_note:skip", "backport:all-open"],
@@ -68,6 +72,7 @@
         "@rsdoctor/rspack-plugin",
         "@swc/plugin-emotion"
       ],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": [
@@ -165,10 +170,7 @@
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
-        "babel-plugin-istanbul",
         "lighthouse",
-        "nyc",
-        "oboe",
         "pixelmatch",
         "@playwright/test",
         "playwright",
@@ -367,7 +369,6 @@
         "react-router",
         "react-router-config",
         "react-router-dom",
-        "react-router-dom-v5-compat",
         "@types/react-router",
         "@types/react-router-config",
         "@types/react-router-dom",
@@ -481,16 +482,16 @@
         "yaml",
         "@types/js-search"
       ],
-      "reviewers": ["team:fleet"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Fleet"],
+      "addLabels": ["Team:streams-ui"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
     {
       "groupName": "tar",
       "matchDepNames": ["tar"],
-      "reviewers": ["team:fleet", "team:kibana-operations"],
+      "reviewers": ["team:streams-ui", "team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -665,7 +666,7 @@
     {
       "groupName": "react-virtualized",
       "matchDepNames": ["react-virtualized", "@types/react-virtualized"],
-      "reviewers": ["team:kibana-management", "team:fleet"],
+      "reviewers": ["team:kibana-management", "team:streams-ui"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Kibana Management", "Team:Monitoring"],
       "enabled": true,
@@ -674,7 +675,7 @@
     {
       "groupName": "react-window",
       "matchDepNames": ["react-window", "@types/react-window"],
-      "reviewers": ["team:kibana-management", "team:fleet"],
+      "reviewers": ["team:kibana-management", "team:streams-ui"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Kibana Management", "Team:Monitoring"],
       "enabled": true,
@@ -867,6 +868,7 @@
       "groupName": "babel",
       "matchDepNames": ["@emotion/babel-preset-css-prop", "babel-loader"],
       "matchDepPatterns": ["^@babel", "^babel-plugin"],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations", "ci:bench-jest"],
@@ -1218,7 +1220,7 @@
     {
       "groupName": "hjson",
       "matchDepNames": ["@types/hjson", "hjson"],
-      "reviewers": ["team:kibana-visualizations", "team:fleet"],
+      "reviewers": ["team:kibana-visualizations", "team:streams-ui"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Feature:Vega", "Team:Visualizations"],
       "minimumReleaseAge": "14 days",
@@ -1796,7 +1798,7 @@
     {
       "groupName": "p-limit",
       "matchDepNames": ["p-limit"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "allowedVersions": "<4.0.0",
       "minimumReleaseAge": "14 days",
@@ -1805,7 +1807,7 @@
     {
       "groupName": "p-map - ESM Required",
       "matchDepNames": ["p-map"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["effort:low", "blocked"],
       "minimumReleaseAge": "14 days",
@@ -1814,7 +1816,7 @@
     {
       "groupName": "p-retry - ESM Required",
       "matchDepNames": ["p-retry"],
-      "reviewers": ["team:fleet", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["blocked", "effort:low"],
       "minimumReleaseAge": "14 days",
@@ -1861,7 +1863,6 @@
         "node-forge",
         "formik",
         "handlebars",
-        "js-yaml",
         "knip",
         "magic-bytes.js",
         "minimist",
@@ -1869,7 +1870,6 @@
         "tough-cookie",
         "xml-crypto",
         "@elastic/node-crypto",
-        "@types/js-yaml",
         "@types/lodash",
         "@types/minimist",
         "@types/node-forge",
@@ -1986,6 +1986,7 @@
         "jest-snapshot",
         "jest-styled-components"
       ],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations", "ci:bench-jest"],
@@ -2010,7 +2011,7 @@
         "team:response-ops",
         "team:contextual-security-apps",
         "team:security-asset-management",
-        "team:fleet",
+        "team:streams-ui",
         "team:awp-platform",
         "team:security-onboarding-and-lifecycle-mgt"
       ],
@@ -2147,6 +2148,24 @@
       "enabled": true
     },
     {
+      "groupName": "@elastic/schemas",
+      "matchDepNames": ["@elastic/schemas"],
+      "reviewers": ["team:workchat-eng"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:agent-builder"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@cfworker/json-schema",
+      "matchDepNames": ["@cfworker/json-schema"],
+      "reviewers": ["team:workchat-eng"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:agent-builder"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "langsmith",
       "matchDepNames": ["langsmith"],
       "reviewers": ["team:security-threat-hunting"],
@@ -2158,9 +2177,9 @@
     {
       "groupName": "seedrandom",
       "matchDepNames": ["seedrandom", "@types/seedrandom"],
-      "reviewers": ["team:cloud-services"],
+      "reviewers": ["team:siem-conduit"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security-Cloud Services"],
+      "addLabels": ["Team:security-siem-conduit"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2208,14 +2227,6 @@
       "groupName": "esql-js",
       "matchDepNames": ["@elastic/esql"],
       "reviewers": ["team:kibana-esql"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "fuse.js",
-      "matchDepNames": ["fuse.js"],
-      "reviewers": ["team:observability-ui"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2460,6 +2471,7 @@
     {
       "groupName": "moonrepo",
       "matchDepNames": ["@moonrepo/cli"],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "/^[9].*/", "8.19"],
       "labels": ["Team:Operations", "release_note:skip", "backport:skip"],
@@ -2495,6 +2507,7 @@
     {
       "groupName": "@swc",
       "matchDepNames": ["@swc/core", "@swc/helpers"],
+      "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
