@@ -25,6 +25,7 @@ import {
   getChangePointByColumns,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
+  getNamedParams,
 } from '@kbn/esql-utils';
 import type { TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType, buildEsQuery } from '@kbn/es-query';
@@ -182,6 +183,7 @@ export const getSeriesCacheKey = (fetchParams: ChangePointFetchParams): string =
     fetchParams.timeRange?.from ?? '',
     fetchParams.timeRange?.to ?? '',
     JSON.stringify(fetchParams.filters ?? []),
+    JSON.stringify(fetchParams.esqlVariables ?? []),
     columnIds,
     String(rowCount),
   ].join('\0');
@@ -325,10 +327,13 @@ const loadLineSeries = async ({
     filter = undefined;
   }
 
+  const query = `${lineEsql} | LIMIT ${LINE_SERIES_LIMIT}`;
+  const namedParams = getNamedParams(query, timeRange, fetchParams.esqlVariables);
   const { rawResponse } = await data.search.esql(
     {
-      query: `${lineEsql} | LIMIT ${LINE_SERIES_LIMIT}`,
+      query,
       ...(filter ? { filter } : {}),
+      ...(namedParams.length ? { params: namedParams } : {}),
     },
     {
       abortSignal,

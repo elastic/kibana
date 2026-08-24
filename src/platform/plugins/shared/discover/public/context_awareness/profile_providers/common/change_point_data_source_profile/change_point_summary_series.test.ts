@@ -238,6 +238,12 @@ describe('change_point_summary_series pure helpers', () => {
           filters: [{ meta: { key: 'host' } }] as never,
         })
       ).not.toBe(same);
+      expect(
+        getSeriesCacheKey({
+          ...base,
+          esqlVariables: [{ key: 'env', value: 'prod', type: 'values' }],
+        })
+      ).not.toBe(same);
     });
   });
 
@@ -350,6 +356,40 @@ describe('change_point_summary_series pure helpers', () => {
         expect(ready.seriesByEntity.get('')).toHaveLength(2);
         expect(ready.cards).toHaveLength(1);
       }
+    });
+
+    it('passes ?_tstart/?_tend named params so the line query can resolve Discover time parameters', async () => {
+      const esql = jest.fn().mockResolvedValue({
+        rawResponse: {
+          columns: [{ name: 'bucket' }, { name: 'avg_bytes' }],
+          values: [['2023-11-15T00:00:00.000Z', 14]],
+        },
+      });
+      const data = { search: { esql } } as unknown as DataPublicPluginStart;
+      const table = makeTable(COLUMNS_NO_BY, [
+        {
+          bucket: '2023-11-15T00:00:00.000Z',
+          avg_bytes: 14,
+          type: 'mean_shift',
+          pvalue: 0.001,
+        },
+      ]);
+      const esqlWithTimeParams =
+        'FROM idx | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket';
+
+      const ready = await waitForTerminalState(
+        makeFetchParams({ table, query: { esql: esqlWithTimeParams } }),
+        data
+      );
+
+      expect(ready.status).toBe('ready');
+      expect(esql).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.stringContaining('?_tend'),
+          params: expect.arrayContaining([{ _tstart: expect.any(String) }, { _tend: expect.any(String) }]),
+        }),
+        expect.anything()
+      );
     });
 
     it('fetches a line series with extended from when a no-BY annotation is before the range', async () => {
