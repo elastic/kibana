@@ -24,7 +24,7 @@ import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common';
 import {
   MAX_YARA_RULE_CONTENT_BYTE_LENGTH,
   MAXIMUM_RULE_IDENTIFIER_LENGTH,
-} from '@kbn/security-solution-plugin/server/lists_integration/endpoint/validators/custom_yara_signatures_validator';
+} from '@kbn/security-solution-plugin/server/endpoint/lib/custom_yara_signatures';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {

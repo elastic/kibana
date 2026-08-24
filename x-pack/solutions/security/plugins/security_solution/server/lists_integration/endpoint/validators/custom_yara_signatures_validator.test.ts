@@ -291,7 +291,9 @@ describe('YARA Signatures API validations', () => {
 
       await expect(
         customYaraSignaturesValidator.validatePreCreateItem(buildCreateItem())
-      ).rejects.toThrow(/Invalid YARA rule \(libyara MOCKED_VERSION\): line 2: syntax error/);
+      ).rejects.toThrow(
+        /Invalid YARA rules \(libyara MOCKED_VERSION\), 1 error found: \[line 2\] syntax error/
+      );
       expect(mockValidateYaraRule).toHaveBeenCalled();
     });
 
