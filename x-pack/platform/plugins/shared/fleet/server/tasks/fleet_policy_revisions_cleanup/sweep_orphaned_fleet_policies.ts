@@ -66,7 +66,9 @@ export const sweepOrphanedFleetPolicies = async (
   }
 
   if (baseIds.length === 0) {
-    logger.debug('[sweepOrphanedFleetPolicies] No policy IDs in .fleet-policies, nothing to sweep.');
+    logger.debug(
+      '[sweepOrphanedFleetPolicies] No policy IDs in .fleet-policies, nothing to sweep.'
+    );
     return { deletedCount: 0 };
   }
 
@@ -92,7 +94,9 @@ export const sweepOrphanedFleetPolicies = async (
   );
 
   if (orphanedIds.length === 0) {
-    logger.debug('[sweepOrphanedFleetPolicies] All candidate orphans still have active agents — skipping deletion.');
+    logger.debug(
+      '[sweepOrphanedFleetPolicies] All candidate orphans still have active agents — skipping deletion.'
+    );
     return { deletedCount: 0 };
   }
 
