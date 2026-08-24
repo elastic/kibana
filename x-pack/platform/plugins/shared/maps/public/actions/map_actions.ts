@@ -18,7 +18,7 @@ import type { Geometry, Position } from 'geojson';
 import { asyncForEach, asyncMap } from '@kbn/std';
 import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
-import { getInspectorAdapters } from '../reducers/non_serializable_instances';
+import { getInspectorAdapters, getMapApi } from '../reducers/non_serializable_instances';
 import type { MapStoreState } from '../reducers/store';
 import type { IVectorStyle } from '../classes/styles/vector/vector_style';
 import {
@@ -47,7 +47,6 @@ import {
   ROLLBACK_MAP_SETTINGS,
   SET_EMBEDDABLE_SEARCH_CONTEXT,
   SET_EXECUTION_CONTEXT,
-  SET_GOTO,
   SET_MAP_INIT_ERROR,
   SET_MAP_SETTINGS,
   SET_MOUSE_COORDINATES,
@@ -284,11 +283,24 @@ export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
 }
 
-export function setGotoWithCenter({ lat, lon, zoom }: MapCenterAndZoom) {
-  return {
-    type: SET_GOTO,
-    center: { lat, lon, zoom },
-  };
+export function setMapCenter({ lat, lon, zoom }: MapCenterAndZoom) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const mapApi = getMapApi(getState());
+    if (!mapApi) {
+      // set initial map location
+      return;
+    }
+
+    mapApi.jumpTo({
+      zoom,
+      center: [lon, lat],
+    });
+
+
+  }
 }
 
 export function clearGoto() {
