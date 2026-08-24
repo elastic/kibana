@@ -159,6 +159,7 @@ export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';
 export {
   CONVERSATION_SCHEMA_VERSION,
+  MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   EventActorType,
   TimelineTriggerType,
   TimelineEventType,
