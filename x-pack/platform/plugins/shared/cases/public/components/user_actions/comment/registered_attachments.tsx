@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import React, { Suspense } from 'react';
 import { memoize, partition } from 'lodash';
@@ -18,7 +12,7 @@ import { EuiButtonIcon, EuiCode, EuiFlexItem, EuiLoadingSpinner, EuiToolTip } fr
 
 import type {
   AttachmentType,
-  AttachmentViewObject,
+  AttachmentCreationActivity,
   CommonAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 
@@ -60,13 +54,13 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
   let AttachmentElement: React.ReactElement;
 
   const renderCallback = (
-    attachmentViewObject: AttachmentViewObject<CommonAttachmentViewProps>,
+    creationActivity: AttachmentCreationActivity<CommonAttachmentViewProps>,
     props: CommonAttachmentViewProps
   ) => {
-    if (!attachmentViewObject.children) return;
+    if (!creationActivity.children) return;
 
     if (!AttachmentElement) {
-      AttachmentElement = React.createElement(attachmentViewObject.children, props);
+      AttachmentElement = React.createElement(creationActivity.children, props);
     } else {
       AttachmentElement = React.cloneElement(AttachmentElement, props);
     }
@@ -133,17 +127,16 @@ export const createRegisteredAttachmentUserActionBuilder = <
       permissions,
     };
 
-    const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
-    const deleteSuccessTitle =
-      attachmentViewObject.deleteSuccessTitle ?? DELETE_REGISTERED_ATTACHMENT;
+    const creationActivity = attachmentType.getCreationActivity(props);
+    const deleteSuccessToast = creationActivity.deleteSuccessToast ?? DELETE_REGISTERED_ATTACHMENT;
 
     const renderer = getAttachmentRenderer(userAction.id);
-    const actions = attachmentViewObject.getActions?.(props) ?? [];
+    const actions = creationActivity.getActions?.(props) ?? [];
     const [primaryActions, nonPrimaryActions] = partition(actions, 'isPrimary');
     const visiblePrimaryActions = primaryActions.slice(0, 2);
     const nonVisiblePrimaryActions = primaryActions.slice(2, primaryActions.length);
     const className =
-      attachmentViewObject.className ?? `comment-${attachment.type}-attachment-${attachmentTypeId}`;
+      creationActivity.className ?? `comment-${attachment.type}-attachment-${attachmentTypeId}`;
 
     return [
       {
@@ -154,12 +147,13 @@ export const createRegisteredAttachmentUserActionBuilder = <
           />
         ),
         className,
-        css: attachmentViewObject.css,
-        event: attachmentViewObject.event,
-        eventColor: attachmentViewObject.eventColor,
+        css: creationActivity.css,
+        event: creationActivity.event,
+        eventColor: creationActivity.eventColor,
         'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineAvatar: attachmentViewObject.timelineAvatar,
+        timelineAvatar: attachmentType.getIcon(props),
+        timelineAvatarAriaLabel: attachmentType.getLabel(),
         actions: (
           <UserActionContentToolbar id={attachment.id}>
             {visiblePrimaryActions.map(
@@ -186,13 +180,13 @@ export const createRegisteredAttachmentUserActionBuilder = <
             )}
             <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}
-              onDelete={() => handleDeleteComment(attachment.id, deleteSuccessTitle)}
+              onDelete={() => handleDeleteComment(attachment.id, deleteSuccessToast)}
               registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
-              hideDefaultActions={!!attachmentViewObject.hideDefaultActions}
+              hideDefaultActions={!!creationActivity.hideDefaultActions}
             />
           </UserActionContentToolbar>
         ),
-        children: renderer(attachmentViewObject, props),
+        children: renderer(creationActivity, props),
       },
     ];
   },
