@@ -69,7 +69,6 @@ import {
 import { useThrottleFn } from '@kbn/react-hooks';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
-import { useJsonModeSettings, useSourceDisplayMode } from '../hooks/use_json_view_settings';
 import type {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -664,18 +663,11 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
 
-    const { sourceDisplayMode, onChangeSourceDisplayMode } = useSourceDisplayMode({
-      storage,
-      consumer,
-      sourceDisplayModeState,
-      onUpdateSourceDisplayMode,
-    });
-    const { jsonModeSettings, onChangeJsonModeSettings } = useJsonModeSettings({
-      storage,
-      consumer,
-      jsonModeSettingsState,
-      onUpdateJsonModeSettings,
-    });
+    const sourceDisplayMode = sourceDisplayModeState ?? 'summary';
+    const jsonModeSettings = useMemo<JsonModeSettings>(
+      () => jsonModeSettingsState ?? {},
+      [jsonModeSettingsState]
+    );
 
     const displayedColumns = getDisplayedColumns(columns, dataView, sourceDisplayMode);
     const isSummaryOnlyColumn = getIsSummaryOnlyColumn(displayedColumns);
@@ -688,13 +680,13 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     const onChangeSourceDisplayModeWithSeen = useMemo(
       () =>
-        onChangeSourceDisplayMode
+        onUpdateSourceDisplayMode
           ? (mode: SourceDisplayMode) => {
               markViewModeSeen();
-              onChangeSourceDisplayMode(mode);
+              onUpdateSourceDisplayMode(mode);
             }
           : undefined,
-      [markViewModeSeen, onChangeSourceDisplayMode]
+      [markViewModeSeen, onUpdateSourceDisplayMode]
     );
 
     const docMap = useMemo<DocMap>(
@@ -1423,7 +1415,7 @@ const InternalUnifiedDataTable = React.forwardRef<
               sourceDisplayMode={sourceDisplayMode}
               onChangeSourceDisplayMode={onChangeSourceDisplayModeWithSeen}
               jsonModeSettings={jsonModeSettings}
-              onChangeJsonModeSettings={onChangeJsonModeSettings}
+              onChangeJsonModeSettings={onUpdateJsonModeSettings}
               isViewModeNew={isViewModeNew}
             />
           </>
@@ -1447,7 +1439,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       sourceDisplayMode,
       onChangeSourceDisplayModeWithSeen,
       jsonModeSettings,
-      onChangeJsonModeSettings,
+      onUpdateJsonModeSettings,
       isViewModeNew,
     ]);
 

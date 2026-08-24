@@ -272,64 +272,6 @@ describe('getInitialAppState', () => {
       currentDataView: undefined,
     });
 
-  describe('JSON view settings seeding', () => {
-    const withStoredJsonSettings = (services: DiscoverServices) => {
-      services.storage.get = jest.fn().mockImplementation((key: string) => {
-        if (key === 'discover:sourceDisplayMode') return 'json';
-        if (key === 'discover:jsonModeSettings') return { hideNulls: true, wrapLines: false };
-        return undefined;
-      });
-    };
-
-    test('seeds a new tab source view mode from local storage when the feature is enabled', () => {
-      const services = createDiscoverServicesMock();
-      services.discoverFeatureFlags.getDataTableJsonViewEnabled = jest.fn(() => true);
-      withStoredJsonSettings(services);
-
-      const actual = getInitialAppState({
-        hasGlobalState: false,
-        initialUrlState: undefined,
-        persistedTab: undefined,
-        dataView: dataViewWithTimefieldMock,
-        services,
-      });
-
-      expect(actual.sourceDisplayMode).toBe('json');
-    });
-
-    test('does not seed a new tab when the feature is disabled', () => {
-      const services = createDiscoverServicesMock();
-      services.discoverFeatureFlags.getDataTableJsonViewEnabled = jest.fn(() => false);
-      withStoredJsonSettings(services);
-
-      const actual = getInitialAppState({
-        hasGlobalState: false,
-        initialUrlState: undefined,
-        persistedTab: undefined,
-        dataView: dataViewWithTimefieldMock,
-        services,
-      });
-
-      expect(actual.sourceDisplayMode).toBeUndefined();
-    });
-
-    test('does not seed a persisted tab that has no mode, so it renders as Table', () => {
-      const services = createDiscoverServicesMock();
-      services.discoverFeatureFlags.getDataTableJsonViewEnabled = jest.fn(() => true);
-      withStoredJsonSettings(services);
-
-      const actual = getInitialAppState({
-        hasGlobalState: false,
-        initialUrlState: undefined,
-        persistedTab: getPersistedTab({ services }),
-        dataView: dataViewWithTimefieldMock,
-        services,
-      });
-
-      expect(actual.sourceDisplayMode).toBeUndefined();
-    });
-  });
-
   test('should set view mode correctly', () => {
     const services = createDiscoverServicesMock();
     const actualForUndefinedViewMode = getInitialAppState({
