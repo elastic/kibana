@@ -21,6 +21,7 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
 import type {
+  CreateExceptionListItemRequestQueryInput,
   CreateExceptionListItemRequestBodyInput,
   CreateExceptionListItemResponse,
 } from './create_exception_list_item/create_exception_list_item.gen';
@@ -75,6 +76,7 @@ import type {
   ReadExceptionListResponse,
 } from './read_exception_list/read_exception_list.gen';
 import type {
+  UpdateExceptionListItemRequestQueryInput,
   UpdateExceptionListItemRequestBodyInput,
   UpdateExceptionListItemResponse,
 } from './update_exception_list_item/update_exception_list_item.gen';
@@ -131,6 +133,7 @@ export class Client {
         },
         method: 'POST',
         body: props.body,
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -373,6 +376,7 @@ an exception list that no longer exists.
         },
         method: 'PUT',
         body: props.body,
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -382,6 +386,7 @@ export interface CreateExceptionListProps {
   body: CreateExceptionListRequestBodyInput;
 }
 export interface CreateExceptionListItemProps {
+  query: CreateExceptionListItemRequestQueryInput;
   body: CreateExceptionListItemRequestBodyInput;
 }
 export interface CreateRuleExceptionListItemsProps {
@@ -426,5 +431,6 @@ export interface UpdateExceptionListProps {
   body: UpdateExceptionListRequestBodyInput;
 }
 export interface UpdateExceptionListItemProps {
+  query: UpdateExceptionListItemRequestQueryInput;
   body: UpdateExceptionListItemRequestBodyInput;
 }
