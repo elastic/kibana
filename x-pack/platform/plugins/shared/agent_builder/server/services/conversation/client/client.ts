@@ -62,8 +62,8 @@ import { createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import {
-  buildMetadataFromTemplate,
   serializeMetadataValue,
+  buildMetadataFromTemplate,
   withDeserializedMetadata,
 } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
@@ -286,7 +286,10 @@ class ConversationClientImpl implements ConversationClient {
         access: 'converse',
       });
 
-      return verifyRoundTrip(toPublicConversation(fromEs(document, this.user)));
+      return withDeserializedMetadata(
+        verifyRoundTrip(toPublicConversation(fromEs(document, this.user))),
+        getTemplate
+      );
     } catch (error) {
       if (isConversationNotFoundError(error)) {
         return undefined;
@@ -607,7 +610,10 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   private toResponseConversation(document: Document): ConversationWithPermissions {
-    const conversation = verifyRoundTrip(toPublicConversation(fromEs(document, this.user)));
+    const conversation = withDeserializedMetadata(
+      verifyRoundTrip(toPublicConversation(fromEs(document, this.user))),
+      getTemplate
+    );
 
     return withPermissions({ conversation, user: this.user });
   }
@@ -615,7 +621,10 @@ class ConversationClientImpl implements ConversationClient {
   private toResponseConversationWithoutRounds(
     document: Document
   ): ConversationWithoutRoundsWithPermissions {
-    const conversation = withDeserializedMetadata(fromEsWithoutRounds(document, this.user));
+    const conversation = withDeserializedMetadata(
+      fromEsWithoutRounds(document, this.user),
+      getTemplate
+    );
 
     return withPermissions({ conversation, user: this.user });
   }
