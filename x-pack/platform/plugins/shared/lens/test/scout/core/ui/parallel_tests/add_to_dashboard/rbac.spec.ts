@@ -5,15 +5,53 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout';
+import { LENS_METRIC_STATE_DEFAULTS } from '@kbn/lens-common';
+import type { KbnClient, KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   createLogstashLensEditorSuiteSetup,
-  createNewLens,
   LENS_EDITOR_VIEWPORT,
   spaceTest,
-  testData,
 } from '../../fixtures';
+
+const createRbacLensVisualization = async (
+  kbnClient: KbnClient,
+  spaceId: string,
+  dataViewId: string
+): Promise<string> => {
+  const { data } = await kbnClient.request<{ id: string }>({
+    method: 'POST',
+    path: `/s/${spaceId}/api/visualizations`,
+    headers: {
+      'kbn-xsrf': 'true',
+      'elastic-api-version': '2023-10-31',
+    },
+    body: {
+      type: 'metric',
+      title: `Lens RBAC save options ${spaceId}`,
+      description: '',
+      ignore_global_filters: false,
+      sampling: 1,
+      data_source: { type: 'data_view_reference', ref_id: dataViewId },
+      metrics: [
+        {
+          type: 'primary',
+          operation: 'count',
+          label: 'Count of records',
+          empty_as_null: true,
+        },
+      ],
+      styling: {
+        primary: {
+          labels: { alignment: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign },
+          value: { alignment: LENS_METRIC_STATE_DEFAULTS.primaryAlign, sizing: 'auto' },
+        },
+      },
+    },
+  });
+
+  return data.id;
+};
 
 const VISUALIZE_ALL_ROLE: KibanaRole = {
   elasticsearch: {
@@ -46,8 +84,16 @@ spaceTest.describe('Lens add to dashboard capabilities', { tag: '@local-stateful
   const suiteSetup = createLogstashLensEditorSuiteSetup({
     skipEmptyLensOpen: true,
   });
+  let lensVisualizationId: string;
 
-  spaceTest.beforeAll(suiteSetup.beforeAll);
+  spaceTest.beforeAll(async ({ apiServices, kbnClient, scoutSpace }) => {
+    await suiteSetup.beforeAll({ apiServices, scoutSpace });
+    lensVisualizationId = await createRbacLensVisualization(
+      kbnClient,
+      scoutSpace.id,
+      suiteSetup.getDataViewId()
+    );
+  });
 
   spaceTest.beforeEach(async ({ page }) => {
     await page.setViewportSize(LENS_EDITOR_VIEWPORT);
@@ -78,10 +124,8 @@ spaceTest.describe('Lens add to dashboard capabilities', { tag: '@local-stateful
         const { lens } = pageObjects;
         await browserAuth.loginWithCustomRole(scenario.role);
 
-        await spaceTest.step('build a new Lens visualization and open the save modal', async () => {
-          await createNewLens(pageObjects);
-          await expect(lens.metric.legacyMetricLabel).toHaveText(testData.AVERAGE_OF_BYTES);
-          await expect(lens.metric.legacyMetricValue).toHaveText(/^[\d,.]+$/);
+        await spaceTest.step('open the Lens save modal', async () => {
+          await lens.workspace.openEditor(lensVisualizationId, 'mtrVis');
           await lens.saveButton.click();
           await expect(lens.saveModal).toBeVisible();
         });

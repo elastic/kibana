@@ -374,7 +374,20 @@ export function createLogstashLensEditorSuiteSetup(options?: {
     await openEmptyLensEditor(pageObjects, { timeRange });
   };
 
-  return { beforeAll, beforeEach, afterAll, openEmptyLensEditor: openEmptyLensEditorForSuite };
+  const getDataViewId = (): string => {
+    if (!storedDataViewId) {
+      throw new Error('Logstash data view has not been created');
+    }
+    return storedDataViewId;
+  };
+
+  return {
+    beforeAll,
+    beforeEach,
+    afterAll,
+    openEmptyLensEditor: openEmptyLensEditorForSuite,
+    getDataViewId,
+  };
 }
 
 /**
