@@ -262,10 +262,12 @@ describe('validateOutputForPolicy managed bulk guard', () => {
   it('should reject a non-agentless policy setting data_output_id to the ECH managed bulk output', async () => {
     mockHasLicence(true);
     await expect(
-      validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
-        monitoring_output_id: null,
-      })
+      validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID, monitoring_output_id: null },
+        {},
+        BEATS_OUTPUT_TYPES
+      )
     ).rejects.toThrow(
       `Output "${ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID}" can only be used with an agentless agent policy.`
     );
@@ -274,10 +276,12 @@ describe('validateOutputForPolicy managed bulk guard', () => {
   it('should reject a non-agentless policy setting monitoring_output_id to the serverless managed bulk output', async () => {
     mockHasLicence(true);
     await expect(
-      validateOutputForPolicy(savedObjectsClientMock.create(), {
-        data_output_id: null,
-        monitoring_output_id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
-      })
+      validateOutputForPolicy(
+        savedObjectsClientMock.create(),
+        { data_output_id: null, monitoring_output_id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID },
+        {},
+        BEATS_OUTPUT_TYPES
+      )
     ).rejects.toThrow(
       `Output "${SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID}" can only be used with an agentless agent policy.`
     );
@@ -285,11 +289,16 @@ describe('validateOutputForPolicy managed bulk guard', () => {
 
   it('should allow an agentless policy to use the managed bulk output via newData', async () => {
     mockHasLicence(true);
-    await validateOutputForPolicy(savedObjectsClientMock.create(), {
-      supports_agentless: true,
-      data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
-      monitoring_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
-    });
+    await validateOutputForPolicy(
+      savedObjectsClientMock.create(),
+      {
+        supports_agentless: true,
+        data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+        monitoring_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+      },
+      {},
+      BEATS_OUTPUT_TYPES
+    );
   });
 });
 
