@@ -77,7 +77,11 @@ export function DuplicateServiceModal({
   const nameTaken = !nameEmpty && isDuplicateNameTaken(trimmedName, existingNames);
   const nameInvalid = nameEmpty || nameTaken;
 
-  const activeInputs = draftEnabledInputs.length ? draftEnabledInputs : service.inputs ?? [];
+  const activeInputs = draftEnabledInputs.length
+    ? draftEnabledInputs
+    : service.defaultEnabledInputs?.length
+    ? service.defaultEnabledInputs
+    : service.inputs?.slice(0, 1) ?? [];
   const anyRequiredEmpty = activeInputs.some((inp) =>
     getRequiredTextFields(service, inp).some((f) => {
       const meta = resolveFieldMeta(service, inp, f);
