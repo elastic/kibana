@@ -54,8 +54,7 @@ const SORTED_COUNTS_DESC = [...TEST_DOCUMENTS]
  *
  * @see src/core/packages/elasticsearch/server-internal/src/elasticsearch_service.ts
  */
-// Failing: See https://github.com/elastic/kibana/issues/254398
-describe.skip('project_routing on serverless CPS', () => {
+describe('project_routing on serverless CPS', () => {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
   let client: ElasticsearchClient;

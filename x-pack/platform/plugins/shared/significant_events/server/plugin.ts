@@ -19,6 +19,7 @@ import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { combineLatest, distinctUntilChanged, filter, skip, switchMap } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
@@ -149,13 +150,22 @@ export class SignificantEventsPlugin
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
       const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
 
+      // `scopedClusterClient`: origin-only. Used for everything the plugin owns (its hidden
+      // data streams), which only ever exists in the origin project.
+      // `streamDataEsClient`: always routed across every CPS-linked project, regardless of the
+      // active space's project routing expression. Knowledge indicators are not space-scoped -
+      // they model all data available to a stream - so extraction must always read across every
+      // linked project.
+      //
+      // This currently splits generation from detection: rule execution still follows the
+      // space's project routing expression, so a rule can be blind to data its knowledge
+      // indicator was derived from. That split is transitional: once alerting v2 supports
+      // per-rule project routing, significant events rules will opt into all linked projects
+      // too, and both scopes will match.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-      // A Query Stream's ES|QL view can resolve to indices that live on remote CPS-connected
-      // projects, so reads of stream data must follow the space's project routing expression
-      // rather than the origin project only. `scopedClusterClient` deliberately stays
-      // origin-only: the plugin's own hidden data streams only ever exist in the origin project.
       const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
-        projectRouting: 'space',
+        projectRouting: 'expression',
+        value: PROJECT_ROUTING_ALL,
       }).asCurrentUser;
       const soClient = scopedSoClient;
       const inferenceClient = pluginsStart.inference.getClient({ request });

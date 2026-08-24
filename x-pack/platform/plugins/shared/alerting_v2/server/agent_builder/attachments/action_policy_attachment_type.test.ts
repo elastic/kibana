@@ -25,12 +25,12 @@ const basePolicyData: ActionPolicyAttachmentData = {
   enabled: true,
   destinations: [{ type: 'workflow', id: 'wf-1' }],
   matcher: 'rule.id: "rule-1"',
-  groupBy: null,
+  group_by: null,
   tags: ['ops'],
-  groupingMode: 'per_episode',
+  grouping_mode: 'per_episode',
   throttle: null,
-  snoozedUntil: null,
-  updatedAt: '2026-04-10T00:00:00.000Z',
+  snoozed_until: null,
+  updated_at: '2026-04-10T00:00:00.000Z',
 };
 
 type ActionPolicyVersionedAttachment = VersionedAttachmentWithOrigin<
