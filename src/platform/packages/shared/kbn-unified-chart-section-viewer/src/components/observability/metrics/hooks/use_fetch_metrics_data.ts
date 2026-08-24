@@ -13,6 +13,7 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildJoinedFilter, buildMetricsInfoQuery, escapeStringValue } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
 import type { Dimension, MetricsESQLResponse, MetricsInfo, ParsedMetrics } from '../../../../types';
+import { dropWherePredicatesOnColumns, keepMetricsPresentInBoth } from '../../../../common/utils';
 import { useTelemetry } from '../../../../context/ebt_telemetry_context';
 import { useChartSectionInspector } from '../../../../context/chart_section_inspector';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
@@ -22,13 +23,23 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from '../utils/execution_context_enums';
+import {
+  GRID_OF_METRICS_REQUEST,
+  METRICS_WITH_DATA_REQUEST,
+} from '../utils/metrics_inspector_requests';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
 
 /**
- * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
- * When selectedDimensionNames is non-empty, refetches with a WHERE filter so only
- * metrics that have all of the selected dimensions are returned.
- * Returns loading state, error, and parsed metrics info for the grid.
+ * Fetches METRICS_INFO for the metrics grid.
+ *
+ * Capability (`Grid of metrics`): selected-dimension WHERE predicates are
+ * dropped, then METRICS_INFO + MV_CONTAINS. This is also the source of the
+ * dimension dropdown.
+ *
+ * Membership (`Metrics with data`): the full user query + METRICS_INFO, names
+ * only. Run only when a selected-dimension predicate was actually dropped.
+ *
+ * Cards = capability ∩ membership.
  */
 export function useFetchMetricsData({
   fetchParams,
@@ -41,97 +52,134 @@ export function useFetchMetricsData({
   services: ChartSectionProps['services'];
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
-  /** Forwarded as `profile_id` APM label on captured errors. */
   profileId: string;
 }): MetricsInfo {
   const { trackMetricsInfo } = useTelemetry();
-  const { trackRequest } = useChartSectionInspector();
+  const { resetRequests, trackRequest } = useChartSectionInspector();
   const reportError = useReportChartSectionError();
   const esql = getEsqlQuery(fetchParams.query);
+  const dataView = fetchParams.dataView;
 
-  // Pre-fetch defense against dimensions the active stream does not map.
-  // Pushing a field name that is not in the dataView into the
-  // `WHERE TO_STRING(field) IS NOT NULL` clause breaks the query and surfaces
-  // "Unable to load visualization". The post-fetch state wipe (against
-  // `allDimensions`) lives in `MetricsExperienceGrid` via `useDimensionsWipe`.
   const appliedDimensions = useMemo(() => {
-    if (!selectedDimensionNames?.length || !fetchParams.dataView) {
+    if (!selectedDimensionNames?.length || !dataView) {
       return selectedDimensionNames;
     }
-    return selectedDimensionNames.filter(
-      (dimension) => fetchParams.dataView!.getFieldByName(dimension.name) != null
-    );
-  }, [selectedDimensionNames, fetchParams.dataView]);
+    return selectedDimensionNames.filter((dimension) => dataView.getFieldByName(dimension.name));
+  }, [selectedDimensionNames, dataView]);
 
   const appliedDimensionNames = useMemo(
     () => appliedDimensions?.map((dimension) => dimension.name),
     [appliedDimensions]
   );
 
-  const metricsInfoQuery = useMemo(() => {
-    // `dimension_fields` is the multivalue column returned by METRICS_INFO; this
-    // caller owns that response-schema knowledge, so it builds the post-filter
-    // (AND = metric must declare every selected dimension) and passes it in.
-    const declaredDimensionFilter = buildJoinedFilter(
-      appliedDimensionNames,
-      (dimension) => `MV_CONTAINS(dimension_fields, ${escapeStringValue(dimension)})`
-    );
-    return buildMetricsInfoQuery(esql, appliedDimensionNames, declaredDimensionFilter);
-  }, [esql, appliedDimensionNames]);
+  const capabilitySourceQuery = useMemo(
+    () => dropWherePredicatesOnColumns(esql, appliedDimensionNames),
+    [esql, appliedDimensionNames]
+  );
 
-  const shouldFetch = isComponentVisible && !!metricsInfoQuery;
+  const declaredDimensionFilter = useMemo(
+    () =>
+      buildJoinedFilter(
+        appliedDimensionNames,
+        (dimension) => `MV_CONTAINS(dimension_fields, ${escapeStringValue(dimension)})`
+      ),
+    [appliedDimensionNames]
+  );
+
+  const capabilityQuery = useMemo(
+    () => buildMetricsInfoQuery(capabilitySourceQuery, declaredDimensionFilter),
+    [capabilitySourceQuery, declaredDimensionFilter]
+  );
+
+  const membershipQuery = useMemo(() => {
+    if (!esql || capabilitySourceQuery === esql) {
+      return '';
+    }
+    return buildMetricsInfoQuery(esql);
+  }, [esql, capabilitySourceQuery]);
+
+  const shouldFetch = isComponentVisible && !!capabilityQuery;
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (
       signal: AbortSignal
     ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
-      const documents = await trackRequest(
-        'Grid of metrics',
-        'This request queries Elasticsearch to fetch metrics info for the grid.',
-        async () => {
-          const {
-            documents: docs,
-            rawResponse,
-            requestParams,
-          } = await executeEsqlQuery<MetricsESQLResponse>({
-            esqlQuery: metricsInfoQuery,
-            search: services.data.search.search,
-            signal,
-            dataView: fetchParams.dataView,
-            timeRange: fetchParams.timeRange,
-            filters: fetchParams.filters ?? [],
-            variables: fetchParams.esqlVariables,
-            uiSettings: services.uiSettings,
-            profileId,
-          });
+      const metricsDataView = fetchParams.dataView;
+      if (!metricsDataView) {
+        return null;
+      }
+
+      resetRequests();
+
+      const runMetricsInfo = async (name: string, description: string, esqlQuery: string) =>
+        trackRequest(name, description, async () => {
+          const { documents, rawResponse, requestParams } =
+            await executeEsqlQuery<MetricsESQLResponse>({
+              esqlQuery,
+              search: services.data.search.search,
+              signal,
+              dataView: metricsDataView,
+              timeRange: fetchParams.timeRange,
+              filters: fetchParams.filters ?? [],
+              variables: fetchParams.esqlVariables,
+              uiSettings: services.uiSettings,
+              profileId,
+            });
 
           return {
-            data: docs,
+            data: documents,
             request: requestParams,
             response: rawResponse,
           };
-        }
-      );
+        });
 
       const getFieldType = (name: string) => {
         const field = fetchParams.dataView?.getFieldByName(name);
         return field ? getFieldIconType(field) : undefined;
       };
 
-      const parsed = parseMetricsWithTelemetry(documents, getFieldType);
+      const capableDocuments = await runMetricsInfo(
+        GRID_OF_METRICS_REQUEST,
+        'This request lists metrics that declare the selected dimensions.',
+        capabilityQuery
+      );
+
+      const capable = parseMetricsWithTelemetry(capableDocuments, getFieldType);
+
+      const withDataDocuments = membershipQuery
+        ? await runMetricsInfo(
+            METRICS_WITH_DATA_REQUEST,
+            'This request lists metrics that have data under the current query.',
+            membershipQuery
+          )
+        : undefined;
+
+      const metricItems = withDataDocuments
+        ? keepMetricsPresentInBoth(
+            capable.metricItems,
+            parseMetricsWithTelemetry(withDataDocuments, getFieldType).metricItems
+          )
+        : capable.metricItems;
+
+      const telemetry = {
+        ...capable.telemetry,
+        total_number_of_metrics: metricItems.length,
+      };
 
       if (!signal.aborted) {
-        trackMetricsInfo(parsed.telemetry);
+        trackMetricsInfo(telemetry);
       }
 
       return {
-        metricItems: parsed.metricItems,
-        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
+        metricItems,
+        allDimensions: [...capable.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
         activeDimensions: appliedDimensions ?? [],
       };
     },
     [
-      metricsInfoQuery,
+      capabilityQuery,
+      membershipQuery,
+      resetRequests,
       trackRequest,
       fetchParams.dataView,
       fetchParams.timeRange,
@@ -164,11 +212,6 @@ export function useFetchMetricsData({
     executeFetch,
   ]);
 
-  // Report every distinct landed fetch error. Repeated failures are a
-  // monitoring signal (something is broken right now), so we deliberately do
-  // not de-dupe at the source - rate-limiting / sampling belongs in APM.
-  // `useAsyncFn` produces a single error reference per failed run, so the
-  // effect only fires once per failure landing.
   useEffect(() => {
     if (!error) {
       return;

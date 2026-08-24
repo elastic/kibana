@@ -19,7 +19,7 @@ import type { ParsedMetricItem } from '../../../types';
  * pipe command is on its own line with `  | ` indentation.
  */
 function formatQuery(basicQuery: string): string {
-  return basicQuery.replace(/ \| /g, '\n  | ');
+  return basicQuery.replace(/; TS /g, ';\nTS ').replace(/ \| /g, '\n  | ');
 }
 
 interface CreateESQLQueryParams {
@@ -72,6 +72,7 @@ export function createESQLQuery({
   }
 
   const query = esql.ts(index);
+  query.addSetCommand('unmapped_fields', 'NULLIFY');
   const timeBucketAggregation = createTimeBucketAggregation({});
   const splitAccessorsClause =
     splitAccessors.length > 0
