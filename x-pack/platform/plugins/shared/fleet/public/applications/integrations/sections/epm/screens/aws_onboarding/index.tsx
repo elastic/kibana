@@ -575,14 +575,12 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           onDeployIdentityNameChange={setDeployIdentityName}
           isDeployed={isDeployed}
           onLaunchCloudFormation={onLaunchCloudFormation}
-          receivedCount={receivedCount}
           stackName={stackName}
           onStackNameChange={setStackName}
           isAgentEnrolled={isAgentEnrolled}
           onAgentEnrolled={onAgentEnrolled}
           isManagedDeployed={isManagedDeployed}
           onDeployManagedIntegrations={onDeployManagedIntegrations}
-          managedReceivedCount={managedReceivedCount}
           agentReceivedCount={agentReceivedCount}
         />
       )}
@@ -631,9 +629,10 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
               isDisabled={
                 selected.size === 0 ||
                 // Authenticate & Deploy: credentials for the selected method must
-                // be filled, and (managed only) CloudFormation must be launched
-                // and the stack name entered — it only appears once every
-                // service is receiving data.
+                // be filled, and (managed only) CloudFormation must be launched,
+                // Managed Integrations deployed, and the stack name entered.
+                // None of these wait on data actually arriving — detection runs
+                // in the background and is only surfaced on Detect & Review.
                 (currentStep === 3 &&
                   (!isCredentialsValid ||
                     (deploymentMethod === 'managed' &&
