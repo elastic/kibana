@@ -74,6 +74,7 @@ export const useStyles = () => {
 
     embeddableConsoleChromeClassic: css`
       left: calc(var(--kbnSolutionNavOffset, 0) + ${layoutVar('application.content.left', '0px')});
+      border-radius: 0;
     `,
 
     embeddableConsoleChromeDefault: css`
