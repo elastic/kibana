@@ -89,10 +89,14 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
 
   // Single 300ms retry for the concurrent-race case where N simultaneous mounts
   // return empty on the first round. refetchAlertData != null narrows the type.
+  // hasRetried is set inside the callback so a re-render before the delay expires
+  // neither cancels the retry nor permanently suppresses it via the gate.
   useEffect(() => {
     if (!firstFetchReturnedNoData || refetchAlertData == null) return;
-    hasRetried.current = true;
-    const timer = setTimeout(refetchAlertData, 300);
+    const timer = setTimeout(() => {
+      hasRetried.current = true;
+      refetchAlertData();
+    }, 300);
     return () => clearTimeout(timer);
   }, [firstFetchReturnedNoData, refetchAlertData]);
 
