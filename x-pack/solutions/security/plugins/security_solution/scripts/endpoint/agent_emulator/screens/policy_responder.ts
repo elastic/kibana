@@ -153,7 +153,7 @@ ${this.choices}
             type: 'confirm',
             name: 'confirm',
             message: 'Send it? ',
-            default: 'y',
+            default: true,
           },
         ],
       });

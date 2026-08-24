@@ -8,7 +8,6 @@
 /* eslint-disable require-atomic-updates */
 
 import { blue, green } from 'chalk';
-import type { DistinctQuestion } from 'inquirer';
 import type { LoadEndpointsConfig } from '../types';
 import { loadEndpoints } from '../services/endpoint_loader';
 import type { EmulatorRunContext } from '../services/emulator_run_context';
@@ -23,28 +22,6 @@ interface LoadOptions {
   isRunning: boolean;
   isDone: boolean;
 }
-
-const promptQuestion = <TAnswers extends object = object>(
-  options: DistinctQuestion<TAnswers>
-): DistinctQuestion<TAnswers> => {
-  const question: DistinctQuestion<TAnswers> = {
-    type: 'input',
-    name: 'Unknown?',
-    message: 'Unknown?',
-    // @ts-expect-error unclear why this is not defined in the definition file
-    askAnswered: true,
-    prefix: green('    ==> '),
-    ...options,
-  };
-
-  if (question.default === undefined) {
-    question.default = (answers: TAnswers) => {
-      return answers[(question.name ?? '-') as keyof TAnswers] ?? '';
-    };
-  }
-
-  return question;
-};
 
 export class LoadEndpointsScreen extends ScreenBaseClass {
   private runInfo: LoadOptions | undefined = undefined;
@@ -136,12 +113,15 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
   private async configView() {
     this.config = await this.prompt<LoadEndpointsConfig>({
       questions: [
-        promptQuestion({
+        {
           type: 'number',
           name: 'count',
           message: 'How many endpoints to load?',
-          validate(input: number, answers): boolean | string {
-            if (!Number.isFinite(input)) {
+          default: this.config.count,
+          askAnswered: true,
+          theme: { prefix: green('    ==> ') },
+          validate(input: number | undefined): boolean | string {
+            if (input === undefined || !Number.isFinite(input)) {
               return 'Enter valid number';
             }
             return true;
@@ -152,7 +132,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
             }
             return input;
           },
-        }),
+        },
       ],
       answers: this.config,
       title: blue('Endpoint Loader Settings'),

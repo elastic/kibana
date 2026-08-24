@@ -2045,7 +2045,6 @@
     "@types/history": "4.7.11",
     "@types/hjson": "2.4.6",
     "@types/http-proxy": "1.17.9",
-    "@types/inquirer": "9.0.9",
     "@types/jest": "29.5.3",
     "@types/jquery": "3.5.33",
     "@types/js-search": "1.4.0",
