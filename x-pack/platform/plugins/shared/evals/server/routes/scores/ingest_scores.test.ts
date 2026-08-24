@@ -17,8 +17,9 @@ import {
 } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { WriteResult } from '../../storage/evaluation_score_service';
+import type { WriteResult } from '../../storage/scores/evaluation_score_service';
 import { registerIngestScoresRoute } from './ingest_scores';
 
 const getBasePayload = (): IngestScoresRequestBodyInput => ({
@@ -79,7 +80,7 @@ describe('POST /internal/evals/scores', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: { list: () => [], get: () => undefined },
+      evaluatorRegistry: createEvaluatorRegistryMock(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
@@ -339,6 +340,7 @@ describe('POST /internal/evals/scores', () => {
           ...payload.scores[0],
           evaluator: {
             ...payload.scores[0].evaluator,
+            version: '1.2.0',
             kind: 'llm',
             model: { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
           },
@@ -348,6 +350,7 @@ describe('POST /internal/evals/scores', () => {
 
     expect(result.success).toBe(true);
     expect(result.data?.scores[0].evaluator).toMatchObject({
+      version: '1.2.0',
       kind: 'llm',
       model: { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
     });
@@ -397,7 +400,7 @@ describe('POST /internal/evals/scores', () => {
       router,
       logger,
       canEncrypt: false,
-      evaluatorRegistry: { list: () => [], get: () => undefined },
+      evaluatorRegistry: createEvaluatorRegistryMock(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),

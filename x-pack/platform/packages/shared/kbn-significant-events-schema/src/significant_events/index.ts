@@ -70,6 +70,7 @@ export {
   type InvestigationHypothesis,
   type InvestigationRecommendation,
   type InvestigationBlindSpot,
+  type InvestigationRunStatus,
   type InvestigationState,
 } from './investigation_state';
 export {
