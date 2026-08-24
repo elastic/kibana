@@ -16,14 +16,20 @@ import { buildAlertsQuery, formatAlertToEcsSignal } from '../../common/utils/ale
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
-export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
+export const useFetchAlertData = (
+  alertIds: string[]
+): [boolean, Record<string, unknown>, (() => void) | null] => {
   const { hasAlertsRead } = useAlertsPrivileges();
   const { dataView } = useDataView(PageScope.alerts);
   const selectedPatterns = useSelectedPatterns(dataView);
 
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
 
-  const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>({
+  const {
+    loading: isLoadingAlerts,
+    data: alertsData,
+    refetch,
+  } = useQueryAlerts<SignalHit, unknown>({
     query: alertsQuery,
     indexName: selectedPatterns[0],
     queryName: ALERTS_QUERY_NAMES.CASES,
@@ -47,5 +53,5 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
     [alertsData?.hits.hits]
   );
 
-  return [isLoadingAlerts, alerts];
+  return [isLoadingAlerts, alerts, refetch ?? null];
 };

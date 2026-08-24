@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { UserActionTitle } from '@kbn/cases-components';
@@ -72,7 +72,33 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
     () => (hasRuleIdFromMetadata ? [] : [alertId]),
     [hasRuleIdFromMetadata, alertId]
   );
-  const [loadingAlertData, alertsData] = useFetchAlertData(idsToFetch);
+  const [loadingAlertData, alertsData, refetchAlertData] = useFetchAlertData(idsToFetch);
+
+  // hasRetried gates the single 300ms retry after a concurrent-race empty result.
+  // Using a ref so setting it doesn't trigger a re-render — we don't want the spinner
+  // to clear before the retry fetch starts.
+  const hasRetried = useRef(false);
+
+  // refetchAlertData is null before the first fetch completes (useQueryAlerts initialises
+  // refetch to null). We use this to distinguish "fetch not started yet" from "fetch
+  // completed with no data", avoiding a flash of "Unknown rule" on the initial render
+  // before the useEffect in useQueryAlerts fires (#284799).
+  const firstFetchReturnedNoData =
+    !hasRuleIdFromMetadata &&
+    !loadingAlertData &&
+    refetchAlertData !== null &&
+    alertsData[alertId] == null &&
+    !hasRetried.current;
+
+  // Schedule a single retry after the initial burst of concurrent fetches settles so the
+  // retry isn't also overwhelmed.
+  useEffect(() => {
+    if (firstFetchReturnedNoData && refetchAlertData != null) {
+      hasRetried.current = true;
+      const timer = setTimeout(refetchAlertData, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [firstFetchReturnedNoData, refetchAlertData]);
 
   const { ruleId: resolvedRuleId, ruleName: resolvedRuleName } = useMemo(
     () =>
@@ -101,7 +127,17 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
     }
   }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
-  if (loadingAlertData) {
+  // Show a spinner while:
+  // 1. the fetch is actively in progress,
+  // 2. we need a live fetch but none has completed yet (refetchAlertData is null before the
+  //    first fetch returns, covering both the pre-start and in-flight windows), OR
+  // 3. the first fetch returned no data — keep the spinner up while we're about to retry so
+  //    "Unknown rule" never flashes during the retry window (#284799).
+  if (
+    loadingAlertData ||
+    (!hasRuleIdFromMetadata && refetchAlertData === null) ||
+    firstFetchReturnedNoData
+  ) {
     return <EuiLoadingSpinner size="m" />;
   }
 

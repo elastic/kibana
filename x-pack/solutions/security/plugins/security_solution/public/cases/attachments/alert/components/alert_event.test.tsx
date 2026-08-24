@@ -41,7 +41,7 @@ describe('AlertEvent', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useFetchAlertData as jest.Mock).mockReturnValue([false, {}]);
+    (useFetchAlertData as jest.Mock).mockReturnValue([false, {}, null]);
     (useUserPrivileges as jest.Mock).mockReturnValue({
       rulesPrivileges: { rules: { read: true } },
     });
@@ -117,6 +117,109 @@ describe('AlertEvent', () => {
 
     expect(mockOpenFlyout).not.toHaveBeenCalled();
     expect(flyoutApi.openRuleFlyout).not.toHaveBeenCalled();
+  });
+
+  describe('when rule info is absent from metadata (live fetch required)', () => {
+    it('shows spinner on initial render before the fetch starts (loadingAlertData=false, no data)', () => {
+      // useFetchAlertData starts with loading=false before useQueryAlerts fires its fetch effect.
+      // refetchAlertData=null (the initial value before any fetch completes) signals this state,
+      // so the spinner shows rather than "Unknown rule".
+      (useFetchAlertData as jest.Mock).mockReturnValue([false, {}, null]);
+
+      const { container } = render(
+        <TestProviders>
+          <AlertEvent {...defaultProps} rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+
+      expect(container.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
+      expect(screen.queryByText('Unknown rule')).not.toBeInTheDocument();
+    });
+
+    it('shows spinner while the fetch is in progress', () => {
+      (useFetchAlertData as jest.Mock).mockReturnValue([true, {}, null]);
+
+      const { container } = render(
+        <TestProviders>
+          <AlertEvent {...defaultProps} rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+
+      expect(container.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
+    });
+
+    it('shows spinner (not "Unknown rule") when first fetch returns no data and retry is pending', () => {
+      // Simulate: loading went true then false with no data — firstFetchReturnedNoData=true.
+      const mockUseFetchAlertData = useFetchAlertData as jest.Mock;
+      const mockRefetch = jest.fn();
+
+      mockUseFetchAlertData.mockReturnValueOnce([true, {}, mockRefetch]);
+      mockUseFetchAlertData.mockReturnValue([false, {}, mockRefetch]);
+
+      const { rerender, container } = render(
+        <TestProviders>
+          <AlertEvent {...defaultProps} rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+
+      expect(container.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
+
+      rerender(
+        <TestProviders>
+          <AlertEvent {...defaultProps} rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+
+      // firstFetchReturnedNoData=true → spinner still up, retry scheduled
+      expect(container.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
+      expect(screen.queryByText('Unknown rule')).not.toBeInTheDocument();
+    });
+
+    it('renders "Unknown rule" after fetch + retry both return no matching alert data', () => {
+      jest.useFakeTimers();
+      const mockUseFetchAlertData = useFetchAlertData as jest.Mock;
+      const mockRefetch = jest.fn();
+
+      // First fetch: in progress, then completes with no data
+      mockUseFetchAlertData.mockReturnValueOnce([true, {}, mockRefetch]);
+      mockUseFetchAlertData.mockReturnValue([false, {}, mockRefetch]);
+
+      const { rerender, container } = render(
+        <TestProviders>
+          <AlertEvent {...defaultProps} rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+
+      // loading=true → spinner
+      expect(container.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
+
+      // First fetch completes with no data → spinner (firstFetchReturnedNoData=true, retry pending)
+      rerender(
+        <TestProviders>
+          <AlertEvent {...defaultProps} rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+      expect(container.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
+
+      // Advance timer to fire the retry
+      jest.advanceTimersByTime(300);
+      expect(mockRefetch).toHaveBeenCalledTimes(1);
+
+      // Retry also returns no data. refetchAlertData stays non-null (useQueryAlerts never resets
+      // refetch to null after the first fetch). hasRetried.current=true → firstFetchReturnedNoData=false.
+      mockUseFetchAlertData.mockReturnValue([false, {}, mockRefetch]);
+      rerender(
+        <TestProviders>
+          <AlertEvent {...defaultProps} rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId(`alerts-user-action-${savedObjectId}`)).toHaveTextContent(
+        'Unknown rule'
+      );
+
+      jest.useRealTimers();
+    });
   });
 
   describe('when the alert is a linked/remote (CPS) alert', () => {
