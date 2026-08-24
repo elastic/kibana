@@ -27,7 +27,7 @@ export const StartNewConversationButton: React.FC = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId, resetAttachments } = useConversationContext();
   const { removeError } = useConversationStream();
-  const lastAgentId = useLastAgentId();
+  const { agentId: lastAgentId, isReady: isLastAgentIdReady } = useLastAgentId();
 
   const handleClick = useCallback(() => {
     if (isEmbeddedContext) {
@@ -46,11 +46,14 @@ export const StartNewConversationButton: React.FC = () => {
     lastAgentId,
   ]);
 
+  const isDisabled = !isEmbeddedContext && !isLastAgentIdReady;
+
   return (
     <EuiButton
       color="primary"
       fill
       onClick={handleClick}
+      isDisabled={isDisabled}
       data-test-subj="startNewConversationButton"
       {...getEbtProps({
         element: AGENT_BUILDER_UI_EBT.element.pageContent,

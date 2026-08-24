@@ -86,4 +86,7 @@ export const queryKeys = {
   aiIndices: {
     list: ['aiIndices', 'list'] as const,
   },
+  spaceSettings: {
+    all: ['spaceSettings'] as const,
+  },
 };
