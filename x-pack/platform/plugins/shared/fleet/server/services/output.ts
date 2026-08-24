@@ -44,13 +44,7 @@ import type {
   BeatsSoBaseAttributes,
   BeatsOutputSOAttributes,
 } from '../types';
-import type {
-  NewBeatsOutput,
-  OtlpGrpcExporterConfig,
-  OtlpHttpExporterConfig,
-  UpdateOutput,
-  UpdateTypedOutput,
-} from '../../common/types';
+import type { NewBeatsOutput, UpdateOutput, UpdateTypedOutput } from '../../common/types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -70,8 +64,6 @@ import {
   kafkaCompressionType,
   kafkaAuthType,
   kafkaAcknowledgeReliabilityLevel,
-  otlpProtocol,
-  OTLP_GRPC_ONLY_COMPRESSION_TYPES,
   RESERVED_CONFIG_YML_KEYS,
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
@@ -820,10 +812,7 @@ class OutputService {
 
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
-    // OTLP has no plaintext alternative: no OTLP-capable Fleet Server predates the 8.12.0
-    // output-secrets floor, so its credentials are always stored as references.
-    const useSecretStorage =
-      isOtlpOutput(output) || (await isOutputSecretStorageEnabled(esClient, soClient));
+    const useSecretStorage = await isOutputSecretStorageEnabled(esClient, soClient);
 
     // Store secret values if enabled; if not, store plain text values
     if (useSecretStorage) {
@@ -1187,62 +1176,6 @@ class OutputService {
       target.ssl = null;
     };
 
-    const removeBeatsFields = (target: Nullable<Partial<BeatsSoBaseAttributes>>) => {
-      target.hosts = null;
-      target.ca_sha256 = null;
-      target.ca_trusted_fingerprint = null;
-      target.config_yaml = null;
-      target.ssl = null;
-      target.shipper = null;
-      target.preset = null;
-      target.proxy_id = null;
-      target.write_to_logs_streams = null;
-      target.otel_exporter_config_yaml = null;
-      target.otel_disable_beatsauth = null;
-    };
-
-    // Null out fields that are exclusive to HTTP when switching to gRPC.
-    const removeOtlpHttpFields = (target: Nullable<Partial<OtlpHttpExporterConfig>>) => {
-      target.encoding = null;
-      target.traces_endpoint = null;
-      target.metrics_endpoint = null;
-      target.logs_endpoint = null;
-      target.profiles_endpoint = null;
-      target.proxy_url = null;
-      target.max_idle_conns = null;
-      target.max_idle_conns_per_host = null;
-      target.max_conns_per_host = null;
-      target.idle_conn_timeout = null;
-      target.disable_keep_alives = null;
-      target.http2_read_idle_timeout = null;
-      target.http2_ping_timeout = null;
-      target.force_attempt_http2 = null;
-      target.compression_params = null;
-      target.cookies = null;
-    };
-
-    // Null out fields that are exclusive to gRPC when switching to HTTP.
-    const removeOtlpGrpcFields = (
-      target: Nullable<Partial<OtlpGrpcExporterConfig>>,
-      original: { compression?: string }
-    ) => {
-      target.balancer_name = null;
-      target.keepalive = null;
-      target.wait_for_ready = null;
-      target.user_agent = null;
-      target.authority = null;
-      // compression is valid on both protocols but snappy/zstd are gRPC-only. The stored value
-      // survives the deep merge, so clear it — unless this update supplies its own (already
-      // validated against the HTTP schema).
-      if (
-        target.compression === undefined &&
-        original.compression !== undefined &&
-        OTLP_GRPC_ONLY_COMPRESSION_TYPES.includes(original.compression)
-      ) {
-        target.compression = null;
-      }
-    };
-
     if (isTypeChanged) {
       if (updateData.type === outputType.Elasticsearch) {
         updateData.preset = null;
@@ -1339,42 +1272,6 @@ class OutputService {
           updateData.password = null;
         }
       }
-
-      if (isOtlpOutput(originalOutput)) {
-        // clear OTLP-only fields when leaving OTLP; secrets cleaned up via getOutputSecretPaths
-        (updateData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
-      }
-
-      if (isOtlpOutput(updateData)) {
-        // clear beats-only fields when switching to OTLP
-        removeBeatsFields(updateData as Nullable<BeatsSoBaseAttributes>);
-      }
-    }
-
-    // When otlp_exporter is included in an update and the protocol changes, ES's partial-update
-    // deep-merges the stored object, so fields exclusive to the old protocol survive unless
-    // explicitly set to null here. null is written into the doc (unlike undefined, which is omitted
-    // from the payload and leaves the old value intact).
-    const isOtlpProtocolChange =
-      isOtlpOutput(updateData) &&
-      isOtlpOutput(originalOutput) &&
-      updateData.otlp_exporter?.protocol !== undefined &&
-      updateData.otlp_exporter.protocol !== originalOutput.otlp_exporter.protocol;
-
-    if (isOtlpProtocolChange && isOtlpOutput(updateData) && isOtlpOutput(originalOutput)) {
-      const exporterUpdate = updateData.otlp_exporter;
-      if (exporterUpdate.protocol === otlpProtocol.Grpc) {
-        // Switching to gRPC — null out HTTP-exclusive fields left over in the stored SO
-        removeOtlpHttpFields(
-          exporterUpdate as unknown as Nullable<Partial<OtlpHttpExporterConfig>>
-        );
-      } else {
-        // Switching to HTTP — null out gRPC-exclusive fields left over in the stored SO
-        removeOtlpGrpcFields(
-          exporterUpdate as unknown as Nullable<Partial<OtlpGrpcExporterConfig>>,
-          originalOutput.otlp_exporter
-        );
-      }
     }
 
     if (isBeatsOutput(updateData) && isBeatsOutput(typedFullUpdateData)) {
@@ -1468,10 +1365,7 @@ class OutputService {
     }
     await remoteSyncIntegrationsCheck(esClient, data);
 
-    // OTLP has no plaintext alternative: no OTLP-capable Fleet Server predates the 8.12.0
-    // output-secrets floor, so its credentials are always stored as references.
-    const useSecretStorage =
-      isOtlpOutput(typedFullUpdateData) || (await isOutputSecretStorageEnabled(esClient, soClient));
+    const useSecretStorage = await isOutputSecretStorageEnabled(esClient, soClient);
 
     // Store secret values if enabled; if not, store plain text values
     if (useSecretStorage) {

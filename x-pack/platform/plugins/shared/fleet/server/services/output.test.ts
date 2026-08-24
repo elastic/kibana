@@ -27,7 +27,6 @@ import { packagePolicyService } from './package_policy';
 import { auditLoggingService } from './audit_logging';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { outputSavedObjectToOutput } from './output';
-import { extractAndWriteOutputSecrets, extractAndUpdateOutputSecrets } from './secrets';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
@@ -38,13 +37,6 @@ jest.mock('./outputs/helpers');
 
 const mockedFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction<
   typeof findAgentlessPolicies
->;
-
-const mockedExtractAndWriteOutputSecrets = extractAndWriteOutputSecrets as jest.MockedFunction<
-  typeof extractAndWriteOutputSecrets
->;
-const mockedExtractAndUpdateOutputSecrets = extractAndUpdateOutputSecrets as jest.MockedFunction<
-  typeof extractAndUpdateOutputSecrets
 >;
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
@@ -1388,7 +1380,6 @@ describe('Output Service', () => {
         mockedAppContextService.getExperimentalFeatures.mockReturnValue({
           enableOtlpOutput: true,
         } as any);
-        mockedExtractAndWriteOutputSecrets.mockResolvedValue({ output: { type: 'otlp' } } as any);
       });
 
       afterEach(() => {
@@ -1450,149 +1441,6 @@ describe('Output Service', () => {
             otlp_exporter: {
               endpoint: 'https://otel.example.com:4317',
               protocol: 'grpc',
-            },
-          }),
-          expect.anything()
-        );
-      });
-
-      it('should always write tls secrets as fleet-secret refs regardless of storage state', async () => {
-        const soClient = getMockedSoClient();
-        mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
-        mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
-        mockedExtractAndWriteOutputSecrets.mockResolvedValueOnce({
-          output: {
-            is_default: false,
-            is_default_monitoring: false,
-            name: 'Test OTLP secrets',
-            type: 'otlp',
-            otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'owner-auth-secret-id' },
-                    auth: { id: 'auth-secret-id' },
-                  },
-                },
-              },
-            },
-          },
-        } as any);
-
-        await outputService.create(
-          soClient,
-          esClientMock,
-          {
-            is_default: false,
-            is_default_monitoring: false,
-            name: 'Test OTLP secrets',
-            type: 'otlp',
-            otlp_exporter: {
-              endpoint: 'https://otel.example.com:4317',
-              protocol: 'grpc',
-            },
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: 'my-key-pem',
-                  tpm: { owner_auth: 'my-owner-auth', auth: 'my-auth' },
-                },
-              },
-            },
-          },
-          { id: 'output-test' }
-        );
-
-        expect(soClient.create).toBeCalledWith(
-          expect.anything(),
-          expect.objectContaining({
-            type: 'otlp',
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'owner-auth-secret-id' },
-                    auth: { id: 'auth-secret-id' },
-                  },
-                },
-              },
-            },
-          }),
-          expect.anything()
-        );
-        expect(soClient.create).not.toBeCalledWith(
-          expect.anything(),
-          expect.objectContaining({ otlp_exporter_secrets: expect.anything() }),
-          expect.anything()
-        );
-      });
-
-      it('should extract tls secrets as ESO secret refs when secret storage is enabled', async () => {
-        const soClient = getMockedSoClient();
-        mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
-        mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
-        mockedExtractAndWriteOutputSecrets.mockResolvedValueOnce({
-          output: {
-            is_default: false,
-            is_default_monitoring: false,
-            name: 'Test OTLP secrets',
-            type: 'otlp',
-            otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'owner-auth-secret-id' },
-                    auth: { id: 'auth-secret-id' },
-                  },
-                },
-              },
-            },
-          },
-        } as any);
-
-        await outputService.create(
-          soClient,
-          esClientMock,
-          {
-            is_default: false,
-            is_default_monitoring: false,
-            name: 'Test OTLP secrets',
-            type: 'otlp',
-            otlp_exporter: {
-              endpoint: 'https://otel.example.com:4317',
-              protocol: 'grpc',
-            },
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: 'my-key-pem',
-                  tpm: { owner_auth: 'my-owner-auth', auth: 'my-auth' },
-                },
-              },
-            },
-          },
-          { id: 'output-test' }
-        );
-
-        expect(soClient.create).toBeCalledWith(
-          expect.anything(),
-          expect.objectContaining({
-            type: 'otlp',
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'owner-auth-secret-id' },
-                    auth: { id: 'auth-secret-id' },
-                  },
-                },
-              },
             },
           }),
           expect.anything()
@@ -3053,10 +2901,6 @@ describe('Output Service', () => {
         } as any);
         mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
-        mockedExtractAndUpdateOutputSecrets.mockResolvedValue({
-          secretsToDelete: [],
-          outputUpdate: {},
-        } as any);
       });
 
       afterEach(() => {
@@ -3099,63 +2943,6 @@ describe('Output Service', () => {
         );
       });
 
-      it('Should clear beats fields when changing an ES output to OTLP', async () => {
-        const soClient = getMockedSoClient({});
-        mockedAgentPolicyService.list.mockResolvedValue({
-          items: [{}],
-        } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
-        mockedAgentPolicyService.getByIds.mockResolvedValue([]);
-        mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
-        mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
-        mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
-
-        await outputService.update(soClient, esClientMock, 'existing-es-output', {
-          type: 'otlp',
-          otlp_exporter: {
-            endpoint: 'https://otel.example.com:4317',
-            protocol: 'grpc',
-          },
-        });
-
-        expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
-          type: 'otlp',
-          otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
-          hosts: null,
-          ca_sha256: null,
-          ca_trusted_fingerprint: null,
-          config_yaml: null,
-          ssl: null,
-          shipper: null,
-          preset: null,
-          proxy_id: null,
-          write_to_logs_streams: null,
-          otel_exporter_config_yaml: null,
-          otel_disable_beatsauth: null,
-        });
-      });
-
-      it('Should clear otlp_exporter when changing an OTLP output to ES', async () => {
-        const soClient = getMockedSoClient({});
-        mockedAgentPolicyService.list.mockResolvedValue({
-          items: [{}],
-        } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
-        mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
-        mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
-        mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
-
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          type: 'elasticsearch',
-          hosts: ['http://test:9200'],
-        });
-
-        expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
-          type: 'elasticsearch',
-          hosts: ['http://test:9200'],
-          otlp_exporter: null,
-          preset: 'balanced',
-        });
-      });
-
       it('Should preserve otlp_exporter on a same-type OTLP update', async () => {
         const soClient = getMockedSoClient({});
 
@@ -3170,115 +2957,6 @@ describe('Output Service', () => {
           type: 'otlp',
           otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
         });
-      });
-
-      it('Should null gRPC-exclusive fields when switching an OTLP output from gRPC to HTTP', async () => {
-        const soClient = getMockedSoClient({});
-
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          otlp_exporter: {
-            endpoint: 'https://otel.example.com:4318',
-            protocol: 'http/protobuf',
-          },
-        });
-
-        expect(soClient.update).toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            otlp_exporter: expect.objectContaining({
-              protocol: 'http/protobuf',
-              balancer_name: null,
-              keepalive: null,
-              wait_for_ready: null,
-              user_agent: null,
-              authority: null,
-            }),
-          })
-        );
-      });
-
-      it('Should null HTTP-exclusive fields when switching an OTLP output from HTTP to gRPC', async () => {
-        const soClient = getMockedSoClient({});
-        // Override the stored output to be an HTTP exporter for this one call
-        esoClientMock.getDecryptedAsInternalUser.mockResolvedValueOnce(
-          mockOutputSO('existing-otlp-output', {
-            type: 'otlp',
-            is_default: false,
-            otlp_exporter: {
-              endpoint: 'https://otel.example.com:4318',
-              protocol: 'http/protobuf',
-              traces_endpoint: 'https://otel.example.com:4318/v1/traces',
-              encoding: 'proto',
-            },
-          })
-        );
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          otlp_exporter: {
-            endpoint: 'https://otel.example.com:4317',
-            protocol: 'grpc',
-          },
-        });
-
-        expect(soClient.update).toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            otlp_exporter: expect.objectContaining({
-              protocol: 'grpc',
-              encoding: null,
-              traces_endpoint: null,
-              metrics_endpoint: null,
-              logs_endpoint: null,
-              profiles_endpoint: null,
-              proxy_url: null,
-              max_idle_conns: null,
-              max_idle_conns_per_host: null,
-              max_conns_per_host: null,
-              idle_conn_timeout: null,
-              disable_keep_alives: null,
-              http2_read_idle_timeout: null,
-              http2_ping_timeout: null,
-              force_attempt_http2: null,
-              compression_params: null,
-              cookies: null,
-            }),
-          })
-        );
-      });
-
-      it('Should null gRPC-only compression when switching from gRPC with snappy/zstd to HTTP', async () => {
-        const soClient = getMockedSoClient({});
-        // Override the stored output to have a gRPC-only compression value
-        esoClientMock.getDecryptedAsInternalUser.mockResolvedValueOnce(
-          mockOutputSO('existing-otlp-output', {
-            type: 'otlp',
-            is_default: false,
-            otlp_exporter: {
-              endpoint: 'https://otel.example.com:4317',
-              protocol: 'grpc',
-              compression: 'zstd',
-            },
-          })
-        );
-
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          otlp_exporter: {
-            endpoint: 'https://otel.example.com:4318',
-            protocol: 'http/protobuf',
-          },
-        });
-
-        expect(soClient.update).toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            otlp_exporter: expect.objectContaining({
-              protocol: 'http/protobuf',
-              compression: null,
-            }),
-          })
-        );
       });
 
       it('Should propagate a null container to soClient.update untouched on OTLP partial update', async () => {
@@ -3297,123 +2975,6 @@ describe('Output Service', () => {
           expect.anything(),
           expect.objectContaining({
             otlp_exporter: expect.objectContaining({ tls: null }),
-          })
-        );
-      });
-
-      it('Should always write tls secrets as fleet-secret refs regardless of storage state', async () => {
-        const soClient = getMockedSoClient({});
-        mockedExtractAndUpdateOutputSecrets.mockResolvedValueOnce({
-          secretsToDelete: [],
-          outputUpdate: {
-            type: 'otlp',
-            otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'updated-key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'updated-owner-auth-secret-id' },
-                    auth: { id: 'updated-auth-secret-id' },
-                  },
-                },
-              },
-            },
-          },
-        } as any);
-
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          otlp_exporter: {
-            endpoint: 'https://new.example.com:4317',
-            protocol: 'grpc',
-          },
-          secrets: {
-            otlp_exporter: {
-              tls: {
-                key_pem: 'updated-key-pem',
-                tpm: { owner_auth: 'updated-owner-auth', auth: 'updated-auth' },
-              },
-            },
-          },
-        });
-
-        expect(soClient.update).toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            type: 'otlp',
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'updated-key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'updated-owner-auth-secret-id' },
-                    auth: { id: 'updated-auth-secret-id' },
-                  },
-                },
-              },
-            },
-          })
-        );
-        expect(soClient.update).not.toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({ otlp_exporter_secrets: expect.anything() })
-        );
-      });
-
-      it('Should extract tls secrets as ESO secret refs on OTLP update when secret storage is enabled', async () => {
-        const soClient = getMockedSoClient({});
-        mockedExtractAndUpdateOutputSecrets.mockResolvedValueOnce({
-          secretsToDelete: [],
-          outputUpdate: {
-            type: 'otlp',
-            otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'updated-key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'updated-owner-auth-secret-id' },
-                    auth: { id: 'updated-auth-secret-id' },
-                  },
-                },
-              },
-            },
-          },
-        } as any);
-
-        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
-          otlp_exporter: {
-            endpoint: 'https://new.example.com:4317',
-            protocol: 'grpc',
-          },
-          secrets: {
-            otlp_exporter: {
-              tls: {
-                key_pem: 'updated-key-pem',
-                tpm: { owner_auth: 'updated-owner-auth', auth: 'updated-auth' },
-              },
-            },
-          },
-        });
-
-        expect(soClient.update).toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            type: 'otlp',
-            secrets: {
-              otlp_exporter: {
-                tls: {
-                  key_pem: { id: 'updated-key-pem-secret-id' },
-                  tpm: {
-                    owner_auth: { id: 'updated-owner-auth-secret-id' },
-                    auth: { id: 'updated-auth-secret-id' },
-                  },
-                },
-              },
-            },
           })
         );
       });
