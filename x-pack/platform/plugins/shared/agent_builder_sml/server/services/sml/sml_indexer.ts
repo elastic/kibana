@@ -208,6 +208,16 @@ class SmlIndexerImpl implements SmlIndexer {
       throw error;
     }
 
+    // An entry with no spaces produces zero nested privilege elements, which the read path
+    // treats as public — so it must not be indexed. Bail out *before* the delete below, so a
+    // producer that reports zero spaces skips the origin instead of wiping its existing entry.
+    if (spaces.length === 0) {
+      this.logger.warn(
+        `SML indexer: origin '${originId}' (type='${attachmentType}') has no spaces — skipping (fail closed), existing entry left intact`
+      );
+      return;
+    }
+
     await this.deleteEntry({ originUri, esClient });
 
     const indexOp = this.buildIndexOp({

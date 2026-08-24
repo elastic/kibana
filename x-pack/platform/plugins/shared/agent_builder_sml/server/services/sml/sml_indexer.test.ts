@@ -960,7 +960,7 @@ describe('createSmlIndexer', () => {
         });
       });
 
-      it('skips indexing and warns when an item resolves to zero spaces', async () => {
+      it('skips indexing without deleting the existing entry when an item resolves to zero spaces', async () => {
         const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
         const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
         (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
@@ -986,6 +986,8 @@ describe('createSmlIndexer', () => {
         );
 
         expect(bulkMock).not.toHaveBeenCalled();
+        // The existing entry must survive: the skip happens before the pre-index delete.
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringContaining('has no spaces — skipping (fail closed)')
         );
