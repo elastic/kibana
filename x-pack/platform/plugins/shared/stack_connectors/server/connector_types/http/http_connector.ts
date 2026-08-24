@@ -29,7 +29,7 @@ import {
 } from '@kbn/connector-schemas/http';
 import { AuthType } from '@kbn/connector-schemas/common/auth';
 import { z } from '@kbn/zod/v4';
-import type { QueryParamScalar } from '@kbn/connector-schemas/http/schemas/v1';
+import type { QueryParamValue } from '@kbn/connector-schemas/http/schemas/v1';
 import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
 import type { HttpFormDataField } from '@kbn/connector-schemas/http/types/v1';
 import { safeJsonStringify } from '@kbn/std';
@@ -167,7 +167,7 @@ function renderParameterTemplates(
   }
 
   if (params.query) {
-    const renderedQuery: Record<string, QueryParamScalar | QueryParamScalar[]> = {};
+    const renderedQuery: Record<string, QueryParamValue> = {};
     for (const [key, value] of Object.entries(params.query)) {
       if (Array.isArray(value)) {
         renderedQuery[key] = value.map((v) =>
@@ -222,10 +222,7 @@ function combineUrl(basePath: string, path?: string): string {
   return url.toString();
 }
 
-function appendQueryString(
-  baseUrl: string,
-  query?: Record<string, QueryParamScalar | QueryParamScalar[]>
-): string {
+function appendQueryString(baseUrl: string, query?: Record<string, QueryParamValue>): string {
   if (!query || Object.keys(query).length === 0) {
     return baseUrl;
   }
