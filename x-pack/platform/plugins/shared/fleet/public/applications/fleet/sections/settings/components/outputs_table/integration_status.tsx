@@ -15,13 +15,12 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiCallOut,
   EuiIcon,
   EuiLoadingSpinner,
   EuiBadge,
   useEuiTheme,
-  EuiButton,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
@@ -189,7 +188,7 @@ export const IntegrationStatus: React.FunctionComponent<{
           {integration?.error && (
             <>
               <EuiSpacer size="s" />
-              <EuiCallOut
+              <KbnDangerCallout
                 announceOnMount={false}
                 title={
                   <FormattedMessage
@@ -197,20 +196,17 @@ export const IntegrationStatus: React.FunctionComponent<{
                     defaultMessage="Error"
                   />
                 }
-                color="danger"
-                iconType="error"
                 size="s"
                 data-test-subj="integrationSyncIntegrationErrorCallout"
-              >
-                <EuiText size="s">{integration.error}</EuiText>
-              </EuiCallOut>
+                text={integration.error}
+              />
               <EuiSpacer size="s" />
             </>
           )}
 
           {integration.sync_status === 'warning' && integration?.warning && (
             <>
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount
                 title={
                   <FormattedMessage
@@ -221,13 +217,10 @@ export const IntegrationStatus: React.FunctionComponent<{
                     }}
                   />
                 }
-                color="warning"
-                iconType="warning"
                 size="s"
                 data-test-subj="integrationSyncIntegrationWarningCallout"
-              >
-                {integration?.warning?.message && (
-                  <EuiText size="s">
+                text={
+                  integration?.warning?.message ? (
                     <FormattedMessage
                       id="xpack.fleet.integrationSyncStatus.integrationWarningContent"
                       defaultMessage="{uninstallWarning}"
@@ -235,21 +228,22 @@ export const IntegrationStatus: React.FunctionComponent<{
                         uninstallWarning: integration.warning.message,
                       }}
                     />
-                  </EuiText>
-                )}
-                <EuiSpacer size="m" />
-                <EuiButton
-                  color="warning"
-                  href={docLinks.links.fleet.remoteESOoutputTroubleshooting}
-                  iconType="external"
-                  target="blank"
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.integrationSyncStatus.integrationWarningButton"
-                    defaultMessage="View troubleshooting guide"
-                  />
-                </EuiButton>
-              </EuiCallOut>
+                  ) : undefined
+                }
+                actionProps={{
+                  primary: {
+                    href: docLinks.links.fleet.remoteESOoutputTroubleshooting,
+                    iconType: 'external',
+                    target: 'blank',
+                    children: (
+                      <FormattedMessage
+                        id="xpack.fleet.integrationSyncStatus.integrationWarningButton"
+                        defaultMessage="View troubleshooting guide"
+                      />
+                    ),
+                  },
+                }}
+              />
             </>
           )}
           <EuiSpacer size="s" />
@@ -321,7 +315,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                   {customAsset.error && (
                     <>
                       <EuiSpacer size="s" />
-                      <EuiCallOut
+                      <KbnDangerCallout
                         announceOnMount={false}
                         title={
                           <FormattedMessage
@@ -329,20 +323,17 @@ export const IntegrationStatus: React.FunctionComponent<{
                             defaultMessage="Error"
                           />
                         }
-                        color="danger"
-                        iconType="error"
                         size="s"
                         data-test-subj="integrationSyncAssetErrorCallout"
-                      >
-                        <EuiText size="s">{customAsset.error}</EuiText>
-                      </EuiCallOut>
+                        text={customAsset.error}
+                      />
                       <EuiSpacer size="s" />
                     </>
                   )}
                   {customAsset.sync_status === SyncStatus.WARNING && customAsset.warning && (
                     <>
                       <EuiSpacer size="s" />
-                      <EuiCallOut
+                      <KbnWarningCallout
                         announceOnMount
                         title={
                           <FormattedMessage
@@ -353,13 +344,10 @@ export const IntegrationStatus: React.FunctionComponent<{
                             }}
                           />
                         }
-                        color="warning"
-                        iconType="warning"
                         size="s"
                         data-test-subj="customAssetWarningCallout"
-                      >
-                        {customAsset.warning.message && (
-                          <EuiText size="s">
+                        text={
+                          customAsset.warning.message ? (
                             <FormattedMessage
                               id="xpack.fleet.integrationSyncStatus.customAssetWarningContent"
                               defaultMessage="{customAssetWarning}"
@@ -367,9 +355,9 @@ export const IntegrationStatus: React.FunctionComponent<{
                                 customAssetWarning: customAsset.warning.message,
                               }}
                             />
-                          </EuiText>
-                        )}
-                      </EuiCallOut>
+                          ) : undefined
+                        }
+                      />
                       <EuiSpacer size="s" />
                     </>
                   )}

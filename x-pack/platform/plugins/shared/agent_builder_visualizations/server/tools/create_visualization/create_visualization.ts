@@ -129,6 +129,13 @@ This tool will:
 Ground first: make sure the target index exists and every field you reference is real before calling this tool. If you omit "index" the tool auto-discovers one, but that fails when the referenced fields are invented or absent from the cluster (do NOT assume APM/metrics schemas are present). For multi-panel requests, resolve the index once up front and pass the same "index" to every call rather than firing several index-less calls in parallel.`,
     schema: createVisualizationSchema,
     tags: [],
+    annotations: {
+      title: 'Create Kibana Visualization',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     handler: async (
       {
         query: nlQuery,
