@@ -99,7 +99,7 @@ describe('fetchExpandedDoc', () => {
       });
 
       expect(getSearchParams().params.query).toBe(
-        `FROM logs-* METADATA _id, _index\n| WHERE _index == "${ref.index}" AND _id == "${ref.id}" | EVAL derived = message\n| LIMIT 1`
+        `FROM logs-* METADATA _id, _index | WHERE _index == "${ref.index}" AND _id == "${ref.id}" | EVAL derived = message | LIMIT 1`
       );
     });
 
@@ -115,7 +115,23 @@ describe('fetchExpandedDoc', () => {
       });
 
       expect(getSearchParams().params.query).toBe(
-        `TS metrics-* METADATA _id, _index\n| WHERE _index == "${ref.index}" AND _id == "${ref.id}"\n| LIMIT 1`
+        `TS metrics-* METADATA _id, _index | WHERE _index == "${ref.index}" AND _id == "${ref.id}" | LIMIT 1`
+      );
+    });
+
+    it('escapes document identifiers when building the query', async () => {
+      const { data, getSearchParams } = setup(esqlResponse);
+
+      await fetchExpandedDoc({
+        ref: { id: 'doc-"1\\path', index: 'logs-"quoted' },
+        dataView: dataViewMock,
+        esqlQueryText: 'FROM logs-* METADATA _id, _index',
+        data,
+        abortSignal: new AbortController().signal,
+      });
+
+      expect(getSearchParams().params.query).toBe(
+        'FROM logs-* METADATA _id, _index | WHERE _index == "logs-\\"quoted" AND _id == "doc-\\"1\\\\path" | LIMIT 1'
       );
     });
 

@@ -14,11 +14,8 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import {
-  escapeStringValue,
-  getESQLResults,
-  injectWhereClauseAfterSourceCommand,
-} from '@kbn/esql-utils';
+import { esql } from '@elastic/esql';
+import { getESQLResults, injectWhereClauseAfterSourceCommand } from '@kbn/esql-utils';
 import { buildSearchBody } from '@kbn/unified-doc-viewer-plugin/public';
 import type { ExpandedDocRef } from '../utils/expanded_doc';
 
@@ -68,11 +65,12 @@ const fetchEsqlExpandedDoc = async ({
   data,
   abortSignal,
 }: FetchExpandedDocParams & { esqlQueryText: string }): Promise<DataTableRecord | undefined> => {
-  const whereClause = `_index == ${escapeStringValue(index)} AND _id == ${escapeStringValue(id)}`;
-  const filteredQuery = injectWhereClauseAfterSourceCommand(esqlQueryText, whereClause);
-  const limitedQuery = `${filteredQuery}\n| LIMIT 1`;
+  const whereClause = esql.exp`_index == ${index} AND _id == ${id}`.toString();
+  const esqlQuery = esql(injectWhereClauseAfterSourceCommand(esqlQueryText, whereClause))
+    .limit(1)
+    .print('basic');
   const { response } = await getESQLResults({
-    esqlQuery: limitedQuery,
+    esqlQuery,
     search: data.search.search,
     signal: abortSignal,
   });
