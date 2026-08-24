@@ -108,7 +108,12 @@ export const initializeSwimLaneDataFetcher = (
         }
 
         return from(
-          anomalyTimelineService.loadOverallData(explorerJobs, undefined, bucketInterval, severityThreshold)
+          anomalyTimelineService.loadOverallData(
+            explorerJobs,
+            undefined,
+            bucketInterval,
+            severityThreshold
+          )
         ).pipe(
           switchMap((overallSwimlaneData) => {
             const { earliest, latest } = overallSwimlaneData;
