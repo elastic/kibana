@@ -178,6 +178,7 @@ const handleConversationExecution = async ({
     subagentCreation,
     readOnly,
     projectRouting,
+    templateId,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -202,6 +203,7 @@ const handleConversationExecution = async ({
     readOnly,
     origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
     subagentCreation,
+    ...(templateId ? { templateId } : {}),
   });
 
   const author = await deps.conversationService.getConversationRoundAuthor({

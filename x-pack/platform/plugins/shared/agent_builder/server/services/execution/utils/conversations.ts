@@ -35,7 +35,14 @@ export const createConversation$ = ({
 }: {
   conversation: Pick<
     Conversation,
-    'id' | 'agent_id' | 'access_control' | 'origin' | 'user' | 'parent_conversation' | 'read_only'
+    | 'id'
+    | 'agent_id'
+    | 'access_control'
+    | 'origin'
+    | 'user'
+    | 'parent_conversation'
+    | 'read_only'
+    | 'template_id'
   >;
   conversationClient: ConversationClient;
   title$: Observable<string>;
@@ -58,6 +65,7 @@ export const createConversation$ = ({
         access_control: conversation.access_control,
         origin: conversation.origin,
         read_only: conversation.read_only,
+        ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
         rounds: [roundCompletedEvent.data.round],
@@ -166,6 +174,7 @@ export const getConversation = async ({
   origin,
   subagentCreation,
   readOnly,
+  templateId,
 }: {
   agentId: string;
   conversationId: string | undefined;
@@ -178,6 +187,7 @@ export const getConversation = async ({
     subagentName: string;
   };
   readOnly?: boolean;
+  templateId?: string;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
@@ -192,6 +202,7 @@ export const getConversation = async ({
 
     return {
       ...placeholderConversation({ agentId, accessControl, origin, readOnly }),
+      ...(templateId ? { template_id: templateId } : {}),
       operation: 'CREATE',
     };
   }
@@ -230,6 +241,7 @@ export const getConversation = async ({
           accessControl: parent.access_control,
           origin,
         }),
+        ...(templateId ? { template_id: templateId } : {}),
         title: subagentCreation.subagentName,
         user: parent.user,
         parent_conversation: parentLink,
@@ -244,6 +256,7 @@ export const getConversation = async ({
         origin,
         readOnly,
       }),
+      ...(templateId ? { template_id: templateId } : {}),
       title: subagentCreation.subagentName,
       parent_conversation: parentLink,
       operation: 'CREATE',
@@ -252,6 +265,7 @@ export const getConversation = async ({
 
   return {
     ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
+    ...(templateId ? { template_id: templateId } : {}),
     operation: 'CREATE',
   };
 };

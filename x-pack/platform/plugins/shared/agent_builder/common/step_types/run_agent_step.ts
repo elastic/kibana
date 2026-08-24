@@ -223,6 +223,16 @@ export const ConfigSchema = z
       .optional()
       .describe('When true, creates a conversation for the step.'),
     /**
+     * Template ID to bind to the created conversation. When set, the conversation is stamped
+     * with this template and the set_conversation_metadata tool becomes available to the agent.
+     */
+    'template-id': z
+      .string()
+      .optional()
+      .describe(
+        'Template ID to bind to the created conversation. When set, the conversation is stamped with this template and the set_conversation_metadata tool becomes available to the agent.'
+      ),
+    /**
      * When true, newly created conversations are public so other users who can use the
      * underlying agent can list, view, and continue them. Ignored when continuing an
      * existing conversation. Defaults to private.

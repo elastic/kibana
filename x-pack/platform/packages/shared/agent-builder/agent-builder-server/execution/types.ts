@@ -103,6 +103,8 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
     subagentName: string;
     subagentPurpose?: string;
   };
+  /** Template ID to bind to the conversation at creation time. */
+  templateId?: string;
 }
 
 /**

@@ -109,6 +109,13 @@ export interface EmbeddableConversationProps {
    * ```
    */
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+
+  /**
+   * Open a specific existing conversation by ID.
+   * When provided, the embeddable loads this conversation directly instead of
+   * restoring from sessionTag or starting a new one.
+   */
+  conversationId?: string;
 }
 
 /**

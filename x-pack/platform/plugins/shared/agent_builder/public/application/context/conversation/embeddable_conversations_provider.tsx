@@ -170,6 +170,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   );
 
   // One-time initialization per provider instance:
+  // - If a specific conversationId prop is passed, validate and load it directly.
   // - If newConversation flag is set, clears the conversation ID to start fresh.
   // - Otherwise, if there's a persisted conversation ID, validates and restores it.
   // - Otherwise, clears the conversation ID.
@@ -177,7 +178,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   useEffect(() => {
     if (hasInitializedConversationIdRef.current) return;
 
-    if (contextProps.newConversation) {
+    if (contextProps.conversationId) {
+      validateAndSetConversationId(contextProps.conversationId);
+    } else if (contextProps.newConversation) {
       setConversationId(undefined);
     } else if (persistedConversationId) {
       validateAndSetConversationId(persistedConversationId);
@@ -186,6 +189,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     }
     hasInitializedConversationIdRef.current = true;
   }, [
+    contextProps.conversationId,
     contextProps.newConversation,
     persistedConversationId,
     setConversationId,
@@ -196,10 +200,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setConversationId(undefined);
   }, [setConversationId]);
 
-  // Derived conversation ID
+  // Derived conversation ID — prop-provided ID takes precedence over localStorage restore
   const conversationId = useMemo(() => {
     if (currentProps.newConversation) {
       return undefined;
+    }
+    if (currentProps.conversationId) {
+      return currentProps.conversationId;
     }
     // After initialization, always use persisted ID
     return persistedConversationId;
