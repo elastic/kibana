@@ -7,7 +7,7 @@
 
 /* eslint-disable require-atomic-updates */
 
-import { blue, green } from 'chalk';
+import chalk from 'chalk';
 import type { DistinctQuestion } from 'inquirer';
 import type { LoadEndpointsConfig } from '../types';
 import { loadEndpoints } from '../services/endpoint_loader';
@@ -33,7 +33,7 @@ const promptQuestion = <TAnswers extends object = object>(
     message: 'Unknown?',
     // @ts-expect-error unclear why this is not defined in the definition file
     askAnswered: true,
-    prefix: green('    ==> '),
+    prefix: chalk.green('    ==> '),
     ...options,
   };
 
@@ -155,7 +155,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
         }),
       ],
       answers: this.config,
-      title: blue('Endpoint Loader Settings'),
+      title: chalk.blue('Endpoint Loader Settings'),
     });
 
     await this.saveSettings();

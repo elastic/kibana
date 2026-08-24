@@ -47,7 +47,7 @@ function commandsSummary(program) {
       const name = cmd._name;
       if (name === '*') return;
       const opts = cmd.options.length ? ' [options]' : '';
-      const args = cmd._args
+      const args = cmd.registeredArguments
         .map(function (arg) {
           return humanReadableArgName(arg);
         })
@@ -68,14 +68,26 @@ function commandsSummary(program) {
 
 function cmdHelp(cmd) {
   if (!cmd) return '';
+
+  const helper = cmd.createHelp();
+  const options = helper.visibleOptions(cmd);
+  const optionTermLength = helper.longestOptionTermLength(cmd, helper);
+  const optionHelp = options
+    .map((option) => {
+      const term = helper.optionTerm(option);
+      return `${term.padEnd(optionTermLength)}  ${helper.optionDescription(option)}`;
+    })
+    .join('\n');
+
   return `
 "${cmd._name}" Options:
 
-${indent(cmd.optionHelp(), 2)}
+${indent(optionHelp, 2)}
 `.trim();
 }
 
 function humanReadableArgName(arg) {
-  const nameOutput = arg.name + (arg.variadic === true ? '...' : '');
+  const name = arg.name();
+  const nameOutput = name + (arg.variadic === true ? '...' : '');
   return arg.required ? '<' + nameOutput + '>' : '[' + nameOutput + ']';
 }

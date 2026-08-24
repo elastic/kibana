@@ -8,7 +8,7 @@
  */
 
 import chalk from 'chalk';
-import getopts from 'getopts';
+import getopts = require('getopts');
 import dedent from 'dedent';
 import { commands } from './cli_commands';
 import { isCliError } from './errors';

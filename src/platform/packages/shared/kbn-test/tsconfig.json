@@ -5,7 +5,7 @@
     "stripInternal": true,
     "types": ["jest", "node"]
   },
-  "include": ["**/*.ts", "**/*.js", "src/jest/jest_flags.json"],
+  "include": ["**/*.ts", "**/*.js", "src/jest/jest_flags.json", "../../../../../typings/getopts.d.ts"],
   "exclude": ["types/**/*", "**/__fixtures__/**/*", "target/**/*"],
   "kbn_references": [
     "@kbn/kbn-client",

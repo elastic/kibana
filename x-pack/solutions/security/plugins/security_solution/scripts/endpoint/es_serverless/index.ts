@@ -6,7 +6,7 @@
  */
 
 import { run, type RunContext } from '@kbn/dev-cli-runner';
-import { cyan, gray } from 'chalk';
+import chalk from 'chalk';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { join } from 'path';
@@ -37,16 +37,16 @@ User accounts available for login:
 ${
   new ColumnLayoutFormatter(
     [
-      ['USERNAME', '-'.repeat(20), ...ES_LOADED_USERS.map((u) => cyan(u))].join('\n'),
+      ['USERNAME', '-'.repeat(20), ...ES_LOADED_USERS.map((u) => chalk.cyan(u))].join('\n'),
 
       [
         'PASSWORD',
         '-'.repeat(20),
         ' ',
         ' ',
-        gray('Password for all'),
-        gray('accounts set'),
-        `${gray('to:')} ${cyan('changeme')}`,
+        chalk.gray('Password for all'),
+        chalk.gray('accounts set'),
+        `${chalk.gray('to:')} ${chalk.cyan('changeme')}`,
       ].join('\n'),
     ],
     { separator: '  ', widths: [50, 40] }
@@ -54,7 +54,7 @@ ${
 }
 `);
 
-      cliContext.log.info(gray(`node ${exeScript} ${callingArgs.join(' ')}`));
+      cliContext.log.info(chalk.gray(`node ${exeScript} ${callingArgs.join(' ')}`));
 
       await execa.node(exeScript, callingArgs, {
         stderr: 'inherit',
@@ -63,15 +63,17 @@ ${
     },
     {
       description: `ES serverless start script for Security project.
-This is a bypass utility that calls ${cyan('yarn es serverless')} along with some default options
+This is a bypass utility that calls ${chalk.cyan(
+        'yarn es serverless'
+      )} along with some default options
 that will enable users and roles to be loaded into ES.
 `,
       flags: {
         allowUnexpected: true,
         help: `
-Any option supported by ${cyan('yarn es')} can also be used with this utility.
+Any option supported by ${chalk.cyan('yarn es')} can also be used with this utility.
 
-For more on ${cyan('yarn es')} usage, enter: ${cyan('yarn es --help')}
+For more on ${chalk.cyan('yarn es')} usage, enter: ${chalk.cyan('yarn es --help')}
 `,
       },
     }

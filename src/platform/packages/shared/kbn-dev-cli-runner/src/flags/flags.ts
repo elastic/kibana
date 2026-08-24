@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import getopts from 'getopts';
+import getopts = require('getopts');
 import { LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
 import type { FlagOptions, Flags } from './types';
 

@@ -9,7 +9,7 @@
 
 const { join } = require('path');
 const { readdirSync, readFileSync, writeFileSync, renameSync } = require('fs');
-const ora = require('ora');
+const ora = require('ora').default;
 const log = ora('Updating generated antlr grammar').start();
 
 const SUPPORTED_FOLDERS = ['painless', 'esql'];

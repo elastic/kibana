@@ -11,7 +11,7 @@ const Fs = require('fs');
 const Path = require('path');
 const Crypto = require('crypto');
 
-const chalk = require('chalk');
+const { default: chalk } = require('chalk');
 const LmdbStore = require('lmdb');
 
 const { utf8StringKeyEncoder } = require('./lmdb_key_encoder');
