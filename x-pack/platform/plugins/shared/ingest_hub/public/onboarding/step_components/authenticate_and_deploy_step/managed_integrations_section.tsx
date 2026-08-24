@@ -231,8 +231,7 @@ export function ManagedIntegrationsSection({
             <EuiSpacer size="m" />
 
             {hasFailed && !isDeploying && (
-              <>
-                <EuiCallOut
+              <EuiCallOut
                   title={
                     <FormattedMessage
                       id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.errorCallout.title"
@@ -260,8 +259,7 @@ export function ManagedIntegrationsSection({
                       defaultMessage="Retry"
                     />
                   </EuiButton>
-                </EuiCallOut>
-              </>
+            </EuiCallOut>
             )}
 
             {!hasFailed && (
