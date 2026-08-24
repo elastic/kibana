@@ -49,6 +49,11 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW,
 } from './significant_events/memory';
+import {
+  THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW,
+  THREAT_INTEL_ENRICH_REPORT_WORKFLOW,
+  THREAT_INTEL_INGEST_FEEDS_WORKFLOW,
+} from './threat_intel';
 import { EXAMPLE_MANAGED_WORKFLOW } from './workflows_extensions_example';
 
 export {
@@ -98,6 +103,12 @@ export {
   PND_WATCH_OFFICER_WORKFLOW_ID,
   PND_WATCH_WORKFLOW_IDS,
 } from './pnd';
+export {
+  THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
+  THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
+  THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+  THREAT_INTEL_WORKFLOW_IDS,
+} from './threat_intel';
 
 // Registering the AD workflow definitions in the managed-workflows registry is
 // FF-off safe: membership only makes a definition *discoverable by id* (which the
@@ -142,4 +153,10 @@ export const managedWorkflowDefinitions = [
   PND_RULE_TUNING_WORKFLOW,
   PND_RULE_CREATION_WORKFLOW,
   PND_WATCH_ATTACK_DISCOVERY_WORKFLOW,
+  // Threat intel supply workflows are FF-off safe: registry membership only
+  // makes a definition discoverable by id. security_solution installs them
+  // in start() only when `threatIntelSupplyEnabled` is on.
+  THREAT_INTEL_INGEST_FEEDS_WORKFLOW,
+  THREAT_INTEL_ENRICH_REPORT_WORKFLOW,
+  THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW,
 ] as const;
