@@ -28,6 +28,7 @@ plugins:
     - data_views
     - data_views_as_code
     - data_visualizer
+    - dataset_quality
     - dev_tools
     - discover
     - discover_enhanced
@@ -73,6 +74,7 @@ plugins:
     - reindex_service
     - saved_objects_management
     - saved_objects_tagging
+    - searchExamples
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
