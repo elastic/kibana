@@ -231,6 +231,13 @@ export class PackagePolicyService {
    * create/edit flow (deciding where a policy *should* live based on its agent
    * policy) and misroutes an existing policy whose recorded space has diverged
    * from its agent policy's spaces — silently dropping the write.
+   *
+   * Only called by the shard-rebalance task, and only ever with monitors from
+   * a condition-sharded (scalable) location, so every write here always goes
+   * through the batched revision bump — unlike {@link bulkUpdate}, there's no
+   * classic/immediate split to make. Without this, a rebalance cycle's bump
+   * races the same agent policy as concurrent monitor CRUD with no retry,
+   * so a single version conflict fails the whole cycle's moves outright.
    */
   async bulkUpdateInSpace({
     policiesToUpdate,
@@ -244,15 +251,23 @@ export class PackagePolicyService {
     }
 
     const soClient = this.getSpaceSoClient(spaceId === ALL_SPACES_ID ? DEFAULT_SPACE_ID : spaceId);
-    const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
+    const { updatedPolicies, failedPolicies } =
+      await this.server.fleet.packagePolicyService.bulkUpdate(
+        soClient,
+        this.getInternalEsClient(),
+        policiesToUpdate,
+        {
+          force: true,
+          asyncDeploy: true,
+          bumpRevision: false,
+        }
+      );
+
+    await this.revisionBatcher.schedule(
       soClient,
-      this.getInternalEsClient(),
-      policiesToUpdate,
-      {
-        force: true,
-        asyncDeploy: true,
-      }
+      updatedPolicies?.flatMap(({ policy_ids: policyIds }) => policyIds) ?? []
     );
+
     return failedPolicies;
   }
 

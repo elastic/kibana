@@ -313,18 +313,26 @@ describe('PackagePolicyService.listByAgentPolicy', () => {
 
 describe('PackagePolicyService.bulkUpdateInSpace', () => {
   const makeUpdateServer = () => {
-    const asScopedToNamespace = jest.fn((space: string) => ({ __space: space }));
-    const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
+    const asScopedToNamespace = jest.fn((space: string) => {
+      const client = { __space: space };
+      Object.defineProperty(client, 'getCurrentNamespace', { value: () => space });
+      return client;
+    });
+    const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [], updatedPolicies: [] });
     const getByIds = jest.fn();
+    const bumpRevision = jest.fn().mockResolvedValue(undefined);
     const server = {
       logger: loggerMock.create(),
-      fleet: { packagePolicyService: { bulkUpdate }, agentPolicyService: { getByIds } },
+      fleet: {
+        packagePolicyService: { bulkUpdate },
+        agentPolicyService: { getByIds, bumpRevision },
+      },
       coreStart: {
         savedObjects: { getUnsafeInternalClient: () => ({ asScopedToNamespace }) },
         elasticsearch: { client: { asInternalUser: { __es: true } } },
       },
     } as unknown as SyntheticsServerSetup;
-    return { server, bulkUpdate, getByIds, asScopedToNamespace };
+    return { server, bulkUpdate, getByIds, bumpRevision, asScopedToNamespace };
   };
 
   const update = (id: string): UpdatePackagePolicyWithId =>
@@ -366,5 +374,27 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
 
     expect(failed).toEqual([]);
     expect(bulkUpdate).not.toHaveBeenCalled();
+  });
+
+  it('routes through the batched revision bump used by the shard-rebalance task', async () => {
+    const { server, bulkUpdate, bumpRevision } = makeUpdateServer();
+    bulkUpdate.mockResolvedValue({
+      failedPolicies: [],
+      updatedPolicies: [update('m1-loc'), update('m2-loc')],
+    });
+
+    await new PackagePolicyService(server).bulkUpdateInSpace({
+      policiesToUpdate: [update('m1-loc'), update('m2-loc')],
+      spaceId: 'team-x',
+    });
+
+    // Opts out of Fleet's own immediate bump so the rebalance task's write
+    // shares the same coalesced/retried bump as concurrent monitor CRUD,
+    // instead of racing it with no retry.
+    expect(bulkUpdate.mock.calls[0][3]).toEqual(expect.objectContaining({ bumpRevision: false }));
+    expect(bumpRevision).toHaveBeenCalledTimes(1);
+    expect(bumpRevision).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'ap-1', {
+      asyncDeploy: true,
+    });
   });
 });
