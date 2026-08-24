@@ -22,6 +22,7 @@ import {
   untar,
   gunzip,
   compressTar,
+  compressZip,
 } from '../fs';
 import { getFips } from 'crypto';
 
@@ -283,6 +284,22 @@ describe('getFileHash()', () => {
       expect(await getFileHash(BAR_TXT_PATH, 'md5')).toBe('c157a79031e1c40f85931829bc5fc552');
     });
   }
+});
+
+describe('compressZip()', () => {
+  it('creates an archive from an absolute source directory', async () => {
+    const destination = resolve(TMP, 'foo_dir.zip');
+
+    const fileCount = await compressZip({
+      createRootDirectory: true,
+      destination,
+      source: resolve(FIXTURES, 'foo_dir'),
+    });
+
+    expect(fileCount).toBeGreaterThan(0);
+    expect(statSync(destination).isFile()).toBe(true);
+    expect(statSync(destination).size).toBeGreaterThan(0);
+  });
 });
 
 describe('untar()', () => {

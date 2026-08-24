@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import archiver from 'archiver';
+import * as archiver from 'archiver';
 import { stringify } from 'yaml';
 import semver from 'semver';
 import type { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
+
+const ZipArchive = (
+  archiver as typeof archiver & {
+    ZipArchive: new (options?: archiver.ArchiverOptions) => archiver.Archiver;
+  }
+).ZipArchive;
 
 export interface GeneratePrebuiltRulesPackageBaseParams {
   packageName: string;
@@ -34,7 +40,7 @@ export function generatePrebuiltRulesPackage({
 }: GeneratePrebuiltRulesPackageParams): void {
   validateSemver(packageSemver);
 
-  const prebuiltRulesPackage = archiver('zip', {
+  const prebuiltRulesPackage = new ZipArchive({
     zlib: { level: 9 },
     forceZip64: true,
   });
