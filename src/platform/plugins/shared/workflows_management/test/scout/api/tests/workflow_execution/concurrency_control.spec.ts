@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'node:crypto';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows/types/latest';
@@ -14,7 +15,7 @@ import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import type { WorkflowsApiService } from '../../../common/apis/workflows';
 import { spaceTest } from '../../fixtures';
 
-const getConcurrencyWorkflowYaml = (strategy: string) => `
+const getConcurrencyWorkflowYaml = (strategy: string, isolationKey: string) => `
 name: Scout API Test Workflow
 enabled: true
 description: Temporary workflow created by Scout API tests
@@ -29,7 +30,7 @@ triggers:
           type: string
 settings:
   concurrency:
-    key: "{{inputs.env}}-{{inputs.problem}}"
+    key: "{{inputs.env}}-{{inputs.problem}}-${isolationKey}"
     strategy: "${strategy}"
 
 
@@ -62,6 +63,7 @@ spaceTest.describe(
     async function runConcurrencyWorkflow(
       workflowsApi: WorkflowsApiService,
       workflowId: string,
+      isolationKey: string,
       { waitTimeout = 20_000 }: { waitTimeout?: number } = {}
     ) {
       const events = [
@@ -76,11 +78,10 @@ spaceTest.describe(
 
       for (const event of events) {
         const response = await workflowsApi.run(workflowId, event);
-        await new Promise((resolve) => setTimeout(resolve, 1500));
 
         scheduledExecutions.push({
           workflowExecutionId: response.workflowExecutionId,
-          concurrencyKey: `${event.env}-${event.problem}`,
+          concurrencyKey: `${event.env}-${event.problem}-${isolationKey}`,
         });
       }
 
@@ -116,13 +117,15 @@ spaceTest.describe(
     spaceTest(
       'cancel-in-progress strategy cancels previous executions and completes the latest',
       async ({ apiServices }) => {
+        const isolationKey = randomUUID();
         const createdWorkflow = await apiServices.workflowsApi.create(
-          getConcurrencyWorkflowYaml('cancel-in-progress')
+          getConcurrencyWorkflowYaml('cancel-in-progress', isolationKey)
         );
 
         const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
           apiServices.workflowsApi,
-          createdWorkflow.id
+          createdWorkflow.id,
+          isolationKey
         );
 
         Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
@@ -148,13 +151,15 @@ spaceTest.describe(
     spaceTest(
       'drop strategy drops new executions until there is an already running execution',
       async ({ apiServices }) => {
+        const isolationKey = randomUUID();
         const createdWorkflow = await apiServices.workflowsApi.create(
-          getConcurrencyWorkflowYaml('drop')
+          getConcurrencyWorkflowYaml('drop', isolationKey)
         );
 
         const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
           apiServices.workflowsApi,
-          createdWorkflow.id
+          createdWorkflow.id,
+          isolationKey
         );
 
         Object.entries(groupedExecutionsByConcurrencyKey).forEach(([, executions]) => {
@@ -184,8 +189,9 @@ spaceTest.describe(
         // the same key (~30s) plus ~6s of inter-run delays, so 120s leaves CI headroom.
         spaceTest.setTimeout(120_000);
 
+        const isolationKey = randomUUID();
         const createdWorkflow = await apiServices.workflowsApi.create(
-          getConcurrencyWorkflowYaml('queue')
+          getConcurrencyWorkflowYaml('queue', isolationKey)
         );
 
         // The queue strategy serialises executions per concurrency key. With 3 queued
@@ -194,6 +200,7 @@ spaceTest.describe(
         const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
           apiServices.workflowsApi,
           createdWorkflow.id,
+          isolationKey,
           { waitTimeout: 60_000 }
         );
 

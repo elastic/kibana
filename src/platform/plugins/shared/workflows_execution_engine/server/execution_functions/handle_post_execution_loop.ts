@@ -61,6 +61,7 @@ export async function handlePostExecutionLoop({
           spaceId,
           concurrencyGroupKey: groupKey,
           concurrencySettings: concurrency,
+          excludeExecutionId: workflowRunId,
         });
       } catch (drainErr) {
         logger.debug(

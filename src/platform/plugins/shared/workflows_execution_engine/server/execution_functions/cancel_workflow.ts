@@ -102,6 +102,7 @@ export const cancelWorkflow = async ({
         spaceId: workflowExecution.spaceId,
         concurrencyGroupKey,
         concurrencySettings,
+        excludeExecutionId: workflowExecution.id,
       });
     } catch (drainErr) {
       logger.debug(

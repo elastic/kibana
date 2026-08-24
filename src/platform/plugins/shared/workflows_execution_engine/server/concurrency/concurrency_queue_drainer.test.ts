@@ -37,6 +37,39 @@ describe('drainConcurrencyQueueSlots', () => {
     jest.clearAllMocks();
   });
 
+  it('excludes excludeExecutionId from occupancy so a stale completed doc cannot block promotion', async () => {
+    const occupancyByCall: Array<string | undefined> = [];
+    const counting = jest.fn(
+      async (_key: string, _space: string, _statuses: unknown, excludeExecutionId?: string) => {
+        occupancyByCall.push(excludeExecutionId);
+        return occupancyByCall.length === 1 ? 0 : 1;
+      }
+    );
+
+    const workflowExecutionRepository = {
+      countExecutionsByConcurrencyGroupAndStatuses: counting,
+      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-queued-1'),
+      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
+      getWorkflowExecutionById: jest.fn().mockResolvedValue({
+        id: 'exec-queued-1',
+        spaceId: 'default',
+        triggeredBy: 'manual',
+        status: ExecutionStatus.PENDING,
+      }),
+      updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    } as unknown as WorkflowExecutionRepository;
+
+    await drainConcurrencyQueueSlots({
+      ...baseParams,
+      workflowExecutionRepository,
+      excludeExecutionId: 'exec-finished',
+    });
+
+    expect(occupancyByCall.length).toBeGreaterThan(0);
+    expect(occupancyByCall.every((id) => id === 'exec-finished')).toBe(true);
+    expect(promoteQueuedRunTask).toHaveBeenCalledTimes(1);
+  });
+
   it('promotes at most one queued execution per drain when max is 1', async () => {
     const countMock = jest.fn().mockResolvedValueOnce(0).mockResolvedValue(1);
     const workflowExecutionRepository = {
@@ -264,12 +297,10 @@ describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
         triggeredBy: 'manual',
         status: ExecutionStatus.PENDING,
       });
+    const countMock = jest.fn().mockResolvedValueOnce(0).mockResolvedValue(1);
     const workflowExecutionRepository = {
       getWorkflowExecutionById: getByIdMock,
-      countExecutionsByConcurrencyGroupAndStatuses: jest
-        .fn()
-        .mockResolvedValueOnce(0)
-        .mockResolvedValue(1),
+      countExecutionsByConcurrencyGroupAndStatuses: countMock,
       getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue('exec-q1'),
       tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
       updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
@@ -281,6 +312,7 @@ describe('maybeDrainConcurrencyQueueAfterTerminal', () => {
     });
 
     expect(promoteQueuedRunTask).toHaveBeenCalledTimes(1);
+    expect(countMock).toHaveBeenCalledWith('g1', 'default', expect.any(Array), 'exec-finished');
     expect(debugMock).toHaveBeenCalledWith(
       'Promoted queued execution exec-q1 to pending and runSoon queued workflow:run (group g1)'
     );

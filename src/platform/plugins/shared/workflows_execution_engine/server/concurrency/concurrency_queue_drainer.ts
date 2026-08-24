@@ -52,6 +52,11 @@ export async function drainConcurrencyQueueSlots(params: {
   spaceId: string;
   concurrencyGroupKey: string;
   concurrencySettings: ConcurrencySettings;
+  /**
+   * Execution that just left a slot (terminal or cancelled). Excluded from the
+   * occupancy count so a stale search hit on this doc cannot block promotion.
+   */
+  excludeExecutionId?: string;
 }): Promise<void> {
   const {
     workflowExecutionRepository,
@@ -60,6 +65,7 @@ export async function drainConcurrencyQueueSlots(params: {
     spaceId,
     concurrencyGroupKey,
     concurrencySettings,
+    excludeExecutionId,
   } = params;
 
   if (concurrencySettings.strategy !== 'queue') {
@@ -73,7 +79,8 @@ export async function drainConcurrencyQueueSlots(params: {
       await workflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses(
         concurrencyGroupKey,
         spaceId,
-        ConcurrencySlotOccupyingExecutionStatuses
+        ConcurrencySlotOccupyingExecutionStatuses,
+        excludeExecutionId
       );
 
     if (slotCount >= maxConcurrency) {
@@ -217,6 +224,7 @@ export async function maybeDrainConcurrencyQueueAfterTerminal(params: {
       spaceId,
       concurrencyGroupKey: groupKey,
       concurrencySettings: concurrency,
+      excludeExecutionId: workflowRunId,
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);

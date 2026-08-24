@@ -237,6 +237,6 @@ describe('cancelWorkflow', () => {
     );
     expect(
       workflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses
-    ).toHaveBeenCalled();
+    ).toHaveBeenCalledWith('group-a', 'default', expect.any(Array), workflowExecutionId);
   });
 });
