@@ -31,6 +31,8 @@ export function useDebouncedGetPreviewData({
 
   const [projectRoutingsState, setProjectRoutingsState] = useState(projectRoutings);
 
+  // Empty deps intentional: debounce must be stable across renders so the pending timer is not
+  // discarded on re-render. The setState setters are guaranteed stable by React.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const store = useCallback(
     debounce((value: string) => setIndicatorState(value), 800),
