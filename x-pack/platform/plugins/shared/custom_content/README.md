@@ -106,13 +106,23 @@ When `agentBuilder` is available (optional plugin dependency), the panel partici
 
 ### 1. Refine an existing panel via chat
 
-"Refine with chat" attaches the current template, query, panel title, and panel id as a `platform.custom_content.panel_context` attachment and opens the chat sidebar. The `embeddable_id` field identifies which panel on the dashboard owns the session, and the session is scoped per panel via a `custom_content-<embeddableId>` tag so concurrent panels don't share chat context.
+"Refine with chat" attaches the current template, query, panel title, and panel id as a `platform.custom_content.panel_context` attachment and opens the chat sidebar. The `embeddable_id` field identifies which panel on the dashboard owns the attachment.
+
+The conversation is the ordinary dashboard chat — panels are not given their own chat session. Isolation comes from the attachment rather than the conversation: each panel gets a stable attachment id (`platform.custom_content.panel_context-<embeddableId>`, see `utils/chat_integration.ts`) so re-pushing a panel's context replaces its previous snapshot instead of accumulating duplicates, and every consumer keys off `embeddable_id`. A single round can therefore carry the dashboard attachment plus one attachment per custom content panel, and each panel picks out its own.
 
 The attachment type is registered server-side in `server/attachment_types/custom_content_context.ts` and client-side in `public/attachment_types/custom_content_context.ts`.
 
-A server-side builtin tool, `custom_content_update_panel` (`server/tools/update_custom_content_tool.ts`), accepts `prompt` and/or `esqlQuery` — never a `template`. It resolves a new template via the shared resolver, merges the result into the stored attachment, and updates it with `actor: agent`. The embeddable subscribes to `RoundCompleteEvent`, and when it sees an agent-authored create/update of a `platform.custom_content.panel_context` attachment whose `embeddable_id` matches its own uuid, it applies the new template and query.
+A server-side builtin tool, `custom_content_update_panel` (`server/tools/update_custom_content_tool.ts`), accepts `prompt` and/or `esqlQuery` — never a `template`. It resolves a new template via the shared resolver, merges the result into the stored attachment, and updates it with `actor: agent`. The embeddable subscribes to `RoundCompleteEvent` and scans every agent-authored create/update ref in the round for a `platform.custom_content.panel_context` attachment whose `embeddable_id` matches its own uuid, then applies that template and query. It scans all refs rather than only the first, because a round routinely touches the dashboard attachment and other panels' attachments too.
 
 Passing `esqlQuery: null` removes the query entirely.
+
+#### Preview and version history
+
+The tool returns `attachment_id` and `version`, and both the tool description and the attachment's `getAgentDescription()` instruct the agent to emit `<render_attachment id="…" version="…" />` in its answer. That tag is what renders the attachment card for the round; the panel update itself is applied independently via `RoundCompleteEvent`, so a round without the tag still updates the panel, it just doesn't offer a card to preview from.
+
+The card carries a single **Preview** action (`public/attachment_types/custom_content_context.ts`), which applies that card's version to the live panel — the same in-place state swap the dashboard attachment performs, not a separate preview container. The definition deliberately provides neither `renderInlineContent` nor `renderCanvasContent`, since either would make agent builder open its canvas flyout instead.
+
+Because each round's card is pinned to the version that round produced, clicking Preview on an earlier round steps the panel back to that template, and clicking a later one steps it forward. The button reaches the panel through a small `embeddableId → handler` registry (`utils/panel_preview_registry.ts`) that mounted panels register into; when the panel is not mounted the action warns instead of failing silently. The handler is lazy-loaded so the registry and its copy stay out of the plugin's page-load bundle.
 
 ### 2. Agent-driven dashboard creation and editing
 
@@ -125,7 +135,19 @@ Passing `esqlQuery: null` removes the query entirely.
 - **Static HTML** — no query involved; produces a self-contained HTML document.
 - **Liquid template** — a query is present or changing; produces a reusable template with no literal data baked in.
 
-When a query is changing it samples 3 rows (`appendLimitToQuery`) to give the LLM the real schema and representative values; a sampling failure degrades to a schema-less prompt rather than failing the call. When only the prompt changes, it skips sampling and asks the LLM to refine the existing template in place, preserving layout and colors. Output is stripped of markdown fences and validated before it is returned.
+When a query is changing it samples 3 rows (`appendLimitToQuery`) to give the LLM the real schema and representative values. When only the prompt changes, it skips sampling and asks the LLM to refine the existing template in place, preserving layout and colors. Output is stripped of markdown fences and validated before it is returned.
+
+**A sampling failure fails the resolve.** The sample is the only source of real column names, so a template generated after it fails references invented columns whatever the cause — and persisting that yields a panel that breaks at render with no explanation. Failing instead gives the caller something it can act on. The error message distinguishes the cause so the agent does not act on the wrong one:
+
+| Cause | Message |
+|-------|---------|
+| `verification_exception` / `parsing_exception` | Query is invalid; build it with `generate_esql` and retry. ES\|QL reports a missing index as `verification_exception`, so this covers unknown indices too. |
+| `security_exception` | No access to the targeted index. |
+| anything else | Could not sample the schema; likely transient, retry. |
+
+A valid query that matches no rows is **not** a failure — Elasticsearch returns the real columns with empty values, and the template is generated with a "no rows available for the current time range" note.
+
+Callers already surface this: `applyCustomContentTemplates` drops the panel and records a failure, `edit_panels` records a failure and leaves the existing panel untouched, and `custom_content_update_panel` returns an error result. The dashboard skill instructs the agent to explain each `data.failures` entry to the user.
 
 ## Security
 
