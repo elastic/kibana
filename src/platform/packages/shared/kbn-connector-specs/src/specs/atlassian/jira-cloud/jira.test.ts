@@ -10,6 +10,7 @@
 import type { ActionContext } from '../../../connector_spec';
 import { toAdf } from './adf';
 import { JiraConnector } from './jira';
+import { CreateIssueInputSchema } from './types';
 
 describe('JiraConnector', () => {
   const mockClient = {
@@ -367,11 +368,18 @@ describe('JiraConnector', () => {
       const result = await JiraConnector.actions.createIssue.handler(mockContext, {
         projectKey: 'PROJ',
         summary: 'Fix login bug',
+        issueType: 'Bug',
       });
 
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://mycompany.atlassian.net/rest/api/3/issue',
-        { fields: { project: { key: 'PROJ' }, summary: 'Fix login bug' } }
+        {
+          fields: {
+            project: { key: 'PROJ' },
+            summary: 'Fix login bug',
+            issuetype: { name: 'Bug' },
+          },
+        }
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -382,6 +390,7 @@ describe('JiraConnector', () => {
       await JiraConnector.actions.createIssue.handler(mockContext, {
         projectKey: 'PROJ',
         summary: 'Bug',
+        issueType: 'Bug',
         description: 'Steps to reproduce:\nOpen the app',
       });
 
@@ -414,21 +423,30 @@ describe('JiraConnector', () => {
       ).toEqual({ name: 'Bug' });
     });
 
-    it('omits optional fields when not provided', async () => {
+    it('always includes issuetype and omits other optional fields when not provided', async () => {
       mockClient.post.mockResolvedValue({ data: { id: '10042', key: 'PROJ-42' } });
 
       await JiraConnector.actions.createIssue.handler(mockContext, {
         projectKey: 'PROJ',
         summary: 'Minimal issue',
+        issueType: 'Task',
       });
 
       const { fields } = mockClient.post.mock.calls[0][1] as { fields: Record<string, unknown> };
+      expect(fields).toHaveProperty('issuetype', { name: 'Task' });
       expect(fields).not.toHaveProperty('description');
-      expect(fields).not.toHaveProperty('issuetype');
       expect(fields).not.toHaveProperty('priority');
       expect(fields).not.toHaveProperty('labels');
       expect(fields).not.toHaveProperty('assignee');
       expect(fields).not.toHaveProperty('parent');
+    });
+
+    it('rejects input when issueType is omitted', () => {
+      const result = CreateIssueInputSchema.safeParse({
+        projectKey: 'PROJ',
+        summary: 'Missing issue type',
+      });
+      expect(result.success).toBe(false);
     });
   });
 

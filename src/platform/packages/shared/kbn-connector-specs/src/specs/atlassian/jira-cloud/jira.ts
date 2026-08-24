@@ -270,10 +270,8 @@ export const JiraConnector: ConnectorSpec = {
         const fields: Record<string, unknown> = {
           project: { key: input.projectKey },
           summary: input.summary,
+          issuetype: issueTypeField(input.issueType),
         };
-        if (input.issueType !== undefined) {
-          fields.issuetype = issueTypeField(input.issueType);
-        }
         if (input.description !== undefined) {
           fields.description = toAdf(input.description);
         }

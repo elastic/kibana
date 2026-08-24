@@ -137,11 +137,9 @@ export const CreateIssueInputSchema = lazySchema(() =>
     issueType: z
       .string()
       .max(255)
-      .optional()
       .describe(
         'Issue type name (e.g. Bug, Task, Story) or numeric ID. ' +
-          'Use getIssueTypes to list available types for the project. ' +
-          'Defaults to the first available issue type when omitted.'
+          'Required by Jira — use getIssueTypes to list valid types for the project.'
       ),
     description: z
       .string()

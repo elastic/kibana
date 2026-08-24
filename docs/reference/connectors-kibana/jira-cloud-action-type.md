@@ -106,7 +106,7 @@ Create issue (`createIssue`) {applies_to}`serverless: preview` {applies_to}`stac
 :   Create a new Jira issue.
     - `projectKey` (required): The project key (for example, `PROJ`).
     - `summary` (required): The issue title.
-    - `issueType` (optional): Issue type name (for example, `Bug`) or numeric ID. Defaults to the first available type.
+    - `issueType` (required): Issue type name (for example, `Bug`) or numeric ID. Use `getIssueTypes` to list valid types for the project.
     - `description` (optional): Issue body in plain text. Newlines become separate paragraphs in Jira.
     - `priority` (optional): Priority name (for example, `High`, `Medium`, `Low`).
     - `labels` (optional): Array of label strings. Labels cannot contain spaces.
