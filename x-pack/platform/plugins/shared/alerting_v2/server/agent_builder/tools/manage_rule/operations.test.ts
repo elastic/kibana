@@ -86,6 +86,94 @@ describe('executeRuleOperations', () => {
       expect(result.data.time_field).toBe('timestamp');
     });
 
+    it('throws when a new rule targets a concrete generation index', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'Nginx Access' },
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: {
+              query: 'FROM logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)',
+            },
+          },
+        },
+      ];
+
+      await expect(executeRuleOperations({}, ops, undefined, { isNew: true })).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations({}, ops, undefined, { isNew: true })).rejects.toThrow(
+        /concrete generation index/
+      );
+      await expect(executeRuleOperations({}, ops, undefined, { isNew: true })).rejects.toThrow(
+        /logs-nginx\.access-default-\*/
+      );
+    });
+
+    it('warns but does not block when editing a rule that targets a concrete generation index', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'count', type: 'long' }],
+        values: [],
+      } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: {
+              query: 'FROM logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)',
+            },
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations(
+        { metadata: { name: 'Existing Rule' } },
+        ops,
+        esClient,
+        { isNew: false }
+      );
+
+      expect(result.data.query).toEqual({
+        format: 'standalone',
+        breach: {
+          query: 'FROM logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)',
+        },
+      });
+      expect(result.warnings).toEqual([expect.stringContaining('concrete generation index')]);
+      expect(result.warnings?.[0]).toContain('logs-nginx.access-default-*');
+    });
+
+    it('allows plain fixed index names that are not generation-shaped', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'timestamp', type: 'date' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: { timestamp: { date: {} } },
+      } as never);
+
+      const ops: RuleOperation[] = [
+        { operation: 'set_metadata', name: 'Flights' },
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM kibana_sample_data_flights | STATS COUNT(*)' },
+          },
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient, { isNew: true });
+
+      expect(result.warnings).toBeUndefined();
+      expect(result.data.query).toBeDefined();
+    });
+
     it('re-resolves a stale stored time field to an available one on the edit path', async () => {
       const esClient = createMockEsClient();
       esClient.asCurrentUser.esql.query.mockResolvedValueOnce({

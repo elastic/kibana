@@ -79,12 +79,11 @@ Use operations[] to:
         currentAttachment?.versions.at(-1)?.data ?? {};
       ruleId = currentAttachment?.origin;
 
-      const { data: updatedData, queryColumns } = await executeRuleOperations(
-        currentData,
-        operations,
-        esClient,
-        { isNew }
-      );
+      const {
+        data: updatedData,
+        queryColumns,
+        warnings,
+      } = await executeRuleOperations(currentData, operations, esClient, { isNew });
 
       // Pre-assign a stable rule ID so that action policies can reference it
       // via `rule.id` before the rule is persisted. The UI will use this ID
@@ -137,6 +136,7 @@ Use operations[] to:
                 query: updatedData.query ? getBreachEsqlQuery(updatedData.query) : undefined,
               },
               ...(queryColumns ? { queryColumns } : {}),
+              ...(warnings?.length ? { warnings } : {}),
             },
           },
         ],

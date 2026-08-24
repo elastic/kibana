@@ -10,6 +10,7 @@ import {
   RULE_ATTACHMENT_TYPE,
   type RuleAttachmentData,
 } from '@kbn/alerting-v2-schemas';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
@@ -24,6 +25,26 @@ import {
   RULE_MANAGEMENT_SKILL_ID,
 } from '../../src/constants';
 import { getLatestAttachmentData } from '../../src/evaluators/expected_attachment';
+
+/**
+ * Asserts that every FROM source in the ES|QL query uses a wildcard (`*` or `?`)
+ * rather than a concrete data-stream backing index or generation suffix.
+ */
+const assertWildcardIndexPatterns = (esql: string) => {
+  const indexPattern = getIndexPatternFromESQLQuery(esql);
+  expect(indexPattern.length).toBeGreaterThan(0);
+  for (const source of indexPattern.split(',')) {
+    const trimmed = source.trim();
+    if (!trimmed) continue;
+    // Strip optional CCS prefix for the assertion
+    const local = trimmed.includes(':') ? trimmed.slice(trimmed.indexOf(':') + 1) : trimmed;
+    expect(
+      local.includes('*') || local.includes('?'),
+      `FROM source "${trimmed}" should use a wildcard pattern, not a concrete index`
+    ).toBe(true);
+    expect(local.startsWith('.ds-')).toBe(false);
+  }
+};
 
 evaluate.describe(
   'Alerting V2 rule-management skill - routing',
@@ -127,6 +148,7 @@ evaluate.describe(
                     const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
                     expect(esql).toContain(hostMetricsIndex);
                     expect(esql).toContain('system.cpu.total.norm.pct');
+                    assertWildcardIndexPatterns(esql);
                   },
                 },
               },
@@ -166,6 +188,7 @@ evaluate.describe(
                     const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
                     expect(esql).toContain(hostMetricsIndex);
                     expect(esql).toContain('system.cpu.total.norm.pct');
+                    assertWildcardIndexPatterns(esql);
                   },
                 },
               },
@@ -234,6 +257,7 @@ evaluate.describe(
                     expect(attachment!.schedule?.lookback).toEqual('5m');
                     const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
                     expect(esql.toLowerCase()).toContain('admin-console');
+                    assertWildcardIndexPatterns(esql);
                   },
                 },
               },
