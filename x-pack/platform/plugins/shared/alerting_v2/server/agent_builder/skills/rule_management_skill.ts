@@ -172,7 +172,13 @@ After composing a complete **alert** rule (has name, query, schedule, and \`kind
 Do not offer notifications if the rule is still incomplete (missing name, query, or schedule).
 If the rule's kind is \`signal\`, follow **Notifications Require Alert Kind** in the [notifications-overview reference](./references/notifications-overview.md) before proceeding.
 
-If the user agrees, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`). Do **not** compose action policies or notification workflows from this skill.
+If the user agrees (or asks for notifications directly), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`) and let that skill own the workflow + action policy setup. Do **not** compose action policies or notification workflows from this skill.
+
+---
+
+## Privileges
+
+The \`${ALERTING_TOOL_IDS.manageRule}\` tool requires the **Rules: All** Kibana privilege. Read-only users can discover and inspect rules via \`platform.core.sml_search\` and \`platform.core.sml_attach\`.
 
 ---
 
