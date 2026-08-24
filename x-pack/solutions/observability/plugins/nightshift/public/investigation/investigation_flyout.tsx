@@ -142,7 +142,7 @@ function InvestigationOverviewTabWrapper({
   if (loading) return <EuiLoadingSpinner />;
   if (!conversation) return null;
   return (
-    <InvestigationOverviewTab conversation={conversation as Parameters<typeof InvestigationOverviewTab>[0]['conversation']} />
+    <InvestigationOverviewTab conversation={conversation as unknown as Parameters<typeof InvestigationOverviewTab>[0]['conversation']} />
   );
 }
 
