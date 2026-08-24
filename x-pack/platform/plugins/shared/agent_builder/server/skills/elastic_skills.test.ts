@@ -81,14 +81,7 @@ describe('loadElasticSkills', () => {
   });
 });
 
-/**
- * Guards the skills copied in from `elastic/agent-skills`.
- *
- * The sync job validates every skill against a Python mirror of the loader's
- * rules before opening its pull request. This test is the other half of that
- * contract: it runs the real loader, so a rule that drifts between the two
- * implementations fails here rather than at Kibana startup.
- */
+// Guards the skills copied in from `elastic/agent-skills`.
 describe('the elastic-skills directory', () => {
   const dirNames = existsSync(ELASTIC_SKILLS_DIR)
     ? readdirSync(ELASTIC_SKILLS_DIR, { withFileTypes: true })
@@ -105,8 +98,6 @@ describe('the elastic-skills directory', () => {
   });
 
   it('loads every skill it holds', () => {
-    // `loadElasticSkills` logs and skips a skill it cannot load, so a count
-    // mismatch is how a skill the real loader rejects surfaces here.
     expect(skills.map((skill) => skill.id)).toHaveLength(dirNames.length);
     expect(logger.error).not.toHaveBeenCalled();
   });
