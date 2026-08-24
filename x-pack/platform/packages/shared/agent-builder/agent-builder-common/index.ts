@@ -184,6 +184,7 @@ export {
   type ConversationPermissions,
   type ConversationWithPermissions,
   type ConversationWithoutRoundsWithPermissions,
+  type ConversationListResult,
   type ToolCallStep,
   type ConversationRoundStep,
   type ReasoningStepData,

@@ -9,14 +9,8 @@ import type {
   ConversationAccessControlInput,
   ConversationListOptions,
   ConversationWithPermissions,
-  ConversationWithoutRoundsWithPermissions,
+  ConversationListResult,
 } from '@kbn/agent-builder-common';
-
-/** Paginated result returned by {@link ConversationPublicClient.list}. */
-export interface ConversationListResult {
-  results: ConversationWithoutRoundsWithPermissions[];
-  total: number;
-}
 
 /**
  * Input for pre-creating an empty conversation without starting an execution.

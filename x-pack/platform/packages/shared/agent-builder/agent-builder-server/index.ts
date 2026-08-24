@@ -158,9 +158,5 @@ export type {
   ConversationTemplatesSetup,
   ConversationTemplatesStart,
 } from './plugin_contract';
-export type {
-  ConversationPublicClient,
-  ConversationCreatePublicRequest,
-  ConversationListResult,
-} from './conversations';
+export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';

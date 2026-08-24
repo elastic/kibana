@@ -208,7 +208,7 @@ describe('ConversationClient', () => {
         },
       });
 
-      const result = await client.list();
+      const { results: result } = await client.list();
 
       expectNoReadByInList(result);
       expectOwnerPermissionsInList(result);
@@ -219,7 +219,7 @@ describe('ConversationClient', () => {
           _source: expect.arrayContaining(['access_control', 'origin']),
         })
       );
-      expect(result.results[0]).toEqual(
+      expect(result[0]).toEqual(
         expect.objectContaining({
           access_control: {
             access_mode: ConversationAccessControlMode.Public,
@@ -238,7 +238,7 @@ describe('ConversationClient', () => {
         },
       });
 
-      const result = await client.list();
+      const { results: result } = await client.list();
 
       expectNoReadByInList(result);
       expectOwnerPermissionsInList(result);
@@ -314,7 +314,7 @@ describe('ConversationClient', () => {
         },
       });
 
-      const result = await client.list({ agentId: 'agent-2' });
+      const { results: result } = await client.list({ agentId: 'agent-2' });
 
       expectNoReadByInList(result);
       expectOwnerPermissionsInList(result);
