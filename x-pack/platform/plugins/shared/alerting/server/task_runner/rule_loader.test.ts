@@ -245,10 +245,14 @@ describe('rule_loader', () => {
 
   describe('getFakeKibanaRequest()', () => {
     let recordUiamApiKeyFallbackSpy: jest.SpyInstance;
+    let recordRuleRunSpy: jest.SpyInstance;
 
     beforeEach(() => {
       recordUiamApiKeyFallbackSpy = jest
         .spyOn(alertingUiamTelemetry, 'recordUiamApiKeyFallback')
+        .mockImplementation(() => {});
+      recordRuleRunSpy = jest
+        .spyOn(alertingUiamTelemetry, 'recordRuleRun')
         .mockImplementation(() => {});
     });
 
@@ -265,6 +269,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
       expect(effectiveApiKey).toEqual(apiKey);
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('es_api_key', 'config');
     });
 
     test('has API key, in non-default space', async () => {
@@ -294,6 +299,7 @@ describe('rule_loader', () => {
       expect(fakeRequest.url.toString()).toEqual('https://fake-request/url');
       expect(fakeRequest.uuid).toEqual(expect.any(String));
       expect(effectiveApiKey).toBeNull();
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('none', 'not_set');
     });
 
     test('returns UIAM API key when config is set to uiam', async () => {
@@ -307,6 +313,7 @@ describe('rule_loader', () => {
         authorization: `ApiKey essu_uiam_api_key`,
       });
       expect(effectiveApiKey).toEqual('essu_uiam_api_key');
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('uiam_api_key', 'provisioned');
     });
 
     test('logs a debug message and records an "unexpected" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is false', () => {
@@ -325,6 +332,7 @@ describe('rule_loader', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('es_api_key', 'fallback_unexpected');
     });
 
     test('logs a debug message and records a "likely_non_cloud_user" fallback metric for likely non-Cloud user API key owners', () => {
@@ -346,6 +354,7 @@ describe('rule_loader', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('likely_non_cloud_user');
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('es_api_key', 'fallback_likely_non_cloud_user');
     });
 
     test('logs a debug message and records a "user_created_key" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is true with an ES API key', () => {
@@ -364,6 +373,7 @@ describe('rule_loader', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('user_created_key');
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('es_api_key', 'user_created_key');
     });
 
     test('logs a debug message and records an "unexpected" fallback metric when UIAM is expected but no UIAM API key and apiKeyCreatedByUser is true without an ES API key', () => {
@@ -384,6 +394,9 @@ describe('rule_loader', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
+      // No credential is used for the run, so the usage counter must not report
+      // an ES-key run.
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('none', 'not_set');
       // No credential is available, so the request must stay unauthenticated
       // rather than carry a literal `ApiKey null` header.
       expect(fakeRequest.headers).toEqual({});
@@ -406,6 +419,7 @@ describe('rule_loader', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
+      expect(recordRuleRunSpy).toHaveBeenCalledWith('es_api_key', 'fallback_unexpected');
     });
 
     test('includes the rule id in the UIAM log labels when provided', () => {
