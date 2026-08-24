@@ -7,12 +7,19 @@
 
 import { registerWorkflowYamlAttachment } from './workflow_yaml_attachment';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { workflowTools } from '../../common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
+
+interface WorkflowYamlAttachmentData {
+  yaml: string;
+  workflowId?: string;
+  name?: string;
+}
 
 interface RegisteredAttachmentType {
   id: string;
@@ -25,6 +32,13 @@ interface RegisteredAttachmentType {
     origin: string,
     context: { spaceId: string }
   ) => Promise<{ yaml: string; workflowId: string; name: string } | undefined>;
+  isStale: (
+    attachment: VersionedAttachment<
+      typeof WORKFLOW_YAML_ATTACHMENT_TYPE,
+      WorkflowYamlAttachmentData
+    >,
+    context: { spaceId: string }
+  ) => Promise<boolean>;
   format: (
     attachment: {
       data: {
@@ -53,6 +67,28 @@ const registerAndCapture = (api: Partial<WorkflowsManagementApi> = {}) => {
   registerWorkflowYamlAttachment(mockAgentBuilder, api as WorkflowsManagementApi);
   return registeredType!;
 };
+
+const createWorkflowAttachment = (
+  yaml: string,
+  overrides: Partial<
+    VersionedAttachment<typeof WORKFLOW_YAML_ATTACHMENT_TYPE, WorkflowYamlAttachmentData>
+  > = {}
+): VersionedAttachment<typeof WORKFLOW_YAML_ATTACHMENT_TYPE, WorkflowYamlAttachmentData> => ({
+  id: 'attachment-1',
+  type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+  origin: 'workflow-1',
+  origin_snapshot_at: '2025-01-01T00:00:00.000Z',
+  versions: [
+    {
+      version: 1,
+      data: { yaml },
+      created_at: '2025-01-01T00:00:00.000Z',
+      content_hash: 'hash',
+    },
+  ],
+  current_version: 1,
+  ...overrides,
+});
 
 describe('workflow_yaml_attachment', () => {
   describe('getTools', () => {
@@ -106,6 +142,60 @@ describe('workflow_yaml_attachment', () => {
       getWorkflow.mockResolvedValueOnce(undefined);
       await expect(type.resolve('missing', { spaceId: 'default' })).resolves.toBeUndefined();
       expect(getWorkflow).toHaveBeenCalledWith('missing', 'default');
+    });
+  });
+
+  describe('isStale', () => {
+    it('returns false before the workflow has changed', async () => {
+      const getWorkflow = jest.fn().mockResolvedValue({
+        id: 'workflow-1',
+        name: 'Workflow',
+        yaml: 'name: Workflow',
+        lastUpdatedAt: '2025-01-01T00:00:00.000Z',
+      });
+      const type = registerAndCapture({ getWorkflow });
+
+      await expect(
+        type.isStale(createWorkflowAttachment('name: Old workflow'), { spaceId: 'default' })
+      ).resolves.toBe(false);
+    });
+
+    it('returns false when only YAML formatting has changed', async () => {
+      const getWorkflow = jest.fn().mockResolvedValue({
+        id: 'workflow-1',
+        name: 'Workflow',
+        yaml: `# Current persisted workflow
+name: Workflow
+version: '1'
+steps: [{ type: console, name: first, with: { message: hello } }]`,
+        lastUpdatedAt: '2025-01-02T00:00:00.000Z',
+      });
+      const type = registerAndCapture({ getWorkflow });
+      const attachment = createWorkflowAttachment(`version: "1"
+name: Workflow
+steps:
+  - name: first
+    type: console
+    with:
+      message: hello`);
+
+      await expect(type.isStale(attachment, { spaceId: 'default' })).resolves.toBe(false);
+    });
+
+    it('returns true when the persisted workflow YAML has changed', async () => {
+      const getWorkflow = jest.fn().mockResolvedValue({
+        id: 'workflow-1',
+        name: 'Workflow',
+        yaml: 'name: Updated workflow',
+        lastUpdatedAt: '2025-01-02T00:00:00.000Z',
+      });
+      const type = registerAndCapture({ getWorkflow });
+
+      await expect(
+        type.isStale(createWorkflowAttachment('name: Original workflow'), {
+          spaceId: 'default',
+        })
+      ).resolves.toBe(true);
     });
   });
 
