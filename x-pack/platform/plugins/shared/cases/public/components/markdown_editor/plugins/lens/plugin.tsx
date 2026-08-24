@@ -15,9 +15,7 @@ import {
   EuiMarkdownContext,
   EuiModalFooter,
   EuiButton,
-  EuiFlexItem,
   EuiFlexGroup,
-  EuiBetaBadge,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useContext, useMemo, useEffect, useRef, useState } from 'react';
@@ -26,18 +24,25 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
 
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { TypedLensByValueInput, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { TimeRange } from '@kbn/data-plugin/common';
-import { useKibana } from '../../../../common/lib/kibana';
+import { LENS_SO_TYPE } from '../../../../../common/constants/attachments';
+import { useCasesConfig, useKibana, useToasts } from '../../../../common/lib/kibana';
 import { useMarkdownEditorPluginClickedEBT } from '../../../../analytics/use_markdown_editor_ebt';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
 import { useLensDraftComment } from './use_lens_draft_comment';
-import { VISUALIZATION } from './translations';
+import {
+  FAILED_TO_LOAD_VISUALIZATION,
+  SEARCH_INPUT_HELP_TEXT,
+  SEARCH_INPUT_HELP_TEXT_WITH_ATTACH_HINT,
+  VISUALIZATION,
+} from './translations';
 import { useIsMainApplication } from '../../../../common/hooks';
 import { convertToAbsoluteTimeRange } from '../../../attachments/lens/actions/convert_to_absolute_time_range';
 import { getPendingLensAttach } from '../../../attachments/lens/lens_return/storage';
@@ -49,7 +54,59 @@ const DEFAULT_TIMERANGE: TimeRange = {
   mode: 'relative',
 };
 
-type LensIncomingEmbeddablePackage = EmbeddablePackageState<TypedLensByValueInput>;
+interface LensIncomingSerializedState {
+  attributes?: TypedLensByValueInput['attributes'];
+  ref_id?: string;
+}
+type LensIncomingEmbeddablePackage = EmbeddablePackageState<LensIncomingSerializedState>;
+
+const getLensIncomingTimeRange = (timefilter: {
+  getTime: () => TimeRange;
+}): TimeRange | undefined => {
+  const lensTime = timefilter.getTime();
+  if (!lensTime?.from || !lensTime?.to) {
+    return undefined;
+  }
+
+  return {
+    from: lensTime.from,
+    to: lensTime.to,
+    mode: [lensTime.from, lensTime.to].join('').includes('now')
+      ? ('relative' as const)
+      : ('absolute' as const),
+  };
+};
+
+interface LensContentManagementGetResult {
+  item?: {
+    attributes?: Record<string, unknown>;
+    references?: Array<{ type: string; id: string; name: string }>;
+  };
+}
+
+const fetchLensAttributesForComment = async ({
+  id,
+  contentManagement,
+}: {
+  id: string;
+  contentManagement: ContentManagementPublicStart;
+}): Promise<Record<string, unknown> | undefined> => {
+  try {
+    const result = (await contentManagement.client.get({
+      contentTypeId: LENS_SO_TYPE,
+      id,
+    })) as LensContentManagementGetResult | undefined;
+    const attributes = result?.item?.attributes;
+    if (!attributes) {
+      return undefined;
+    }
+
+    const references = result?.item?.references ?? [];
+    return references.length > 0 ? { ...attributes, references } : attributes;
+  } catch {
+    return undefined;
+  }
+};
 
 type LensEuiMarkdownEditorUiPlugin = EuiMarkdownEditorUiPlugin<{
   timeRange: TypedLensByValueInput['timeRange'];
@@ -78,6 +135,8 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   } = useKibana().services;
   const [currentAppId, setCurrentAppId] = useState<string | undefined>(undefined);
   const { draftComment, clearDraftComment } = useLensDraftComment();
+  const { attachmentsEnabled } = useCasesConfig();
+  const toasts = useToasts();
   const commentEditorContext = useContext(CommentEditorContext);
   const markdownContext = useContext(EuiMarkdownContext);
   const isMainApplication = useIsMainApplication();
@@ -220,13 +279,15 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       fullName: string,
       savedObject: SavedObjectCommon
     ) => {
-      handleEditInLensClick({
-        ...savedObject.attributes,
-        title: '',
-        references: savedObject.references,
-      });
+      handleAdd(
+        {
+          ...savedObject.attributes,
+          references: savedObject.references,
+        } as Record<string, unknown>,
+        getLensIncomingTimeRange(timefilter)
+      );
     },
-    [handleEditInLensClick]
+    [handleAdd, timefilter]
   );
 
   const savedObjectMetaData = useMemo(
@@ -288,37 +349,74 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
     const lensEmbeddablePackage = peeked?.find((pkg) => pkg.type === LENS_EMBEDDABLE_TYPE) as
       | LensIncomingEmbeddablePackage
       | undefined;
+    const serializedState = lensEmbeddablePackage?.serializedState;
+    const packageAttributes = serializedState?.attributes;
+    const refId = serializedState?.ref_id;
 
-    if (!lensEmbeddablePackage?.serializedState?.attributes) {
+    if (!packageAttributes && !refId) {
       return;
     }
 
-    // Drain so a re-render or sibling consumer can't double-process it.
-    stateTransfer?.getIncomingEmbeddablePackage(currentAppId, true);
+    let cancelled = false;
 
-    const lensTime = timefilter.getTime();
-    const newTimeRange =
-      lensTime?.from && lensTime?.to
-        ? {
-            from: lensTime.from,
-            to: lensTime.to,
-            mode: [lensTime.from, lensTime.to].join('').includes('now')
-              ? ('relative' as const)
-              : ('absolute' as const),
-          }
-        : undefined;
+    const insertFromAttributes = (attributes: Record<string, unknown>) => {
+      if (cancelled) {
+        return;
+      }
 
-    if (draftComment.position) {
-      handleUpdate(
-        lensEmbeddablePackage.serializedState.attributes,
-        newTimeRange,
-        draftComment.position
-      );
+      // Drain so a re-render or sibling consumer can't double-process it.
+      stateTransfer?.getIncomingEmbeddablePackage(currentAppId, true);
+      const newTimeRange = getLensIncomingTimeRange(timefilter);
+
+      if (draftComment.position) {
+        handleUpdate(attributes, newTimeRange, draftComment.position);
+        return;
+      }
+
+      handleAdd(attributes, newTimeRange);
+    };
+
+    if (packageAttributes) {
+      insertFromAttributes(packageAttributes as Record<string, unknown>);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (!refId) {
       return;
     }
 
-    handleAdd(lensEmbeddablePackage.serializedState.attributes, newTimeRange);
-  }, [embeddable, storage, timefilter, currentAppId, handleAdd, handleUpdate, draftComment]);
+    const resolveByRef = async () => {
+      const attributes = await fetchLensAttributesForComment({
+        id: refId,
+        contentManagement,
+      });
+      if (cancelled) {
+        return;
+      }
+      if (!attributes) {
+        toasts.addDanger({ title: FAILED_TO_LOAD_VISUALIZATION });
+        return;
+      }
+      insertFromAttributes(attributes);
+    };
+
+    resolveByRef();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    embeddable,
+    storage,
+    timefilter,
+    currentAppId,
+    handleAdd,
+    handleUpdate,
+    draftComment,
+    contentManagement,
+    toasts,
+  ]);
 
   const createLensButton = (
     <EuiButton onClick={handleCreateInLensClick} iconType="plusCircle">
@@ -343,40 +441,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       gutterSize="none"
     >
       <EuiModalHeader>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiModalHeaderTitle>
-              <FormattedMessage
-                id="xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle"
-                defaultMessage="Add visualization"
-              />
-            </EuiModalHeaderTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <span
-              css={css`
-                display: inline-flex;
-
-                .euiToolTipAnchor {
-                  display: inline-flex;
-                }
-              `}
-            >
-              <EuiBetaBadge
-                label={i18n.translate('xpack.cases.markdownEditor.plugins.lens.betaLabel', {
-                  defaultMessage: 'Beta',
-                })}
-                tooltipContent={i18n.translate(
-                  'xpack.cases.markdownEditor.plugins.lens.betaDescription',
-                  {
-                    defaultMessage:
-                      'This module is not GA. You can only insert one lens per comment for now. Please help us by reporting bugs.',
-                  }
-                )}
-              />
-            </span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle"
+            defaultMessage="Add visualization"
+          />
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <SavedObjectFinder
@@ -397,13 +467,9 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
             uiSettings,
           }}
           leftChildren={createLensButton}
-          helpText={i18n.translate(
-            'xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.searchInputHelpText',
-            {
-              defaultMessage:
-                'Insert an existing lens visualization or create a new one. Any changes or new visualizations will only apply to this comment.',
-            }
-          )}
+          helpText={
+            attachmentsEnabled ? SEARCH_INPUT_HELP_TEXT_WITH_ATTACH_HINT : SEARCH_INPUT_HELP_TEXT
+          }
         />
       </EuiModalBody>
       <EuiModalFooter>
