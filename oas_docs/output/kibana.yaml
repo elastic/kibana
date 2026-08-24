@@ -96311,11 +96311,11 @@ components:
           type: string
         breach:
           additionalProperties: false
-          description: Breach detection configuration (required).
+          description: Breach detection configuration. Omit to treat every base row as a breach.
           type: object
           properties:
             segment:
-              description: Appendable ES|QL segment for breach detection (required).
+              description: A clause appended to the end of the rule's ES|QL query. Required in breach blocks.
               maxLength: 10000
               minLength: 1
               type: string
@@ -96340,7 +96340,6 @@ components:
       required:
         - format
         - base
-        - breach
     Kibana_HTTP_APIs_alerting_deactivate_alert_action:
       additionalProperties: false
       type: object
@@ -97678,12 +97677,13 @@ components:
           description: The parameters for the APM anomaly rule. These parameters are appropriate when `rule_type_id` is `apm.anomaly"`.
           properties:
             anomalyDetectorTypes:
-              description: The types of anomalies that are detected. For example, detect abnormal latency, throughput, or failed transaction rates.
+              description: The types of anomalies that are detected. For example, detect abnormal latency, throughput, failed transaction rates, or low transaction count.
               items:
                 enum:
                   - txLatency
                   - txThroughput
                   - txFailureRate
+                  - txLowCount
                 type: string
               minItems: 1
               type: array

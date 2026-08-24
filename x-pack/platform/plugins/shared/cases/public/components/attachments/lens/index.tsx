@@ -70,7 +70,15 @@ const toLensProps = (data: LensAttachmentData) => {
   if (isLensPersistableData(data)) {
     return data.state as LensProps;
   }
-  return { attributes: data.attributes, timeRange: data.timeRange } as unknown as LensProps;
+  // The description isn't persisted on the attachment metadata for by-ref
+  // snapshots -- it already lives on the snapshotted SO `attributes`, same
+  // as the by-value arm's `state.metadata.description`.
+  const description = data.attributes.description as string | undefined;
+  return {
+    attributes: data.attributes,
+    timeRange: data.timeRange,
+    metadata: description ? { description } : undefined,
+  } as unknown as LensProps;
 };
 
 const LensAttachment = React.memo(
