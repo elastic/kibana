@@ -200,6 +200,49 @@ describe('AlertEvent', () => {
       expect(screen.queryByText('Unknown rule')).not.toBeInTheDocument();
     });
 
+    it('resolves the rule name when the retry fetch returns alert data', () => {
+      jest.useFakeTimers();
+      const mockUseFetchAlertData = useFetchAlertData as jest.Mock;
+      const mockRefetch = jest.fn();
+
+      // First fetch: in progress, then completes with no data
+      mockUseFetchAlertData.mockReturnValueOnce([true, {}, mockRefetch]);
+      mockUseFetchAlertData.mockReturnValue([false, {}, mockRefetch]);
+
+      const { rerender } = render(
+        <TestProviders>
+          <AlertEvent {...defaultProps} alertId="a1" rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+
+      rerender(
+        <TestProviders>
+          <AlertEvent {...defaultProps} alertId="a1" rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+
+      // Retry fires; hook now returns alert data for a1
+      jest.advanceTimersByTime(300);
+      mockUseFetchAlertData.mockReturnValue([
+        false,
+        {
+          a1: { 'kibana.alert.rule.uuid': 'rule-id-1', 'kibana.alert.rule.name': 'Recovered rule' },
+        },
+        mockRefetch,
+      ]);
+      rerender(
+        <TestProviders>
+          <AlertEvent {...defaultProps} alertId="a1" rule={{ id: null, name: null }} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId(`alerts-user-action-${savedObjectId}`)).toHaveTextContent(
+        'Recovered rule'
+      );
+
+      jest.useRealTimers();
+    });
+
     it('renders "Unknown rule" after fetch + retry both return no matching alert data', () => {
       jest.useFakeTimers();
       const mockUseFetchAlertData = useFetchAlertData as jest.Mock;
