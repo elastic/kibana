@@ -29,7 +29,6 @@ import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { MAX_DISCOVER_SESSION_TABS } from '@kbn/saved-search-plugin/common';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import { DISCOVER_SESSION_CHART_INTERVALS } from '../../common/api/constants';
 import { classicTabSchema, esqlTabSchema } from '../embeddable/schema';
 
 export const MAX_SESSION_TITLE_LENGTH = 256;
@@ -124,9 +123,22 @@ const discoverSessionTabPresentationSchema = z
       .max(MAX_BREAKDOWN_FIELD_LENGTH)
       .optional()
       .meta({ description: 'Field name used to split chart data into series.' }),
-    chart_interval: z.enum(DISCOVER_SESSION_CHART_INTERVALS).optional().meta({
-      description: 'Time interval for the chart histogram on this tab.',
-    }),
+    chart_interval: z
+      .union([
+        z.literal('auto'),
+        z.literal('ms'),
+        z.literal('s'),
+        z.literal('m'),
+        z.literal('h'),
+        z.literal('d'),
+        z.literal('w'),
+        z.literal('M'),
+        z.literal('y'),
+      ])
+      .optional()
+      .meta({
+        description: 'Time interval for the chart histogram on this tab.',
+      }),
     time_restore: z.boolean().default(false).meta({
       description:
         "When `true`, Discover applies this tab's `time_range` and `refresh_interval`. When `false`, those fields are ignored and global time settings are used.",
@@ -247,6 +259,13 @@ export const discoverSessionGetResponseSchema = discoverSessionApiResponseSchema
   warnings: discoverSessionWarningsSchema.optional(),
 });
 
+export const discoverSessionSanitizeResponseSchema = z
+  .object({
+    data: discoverSessionApiDataSchema,
+    warnings: discoverSessionWarningsSchema.optional(),
+  })
+  .strict();
+
 export const discoverSessionSearchParamsSchema = asCodeSearchRequestSchema.extend({
   query: z
     .string()
@@ -291,6 +310,9 @@ export const discoverSessionSearchResponseSchema = z
 export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
 export type DiscoverSessionGetResponse = z.output<typeof discoverSessionGetResponseSchema>;
+export type DiscoverSessionSanitizeResponse = z.output<
+  typeof discoverSessionSanitizeResponseSchema
+>;
 export type DiscoverSessionWarning = z.output<typeof discoverSessionWarningsSchema>[number];
 export type DiscoverSessionSearchParams = z.output<typeof discoverSessionSearchParamsSchema>;
 export type DiscoverSessionSearchResponse = z.output<typeof discoverSessionSearchResponseSchema>;

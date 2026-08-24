@@ -107,30 +107,6 @@ describe('discover session API transforms', () => {
       expect(transformed).toEqual(discoverSessionApiData);
     });
 
-    it('omits an unsupported chart interval and returns a warning', () => {
-      const { sessionState, warnings } = transformDiscoverSessionOut({
-        ...discoverSessionAttributes,
-        tabs: [
-          {
-            ...discoverSessionAttributes.tabs[0],
-            attributes: {
-              ...discoverSessionAttributes.tabs[0].attributes,
-              chartInterval: '10m',
-            },
-          },
-        ],
-      });
-
-      expect(sessionState.tabs[0]).not.toHaveProperty('chart_interval');
-      expect(warnings).toEqual([
-        expect.objectContaining({
-          type: 'dropped_property',
-          tab_id: discoverSessionAttributes.tabs[0].id,
-          key: 'chart_interval',
-        }),
-      ]);
-    });
-
     it('extracts tag IDs from saved object references', () => {
       const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes, [
         { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },

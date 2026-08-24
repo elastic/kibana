@@ -8,15 +8,14 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { internalStateActions } from '../../../state_management/redux';
+import { internalStateActions, type TabState } from '../../../state_management/redux';
 import { getTabStateMock } from '../../../state_management/redux/__mocks__/internal_state.mocks';
-import { getDiscoverSessionExportJson } from './get_discover_session_export_json';
+import { buildDiscoverSessionExportRequest } from './build_discover_session_export_request';
 
-describe('getDiscoverSessionExportJson', () => {
-  it('builds a portable API body from an unsaved session', async () => {
+describe('buildDiscoverSessionExportRequest', () => {
+  it('builds a stored session draft from an unsaved session', async () => {
     const services = createDiscoverServicesMock();
     const toolkit = getDiscoverInternalStateMock({
       services,
@@ -35,18 +34,18 @@ describe('getDiscoverSessionExportJson', () => {
     toolkit.internalState.dispatch(
       internalStateActions.updateAppState({
         tabId: toolkit.getCurrentTab().id,
-        appState: { interval: '10m' },
+        appState: { interval: 'auto' },
       })
     );
 
-    const { sessionState: result, warnings } = getDiscoverSessionExportJson({
+    const result = buildDiscoverSessionExportRequest({
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
       title: 'Untitled Discover session',
     });
 
-    expect(result).toEqual(
+    expect(result.attributes).toEqual(
       expect.objectContaining({
         title: 'Untitled Discover session',
         description: '',
@@ -54,27 +53,24 @@ describe('getDiscoverSessionExportJson', () => {
           expect.objectContaining({
             id: toolkit.getCurrentTab().id,
             label: toolkit.getCurrentTab().label,
-            hide_chart: expect.any(Boolean),
-            hide_table: false,
-            time_restore: false,
-            data_source: expect.any(Object),
+            attributes: expect.objectContaining({
+              hideChart: expect.any(Boolean),
+              hideTable: false,
+              timeRestore: false,
+              chartInterval: 'auto',
+              kibanaSavedObjectMeta: {
+                searchSourceJSON: expect.any(String),
+              },
+            }),
           }),
         ],
       })
     );
     expect(result).not.toHaveProperty('id');
     expect(result).not.toHaveProperty('meta');
-    expect(result.tabs[0]).not.toHaveProperty('chart_interval');
-    expect(warnings).toEqual([
-      expect.objectContaining({
-        type: 'dropped_property',
-        tab_id: toolkit.getCurrentTab().id,
-        key: 'chart_interval',
-      }),
-    ]);
   });
 
-  it('includes the current control state', async () => {
+  it('includes the current control state for server sanitization', async () => {
     const services = createDiscoverServicesMock();
     const toolkit = getDiscoverInternalStateMock({
       services,
@@ -87,29 +83,39 @@ describe('getDiscoverSessionExportJson', () => {
     toolkit.internalState.dispatch(
       internalStateActions.updateAttributes({
         tabId: toolkit.getCurrentTab().id,
-        attributes: { controlGroupState: mockControlState },
+        attributes: {
+          controlGroupState: {
+            panel1: {
+              type: 'esqlControl',
+              order: 0,
+              width: 'medium',
+              grow: false,
+              controlType: 'STATIC_VALUES',
+              variableName: 'foo',
+              variableType: 'values',
+              availableOptions: ['bar', 'baz'],
+              selectedOptions: ['bar'],
+              singleSelect: true,
+            },
+          } as unknown as TabState['attributes']['controlGroupState'],
+        },
       })
     );
 
-    const { sessionState: result } = getDiscoverSessionExportJson({
+    const result = buildDiscoverSessionExportRequest({
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
       title: 'Session with controls',
     });
 
-    expect(result.tabs[0].control_panels).toEqual([
-      {
-        id: 'panel1',
-        type: 'esql_control',
-        width: 'medium',
-        grow: false,
-        config: expect.objectContaining({
-          variable_name: 'foo',
-          selected_options: ['bar'],
-        }),
-      },
-    ]);
+    expect(JSON.parse(result.attributes.tabs[0].attributes.controlGroupJson ?? '{}')).toEqual({
+      panel1: expect.objectContaining({
+        type: 'esqlControl',
+        variableName: 'foo',
+        selectedOptions: ['bar'],
+      }),
+    });
   });
 
   it('exports all tabs by default and can export only the selected tab', async () => {
@@ -123,34 +129,27 @@ describe('getDiscoverSessionExportJson', () => {
     await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
     const initialTabId = toolkit.getCurrentTab().id;
 
-    const selectedTab = getTabStateMock({
-      id: 'selected-tab',
-      label: 'Selected tab',
-    });
-    await toolkit.addNewTab({ tab: selectedTab });
-    await toolkit.initializeSingleTab({ tabId: selectedTab.id });
+    const secondTab = getTabStateMock({ id: 'second-tab', label: 'Second tab' });
+    await toolkit.addNewTab({ tab: secondTab });
+    await toolkit.initializeSingleTab({ tabId: secondTab.id });
 
-    const { sessionState: allTabsResult } = getDiscoverSessionExportJson({
+    const result = buildDiscoverSessionExportRequest({
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
       title: 'All tabs session',
     });
-    const { sessionState: result } = getDiscoverSessionExportJson({
+    const selectedTabResult = buildDiscoverSessionExportRequest({
       getState: toolkit.internalState.getState,
       runtimeStateManager: toolkit.runtimeStateManager,
       services,
-      tabId: selectedTab.id,
+      tabId: secondTab.id,
       title: 'Single tab session',
     });
 
-    expect(allTabsResult.tabs.map(({ id }) => id)).toEqual([initialTabId, selectedTab.id]);
-    expect(result.tabs).toHaveLength(1);
-    expect(result.tabs[0]).toEqual(
-      expect.objectContaining({
-        id: selectedTab.id,
-        label: selectedTab.label,
-      })
-    );
+    expect(result.attributes.tabs.map(({ id }) => id)).toEqual([initialTabId, secondTab.id]);
+    expect(selectedTabResult.attributes.tabs).toEqual([
+      expect.objectContaining({ id: secondTab.id, label: secondTab.label }),
+    ]);
   });
 });

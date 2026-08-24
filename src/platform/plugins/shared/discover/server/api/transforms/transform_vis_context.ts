@@ -8,10 +8,12 @@
  */
 
 import type { DiscoverSessionTabAttributes } from '@kbn/saved-search-plugin/server';
+import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import type { DiscoverSessionApiTab } from '../schema';
 
 type StoredVisContext = DiscoverSessionTabAttributes['visContext'];
 type ApiVisContext = DiscoverSessionApiTab['vis_context'];
+type ApiSuggestionType = NonNullable<ApiVisContext>['suggestion_type'];
 
 export interface StoredVisContextRequestData {
   dataViewId?: string;
@@ -20,7 +22,31 @@ export interface StoredVisContextRequestData {
   breakdownField?: string;
 }
 
-export { getDiscoverSessionVisContext as transformVisContextOut } from '../../../common/api/converters';
+const isApiSuggestionType = (value: unknown): value is ApiSuggestionType =>
+  value === UnifiedHistogramSuggestionType.lensSuggestion ||
+  value === UnifiedHistogramSuggestionType.histogramForESQL ||
+  value === UnifiedHistogramSuggestionType.histogramForDataView;
+
+export const transformVisContextOut = (visContext: StoredVisContext): ApiVisContext | undefined => {
+  if (
+    !visContext ||
+    !('suggestionType' in visContext) ||
+    !('attributes' in visContext) ||
+    !visContext.suggestionType ||
+    !visContext.attributes
+  ) {
+    return undefined;
+  }
+
+  if (!isApiSuggestionType(visContext.suggestionType)) {
+    return undefined;
+  }
+
+  return {
+    suggestion_type: visContext.suggestionType,
+    attributes: visContext.attributes,
+  };
+};
 
 export const transformVisContextIn = (
   visContext: ApiVisContext,

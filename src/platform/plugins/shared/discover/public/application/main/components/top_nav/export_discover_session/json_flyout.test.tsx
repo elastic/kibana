@@ -15,19 +15,31 @@ import {
   DISCOVER_SESSION_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
 } from '../../../../../../common/constants';
-import type { DiscoverSessionApiData } from '../../../../../../server';
-import { ExportDiscoverSessionJsonFlyout } from './export_json_flyout';
+import type {
+  DiscoverSessionApiData,
+  DiscoverSessionSanitizeRequest,
+} from '../../../../../../server';
+import { ExportDiscoverSessionJsonFlyout } from './json_flyout';
 
 type MockExportJsonFlyoutContentProps = React.ComponentProps<typeof ExportJsonFlyoutContent>;
 
 const mockGetExportJson = jest.fn(
-  (_exportAllTabs?: boolean): { data: DiscoverSessionApiData; warnings: readonly string[] } => ({
+  (_exportCurrentTab: boolean): DiscoverSessionSanitizeRequest => ({
+    attributes: {
+      title: 'Discover session',
+      description: '',
+      tabs: [],
+    },
+  })
+);
+const mockSanitizeExportJson = jest.fn(
+  async (): Promise<{ data: DiscoverSessionApiData; warnings: readonly string[] }> => ({
     data: {
       title: 'Discover session',
       description: '',
       tabs: [],
     },
-    warnings: ['An unsupported chart interval was omitted.'],
+    warnings: ['An unsupported control panel was omitted.'],
   })
 );
 const mockDownloadFileAs = jest.fn();
@@ -54,6 +66,7 @@ describe('Discover export JSON flyout', () => {
         canShowDevTools
         closeFlyout={jest.fn()}
         getExportJson={mockGetExportJson}
+        sanitizeExportJson={mockSanitizeExportJson}
         title="Discover session"
         useConsoleUrl={mockUseUrl}
       />
@@ -82,8 +95,13 @@ describe('Discover export JSON flyout', () => {
         description: '',
         tabs: [],
       },
-      warnings: ['An unsupported chart interval was omitted.'],
+      warnings: ['An unsupported control panel was omitted.'],
     });
+    expect(mockSanitizeExportJson).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attributes: expect.objectContaining({ title: 'Discover session' }),
+      })
+    );
 
     expect(mockDownloadFileAs).toHaveBeenCalledWith('discover-session.json', {
       content: '{}',
@@ -112,27 +130,27 @@ describe('Discover export JSON flyout', () => {
     );
   });
 
-  it('exports all tabs by default and can export only the current tab', async () => {
+  it('exports the whole session by default and can export only the current tab', () => {
     renderFlyout();
 
     const initialProps = mockExportJsonFlyoutContent.mock.calls[0][0];
 
     render(<>{initialProps.headerActions}</>);
-    await initialProps.prepareExportJson(initialProps.getExportJson());
+    initialProps.getExportJson();
 
-    const exportAllTabsSwitch = screen.getByRole('switch');
+    const exportCurrentTabSwitch = screen.getByRole('switch');
 
-    expect(screen.getByText('Export all tabs')).toBeInTheDocument();
-    expect(exportAllTabsSwitch).toBeChecked();
-    expect(mockGetExportJson).toHaveBeenLastCalledWith(true);
+    expect(screen.getByText('Export only the current tab')).toBeInTheDocument();
+    expect(exportCurrentTabSwitch).not.toBeChecked();
+    expect(mockGetExportJson).toHaveBeenLastCalledWith(false);
 
-    fireEvent.click(exportAllTabsSwitch);
+    fireEvent.click(exportCurrentTabSwitch);
 
     const updatedProps =
       mockExportJsonFlyoutContent.mock.calls[mockExportJsonFlyoutContent.mock.calls.length - 1][0];
-    await updatedProps.prepareExportJson(updatedProps.getExportJson());
+    updatedProps.getExportJson();
 
-    expect(mockGetExportJson).toHaveBeenLastCalledWith(false);
+    expect(mockGetExportJson).toHaveBeenLastCalledWith(true);
   });
 
   it('surfaces export errors through prepareExportJson', async () => {
@@ -140,12 +158,12 @@ describe('Discover export JSON flyout', () => {
 
     const props = mockExportJsonFlyoutContent.mock.calls[0][0];
 
-    mockGetExportJson.mockImplementationOnce(() => {
-      throw new Error('Unsupported Discover control type: rangeSlider');
-    });
+    mockSanitizeExportJson.mockRejectedValueOnce(
+      new Error('Unable to sanitize Discover session')
+    );
 
     await expect(props.prepareExportJson(props.getExportJson())).rejects.toThrow(
-      'Unsupported Discover control type: rangeSlider'
+      'Unable to sanitize Discover session'
     );
   });
 });

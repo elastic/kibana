@@ -19,37 +19,36 @@ import {
   DISCOVER_SESSION_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
 } from '../../../../../../common/constants';
-import type { DiscoverSessionApiData } from '../../../../../../server';
+import type {
+  DiscoverSessionApiData,
+  DiscoverSessionSanitizeRequest,
+} from '../../../../../../server';
 
 interface ExportDiscoverSessionJsonFlyoutProps {
   canShowDevTools: boolean;
   closeFlyout: () => void;
-  getExportJson: (exportAllTabs?: boolean) => {
+  getExportJson: (exportCurrentTab: boolean) => DiscoverSessionSanitizeRequest;
+  sanitizeExportJson: (state: DiscoverSessionSanitizeRequest) => Promise<{
     data: DiscoverSessionApiData;
     warnings: readonly string[];
-  };
+  }>;
   title: string;
   useConsoleUrl: SharePluginStart['url']['locators']['useUrl'];
-}
-
-interface ExportJsonSelection {
-  exportAllTabs: boolean;
 }
 
 export const ExportDiscoverSessionJsonFlyout = ({
   canShowDevTools,
   closeFlyout,
   getExportJson,
+  sanitizeExportJson,
   title,
   useConsoleUrl,
 }: ExportDiscoverSessionJsonFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'discoverExportJsonFlyoutTitle' });
-  const [exportAllTabs, setExportAllTabs] = useState(true);
-  const getExportJsonSelection = useCallback(() => ({ exportAllTabs }), [exportAllTabs]);
-  const prepareExportJson = useCallback(
-    async ({ exportAllTabs: shouldExportAllTabs }: ExportJsonSelection) =>
-      getExportJson(shouldExportAllTabs),
-    [getExportJson]
+  const [exportCurrentTab, setExportCurrentTab] = useState(false);
+  const getSelectedExportJson = useCallback(
+    () => getExportJson(exportCurrentTab),
+    [exportCurrentTab, getExportJson]
   );
 
   return (
@@ -62,22 +61,22 @@ export const ExportDiscoverSessionJsonFlyout = ({
       session="start"
       size="m"
     >
-      <ExportJsonFlyoutContent<ExportJsonSelection, DiscoverSessionApiData>
+      <ExportJsonFlyoutContent<DiscoverSessionSanitizeRequest, DiscoverSessionApiData>
         closeFlyout={closeFlyout}
         dataTestSubjPrefix="discover"
         downloadExportJson={(filename, content) =>
           downloadFileAs(filename, { content, type: 'application/json' })
         }
-        getExportJson={getExportJsonSelection}
+        getExportJson={getSelectedExportJson}
         headerActions={
           <EuiSwitch
             compressed
-            checked={exportAllTabs}
-            data-test-subj="discoverExportJsonAllTabsSwitch"
-            label={i18n.translate('discover.exportJson.exportAllTabsToggleSwitch', {
-              defaultMessage: 'Export all tabs',
+            checked={exportCurrentTab}
+            data-test-subj="discoverExportJsonCurrentTabSwitch"
+            label={i18n.translate('discover.exportJson.exportCurrentTabToggleSwitch', {
+              defaultMessage: 'Export only the current tab',
             })}
-            onChange={(event) => setExportAllTabs(event.target.checked)}
+            onChange={(event) => setExportCurrentTab(event.target.checked)}
           />
         }
         isTechnicalPreview
@@ -91,7 +90,7 @@ export const ExportDiscoverSessionJsonFlyout = ({
             `POST kbn:${DISCOVER_SESSION_API_BASE_PATH}?apiVersion=${DISCOVER_SESSION_API_VERSION}\n${jsonValue}`,
           useUrl: useConsoleUrl,
         }}
-        prepareExportJson={prepareExportJson}
+        prepareExportJson={sanitizeExportJson}
         title={title}
         titleId={titleId}
       />

@@ -26,8 +26,9 @@ import type {
 } from '../../../state_management/redux';
 import type { AppMenuDiscoverParams } from './types';
 import { buildShareOptions } from './get_share';
-import { getDiscoverSessionExportJson } from './get_discover_session_export_json';
-import { ExportDiscoverSessionJsonFlyout } from './export_json_flyout';
+import { buildDiscoverSessionExportRequest } from '../export_discover_session/build_discover_session_export_request';
+import { ExportDiscoverSessionJsonFlyout } from '../export_discover_session/json_flyout';
+import { sanitizeDiscoverSession } from '../export_discover_session/sanitize_discover_session';
 
 interface GetExportAppMenuItemParams {
   discoverParams: AppMenuDiscoverParams;
@@ -103,21 +104,16 @@ export const getExportAppMenuItem = ({
       defaultMessage: 'Untitled Discover session',
     });
 
-  const getExportJson = (exportAllTabs: boolean = true) => {
+  const getExportJson = (exportCurrentTab: boolean) => {
     const title = getDiscoverSessionTitle();
 
-    const { sessionState, warnings } = getDiscoverSessionExportJson({
+    return buildDiscoverSessionExportRequest({
       getState,
       runtimeStateManager,
       services,
-      tabId: exportAllTabs ? undefined : currentTab.id,
+      tabId: exportCurrentTab ? currentTab.id : undefined,
       title,
     });
-
-    return {
-      data: sessionState,
-      warnings: warnings.map(({ message }) => message),
-    };
   };
 
   const shareOptionsParams = {
@@ -143,6 +139,7 @@ export const getExportAppMenuItem = ({
         canShowDevTools={Boolean(services.capabilities.dev_tools?.show)}
         closeFlyout={onFinishAction}
         getExportJson={getExportJson}
+        sanitizeExportJson={(state) => sanitizeDiscoverSession(services.http, state)}
         title={getDiscoverSessionTitle()}
         useConsoleUrl={share.url.locators.useUrl}
       />
