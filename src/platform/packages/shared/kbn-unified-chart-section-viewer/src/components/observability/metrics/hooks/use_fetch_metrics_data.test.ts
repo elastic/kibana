@@ -33,7 +33,7 @@ jest.mock('@kbn/esql-utils', () => ({
     if (!esql?.trim()) return '';
     const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
     const post = postFilter ? ` | WHERE ${postFilter}` : '';
-    return `${esql} | METRICS_INFO${post}`;
+    return `${esql}${preFilter} | METRICS_INFO${post}`;
   }),
   escapeStringValue: jest.fn((val: string) => `"${val}"`),
   buildJoinedFilter: jest.fn(
@@ -698,7 +698,7 @@ describe('useFetchMetricsData', () => {
         expect(result.current.loading).toBe(false);
       });
 
-      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', '');
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', [], '');
       expect(result.current.activeDimensions).toEqual([]);
       // Intent must not be mutated — the caller still sees the original array.
       expect(params.selectedDimensionNames).toEqual([hostDimension]);
@@ -720,6 +720,7 @@ describe('useFetchMetricsData', () => {
 
       expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith(
         'TS metrics-*',
+        ['host.name'],
         'MV_CONTAINS(dimension_fields, "host.name")'
       );
       expect(result.current.activeDimensions).toEqual([hostDimension]);
@@ -738,6 +739,7 @@ describe('useFetchMetricsData', () => {
 
       expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith(
         'TS metrics-*',
+        ['host.name', 'service.name'],
         'MV_CONTAINS(dimension_fields, "host.name") AND MV_CONTAINS(dimension_fields, "service.name")'
       );
       expect(result.current.activeDimensions).toEqual([hostDimension, serviceDimension]);
@@ -807,7 +809,7 @@ describe('useFetchMetricsData', () => {
         expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
       });
 
-      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', '');
+      expect(buildMetricsInfoQueryMock).toHaveBeenLastCalledWith('TS metrics-*', [], '');
     });
   });
 

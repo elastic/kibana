@@ -7,20 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ParsedMetricItem } from '../../../types';
-import { createESQLQuery as createESQLQueryWithSettings } from './create_esql_query';
+import { createESQLQuery } from './create_esql_query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-
-const UNMAPPED_FIELDS_NULLIFY_SET_COMMAND = 'SET unmapped_fields = "NULLIFY";';
-
-const createESQLQuery = (params: Parameters<typeof createESQLQueryWithSettings>[0]): string => {
-  const query = createESQLQueryWithSettings(params);
-  // pipe-multiline keeps SET on the same line as the TS source command.
-  const expectedPrefix = `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND} `;
-
-  expect(query.startsWith(expectedPrefix)).toBe(true);
-
-  return query.slice(expectedPrefix.length);
-};
 
 const mockMetric: ParsedMetricItem = {
   metricName: 'cpu.usage',
@@ -65,15 +53,6 @@ const mockLegacyHistogramMetric: ParsedMetricItem = {
 };
 
 describe('createESQLQuery', () => {
-  it('should nullify unmapped fields in generated metric queries', () => {
-    expect(createESQLQueryWithSettings({ metricItem: mockMetric })).toBe(
-      `
-SET unmapped_fields = "NULLIFY"; TS metrics-*
-  | STATS AVG(cpu.usage) BY TBUCKET(100)
-`.trim()
-    );
-  });
-
   it('should generate a basic AVG query for a metric field', () => {
     const query = createESQLQuery({ metricItem: mockMetric });
     expect(query).toBe(
