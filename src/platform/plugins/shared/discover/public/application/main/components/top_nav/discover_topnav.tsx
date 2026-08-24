@@ -93,10 +93,10 @@ export const DiscoverTopNav = ({
   );
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
-    // always show the timepicker for ES|QL mode
-    return (
-      isEsqlMode || (!isEsqlMode && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
-    );
+    // Always show the time picker for ES|QL. For KQL/Lucene, keep it visible
+    // (the shared query bar disables it) when the data view has no time field
+    // so users can see that all time ranges are included. Rollups still hide it.
+    return isEsqlMode || dataView.type !== DataViewType.ROLLUP;
   }, [dataView, isEsqlMode]);
 
   const closeFieldEditor = useRef<() => void | undefined>();

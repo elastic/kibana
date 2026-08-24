@@ -112,6 +112,10 @@ export const strings = {
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
       defaultMessage: 'All time',
     }),
+  getNoTimeFieldTooltip: () =>
+    i18n.translate('unifiedSearch.query.queryBar.noTimeFieldTooltip', {
+      defaultMessage: 'Date range selection requires a time field on the data view.',
+    }),
   getSendToBackgroundLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.sendToBackground', {
       defaultMessage: 'Send to background',
@@ -123,7 +127,11 @@ const getWrapperWithTooltip = (
   enableTooltip: boolean,
   query?: Query | AggregateQuery
 ) => {
-  if (enableTooltip && query && isOfAggregateQueryType(query)) {
+  if (!enableTooltip) {
+    return children;
+  }
+
+  if (query && isOfAggregateQueryType(query)) {
     const textBasedLanguage = getAggregateQueryMode(query);
     const displayName = getLanguageDisplayName(textBasedLanguage);
     return (
@@ -138,9 +146,13 @@ const getWrapperWithTooltip = (
         {children}
       </EuiToolTip>
     );
-  } else {
-    return children;
   }
+
+  return (
+    <EuiToolTip position="top" content={strings.getNoTimeFieldTooltip()}>
+      {children}
+    </EuiToolTip>
+  );
 };
 
 // @internal
@@ -820,19 +832,25 @@ export const QueryBarTopRow = React.memo(
       }
       let isDisabled: boolean | { display: React.ReactNode } = Boolean(props.isDisabled);
       let enableTooltip = false;
-      if (Boolean(isQueryLangSelected) && !props.isDirty) {
-        const adHocDataview = props.indexPatterns?.[0];
-        if (adHocDataview && typeof adHocDataview !== 'string') {
-          if (!adHocDataview.timeFieldName) {
-            isDisabled = {
-              display: (
-                <span data-test-subj="kbnQueryBar-datePicker-disabled">
-                  {strings.getDisabledDatePickerLabel()}
-                </span>
-              ),
-            };
-          }
-          enableTooltip = !Boolean(adHocDataview.timeFieldName);
+      const resolvedDataViews = (props.indexPatterns ?? []).filter(
+        (indexPattern): indexPattern is DataView => typeof indexPattern !== 'string'
+      );
+      // ES|QL: skip while the query is dirty so the picker doesn't flicker as the
+      // derived data view (and its time field) is still being resolved.
+      const shouldEvaluateTimeField = !isQueryLangSelected || !props.isDirty;
+      if (shouldEvaluateTimeField && resolvedDataViews.length > 0) {
+        const hasTimeField = Boolean(isQueryLangSelected)
+          ? Boolean(resolvedDataViews[0].timeFieldName)
+          : resolvedDataViews.some((indexPattern) => Boolean(indexPattern.timeFieldName));
+        if (!hasTimeField) {
+          isDisabled = {
+            display: (
+              <span data-test-subj="kbnQueryBar-datePicker-disabled">
+                {strings.getDisabledDatePickerLabel()}
+              </span>
+            ),
+          };
+          enableTooltip = true;
         }
       }
 
