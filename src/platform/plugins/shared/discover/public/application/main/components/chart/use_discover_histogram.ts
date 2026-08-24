@@ -235,7 +235,7 @@ export const useDiscoverHistogram = (
       // visContext should be in sync with current query
       externalVisContext: isEsqlMode && canImportVisContext(visContext) ? visContext : undefined,
       getModifiedVisAttributes,
-    };
+    } satisfies UnifiedHistogramFetchParamsExternal;
   }, [
     breakdownField,
     timeInterval,
