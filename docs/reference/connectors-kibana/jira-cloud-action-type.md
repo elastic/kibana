@@ -3,7 +3,7 @@ navigation_title: "Jira Cloud"
 type: reference
 description: "Use the Jira Cloud connector to create, update, and track Jira issues; search with JQL; manage transitions, comments, and attachments; and look up users and projects."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.4, ga 9.6+
   serverless: preview
 ---
 
