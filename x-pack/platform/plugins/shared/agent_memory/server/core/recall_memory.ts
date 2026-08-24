@@ -7,9 +7,13 @@
 
 import type { Logger } from '@kbn/logging';
 import type { MemoryCategory } from '../storage/memory_storage';
-import type { MemoryDocument, MemoryStorage } from '../storage/memory_storage';
+import type { MemoryStorage } from '../storage/memory_storage';
 import type { ResolvedIdentity } from './resolve_identity';
-import { buildKeywordRetriever, buildRetriever } from '../recall/build_retriever';
+import {
+  buildBeliefFilter,
+  buildHybridRecallPipeline,
+  buildKeywordRecallPipeline,
+} from '../recall/build_retriever';
 
 export interface RecallMemoryParams {
   query: string;
@@ -39,8 +43,6 @@ export interface RecallMemoryResult {
 
 const MAX_LIMIT = 50;
 const DEFAULT_LIMIT = 10;
-const HYBRID_MIN_SCORE = 0.05;
-const KEYWORD_MIN_SCORE = 1;
 
 /**
  * Recalls relevant memories using hybrid RRF (BM25 + semantic).
@@ -48,7 +50,7 @@ const KEYWORD_MIN_SCORE = 1;
  * Recall fails open: any ES error returns an empty result set rather than
  * propagating to the agent. The caller should log the error for observability.
  *
- * Mandatory filters (G3) are applied unconditionally via `buildRetriever`:
+ * Mandatory filters (G3) are applied unconditionally via the ES|QL body filter:
  *  - `space_id` — isolation per Kibana space
  *  - user scope with `scope_id` set to the authenticated identity
  * These are injected before any caller-supplied params; no param can widen them.
@@ -66,60 +68,61 @@ export const recallMemory = async ({
   const limit = Math.min(params.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
   const client = storage.getClient();
 
-  const searchWithRetriever = async (
-    retriever: ReturnType<typeof buildRetriever>,
-    minScore: number
+  const filter = buildBeliefFilter({
+    space_id,
+    scope_kind: 'user',
+    scope_id: identity.author,
+    category,
+  });
+
+  const searchWithPipeline = async (
+    pipeline: ReturnType<typeof buildHybridRecallPipeline>
   ): Promise<RecallMemoryResult> => {
-    const result = await client.search({
-      retriever,
-      min_score: minScore,
-      size: limit,
-      track_total_hits: false,
-      _source: true,
+    const result = await client.esql({
+      metadata: ['_id', '_index', '_score'],
+      pipeline,
+      filter,
     });
 
-    const memories: RecalledMemory[] = result.hits.hits
-      .map((hit) => {
-        const doc = hit._source as MemoryDocument;
-        if (!doc) return null;
-        return {
-          id: hit._id ?? doc.id,
-          title: doc.title,
-          description: doc.description,
-          category: doc.memory?.category,
-          type: doc.memory?.type,
-          tags: doc.tags,
-          created_at: doc.created_at,
-          author: doc.memory?.provenance?.author,
-          author_kind: doc.memory?.provenance?.author_kind,
-          revision: doc.memory?.revision,
-        } as RecalledMemory;
-      })
-      .filter((m): m is RecalledMemory => m !== null);
+    const columnIndex = new Map(result.columns.map(({ name }, index) => [name, index]));
+    const read = (row: unknown[], column: string): unknown => {
+      const index = columnIndex.get(column);
+      return index === undefined ? undefined : row[index];
+    };
+    const toStringArray = (value: unknown): string[] | undefined => {
+      if (value == null) return undefined;
+      return Array.isArray(value)
+        ? value.filter((item) => item != null).map(String)
+        : [String(value)];
+    };
+
+    const memories: RecalledMemory[] = result.values.map((row) => {
+      const revision = read(row, 'revision');
+      return {
+        id: String(read(row, '_id') ?? ''),
+        title: String(read(row, 'title') ?? ''),
+        description: String(read(row, 'description') ?? ''),
+        category: read(row, 'category') == null ? undefined : String(read(row, 'category')),
+        type: read(row, 'memory_type') == null ? undefined : String(read(row, 'memory_type')),
+        tags: toStringArray(read(row, 'tags')),
+        created_at: String(read(row, 'created_at') ?? ''),
+        author: String(read(row, 'author') ?? ''),
+        author_kind: String(read(row, 'author_kind') ?? ''),
+        revision: typeof revision === 'number' ? revision : Number(revision ?? 0),
+      };
+    });
 
     return { memories };
   };
 
-  const retrieverParams = {
-    query,
-    space_id,
-    scope_kind: 'user' as const,
-    scope_id: identity.author,
-    category,
-    limit,
-  };
-
   try {
-    return await searchWithRetriever(buildRetriever(retrieverParams), HYBRID_MIN_SCORE);
+    return await searchWithPipeline(buildHybridRecallPipeline({ query, limit }));
   } catch {
     logger?.warn('Agent Memory hybrid recall failed; retrying with keyword-only retrieval');
   }
 
   try {
-    return await searchWithRetriever(
-      buildKeywordRetriever(retrieverParams),
-      KEYWORD_MIN_SCORE
-    );
+    return await searchWithPipeline(buildKeywordRecallPipeline({ query, limit }));
   } catch {
     // Fail open: an unreachable memory service must never stop the agent (G5, D-security).
     logger?.warn('Agent Memory keyword recall fallback failed; returning empty results');

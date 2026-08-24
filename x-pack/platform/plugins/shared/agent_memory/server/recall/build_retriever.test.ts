@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { buildKeywordRetriever, buildRetriever } from './build_retriever';
+import {
+  buildBeliefFilter,
+  buildHybridRecallPipeline,
+  buildKeywordRecallPipeline,
+} from './build_retriever';
 
 const NOW = '2026-08-13T12:34:56.789Z';
 const expiryFilter = {
@@ -18,17 +22,15 @@ const expiryFilter = {
   },
 };
 
-const buildTestRetriever = (category?: string) =>
-  buildRetriever({
-    query: 'preferred sources',
+const buildTestFilter = (category?: string) =>
+  buildBeliefFilter({
     space_id: 'space-1',
     scope_kind: 'user',
     scope_id: 'user-1',
     category,
-    limit: 10,
   });
 
-describe('buildRetriever', () => {
+describe('Agent Memory ES|QL recall builders', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(NOW));
@@ -38,93 +40,54 @@ describe('buildRetriever', () => {
     jest.useRealTimers();
   });
 
-  it('builds hybrid retrieval with authoritative scope and lifecycle filters', () => {
-    const retriever = buildTestRetriever('preferences');
-
-    expect(retriever).toEqual({
-      rrf: expect.objectContaining({
-        retrievers: expect.arrayContaining([
-          expect.objectContaining({
-            standard: expect.objectContaining({
-              query: expect.objectContaining({
-                bool: expect.objectContaining({
-                  must: expect.arrayContaining([
-                    expect.objectContaining({ multi_match: expect.any(Object) }),
-                  ]),
-                  should: expect.arrayContaining([
-                    expect.objectContaining({ distance_feature: expect.any(Object) }),
-                  ]),
-                }),
-              }),
-            }),
-          }),
-          expect.objectContaining({
-            linear: expect.objectContaining({
-              retrievers: expect.arrayContaining([
-                expect.objectContaining({
-                  retriever: expect.objectContaining({
-                    standard: expect.objectContaining({
-                      query: { match: { 'content.semantic': 'preferred sources' } },
-                    }),
-                  }),
-                }),
-              ]),
-            }),
-          }),
-        ]),
-        filter: {
-          bool: {
-            filter: expect.arrayContaining([
-              { term: { space_id: 'space-1' } },
-              { term: { 'memory.scope_kind': 'user' } },
-              { term: { 'memory.scope_id': 'user-1' } },
-              { term: { deleted: false } },
-              { term: { 'memory.category': 'preferences' } },
-              expiryFilter,
-            ]),
-          },
-        },
-      }),
+  it('builds the authoritative body filter independently from the ES|QL pipeline', () => {
+    expect(buildTestFilter('preferences')).toEqual({
+      bool: {
+        filter: [
+          { term: { space_id: 'space-1' } },
+          { term: { 'memory.scope_kind': 'user' } },
+          { term: { 'memory.scope_id': 'user-1' } },
+          { term: { deleted: false } },
+          expiryFilter,
+          { term: { 'memory.category': 'preferences' } },
+        ],
+      },
     });
-    expect(retriever).toHaveProperty('rrf.retrievers.length', 2);
-    expect(JSON.stringify(retriever)).not.toContain('memory.provenance.author');
+    expect(JSON.stringify(buildTestFilter())).not.toContain('memory.provenance.author');
   });
 
-  it('builds keyword retrieval with the same authoritative filters and no semantic leg', () => {
-    const retriever = buildKeywordRetriever({
+  it('builds a parameterized hybrid FORK and FUSE pipeline', () => {
+    const request = buildHybridRecallPipeline({
       query: 'preferred sources',
-      space_id: 'space-1',
-      scope_kind: 'user',
-      scope_id: 'user-1',
-      category: 'preferences',
       limit: 10,
-    });
+    }).toRequest();
 
-    expect(retriever).toEqual({
-      standard: expect.objectContaining({
-        query: expect.objectContaining({
-          bool: expect.objectContaining({
-            must: expect.arrayContaining([
-              expect.objectContaining({ multi_match: expect.any(Object) }),
-            ]),
-          }),
-        }),
-        filter: {
-          bool: {
-            filter: expect.arrayContaining([
-              { term: { space_id: 'space-1' } },
-              { term: { 'memory.scope_kind': 'user' } },
-              { term: { 'memory.scope_id': 'user-1' } },
-              { term: { deleted: false } },
-              { term: { 'memory.category': 'preferences' } },
-              expiryFilter,
-            ]),
-          },
-        },
-      }),
-    });
-    expect(retriever).not.toHaveProperty('rrf');
-    expect(JSON.stringify(retriever)).not.toContain('content.semantic');
-    expect(JSON.stringify(retriever)).not.toContain('memory.provenance.author');
+    expect(request.query).toContain('FORK');
+    expect(request.query).toContain('MATCH(title,');
+    expect(request.query).toContain('MATCH(description,');
+    expect(request.query).toContain('MATCH(content.semantic,');
+    expect(request.query).toContain('3.0 / (30.0 + age_days)');
+    expect(request.query).toContain('FUSE RRF WITH {"rank_constant": 20}');
+    expect(request.query).toContain('LIMIT 20');
+    expect(request.query).toContain('LIMIT 10');
+    expect(request.params).toEqual([
+      { lexicalTitleQuery: 'preferred sources' },
+      { lexicalDescriptionQuery: 'preferred sources' },
+      { semanticQuery: 'preferred sources' },
+    ]);
+  });
+
+  it('builds a keyword fallback without semantic fusion', () => {
+    const request = buildKeywordRecallPipeline({
+      query: 'preferred sources',
+      limit: 10,
+    }).toRequest();
+
+    expect(request.query).toContain('MATCH(title,');
+    expect(request.query).toContain('MATCH(description,');
+    expect(request.query).toContain('WHERE _score >= 1');
+    expect(request.query).not.toContain('content.semantic');
+    expect(request.query).not.toContain('FORK');
+    expect(request.query).not.toContain('FUSE');
   });
 });

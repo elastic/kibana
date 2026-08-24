@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import type {
-  QueryDslQueryContainer,
-  RetrieverContainer,
-} from '@elastic/elasticsearch/lib/api/types';
+import { esql, type ComposerQuery } from '@elastic/esql';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 /**
- * Parameters for the hybrid RRF retriever used in recall.
+ * Parameters for the ES|QL recall query and its authoritative body filter.
  *
- * The retriever enforces authoritative space and user-scope filters that are
+ * Recall enforces authoritative space and user-scope filters that are
  * never overridable by tool params.
  */
-export interface BuildRetrieverParams {
+export interface BuildRecallQueryParams {
   query: string;
   /** Mandatory scope filter — injected unconditionally (G3). */
   space_id: string;
@@ -39,7 +37,7 @@ export interface BuildRetrieverParams {
  *  - `space_id` scope (G3)
  *  - `memory.scope_kind` and `memory.scope_id` (G3)
  */
-const buildBeliefFilter = (
+const buildBeliefFilterClauses = (
   space_id: string,
   scope_kind: 'user',
   scope_id: string,
@@ -75,104 +73,70 @@ const buildBeliefFilter = (
   return filters;
 };
 
-const buildBm25Query = (query: string): QueryDslQueryContainer => ({
+export const buildBeliefFilter = ({
+  space_id,
+  scope_kind,
+  scope_id,
+  category,
+}: Omit<BuildRecallQueryParams, 'query' | 'limit'>): QueryDslQueryContainer => ({
   bool: {
-    must: [
-      {
-        multi_match: {
-          query,
-          fields: ['title^2', 'description'],
-          type: 'best_fields',
-        },
-      },
-    ],
-    // Recency only reorders relevant matches; it cannot admit an unrelated memory.
-    should: [
-      {
-        distance_feature: {
-          field: '@timestamp',
-          origin: 'now',
-          pivot: '30d',
-          boost: 0.1,
-        },
-      },
-    ],
+    filter: buildBeliefFilterClauses(space_id, scope_kind, scope_id, category),
   },
 });
 
-export const buildKeywordRetriever = ({
+export const buildHybridRecallPipeline = ({
   query,
-  space_id,
-  scope_kind,
-  scope_id,
-  category,
-}: BuildRetrieverParams): RetrieverContainer => ({
-  standard: {
-    query: buildBm25Query(query),
-    filter: {
-      bool: {
-        filter: buildBeliefFilter(space_id, scope_kind, scope_id, category),
-      },
-    },
-  },
-});
-
-/**
- * Builds a two-leg RRF retriever for hybrid recall.
- *
- * Legs:
- *  1. BM25 — `multi_match` on `title` + `description` (exact-text match)
- *  2. Semantic — `match` on inherited `content.semantic` wrapped in `linear`
- *
- * All legs share the same mandatory scope + belief filter via the outer RRF's
- * `filter` clause; the standard retrievers do not need their own filter.
- */
-export const buildRetriever = ({
-  query,
-  space_id,
-  scope_kind,
-  scope_id,
-  category,
   limit,
-}: BuildRetrieverParams): RetrieverContainer => {
-  const beliefFilter = buildBeliefFilter(space_id, scope_kind, scope_id, category);
-  const combinedFilter: QueryDslQueryContainer = { bool: { filter: beliefFilter } };
+}: Pick<BuildRecallQueryParams, 'query' | 'limit'>): ComposerQuery => {
+  const candidateLimit = limit * 2;
 
-  // Leg 1: BM25 keyword match
-  const bm25Leg: RetrieverContainer = {
-    standard: {
-      query: buildBm25Query(query),
-    },
-  };
-
-  // Leg 2: Semantic (dense vector via semantic_text inference)
-  const semanticLeg: RetrieverContainer = {
-    linear: {
-      retrievers: [
-        {
-          retriever: {
-            standard: {
-              query: {
-                match: {
-                  'content.semantic': query,
-                },
-              },
-            },
-          },
-          weight: 1,
-          normalizer: 'minmax',
-        },
-      ],
-      rank_window_size: limit * 2,
-    },
-  };
-
-  return {
-    rrf: {
-      retrievers: [bm25Leg, semanticLeg],
-      filter: combinedFilter,
-      rank_window_size: limit * 2,
-      rank_constant: 20,
-    },
-  };
+  return esql`
+    FORK
+      (
+        WHERE MATCH(title, ${{ lexicalTitleQuery: query }}, {"boost": 2.0})
+           OR MATCH(description, ${{ lexicalDescriptionQuery: query }})
+        | EVAL age_days = DATE_DIFF("day", @timestamp, NOW())
+        | EVAL recency_boost = CASE(age_days <= 0, 0.1, 3.0 / (30.0 + age_days))
+        | EVAL _score = _score + recency_boost
+        | SORT _score DESC
+        | LIMIT ${candidateLimit}
+      )
+      (
+        WHERE MATCH(content.semantic, ${{ semanticQuery: query }})
+        | SORT _score DESC
+        | LIMIT ${candidateLimit}
+      )
+    | FUSE RRF WITH {"rank_constant": 20}
+    | SORT _score DESC, _id ASC
+    | LIMIT ${limit}
+    | EVAL category = memory.category,
+           memory_type = memory.type,
+           author = memory.provenance.author,
+           author_kind = memory.provenance.author_kind,
+           revision = memory.revision
+    | KEEP _id, title, description, category, memory_type, tags, created_at,
+           author, author_kind, revision
+  `;
 };
+
+export const buildKeywordRecallPipeline = ({
+  query,
+  limit,
+}: Pick<BuildRecallQueryParams, 'query' | 'limit'>): ComposerQuery =>
+  esql`
+    WHERE MATCH(title, ${{ lexicalTitleQuery: query }}, {"boost": 2.0})
+       OR MATCH(description, ${{ lexicalDescriptionQuery: query }})
+    | EVAL age_days = DATE_DIFF("day", @timestamp, NOW())
+    | EVAL recency_boost = CASE(age_days <= 0, 0.1, 3.0 / (30.0 + age_days))
+    | EVAL _score = _score + recency_boost
+    | WHERE _score >= 1
+    | SORT _score DESC, _id ASC
+    | LIMIT ${limit}
+    | EVAL category = memory.category,
+           memory_type = memory.type,
+           author = memory.provenance.author,
+           author_kind = memory.provenance.author_kind,
+           revision = memory.revision
+    | KEEP _id, title, description, category, memory_type, tags, created_at,
+           author, author_kind, revision
+  `;

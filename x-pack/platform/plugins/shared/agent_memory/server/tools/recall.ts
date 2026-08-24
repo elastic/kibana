@@ -21,9 +21,9 @@ import type { GetMemoryStorage } from '../types';
  * Uses `asCurrentUser` for storage access because Agent Memory is user data,
  * so `kibana_system` is unauthorized. Data isolation is enforced via
  * mandatory personal-scope filters (`space_id + scope_kind + scope_id`) in
- * `buildRetriever` (G3). Elasticsearch authorization is enforced by the request-scoped
- * client. Recall **fails open**: ES errors return empty results rather than propagating
- * to the agent (D-security, G5).
+ * the ES|QL request body (G3). Elasticsearch authorization is enforced by the
+ * request-scoped client. Recall **fails open**: ES errors return empty results
+ * rather than propagating to the agent (D-security, G5).
  */
 export const createRecallTool = ({
   getStorage,

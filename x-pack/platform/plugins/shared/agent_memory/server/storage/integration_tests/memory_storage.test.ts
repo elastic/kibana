@@ -10,8 +10,8 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AGENT_MEMORY_INDEX } from '../../../common';
+import { recallMemory } from '../../core/recall_memory';
 import { writeMemory } from '../../core/write_memory';
-import { buildRetriever } from '../../recall/build_retriever';
 import { createMemoryStorage, memoryStorageSettings, type MemoryStorage } from '../memory_storage';
 
 describe('Agent Memory AI Index integration', () => {
@@ -157,18 +157,15 @@ describe('Agent Memory AI Index integration', () => {
     });
     expect(lexicalOnly.hits.hits).toHaveLength(0);
 
-    const retriever = buildRetriever({
-      query: semanticQuery,
-      space_id: spaceId,
-      scope_kind: 'user',
-      scope_id: identity.author,
-      limit: 10,
+    const recalled = await recallMemory({
+      storage,
+      params: {
+        query: semanticQuery,
+        space_id: spaceId,
+        identity,
+        limit: 10,
+      },
     });
-    const recalled = await storage.getClient().search({
-      size: 10,
-      track_total_hits: true,
-      retriever,
-    });
-    expect(recalled.hits.hits.map(({ _id }) => _id)).toContain(writeResult.id);
+    expect(recalled.memories.map(({ id }) => id)).toContain(writeResult.id);
   });
 });
