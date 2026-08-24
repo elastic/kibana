@@ -131,7 +131,7 @@ export const createBashTool = ({
     maxResultTokens: SAFEGUARD_TOKEN_COUNT * 2,
     handler: async ({ command }) => {
       const result = await bashService.exec(command);
-      if (result.exit_code !== 0) {
+      if (result.exit_code !== 0 && result.stderr) {
         return {
           results: [
             createErrorResult({
