@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { WorkflowOrigin, WorkflowUserAction } from '../../../common/types/domain';
 import {
@@ -23,7 +24,6 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { UserActionBuilder, UserActionBuilderArgs } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { useAppUrl, useKibana } from '../../common/lib/kibana';
-import * as i18n from './translations';
 import type { CasesConfigurationUI } from '../../containers/types';
 
 interface WorkflowActivityLabelProps {
@@ -60,10 +60,8 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
     <>{name}</>
   );
 
-  const originDescription = (() => {
+  const label = (() => {
     switch (origin.type) {
-      case CASE_WORKFLOW_ORIGIN_TYPE:
-        return i18n.STARTED_WORKFLOW_AGAINST_CASE_LABEL;
       case OBSERVABLE_WORKFLOW_ORIGIN_TYPE: {
         if (origin.typeKey && origin.value) {
           const allObservableTypes = [
@@ -72,26 +70,69 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
           ];
           const found = allObservableTypes.find((t) => t.key === origin.typeKey);
           const typeLabel = found?.label ?? origin.typeKey;
-          return i18n.STARTED_WORKFLOW_AGAINST_OBSERVABLE_LABEL(typeLabel, origin.value);
+          return (
+            <FormattedMessage
+              id="xpack.cases.caseView.userActions.ranWorkflowOnObservableDetailsLabel"
+              defaultMessage="ran {name} on observable {typeLabel}: {value}"
+              values={{ name: workflowNameNode, typeLabel, value: origin.value }}
+            />
+          );
         }
-        return i18n.STARTED_WORKFLOW_AGAINST_OBSERVABLE_FALLBACK_LABEL;
+        return (
+          <FormattedMessage
+            id="xpack.cases.caseView.userActions.ranWorkflowOnObservableLabel"
+            defaultMessage="ran {name} on an observable"
+            values={{ name: workflowNameNode }}
+          />
+        );
       }
       case ALERT_WORKFLOW_ORIGIN_TYPE:
-        return i18n.STARTED_WORKFLOW_AGAINST_ALERT_LABEL;
+        return (
+          <FormattedMessage
+            id="xpack.cases.caseView.userActions.ranWorkflowOnAlertLabel"
+            defaultMessage="ran {name} on an alert"
+            values={{ name: workflowNameNode }}
+          />
+        );
       case ALERTS_WORKFLOW_ORIGIN_TYPE:
-        return i18n.STARTED_WORKFLOW_AGAINST_ALERTS_LABEL;
+        return (
+          <FormattedMessage
+            id="xpack.cases.caseView.userActions.ranWorkflowOnAlertsLabel"
+            defaultMessage="ran {name} on alerts"
+            values={{ name: workflowNameNode }}
+          />
+        );
       case COMMENT_WORKFLOW_ORIGIN_TYPE:
-        return i18n.STARTED_WORKFLOW_AGAINST_COMMENT_LABEL;
+        return (
+          <FormattedMessage
+            id="xpack.cases.caseView.userActions.ranWorkflowOnCommentLabel"
+            defaultMessage="ran {name} on a comment"
+            values={{ name: workflowNameNode }}
+          />
+        );
       case ATTACHMENT_WORKFLOW_ORIGIN_TYPE:
-        return i18n.STARTED_WORKFLOW_AGAINST_ATTACHMENT_LABEL;
+        return (
+          <FormattedMessage
+            id="xpack.cases.caseView.userActions.ranWorkflowOnAttachmentLabel"
+            defaultMessage="ran {name} on an attachment"
+            values={{ name: workflowNameNode }}
+          />
+        );
+      case CASE_WORKFLOW_ORIGIN_TYPE:
       default:
-        return i18n.STARTED_WORKFLOW_AGAINST_CASE_LABEL;
+        return (
+          <FormattedMessage
+            id="xpack.cases.caseView.userActions.ranWorkflowOnCaseLabel"
+            defaultMessage="ran {name} on this case"
+            values={{ name: workflowNameNode }}
+          />
+        );
     }
   })();
 
   return (
     <EuiText size="s" data-test-subj="workflow-user-action-label">
-      {originDescription}&nbsp;with {workflowNameNode}
+      {label}
     </EuiText>
   );
 };
