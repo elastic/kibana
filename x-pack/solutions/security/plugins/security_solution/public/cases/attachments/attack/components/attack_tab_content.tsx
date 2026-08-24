@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiFlexItem, EuiInMemoryTable, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
@@ -28,6 +35,9 @@ import { FormattedRelativePreferenceDate } from '../../../../common/components/f
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { RuleStatus } from '../../../../timelines/components/timeline/body/renderers/rule_status';
 import { ShowAttackButton } from './show_attack_button';
+import type { RemoveAttackConfirmation } from './remove_attack_button';
+import { RemoveAttackButton } from './remove_attack_button';
+import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
 import type { AttackCaseAttachmentRow } from '../utils';
 import { isAttackAttachment, matchesSearchTerm } from '../utils';
 
@@ -136,7 +146,7 @@ export const AttackTabContent: React.FC<CommonAttachmentListViewProps> = ({
     );
   }
 
-  return <AttackTabTable attachments={attachments} />;
+  return <AttackTabTable attachments={attachments} caseData={caseData} />;
 };
 
 AttackTabContent.displayName = 'AttackTabContent';
@@ -145,9 +155,24 @@ AttackTabContent.displayName = 'AttackTabContent';
  * Deferred inner component — keeps the attacks search request from firing on cases with no
  * attack attachments.
  */
-const AttackTabTable = ({ attachments }: { attachments: AttackCaseAttachmentRow[] }) => {
+const AttackTabTable = ({
+  attachments,
+  caseData,
+}: {
+  attachments: AttackCaseAttachmentRow[];
+  caseData: CommonAttachmentListViewProps['caseData'];
+}) => {
   const { http } = useKibana().services;
   const { isAssistantEnabled } = useAssistantAvailability();
+  const { mutate: removeAttack, isLoading: isRemoving } = useRemoveAttackAttachment();
+
+  const { id: caseId, comments } = caseData;
+
+  const onRemoveConfirmed = useCallback(
+    (attackAttachmentId: string, { alertAttachmentIds }: RemoveAttackConfirmation) =>
+      removeAttack({ caseId, attackAttachmentId, alertAttachmentIds }),
+    [caseId, removeAttack]
+  );
 
   // One `_find` request for every attached attack rather than one per row. Memoized because
   // the array is part of the react-query key.
@@ -280,20 +305,36 @@ const AttackTabTable = ({ attachments }: { attachments: AttackCaseAttachmentRow[
         name: i18n.translate('xpack.securitySolution.attackDiscovery.cases.tab.actionsColumn', {
           defaultMessage: 'Actions',
         }),
-        width: '72px',
+        width: '112px',
         align: 'right',
         render: (row: AttackRow) => (
-          <ShowAttackButton
-            id={row.savedObjectId}
-            attackId={row.attachmentId}
-            indexName={row.attack?.index ?? row.metadata.index}
-            attackTitle={getTitle(row.attack, row.metadata)}
-            isDisabled={row.isUnresolved}
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <ShowAttackButton
+                id={row.savedObjectId}
+                attackId={row.attachmentId}
+                indexName={row.attack?.index ?? row.metadata.index}
+                attackTitle={getTitle(row.attack, row.metadata)}
+                isDisabled={row.isUnresolved}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {/* Removal stays available for an unresolved attack — the attachment can always be
+                  taken off the case; only the "also remove its alerts" offer needs the document. */}
+              <RemoveAttackButton
+                id={row.savedObjectId}
+                attackId={row.attachmentId}
+                attackTitle={getTitle(row.attack, row.metadata)}
+                comments={comments}
+                isDisabled={isRemoving}
+                onConfirm={(confirmation) => onRemoveConfirmed(row.savedObjectId, confirmation)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
     ],
-    []
+    [comments, isRemoving, onRemoveConfirmed]
   );
 
   return (

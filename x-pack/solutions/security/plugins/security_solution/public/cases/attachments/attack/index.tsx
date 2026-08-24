@@ -105,6 +105,10 @@ export const getAttackAttachment = () =>
         />
       ),
       children: AttackAttachmentChildrenLazy,
+      // Removal from the activity log is the framework's default trash action, which takes the
+      // attack attachment on its own. The offer to take the attack's alerts with it lives on the
+      // Attacks section row instead: resolving what is safe to remove needs the case's other
+      // attachments, and activity-log actions are only handed the case id and title.
       getActions: (actionProps: AttackAttachmentViewProps) => {
         const { attachmentId, metadata, savedObjectId } = actionProps;
         if (!metadata) {
@@ -128,6 +132,14 @@ export const getAttackAttachment = () =>
           },
         ];
       },
+    }),
+    getRemovalActivity: () => ({
+      event: (
+        <FormattedMessage
+          id="xpack.securitySolution.attackDiscovery.cases.removalEventDescription"
+          defaultMessage="removed an attack"
+        />
+      ),
     }),
     // Exposing `children` here is what makes attacks their own section in the consolidated
     // Attachments tab, contributes to the tab badge, and adds the type filter entry — no new

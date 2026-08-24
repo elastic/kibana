@@ -6,12 +6,19 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
-import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { expect } from '@kbn/scout-security/ui';
+import {
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common';
 import {
   ATTACK_TITLE_TEST_ID,
   ATTACK_ALERT_COUNT_TEST_ID,
   ATTACK_TAB_ROW_TITLE_TEST_ID,
   ATTACK_TAB_TABLE_TEST_ID,
+  REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
+  REMOVE_ATTACK_BUTTON_TEST_ID,
+  REMOVE_ATTACK_MODAL_TEST_ID,
   SHOW_ATTACK_BUTTON_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
 
@@ -51,6 +58,14 @@ export class AttackCasesPage {
   public readonly attackAccordionBadge: Locator;
   public readonly attackTable: Locator;
   public readonly attackTableRowTitles: Locator;
+  public readonly alertAccordion: Locator;
+  public readonly alertAccordionBadge: Locator;
+
+  // Case view – attack removal prompt
+  public readonly removeAttackButtons: Locator;
+  public readonly removeAttackModal: Locator;
+  public readonly removeAttackAlertsCheckbox: Locator;
+  public readonly removeAttackConfirmButton: Locator;
 
   // Attack details flyout (legacy expandable flyout, i.e. `enableNewFlyout: false`)
   public readonly attackDetailsFlyoutBody: Locator;
@@ -83,6 +98,18 @@ export class AttackCasesPage {
     );
     this.attackTable = page.testSubj.locator(ATTACK_TAB_TABLE_TEST_ID);
     this.attackTableRowTitles = page.testSubj.locator(ATTACK_TAB_ROW_TITLE_TEST_ID);
+    this.alertAccordion = page.testSubj.locator(
+      `case-view-attachment-accordion-${SECURITY_ALERT_ATTACHMENT_TYPE}`
+    );
+    this.alertAccordionBadge = page.testSubj.locator(
+      `case-view-attachment-badge-${SECURITY_ALERT_ATTACHMENT_TYPE}`
+    );
+
+    // Suffixed with the attachment saved object id, generated server-side — match the prefix.
+    this.removeAttackButtons = page.locator(`[data-test-subj^="${REMOVE_ATTACK_BUTTON_TEST_ID}-"]`);
+    this.removeAttackModal = page.testSubj.locator(REMOVE_ATTACK_MODAL_TEST_ID);
+    this.removeAttackAlertsCheckbox = page.testSubj.locator(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID);
+    this.removeAttackConfirmButton = page.testSubj.locator('confirmModalConfirmButton');
 
     this.attackDetailsFlyoutBody = page.testSubj.locator('attack-details-flyout-body');
   }
@@ -145,5 +172,33 @@ export class AttackCasesPage {
   async openAttackFlyoutFromActivity() {
     await this.showAttackButton.waitFor({ state: 'visible', timeout: 30_000 });
     await this.showAttackButton.click();
+  }
+
+  /** Opens the removal prompt for the first row of the Attacks section. */
+  async openRemoveAttackPrompt() {
+    const [firstRemoveButton] = await this.removeAttackButtons.all();
+
+    if (!firstRemoveButton) {
+      throw new Error('No remove attack button found in the attacks section');
+    }
+
+    await firstRemoveButton.click();
+    await this.removeAttackModal.waitFor({ state: 'visible', timeout: 30_000 });
+  }
+
+  /**
+   * Confirms the removal prompt. Tick `withRelatedAlerts` to take the attack's alerts with it —
+   * the checkbox only enables once the attack's alert set has been resolved, so wait for that
+   * rather than racing the request.
+   */
+  async confirmRemoveAttack({ withRelatedAlerts }: { withRelatedAlerts: boolean }) {
+    if (withRelatedAlerts) {
+      await this.removeAttackAlertsCheckbox.waitFor({ state: 'visible', timeout: 30_000 });
+      await expect(this.removeAttackAlertsCheckbox).toBeEnabled({ timeout: 30_000 });
+      await this.removeAttackAlertsCheckbox.check();
+    }
+
+    await this.removeAttackConfirmButton.click();
+    await this.removeAttackModal.waitFor({ state: 'hidden', timeout: 30_000 });
   }
 }

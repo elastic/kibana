@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
 import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { AttackTabContent } from './attack_tab_content';
@@ -16,13 +17,22 @@ import {
   ATTACK_TAB_ROW_TITLE_TEST_ID,
   ATTACK_TAB_ROW_UNRESOLVED_TEST_ID,
   ATTACK_TAB_TABLE_TEST_ID,
+  REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID,
+  REMOVE_ATTACK_BUTTON_TEST_ID,
 } from '../../../../../common/cases/attachments/attack/test_ids';
 import { TestProviders } from '../../../../common/mock/test_providers';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
+import { allCasesPermissions } from '../../../../cases_test_utils';
 import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
+import { useRemoveAttackAttachment } from '../hooks/use_remove_attack_attachment';
+import { useRemovableAlertAttachments } from '../hooks/use_removable_alert_attachments';
 
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
 jest.mock('../../../../assistant/use_assistant_availability');
+jest.mock('../hooks/use_remove_attack_attachment');
+jest.mock('../hooks/use_removable_alert_attachments');
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
 }));
@@ -35,6 +45,10 @@ jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
 
 const useFindAttackDiscoveriesMock = useFindAttackDiscoveries as jest.Mock;
 const useAssistantAvailabilityMock = useAssistantAvailability as jest.Mock;
+const useRemoveAttackAttachmentMock = useRemoveAttackAttachment as jest.Mock;
+const useRemovableAlertAttachmentsMock = useRemovableAlertAttachments as jest.Mock;
+const mockedUseKibana = mockUseKibana();
+const removeAttack = jest.fn();
 
 const buildAttachment = (overrides: Record<string, unknown> = {}) => ({
   id: 'so-1',
@@ -94,6 +108,16 @@ describe('AttackTabContent', () => {
     jest.clearAllMocks();
     useAssistantAvailabilityMock.mockReturnValue({ isAssistantEnabled: true });
     mockFindResult([liveAttack]);
+    mockedUseKibana.services.cases.helpers.canUseCases = jest
+      .fn()
+      .mockReturnValue(allCasesPermissions());
+    useRemoveAttackAttachmentMock.mockReturnValue({ mutate: removeAttack, isLoading: false });
+    useRemovableAlertAttachmentsMock.mockReturnValue({
+      isLoading: false,
+      isResolvable: true,
+      attachmentIds: ['so-alert-1', 'so-alert-2'],
+      alertIds: ['alert-1', 'alert-2'],
+    });
   });
 
   it('renders an empty state and fires no query when no attacks are attached', () => {
@@ -164,6 +188,66 @@ describe('AttackTabContent', () => {
     renderTab();
 
     expect(screen.getByTestId('comment-action-show-attack-so-1')).toBeEnabled();
+  });
+
+  describe('removal', () => {
+    const openRemovalPrompt = async () => {
+      await userEvent.click(screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-so-1`));
+    };
+
+    const confirmRemoval = async () => {
+      await userEvent.click(screen.getByText('Remove'));
+    };
+
+    it('exposes the remove attack button on each row', () => {
+      renderTab();
+
+      expect(screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-so-1`)).toBeEnabled();
+    });
+
+    it('removes only the attack attachment when the checkbox is left unchecked', async () => {
+      renderTab();
+
+      await openRemovalPrompt();
+      await confirmRemoval();
+
+      expect(removeAttack).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        attackAttachmentId: 'so-1',
+        alertAttachmentIds: [],
+      });
+    });
+
+    it('removes the resolved alert attachments too when the checkbox is checked', async () => {
+      renderTab();
+
+      await openRemovalPrompt();
+      await userEvent.click(screen.getByTestId(REMOVE_ATTACK_ALERTS_CHECKBOX_TEST_ID));
+      await confirmRemoval();
+
+      expect(removeAttack).toHaveBeenCalledTimes(1);
+      expect(removeAttack).toHaveBeenCalledWith({
+        caseId: 'case-1',
+        attackAttachmentId: 'so-1',
+        alertAttachmentIds: ['so-alert-1', 'so-alert-2'],
+      });
+    });
+
+    it('disables the remove button while a removal is in flight', () => {
+      useRemoveAttackAttachmentMock.mockReturnValue({ mutate: removeAttack, isLoading: true });
+
+      renderTab();
+
+      expect(screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-so-1`)).toBeDisabled();
+    });
+
+    it('still offers removal for an attack that could not be resolved', () => {
+      mockFindResult([]);
+
+      renderTab();
+
+      expect(screen.getByTestId(`${REMOVE_ATTACK_BUTTON_TEST_ID}-so-1`)).toBeEnabled();
+    });
   });
 
   it('falls back to the snapshotted metadata and disables navigation for an unresolved attack', () => {

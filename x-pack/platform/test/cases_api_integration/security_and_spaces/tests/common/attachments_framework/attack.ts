@@ -20,6 +20,7 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   bulkCreateAttachments,
+  bulkDeleteAttachments,
   createCase,
   createComment,
   deleteAllCaseItems,
@@ -164,6 +165,193 @@ export default ({ getService }: FtrProviderContext): void => {
             .flatMap((comment) => toIds(comment.alertId ?? comment.attachmentId))
             .sort()
         ).to.eql([...ALERT_IDS].sort());
+      });
+    });
+
+    describe('remove', () => {
+      // Attack↔alert is many-to-many: an alert can belong to several attacks, and both of those
+      // attacks can be attached to the same case. Removing one attack must not strip the shared
+      // alert from the other.
+      const SHARED_ALERT_ID = 'attack-alert-shared';
+      const ATTACK_A_ONLY_ALERT_ID = 'attack-alert-a-only';
+      const ATTACK_B_ONLY_ALERT_ID = 'attack-alert-b-only';
+      const ATTACK_A_ID = 'attack-doc-a';
+      const ATTACK_B_ID = 'attack-doc-b';
+
+      const attackAlertIds = {
+        [ATTACK_A_ID]: [SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID],
+        [ATTACK_B_ID]: [SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID],
+      };
+
+      const buildAttackAttachment = (attachmentId: string, alertIds: string[]) => ({
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        owner: OWNER,
+        attachmentId,
+        metadata: { ...attackMetadata, alertCount: alertIds.length },
+      });
+
+      const buildAlertAttachment = (alertId: string) => ({
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        owner: OWNER,
+        attachmentId: alertId,
+        metadata: { index: ALERT_INDEX, rule: { id: 'attack-rule-id', name: 'attack rule' } },
+      });
+
+      interface Attachment {
+        id: string;
+        type: string;
+        attachmentId?: string | string[];
+        alertId?: string | string[];
+      }
+
+      /**
+       * The rule the removal prompt applies, restated here so the assertions below are driven by
+       * it rather than by hand-picked ids: an alert attachment goes with the attack only when
+       * every alert it references is currently in that attack *and* is not claimed by another
+       * attack attached to the same case. The rule itself is unit tested in
+       * `resolve_removable_alerts.test.ts`; this exercises the endpoint that carries it out.
+       */
+      const resolveRemovableAlertAttachmentIds = (
+        attachments: Attachment[],
+        attackId: keyof typeof attackAlertIds
+      ): string[] => {
+        const attackSet = new Set(attackAlertIds[attackId]);
+        const claimedByOthers = new Set(
+          Object.entries(attackAlertIds)
+            .filter(([id]) => id !== attackId)
+            .flatMap(([, ids]) => ids)
+        );
+
+        return attachments
+          .filter(({ type }) => type === SECURITY_ALERT_ATTACHMENT_TYPE)
+          .filter(({ attachmentId, alertId }) => {
+            const ids = toIds(alertId ?? attachmentId);
+            return (
+              ids.length > 0 && ids.every((id) => attackSet.has(id) && !claimedByOthers.has(id))
+            );
+          })
+          .map(({ id }) => id);
+      };
+
+      const seedCaseWithTwoAttacks = async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
+
+        const updatedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            buildAttackAttachment(ATTACK_A_ID, attackAlertIds[ATTACK_A_ID]),
+            buildAttackAttachment(ATTACK_B_ID, attackAlertIds[ATTACK_B_ID]),
+            buildAlertAttachment(SHARED_ALERT_ID),
+            buildAlertAttachment(ATTACK_A_ONLY_ALERT_ID),
+            buildAlertAttachment(ATTACK_B_ONLY_ALERT_ID),
+          ] as unknown as BulkCreateAttachmentsRequestV2,
+        });
+
+        const attachments = updatedCase.comments as unknown as Attachment[];
+        const attackAttachmentId = (attackId: string) =>
+          attachments.find(
+            (attachment) =>
+              attachment.type === SECURITY_ATTACK_ATTACHMENT_TYPE &&
+              attachment.attachmentId === attackId
+          )!.id;
+
+        return { caseId: postedCase.id, attachments, attackAttachmentId };
+      };
+
+      const readAttachments = async (caseId: string): Promise<Attachment[]> =>
+        (await getAllComments({ supertest, caseId })) as unknown as Attachment[];
+
+      const alertIdsOf = (attachments: Attachment[]): string[] =>
+        attachments
+          .filter(({ type }) => type !== SECURITY_ATTACK_ATTACHMENT_TYPE)
+          .flatMap(({ alertId, attachmentId }) => toIds(alertId ?? attachmentId))
+          .sort();
+
+      it('removes only the attack attachment when no alerts were opted in', async () => {
+        const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId,
+          attachmentIds: [attackAttachmentId(ATTACK_A_ID)],
+        });
+
+        const remaining = await readAttachments(caseId);
+        expect(
+          remaining
+            .filter(({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE)
+            .map(({ attachmentId }) => attachmentId)
+        ).to.eql([ATTACK_B_ID]);
+        // Every alert stays: the attack was removed on its own.
+        expect(alertIdsOf(remaining)).to.eql(
+          [SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort()
+        );
+      });
+
+      it('leaves an alert shared with another attached attack when removing one attack with its alerts', async () => {
+        const { caseId, attachments, attackAttachmentId } = await seedCaseWithTwoAttacks();
+
+        const removableAlertAttachmentIds = resolveRemovableAlertAttachmentIds(
+          attachments,
+          ATTACK_A_ID
+        );
+        // Only attack A's exclusive alert is removable — the shared one is still claimed by B.
+        expect(removableAlertAttachmentIds.length).to.be(1);
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId,
+          attachmentIds: [attackAttachmentId(ATTACK_A_ID), ...removableAlertAttachmentIds],
+        });
+
+        const remaining = await readAttachments(caseId);
+        expect(
+          remaining
+            .filter(({ type }) => type === SECURITY_ATTACK_ATTACHMENT_TYPE)
+            .map(({ attachmentId }) => attachmentId)
+        ).to.eql([ATTACK_B_ID]);
+        expect(alertIdsOf(remaining)).to.eql([SHARED_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort());
+      });
+
+      it('removes both attacks and every alert when the second attack is removed too', async () => {
+        const { caseId, attachments, attackAttachmentId } = await seedCaseWithTwoAttacks();
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId,
+          attachmentIds: [
+            attackAttachmentId(ATTACK_A_ID),
+            ...resolveRemovableAlertAttachmentIds(attachments, ATTACK_A_ID),
+          ],
+        });
+
+        // Attack A is gone, so the shared alert is no longer claimed by anyone but B.
+        const afterFirstRemoval = await readAttachments(caseId);
+        const remainingAlertAttachmentIds = afterFirstRemoval
+          .filter(({ type }) => type === SECURITY_ALERT_ATTACHMENT_TYPE)
+          .map(({ id }) => id);
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId,
+          attachmentIds: [attackAttachmentId(ATTACK_B_ID), ...remainingAlertAttachmentIds],
+        });
+
+        expect(await readAttachments(caseId)).to.eql([]);
+      });
+
+      it('deletes nothing when one of the ids is not an attachment of the case', async () => {
+        const { caseId, attachments, attackAttachmentId } = await seedCaseWithTwoAttacks();
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId,
+          attachmentIds: [attackAttachmentId(ATTACK_A_ID), 'not-an-attachment-of-this-case'],
+          expectedHttpCode: 404,
+        });
+
+        expect((await readAttachments(caseId)).length).to.be(attachments.length);
       });
     });
 

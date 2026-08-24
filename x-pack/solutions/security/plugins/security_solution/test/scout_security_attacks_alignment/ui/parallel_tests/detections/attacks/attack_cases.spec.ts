@@ -14,6 +14,8 @@
  *    case shows the attack preview card in the Activity log and an Attacks section in the
  *    consolidated Attachments tab.
  *  - The "Show attack details" affordance on the preview card opens the attack flyout.
+ *  - Removing the attack from the Attacks section, with the prompt's "also remove related
+ *    alerts" checkbox ticked, takes the attack and the alerts it brought in off the case.
  *
  * The `security.attack` type is registered only when `attackAttachmentsEnabled` is on; the
  * attacks-alignment Scout config boots with it (see
@@ -96,6 +98,52 @@ spaceTest.describe(
             await expect(attackCases.attackAccordionBadge).toHaveText('1');
             await expect(attackCases.attackTable).toBeVisible();
             await expect(attackCases.attackTableRowTitles).toHaveCount(1);
+          }
+        );
+      }
+    );
+
+    spaceTest(
+      'removes the attack and the alerts it brought in from the Attacks section',
+      async ({ pageObjects }) => {
+        const { detectionsAttackDiscoveryPage, attackCases } = pageObjects;
+        const caseName = 'Scout attack attachment case – removal';
+
+        await spaceTest.step('attach the first attack to a new case', async () => {
+          await detectionsAttackDiscoveryPage.navigateToAttacksPage();
+          await detectionsAttackDiscoveryPage.collapseKpisSection();
+          await expect(detectionsAttackDiscoveryPage.attacksTableSection).toBeVisible();
+
+          await attackCases.openFirstAttackTakeActionMenu();
+          await attackCases.clickAddToNewCase();
+          await attackCases.createCase(caseName, CASE_DESCRIPTION);
+          await attackCases.clickCaseToastLink();
+        });
+
+        await spaceTest.step(
+          'the Attachments tab shows the attack and its constituent alerts',
+          async () => {
+            await attackCases.openAttachmentsTab();
+            await expect(attackCases.attackAccordion).toBeVisible();
+            await expect(attackCases.attackAccordionBadge).toHaveText('1');
+            // The seeded attack carries two constituent alerts, attached alongside it.
+            await expect(attackCases.alertAccordionBadge).toHaveText('2');
+          }
+        );
+
+        await spaceTest.step('remove the attack, taking its related alerts', async () => {
+          await attackCases.openRemoveAttackPrompt();
+          await attackCases.confirmRemoveAttack({ withRelatedAlerts: true });
+        });
+
+        await spaceTest.step(
+          'the case view drops both sections without a manual refresh',
+          async () => {
+            // An accordion only renders while the case still has an attachment of that type, so
+            // both disappearing is the end state for an attack removed with all of its alerts.
+            await expect(attackCases.attackAccordion).toBeHidden();
+            await expect(attackCases.alertAccordion).toBeHidden();
+            await expect(attackCases.activityAttackTitle).toBeHidden();
           }
         );
       }

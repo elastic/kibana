@@ -68,6 +68,7 @@ describe('Attack attachment', () => {
       getLabel: expect.any(Function),
       schema: AttackAttachmentPayloadSchema,
       getCreationActivity: expect.any(Function),
+      getRemovalActivity: expect.any(Function),
       getAttachmentList: expect.any(Function),
     });
   });
@@ -85,6 +86,15 @@ describe('Attack attachment', () => {
     render(<TestProviders>{event}</TestProviders>);
 
     expect(screen.getByText('added an attack')).toBeInTheDocument();
+  });
+
+  it('renders the removal event text correctly', () => {
+    const attackType = getAttackAttachment();
+    const { event } = attackType.getRemovalActivity?.(baseProps) ?? {};
+
+    render(<TestProviders>{event}</TestProviders>);
+
+    expect(screen.getByText('removed an attack')).toBeInTheDocument();
   });
 
   it('renders the preview card lazily from metadata only', async () => {
