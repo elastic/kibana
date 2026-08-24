@@ -18,7 +18,7 @@ const toSecretValidator =
     return validator(value ?? '');
   };
 
-const validKafkaTopicToken = /%\{[^\]]+\](?::[^}]*)?\}/g;
+const validKafkaTopicToken = /%\{\[[^\]]+\](?::[^}]*)?\}/g;
 
 export function validateKafkaHosts(value: string[]) {
   const res: Array<{ message: string; index?: number }> = [];
