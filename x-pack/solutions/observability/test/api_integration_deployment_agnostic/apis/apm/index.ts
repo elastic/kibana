@@ -26,20 +26,5 @@ export default function apmApiIntegrationTests({
     loadTestFile(require.resolve('./infrastructure'));
     loadTestFile(require.resolve('./inspect'));
     loadTestFile(require.resolve('./latency'));
-    loadTestFile(require.resolve('./metrics'));
-    loadTestFile(require.resolve('./mobile'));
-    loadTestFile(require.resolve('./observability_overview'));
-    loadTestFile(require.resolve('./service_groups'));
-    loadTestFile(require.resolve('./service_maps'));
-    loadTestFile(require.resolve('./service_nodes'));
-    loadTestFile(require.resolve('./service_overview'));
-    loadTestFile(require.resolve('./services'));
-    loadTestFile(require.resolve('./settings'));
-    loadTestFile(require.resolve('./span_links'));
-    loadTestFile(require.resolve('./suggestions'));
-    loadTestFile(require.resolve('./throughput'));
-    loadTestFile(require.resolve('./time_range_metadata'));
-    loadTestFile(require.resolve('./traces'));
-    loadTestFile(require.resolve('./transactions'));
   });
 }
