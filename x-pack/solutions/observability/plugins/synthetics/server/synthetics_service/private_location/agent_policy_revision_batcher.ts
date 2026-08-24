@@ -21,8 +21,17 @@ interface PendingPolicyRevision {
   policyId: string;
   running: boolean;
   timer?: ReturnType<typeof setTimeout>;
+  /** Resolves when the in-progress bump settles; used to await a drain. */
+  inFlight?: Promise<void>;
   waiters: Waiter[];
 }
+
+/**
+ * Bounds {@link AgentPolicyRevisionBatcher.flushPending}. A drain pass can
+ * enqueue a follow-up batch, so we loop — but never indefinitely, since a
+ * shutdown flush must not outlive core's stop timeout.
+ */
+const MAX_DRAIN_PASSES = 10;
 
 interface AgentPolicyRevisionBatcherDependencies {
   logger: Logger;
@@ -60,22 +69,59 @@ export class AgentPolicyRevisionBatcher {
       pendingPolicyRevision.waiters.push({ resolve, reject });
     });
 
-    this.scheduleFlush(policyId, pendingPolicyRevision);
+    this.scheduleFlush(pendingPolicyRevision);
     return promise;
   }
 
-  private scheduleFlush(key: string, pending: PendingPolicyRevision): void {
+  /**
+   * Runs every pending batch now instead of waiting out its debounce window.
+   *
+   * Package policies are written with `bumpRevision: false` on the assumption
+   * that this batcher will bump shortly after, so a pending batch dropped at
+   * shutdown leaves those policies attached to an un-bumped agent policy —
+   * Fleet never redeploys and the monitors silently never reach an agent. Call
+   * this from the plugin's `stop()` so a graceful shutdown still deploys them.
+   * An ungraceful kill (SIGKILL/OOM) still cannot be covered here; only a later
+   * write to the same agent policy or a rebalance pass will reconcile that.
+   */
+  public async flushPending(): Promise<void> {
+    for (let pass = 0; pass < MAX_DRAIN_PASSES && this.pendingByPolicy.size > 0; pass += 1) {
+      const draining: Array<Promise<void>> = [];
+
+      for (const pending of [...this.pendingByPolicy.values()]) {
+        if (pending.timer) {
+          clearTimeout(pending.timer);
+          pending.timer = undefined;
+        }
+        if (!pending.running) {
+          pending.inFlight = this.flush(pending);
+        }
+        if (pending.inFlight) {
+          draining.push(pending.inFlight);
+        }
+      }
+
+      if (draining.length === 0) {
+        return;
+      }
+      // flush() settles its own waiters; allSettled keeps one failed batch from
+      // abandoning the rest of the drain.
+      await Promise.allSettled(draining);
+    }
+  }
+
+  private scheduleFlush(pending: PendingPolicyRevision): void {
     if (pending.running || pending.timer) {
       return;
     }
 
     pending.timer = setTimeout(() => {
       pending.timer = undefined;
-      void this.flush(key, pending);
+      pending.inFlight = this.flush(pending);
     }, AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
   }
 
-  private async flush(key: string, pending: PendingPolicyRevision): Promise<void> {
+  private async flush(pending: PendingPolicyRevision): Promise<void> {
     pending.running = true;
     const waiters = pending.waiters.splice(0);
 
@@ -86,10 +132,11 @@ export class AgentPolicyRevisionBatcher {
       waiters.forEach(({ reject }) => reject(error as Error));
     } finally {
       pending.running = false;
+      pending.inFlight = undefined;
       if (pending.waiters.length > 0) {
-        this.scheduleFlush(key, pending);
+        this.scheduleFlush(pending);
       } else {
-        this.pendingByPolicy.delete(key);
+        this.pendingByPolicy.delete(pending.policyId);
       }
     }
   }

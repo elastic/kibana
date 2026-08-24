@@ -32,26 +32,108 @@ interface PackagePolicyWithAgentPolicyIds {
   condition?: string | null;
 }
 
+const getSpaceSoClientFor = (server: SyntheticsServerSetup, spaceId: string) =>
+  server.coreStart.savedObjects.getUnsafeInternalClient().asScopedToNamespace(spaceId);
+
+const getInternalEsClientFor = (server: SyntheticsServerSetup) =>
+  server.coreStart.elasticsearch.client.asInternalUser;
+
+/**
+ * Bumps one agent policy's revision, scoping the write to a space the agent
+ * policy actually lives in.
+ *
+ * A batch coalesces writes for the same agent policy across spaces, so no
+ * requesting client is the right one to bump with: whichever scheduled first
+ * would pick the namespace for every coalesced write. That client is not
+ * guaranteed to resolve the agent policy — {@link PackagePolicyService.bulkUpdateInSpace}
+ * scopes to each package policy's own recorded space, which can diverge from
+ * its agent policy's spaces — and a namespace miss throws a non-conflict (404)
+ * error, which is not retried and rejects every waiter in the batch, failing
+ * monitor writes whose package policies already persisted. So resolve the space
+ * from the agent policy itself: `spaceId: ALL_SPACES_ID` on an unscoped client
+ * finds it wherever it lives (agent policies are `namespaceType: 'multiple'`,
+ * so the write itself still needs a single concrete namespace).
+ */
+const bumpAgentPolicyRevision = async (
+  server: SyntheticsServerSetup,
+  policyId: string
+): Promise<void> => {
+  const unscopedSoClient = server.coreStart.savedObjects.getUnsafeInternalClient();
+  const [agentPolicy] = await server.fleet.agentPolicyService.getByIds(
+    unscopedSoClient,
+    [{ id: policyId, spaceId: ALL_SPACES_ID }],
+    { ignoreMissing: true, fields: ['name'] }
+  );
+  const spaceIds = agentPolicy?.space_ids ?? [];
+  // Prefer the default space when the policy is there (or is all-spaces): it
+  // matches the create/edit routing fallback, and an all-spaces policy cannot
+  // be written through a literal `*` namespace.
+  const bumpSpaceId =
+    spaceIds.length === 0 || spaceIds.includes(DEFAULT_SPACE_ID) || spaceIds.includes(ALL_SPACES_ID)
+      ? DEFAULT_SPACE_ID
+      : spaceIds[0];
+
+  await server.fleet.agentPolicyService.bumpRevision(
+    getSpaceSoClientFor(server, bumpSpaceId),
+    getInternalEsClientFor(server),
+    policyId,
+    { asyncDeploy: true }
+  );
+};
+
+/**
+ * One batcher per server, not per {@link PackagePolicyService}.
+ *
+ * Coalescing only works among writes that share a batcher, and instances are
+ * constructed ad hoc (e.g. the monitor-create rollback in `add_monitor_api`),
+ * so a per-instance batcher would let those writes race the main CRUD path on
+ * the same agent policy — the version-conflict storm this batching exists to
+ * prevent. Keyed on the server object rather than a module singleton so tests
+ * (and any future multi-server setup) stay isolated, and weakly so a discarded
+ * server does not pin its batcher.
+ */
+const revisionBatchersByServer = new WeakMap<SyntheticsServerSetup, AgentPolicyRevisionBatcher>();
+
+const getRevisionBatcher = (server: SyntheticsServerSetup): AgentPolicyRevisionBatcher => {
+  const existing = revisionBatchersByServer.get(server);
+  if (existing) {
+    return existing;
+  }
+
+  const batcher = new AgentPolicyRevisionBatcher({
+    logger: server.logger,
+    bumpRevision: (policyId) => bumpAgentPolicyRevision(server, policyId),
+  });
+  revisionBatchersByServer.set(server, batcher);
+  return batcher;
+};
+
+/**
+ * Runs any batched agent-policy revision bumps still waiting out their debounce
+ * window. Call from the plugin's `stop()`: package policies are written with
+ * `bumpRevision: false`, so a batch dropped at shutdown leaves them undeployed.
+ */
+export const flushPendingAgentPolicyRevisionBumps = async (
+  server: SyntheticsServerSetup
+): Promise<void> => {
+  await revisionBatchersByServer.get(server)?.flushPending();
+};
+
 export class PackagePolicyService {
   private readonly server: SyntheticsServerSetup;
   private readonly revisionBatcher: AgentPolicyRevisionBatcher;
 
   constructor(_server: SyntheticsServerSetup) {
     this.server = _server;
-    this.revisionBatcher = new AgentPolicyRevisionBatcher({
-      logger: this.server.logger,
-      bumpRevision: (policyId) => this.bumpAgentPolicyRevision(policyId),
-    });
+    this.revisionBatcher = getRevisionBatcher(_server);
   }
 
   private getSpaceSoClient(spaceId: string) {
-    return this.server.coreStart.savedObjects
-      .getUnsafeInternalClient()
-      .asScopedToNamespace(spaceId);
+    return getSpaceSoClientFor(this.server, spaceId);
   }
 
   private getInternalEsClient() {
-    return this.server.coreStart.elasticsearch.client.asInternalUser;
+    return getInternalEsClientFor(this.server);
   }
 
   async buildPackagePolicyFromPackage({ spaceId }: { spaceId: string }) {
@@ -321,48 +403,6 @@ export class PackagePolicyService {
     });
 
     return { batched, immediate };
-  }
-
-  /**
-   * Bumps one agent policy's revision, scoping the write to a space the agent
-   * policy actually lives in.
-   *
-   * A batch coalesces writes for the same agent policy across spaces, so no
-   * requesting client is the right one to bump with: whichever scheduled first
-   * would pick the namespace for every coalesced write. That client is not
-   * guaranteed to resolve the agent policy — {@link bulkUpdateInSpace} scopes to
-   * each package policy's own recorded space, which can diverge from its agent
-   * policy's spaces — and a namespace miss throws a non-conflict (404) error,
-   * which is not retried and rejects every waiter in the batch, failing monitor
-   * writes whose package policies already persisted. So resolve the space from
-   * the agent policy itself: `spaceId: ALL_SPACES_ID` on an unscoped client
-   * finds it wherever it lives (agent policies are `namespaceType: 'multiple'`,
-   * so the write itself still needs a single concrete namespace).
-   */
-  private async bumpAgentPolicyRevision(policyId: string): Promise<void> {
-    const unscopedSoClient = this.server.coreStart.savedObjects.getUnsafeInternalClient();
-    const [agentPolicy] = await this.server.fleet.agentPolicyService.getByIds(
-      unscopedSoClient,
-      [{ id: policyId, spaceId: ALL_SPACES_ID }],
-      { ignoreMissing: true, fields: ['name'] }
-    );
-    const spaceIds = agentPolicy?.space_ids ?? [];
-    // Prefer the default space when the policy is there (or is all-spaces): it
-    // matches the create/edit routing fallback, and an all-spaces policy cannot
-    // be written through a literal `*` namespace.
-    const bumpSpaceId =
-      spaceIds.length === 0 ||
-      spaceIds.includes(DEFAULT_SPACE_ID) ||
-      spaceIds.includes(ALL_SPACES_ID)
-        ? DEFAULT_SPACE_ID
-        : spaceIds[0];
-
-    await this.server.fleet.agentPolicyService.bumpRevision(
-      this.getSpaceSoClient(bumpSpaceId),
-      this.getInternalEsClient(),
-      policyId,
-      { asyncDeploy: true }
-    );
   }
 
   private async bulkCreateWithBatchedRevision(

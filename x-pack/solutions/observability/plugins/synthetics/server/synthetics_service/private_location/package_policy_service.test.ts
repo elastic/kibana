@@ -10,7 +10,10 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AgentPolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
-import { PackagePolicyService } from './package_policy_service';
+import {
+  PackagePolicyService,
+  flushPendingAgentPolicyRevisionBumps,
+} from './package_policy_service';
 import { AGENT_POLICY_REVISION_BATCH_WINDOW_MS } from './agent_policy_revision_batcher';
 import type { SyntheticsServerSetup } from '../../types';
 
@@ -260,6 +263,95 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
       expect.objectContaining({ bumpRevision: false })
     );
     expect(bumpRevision).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('PackagePolicyService revision batcher sharing', () => {
+  it('coalesces writes made through separate service instances on one server', async () => {
+    const { server, fleetBulkCreate, bumpRevision } = makeServer();
+    fleetBulkCreate.mockImplementation(async (_client, _esClient, policies) => ({
+      created: policies,
+      failed: [],
+    }));
+
+    // Callers construct PackagePolicyService ad hoc (e.g. the monitor-create
+    // rollback in add_monitor_api), so a per-instance batcher would let these
+    // race each other on the same agent policy instead of sharing one bump.
+    const requests = Promise.all([
+      new PackagePolicyService(server).bulkCreate({
+        newPolicies: [policy({ id: 'monitor-1-policyId', condition: "agent.id == 'agent-1'" })],
+        spaceId: DEFAULT_SPACE_ID,
+      }),
+      new PackagePolicyService(server).bulkCreate({
+        newPolicies: [policy({ id: 'monitor-2-policyId', condition: "agent.id == 'agent-2'" })],
+        spaceId: DEFAULT_SPACE_ID,
+      }),
+    ]);
+    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await requests;
+
+    expect(fleetBulkCreate).toHaveBeenCalledTimes(2);
+    expect(bumpRevision).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps separate servers on separate batchers', async () => {
+    const first = makeServer();
+    const second = makeServer();
+    for (const { fleetBulkCreate } of [first, second]) {
+      fleetBulkCreate.mockImplementation(async (_client, _esClient, policies) => ({
+        created: policies,
+        failed: [],
+      }));
+    }
+
+    const requests = Promise.all([
+      new PackagePolicyService(first.server).bulkCreate({
+        newPolicies: [policy({ condition: "agent.id == 'agent-1'" })],
+        spaceId: DEFAULT_SPACE_ID,
+      }),
+      new PackagePolicyService(second.server).bulkCreate({
+        newPolicies: [policy({ condition: "agent.id == 'agent-1'" })],
+        spaceId: DEFAULT_SPACE_ID,
+      }),
+    ]);
+    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await requests;
+
+    expect(first.bumpRevision).toHaveBeenCalledTimes(1);
+    expect(second.bumpRevision).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('PackagePolicyService.flushPendingAgentPolicyRevisionBumps', () => {
+  it('bumps a batch still inside its debounce window', async () => {
+    const { server, fleetBulkCreate, bumpRevision } = makeServer();
+    fleetBulkCreate.mockImplementation(async (_client, _esClient, policies) => ({
+      created: policies,
+      failed: [],
+    }));
+
+    const request = new PackagePolicyService(server).bulkCreate({
+      newPolicies: [policy({ condition: "agent.id == 'agent-1'" })],
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    // Let the package-policy write settle so the bump is queued, but stay
+    // inside the debounce window so the timer has not fired.
+    await jest.advanceTimersByTimeAsync(0);
+    expect(bumpRevision).not.toHaveBeenCalled();
+
+    // Simulates plugin stop() landing before the debounce window elapses.
+    await flushPendingAgentPolicyRevisionBumps(server);
+    await request;
+
+    expect(bumpRevision).toHaveBeenCalledTimes(1);
+  });
+
+  it('is a no-op for a server that never scheduled a bump', async () => {
+    const { server, bumpRevision } = makeServer();
+
+    await flushPendingAgentPolicyRevisionBumps(server);
+
+    expect(bumpRevision).not.toHaveBeenCalled();
   });
 });
 
