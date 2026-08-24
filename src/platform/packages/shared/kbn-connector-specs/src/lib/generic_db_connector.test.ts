@@ -67,8 +67,12 @@ describe('escapeLikePattern', () => {
     expect(escapeLikePattern('a!b')).toBe('a!!b');
   });
 
-  it('escapes single quotes for safe embedding in a SQL string literal', () => {
+  it('escapes single quotes by default for text-protocol SQL string literals', () => {
     expect(escapeLikePattern("o'brien")).toBe("o''brien");
+  });
+
+  it('leaves single quotes unmodified when escapeSingleQuotes is false', () => {
+    expect(escapeLikePattern("o'brien", false)).toBe("o'brien");
   });
 
   it('leaves plain text untouched', () => {

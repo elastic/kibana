@@ -21,17 +21,6 @@ const createMockPool = (): MockPool => ({
   end: jest.fn().mockResolvedValue(undefined),
 });
 
-let mockPoolsByCall: MockPool[] = [];
-const mockCreatePool = jest.fn(() => {
-  const pool = createMockPool();
-  mockPoolsByCall.push(pool);
-  return pool;
-}) as jest.Mock<MockPool, unknown[]>;
-
-jest.mock('mysql2/promise', () => ({
-  createPool: (...args: unknown[]) => mockCreatePool(...args),
-}));
-
 const makeConfig = (overrides: Record<string, unknown> = {}) => ({
   host: 'db.example.com',
   port: 3306,
@@ -39,33 +28,29 @@ const makeConfig = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const makeSecrets = (overrides: Record<string, unknown> = {}) => ({
-  username: 'tester',
-  password: 'secret',
-  ...overrides,
-});
-
 const makeContext = (
   config: Record<string, unknown>,
-  secrets: Record<string, unknown> = makeSecrets()
+  pool: MockPool = createMockPool()
 ): ActionContext =>
   ({
     config,
-    secrets,
     log: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
+    getClient: jest.fn().mockResolvedValue(pool),
   } as unknown as ActionContext);
 
-describe('MysqlConnector', () => {
-  // The connector keeps a module-level connection pool cache, so each test
-  // gets a fresh module instance to avoid pool state leaking across tests.
-  let MysqlConnector: ConnectorSpec;
+// Convenience wrapper when pool behaviour needs to be inspected in the test.
+const makeContextWithPool = (
+  config: Record<string, unknown> = makeConfig()
+): { ctx: ActionContext; pool: MockPool } => {
+  const pool = createMockPool();
+  return { ctx: makeContext(config, pool), pool };
+};
 
+describe('MysqlConnector', () => {
+  let MysqlConnector: ConnectorSpec;
   let configSchema: NonNullable<ConnectorSpec['schema']>;
 
   beforeEach(() => {
-    jest.resetModules();
-    mockCreatePool.mockClear();
-    mockPoolsByCall = [];
     ({ MysqlConnector } = require('./mysql'));
     if (!MysqlConnector.schema) {
       throw new Error('MySQL spec is missing a config schema');
@@ -101,9 +86,13 @@ describe('MysqlConnector', () => {
       expect(result.success).toBe(true);
     });
 
-    it('coerces a string port into a number', () => {
-      const result = configSchema.parse(makeConfig({ port: '3306' }));
+    it('accepts a numeric port', () => {
+      const result = configSchema.parse(makeConfig({ port: 3306 }));
       expect(result.port).toBe(3306);
+    });
+
+    it('rejects an out-of-range port', () => {
+      expect(configSchema.safeParse(makeConfig({ port: 99999 })).success).toBe(false);
     });
 
     it.each(['host', 'port', 'database'])('rejects a config missing %s', (field) => {
@@ -113,92 +102,92 @@ describe('MysqlConnector', () => {
     });
   });
 
-  describe('tool exposure (isTool flags)', () => {
+  describe('tool exposure and scope', () => {
     it('marks every action as an agent-facing tool', () => {
       for (const action of Object.values(MysqlConnector.actions)) {
         expect(action.isTool).toBe(true);
       }
     });
+
+    it('marks all discovery/query actions as read scope', () => {
+      const readActions = ['query', 'listDatabases', 'listTables', 'describeTable', 'searchRows'];
+      for (const name of readActions) {
+        expect(MysqlConnector.actions[name].scope).toBe('read');
+      }
+    });
+
+    it('marks executeSql as destroy scope', () => {
+      expect(MysqlConnector.actions.executeSql.scope).toBe('destroy');
+    });
   });
 
   describe('query action', () => {
-    it('wraps the statement in a bounded outer SELECT with the default maxRows', async () => {
-      const ctx = makeContext(makeConfig());
+    it('wraps SELECT in a bounded outer query with the default maxRows', async () => {
+      const { ctx, pool } = makeContextWithPool();
 
       await MysqlConnector.actions.query.handler(ctx, { sql: 'SELECT * FROM users' });
 
-      const pool = mockPoolsByCall[0];
       expect(pool.execute).toHaveBeenCalledWith(
-        'SELECT * FROM (\nSELECT * FROM users\n) AS _q LIMIT ?',
-        [100]
+        'SELECT * FROM (\nSELECT * FROM users\n) AS _q LIMIT 100'
       );
     });
 
     it('respects a custom maxRows', async () => {
-      const ctx = makeContext(makeConfig());
+      const { ctx, pool } = makeContextWithPool();
 
-      await MysqlConnector.actions.query.handler(ctx, {
-        sql: 'SELECT * FROM users',
-        maxRows: 5,
-      });
+      await MysqlConnector.actions.query.handler(ctx, { sql: 'SELECT * FROM users', maxRows: 5 });
 
-      const pool = mockPoolsByCall[0];
-      expect(pool.execute).toHaveBeenCalledWith(expect.any(String), [5]);
+      expect(pool.execute).toHaveBeenCalledWith(expect.stringContaining('LIMIT 5'));
     });
 
-    it('rejects a write statement without opening a connection', async () => {
-      const ctx = makeContext(makeConfig());
+    it('rejects a write statement before leasing a connection', async () => {
+      const { ctx } = makeContextWithPool();
 
       await expect(
         MysqlConnector.actions.query.handler(ctx, { sql: 'DROP TABLE users' })
       ).rejects.toThrow(/read-only/i);
-      expect(mockCreatePool).not.toHaveBeenCalled();
+      expect(ctx.getClient).not.toHaveBeenCalled();
     });
 
-    it('rejects multi-statement input', async () => {
-      const ctx = makeContext(makeConfig());
+    it('rejects multi-statement input before leasing a connection', async () => {
+      const { ctx } = makeContextWithPool();
 
       await expect(
-        MysqlConnector.actions.query.handler(ctx, {
-          sql: 'SELECT 1; DROP TABLE users',
-        })
+        MysqlConnector.actions.query.handler(ctx, { sql: 'SELECT 1; DROP TABLE users' })
       ).rejects.toThrow(/multi-statement/i);
-      expect(mockCreatePool).not.toHaveBeenCalled();
+      expect(ctx.getClient).not.toHaveBeenCalled();
     });
   });
 
   describe('listDatabases action', () => {
     it('runs SHOW DATABASES', async () => {
-      const ctx = makeContext(makeConfig());
+      const { ctx, pool } = makeContextWithPool();
 
       await MysqlConnector.actions.listDatabases.handler(ctx, {});
 
-      const pool = mockPoolsByCall[0];
-      expect(pool.query).toHaveBeenCalledWith('SHOW DATABASES');
+      expect(pool.execute).toHaveBeenCalledWith('SHOW DATABASES');
     });
   });
 
   describe('listTables action', () => {
     it('quotes the target database and defaults to the configured database', async () => {
-      const ctx = makeContext(makeConfig({ database: 'my_db' }));
+      const { ctx, pool } = makeContextWithPool(makeConfig({ database: 'my_db' }));
 
       await MysqlConnector.actions.listTables.handler(ctx, {});
 
-      const pool = mockPoolsByCall[0];
-      expect(pool.query).toHaveBeenCalledWith('SHOW TABLES FROM `my_db`');
+      expect(pool.execute).toHaveBeenCalledWith('SHOW TABLES FROM `my_db`');
     });
 
     it('uses the explicitly provided database over the configured default', async () => {
-      const ctx = makeContext(makeConfig({ database: 'default_db' }));
+      const { ctx, pool } = makeContextWithPool(makeConfig({ database: 'default_db' }));
 
       await MysqlConnector.actions.listTables.handler(ctx, { database: 'other_db' });
 
-      const pool = mockPoolsByCall[0];
-      expect(pool.query).toHaveBeenCalledWith('SHOW TABLES FROM `other_db`');
+      expect(pool.execute).toHaveBeenCalledWith('SHOW TABLES FROM `other_db`');
     });
 
     it('throws when no database is provided or configured', async () => {
-      const ctx = makeContext(makeConfig({ database: undefined }));
+      const { ctx } = makeContextWithPool(makeConfig({ database: undefined }));
 
       await expect(MysqlConnector.actions.listTables.handler(ctx, {})).rejects.toThrow(
         /no database specified/i
@@ -208,27 +197,25 @@ describe('MysqlConnector', () => {
 
   describe('describeTable action', () => {
     it('quotes both the database and table name', async () => {
-      const ctx = makeContext(makeConfig({ database: 'my_db' }));
+      const { ctx, pool } = makeContextWithPool(makeConfig({ database: 'my_db' }));
 
       await MysqlConnector.actions.describeTable.handler(ctx, { table: 'orders' });
 
-      const pool = mockPoolsByCall[0];
-      expect(pool.query).toHaveBeenCalledWith('DESCRIBE `my_db`.`orders`');
+      expect(pool.execute).toHaveBeenCalledWith('DESCRIBE `my_db`.`orders`');
     });
 
     it('escapes backticks embedded in an identifier', async () => {
-      const ctx = makeContext(makeConfig({ database: 'my_db' }));
+      const { ctx, pool } = makeContextWithPool(makeConfig({ database: 'my_db' }));
 
       await MysqlConnector.actions.describeTable.handler(ctx, { table: 'weird`table' });
 
-      const pool = mockPoolsByCall[0];
-      expect(pool.query).toHaveBeenCalledWith('DESCRIBE `my_db`.`weird``table`');
+      expect(pool.execute).toHaveBeenCalledWith('DESCRIBE `my_db`.`weird``table`');
     });
   });
 
   describe('searchRows action', () => {
     it('builds an OR-joined LIKE clause across the requested columns', async () => {
-      const ctx = makeContext(makeConfig({ database: 'my_db' }));
+      const { ctx, pool } = makeContextWithPool(makeConfig({ database: 'my_db' }));
 
       await MysqlConnector.actions.searchRows.handler(ctx, {
         table: 'users',
@@ -236,15 +223,14 @@ describe('MysqlConnector', () => {
         columns: ['name', 'email'],
       });
 
-      const pool = mockPoolsByCall[0];
       expect(pool.execute).toHaveBeenCalledWith(
-        "SELECT * FROM `my_db`.`users` WHERE `name` LIKE ? ESCAPE '!' OR `email` LIKE ? ESCAPE '!' LIMIT ?",
-        ['%jane%', '%jane%', 100]
+        "SELECT * FROM `my_db`.`users` WHERE `name` LIKE ? ESCAPE '!' OR `email` LIKE ? ESCAPE '!' LIMIT 100",
+        ['%jane%', '%jane%']
       );
     });
 
     it('escapes SQL LIKE wildcards in the search term', async () => {
-      const ctx = makeContext(makeConfig({ database: 'my_db' }));
+      const { ctx, pool } = makeContextWithPool(makeConfig({ database: 'my_db' }));
 
       await MysqlConnector.actions.searchRows.handler(ctx, {
         table: 'users',
@@ -252,13 +238,25 @@ describe('MysqlConnector', () => {
         columns: ['notes'],
       });
 
-      const pool = mockPoolsByCall[0];
       const [, params] = pool.execute.mock.calls[0];
       expect(params[0]).toBe('%50!%!_off%');
     });
 
+    it('passes single quotes in the search term unmodified — the driver handles them', async () => {
+      const { ctx, pool } = makeContextWithPool(makeConfig({ database: 'my_db' }));
+
+      await MysqlConnector.actions.searchRows.handler(ctx, {
+        table: 'users',
+        searchTerm: "o'brien",
+        columns: ['name'],
+      });
+
+      const [, params] = pool.execute.mock.calls[0];
+      expect(params[0]).toBe("%o'brien%");
+    });
+
     it('respects a custom maxRows', async () => {
-      const ctx = makeContext(makeConfig({ database: 'my_db' }));
+      const { ctx, pool } = makeContextWithPool(makeConfig({ database: 'my_db' }));
 
       await MysqlConnector.actions.searchRows.handler(ctx, {
         table: 'users',
@@ -267,78 +265,49 @@ describe('MysqlConnector', () => {
         maxRows: 25,
       });
 
-      const pool = mockPoolsByCall[0];
-      const [, params] = pool.execute.mock.calls[0];
-      expect(params[params.length - 1]).toBe(25);
+      const [sql] = pool.execute.mock.calls[0];
+      expect(sql).toContain('LIMIT 25');
+    });
+  });
+
+  describe('executeSql action', () => {
+    it('runs the SQL directly without any read-only guard', async () => {
+      const { ctx, pool } = makeContextWithPool();
+
+      await MysqlConnector.actions.executeSql.handler(ctx, {
+        sql: 'DROP TABLE users',
+      });
+
+      expect(pool.execute).toHaveBeenCalledWith('DROP TABLE users');
+    });
+
+    it('runs INSERT statements', async () => {
+      const { ctx, pool } = makeContextWithPool();
+
+      await MysqlConnector.actions.executeSql.handler(ctx, {
+        sql: "INSERT INTO users (name) VALUES ('alice')",
+      });
+
+      expect(pool.execute).toHaveBeenCalledWith("INSERT INTO users (name) VALUES ('alice')");
     });
   });
 
   describe('test handler', () => {
-    it('reports success when the connection works', async () => {
-      const ctx = makeContext(makeConfig());
+    it('returns a success message when the connection works', async () => {
+      const { ctx, pool } = makeContextWithPool();
 
       const result = await MysqlConnector.test?.handler(ctx);
 
-      expect(result?.ok).toBe(true);
-      expect(mockPoolsByCall[0].query).toHaveBeenCalledWith('SELECT 1');
+      expect(pool.execute).toHaveBeenCalledWith('SELECT 1');
+      expect(result?.message).toMatch(/connected/i);
     });
 
-    it('reports failure with the underlying error message', async () => {
-      const ctx = makeContext(makeConfig());
-      mockCreatePool.mockImplementationOnce(() => {
-        const pool = createMockPool();
-        pool.query.mockRejectedValue(new Error('connect ECONNREFUSED'));
-        mockPoolsByCall.push(pool);
-        return pool;
-      });
+    it('throws when the connection fails', async () => {
+      const pool = createMockPool();
+      pool.execute.mockRejectedValue(new Error('connect ECONNREFUSED'));
+      const ctx = makeContext(makeConfig(), pool);
 
-      const result = await MysqlConnector.test?.handler(ctx);
-
-      expect(result?.ok).toBe(false);
-      expect(result?.message).toBe('connect ECONNREFUSED');
-    });
-  });
-
-  describe('connection pooling', () => {
-    it('reuses a cached pool for repeated calls with identical config and secrets', async () => {
-      const config = makeConfig();
-      const secrets = makeSecrets();
-      const ctx1 = makeContext(config, secrets);
-      const ctx2 = makeContext(config, secrets);
-
-      await MysqlConnector.actions.listDatabases.handler(ctx1, {});
-      await MysqlConnector.actions.listDatabases.handler(ctx2, {});
-
-      expect(mockCreatePool).toHaveBeenCalledTimes(1);
-    });
-
-    it('opens a new pool when credentials differ even for the same host', async () => {
-      const ctx1 = makeContext(makeConfig(), makeSecrets({ password: 'secret-a' }));
-      const ctx2 = makeContext(makeConfig(), makeSecrets({ password: 'secret-b' }));
-
-      await MysqlConnector.actions.listDatabases.handler(ctx1, {});
-      await MysqlConnector.actions.listDatabases.handler(ctx2, {});
-
-      expect(mockCreatePool).toHaveBeenCalledTimes(2);
-    });
-
-    it('evicts the oldest pool once the cache exceeds its capacity', async () => {
-      // The pool cache holds at most 10 entries; the 11th distinct config
-      // must evict the first (oldest) one and close it.
-      const contexts = Array.from({ length: 11 }, (_, i) =>
-        makeContext(makeConfig({ host: `db-${i}.example.com` }))
-      );
-
-      for (const ctx of contexts) {
-        await MysqlConnector.actions.listDatabases.handler(ctx, {});
-      }
-
-      expect(mockCreatePool).toHaveBeenCalledTimes(11);
-      expect(mockPoolsByCall[0].end).toHaveBeenCalledTimes(1);
-      // Only the oldest pool is evicted — the rest stay open.
-      for (const pool of mockPoolsByCall.slice(1)) {
-        expect(pool.end).not.toHaveBeenCalled();
-      }
+      await expect(MysqlConnector.test?.handler(ctx)).rejects.toThrow('connect ECONNREFUSED');
     });
   });
 });

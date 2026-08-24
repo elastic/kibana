@@ -103,3 +103,16 @@ export const SearchRowsInputSchema = lazySchema(() =>
   })
 );
 export type SearchRowsInput = z.infer<typeof SearchRowsInputSchema>;
+
+export const ExecuteSqlInputSchema = lazySchema(() =>
+  z.object({
+    sql: z
+      .string()
+      .min(1)
+      .max(10000)
+      .describe(
+        'SQL statement to execute. Any statement type is permitted (SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, etc.). Use with caution — this action is unrestricted.'
+      ),
+  })
+);
+export type ExecuteSqlInput = z.infer<typeof ExecuteSqlInputSchema>;

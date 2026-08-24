@@ -27,9 +27,15 @@ export const assertReadOnly = (sql: string): void => {
 };
 
 // LIKE escape character is '!'. Safe regardless of NO_BACKSLASH_ESCAPES.
-export const escapeLikePattern = (value: string): string =>
-  value
+// escapeSingleQuotes: true (default) for text-protocol drivers that embed the pattern
+// in a SQL string literal; false for prepared-statement drivers (binary protocol).
+export const escapeLikePattern = (value: string, escapeSingleQuotes = true): string => {
+  let result = value
     .replace(/!/g, '!!') // escape char itself first
     .replace(/%/g, '!%') // literal percent
-    .replace(/_/g, '!_') // literal underscore
-    .replace(/'/g, "''"); // single-quote within SQL string literal
+    .replace(/_/g, '!_'); // literal underscore
+  if (escapeSingleQuotes) {
+    result = result.replace(/'/g, "''");
+  }
+  return result;
+};

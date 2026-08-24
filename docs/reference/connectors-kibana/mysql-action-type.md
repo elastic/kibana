@@ -1,7 +1,7 @@
 ---
 navigation_title: "MySQL"
 type: reference
-description: "Use the MySQL connector to run read-only SQL queries and discover databases, tables, and schema against a MySQL database."
+description: "Use the MySQL connector to query, explore schema, and execute SQL against a MySQL database."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -66,6 +66,10 @@ Search Rows
     - **maxRows** (optional): Maximum number of rows to return (1-1000, default: 100).
     - **database** (optional): The database name. Uses the configured default if omitted.
 
+Execute SQL {applies_to}`stack: preview 9.6`
+:   Execute any SQL statement against the MySQL database. No restrictions — `INSERT`, `UPDATE`, `DELETE`, `DROP`, and DDL are all permitted. Use only when the workflow explicitly requires a write or destructive operation. Prefer **Query** for read-only access.
+    - **sql** (required): The SQL statement to execute.
+
 
 ## Requirements [mysql-requirements]
 
@@ -92,7 +96,7 @@ GRANT SELECT ON my_database.* TO 'kibana_reader'@'%';
 FLUSH PRIVILEGES;
 ```
 
-The connector also enforces read-only access at the application level by rejecting any SQL that does not begin with a read-only keyword (`SELECT`, `SHOW`, `DESCRIBE`, `EXPLAIN`, or `WITH`) and by blocking multi-statement input. Using a least-privilege database user adds a second, independent layer of enforcement.
+The `query` action enforces read-only access at the application level by rejecting any SQL that does not begin with a read-only keyword (`SELECT`, `SHOW`, `DESCRIBE`, `EXPLAIN`, or `WITH`) and by blocking multi-statement input. Using a least-privilege database user adds a second, independent layer of enforcement. Note: the `executeSql` action bypasses these restrictions and can run any statement — do not grant write privileges unless your use case requires them.
 
 You can further restrict the user to connections from your Kibana host's IP address:
 

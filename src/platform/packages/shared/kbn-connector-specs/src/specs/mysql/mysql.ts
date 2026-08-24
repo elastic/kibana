@@ -11,25 +11,23 @@
  * MySQL Connector
  *
  * Connects directly to a MySQL database over the native MySQL wire protocol
- * (via `mysql2`) rather than HTTP — there is no vendor REST/MCP API to wrap.
- * `ctx.client` (an `AxiosInstance`) is never used; a `mysql2` connection pool
- * is opened directly from `ctx.config` / `ctx.secrets` instead.
+ * (via `mysql2`) rather than HTTP. The connection pool is managed by the
+ * framework's client lease pool via `ctx.getClient('mysql')`, which handles
+ * lifecycle (eviction on connector update/delete, TTL-based eviction) and
+ * enforces `xpack.actions.allowedHosts` before the first connection.
  *
  * Username and password are declared under `auth: { types: ['basic'] }`
- * rather than `schema`, even though nothing here makes an HTTP request.
- * `schema` fields are stored unencrypted, so credentials must go through
- * `auth` to be encrypted at rest — `basic`'s username/password shape is a
- * convenient fit. `configure()` (which sets `axiosInstance.defaults.auth`)
- * runs but is unused; the handlers read the credentials from `ctx.secrets`.
+ * rather than `schema` so they are encrypted at rest. The `MysqlClientTypeSpec`
+ * in `lib/clients/mysql.ts` decodes them from the Authorization header that
+ * the framework's credential accessor produces.
  *
- * All actions are read-only: `assertReadOnly` (see `lib/generic_db_connector`)
- * rejects any statement that doesn't start with SELECT/SHOW/DESCRIBE/DESC/
- * EXPLAIN/WITH, and rejects semicolon-delimited multi-statement input. Query
- * execution wraps user SQL in a bounded outer SELECT so `maxRows` is always
- * enforced server-side.
+ * Read actions (`query`, `listDatabases`, `listTables`, `describeTable`,
+ * `searchRows`) are enforced as read-only via `assertReadOnly`. `executeSql`
+ * is unrestricted and carries `scope: 'destroy'`.
+ * `query` wraps SELECT/WITH inside a bounded subquery to enforce `maxRows`
+ * server-side; SHOW/DESCRIBE/EXPLAIN are run directly (they cannot appear
+ * inside a derived table).
  */
-import type { Pool as Mysql2Pool } from 'mysql2/promise';
-import { Sha256 } from '@kbn/crypto-browser';
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
@@ -37,6 +35,8 @@ import { assertReadOnly, escapeLikePattern } from '../../lib/generic_db_connecto
 import {
   type DescribeTableInput,
   DescribeTableInputSchema,
+  type ExecuteSqlInput,
+  ExecuteSqlInputSchema,
   ListDatabasesInputSchema,
   type ListTablesInput,
   ListTablesInputSchema,
@@ -52,7 +52,7 @@ export const MysqlConnector: ConnectorSpec = {
     displayName: 'MySQL',
     description: i18n.translate('core.kibanaConnectorSpecs.mysql.metadata.description', {
       defaultMessage:
-        'Query tables, search rows, and explore schema in a MySQL database using read-only SQL',
+        'Query tables, search rows, explore schema, and execute SQL in a MySQL database',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -83,7 +83,7 @@ export const MysqlConnector: ConnectorSpec = {
             defaultMessage: 'The hostname or IP address of the MySQL server (no protocol prefix).',
           }),
         }),
-      port: z.coerce
+      port: z
         .number()
         .int()
         .min(1)
@@ -94,7 +94,7 @@ export const MysqlConnector: ConnectorSpec = {
           })
         )
         .meta({
-          widget: 'text',
+          widget: 'number',
           label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.label', {
             defaultMessage: 'Port',
           }),
@@ -127,62 +127,100 @@ export const MysqlConnector: ConnectorSpec = {
   actions: {
     query: {
       isTool: true,
+      scope: 'read',
       description:
-        'Execute a read-only SQL SELECT query against the MySQL database. Only SELECT statements are permitted; INSERT, UPDATE, DELETE, and DDL are blocked. Returns up to maxRows rows (default 100). Use listTables first to discover available tables, and describeTable to inspect column names before writing queries. Prefer WHERE clauses and explicit column lists to keep result size manageable.',
+        'Execute a read-only SQL SELECT query against the MySQL database. Only SELECT and WITH statements are permitted; SHOW, DESCRIBE, INSERT, UPDATE, DELETE, and DDL are blocked. Returns up to maxRows rows (default 100). Use listTables first to discover available tables, and describeTable to inspect column names before writing queries. Prefer WHERE clauses and explicit column lists to keep result size manageable.',
       input: QueryInputSchema,
-      handler: async (ctx, input: QueryInput) =>
-        getClient().runReadonlyQuery(ctx, input.sql, input.maxRows ?? 100),
+      handler: async (ctx, input: QueryInput) => {
+        assertReadOnly(input.sql);
+        // maxRows is a schema-validated integer — safe to inline directly.
+        // Avoid LIMIT ? binding: user SQL may contain '?' in string literals, causing
+        // a param-count mismatch in MySQL's binary prepared-statement protocol.
+        const maxRows = input.maxRows ?? 100;
+        const pool = await ctx.getClient('mysql');
+        const [rows] = await pool.execute(
+          `SELECT * FROM (\n${input.sql}\n) AS _q LIMIT ${maxRows}`
+        );
+        return rows as unknown[];
+      },
     },
 
     listDatabases: {
       isTool: true,
+      scope: 'read',
       description:
         'List all databases available on the connected MySQL server. Use this first to discover what databases are accessible before querying tables.',
       input: ListDatabasesInputSchema,
-      handler: async (ctx) => getClient().runQuery(ctx, 'SHOW DATABASES'),
+      handler: async (ctx) => {
+        const pool = await ctx.getClient('mysql');
+        const [rows] = await pool.execute('SHOW DATABASES');
+        return rows as unknown[];
+      },
     },
 
     listTables: {
       isTool: true,
+      scope: 'read',
       description:
         'List all tables in a MySQL database. Specify database to target a specific database, or omit to use the configured default. Use describeTable to inspect column names and types before querying.',
       input: ListTablesInputSchema,
       handler: async (ctx, input: ListTablesInput) => {
         const db = resolveDatabase(input.database, ctx);
-        return getClient().runQuery(ctx, `SHOW TABLES FROM ${quoteIdentifier(db)}`);
+        const pool = await ctx.getClient('mysql');
+        const [rows] = await pool.execute(`SHOW TABLES FROM ${quoteIdentifier(db)}`);
+        return rows as unknown[];
       },
     },
 
     describeTable: {
       isTool: true,
+      scope: 'read',
       description:
         'Describe the structure of a MySQL table — returns column names, data types, nullability, and default values. Use this before query or searchRows to discover available columns and build correct queries.',
       input: DescribeTableInputSchema,
       handler: async (ctx, input: DescribeTableInput) => {
         const db = resolveDatabase(input.database, ctx);
-        return getClient().runQuery(
-          ctx,
+        const pool = await ctx.getClient('mysql');
+        const [rows] = await pool.execute(
           `DESCRIBE ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}`
         );
+        return rows as unknown[];
       },
     },
 
     searchRows: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for rows in a MySQL table by matching a text value against one or more columns using LIKE pattern matching (case-insensitive partial match). Returns up to maxRows results (default 100). Use describeTable first to discover searchable column names. Prefer query (SQL SELECT) for structured filtering; use searchRows for broad text discovery across known columns.',
       input: SearchRowsInputSchema,
       handler: async (ctx, input: SearchRowsInput) => {
         const db = resolveDatabase(input.database, ctx);
-        const likeParam = `%${escapeLikePattern(input.searchTerm)}%`;
+        const likeParam = `%${escapeLikePattern(input.searchTerm, false)}%`;
         const whereClause = input.columns
           .map((col) => `${quoteIdentifier(col)} LIKE ? ESCAPE '!'`)
           .join(' OR ');
+        const maxRows = input.maxRows ?? 100;
         const sql =
           `SELECT * FROM ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}` +
-          ` WHERE ${whereClause} LIMIT ?`;
-        const params = [...input.columns.map(() => likeParam), input.maxRows ?? 100];
-        return getClient().runParamQuery(ctx, sql, params);
+          ` WHERE ${whereClause} LIMIT ${maxRows}`;
+        const params = input.columns.map(() => likeParam);
+        const pool = await ctx.getClient('mysql');
+        const [rows] = await pool.execute(sql, params as never[]);
+        return rows as unknown[];
+      },
+    },
+
+    executeSql: {
+      isTool: true,
+      scope: 'destroy',
+      description:
+        'Execute any SQL statement against the MySQL database. No restrictions — INSERT, UPDATE, DELETE, DROP, and DDL are all permitted. Use only when the workflow explicitly requires a write or destructive operation. Prefer query for read-only access.',
+      input: ExecuteSqlInputSchema,
+      handler: async (ctx, input: ExecuteSqlInput) => {
+        const pool = await ctx.getClient('mysql');
+        const [result] = await pool.execute(input.sql);
+        return result as unknown;
       },
     },
   },
@@ -191,21 +229,18 @@ export const MysqlConnector: ConnectorSpec = {
     description: i18n.translate('core.kibanaConnectorSpecs.mysql.test.description', {
       defaultMessage: 'Verifies MySQL connection by running a lightweight query',
     }),
+    enabled: true,
     handler: async (ctx) => {
-      try {
-        await getClient().runQuery(ctx, 'SELECT 1');
-        return { ok: true, message: `Successfully connected to MySQL` };
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        return { ok: false, message };
-      }
+      const pool = await ctx.getClient('mysql');
+      await pool.execute('SELECT 1');
+      return { message: 'Successfully connected to MySQL' };
     },
   },
 
   skill: [
     '## MySQL Connector',
     '',
-    'Read-only access to a MySQL database. All statements are checked before execution — only SELECT, SHOW, DESCRIBE, EXPLAIN, and WITH are allowed, and semicolon-delimited multi-statement submissions are rejected.',
+    'Access to a MySQL database. Read actions (`query`, `searchRows`, `listDatabases`, `listTables`, `describeTable`) are read-only and safe to call freely. `executeSql` is unrestricted — use it only when a write or destructive operation is explicitly required.',
     '',
     '### Discovery pattern (schema unknown)',
     '1. `listDatabases` — see what databases are accessible.',
@@ -213,83 +248,18 @@ export const MysqlConnector: ConnectorSpec = {
     '3. `describeTable` — inspect column names, types, and nullability before writing a query.',
     '4. `query` or `searchRows` — read the data.',
     '',
-    '### Choosing between `query` and `searchRows`',
+    '### Choosing between `query`, `searchRows`, and `executeSql`',
     '- Prefer `query` for structured filtering, joins, aggregation, or anything expressible as a SELECT.',
-    '- Prefer `searchRows` for broad, unstructured text lookups across a known set of columns — it builds a LIKE-based search so you do not need to hand-write SQL wildcards.',
+    '- Prefer `searchRows` for broad, unstructured text lookups across a known set of columns.',
+    '- Use `executeSql` only for writes or DDL that the workflow explicitly requires (INSERT, UPDATE, DELETE, CREATE, DROP, etc.).',
+    '- Use `listDatabases`, `listTables`, and `describeTable` for schema exploration.',
     '',
     '### Gotchas',
-    '- Write, DDL, and multi-statement SQL are rejected outright — there is no workflow-only escape hatch for this connector; ask the user to run those directly against the database.',
-    '- `query` and `searchRows` cap results at `maxRows` (default 100, max 1000) to keep responses small — narrow the query with WHERE clauses rather than relying on a large `maxRows`.',
+    '- `query` only allows SELECT and WITH — multi-statement and write SQL are rejected; use `executeSql` for writes.',
+    '- `query` and `searchRows` cap results at `maxRows` (default 100, max 1000) — narrow with WHERE clauses rather than relying on a large `maxRows`.',
     '- Database and table names are case-sensitive on case-sensitive filesystems (the common case on Linux). Use the exact casing returned by `listDatabases` / `listTables`.',
   ].join('\n'),
 };
-
-type ExecuteParams = NonNullable<Parameters<Mysql2Pool['execute']>[1]>;
-
-class MysqlClient {
-  private static readonly MAX_POOLS = 10;
-  private readonly pools = new Map<string, Mysql2Pool>();
-
-  async runQuery(ctx: ActionContext, sql: string): Promise<unknown[]> {
-    const [rows] = await (await this.getPool(ctx)).query(sql);
-    return rows as unknown[];
-  }
-
-  async runReadonlyQuery(ctx: ActionContext, sql: string, maxRows: number): Promise<unknown[]> {
-    assertReadOnly(sql);
-    const [rows] = await (
-      await this.getPool(ctx)
-    ).execute(`SELECT * FROM (\n${sql}\n) AS _q LIMIT ?`, [maxRows]);
-    return rows as unknown[];
-  }
-
-  async runParamQuery(ctx: ActionContext, sql: string, params: ExecuteParams): Promise<unknown[]> {
-    const [rows] = await (await this.getPool(ctx)).execute(sql, params);
-    return rows as unknown[];
-  }
-
-  private async getPool(ctx: ActionContext): Promise<Mysql2Pool> {
-    const host = ctx.config?.host as string;
-    const port = ctx.config?.port as number;
-    const database = ctx.config?.database as string;
-    const username = ctx.secrets?.username as string;
-    const password = ctx.secrets?.password as string;
-
-    const passwordHash = new Sha256().update(password).digest('hex');
-    const key = `${host}:${port}:${database}:${username}:${passwordHash}`;
-    let pool = this.pools.get(key);
-    if (!pool) {
-      if (this.pools.size >= MysqlClient.MAX_POOLS) {
-        const [oldestKey] = this.pools.keys();
-        if (oldestKey) {
-          const oldPool = this.pools.get(oldestKey);
-          this.pools.delete(oldestKey);
-          ctx.log.info(`[mysql] Pool cache full (${MysqlClient.MAX_POOLS}), evicting oldest pool`);
-          await oldPool?.end();
-        }
-      }
-      ctx.log.info(
-        `[mysql] Creating connection pool for ${host}:${port}/${database} (user: ${username})`
-      );
-      const lib = await import('mysql2/promise');
-      pool = lib.createPool({
-        host,
-        port,
-        database,
-        user: username,
-        password,
-        waitForConnections: true,
-        connectionLimit: 10,
-        queueLimit: 0,
-      });
-      this.pools.set(key, pool);
-    }
-    return pool;
-  }
-}
-
-const _client = new MysqlClient();
-const getClient = () => _client;
 
 const quoteIdentifier = (identifier: string): string => `\`${identifier.replace(/`/g, '``')}\``;
 
