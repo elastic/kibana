@@ -95,6 +95,9 @@ export { getSavedObjectsTypes } from './utils/saved_object_types';
 export {
   isEventAttachmentType,
   isAlertAttachmentType,
+  isDetectionAttachmentType,
+  UNIFIED_DETECTION_TYPES,
+  UNIFIED_DETECTION_TYPES_ARRAY,
   isLegacyAttachmentRequest,
   isUnifiedEventAttachment,
   isUnifiedAlertAttachment,
