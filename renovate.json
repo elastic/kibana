@@ -1024,7 +1024,6 @@
         "commander",
         "dedent",
         "getopts",
-        "meow",
         "listr2",
         "ora",
         "@parcel/watcher",
@@ -1166,7 +1165,7 @@
     },
     {
       "groupName": "stylelint",
-      "matchDepNames": ["stylelint", "stylelint-scss"],
+      "matchDepNames": ["meow", "stylelint", "stylelint-scss"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
