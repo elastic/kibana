@@ -17,6 +17,7 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   connector = 'connector',
+  image = 'image',
 }
 
 interface AttachmentDataMap {
@@ -24,6 +25,7 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
+  [AttachmentType.image]: ImageAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -124,3 +126,28 @@ export interface ConnectorAttachmentData {
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
+
+export const SUPPORTED_IMAGE_MIME_TYPES = ['image/png', 'image/jpeg'] as const;
+export type SupportedImageMimeType = (typeof SUPPORTED_IMAGE_MIME_TYPES)[number];
+
+export const CHAT_ATTACHMENT_IMAGES_FILE_KIND = 'chat-attachment-images';
+
+export const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
+export const imageAttachmentDataSchema = z.object({
+  file_id: z.string().max(1024),
+  name: z.string().max(1024),
+  mime_type: z.enum(SUPPORTED_IMAGE_MIME_TYPES),
+});
+
+/**
+ * Data for an image attachment.
+ */
+export interface ImageAttachmentData {
+  /** files plugin file id */
+  file_id: string;
+  /** original filename */
+  name: string;
+  /** mime type of the image */
+  mime_type: SupportedImageMimeType;
+}

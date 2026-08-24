@@ -309,6 +309,53 @@ describe('attachment tools', () => {
       expect(result.results).toHaveLength(1);
       expect(result.results[0].type).toBe(ToolResultType.error);
     });
+
+    it('returns a small image marker (not base64) for image attachments', async () => {
+      const getBase64 = jest.fn(async () => 'BASE64_SHOULD_NOT_APPEAR');
+      const imageAttachmentsService = {
+        getTypeDefinition: () => ({
+          id: 'image',
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({
+            getRepresentation: () => ({
+              type: 'image',
+              mimeType: 'image/png',
+              getBase64,
+            }),
+          }),
+          isReadonly: true,
+        }),
+      } as any;
+
+      const imageManager = createAttachmentStateManager([], {
+        getTypeDefinition: imageAttachmentsService.getTypeDefinition,
+      });
+      const attachment = await imageManager.add({
+        type: 'image',
+        data: { file_id: 'file-1', name: 'screenshot.png', mime_type: 'image/png' },
+        description: 'a screenshot',
+      });
+
+      const tool = createAttachmentTools({
+        attachmentManager: imageManager,
+        attachmentsService: imageAttachmentsService,
+        formatContext,
+      }).find((t) => t.id === attachmentTools.read)!;
+
+      const result = (await tool.handler(
+        { attachment_id: attachment.id },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.image);
+      const data = (result.results[0] as any).data;
+      expect(data.attachment_id).toBe(attachment.id);
+      expect(data.mime_type).toBe('image/png');
+      expect(data.name).toBe('screenshot.png');
+      expect(JSON.stringify(result.results[0])).not.toContain('BASE64_SHOULD_NOT_APPEAR');
+      // getBase64 must NOT be called on the tool-result path — the prompt builder pulls bytes later.
+      expect(getBase64).not.toHaveBeenCalled();
+    });
   });
 
   describe('attachment_update', () => {
