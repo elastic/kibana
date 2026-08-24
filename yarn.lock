@@ -10576,6 +10576,18 @@
     express "^4.18.2"
     strict-event-emitter "^0.5.1"
 
+"@mswjs/interceptors@^0.39.5":
+  version "0.39.8"
+  resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.39.8.tgz#0a2cf4cf26a731214ca4156273121f67dff7ebf8"
+  integrity sha512-2+BzZbjRO7Ct61k8fMNHEtoKjeWI9pIlHFTqBwZ5icHpqszIgEZbjb1MW5Z0+bITTCTl3gk4PDBxs9tA/csXvA==
+  dependencies:
+    "@open-draft/deferred-promise" "^2.2.0"
+    "@open-draft/logger" "^0.3.0"
+    "@open-draft/until" "^2.0.0"
+    is-node-process "^1.2.0"
+    outvariant "^1.4.3"
+    strict-event-emitter "^0.5.1"
+
 "@mswjs/interceptors@^0.41.3":
   version "0.41.3"
   resolved "https://registry.yarnpkg.com/@mswjs/interceptors/-/interceptors-0.41.3.tgz#d766dc1a168aa315a6a0b2d0f2e0cf1b74f23c82"
@@ -25452,7 +25464,7 @@ lodash.truncate@^4.4.2:
   resolved "https://registry.yarnpkg.com/lodash.truncate/-/lodash.truncate-4.4.2.tgz#5a350da0b1113b837ecfffd5812cbe58d6eae193"
   integrity sha1-WjUNoLERO4N+z//VgSy+WNbq4ZM=
 
-lodash@4.18.1, lodash@^4.17.10, lodash@^4.17.13, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.17.23:
+lodash@4.18.1, lodash@^4.17.10, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@^4.17.21, lodash@^4.17.23:
   version "4.18.1"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.18.1.tgz#ff2b66c1f6326d59513de2407bf881439812771c"
   integrity sha512-dMInicTPVE8d1e5otfwmmjlxkZoUpiVLwyeTdUsi/Caj/gfzzblBcCE5sRHV/AsjuCmxWrte2TNGSYuCeCq+0Q==
@@ -27009,14 +27021,13 @@ no-case@^3.0.4:
     lower-case "^2.0.2"
     tslib "^2.0.3"
 
-nock@12.0.3:
-  version "12.0.3"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-12.0.3.tgz#83f25076dbc4c9aa82b5cdf54c9604c7a778d1c9"
-  integrity sha512-QNb/j8kbFnKCiyqi9C5DD0jH/FubFGj5rt9NQFONXwQm3IPB0CULECg/eS3AU1KgZb/6SwUa4/DTRKhVxkGABw==
+nock@14.0.10:
+  version "14.0.10"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-14.0.10.tgz#d6f4e73e1c6b4b7aa19d852176e68940e15cd19d"
+  integrity sha512-Q7HjkpyPeLa0ZVZC5qpxBt5EyLczFJ91MEewQiIi9taWuA0KB/MDJlUWtON+7dGouVdADTQsf9RA7TZk6D8VMw==
   dependencies:
-    debug "^4.1.0"
+    "@mswjs/interceptors" "^0.39.5"
     json-stringify-safe "^5.0.1"
-    lodash "^4.17.13"
     propagate "^2.0.0"
 
 node-abi@^3.3.0:
