@@ -12,7 +12,7 @@ import {
   MAX_ID_LENGTH,
   previousStatusSchema,
   workflowStatusEnum,
-} from './constants';
+} from '../constants';
 import {
   ALERT_STATUS_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION,
   ALERT_STATUS_CHANGED_SCHEMA_PREVIOUS_STATUSES_DESCRIPTION,
@@ -21,7 +21,7 @@ import {
   ALERT_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
   ALERT_STATUS_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_STATUS_DESCRIPTION,
-} from './translations';
+} from '../translations';
 
 export const AlertStatusChangedTriggerId = 'security.alertStatusChanged' as const;
 

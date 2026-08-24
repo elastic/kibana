@@ -12,32 +12,32 @@ import {
   MAX_ID_LENGTH,
   MAX_TAG_LENGTH,
   MAX_TAGS_PER_OPERATION,
-} from './constants';
+} from '../constants';
 import {
-  ALERT_TAGS_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION,
-  ALERT_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION,
-  ALERT_TAGS_CHANGED_TRIGGER_DESCRIPTION,
-  ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
-  ALERT_TAGS_CHANGED_TRIGGER_TITLE,
+  ATTACK_TAGS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION,
+  ATTACK_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION,
+  ATTACK_TAGS_CHANGED_TRIGGER_DESCRIPTION,
+  ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
+  ATTACK_TAGS_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_TAGS_TO_ADD_DESCRIPTION,
   TRIGGER_SCHEMA_TAGS_TO_REMOVE_DESCRIPTION,
-} from './translations';
+} from '../translations';
 
-export const AlertTagsChangedTriggerId = 'security.alertTagsChanged' as const;
+export const AttackTagsChangedTriggerId = 'security.attackTagsChanged' as const;
 
-const documentationExample = `## Run when a specific tag is added
+const documentationExample = `## Run when a tag is added to attacks
 \`\`\`yaml
 triggers:
-  - type: security.alertTagsChanged
+  - type: security.attackTagsChanged
     on:
-      condition: 'event.tagsToAdd: "high-priority"'
+      condition: 'event.tagsToAdd: "escalated"'
 \`\`\``;
 
-const alertTagsChangedEventSchema = z.object({
-  alertIds: z
+const attackTagsChangedEventSchema = z.object({
+  attackIds: z
     .array(z.string().min(1).max(MAX_ID_LENGTH))
     .max(MAX_ALERTS_PER_TRIGGER)
-    .meta({ description: ALERT_TAGS_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION }),
+    .meta({ description: ATTACK_TAGS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION }),
   tagsToAdd: z
     .array(z.string().min(1).max(MAX_TAG_LENGTH))
     .max(MAX_TAGS_PER_OPERATION)
@@ -46,17 +46,17 @@ const alertTagsChangedEventSchema = z.object({
     .array(z.string().min(1).max(MAX_TAG_LENGTH))
     .max(MAX_TAGS_PER_OPERATION)
     .meta({ description: TRIGGER_SCHEMA_TAGS_TO_REMOVE_DESCRIPTION }),
-  truncated: z.boolean().meta({ description: ALERT_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
+  truncated: z.boolean().meta({ description: ATTACK_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
 });
 
-export const alertTagsChangedTriggerDef: CommonTriggerDefinition = {
-  id: AlertTagsChangedTriggerId,
+export const attackTagsChangedTriggerDef: CommonTriggerDefinition = {
+  id: AttackTagsChangedTriggerId,
   stability: 'tech_preview',
-  eventSchema: alertTagsChangedEventSchema,
-  title: ALERT_TAGS_CHANGED_TRIGGER_TITLE,
-  description: ALERT_TAGS_CHANGED_TRIGGER_DESCRIPTION,
+  eventSchema: attackTagsChangedEventSchema,
+  title: ATTACK_TAGS_CHANGED_TRIGGER_TITLE,
+  description: ATTACK_TAGS_CHANGED_TRIGGER_DESCRIPTION,
   documentation: {
-    details: ALERT_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
+    details: ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
     examples: [documentationExample],
   },
 };

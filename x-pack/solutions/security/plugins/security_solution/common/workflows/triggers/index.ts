@@ -12,20 +12,26 @@ export {
   WORKFLOW_STATUS_VALUES,
 } from './constants';
 export type { WorkflowStatus } from './constants';
-export { AlertStatusChangedTriggerId, alertStatusChangedTriggerDef } from './alert_status_changed';
-export { AlertTagsChangedTriggerId, alertTagsChangedTriggerDef } from './alert_tags_changed';
+export {
+  AlertStatusChangedTriggerId,
+  alertStatusChangedTriggerDef,
+} from './alerts/alert_status_changed';
+export { AlertTagsChangedTriggerId, alertTagsChangedTriggerDef } from './alerts/alert_tags_changed';
 export {
   AlertAssigneesChangedTriggerId,
   alertAssigneesChangedTriggerDef,
-} from './alert_assignees_changed';
+} from './alerts/alert_assignees_changed';
 export {
   AttackStatusChangedTriggerId,
   attackStatusChangedTriggerDef,
-} from './attack_status_changed';
-export { AttackTagsChangedTriggerId, attackTagsChangedTriggerDef } from './attack_tags_changed';
+} from './attacks/attack_status_changed';
+export {
+  AttackTagsChangedTriggerId,
+  attackTagsChangedTriggerDef,
+} from './attacks/attack_tags_changed';
 export {
   AttackAssigneesChangedTriggerId,
   attackAssigneesChangedTriggerDef,
-} from './attack_assignees_changed';
-export { NoteCreatedTriggerId, noteCreatedTriggerDef } from './note_created';
-export { NoteUpdatedTriggerId, noteUpdatedTriggerDef } from './note_updated';
+} from './attacks/attack_assignees_changed';
+export { NoteCreatedTriggerId, noteCreatedTriggerDef } from './notes/note_created';
+export { NoteUpdatedTriggerId, noteUpdatedTriggerDef } from './notes/note_updated';

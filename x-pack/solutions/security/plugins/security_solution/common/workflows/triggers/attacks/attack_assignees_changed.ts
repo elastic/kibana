@@ -12,7 +12,7 @@ import {
   MAX_ASSIGNEE_UID_LENGTH,
   MAX_ASSIGNEES_PER_OPERATION,
   MAX_ID_LENGTH,
-} from './constants';
+} from '../constants';
 import {
   ATTACK_ASSIGNEES_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION,
   ATTACK_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION,
@@ -21,7 +21,7 @@ import {
   ATTACK_ASSIGNEES_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_ASSIGNEES_TO_ADD_DESCRIPTION,
   TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION,
-} from './translations';
+} from '../translations';
 
 export const AttackAssigneesChangedTriggerId = 'security.attackAssigneesChanged' as const;
 

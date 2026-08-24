@@ -12,7 +12,7 @@ import {
   MAX_ID_LENGTH,
   previousStatusSchema,
   workflowStatusEnum,
-} from './constants';
+} from '../constants';
 import {
   ATTACK_STATUS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION,
   ATTACK_STATUS_CHANGED_SCHEMA_PREVIOUS_STATUSES_DESCRIPTION,
@@ -21,7 +21,7 @@ import {
   ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
   ATTACK_STATUS_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_STATUS_DESCRIPTION,
-} from './translations';
+} from '../translations';
 
 export const AttackStatusChangedTriggerId = 'security.attackStatusChanged' as const;
 

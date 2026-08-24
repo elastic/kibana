@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { MAX_ID_LENGTH, MAX_USERNAME_LENGTH } from './constants';
+import { MAX_ID_LENGTH, MAX_USERNAME_LENGTH } from '../constants';
 import {
   NOTE_UPDATED_SCHEMA_DOCUMENT_ID_DESCRIPTION,
   NOTE_UPDATED_SCHEMA_NOTE_ID_DESCRIPTION,
@@ -15,7 +15,7 @@ import {
   NOTE_UPDATED_TRIGGER_DESCRIPTION,
   NOTE_UPDATED_TRIGGER_DOCUMENTATION_DETAILS,
   NOTE_UPDATED_TRIGGER_TITLE,
-} from './translations';
+} from '../translations';
 
 export const NoteUpdatedTriggerId = 'security.noteUpdated' as const;
 

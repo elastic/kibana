@@ -12,7 +12,7 @@ import {
   MAX_ASSIGNEE_UID_LENGTH,
   MAX_ASSIGNEES_PER_OPERATION,
   MAX_ID_LENGTH,
-} from './constants';
+} from '../constants';
 import {
   ALERT_ASSIGNEES_CHANGED_SCHEMA_ALERT_IDS_DESCRIPTION,
   ALERT_ASSIGNEES_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION,
@@ -21,7 +21,7 @@ import {
   ALERT_ASSIGNEES_CHANGED_TRIGGER_TITLE,
   TRIGGER_SCHEMA_ASSIGNEES_TO_ADD_DESCRIPTION,
   TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION,
-} from './translations';
+} from '../translations';
 
 export const AlertAssigneesChangedTriggerId = 'security.alertAssigneesChanged' as const;
 

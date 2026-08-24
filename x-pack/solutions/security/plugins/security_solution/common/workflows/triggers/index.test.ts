@@ -5,23 +5,29 @@
  * 2.0.
  */
 
-import { alertStatusChangedTriggerDef, AlertStatusChangedTriggerId } from './alert_status_changed';
-import { alertTagsChangedTriggerDef, AlertTagsChangedTriggerId } from './alert_tags_changed';
+import {
+  alertStatusChangedTriggerDef,
+  AlertStatusChangedTriggerId,
+} from './alerts/alert_status_changed';
+import { alertTagsChangedTriggerDef, AlertTagsChangedTriggerId } from './alerts/alert_tags_changed';
 import {
   alertAssigneesChangedTriggerDef,
   AlertAssigneesChangedTriggerId,
-} from './alert_assignees_changed';
+} from './alerts/alert_assignees_changed';
 import {
   attackStatusChangedTriggerDef,
   AttackStatusChangedTriggerId,
-} from './attack_status_changed';
-import { attackTagsChangedTriggerDef, AttackTagsChangedTriggerId } from './attack_tags_changed';
+} from './attacks/attack_status_changed';
+import {
+  attackTagsChangedTriggerDef,
+  AttackTagsChangedTriggerId,
+} from './attacks/attack_tags_changed';
 import {
   attackAssigneesChangedTriggerDef,
   AttackAssigneesChangedTriggerId,
-} from './attack_assignees_changed';
-import { noteCreatedTriggerDef, NoteCreatedTriggerId } from './note_created';
-import { noteUpdatedTriggerDef, NoteUpdatedTriggerId } from './note_updated';
+} from './attacks/attack_assignees_changed';
+import { noteCreatedTriggerDef, NoteCreatedTriggerId } from './notes/note_created';
+import { noteUpdatedTriggerDef, NoteUpdatedTriggerId } from './notes/note_updated';
 
 const allDefs = [
   { def: alertStatusChangedTriggerDef, id: AlertStatusChangedTriggerId },
