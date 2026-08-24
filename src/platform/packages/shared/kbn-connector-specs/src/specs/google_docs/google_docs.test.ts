@@ -355,6 +355,22 @@ describe('GoogleDocsConnector', () => {
         })
       ).toThrow('exactly one operation key');
     });
+
+    it('rejects requests whose total serialized size exceeds 100 KB', () => {
+      const requests = [
+        { replaceAllText: { containsText: { text: 'a'.repeat(103_000) }, replaceText: 'b' } },
+      ];
+      expect(() => parse('updateDoc', { document_id: DOC_ID, requests })).toThrow(
+        'Total size of requests must not exceed 100 KB'
+      );
+    });
+
+    it('accepts requests whose total serialized size is just under 100 KB', () => {
+      // 102,400 bytes limit; build a payload just below it
+      const text = 'a'.repeat(100_000);
+      const requests = [{ replaceAllText: { containsText: { text }, replaceText: 'b' } }];
+      expect(() => parse('updateDoc', { document_id: DOC_ID, requests })).not.toThrow();
+    });
   });
 
   // =========================================================================
