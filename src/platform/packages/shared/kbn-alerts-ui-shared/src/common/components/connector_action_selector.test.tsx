@@ -124,8 +124,6 @@ describe('ConnectorActionSelector — mode switching', () => {
 
     await user.click(screen.getByTestId('connectorActionSelectorClearSelection'));
 
-    expect(
-      screen.getByText('Select at least one action, or enable All.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Select at least one action, or enable All.')).toBeInTheDocument();
   });
 });

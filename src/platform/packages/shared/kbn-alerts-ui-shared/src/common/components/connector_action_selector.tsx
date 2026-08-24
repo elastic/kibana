@@ -110,7 +110,8 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
       const scopeActions = actionsByScope[scope] ?? [];
       if (scopeActions.length === 0) continue;
       const n = scopeActions.filter((a) => selectedSet.has(a.name)).length;
-      result[scope] = n === 0 ? 'unchecked' : n === scopeActions.length ? 'checked' : 'indeterminate';
+      result[scope] =
+        n === 0 ? 'unchecked' : n === scopeActions.length ? 'checked' : 'indeterminate';
     }
     return result;
   }, [rawSelected, actionsByScope]);
@@ -427,10 +428,9 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
               isInvalid={emptySpecificSelection}
               error={
                 emptySpecificSelection
-                  ? i18n.translate(
-                      'alertsUIShared.connectorActionSelector.emptySelectionError',
-                      { defaultMessage: 'Select at least one action, or enable All.' }
-                    )
+                  ? i18n.translate('alertsUIShared.connectorActionSelector.emptySelectionError', {
+                      defaultMessage: 'Select at least one action, or enable All.',
+                    })
                   : undefined
               }
               fullWidth
@@ -441,10 +441,7 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
                   columns={columns}
                   itemId="name"
                   selection={selection}
-                  onTableChange={({
-                    page,
-                    sort,
-                  }: CriteriaWithPagination<ConnectorActionDef>) => {
+                  onTableChange={({ page, sort }: CriteriaWithPagination<ConnectorActionDef>) => {
                     // EuiBasicTable clears selection before firing onChange on page/sort changes.
                     // Capture now and restore below; React batches both calls so this one wins.
                     const selectionToRestore = rawSelectedRef.current;
