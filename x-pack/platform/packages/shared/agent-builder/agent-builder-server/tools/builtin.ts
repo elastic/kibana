@@ -161,6 +161,11 @@ export interface BuiltInToolSpecificConfig<
    * Set to `Infinity` to fully exempt this tool's results from truncation.
    */
   maxResultTokens?: number;
+  /**
+   * When true, this tool is excluded from the MCP server's tool list but
+   * remains available to 1P Agent Builder chat via the builtin tool registry.
+   */
+  excludeFromMcp?: boolean;
 }
 
 /**

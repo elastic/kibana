@@ -1,5 +1,5 @@
 {
-  "sha1": "88d971f943b97404189624b03390f139a2bc6915",
+  "sha1": "a0f609e3f745613101b80bdffd558150dd7b5836",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -683,12 +683,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
         "line": 35,
-        "column": 30
+        "column": 48
       }
     },
     {
@@ -697,12 +699,14 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
-        "line": 40,
-        "column": 25
+        "line": 41,
+        "column": 7
       }
     },
     {
@@ -711,11 +715,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/cases/cases_feature_controls.read.spec.ts",
-        "line": 49,
+        "line": 50,
         "column": 13
       }
     },
