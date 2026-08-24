@@ -1,52 +1,10 @@
 {
-  "sha1": "b910b6ec66dc6a071de90bebf6846027d01e991c",
+  "sha1": "7d945e56569fbd5c039384a951c5299c21c927bb",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
-    {
-      "id": "2e34171f24bcdca-674591f076626ad",
-      "title": "Onboarding deploy settings step static keys path — form enables Next when credentials are filled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_deploy_settings_step.spec.ts",
-        "line": 35,
-        "column": 23
-      }
-    },
-    {
-      "id": "2e34171f24bcdca-90e5aa39d02d5a8",
-      "title": "Onboarding deploy settings step identity federation create — New Identity tab active when no connectors exist",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_deploy_settings_step.spec.ts",
-        "line": 47,
-        "column": 5
-      }
-    },
-    {
-      "id": "2e34171f24bcdca-15500196b0e1b26",
-      "title": "Onboarding deploy settings step identity federation reuse — shows connector selector on Existing Identity tab",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_deploy_settings_step.spec.ts",
-        "line": 74,
-        "column": 24
-      }
-    },
     {
       "id": "8b1c88bbca05585-cc5ebedbcad32a7",
       "title": "Onboarding app — FF enabled renders the onboarding shell and navigates between steps",
@@ -62,34 +20,6 @@
       }
     },
     {
-      "id": "b0669359ac1acfc-a80b304ef315b8d",
-      "title": "Onboarding deploy settings step IAM permissions viewer shows the aggregated IAM policy for the selected services",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_permissions_viewer.spec.ts",
-        "line": 63,
-        "column": 7
-      }
-    },
-    {
-      "id": "b0669359ac1acfc-7a437c0b8c2cda8",
-      "title": "Onboarding deploy settings step IAM permissions viewer narrows the policy when a single integration is selected",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_permissions_viewer.spec.ts",
-        "line": 86,
-        "column": 9
-      }
-    },
-    {
       "id": "f11cb343b6e8637-579fcdc671b7aba",
       "title": "Onboarding Service Settings step renders table with Service Name, Collects, Category, Region columns",
       "expectedStatus": "passed",
@@ -99,8 +29,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 78,
-        "column": 23
+        "line": 219,
+        "column": 5
       }
     },
     {
@@ -113,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 103,
-        "column": 9
+        "line": 234,
+        "column": 11
       }
     },
     {
@@ -127,8 +57,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 110,
-        "column": 89
+        "line": 242,
+        "column": 24
       }
     },
     {
@@ -141,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 116,
-        "column": 11
+        "line": 253,
+        "column": 24
       }
     },
     {
@@ -155,8 +85,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 131,
-        "column": 7
+        "line": 270,
+        "column": 34
       }
     },
     {
@@ -169,8 +99,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 159,
-        "column": 8
+        "line": 288,
+        "column": 7
       }
     },
     {
@@ -183,8 +113,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 165,
-        "column": 61
+        "line": 299,
+        "column": 11
       }
     },
     {
@@ -197,13 +127,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 173,
-        "column": 57
+        "line": 314,
+        "column": 16
       }
     },
     {
-      "id": "f11cb343b6e8637-2ea1af567ed22e1",
-      "title": "Onboarding Service Settings step regions-only service shows no attention badge and does not block Continue",
+      "id": "f11cb343b6e8637-f4a4ac0be8cbc8a",
+      "title": "Onboarding Service Settings step service with no required text vars shows no attention badge and does not block Continue",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -211,8 +141,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 190,
-        "column": 11
+        "line": 327,
+        "column": 8
       }
     },
     {
@@ -225,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 199,
-        "column": 68
+        "line": 339,
+        "column": 5
       }
     },
     {
@@ -239,8 +169,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 212,
-        "column": 7
+        "line": 352,
+        "column": 11
       }
     },
     {
@@ -253,8 +183,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 224,
-        "column": 5
+        "line": 360,
+        "column": 24
       }
     },
     {
@@ -267,8 +197,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 249,
-        "column": 24
+        "line": 381,
+        "column": 11
       }
     },
     {
@@ -281,8 +211,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 258,
-        "column": 24
+        "line": 392,
+        "column": 93
       }
     },
     {
@@ -295,8 +225,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 295,
-        "column": 24
+        "line": 413,
+        "column": 11
       }
     },
     {
@@ -309,8 +239,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 301,
-        "column": 8
+        "line": 432,
+        "column": 7
       }
     },
     {
@@ -323,8 +253,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 325,
-        "column": 24
+        "line": 449,
+        "column": 7
       }
     },
     {
@@ -337,8 +267,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 321,
-        "column": 5
+        "line": 461,
+        "column": 87
       }
     },
     {
@@ -351,8 +281,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 337,
-        "column": 7
+        "line": 478,
+        "column": 11
       }
     },
     {
@@ -365,8 +295,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 366,
-        "column": 100
+        "line": 497,
+        "column": 93
       }
     },
     {
@@ -379,8 +309,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 398,
-        "column": 8
+        "line": 519,
+        "column": 46
       }
     },
     {
@@ -393,8 +323,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 434,
-        "column": 24
+        "line": 555,
+        "column": 9
       }
     },
     {
@@ -407,8 +337,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 481,
-        "column": 11
+        "line": 602,
+        "column": 17
       }
     },
     {
@@ -421,8 +351,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_service_settings_step.spec.ts",
-        "line": 503,
-        "column": 48
+        "line": 624,
+        "column": 9
       }
     },
     {
@@ -505,22 +435,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_step_invalidation.spec.ts",
-        "line": 64,
+        "line": 62,
         "column": 8
-      }
-    },
-    {
-      "id": "987d8f3ed53a350-fdcceb3f9769da6",
-      "title": "Onboarding — downstream step invalidation path 2 — deploy-settings indicator loses checkmark when agentless service is added",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/ingest_hub/test/scout/ui/tests/onboarding_step_invalidation.spec.ts",
-        "line": 88,
-        "column": 9
       }
     },
     {

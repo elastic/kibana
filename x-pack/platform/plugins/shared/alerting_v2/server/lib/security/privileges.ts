@@ -15,6 +15,7 @@ import {
   ALERTING_V2_API_PRIVILEGES,
   ALERTING_V2_DEPRECATED_FEATURE_IDS,
   ALERTING_V2_FEATURES,
+  getFeatureManagementApps,
   type AlertingV2Feature,
   type AlertingV2FeatureDefinition,
 } from '../../../common/feature_privileges';
@@ -29,7 +30,7 @@ const category: AppCategory = {
 };
 
 const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeatureConfig => {
-  const managementApps = [feature.managementApp];
+  const managementApps = [...getFeatureManagementApps(feature)];
   const app = [APP_ID];
 
   return {
@@ -46,6 +47,9 @@ const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeature
         management: {
           [ALERTING_V2_SECTION_ID]: managementApps,
         },
+        ...(feature.privileges.all.aiIndex
+          ? { aiIndex: { ...feature.privileges.all.aiIndex } }
+          : {}),
         ...(feature.privileges.all.alerts ? { alerts: { ...feature.privileges.all.alerts } } : {}),
         savedObject: {
           all: [...feature.privileges.all.savedObject.all],
@@ -59,6 +63,9 @@ const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeature
         management: {
           [ALERTING_V2_SECTION_ID]: managementApps,
         },
+        ...(feature.privileges.read.aiIndex
+          ? { aiIndex: { ...feature.privileges.read.aiIndex } }
+          : {}),
         ...(feature.privileges.read.alerts
           ? { alerts: { ...feature.privileges.read.alerts } }
           : {}),

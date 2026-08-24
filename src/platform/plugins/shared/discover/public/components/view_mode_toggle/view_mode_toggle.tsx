@@ -369,7 +369,7 @@ const ViewModeSelector = ({
           buttonRef={buttonRef}
           data-test-subj={`${dataTestSubj}Button`}
           data-selected-value={dataSelectedValue}
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={togglePopover}
         >
