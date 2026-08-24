@@ -9,12 +9,14 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { CustomContentTelemetryService } from './telemetry';
 
 interface Services {
   core: CoreStart;
   search: ISearchGeneric;
   dataViews: DataViewsPublicPluginStart;
   agentBuilder: AgentBuilderPluginStart | undefined;
+  telemetry: CustomContentTelemetryService;
 }
 
 let services: Services | undefined;
@@ -23,9 +25,10 @@ export const setServices = (
   core: CoreStart,
   search: ISearchGeneric,
   dataViews: DataViewsPublicPluginStart,
-  agentBuilder: AgentBuilderPluginStart | undefined
+  agentBuilder: AgentBuilderPluginStart | undefined,
+  telemetry: CustomContentTelemetryService
 ) => {
-  services = { core, search, dataViews, agentBuilder };
+  services = { core, search, dataViews, agentBuilder, telemetry };
 };
 
 export const getServices = (): Services => {

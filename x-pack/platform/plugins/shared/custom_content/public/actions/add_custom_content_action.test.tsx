@@ -16,6 +16,14 @@ jest.mock('@kbn/presentation-publishing', () => ({
   hasEditCapabilities: jest.fn(),
 }));
 
+const mockTrackPanelAdded = jest.fn();
+
+jest.mock('../services', () => ({
+  getServices: () => ({
+    telemetry: { trackPanelAdded: mockTrackPanelAdded },
+  }),
+}));
+
 const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.MockedFunction<
   typeof apiIsPresentationContainer
 >;
@@ -28,6 +36,7 @@ describe('getAddCustomContentAction', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockTrackPanelAdded.mockReset();
   });
 
   it('has the correct id', () => {
@@ -77,6 +86,7 @@ describe('getAddCustomContentAction', () => {
 
       await action.execute({ embeddable: mockEmbeddable });
 
+      expect(mockTrackPanelAdded).toHaveBeenCalledWith('dashboard_panel');
       expect(mockAddNewPanel).toHaveBeenCalledWith(
         expect.objectContaining({ panelType: 'custom_content' }),
         { displaySuccessMessage: false }

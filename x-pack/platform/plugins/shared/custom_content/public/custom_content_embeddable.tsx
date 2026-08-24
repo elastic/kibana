@@ -129,7 +129,12 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           defaultMessage: 'Custom content',
         }),
       onEdit: async ({ isNewPanel, returnFocus } = {}) => {
-        const { core } = getServices();
+        const { core, telemetry } = getServices();
+        telemetry.trackEditFlyoutOpened({
+          isNewPanel: isNewPanel ?? false,
+          hasTemplate: Boolean(template$.getValue()),
+          hasEsqlQuery: Boolean(esqlQuery$.getValue()),
+        });
         let hasSaved = false;
         const flyoutRef = openLazyFlyout({
           core,
@@ -226,7 +231,18 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           },
         });
         flyoutRef.onClose.then(() => {
-          if (!hasSaved && !isRetained && isNewPanel && apiIsPresentationContainer(parentApi)) {
+          const panelRemoved =
+            !hasSaved &&
+            !isRetained &&
+            (isNewPanel ?? false) &&
+            apiIsPresentationContainer(parentApi);
+          if (!hasSaved) {
+            getServices().telemetry.trackEditCancelled({
+              isNewPanel: isNewPanel ?? false,
+              panelRemoved,
+            });
+          }
+          if (panelRemoved) {
             parentApi.removePanel(uuid);
           }
           isRetained = false;
@@ -351,14 +367,22 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
               template$.next(data.panel_template);
               esqlQuery$.next(data.esql_query);
+              getServices().telemetry.trackAgentUpdateApplied({
+                hasEsqlQuery: Boolean(data.esql_query),
+                templateSizeBytes: data.panel_template.length,
+              });
             });
 
           return () => sub.unsubscribe();
         }, []);
 
         const handleGenerateWithChat = useCallback(() => {
-          const { agentBuilder } = getServices();
+          const { agentBuilder, telemetry } = getServices();
           if (!agentBuilder) return;
+          telemetry.trackGenerateWithChatClicked({
+            triggerSource: 'empty_panel',
+            hasExistingTemplate: false,
+          });
           isRetained = true;
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
