@@ -75,11 +75,10 @@ const buildSkillStorageMock = (pages: SkillProperties[][]): SkillStorage => {
 describe('addToolIdsToToolSelection', () => {
   it('adds new IDs alongside the old ID without removing it', () => {
     const tools = [{ tool_ids: ['platform.core.cases.attachments', 'platform.core.search'] }];
-    const result = addToolIdsToToolSelection(
-      tools,
-      'platform.core.cases.attachments',
-      ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments']
-    );
+    const result = addToolIdsToToolSelection(tools, 'platform.core.cases.attachments', [
+      'platform.core.cases.get_attachments',
+      'platform.core.cases.manage_attachments',
+    ]);
     expect(result[0].tool_ids).toEqual([
       'platform.core.cases.attachments',
       'platform.core.search',
@@ -94,11 +93,10 @@ describe('addToolIdsToToolSelection', () => {
         tool_ids: ['platform.core.cases.attachments', 'platform.core.cases.get_attachments'],
       },
     ];
-    const result = addToolIdsToToolSelection(
-      tools,
-      'platform.core.cases.attachments',
-      ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments']
-    );
+    const result = addToolIdsToToolSelection(tools, 'platform.core.cases.attachments', [
+      'platform.core.cases.get_attachments',
+      'platform.core.cases.manage_attachments',
+    ]);
     expect(result[0].tool_ids).toEqual([
       'platform.core.cases.attachments',
       'platform.core.cases.get_attachments',
@@ -108,11 +106,9 @@ describe('addToolIdsToToolSelection', () => {
 
   it('is a no-op when old ID is not present', () => {
     const tools = [{ tool_ids: ['platform.core.search'] }];
-    const result = addToolIdsToToolSelection(
-      tools,
-      'platform.core.cases.attachments',
-      ['platform.core.cases.get_attachments']
-    );
+    const result = addToolIdsToToolSelection(tools, 'platform.core.cases.attachments', [
+      'platform.core.cases.get_attachments',
+    ]);
     expect(result).toBe(tools); // same reference
   });
 
@@ -126,24 +122,19 @@ describe('addToolIdsToToolSelection', () => {
         ],
       },
     ];
-    const result = addToolIdsToToolSelection(
-      tools,
-      'platform.core.cases.attachments',
-      ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments']
-    );
+    const result = addToolIdsToToolSelection(tools, 'platform.core.cases.attachments', [
+      'platform.core.cases.get_attachments',
+      'platform.core.cases.manage_attachments',
+    ]);
     expect(result).toBe(tools); // same reference — nothing to add
   });
 
   it('handles multiple selections', () => {
-    const tools = [
-      { tool_ids: ['platform.core.cases.attachments'] },
-      { tool_ids: ['other.tool'] },
-    ];
-    const result = addToolIdsToToolSelection(
-      tools,
-      'platform.core.cases.attachments',
-      ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments']
-    );
+    const tools = [{ tool_ids: ['platform.core.cases.attachments'] }, { tool_ids: ['other.tool'] }];
+    const result = addToolIdsToToolSelection(tools, 'platform.core.cases.attachments', [
+      'platform.core.cases.get_attachments',
+      'platform.core.cases.manage_attachments',
+    ]);
     expect(result).toEqual([
       {
         tool_ids: [
