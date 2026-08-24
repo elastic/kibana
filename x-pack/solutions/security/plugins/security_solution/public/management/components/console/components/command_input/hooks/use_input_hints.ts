@@ -31,7 +31,7 @@ export const UP_ARROW_ACCESS_HISTORY_HINT = i18n.translate(
   'xpack.securitySolution.useInputHints.viewInputHistory',
   {
     defaultMessage:
-      'Press [{isMac, select, true {⌘} other {ALT}}][SPACE] for list of commands or arguments for a command. Press [UP] arrow key for previously entered commands',
+      'Press [{isMac, select, true {⌥} other {ALT}}][SPACE] for list of commands or arguments for a command. Press [UP] arrow key for previously entered commands',
     values: { isMac },
   }
 );
