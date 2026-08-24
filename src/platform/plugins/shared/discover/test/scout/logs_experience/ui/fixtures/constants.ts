@@ -21,6 +21,8 @@ export const LOGS = {
 
   SYNTH_LOGS_DATASET,
   SYNTH_LOGS_NAMESPACE: 'default',
+  SYNTH_LOGS_HOST: 'synth-host',
+  SYNTH_LOGS_MESSAGE: 'Test log message for the logs profile',
 
   SYNTH_LOGS_DATA_VIEW: `logs-${SYNTH_LOGS_DATASET}-*`,
   SYNTH_LOGS_ESQL_QUERY: `from logs-${SYNTH_LOGS_DATASET}-* | limit 100`,
@@ -30,5 +32,4 @@ export const LOGS = {
   // timestamps above. The name also stays clear of `metrics-*-*` so no Fleet template claims it.
   NON_LOGS_INDEX: 'synth-metrics-2025',
   NON_LOGS_DATA_VIEW: 'synth-metrics*',
-  NON_LOGS_HOST: 'synth-metrics-host-01',
 } as const;

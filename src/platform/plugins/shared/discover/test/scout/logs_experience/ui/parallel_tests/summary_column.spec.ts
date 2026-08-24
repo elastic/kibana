@@ -19,10 +19,6 @@ import {
 /** The logs profile renders its summary in place of the `_source` column. */
 const SUMMARY_COLUMN_ID = '_source';
 
-/** Resource badge value and message fragment from the dataset seeded in global setup. */
-const EXPECTED_HOST = 'synth-host';
-const EXPECTED_MESSAGE = 'Test log message';
-
 spaceTest.describe(
   'Logs profile - Summary column',
   {
@@ -51,8 +47,8 @@ spaceTest.describe(
       );
 
       const summaryCell = dataGrid.getCellValue(0, SUMMARY_COLUMN_ID);
-      await expect(summaryCell).toContainText(EXPECTED_HOST);
-      await expect(summaryCell).toContainText(EXPECTED_MESSAGE);
+      await expect(summaryCell).toContainText(LOGS.SYNTH_LOGS_HOST);
+      await expect(summaryCell).toContainText(LOGS.SYNTH_LOGS_MESSAGE);
     });
 
     spaceTest(
@@ -61,15 +57,15 @@ spaceTest.describe(
         const { discover, dataGrid } = pageObjects;
 
         await discover.goto({ queryMode: 'classic' });
-        await discover.selectDataView(LOGS.ALL_LOGS_DATA_VIEW);
+        await discover.selectDataView(LOGS.ALL_LOGS_DATA_VIEW, { createAdHocIfMissing: false });
         await discover.waitUntilTabIsLoaded();
 
         // Summary is contributed by the logs profile as a default column.
-        expect(await dataGrid.getColumnTitles()).toContain('Summary');
+        await expect.poll(() => dataGrid.getColumnTitles()).toContain('Summary');
 
         const summaryCell = dataGrid.getCellValue(0, SUMMARY_COLUMN_ID);
-        await expect(summaryCell).toContainText(EXPECTED_HOST);
-        await expect(summaryCell).toContainText(EXPECTED_MESSAGE);
+        await expect(summaryCell).toContainText(LOGS.SYNTH_LOGS_HOST);
+        await expect(summaryCell).toContainText(LOGS.SYNTH_LOGS_MESSAGE);
       }
     );
   }

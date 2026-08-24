@@ -16,6 +16,7 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
   const from = new Date(LOGS.DEFAULT_START_TIME).getTime();
   const to = new Date(LOGS.DEFAULT_END_TIME).getTime();
 
+  // Logs data: the data source that triggers the logs profile.
   const { logsEsClient } = await getSynthtraceClient('logsEsClient', {
     esClient,
     log,
@@ -29,11 +30,16 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
       .generator((timestamp: number) =>
         logDoc
           .create()
-          .message('Test log message for recommended fields')
+          .message(LOGS.SYNTH_LOGS_MESSAGE)
+          .hostName(LOGS.SYNTH_LOGS_HOST)
           .timestamp(timestamp)
           .dataset(LOGS.SYNTH_LOGS_DATASET)
           .namespace(LOGS.SYNTH_LOGS_NAMESPACE)
           .logLevel('info')
+          .defaults({
+            'event.dataset': LOGS.SYNTH_LOGS_DATASET,
+            'log.level': 'info',
+          })
       ),
   ]);
   log.debug('[setup:logs] synthtrace logs data indexed');
@@ -61,7 +67,7 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
   const intervalMs = 10 * 60 * 1000;
   const documents = Array.from({ length: 1 + (to - from) / intervalMs }, (_, i) => ({
     '@timestamp': new Date(from + i * intervalMs).toISOString(),
-    'host.name': LOGS.NON_LOGS_HOST,
+    'host.name': 'synth-metrics-host-01',
     'system.cpu.total.norm.pct': 0.98,
     'system.memory.actual.used.pct': 0.5,
   }));
