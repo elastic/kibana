@@ -360,6 +360,14 @@ const findUnescapedQuoteIndex = (
   return -1;
 };
 
+const findOpeningQuoteStartColumn = (lineContentBeforePosition: string): number | undefined => {
+  for (let index = lineContentBeforePosition.length - 1; index >= 0; index--) {
+    if (lineContentBeforePosition[index] === '"' && !isEscaped(lineContentBeforePosition, index)) {
+      return index + 1;
+    }
+  }
+};
+
 // If there is a closing `"` after the cursor, include it in the replacement range so accepting
 // a suggestion replaces the rest of the token instead of duplicating the quote.
 const getCompletionEndColumn = (
@@ -435,7 +443,9 @@ const getSuggestions = (
   // Check if we're typing a field name with a trailing dot
   // Check if we're typing a nested field name (contains a dot)
   // This handles both "category." (trailing dot) and "category.keywor" (partial field after dot)
-  const quotedFieldWithDotMatch = lineContentBeforePosition.match(/"([^"]*\.[^"]*)$/);
+  const quotedFieldWithDotMatch = /:\s*"[^"]*$/.test(lineContentBeforePosition)
+    ? null
+    : lineContentBeforePosition.match(/"([^"]*\.[^"]*)$/);
   // Also check for unquoted fields with dots (e.g., index.mode without quotes)
   const unquotedFieldWithDotMatch = lineContentBeforePosition.match(
     /(?:^|[\s{:,\[])([a-zA-Z_][\w]*(?:\.[\w]+)+)$/
@@ -473,12 +483,15 @@ const getSuggestions = (
   };
 
   // Primitive terms insert bare JSON literals (`true`, `0`), so when the cursor is inside a
-  // quoted string the replacement range must also cover the opening quote, otherwise accepting
-  // leaves it behind (`"refresh": "false`). String terms don't need this: they re-insert the
-  // closing quote themselves without the opening one.
-  const startsInsideQuotedString =
-    isInsideQuotedString && lineContentBeforePosition.charAt(startColumn - 2) === '"';
-  const primitiveTermRange = { ...range, startColumn: startColumn - 1 };
+  // quoted string the replacement range must also cover the opening quote. Monaco can start the
+  // current word after JSON punctuation (`-`, `.`), so scan back to the string boundary instead
+  // of shifting by one column.
+  const primitiveTermRangeStartColumn =
+    isInsideQuotedString && findOpeningQuoteStartColumn(lineContentBeforePosition);
+  const primitiveTermRange =
+    primitiveTermRangeStartColumn !== false && primitiveTermRangeStartColumn !== undefined
+      ? { ...range, startColumn: primitiveTermRangeStartColumn }
+      : range;
 
   return (
     filterTermsWithoutName(autocompleteSet)
@@ -507,8 +520,7 @@ const getSuggestions = (
           detail: i18nTexts.api,
           // the kind is only used to configure the icon
           kind: monaco.languages.CompletionItemKind.Constant,
-          range:
-            typeof item.name !== 'string' && startsInsideQuotedString ? primitiveTermRange : range,
+          range: typeof item.name !== 'string' ? primitiveTermRange : range,
           insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           ...(endsInsideEmptyContainer
             ? { command: { id: 'editor.action.triggerSuggest', title: '' } }
