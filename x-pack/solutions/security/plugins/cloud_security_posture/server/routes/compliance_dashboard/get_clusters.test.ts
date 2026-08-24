@@ -103,7 +103,9 @@ describe('getClusters', () => {
       statusCode: 413,
     });
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('max response size'));
+    // Logging is intentionally deferred to the route handler (benchmarks.ts) to avoid
+    // double-logging. getClusters itself does not log the size-exceeded case.
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
   });
 

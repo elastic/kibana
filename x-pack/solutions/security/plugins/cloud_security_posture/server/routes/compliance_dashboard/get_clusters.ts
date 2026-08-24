@@ -136,8 +136,8 @@ export const getClusters = async (
   } catch (err) {
     if (isMaximumResponseSizeExceededError(err)) {
       // The top_hits payload exceeded elasticsearch.maxResponseSize. This is a data-volume
-      // issue, not a code bug — log at warn to avoid re-paging on-call engineers.
-      logger.warn(`Benchmarks cluster query exceeded max response size: ${err.message}`);
+      // issue, not a code bug. Throw a 413 so the route handler can log at warn level
+      // (avoiding re-paging on-call engineers) and return an actionable message to the client.
       const sizeError = new Error(
         'Too many cluster findings to load. Try reducing the number of monitored accounts or contact support.'
       ) as Error & { statusCode: number };
