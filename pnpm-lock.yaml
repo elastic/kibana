@@ -4626,8 +4626,8 @@ importers:
         specifier: 1.8.0
         version: 1.8.0
       monaco-yaml:
-        specifier: 5.4.0
-        version: 5.4.0(monaco-editor@0.54.0)
+        specifier: 5.5.1
+        version: 5.5.1(monaco-editor@0.54.0)
       mongodb:
         specifier: 6.21.0
         version: 6.21.0(socks@2.8.10)
@@ -21711,8 +21711,8 @@ packages:
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
-  monaco-yaml@5.4.0:
-    resolution: {integrity: sha512-tuBVDy1KAPrgO905GHTItu8AaA5bIzF5S4X0JVRAE/D66FpRhkDUk7tKi5bwKMVTTugtpMLsXN4ewh4CgE/FtQ==}
+  monaco-yaml@5.5.1:
+    resolution: {integrity: sha512-vLR1EoV7Au0tkuA9T6ZJr2q7CooRP69AvlqzWh9Gui6amuijdTsfCAQHtCFobRMwkhbuly6J1Q16NziTTiWtWQ==}
     peerDependencies:
       monaco-editor: '>=0.36'
 
@@ -23009,6 +23009,9 @@ packages:
   proxy-agent@8.0.2:
     resolution: {integrity: sha512-idLLRewuemWd7GH/BDJzGiB0dWGfT2SQs3jy6NtZtGWU9uPTTSdeC1/cdbqLwgzhfv027daGFuXX426e2Eg20A==}
     engines: {node: '>= 20'}
+
+  proxy-disposable@1.0.0:
+    resolution: {integrity: sha512-Y673BKpFqk8XkYuoK9DGZ1RIzldz5SkzxTKc/+DkpaMdrDEbEalWlO/uMRMdJsXvdbTybJI26XDwN0KJpZDN4w==}
 
   proxy-from-env@1.0.0:
     resolution: {integrity: sha512-F2JHgJQ1iqwnHDcQjVBsq3n/uoaFL+iPW/eAeL7kVxy/2RrWaN4WroKjjvbsoRtv0ftelNyC01bjRhn/bhcf4A==}
@@ -40578,8 +40581,9 @@ snapshots:
     dependencies:
       monaco-editor: 0.54.0
 
-  monaco-yaml@5.4.0(monaco-editor@0.54.0):
+  monaco-yaml@5.5.1(monaco-editor@0.54.0):
     dependencies:
+      '@vscode/l10n': 0.0.18
       jsonc-parser: 3.3.1
       monaco-editor: 0.54.0
       monaco-languageserver-types: 0.4.1
@@ -40588,6 +40592,7 @@ snapshots:
       monaco-worker-manager: 2.0.1(monaco-editor@0.54.0)
       path-browserify: 1.0.1
       prettier: 3.9.8
+      proxy-disposable: 1.0.0
       vscode-languageserver-textdocument: 1.0.12
       vscode-languageserver-types: 3.17.5
       vscode-uri: 3.2.0
@@ -42000,6 +42005,8 @@ snapshots:
     transitivePeerDependencies:
       - kerberos
       - supports-color
+
+  proxy-disposable@1.0.0: {}
 
   proxy-from-env@1.0.0: {}
 

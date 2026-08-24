@@ -16,7 +16,7 @@ import { monaco } from './monaco_imports';
 export const DEFAULT_WORKER_ID = 'default' as const;
 
 const langSpecificWorkerIds = [
-  monaco.languages.json.jsonDefaults.languageId,
+  monaco.languages.json.jsonDefaults.languageId as 'json',
   XJSON_LANG_ID,
   PAINLESS_LANG_ID,
   YAML_LANG_ID,
@@ -26,6 +26,11 @@ const langSpecificWorkerIds = [
 // exported for use in webpack config to build workers
 export type LangSpecificWorkerIds = [typeof DEFAULT_WORKER_ID, ...typeof langSpecificWorkerIds];
 
+const isLangSpecificWorkerId = (
+  languageId: string
+): languageId is (typeof langSpecificWorkerIds)[number] =>
+  langSpecificWorkerIds.some((id) => id === languageId);
+
 const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 
 export const getWorkerUrl = (languageId: string): string => {
@@ -33,7 +38,7 @@ export const getWorkerUrl = (languageId: string): string => {
     throw new Error('Could not resolve Monaco bundle directory');
   }
 
-  const workerId = langSpecificWorkerIds.includes(languageId) ? languageId : DEFAULT_WORKER_ID;
+  const workerId = isLangSpecificWorkerId(languageId) ? languageId : DEFAULT_WORKER_ID;
   return `${monacoBundleDir}${workerId}.editor.worker.js`;
 };
 
