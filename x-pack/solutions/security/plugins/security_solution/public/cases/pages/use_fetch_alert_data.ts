@@ -16,6 +16,8 @@ import { buildAlertsQuery, formatAlertToEcsSignal } from '../../common/utils/ale
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
+// The third element (refetch) is null before the first fetch completes — AlertEvent relies
+// on this to show a spinner instead of "Unknown rule" on the initial render. See use_query.tsx.
 export const useFetchAlertData = (
   alertIds: string[]
 ): [boolean, Record<string, unknown>, (() => void) | null] => {

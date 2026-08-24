@@ -79,10 +79,10 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   // to clear before the retry fetch starts.
   const hasRetried = useRef(false);
 
-  // refetchAlertData is null before the first fetch completes (useQueryAlerts initialises
-  // refetch to null). We use this to distinguish "fetch not started yet" from "fetch
-  // completed with no data", avoiding a flash of "Unknown rule" on the initial render
-  // before the useEffect in useQueryAlerts fires (#284799).
+  // useQueryAlerts (via useFetchAlertData) initialises refetch to null and only sets it
+  // after the first fetch attempt completes — see use_query.tsx. null therefore means
+  // "no fetch has run yet", which is distinct from "fetch returned empty results".
+  // This prevents a flash of "Unknown rule" on initial render (#284799).
   const firstFetchReturnedNoData =
     !hasRuleIdFromMetadata &&
     !loadingAlertData &&
@@ -90,14 +90,20 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
     alertsData[alertId] == null &&
     !hasRetried.current;
 
-  // Schedule a single retry after the initial burst of concurrent fetches settles so the
-  // retry isn't also overwhelmed.
+  // Schedule a single 300ms retry for the concurrent-race case (N components mounting
+  // simultaneously can overwhelm the data view and get empty results on the first round).
+  // Known limitation: if a parent re-render occurs between this effect setting
+  // hasRetried.current=true and the retry fetch setting loadingAlertData=true, the spinner
+  // will briefly drop. This window is 300ms and requires an external re-render trigger —
+  // acceptable given the improvement over the pre-fix "Unknown rule" staying permanently.
   useEffect(() => {
-    if (firstFetchReturnedNoData && refetchAlertData != null) {
-      hasRetried.current = true;
-      const timer = setTimeout(refetchAlertData, 300);
-      return () => clearTimeout(timer);
-    }
+    if (!firstFetchReturnedNoData) return;
+    // refetchAlertData !== null is guaranteed by firstFetchReturnedNoData above;
+    // the explicit check is required for TypeScript to narrow the type.
+    if (refetchAlertData == null) return;
+    hasRetried.current = true;
+    const timer = setTimeout(refetchAlertData, 300);
+    return () => clearTimeout(timer);
   }, [firstFetchReturnedNoData, refetchAlertData]);
 
   const { ruleId: resolvedRuleId, ruleName: resolvedRuleName } = useMemo(

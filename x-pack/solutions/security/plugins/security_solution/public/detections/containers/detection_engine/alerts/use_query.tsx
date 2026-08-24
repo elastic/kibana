@@ -93,6 +93,9 @@ export const useQueryAlerts = <Hit, Aggs>({
     response: '',
     request: '',
     setQuery,
+    // null until the first fetch attempt completes (success or error). AlertEvent in the
+    // cases plugin reads this via useFetchAlertData to distinguish "no fetch has run yet"
+    // from "fetch returned empty results". Do not change to a no-op or initialise eagerly.
     refetch: null,
   });
   const [loading, setLoading] = useState(false);
