@@ -77,7 +77,7 @@ export const HttpFormDataFieldSchema = lazySchema(() =>
 );
 
 export const QueryParamScalarSchema = z.union([z.string(), z.number(), z.boolean()]);
-
+export type QueryParamScalar = z.infer<typeof QueryParamScalarSchema>;
 export const QueryParamValueSchema = z.union([
   QueryParamScalarSchema,
   z.array(QueryParamScalarSchema),
