@@ -312,7 +312,7 @@ export const EditCustomContentFlyout = ({
                   data-test-subj="customContentRunPreviewButton"
                 >
                   {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {
-                    defaultMessage: 'Run Preview',
+                    defaultMessage: 'Run preview',
                   })}
                 </EuiButton>
               </EuiFlexItem>

@@ -10,7 +10,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useCustomContentHtml } from '../hooks/use_custom_content_html';
 import { getServices } from '../services';
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
@@ -25,7 +25,6 @@ interface CustomContentComponentProps {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
-  onErrorChange?: (error: string | undefined) => void;
   previewHtml: string | null;
   onGenerateWithChat?: () => void;
 }
@@ -59,7 +58,6 @@ export const CustomContentComponent = ({
   projectRouting,
   query,
   filters,
-  onErrorChange,
   previewHtml,
   onGenerateWithChat,
 }: CustomContentComponentProps) => {
@@ -80,10 +78,6 @@ export const CustomContentComponent = ({
 
   const { agentBuilder } = getServices();
   const isAiAvailable = Boolean(agentBuilder);
-
-  useEffect(() => {
-    onErrorChange?.(error);
-  }, [error, onErrorChange]);
 
   const wrapperCss = useMemo(
     () =>
