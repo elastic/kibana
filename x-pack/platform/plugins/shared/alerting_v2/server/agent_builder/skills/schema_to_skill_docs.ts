@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ACTION_POLICY_MANAGEMENT_SKILL_ID, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
+import {
+  ACTION_POLICY_MANAGEMENT_SKILL_ID,
+  RULE_KIND_LABELS,
+  RULE_MANAGEMENT_SKILL_ID,
+} from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
@@ -22,6 +26,7 @@ import {
   PER_EPISODE_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
+  MAX_GROUPING_FIELDS,
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
@@ -680,6 +685,114 @@ export const generateEpisodeLifecycleDoc = (): string => {
   ].join('\n');
 };
 
+/**
+ * Generates standalone markdown for alert grouping: `set_grouping`,
+ * `STATS ... BY`, query-column alignment, and common scenarios.
+ */
+export const generateAlertGroupingDoc = (): string => {
+  return [
+    '# Alert Grouping',
+    '',
+    '`set_grouping` defines **alert identity**. Each unique combination of grouping-field',
+    'values gets its own alert (`group_hash`) and independent lifecycle. See the',
+    '[alert lifecycle reference](./episode-lifecycle.md).',
+    '',
+    '## When to set grouping',
+    '',
+    'Use `set_grouping` when the user wants a **separate alert per entity** — per host,',
+    'per service, per cluster, and so on.',
+    '',
+    'Omit `set_grouping` when the user wants a **single combined alert** for the whole',
+    'query result (a global / ungrouped threshold).',
+    '',
+    '## Relationship to ES|QL `STATS ... BY`',
+    '',
+    '`STATS ... BY <field>` and `set_grouping` are complementary, not interchangeable:',
+    '',
+    '1. **`STATS ... BY <field>`** (in the query) produces **one result row per unique',
+    '   `<field>` value**. Those BY fields become query output columns.',
+    '2. **`set_grouping` with those same fields** tells the alerting engine to treat each',
+    '   of those rows as a **separate, stable alert**.',
+    '',
+    'Typical pattern:',
+    '',
+    '```',
+    'set_query:     FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+    '               breach: WHERE avg_cpu > 0.9',
+    'set_grouping:  fields: ["host.name"]',
+    '```',
+    '',
+    'If you `STATS ... BY host.name` but omit `set_grouping`, alert identity is not',
+    'tied to `host.name` and is not stable across executions. Always pair `STATS ... BY`',
+    'with matching `set_grouping` fields.',
+    '',
+    'If you `set_grouping` without a `STATS ... BY` clause, grouping fields must still',
+    'appear as output columns (for example `KEEP host.name, ...` on a match-style query).',
+    '',
+    '## Column alignment',
+    '',
+    '- Grouping fields **must be output columns** of the query. Use the names ES|QL',
+    '  returns (`host.name`), not a source field that was aggregated away.',
+    '- Put `set_query` **before** `set_grouping` in the same `operations` array so the',
+    '  tool can validate fields against query columns. Missing fields throw:',
+    '  `Grouping fields not found in query output columns`.',
+    `- Maximum ${MAX_GROUPING_FIELDS} grouping fields.`,
+    '',
+    '## Notifications',
+    '',
+    'Alert grouping only decides which rows become which alerts. How those alerts are',
+    'batched into emails, Slack messages, or other notifications is configured on an',
+    'action policy. Load the',
+    `\`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill when the user asks how notifications`,
+    'should be grouped.',
+    '',
+    '## Common scenarios',
+    '',
+    '### Per-host',
+    '',
+    'User: "alert me when CPU is high on any host"',
+    '',
+    '```',
+    'set_query:     FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+    '               breach: WHERE avg_cpu > 0.9',
+    'set_grouping:  fields: ["host.name"]',
+    '```',
+    '',
+    'Each host gets its own alert.',
+    '',
+    '### Per-service',
+    '',
+    'User: "alert me per service when error rate is high"',
+    '',
+    '```',
+    'set_query:     FROM logs-* | STATS error_count = COUNT(*) BY service.name',
+    '               breach: WHERE error_count >= 10',
+    'set_grouping:  fields: ["service.name"]',
+    '```',
+    '',
+    '### Multi-field (host and service)',
+    '',
+    'User: "alert me per host and service"',
+    '',
+    '```',
+    'set_query:     FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name, service.name',
+    '               breach: WHERE avg_cpu > 0.9',
+    'set_grouping:  fields: ["host.name", "service.name"]',
+    '```',
+    '',
+    '### Ungrouped',
+    '',
+    'User: "alert me if total errors across the cluster exceed 100"',
+    '',
+    '```',
+    'set_query:     FROM logs-* | STATS error_count = COUNT(*)',
+    '               breach: WHERE error_count > 100',
+    '```',
+    '',
+    'Omit `set_grouping`. There is a single aggregate row and no per-entity split.',
+  ].join('\n');
+};
+
 /** Generates standalone markdown for alert event severity: valid values and ES|QL patterns. */
 export const generateSeverityDoc = (): string => {
   const values = formatEnumValuesList(getSeverityValues());
@@ -789,6 +902,11 @@ export const generateGroupingModesDoc = (): string => {
 
   return [
     '# Grouping Modes',
+    '',
+    'Action-policy grouping batches **already-created alerts** into notifications.',
+    'It does not define which query rows become which alerts — that is alert',
+    `grouping (\`set_grouping\` \`fields\` on the rule). Load the \`${RULE_MANAGEMENT_SKILL_ID}\``,
+    'skill for alert grouping.',
     '',
     list,
     '',

@@ -58,7 +58,7 @@ Use operations[] to:
      - standalone: required "breach: { query }", optional "recovery: { query }" (only when recovery_strategy is "query") and "no_data: { query }" (only when no_data_strategy is not "none")
    - recovery_strategy (optional): "no_breach" | "query" | "none" — "no_breach" recovers when breach stops, "query" runs a separate recovery query, "none" disables recovery. Signal rules cannot set this.
    - no_data_strategy (optional): "last_known_status" | "recover" | "none" — controls behaviour when no data is present; requires a "no_data" block in standalone queries. Signal rules cannot set this. ("emit" is not currently accepted by the create/update API — do not use it.)
-5. set_grouping — set fields to group alerts by
+5. set_grouping — set fields so each entity gets its own alert (must match query output columns; typically the STATS ... BY fields)
 6. set_state_transition — set consecutive breaches threshold
 7. validate — validate the accumulated rule against the API request schema; throws if not ready to save`,
   schema: manageRuleSchema,

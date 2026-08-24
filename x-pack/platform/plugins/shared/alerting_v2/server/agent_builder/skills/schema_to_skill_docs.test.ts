@@ -15,6 +15,7 @@ import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
   generateEpisodeLifecycleDoc,
+  generateAlertGroupingDoc,
   generateStateTransitionDoc,
   generateRecoveryStrategyDoc,
   generateNoDataStrategyDoc,
@@ -255,6 +256,9 @@ describe('schema_to_skill_docs', () => {
         'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
       );
       expect(doc).toContain("Use `set_kind` to choose a rule kind matching the user's goal");
+      expect(doc).toContain(
+        'Use `set_grouping` to split alerts by entity (host, service, etc.) so each group has its own alert. Fields must be query output columns — typically the same fields as `STATS ... BY`.'
+      );
     });
   });
 
@@ -442,6 +446,32 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
+  describe('generateAlertGroupingDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateAlertGroupingDoc()).toMatchSnapshot();
+    });
+
+    it('explains STATS BY alignment, column validation, and hands off notification grouping', () => {
+      const doc = generateAlertGroupingDoc();
+      expect(doc).toContain('# Alert Grouping');
+      expect(doc).toContain('STATS ... BY');
+      expect(doc).toContain('set_query');
+      expect(doc).toContain('set_grouping');
+      expect(doc).toContain('query output columns');
+      expect(doc).toContain('### Per-host');
+      expect(doc).toContain('### Per-service');
+      expect(doc).toContain('### Ungrouped');
+      expect(doc).toContain('## Notifications');
+      expect(doc).toContain('action-policy-management');
+      expect(doc).not.toContain('groupingMode');
+      expect(doc).not.toContain('per_episode');
+      expect(doc).not.toContain('This is not');
+      expect(doc).toContain('[alert lifecycle reference](./episode-lifecycle.md)');
+      expect(doc.replaceAll('episode-lifecycle.md', '')).not.toMatch(/episode/i);
+      expect(doc).not.toContain('./references/');
+    });
+  });
+
   describe('generateRecoveryStrategyDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateRecoveryStrategyDoc()).toMatchSnapshot();
@@ -482,6 +512,9 @@ describe('schema_to_skill_docs', () => {
       const doc = generateGroupingModesDoc();
       expect(doc).toContain('# Grouping Modes');
       expect(doc).toContain('action-policy-throttle-grouping-compatibility.md');
+      expect(doc).toContain('already-created alerts');
+      expect(doc).toContain('rule-management');
+      expect(doc).toContain('alert grouping');
     });
   });
 
@@ -654,6 +687,7 @@ describe('schema_to_skill_docs', () => {
       ['manage_rule operation .describe()', generateRuleOperationsDoc],
       ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
       ['generateEnumTable (episode status from spec)', generateEpisodeLifecycleDoc],
+      ['generateAlertGroupingDoc from spec', generateAlertGroupingDoc],
       ['generateEnumTable (no-data strategy from spec)', generateNoDataStrategyDoc],
       ['generateEnumList (recovery strategy from spec)', generateRecoveryStrategyDoc],
       ['generateEnumList (grouping modes from spec)', generateGroupingModesDoc],

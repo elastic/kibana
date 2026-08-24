@@ -18,6 +18,7 @@ import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
   generateEpisodeLifecycleDoc,
+  generateAlertGroupingDoc,
   generateSeverityDoc,
   generateRecoveryStrategyDoc,
   generateNoDataStrategyDoc,
@@ -43,6 +44,11 @@ export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
         name: 'episode-lifecycle',
         relativePath: './references',
         content: generateEpisodeLifecycleDoc(),
+      },
+      {
+        name: 'alert-grouping',
+        relativePath: './references',
+        content: generateAlertGroupingDoc(),
       },
       {
         name: 'alert-event-severity',
@@ -98,7 +104,7 @@ Build the request for ${
       ALERTING_TOOL_IDS.manageRule
     } as an ordered \`operations\` array. Operations run in sequence.
 
-For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, and \`set_query\`.
+For a new rule, start with \`set_metadata\` (name required), then \`set_kind\`, \`set_schedule\`, and \`set_query\`. If the condition is per-entity (per host, per service, etc.), add \`set_grouping\` after \`set_query\` so grouping fields can be validated against query output columns. Consult the [alert-grouping reference](./references/alert-grouping.md).
 
 For an existing rule, pass the \`ruleAttachmentId\` and only include the operations needed for the changes requested.
 
@@ -118,13 +124,12 @@ ${generateRuleOperationsDoc()}
 - Do **not** include time range filters in the query — the lookback window is applied automatically.
 - The query must return rows for an alert to fire. Use \`| WHERE ...\` to filter for breach conditions.
 - Prefer \`FROM <index-pattern> | STATS ... BY <group-field> | WHERE <condition>\` for threshold-based alerting.
+- Pair \`STATS ... BY <field>\` with \`set_grouping\` using those same fields so each group is a stable alert. Grouping fields must be query output columns; run \`set_query\` before \`set_grouping\`. Consult the [alert-grouping reference](./references/alert-grouping.md).
 - **Never** use backtick quoting around index names or field names in ES|QL. Standard index patterns (letters, digits, dashes, dots, underscores, wildcards, and colons for CCS) do not require backticks. Backticks break cross-cluster search and are almost never needed in practice. Write \`FROM remote_cluster:metrics-system.cpu-default\`, not \`FROM \\\`remote_cluster:metrics-system.cpu-default\\\`\`.
 - The \`set_schedule\` lookback should be >= the execution interval (\`every\`).
 - The \`set_query\` operation validates the query against Elasticsearch automatically.
   If the query references an unknown index or field, the tool will return an error
   with the Elasticsearch error message. Inspect the error, fix the query, and retry.
-- If grouping fields are set after a query, they are validated against the query's
-  output columns. Use fields that appear in the query results.
 
 ## Final Validation
 
@@ -183,6 +188,9 @@ When the user asks whether a rule should notify, record events only, or about th
 
 ### Episode Lifecycle
 When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\` means, why an alert has not fired yet, or how group state works, consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
+
+### Alert grouping
+When the user wants per-host or per-service alerts, or asks how grouping relates to \`STATS ... BY\`, consult the [alert-grouping reference](./references/alert-grouping.md). If they ask about grouping notifications, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill.
 
 ### Severity
 When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.
