@@ -27,7 +27,7 @@ import type { CreateSLOForm } from '../../types';
 
 export function ProjectRoutingsSelector() {
   const { watch, setValue } = useFormContext<CreateSLOForm>();
-  const { isGateOpen, fetchProjects } = useCpsProjectScope();
+  const { showProjectScopeUI, fetchProjects } = useCpsProjectScope();
   const projectRoutings = watch('settings.projectRoutings');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -60,11 +60,11 @@ export function ProjectRoutingsSelector() {
   );
 
   useEffect(() => {
-    if (!isGateOpen || linkedProjects.length === 0 || projectRoutings !== undefined) {
+    if (!showProjectScopeUI || linkedProjects.length === 0 || projectRoutings !== undefined) {
       return;
     }
     setValue('settings.projectRoutings', LOCAL_PROJECT_ROUTING);
-  }, [isGateOpen, linkedProjects.length, projectRoutings, setValue]);
+  }, [showProjectScopeUI, linkedProjects.length, projectRoutings, setValue]);
 
   const handleProjectRoutingChange = useCallback(
     (nextProjectRouting: ProjectRouting) => {
@@ -79,7 +79,7 @@ export function ProjectRoutingsSelector() {
     [originProjectId, setValue]
   );
 
-  if (!isGateOpen) {
+  if (!showProjectScopeUI) {
     return null;
   }
 

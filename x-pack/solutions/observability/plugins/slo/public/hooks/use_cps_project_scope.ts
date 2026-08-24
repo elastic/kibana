@@ -12,8 +12,7 @@ import { useKibana } from './use_kibana';
 import { usePluginContext } from './use_plugin_context';
 
 export interface CpsProjectScope {
-  /** Whether project scope UI may render at all. */
-  isGateOpen: boolean;
+  showProjectScopeUI: boolean;
   cpsManager: ICPSManager | undefined;
   /** Stable callback for the picker components, which hold it in effect dependencies. */
   fetchProjects: (projectRouting?: ProjectRouting) => Promise<ProjectsData | null>;
@@ -32,7 +31,7 @@ export function useCpsProjectScope(): CpsProjectScope {
   );
 
   return {
-    isGateOpen: Boolean(isServerless && cps?.isTierEligible && cpsManager),
+    showProjectScopeUI: Boolean(isServerless && cps?.isTierEligible && cpsManager),
     cpsManager,
     fetchProjects,
   };

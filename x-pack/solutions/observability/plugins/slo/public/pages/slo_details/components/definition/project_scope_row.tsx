@@ -70,7 +70,7 @@ export interface Props {
 }
 
 export function ProjectScopeRow({ slo }: Props) {
-  const { isGateOpen, cpsManager, fetchProjects } = useCpsProjectScope();
+  const { showProjectScopeUI, cpsManager, fetchProjects } = useCpsProjectScope();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverTitleId = useGeneratedHtmlId();
 
@@ -79,7 +79,7 @@ export function ProjectScopeRow({ slo }: Props) {
   const projectRouting =
     toPickerProjectRouting(projectRoutings, preventCrossProjectSearch) ?? LOCAL_PROJECT_ROUTING;
 
-  if (!isGateOpen || !cpsManager) {
+  if (!showProjectScopeUI || !cpsManager) {
     return null;
   }
 
