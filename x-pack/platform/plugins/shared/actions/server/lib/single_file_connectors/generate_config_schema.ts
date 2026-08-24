@@ -17,7 +17,7 @@ export const generateConfigSchema = (
 ): ValidatorType<ActionTypeConfig> => {
   const authType = z.string().optional();
   // null/absent = recommended (isTool) actions; non-empty array = explicit allowlist.
-  const selectedActions = z.array(z.string()).nullish();
+  const selectedActions = z.array(z.string().max(256)).max(500).nullish();
   const configSchema = schema
     ? schema.extend({ authType, selectedActions })
     : z.object({ authType, selectedActions });

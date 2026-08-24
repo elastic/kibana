@@ -131,8 +131,8 @@ export const createExecuteConnectorSubActionTool = ({
       };
     }
 
-    // Validate that the sub-action is marked as a tool in the connector spec
-    if (!isToolAction(spec, subAction)) {
+    // Validate the sub-action is allowed.
+    if (!Array.isArray(selectedActions) && !isToolAction(spec, subAction)) {
       return {
         results: [
           createErrorResult({

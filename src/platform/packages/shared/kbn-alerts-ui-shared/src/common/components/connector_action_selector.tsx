@@ -180,6 +180,8 @@ export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = (
   currentPageActionsRef.current = currentPageActions;
 
   const handleModeChange = useCallback(() => {
+    setSearchText('');
+    setPageIndex(0);
     if (isAll) {
       onChange(previousSpecificRef.current ?? defaultReadActionNames);
     } else {

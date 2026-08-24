@@ -40,7 +40,7 @@ export interface ConnectorActionWireDef {
   name: string;
   description?: string;
   is_tool: boolean;
-  scope?: 'read' | 'write' | 'destroy';
+  scope?: ActionScope;
 }
 
 /** Client-side connector spec after normalising API casing. */
