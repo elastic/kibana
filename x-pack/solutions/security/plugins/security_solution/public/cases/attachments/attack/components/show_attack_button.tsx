@@ -20,6 +20,14 @@ const SHOW_ATTACK_TOOLTIP = i18n.translate(
   { defaultMessage: 'Show attack details' }
 );
 
+const ATTACK_UNAVAILABLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.cases.attackUnavailable',
+  {
+    defaultMessage:
+      'This attack could not be loaded, so its details cannot be opened. It may have been deleted, aged into a frozen tier, or be outside your access.',
+  }
+);
+
 export interface ShowAttackButtonProps {
   /** Id used to build the action's `data-test-subj` and DOM id, usually the attachment saved object id. */
   id: string;
@@ -29,6 +37,11 @@ export interface ShowAttackButtonProps {
   indexName: string;
   /** The attack title, used to label the flyout history entry. */
   attackTitle?: string;
+  /**
+   * Disables navigation when the attack document could not be resolved — there is nothing for
+   * the flyout to open. The tooltip explains why instead of silently doing nothing.
+   */
+  isDisabled?: boolean;
 }
 
 /**
@@ -40,6 +53,7 @@ export const ShowAttackButton = ({
   attackId,
   indexName,
   attackTitle,
+  isDisabled = false,
 }: ShowAttackButtonProps) => {
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openAttackFlyout } = useFlyoutApi();
@@ -66,10 +80,14 @@ export const ShowAttackButton = ({
   }, [attackId, attackTitle, enableNewFlyout, indexName, openAttackFlyout, openFlyout]);
 
   return (
-    <EuiToolTip position="top" content={<p>{SHOW_ATTACK_TOOLTIP}</p>}>
+    <EuiToolTip
+      position="top"
+      content={<p>{isDisabled ? ATTACK_UNAVAILABLE_TOOLTIP : SHOW_ATTACK_TOOLTIP}</p>}
+    >
       <EuiButtonIcon
         aria-label={SHOW_ATTACK_TOOLTIP}
         data-test-subj={`${SHOW_ATTACK_BUTTON_TEST_ID}-${id}`}
+        disabled={isDisabled}
         onClick={onClick}
         iconType="chevronSingleRight"
         id={`${id}-show-attack`}

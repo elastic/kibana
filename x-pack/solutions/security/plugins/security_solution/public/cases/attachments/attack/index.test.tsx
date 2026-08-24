@@ -58,7 +58,14 @@ describe('Attack attachment', () => {
       getLabel: expect.any(Function),
       schema: AttackAttachmentPayloadSchema,
       getCreationActivity: expect.any(Function),
+      getAttachmentList: expect.any(Function),
     });
+  });
+
+  it('exposes an attachments list view so attacks get their own section in the Attachments tab', () => {
+    const attackType = getAttackAttachment();
+
+    expect(attackType.getAttachmentList?.()?.children).toBeDefined();
   });
 
   it('renders the activity event text correctly', () => {

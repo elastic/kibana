@@ -15,3 +15,6 @@ export const ADD_TO_NEW_CASE_TEST_ID = 'adCasesAddToNewCase';
 export const ADD_TO_EXISTING_CASE_TEST_ID = 'adCasesAddToExistingCase';
 export const ATTACK_TAB_TABLE_TEST_ID = 'adCasesAttackTabTable';
 export const ATTACK_TAB_EMPTY_TEST_ID = 'adCasesAttackTabEmpty';
+export const ATTACK_TAB_ROW_TITLE_TEST_ID = 'adCasesAttackTabRowTitle';
+export const ATTACK_TAB_ROW_STATUS_TEST_ID = 'adCasesAttackTabRowStatus';
+export const ATTACK_TAB_ROW_UNRESOLVED_TEST_ID = 'adCasesAttackTabRowUnresolved';
