@@ -828,7 +828,24 @@ describe('SmlService', () => {
   });
 
   describe('autocomplete', () => {
-    it('builds a single nested discovery_labels query (with inner_hits) and a space filter', async () => {
+    const titlePrefixQuery = (text: string) => ({
+      match_bool_prefix: { title: { query: text, operator: 'and' } },
+    });
+
+    /**
+     * A "type/name" query is only recognised when the left side names a registered
+     * type, so tests exercising that syntax must register the type first.
+     */
+    const startServiceWithTypes = (typeIds: string[]) => {
+      const service = createSmlService();
+      const { registerType } = service.setup({ logger });
+      for (const id of typeIds) {
+        registerType(createMockSmlTypeDefinition({ id }));
+      }
+      return service.start({ logger });
+    };
+
+    it('matches the typed text against title or type, with a space filter', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -851,34 +868,9 @@ describe('SmlService', () => {
         bool: {
           must: [
             {
-              nested: {
-                path: 'discovery_labels',
-                query: {
-                  multi_match: {
-                    query: 'git',
-                    type: 'bool_prefix',
-                    operator: 'and',
-                    fields: [
-                      'discovery_labels.value',
-                      'discovery_labels.value._2gram',
-                      'discovery_labels.value._3gram',
-                    ],
-                  },
-                },
-                inner_hits: {
-                  _source: ['discovery_labels.value', 'discovery_labels.kind'],
-                  size: 10,
-                  highlight: {
-                    type: 'unified',
-                    number_of_fragments: 0,
-                    pre_tags: ['<em>'],
-                    post_tags: ['</em>'],
-                    encoder: 'html',
-                    fields: {
-                      'discovery_labels.value': {},
-                    },
-                  },
-                },
+              bool: {
+                should: [titlePrefixQuery('git'), { prefix: { type: 'git' } }],
+                minimum_should_match: 1,
               },
             },
           ],
@@ -893,6 +885,51 @@ describe('SmlService', () => {
         },
       });
       expect(call._source).toEqual(['id', 'type', 'title', 'origin', 'permissions']);
+    });
+
+    it('breaks score ties deterministically instead of falling back to doc order', async () => {
+      const smlService = startServiceWithTypes(['connector']);
+
+      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+      // A type-only query runs entirely in filter context, so every hit ties on
+      // score and the tiebreak is what determines the order the menu shows.
+      await smlService.autocomplete({
+        query: 'connector/',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]!;
+      expect(call.sort).toEqual([
+        { _score: { order: 'desc' } },
+        { updated_at: 'desc' },
+        { id: 'asc' },
+      ]);
+    });
+
+    it('requires every typed token to match, trailing one as a prefix', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+      await smlService.autocomplete({
+        query: 'pacific blue',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      const call = esClient.search.mock.calls[0]![0]!;
+      const titleClause = (call.query!.bool!.must as any[])[0].bool.should[0];
+      expect(titleClause).toEqual({
+        match_bool_prefix: { title: { query: 'pacific blue', operator: 'and' } },
+      });
     });
 
     it('uses match_all for query "*"', async () => {
@@ -914,43 +951,9 @@ describe('SmlService', () => {
       expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
     });
 
-    const nameNestedQuery = (name: string) => ({
-      nested: {
-        path: 'discovery_labels',
-        query: {
-          multi_match: {
-            query: name,
-            type: 'bool_prefix',
-            operator: 'and',
-            fields: [
-              'discovery_labels.value',
-              'discovery_labels.value._2gram',
-              'discovery_labels.value._3gram',
-            ],
-          },
-        },
-        inner_hits: {
-          _source: ['discovery_labels.value', 'discovery_labels.kind'],
-          size: 10,
-          highlight: {
-            type: 'unified',
-            number_of_fragments: 0,
-            pre_tags: ['<em>'],
-            post_tags: ['</em>'],
-            encoder: 'html',
-            fields: {
-              'discovery_labels.value': {},
-            },
-          },
-        },
-      },
-    });
-
     describe('"type/name" query syntax', () => {
-      it('splits into two independent nested queries, ANDed at the parent level', async () => {
-        const service = createSmlService();
-        service.setup({ logger });
-        const smlService = service.start({ logger });
+      it('matches each half against its own field, with type in filter context', async () => {
+        const smlService = startServiceWithTypes(['connector']);
 
         esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
 
@@ -966,42 +969,15 @@ describe('SmlService', () => {
         expect(call.query!.bool!.must).toEqual([
           {
             bool: {
-              must: [
-                {
-                  nested: {
-                    path: 'discovery_labels',
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            multi_match: {
-                              query: 'connector',
-                              type: 'bool_prefix',
-                              operator: 'and',
-                              fields: [
-                                'discovery_labels.value',
-                                'discovery_labels.value._2gram',
-                                'discovery_labels.value._3gram',
-                              ],
-                            },
-                          },
-                          { term: { 'discovery_labels.kind': 'type' } },
-                        ],
-                      },
-                    },
-                  },
-                },
-                nameNestedQuery('s3'),
-              ],
+              filter: [{ terms: { type: ['connector'] } }],
+              must: [titlePrefixQuery('s3')],
             },
           },
         ]);
       });
 
-      it('falls back to a single nested query for a bare trailing slash', async () => {
-        const service = createSmlService();
-        service.setup({ logger });
-        const smlService = service.start({ logger });
+      it('matches on type alone for a bare trailing slash', async () => {
+        const smlService = startServiceWithTypes(['connector']);
 
         esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
 
@@ -1014,7 +990,123 @@ describe('SmlService', () => {
         });
 
         const call = esClient.search.mock.calls[0]![0]!;
-        expect(call.query!.bool!.must).toEqual([nameNestedQuery('connector/')]);
+        expect(call.query!.bool!.must).toEqual([
+          { bool: { filter: [{ terms: { type: ['connector'] } }] } },
+        ]);
+      });
+
+      it('resolves the type half case-insensitively', async () => {
+        const smlService = startServiceWithTypes(['connector']);
+
+        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+        await smlService.autocomplete({
+          query: 'Connector/s3',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        const call = esClient.search.mock.calls[0]![0]!;
+        expect(call.query!.bool!.must).toEqual([
+          {
+            bool: {
+              filter: [{ terms: { type: ['connector'] } }],
+              must: [titlePrefixQuery('s3')],
+            },
+          },
+        ]);
+      });
+
+      it('filters on every type an ambiguous abbreviation could mean', async () => {
+        const smlService = startServiceWithTypes([
+          'alerting_v2_rule',
+          'alerting_v2_action_policy',
+          'connector',
+        ]);
+
+        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+        await smlService.autocomplete({
+          query: 'alerting_v2/',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        const call = esClient.search.mock.calls[0]![0]!;
+        expect(call.query!.bool!.must).toEqual([
+          {
+            bool: {
+              filter: [{ terms: { type: ['alerting_v2_rule', 'alerting_v2_action_policy'] } }],
+            },
+          },
+        ]);
+      });
+
+      it('treats a slash as title punctuation when the left side is not a type', async () => {
+        const smlService = startServiceWithTypes(['connector', 'dashboard']);
+
+        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+        await smlService.autocomplete({
+          query: 'sales/marketing',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        // No registered type starts with "sales", so the whole string goes to
+        // `title` — the analyzer splits on the slash — rather than filtering on a
+        // type that cannot exist, which would return nothing.
+        const call = esClient.search.mock.calls[0]![0]!;
+        expect(call.query!.bool!.must).toEqual([titlePrefixQuery('sales/marketing')]);
+      });
+
+      it('resolves an abbreviated type id to the full id', async () => {
+        const smlService = startServiceWithTypes(['connector']);
+
+        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+        await smlService.autocomplete({
+          query: 'conn/s3',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        const call = esClient.search.mock.calls[0]![0]!;
+        expect(call.query!.bool!.must).toEqual([
+          {
+            bool: {
+              filter: [{ terms: { type: ['connector'] } }],
+              must: [titlePrefixQuery('s3')],
+            },
+          },
+        ]);
+      });
+
+      it('matches everything for a lone slash', async () => {
+        const service = createSmlService();
+        service.setup({ logger });
+        const smlService = service.start({ logger });
+
+        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+        await smlService.autocomplete({
+          query: '/',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        const call = esClient.search.mock.calls[0]![0]!;
+        expect(call.query!.bool!.must).toEqual([{ match_all: {} }]);
       });
 
       it('searches only by name when the query starts with a slash', async () => {
@@ -1033,7 +1125,7 @@ describe('SmlService', () => {
         });
 
         const call = esClient.search.mock.calls[0]![0]!;
-        expect(call.query!.bool!.must).toEqual([nameNestedQuery('s3')]);
+        expect(call.query!.bool!.must).toEqual([titlePrefixQuery('s3')]);
       });
     });
 
@@ -1070,50 +1162,36 @@ describe('SmlService', () => {
       });
     });
 
-    it('maps inner_hits onto matched_discovery_labels', async () => {
+    it('preserves the score order Elasticsearch returned', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
 
       esClient.search.mockResolvedValue({
         hits: {
-          total: 1,
+          total: 2,
           hits: [
             {
               _source: {
                 id: 'entry-1',
                 type: 'connector',
-                title: 'GitHub Connector',
+                title: 'GitHub',
                 origin: { uri: 'gh-1' },
                 spaces: ['default'],
                 permissions: makePermissions(),
               },
               _score: 5.4,
-              inner_hits: {
-                discovery_labels: {
-                  hits: {
-                    total: { value: 2, relation: 'eq' },
-                    hits: [
-                      {
-                        _nested: { field: 'discovery_labels', offset: 0 },
-                        _score: 5.4,
-                        _source: { value: 'GitHub Connector', kind: 'title' },
-                        highlight: {
-                          'discovery_labels.value': ['<em>GitHub</em> Connector'],
-                        },
-                      },
-                      {
-                        _nested: { field: 'discovery_labels', offset: 2 },
-                        _score: 4.1,
-                        _source: { value: 'github', kind: 'tagline' },
-                        highlight: {
-                          'discovery_labels.value': ['<em>github</em>'],
-                        },
-                      },
-                    ],
-                  },
-                },
+            },
+            {
+              _source: {
+                id: 'entry-2',
+                type: 'connector',
+                title: 'GitHub Enterprise Server',
+                origin: { uri: 'gh-2' },
+                spaces: ['default'],
+                permissions: makePermissions(),
               },
+              _score: 4.1,
             },
           ],
         },
@@ -1127,26 +1205,10 @@ describe('SmlService', () => {
         request,
       });
 
-      expect(result.results).toHaveLength(1);
-      expect(result.results[0]).toEqual({
-        id: 'entry-1',
-        type: 'connector',
-        title: 'GitHub Connector',
-        origin: { uri: 'gh-1' },
-        spaces: ['default'],
-        permissions: makePermissions(),
-        matched_discovery_labels: [
-          {
-            value: 'GitHub Connector',
-            kind: 'title',
-            highlighted: '<em>GitHub</em> Connector',
-          },
-          { value: 'github', kind: 'tagline', highlighted: '<em>github</em>' },
-        ],
-      });
+      expect(result.results.map(({ id }) => id)).toEqual(['entry-1', 'entry-2']);
     });
 
-    it('omits matched_discovery_labels when absent', async () => {
+    it('projects a hit as an autocomplete result', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -1646,7 +1708,7 @@ describe('SmlService', () => {
       });
     });
 
-    it('round-trips all new schema fields (origin, tags, discovery_labels, extended_attrs)', async () => {
+    it('round-trips all new schema fields (origin, tags, extended_attrs)', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });
@@ -1664,7 +1726,6 @@ describe('SmlService', () => {
                 content: 'sales content',
                 description: 'sales summary',
                 tags: ['sales', 'executive'],
-                discovery_labels: [{ value: 'q3 sales', kind: 'tagline' }],
                 extended_attrs: { owner_team: 'sales-ops' },
                 user_id: 'user-7',
                 references: [{ uri: 'category://sales' }],
@@ -1693,7 +1754,6 @@ describe('SmlService', () => {
         content: 'sales content',
         description: 'sales summary',
         tags: ['sales', 'executive'],
-        discovery_labels: [{ value: 'q3 sales', kind: 'tagline' }],
         extended_attrs: { owner_team: 'sales-ops' },
         user_id: 'user-7',
         references: [{ uri: 'category://sales' }],
