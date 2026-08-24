@@ -307,6 +307,7 @@ dependsOn:
   - '@kbn/chart-icons'
   - '@kbn/core-mount-utils-browser'
   - '@kbn/ui-callout'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod
