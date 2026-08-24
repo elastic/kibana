@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { spaceTest, testData } from '../fixtures';
 
 const FIRST_TAB_UNSAVED_TIME = {
@@ -61,7 +62,7 @@ spaceTest.describe(
 
     spaceTest(
       'locally persists unsaved tab state after refresh',
-      async ({ discoverScoutSpace, page, pageObjects }) => {
+      async ({ apiServices, discoverScoutSpace, page, pageObjects }) => {
         const { datePicker, discover, lens, queryBar, unifiedFieldList, unifiedTabs } = pageObjects;
         const sessionName = `Unsaved state Discover session ${Date.now()}`;
         const firstTabUnsavedQuery = 'test and extension : png';
@@ -72,36 +73,39 @@ spaceTest.describe(
         await spaceTest.step(
           'create and load a multi-tab session through the fixture',
           async () => {
-            await discoverScoutSpace.createDiscoverSession({
-              title: sessionName,
-              tabs: [
-                {
-                  id: 'persisted-data-view',
-                  label: 'Persisted data view',
-                  data_source: {
-                    type: 'data_view_reference',
-                    ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+            await apiServices.discover.create(
+              {
+                title: sessionName,
+                tabs: [
+                  {
+                    id: 'persisted-data-view',
+                    label: 'Persisted data view',
+                    data_source: {
+                      type: 'data_view_reference',
+                      ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+                    },
                   },
-                },
-                {
-                  id: 'ad-hoc-data-view',
-                  label: 'Ad hoc data view',
-                  data_source: {
-                    type: 'data_view_spec',
-                    index_pattern: 'logs*',
-                    time_field: '@timestamp',
+                  {
+                    id: 'ad-hoc-data-view',
+                    label: 'Ad hoc data view',
+                    data_source: {
+                      type: 'data_view_spec',
+                      index_pattern: 'logs*',
+                      time_field: '@timestamp',
+                    },
                   },
-                },
-                {
-                  id: 'esql',
-                  label: 'ES|QL',
-                  data_source: {
-                    type: 'esql',
-                    query: 'FROM logstash-* | SORT @timestamp DESC | LIMIT 50',
+                  {
+                    id: 'esql',
+                    label: 'ES|QL',
+                    data_source: {
+                      type: 'esql',
+                      query: 'FROM logstash-* | SORT @timestamp DESC | LIMIT 50',
+                    },
                   },
-                },
-              ],
-            });
+                ],
+              } satisfies DiscoverSessionApiDataInput,
+              discoverScoutSpace.id
+            );
 
             await discover.loadSavedSearch(sessionName);
             expect(await discover.getCurrentQueryName()).toBe(sessionName);

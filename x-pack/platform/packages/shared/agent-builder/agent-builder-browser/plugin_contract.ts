@@ -19,6 +19,7 @@ import type {
   EventsServiceStartContract,
   ToolServiceStartContract,
 } from '.';
+import type { ConversationTemplateServiceStartContract } from './templates';
 
 /**
  * Props for the embeddable conversation component.
@@ -187,6 +188,11 @@ export interface AgentBuilderPluginStart {
    */
   renderers: RendererServiceStartContract;
   /**
+   * Conversation template service contract, can be used to register and retrieve
+   * per-template UI definitions (reusable tabs, and which tabs each template shows).
+   */
+  conversationTemplates: ConversationTemplateServiceStartContract;
+  /**
    * Tool service contract, can be used to list or execute tools.
    */
   tools: ToolServiceStartContract;
@@ -233,6 +239,13 @@ export interface AgentBuilderPluginStart {
    * @param attachment - The attachment to add
    */
   addAttachment: (attachment: AttachmentInput) => void;
+  /**
+   * Removes a staged attachment from the active conversation sidebar by its id.
+   * If no sidebar is open or the id is not found, the call is a no-op.
+   *
+   * @param attachmentId - The id of the attachment to remove
+   */
+  removeAttachment: (attachmentId: string) => void;
   /**
    * Updates the origin of an attachment in a conversation.
    * Use this after saving a by-value attachment to link it to its persistent store.
