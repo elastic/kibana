@@ -78,6 +78,7 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/core-http-server-utils'
   - '@kbn/cps-server-utils'
+  - '@kbn/inference-prompt-utils'
 tags:
   - plugin
   - prod
