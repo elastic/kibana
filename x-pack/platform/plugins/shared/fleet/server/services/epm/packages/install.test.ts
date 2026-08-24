@@ -45,7 +45,7 @@ import {
   saveKibanaAssetsRefs,
 } from './install';
 import * as installStateMachine from './install_state_machine/_state_machine_package_install';
-import { getBundledPackageByPkgKey } from './bundled_packages';
+import { getBundledPackageByName, getBundledPackageByPkgKey } from './bundled_packages';
 
 import { getInstallationObject, getPackageSavedObjects } from './get';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
@@ -836,6 +836,7 @@ describe('install', () => {
         .mocked(Registry.fetchFindLatestPackageOrThrow)
         .mockRejectedValue(new PackageNotFoundError('not found'));
       jest.mocked(getPackageSavedObjects).mockResolvedValue(emptyPackageSavedObjects);
+      jest.mocked(getBundledPackageByName).mockResolvedValue(undefined);
       jest.mocked(setPackageInfo).mockClear();
       jest.mocked(deleteVerificationResult).mockClear();
     });
@@ -926,6 +927,94 @@ describe('install', () => {
       expect(deleteVerificationResult).not.toHaveBeenCalled();
     });
 
+    it('rejects a first upload when a matching live stream already uses the same package name', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          {
+            name: 'logs-payroll.records-default',
+            timestamp_field: { name: '@timestamp' },
+            indices: [
+              {
+                index_name: '.ds-logs-payroll.records-default-000001',
+                index_uuid: 'uuid',
+              },
+            ],
+            generation: 1,
+            hidden: false,
+            next_generation_managed_by: 'Index Lifecycle Management',
+            prefer_ilm: true,
+            rollover_on_write: false,
+            settings: {},
+            status: 'GREEN',
+            template: 'logs-payroll.records',
+            _meta: { managed_by: 'fleet', managed: true, package: { name: 'evilclaim' } },
+          },
+        ],
+      });
+      jest.mocked(generatePackageInfoFromArchiveBuffer).mockResolvedValueOnce(
+        parsedArchiveFixture({
+          name: 'evilclaim',
+          version: '1.0.0',
+          data_streams: [
+            {
+              dataset: 'payroll.records',
+              type: 'logs',
+              title: 'Payroll records',
+              release: 'ga',
+              package: 'evilclaim',
+              path: 'payroll.records',
+            },
+          ],
+        })
+      );
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'upload',
+        archiveBuffer: {} as Buffer,
+        contentType: '',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient,
+      });
+
+      expect(response.error).toBeInstanceOf(PackageInvalidArchiveError);
+      expect(response.error).toEqual(
+        expect.objectContaining({
+          message: expect.stringMatching(/must be migrated or removed/),
+        })
+      );
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+      expect(setPackageInfo).not.toHaveBeenCalled();
+    });
+
+    it('does not query the registry when re-uploading an existing upload package', async () => {
+      jest.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      jest
+        .mocked(Registry.fetchFindLatestPackageOrThrow)
+        .mockResolvedValue(registryPackageFixture({ name: 'apache', version: '1.3.0' }));
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'upload',
+        archiveBuffer: {} as Buffer,
+        contentType: '',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeUndefined();
+      expect(Registry.fetchFindLatestPackageOrThrow).not.toHaveBeenCalledWith(
+        'apache',
+        expect.objectContaining({
+          ignoreConstraints: true,
+          prerelease: true,
+          throwOnError: true,
+        })
+      );
+    });
+
     it('rejects a registry package name when allowRegistryPackageUploads is unset', async () => {
       jest
         .mocked(Registry.fetchFindLatestPackageOrThrow)
@@ -949,6 +1038,124 @@ describe('install', () => {
         })
       );
       expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when the installation saved object lookup throws', async () => {
+      jest.mocked(getInstallationObject).mockRejectedValueOnce(new Error('so unavailable'));
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'upload',
+        archiveBuffer: {} as Buffer,
+        contentType: '',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(getInstallationObject).toHaveBeenCalledWith(
+        expect.objectContaining({ failOnUnexpectedError: true })
+      );
+      expect(response.error).toEqual(
+        expect.objectContaining({
+          message: 'so unavailable',
+        })
+      );
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+    });
+
+    it('rejects a legacy bundled installation recorded as upload', async () => {
+      jest.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
+      jest.mocked(getBundledPackageByName).mockResolvedValue({
+        name: 'apache',
+        version: '1.2.0',
+        getBuffer: async () => Buffer.from(''),
+      });
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'upload',
+        archiveBuffer: {} as Buffer,
+        contentType: '',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.error).toBeInstanceOf(PackageInvalidArchiveError);
+      expect(response.error).toEqual(
+        expect.objectContaining({
+          message: expect.stringContaining(
+            'Cannot upload a package that replaces the bundled-installed package'
+          ),
+        })
+      );
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+    });
+
+    it('allows a first upload in air-gapped mode when the name has no bundled match', async () => {
+      jest.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
+      jest
+        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mockResolvedValueOnce(parsedArchiveFixture({ name: 'custom_probe', version: '1.0.0' }));
+
+      try {
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'upload',
+          archiveBuffer: {} as Buffer,
+          contentType: '',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        // The registry is never contacted for installs in air-gapped mode, so pre-squatting
+        // a registry name has nothing to intercept there; only local bundled names matter.
+        expect(response.error).toBeUndefined();
+        expect(Registry.fetchFindLatestPackageOrThrow).not.toHaveBeenCalledWith(
+          'custom_probe',
+          expect.objectContaining({
+            ignoreConstraints: true,
+            prerelease: true,
+            throwOnError: true,
+          })
+        );
+      } finally {
+        jest.mocked(appContextService.getConfig).mockReturnValue({} as any);
+      }
+    });
+
+    it('rejects a first upload in air-gapped mode when the name matches a bundled package', async () => {
+      jest.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
+      jest
+        .mocked(generatePackageInfoFromArchiveBuffer)
+        .mockResolvedValueOnce(parsedArchiveFixture({ name: 'apache', version: '1.0.0' }));
+      jest.mocked(getBundledPackageByName).mockResolvedValue({
+        name: 'apache',
+        version: '1.2.0',
+        getBuffer: async () => Buffer.from(''),
+      });
+
+      try {
+        const response = await installPackage({
+          spaceId: DEFAULT_SPACE_ID,
+          installSource: 'upload',
+          archiveBuffer: {} as Buffer,
+          contentType: '',
+          savedObjectsClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+        });
+
+        expect(response.error).toBeInstanceOf(PackageInvalidArchiveError);
+        expect(response.error).toEqual(
+          expect.objectContaining({
+            message: expect.stringContaining(
+              'Cannot upload a package whose name already exists in the package registry'
+            ),
+          })
+        );
+        expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
+      } finally {
+        jest.mocked(appContextService.getConfig).mockReturnValue({} as any);
+      }
     });
 
     it('should send telemetry on update', async () => {

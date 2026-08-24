@@ -16,6 +16,7 @@ import { PackageInvalidArchiveError, PackageNotFoundError, RegistryError } from 
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 
+import { getBundledPackageByName } from './bundled_packages';
 import { getPackageSavedObjects } from './get';
 import { validatePackageUpload } from './validate_package_upload';
 
@@ -34,10 +35,15 @@ jest.mock('./get', () => ({
   getPackageSavedObjects: jest.fn(),
 }));
 
+jest.mock('./bundled_packages', () => ({
+  getBundledPackageByName: jest.fn(),
+}));
+
 const mockedGetConfig = appContextService.getConfig as jest.Mock;
 const mockedGetExperimentalFeatures = appContextService.getExperimentalFeatures as jest.Mock;
 const mockedFetchLatest = Registry.fetchFindLatestPackageOrThrow as jest.Mock;
 const mockedGetPackageSavedObjects = getPackageSavedObjects as jest.Mock;
+const mockedGetBundledPackageByName = getBundledPackageByName as jest.Mock;
 
 const soClient = savedObjectsClientMock.create();
 const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -69,6 +75,12 @@ function liveDataStream(
   };
 }
 
+function uploadedInstallation(name = 'my_integration'): SavedObject<Installation> {
+  return {
+    attributes: { name, install_source: 'upload' },
+  } as SavedObject<Installation>;
+}
+
 function validateUpload(
   params: Omit<Parameters<typeof validatePackageUpload>[0], 'esClient'> & {
     esClient?: ElasticsearchClient;
@@ -88,6 +100,7 @@ describe('validatePackageUpload', () => {
     mockedGetExperimentalFeatures.mockReturnValue({ enableOtelIntegrations: true });
     mockedFetchLatest.mockRejectedValue(new PackageNotFoundError('not found'));
     mockedGetPackageSavedObjects.mockResolvedValue({ saved_objects: [] });
+    mockedGetBundledPackageByName.mockResolvedValue(undefined);
     esClient.indices.getDataStream.mockResolvedValue({ data_streams: [] });
   });
 
@@ -180,44 +193,54 @@ describe('validatePackageUpload', () => {
       ).resolves.toBeUndefined();
     });
 
-    it('rejects an ILM policy', async () => {
-      await expectUploadRejected({
-        packageInfo: validPackage,
-        paths: ['my_integration-1.0.0/elasticsearch/ilm_policy/logs.json'],
-        savedObjectsClient: soClient,
-      });
+    it('allows an ILM policy', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: ['my_integration-1.0.0/elasticsearch/ilm_policy/logs.json'],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects a data-stream ILM policy', async () => {
-      await expectUploadRejected({
-        packageInfo: validPackage,
-        paths: ['my_integration-1.0.0/data_stream/logs/elasticsearch/ilm/policy.json'],
-        savedObjectsClient: soClient,
-      });
+    it('allows a data-stream ILM policy', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: ['my_integration-1.0.0/data_stream/logs/elasticsearch/ilm/policy.json'],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects an ES|QL view', async () => {
-      await expectUploadRejected({
-        packageInfo: validPackage,
-        paths: ['my_integration-1.0.0/elasticsearch/esql_view/view.yml'],
-        savedObjectsClient: soClient,
-      });
+    it('allows an ES|QL view', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: ['my_integration-1.0.0/elasticsearch/esql_view/view.yml'],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects an ML model', async () => {
-      await expectUploadRejected({
-        packageInfo: validPackage,
-        paths: ['my_integration-1.0.0/elasticsearch/ml_model/model.json'],
-        savedObjectsClient: soClient,
-      });
+    it('allows an ML model', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: ['my_integration-1.0.0/elasticsearch/ml_model/model.json'],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects a transform', async () => {
-      await expectUploadRejected({
-        packageInfo: validPackage,
-        paths: ['my_integration-1.0.0/elasticsearch/transform/transform.json'],
-        savedObjectsClient: soClient,
-      });
+    it('allows a transform', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: ['my_integration-1.0.0/elasticsearch/transform/transform.json'],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
     it('allows a knowledge base asset', async () => {
@@ -249,9 +272,7 @@ describe('validatePackageUpload', () => {
           packageInfo: validPackage,
           paths: [],
           savedObjectsClient: soClient,
-          installedPkg: {
-            attributes: { name: 'my_integration', install_source: 'upload' },
-          } as SavedObject<Installation>,
+          installedPkg: uploadedInstallation(),
         })
       ).resolves.toBeUndefined();
     });
@@ -265,6 +286,46 @@ describe('validatePackageUpload', () => {
           attributes: { name: 'my_integration' },
         } as SavedObject<Installation>,
       });
+    });
+
+    it('rejects a non-upload installed package before querying the registry', async () => {
+      mockedFetchLatest.mockResolvedValue({ name: 'my_integration', version: '1.0.0' });
+
+      await expectUploadRejected({
+        packageInfo: validPackage,
+        paths: [],
+        savedObjectsClient: soClient,
+        installedPkg: {
+          attributes: { name: 'my_integration', install_source: 'registry' },
+        } as SavedObject<Installation>,
+      });
+
+      expect(mockedFetchLatest).not.toHaveBeenCalled();
+    });
+
+    it('rejects a legacy bundled installation recorded as upload', async () => {
+      mockedGetBundledPackageByName.mockResolvedValue({
+        name: 'my_integration',
+        version: '1.0.0',
+        getBuffer: async () => Buffer.from(''),
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+          installedPkg: uploadedInstallation(),
+        })
+      ).rejects.toEqual(
+        expect.objectContaining({
+          message: expect.stringContaining(
+            'Cannot upload a package that replaces the bundled-installed package'
+          ),
+        })
+      );
+
+      expect(mockedFetchLatest).not.toHaveBeenCalled();
     });
   });
 
@@ -314,6 +375,73 @@ describe('validatePackageUpload', () => {
           savedObjectsClient: soClient,
         })
       ).resolves.toBeUndefined();
+    });
+
+    it('does not query the registry when re-uploading an existing upload package', async () => {
+      mockedFetchLatest.mockResolvedValue({ name: 'my_integration', version: '1.0.0' });
+
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+          installedPkg: uploadedInstallation(),
+        })
+      ).resolves.toBeUndefined();
+
+      expect(mockedFetchLatest).not.toHaveBeenCalled();
+    });
+
+    it('still validates archive assets when skipping the registry lookup on re-upload', async () => {
+      mockedFetchLatest.mockResolvedValue({ name: 'my_integration', version: '1.0.0' });
+
+      await expectUploadRejected({
+        packageInfo: validPackage,
+        paths: ['my_integration-1.0.0/elasticsearch/index_template/logs.json'],
+        savedObjectsClient: soClient,
+        installedPkg: uploadedInstallation(),
+      });
+
+      expect(mockedFetchLatest).not.toHaveBeenCalled();
+    });
+
+    it('allows a first upload in air-gapped mode when the name has no bundled match', async () => {
+      mockedGetConfig.mockReturnValue({ isAirGapped: true });
+
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
+
+      // The registry is never contacted for installs in air-gapped mode, so pre-squatting
+      // a registry name has nothing to intercept there; only local bundled names matter.
+      expect(mockedFetchLatest).not.toHaveBeenCalled();
+    });
+
+    it('rejects a bundled package name in air-gapped mode', async () => {
+      mockedGetConfig.mockReturnValue({ isAirGapped: true });
+      mockedGetBundledPackageByName.mockResolvedValue({
+        name: 'my_integration',
+        version: '1.0.0',
+        getBuffer: async () => Buffer.from(''),
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: validPackage,
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).rejects.toEqual(
+        expect.objectContaining({
+          message: expect.stringContaining(
+            'Cannot upload a package whose name already exists in the package registry'
+          ),
+        })
+      );
     });
   });
 
@@ -431,9 +559,7 @@ describe('validatePackageUpload', () => {
           packageInfo: validPackage,
           paths: [],
           savedObjectsClient: soClient,
-          installedPkg: {
-            attributes: { name: 'my_integration', install_source: 'upload' },
-          } as SavedObject<Installation>,
+          installedPkg: uploadedInstallation(),
         })
       ).resolves.toBeUndefined();
     });
@@ -561,6 +687,71 @@ describe('validatePackageUpload', () => {
       });
     });
 
+    it('rejects a first upload when a matching live stream has the same package metadata', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-payroll.records-default',
+            template: 'logs-payroll.records',
+            _meta: { managed_by: 'fleet', managed: true, package: { name: 'evilclaim' } },
+          }),
+        ],
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: {
+            name: 'evilclaim',
+            data_streams: [{ dataset: 'payroll.records', type: 'logs' }],
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).rejects.toEqual(
+        expect.objectContaining({
+          message: expect.stringMatching(/must be migrated or removed/),
+        })
+      );
+    });
+
+    it('rejects a first upload of an OTel dataset when a matching .otel stream has the same package metadata', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-payroll.records.otel-default',
+            template: 'logs-payroll.records',
+            _meta: { managed_by: 'fleet', managed: true, package: { name: 'evilclaim' } },
+          }),
+        ],
+      });
+
+      await expect(
+        validateUpload({
+          packageInfo: {
+            name: 'evilclaim',
+            data_streams: [
+              {
+                dataset: 'payroll.records',
+                type: 'logs',
+                streams: [{ input: 'otelcol' }],
+              },
+            ],
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).rejects.toEqual(
+        expect.objectContaining({
+          message: expect.stringMatching(/must be migrated or removed/),
+        })
+      );
+
+      expect(esClient.indices.getDataStream).toHaveBeenCalledWith({
+        name: 'logs-payroll.records.otel-*',
+        expand_wildcards: ['open', 'hidden'],
+      });
+    });
+
     it('allows an upgrade when live data streams are owned by this package', async () => {
       esClient.indices.getDataStream.mockResolvedValue({
         data_streams: [
@@ -581,11 +772,46 @@ describe('validatePackageUpload', () => {
           packageInfo: validPackage,
           paths: [],
           savedObjectsClient: soClient,
-          installedPkg: {
-            attributes: { name: 'my_integration', install_source: 'upload' },
-          } as SavedObject<Installation>,
+          installedPkg: uploadedInstallation(),
         })
       ).resolves.toBeUndefined();
+    });
+
+    it('rejects a re-upload when a matching live stream has no owner', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-my_integration.logs-default',
+            template: 'logs-my_integration.logs',
+          }),
+        ],
+      });
+
+      await expectUploadRejected({
+        packageInfo: validPackage,
+        paths: [],
+        savedObjectsClient: soClient,
+        installedPkg: uploadedInstallation(),
+      });
+    });
+
+    it('rejects a re-upload when a matching live stream is owned by another package', async () => {
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          liveDataStream({
+            name: 'logs-my_integration.logs-default',
+            template: 'logs-my_integration.logs',
+            _meta: { managed_by: 'fleet', managed: true, package: { name: 'nginx' } },
+          }),
+        ],
+      });
+
+      await expectUploadRejected({
+        packageInfo: validPackage,
+        paths: [],
+        savedObjectsClient: soClient,
+        installedPkg: uploadedInstallation(),
+      });
     });
 
     it('treats a missing data stream as unclaimed', async () => {
@@ -713,122 +939,140 @@ describe('validatePackageUpload', () => {
     });
   });
 
-  describe('cluster privileges and dynamic index patterns', () => {
-    it('rejects top-level cluster privileges', async () => {
-      await expectUploadRejected({
-        packageInfo: {
-          ...validPackage,
-          elasticsearch: { privileges: { cluster: ['all'] } },
-        },
-        paths: [],
-        savedObjectsClient: soClient,
-      });
+  describe('capabilities outside the upload takeover scope', () => {
+    it('allows top-level cluster privileges', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: {
+            ...validPackage,
+            elasticsearch: { privileges: { cluster: ['all'] } },
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects data-stream cluster privileges', async () => {
-      await expectUploadRejected({
-        packageInfo: {
-          name: 'my_integration',
-          data_streams: [
-            {
-              dataset: 'my_integration.logs',
-              type: 'logs',
-              elasticsearch: { privileges: { cluster: ['manage'] } },
-            },
-          ],
-        },
-        paths: [],
-        savedObjectsClient: soClient,
-      });
+    it('allows data-stream cluster privileges', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: {
+            name: 'my_integration',
+            data_streams: [
+              {
+                dataset: 'my_integration.logs',
+                type: 'logs',
+                elasticsearch: { privileges: { cluster: ['manage'] } },
+              },
+            ],
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects dynamic_dataset', async () => {
-      await expectUploadRejected({
-        packageInfo: {
-          name: 'my_integration',
-          data_streams: [
-            {
-              dataset: 'my_integration.logs',
-              type: 'logs',
-              elasticsearch: { dynamic_dataset: true },
-            },
-          ],
-        },
-        paths: [],
-        savedObjectsClient: soClient,
-      });
+    it('allows dynamic_dataset', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: {
+            name: 'my_integration',
+            data_streams: [
+              {
+                dataset: 'my_integration.logs',
+                type: 'logs',
+                elasticsearch: { dynamic_dataset: true },
+              },
+            ],
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects dynamic_namespace', async () => {
-      await expectUploadRejected({
-        packageInfo: {
-          name: 'my_integration',
-          data_streams: [
-            {
-              dataset: 'my_integration.logs',
-              type: 'logs',
-              elasticsearch: { dynamic_namespace: true },
-            },
-          ],
-        },
-        paths: [],
-        savedObjectsClient: soClient,
-      });
+    it('allows dynamic_namespace', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: {
+            name: 'my_integration',
+            data_streams: [
+              {
+                dataset: 'my_integration.logs',
+                type: 'logs',
+                elasticsearch: { dynamic_namespace: true },
+              },
+            ],
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects an input package even when it declares no data streams', async () => {
-      await expectUploadRejected({
-        packageInfo: {
-          name: 'my_integration',
-          type: 'input',
-        },
-        paths: [],
-        savedObjectsClient: soClient,
-      });
+    it('allows an input package that declares no data streams', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: {
+            name: 'my_integration',
+            type: 'input',
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects dynamic_signal_types on a policy template', async () => {
-      await expectUploadRejected({
-        packageInfo: {
-          ...validPackage,
-          policy_templates: [{ dynamic_signal_types: true }],
-        },
-        paths: [],
-        savedObjectsClient: soClient,
-      });
+    it('allows dynamic_signal_types on a policy template', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: {
+            ...validPackage,
+            policy_templates: [{ dynamic_signal_types: true }],
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects dynamic_signal_types on a policy template input', async () => {
-      await expectUploadRejected({
-        packageInfo: {
-          ...validPackage,
-          policy_templates: [{ inputs: [{ dynamic_signal_types: true }] }],
-        },
-        paths: [],
-        savedObjectsClient: soClient,
-      });
+    it('allows dynamic_signal_types on a policy template input', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: {
+            ...validPackage,
+            policy_templates: [{ inputs: [{ dynamic_signal_types: true }] }],
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects a profiles data stream', async () => {
-      await expectUploadRejected({
-        packageInfo: {
-          name: 'my_integration',
-          data_streams: [{ dataset: 'my_integration.profile', type: 'profiles' }],
-        },
-        paths: [],
-        savedObjectsClient: soClient,
-      });
+    it('allows a profiles data stream', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: {
+            name: 'my_integration',
+            data_streams: [{ dataset: 'my_integration.profile', type: 'profiles' }],
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
 
-    it('rejects package-level index privileges', async () => {
-      await expectUploadRejected({
-        packageInfo: {
-          ...validPackage,
-          elasticsearch: { privileges: { indices: ['all'] } },
-        },
-        paths: [],
-        savedObjectsClient: soClient,
-      });
+    it('allows package-level index privileges', async () => {
+      await expect(
+        validateUpload({
+          packageInfo: {
+            ...validPackage,
+            elasticsearch: { privileges: { indices: ['all'] } },
+          },
+          paths: [],
+          savedObjectsClient: soClient,
+        })
+      ).resolves.toBeUndefined();
     });
   });
 });

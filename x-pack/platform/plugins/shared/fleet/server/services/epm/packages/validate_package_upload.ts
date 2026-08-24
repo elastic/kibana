@@ -22,16 +22,17 @@ import {
 } from '../../../../common/services';
 import { PackageInvalidArchiveError, PackageNotFoundError } from '../../../errors';
 import { appContextService } from '../../app_context';
+import { airGappedUtils } from '../airgapped';
 import { getPathParts } from '../archive';
 import { isTopLevelPipeline } from '../elasticsearch/ingest_pipeline/helpers';
 import * as Registry from '../registry';
 
+import { getBundledPackageByName } from './bundled_packages';
 import { getPackageSavedObjects } from './get';
 
 const UPLOAD_PACKAGE_NAME_MIN_LENGTH = 2;
 const UPLOAD_PACKAGE_NAME_MAX_LENGTH = 150;
 const UPLOAD_PACKAGE_NAME_PATTERN = /^[a-z][a-z0-9_]*$/;
-const DATA_STREAM_ILM_PATH = /\/data_stream\/[^/]+\/elasticsearch\/ilm\//;
 
 interface UploadDataStream {
   dataset: string;
@@ -40,7 +41,7 @@ interface UploadDataStream {
   dataset_is_prefix?: boolean;
   streams?: Array<{ input?: string }>;
   elasticsearch?: {
-    privileges?: { cluster?: string[] };
+    privileges?: { cluster?: string[]; indices?: string[] };
     dynamic_dataset?: boolean;
     dynamic_namespace?: boolean;
   };
@@ -61,16 +62,9 @@ interface UploadPackageInfo {
   data_streams?: UploadDataStream[];
 }
 
-const FORBIDDEN_UPLOAD_DATA_STREAM_TYPES = new Set(['profiles']);
-
 const FORBIDDEN_ARCHIVE_TYPES = new Set<string>([
   ElasticsearchAssetType.indexTemplate,
   ElasticsearchAssetType.componentTemplate,
-  ElasticsearchAssetType.ilmPolicy,
-  ElasticsearchAssetType.dataStreamIlmPolicy,
-  ElasticsearchAssetType.esqlView,
-  ElasticsearchAssetType.mlModel,
-  ElasticsearchAssetType.transform,
 ]);
 
 export async function validatePackageUpload({
@@ -88,17 +82,13 @@ export async function validatePackageUpload({
 }): Promise<void> {
   assertValidUploadPackageName(packageInfo.name);
   assertNoForbiddenArchiveAssets(paths);
-  assertNoWildcardAgentPermissions(packageInfo);
-  assertNoClusterPrivileges(packageInfo);
-  assertNoIndexPrivileges(packageInfo);
-  assertNoDynamicIndexPatterns(packageInfo);
   assertValidUploadDataStreams(packageInfo.data_streams ?? []);
-  assertDoesNotShadowInstalledPackage(packageInfo.name, installedPkg);
-  await assertNotRegistryOrBundledName(packageInfo.name);
+  await assertDoesNotShadowInstalledPackage(packageInfo.name, installedPkg);
+  await assertNotRegistryOrBundledName(packageInfo.name, installedPkg);
   // Residual: Kibana saved objects in the archive are still imported with overwrite: true.
   // Preflight only; an upload can race any first install (upload, registry, or setup).
   await assertNoOwnedDatasetCollision(packageInfo, savedObjectsClient);
-  await assertNoUnownedLiveDataStreams(packageInfo, esClient);
+  await assertNoUnownedLiveDataStreams(packageInfo, esClient, installedPkg);
 }
 
 function assertValidUploadPackageName(name: string): void {
@@ -124,11 +114,7 @@ function assertNoForbiddenArchiveAssets(paths: string[]): void {
     }
 
     const { type } = getPathParts(path);
-    if (
-      FORBIDDEN_ARCHIVE_TYPES.has(type) ||
-      isTopLevelPipeline(path) ||
-      DATA_STREAM_ILM_PATH.test(path)
-    ) {
+    if (FORBIDDEN_ARCHIVE_TYPES.has(type) || isTopLevelPipeline(path)) {
       throw new PackageInvalidArchiveError(
         i18n.translate('xpack.fleet.packageUpload.forbiddenArchiveAsset', {
           defaultMessage: 'Uploaded package contains a forbidden asset: {path}',
@@ -139,97 +125,8 @@ function assertNoForbiddenArchiveAssets(paths: string[]): void {
   }
 }
 
-function hasClusterPrivileges(cluster?: string[]): boolean {
-  return Boolean(cluster && cluster.length > 0);
-}
-
-function assertNoWildcardAgentPermissions(packageInfo: UploadPackageInfo): void {
-  if (packageInfo.type === 'input') {
-    throw new PackageInvalidArchiveError(
-      i18n.translate('xpack.fleet.packageUpload.inputPackageType', {
-        defaultMessage: 'Uploaded packages cannot be input packages.',
-      })
-    );
-  }
-
-  for (const template of packageInfo.policy_templates ?? []) {
-    if (template.dynamic_signal_types) {
-      throw new PackageInvalidArchiveError(
-        i18n.translate('xpack.fleet.packageUpload.dynamicSignalTypes', {
-          defaultMessage: 'Uploaded packages cannot enable dynamic_signal_types.',
-        })
-      );
-    }
-
-    for (const input of template.inputs ?? []) {
-      if (input.dynamic_signal_types) {
-        throw new PackageInvalidArchiveError(
-          i18n.translate('xpack.fleet.packageUpload.dynamicSignalTypes', {
-            defaultMessage: 'Uploaded packages cannot enable dynamic_signal_types.',
-          })
-        );
-      }
-    }
-  }
-}
-
-function assertNoIndexPrivileges(packageInfo: UploadPackageInfo): void {
-  if (packageInfo.elasticsearch?.privileges?.indices?.length) {
-    throw new PackageInvalidArchiveError(
-      i18n.translate('xpack.fleet.packageUpload.indexPrivileges', {
-        defaultMessage: 'Uploaded packages cannot request Elasticsearch index privileges.',
-      })
-    );
-  }
-}
-
-function assertNoClusterPrivileges(packageInfo: UploadPackageInfo): void {
-  if (hasClusterPrivileges(packageInfo.elasticsearch?.privileges?.cluster)) {
-    throw new PackageInvalidArchiveError(
-      i18n.translate('xpack.fleet.packageUpload.clusterPrivileges', {
-        defaultMessage: 'Uploaded packages cannot request Elasticsearch cluster privileges.',
-      })
-    );
-  }
-
-  for (const dataStream of packageInfo.data_streams ?? []) {
-    if (hasClusterPrivileges(dataStream.elasticsearch?.privileges?.cluster)) {
-      throw new PackageInvalidArchiveError(
-        i18n.translate('xpack.fleet.packageUpload.dataStreamClusterPrivileges', {
-          defaultMessage:
-            'Uploaded package dataset "{dataset}" cannot request Elasticsearch cluster privileges.',
-          values: { dataset: dataStream.dataset },
-        })
-      );
-    }
-  }
-}
-
-function assertNoDynamicIndexPatterns(packageInfo: UploadPackageInfo): void {
-  for (const dataStream of packageInfo.data_streams ?? []) {
-    if (dataStream.elasticsearch?.dynamic_dataset || dataStream.elasticsearch?.dynamic_namespace) {
-      throw new PackageInvalidArchiveError(
-        i18n.translate('xpack.fleet.packageUpload.dynamicIndexPattern', {
-          defaultMessage:
-            'Uploaded package dataset "{dataset}" cannot enable dynamic_dataset or dynamic_namespace.',
-          values: { dataset: dataStream.dataset },
-        })
-      );
-    }
-  }
-}
-
 function assertValidUploadDataStreams(dataStreams: UploadDataStream[]): void {
   for (const dataStream of dataStreams) {
-    if (FORBIDDEN_UPLOAD_DATA_STREAM_TYPES.has(dataStream.type ?? '')) {
-      throw new PackageInvalidArchiveError(
-        i18n.translate('xpack.fleet.packageUpload.forbiddenDataStreamType', {
-          defaultMessage: 'Uploaded packages cannot declare {type} data streams.',
-          values: { type: dataStream.type ?? '' },
-        })
-      );
-    }
-
     const typeResult = isValidDataStreamType(dataStream.type ?? '');
     if (!typeResult.valid) {
       throw new PackageInvalidArchiveError(
@@ -252,16 +149,20 @@ function assertValidUploadDataStreams(dataStreams: UploadDataStream[]): void {
   }
 }
 
-function assertDoesNotShadowInstalledPackage(
+async function assertDoesNotShadowInstalledPackage(
   name: string,
   installedPkg?: SavedObject<Installation>
-): void {
+): Promise<void> {
   if (!installedPkg) {
     return;
   }
 
   const installSource = installedPkg.attributes.install_source;
-  if (installSource === 'upload') {
+  const isLegacyBundled =
+    installSource === 'upload' &&
+    Boolean(await getBundledPackageByName(installedPkg.attributes.name));
+
+  if (installSource === 'upload' && !isLegacyBundled) {
     return;
   }
 
@@ -269,13 +170,38 @@ function assertDoesNotShadowInstalledPackage(
     i18n.translate('xpack.fleet.packageUpload.registryPackageShadow', {
       defaultMessage:
         'Cannot upload a package that replaces the {installSource}-installed package "{name}".',
-      values: { name, installSource: installSource || 'existing' },
+      values: { name, installSource: isLegacyBundled ? 'bundled' : installSource || 'existing' },
     })
   );
 }
 
-async function assertNotRegistryOrBundledName(name: string): Promise<void> {
+async function assertNotRegistryOrBundledName(
+  name: string,
+  installedPkg?: SavedObject<Installation>
+): Promise<void> {
+  if (await isTrustedUploadInstallation(installedPkg)) {
+    return;
+  }
+
   if (appContextService.getConfig()?.internal?.allowRegistryPackageUploads) {
+    return;
+  }
+
+  if (airGappedUtils().shouldSkipRegistryRequests) {
+    // The registry is never contacted for installs in air-gapped mode, so there is
+    // nothing for a pre-squatted registry name to intercept. Only the locally known
+    // bundled packages can still be shadowed, so that is all we check here.
+    const bundledPackage = await getBundledPackageByName(name);
+    if (bundledPackage) {
+      throw new PackageInvalidArchiveError(
+        i18n.translate('xpack.fleet.packageUpload.registryPackageName', {
+          defaultMessage:
+            'Cannot upload a package whose name already exists in the package registry or as a bundled package: {name}',
+          values: { name },
+        })
+      );
+    }
+
     return;
   }
 
@@ -293,7 +219,7 @@ async function assertNotRegistryOrBundledName(name: string): Promise<void> {
     throw new PackageInvalidArchiveError(
       i18n.translate('xpack.fleet.packageUpload.registryUnavailable', {
         defaultMessage:
-          'Could not verify that uploaded package name "{name}" is not a registry or bundled package.',
+          'Could not verify that uploaded package name "{name}" is not a registry or bundled package. If this deployment intentionally has no access to the package registry, configure Fleet for air-gapped operation (`xpack.fleet.isAirGapped: true`).',
         values: { name },
       })
     );
@@ -306,6 +232,21 @@ async function assertNotRegistryOrBundledName(name: string): Promise<void> {
       values: { name },
     })
   );
+}
+
+async function isTrustedUploadInstallation(
+  installedPkg?: SavedObject<Installation>
+): Promise<boolean> {
+  if (installedPkg?.attributes.install_source !== 'upload') {
+    return false;
+  }
+
+  return !(await isLegacyBundledUpload(installedPkg));
+}
+
+async function isLegacyBundledUpload(installedPkg: SavedObject<Installation>): Promise<boolean> {
+  const bundledPackage = await getBundledPackageByName(installedPkg.attributes.name);
+  return Boolean(bundledPackage);
 }
 
 async function assertNoOwnedDatasetCollision(
@@ -366,7 +307,8 @@ function assetBaseNameFromTemplateId(id: string): string | undefined {
 
 async function assertNoUnownedLiveDataStreams(
   packageInfo: UploadPackageInfo,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  installedPkg?: SavedObject<Installation>
 ): Promise<void> {
   for (const dataStream of packageInfo.data_streams ?? []) {
     const matching = await fetchMatchingLiveDataStreams(
@@ -374,25 +316,41 @@ async function assertNoUnownedLiveDataStreams(
       liveDataStreamIndexPattern(dataStream, packageInfo),
       dataStream.dataset
     );
+
+    if (matching.length === 0) {
+      continue;
+    }
+
+    if (!installedPkg) {
+      throw existingLiveDataStreamError(dataStream.dataset, matching[0].name);
+    }
+
     const unowned = matching.find(
-      (liveStream) => ownedPackageName(liveStream) !== packageInfo.name
+      (liveStream) => ownedPackageName(liveStream) !== installedPkg.attributes.name
     );
 
     if (!unowned) {
       continue;
     }
 
-    throw new PackageInvalidArchiveError(
-      i18n.translate('xpack.fleet.packageUpload.existingDataStream', {
-        defaultMessage:
-          'Uploaded package declares dataset "{dataset}" that matches existing Elasticsearch data stream "{dataStreamName}" which this package does not own.',
-        values: {
-          dataset: dataStream.dataset,
-          dataStreamName: unowned.name,
-        },
-      })
-    );
+    throw existingLiveDataStreamError(dataStream.dataset, unowned.name);
   }
+}
+
+function existingLiveDataStreamError(
+  dataset: string,
+  dataStreamName: string
+): PackageInvalidArchiveError {
+  return new PackageInvalidArchiveError(
+    i18n.translate('xpack.fleet.packageUpload.existingDataStream', {
+      defaultMessage:
+        'A matching live data stream "{dataStreamName}" already exists for dataset "{dataset}" and must be migrated or removed before uploading a new package.',
+      values: {
+        dataset,
+        dataStreamName,
+      },
+    })
+  );
 }
 
 function liveDataStreamIndexPattern(

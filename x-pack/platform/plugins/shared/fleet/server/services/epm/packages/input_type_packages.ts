@@ -10,12 +10,14 @@ import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@k
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
+  Installation,
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicy,
   RegistryDataStream,
 } from '../../../types';
+import { ElasticsearchAssetType } from '../../../../common';
 import {
   DATASET_VAR_NAME,
   DATA_STREAM_TYPE_VAR_NAME,
@@ -147,6 +149,43 @@ export const checkExistingDataStreamsAreFromDifferentPackage = (
     (ds) => ds._meta?.package?.name && ds._meta.package.name !== pkgInfo.name
   );
 };
+
+function shouldSkipUncorroboratedUploadAssets(
+  installation: Pick<Installation, 'name' | 'install_source' | 'installed_es'>,
+  existingDataStreams: IndicesDataStream[],
+  dataStreamType: string,
+  datasetName: string
+): boolean {
+  if (installation.install_source !== 'upload') {
+    return false;
+  }
+
+  return existingDataStreams.some(
+    (liveStream) =>
+      !isLiveStreamCorroboratedByUpload(installation, liveStream, dataStreamType, datasetName)
+  );
+}
+
+function isLiveStreamCorroboratedByUpload(
+  installation: Pick<Installation, 'name' | 'installed_es'>,
+  liveStream: IndicesDataStream,
+  dataStreamType: string,
+  datasetName: string
+): boolean {
+  const owner = liveStream._meta?.package?.name;
+  if (owner !== installation.name) {
+    return false;
+  }
+
+  const expected = `${dataStreamType}-${datasetName}`;
+  return (installation.installed_es ?? []).some((asset) => {
+    if (asset.type !== ElasticsearchAssetType.indexTemplate) {
+      return false;
+    }
+    const base = asset.id.split('@')[0];
+    return base === expected || base.startsWith(`${expected}.`) || expected.startsWith(`${base}.`);
+  });
+}
 
 export const isInputPackageDatasetUsedByMultiplePolicies = (
   packagePolicies: PackagePolicy[],
@@ -342,6 +381,22 @@ async function installAssetsForDataStreamType(opts: {
       `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
     );
   }
+
+  if (
+    existingDataStreams.length &&
+    shouldSkipUncorroboratedUploadAssets(
+      installedPkgWithAssets.installation,
+      existingDataStreams,
+      dataStream.type,
+      datasetName
+    )
+  ) {
+    logger.info(
+      `Data stream for dataset ${datasetName} already exists without corroborated ownership from this uploaded package, skipping index template creation`
+    );
+    return;
+  }
+
   try {
     if (installedPkgWithAssets.installation.version !== pkgInfo.version) {
       const pkg = await Registry.getPackage(pkgInfo.name, pkgInfo.version, {
