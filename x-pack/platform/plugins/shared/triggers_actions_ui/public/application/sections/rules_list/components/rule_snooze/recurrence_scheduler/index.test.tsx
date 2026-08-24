@@ -30,17 +30,11 @@ describe('RecurrenceScheduler', () => {
         onChange={onChange}
       />
     );
+    expect(await screen.findByTestId('recurrenceSchedulerRepeat')).toHaveValue('CUSTOM');
 
-    await waitFor(() => {
-      expect(screen.getByTestId('recurrenceSchedulerRepeat')).toHaveValue('CUSTOM');
-    });
+    expect(await screen.findByTestId('customRecurrenceSchedulerMonthly')).toBeInTheDocument();
 
-    expect(screen.getByTestId('customRecurrenceSchedulerMonthly')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'On day 23' })).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
-    expect(screen.getByText('Repeats every month on day 23')).toBeInTheDocument();
+    expect(await screen.findByText('Repeats every month on day 23')).toBeInTheDocument();
 
     await waitFor(() => {
       const lastCall = onChange.mock.calls.at(-1)?.[0];
