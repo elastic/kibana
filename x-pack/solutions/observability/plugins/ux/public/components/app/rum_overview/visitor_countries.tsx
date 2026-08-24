@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -21,7 +21,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import type { RumCountryRow } from '../../../../common/rum_app';
@@ -32,6 +32,8 @@ import { VisitorCountryMap } from './visitor_country_map';
 
 const LCP_POOR_MS = 4000;
 const LCP_NI_MS = 2500;
+const COUNTRY_PAGE_SIZE_OPTIONS = [10, 25, 50];
+const DEFAULT_COUNTRY_PAGE_SIZE = 10;
 
 const formatMs = (ms: number | null): string => {
   if (ms == null) {
@@ -67,6 +69,23 @@ export function VisitorCountriesPanel({
 }: VisitorCountriesPanelProps) {
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_COUNTRY_PAGE_SIZE);
+
+  const pageCount = Math.max(1, Math.ceil(countries.length / pageSize));
+  const currentPageIndex = Math.min(pageIndex, pageCount - 1);
+  const pageOfItems = useMemo(
+    () => countries.slice(currentPageIndex * pageSize, currentPageIndex * pageSize + pageSize),
+    [countries, currentPageIndex, pageSize]
+  );
+
+  const onTableChange = ({ page }: Criteria<RumCountryRow>) => {
+    if (!page) {
+      return;
+    }
+    setPageIndex(page.index);
+    setPageSize(page.size);
+  };
 
   const activeRow = activeLocation
     ? countries.find((row) => row.isoCode === activeLocation)
@@ -259,11 +278,19 @@ export function VisitorCountriesPanel({
           </EuiFlexItem>
           <EuiFlexItem grow={6} style={{ minWidth: 320 }}>
             <EuiBasicTable
+              data-test-subj="uxOverviewCountriesTable"
               tableCaption={i18n.translate('xpack.ux.overview.countriesCaption', {
                 defaultMessage: 'Visitors by country',
               })}
-              items={countries}
+              items={pageOfItems}
               columns={columns}
+              pagination={{
+                pageIndex: currentPageIndex,
+                pageSize,
+                totalItemCount: countries.length,
+                pageSizeOptions: COUNTRY_PAGE_SIZE_OPTIONS,
+              }}
+              onChange={onTableChange}
               rowProps={(row) => ({
                 className: row.isoCode === activeLocation ? 'euiTableRow-isSelected' : undefined,
               })}
