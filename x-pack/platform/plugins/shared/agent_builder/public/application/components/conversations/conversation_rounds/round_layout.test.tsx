@@ -7,13 +7,18 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ConversationRoundStatus, type ConversationRound } from '@kbn/agent-builder-common';
+import {
+  ConversationOriginType,
+  ConversationRoundStatus,
+  type ConversationRound,
+} from '@kbn/agent-builder-common';
 import { RoundLayout } from './round_layout';
+import { RoundInput } from './round_input';
 import { RoundResponse } from './round_response/round_response';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 
 jest.mock('./round_input', () => ({
-  RoundInput: () => null,
+  RoundInput: jest.fn(() => null),
 }));
 
 jest.mock('./round_response/round_response', () => ({
@@ -39,6 +44,7 @@ jest.mock('../../../hooks/use_conversation_stream', () => ({
 const useConversationStreamMock = useConversationStream as jest.MockedFunction<
   typeof useConversationStream
 >;
+const roundInputMock = RoundInput as jest.MockedFunction<typeof RoundInput>;
 const roundResponseMock = RoundResponse as jest.MockedFunction<typeof RoundResponse>;
 
 const createRound = (version: number): ConversationRound =>
@@ -148,5 +154,43 @@ describe('RoundLayout', () => {
     expect(roundResponseMock.mock.calls[1][0].attachmentRefs).toEqual([
       { attachment_id: 'attachment-1', version: 2 },
     ]);
+  });
+
+  it('passes round attribution through to the user and agent renderers', () => {
+    const round = {
+      ...createRound(1),
+      author: {
+        id: 'user-1',
+        full_name: 'Jane Doe',
+        username: 'jdoe',
+      },
+      origin: {
+        type: ConversationOriginType.Slack,
+      },
+    };
+
+    render(
+      <RoundLayout
+        allRounds={[round]}
+        conversationId="conversation-1"
+        isCurrentRound={false}
+        rawRound={round}
+        roundIndex={0}
+        scrollContainerHeight={100}
+      />
+    );
+
+    expect(roundInputMock.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        author: round.author,
+        origin: round.origin,
+        startedAt: round.started_at,
+      })
+    );
+    expect(roundResponseMock.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        startedAt: round.started_at,
+      })
+    );
   });
 });

@@ -34,8 +34,15 @@ const mockUseConversationTitle = jest.mocked(useConversationTitle);
 const mockUseHasPersistedConversation = jest.mocked(useHasPersistedConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
 
-const renderTitle = (permissions: Partial<ConversationPermissions>) => {
-  mockUseConversationTitle.mockReturnValue({ title: 'My conversation', isLoading: false });
+const renderTitle = (
+  permissions: Partial<ConversationPermissions>,
+  { isReadOnly = false }: { isReadOnly?: boolean } = {}
+) => {
+  mockUseConversationTitle.mockReturnValue({
+    title: 'My conversation',
+    isLoading: false,
+    isReadOnly,
+  });
   mockUseHasPersistedConversation.mockReturnValue(true);
   mockUseConversationPermissions.mockReturnValue({
     rename: false,
@@ -82,6 +89,14 @@ describe('ConversationTitle', () => {
     expect(screen.queryByTestId('agentBuilderConversationTitleButton')).not.toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderConversationTitle')).toHaveTextContent(
       'My conversation'
+    );
+  });
+
+  it('renders the read-only chip when the conversation is read-only', () => {
+    renderTitle({ rename: false, delete: false }, { isReadOnly: true });
+
+    expect(screen.getByTestId('agentBuilderConversationReadOnlyBadge')).toHaveTextContent(
+      'Read-Only'
     );
   });
 });

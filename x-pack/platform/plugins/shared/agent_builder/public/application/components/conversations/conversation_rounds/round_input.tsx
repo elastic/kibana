@@ -16,6 +16,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import type { ConversationRoundAuthor, ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type {
   Attachment,
   AttachmentVersionRef,
@@ -26,6 +27,7 @@ import { AB_PANEL_RADIUS } from '../../../../common.styles';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { CommandBadgeText } from './command_badge_text';
+import { RoundAuthorHeader } from './round_author_header';
 
 const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.round.userInput', {
@@ -35,6 +37,9 @@ const labels = {
 
 interface RoundInputProps {
   input: string;
+  author?: ConversationRoundAuthor;
+  origin?: ConversationRoundOrigin;
+  startedAt: string;
   attachmentRefs?: AttachmentVersionRef[];
   conversationAttachments?: VersionedAttachment[];
   fallbackAttachments?: Attachment[];
@@ -42,6 +47,9 @@ interface RoundInputProps {
 
 export const RoundInput = ({
   input,
+  author,
+  origin,
+  startedAt,
   attachmentRefs,
   conversationAttachments,
   fallbackAttachments,
@@ -50,13 +58,17 @@ export const RoundInput = ({
   const [isHovering, setIsHovering] = useState(false);
 
   const inputContainerStyles = css`
-    align-self: end;
-    max-inline-size: 90%;
+    width: 100%;
     background: ${euiTheme.colors.backgroundLightPrimary};
     ${euiTextBreakWord()}
     white-space: pre-wrap;
     border-radius: ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px 0 ${AB_PANEL_RADIUS}px;
     padding: ${euiTheme.size.m} ${euiTheme.size.base};
+  `;
+
+  const inputContentStyles = css`
+    align-self: end;
+    inline-size: min(640px, 90%);
   `;
 
   return (
@@ -67,20 +79,29 @@ export const RoundInput = ({
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      <EuiPanel
-        css={inputContainerStyles}
-        hasShadow={false}
-        hasBorder={false}
-        aria-label={labels.userMessage}
-      >
-        <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false} css={inputContentStyles}>
+        <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <CommandBadgeText text={input} />
-            </EuiText>
+            <RoundAuthorHeader author={author} origin={origin} startedAt={startedAt} actor="user" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              css={inputContainerStyles}
+              hasShadow={false}
+              hasBorder={false}
+              aria-label={labels.userMessage}
+            >
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <CommandBadgeText text={input} />
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <RoundAttachmentReferences
           attachmentRefs={attachmentRefs}

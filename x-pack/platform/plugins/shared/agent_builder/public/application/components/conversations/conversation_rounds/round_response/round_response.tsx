@@ -21,6 +21,7 @@ import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundResponseActions } from './round_response_actions';
+import { RoundAuthorHeader } from '../round_author_header';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
@@ -32,6 +33,7 @@ export interface RoundResponseProps {
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
   rawRound: ConversationRound;
+  startedAt: string;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
@@ -44,6 +46,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   attachmentRefs,
   conversationId,
   rawRound,
+  startedAt,
 }) => {
   const hasMessage = Boolean(response.message);
 
@@ -62,6 +65,9 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
         position: relative;
       `}
     >
+      <EuiFlexItem grow={false}>
+        <RoundAuthorHeader startedAt={startedAt} actor="agent" />
+      </EuiFlexItem>
       <EuiFlexItem>
         {showStreamingText ? (
           <StreamingText

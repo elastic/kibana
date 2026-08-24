@@ -7,10 +7,13 @@
 
 import React, { useState } from 'react';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
@@ -39,6 +42,9 @@ const labels = {
   openTitleMenu: i18n.translate('xpack.agentBuilder.conversationTitle.openTitleMenu', {
     defaultMessage: 'Open conversation menu',
   }),
+  readOnly: i18n.translate('xpack.agentBuilder.conversationTitle.readOnly', {
+    defaultMessage: 'Read-Only',
+  }),
 };
 
 interface ConversationTitleProps {
@@ -46,7 +52,7 @@ interface ConversationTitleProps {
 }
 
 export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
-  const { title, isLoading: isLoadingTitle } = useConversationTitle();
+  const { title, isLoading: isLoadingTitle, isReadOnly } = useConversationTitle();
   const hasPersistedConversation = useHasPersistedConversation();
   const { rename: canRename, delete: canDelete } = useConversationPermissions();
   const { euiTheme } = useEuiTheme();
@@ -56,6 +62,30 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const displayedTitle = isLoadingTitle ? '' : title || labels.newConversation;
+
+  const titleWrapperStyles = css`
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: ${euiTheme.size.xs};
+  `;
+
+  const titleTextStyles = css`
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `;
+
+  const readOnlyBadge = isReadOnly ? (
+    <EuiBadge
+      color="hollow"
+      iconType="readOnly"
+      data-test-subj="agentBuilderConversationReadOnlyBadge"
+    >
+      {labels.readOnly}
+    </EuiBadge>
+  ) : null;
 
   const menuItems = [
     ...(canRename
@@ -106,15 +136,20 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   // Nothing to open the popover for: an unsaved conversation, or one the user may not act on.
   if (!hasPersistedConversation || menuItems.length === 0) {
     return (
-      <h4
-        id={ariaLabelledBy}
-        css={css`
-          font-weight: ${euiTheme.font.weight.semiBold};
-        `}
-        data-test-subj="agentBuilderConversationTitle"
-      >
-        {displayedTitle}
-      </h4>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} css={titleWrapperStyles}>
+        <EuiFlexItem grow={false} css={titleTextStyles}>
+          <h4
+            id={ariaLabelledBy}
+            css={css`
+              font-weight: ${euiTheme.font.weight.semiBold};
+            `}
+            data-test-subj="agentBuilderConversationTitle"
+          >
+            {displayedTitle}
+          </h4>
+        </EuiFlexItem>
+        {readOnlyBadge && <EuiFlexItem grow={false}>{readOnlyBadge}</EuiFlexItem>}
+      </EuiFlexGroup>
     );
   }
 
@@ -145,7 +180,12 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
         detail: 'conversation',
       })}
     >
-      <span id={ariaLabelledBy}>{displayedTitle}</span>
+      <span css={titleWrapperStyles}>
+        <span id={ariaLabelledBy} css={titleTextStyles}>
+          {displayedTitle}
+        </span>
+        {readOnlyBadge}
+      </span>
     </EuiButtonEmpty>
   );
 

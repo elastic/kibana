@@ -134,7 +134,11 @@ export const useAgentId = () => {
 
 export const useConversationTitle = () => {
   const { conversation, isLoading } = useConversation();
-  return { title: conversation?.title ?? '', isLoading };
+  return {
+    title: conversation?.title ?? '',
+    isLoading,
+    isReadOnly: conversation?.read_only ?? false,
+  };
 };
 
 export const useConversationRounds = () => {
