@@ -246,6 +246,96 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('workload bindings', () => {
+    const WORKLOAD = { workloadType: 'rule', workloadId: 'rule-id' };
+
+    it('delegates attach, forwarding the operation type Core supplied', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const params = { serviceAccountId: 'service-account-id', ...WORKLOAD };
+
+      await api.serviceAccounts.attachWorkload('alerting_rule', request, params);
+
+      expect(serviceAccounts!.workloads.attach).toHaveBeenCalledWith(
+        'alerting_rule',
+        request,
+        params
+      );
+    });
+
+    it('delegates detach', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      await api.serviceAccounts.detachWorkload('alerting_rule', request, WORKLOAD);
+
+      expect(serviceAccounts!.workloads.detach).toHaveBeenCalledWith(
+        'alerting_rule',
+        request,
+        WORKLOAD
+      );
+    });
+
+    it('delegates getBinding and returns its result', async () => {
+      const binding = { operationType: 'alerting_rule' } as never;
+      serviceAccounts!.workloads.getBinding.mockResolvedValue(binding);
+
+      await expect(api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD)).resolves.toBe(
+        binding
+      );
+      expect(serviceAccounts!.workloads.getBinding).toHaveBeenCalledWith('alerting_rule', WORKLOAD);
+    });
+
+    it('delegates withScopedRequest, passing the callback through', async () => {
+      const fn = jest.fn();
+
+      await api.serviceAccounts.withScopedRequestForWorkload('alerting_rule', WORKLOAD, fn);
+
+      expect(serviceAccounts!.workloads.withScopedRequest).toHaveBeenCalledWith(
+        'alerting_rule',
+        WORKLOAD,
+        fn
+      );
+    });
+
+    it.each([
+      [
+        'attachWorkload',
+        () =>
+          api.serviceAccounts.attachWorkload(
+            'alerting_rule',
+            httpServerMock.createKibanaRequest(),
+            {
+              serviceAccountId: 'sa',
+              ...WORKLOAD,
+            }
+          ),
+      ],
+      [
+        'detachWorkload',
+        () =>
+          api.serviceAccounts.detachWorkload(
+            'alerting_rule',
+            httpServerMock.createKibanaRequest(),
+            WORKLOAD
+          ),
+      ],
+      [
+        'getWorkloadBinding',
+        () => api.serviceAccounts.getWorkloadBinding('alerting_rule', WORKLOAD),
+      ],
+      [
+        'withScopedRequestForWorkload',
+        () =>
+          api.serviceAccounts.withScopedRequestForWorkload('alerting_rule', WORKLOAD, jest.fn()),
+      ],
+    ])('rejects %s when service accounts are not enabled', async (_name, invoke) => {
+      serviceAccounts = null;
+
+      await expect(invoke()).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Service accounts are not enabled"`
+      );
+    });
+  });
+
   describe('config.uiam', () => {
     describe('when uiam is enabled', () => {
       beforeEach(() => {
