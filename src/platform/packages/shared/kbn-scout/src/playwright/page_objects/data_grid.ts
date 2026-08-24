@@ -16,6 +16,10 @@ const IN_TABLE_SEARCH_INPUT_TEST_SUBJ = 'inTableSearchInput';
 const IN_TABLE_SEARCH_COUNTER_TEST_SUBJ = 'inTableSearchMatchesCounter';
 const IN_TABLE_SEARCH_NEXT_BUTTON_TEST_SUBJ = 'inTableSearchButtonNext';
 const IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME = 'dataGridInTableSearch__match';
+// EUI internal class on the react-window scroll container. `UnifiedDataTable` queries the same
+// class to decide `hasScrolledToBottom` (see `data_table.tsx`, which carries a TODO asking EUI to
+// expose `outerRef` via `virtualizationOptions`) — keep the two in sync until it does.
+const EUI_DATA_GRID_VIRTUALIZED_CLASS = 'euiDataGrid__virtualized';
 
 export type DataGridDensity = 'Compact' | 'Normal' | 'Expanded';
 export type DataGridRowHeight = 'Auto' | 'Custom';
@@ -87,9 +91,7 @@ export class DataGrid {
   }
 
   async changeRowsPerPageTo(rowsPerPage: number, scope: DataGridPaginationScope = 'discover') {
-    await this.getPaginationContainer(scope)
-      .locator('[data-test-subj="tablePaginationPopoverButton"]')
-      .click();
+    await this.getRowsPerPageButton(scope).click();
     const option = this.page.testSubj.locator(`tablePagination-${rowsPerPage}-rows`);
     await option.waitFor({ state: 'visible' });
     await option.click();
@@ -198,6 +200,23 @@ export class DataGrid {
     );
   }
 
+  /** The "Rows per page: N" toolbar button. Absent in `singlePage` pagination mode. */
+  getRowsPerPageButton(scope: DataGridPaginationScope = 'discover'): Locator {
+    return this.getPaginationContainer(scope).locator(
+      '[data-test-subj="tablePaginationPopoverButton"]'
+    );
+  }
+
+  getPreviousPageButton(scope: DataGridPaginationScope = 'discover'): Locator {
+    return this.getPaginationContainer(scope).locator(
+      '[data-test-subj="pagination-button-previous"]'
+    );
+  }
+
+  getNextPageButton(scope: DataGridPaginationScope = 'discover'): Locator {
+    return this.getPaginationContainer(scope).locator('[data-test-subj="pagination-button-next"]');
+  }
+
   async getCurrentRowHeight(scope: 'row' | 'header' = 'row'): Promise<DataGridRowHeight> {
     const buttonGroup = this.page.testSubj.locator(
       `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
@@ -211,9 +230,7 @@ export class DataGrid {
   }
 
   async getCurrentRowsPerPage(scope: DataGridPaginationScope = 'discover'): Promise<number> {
-    const buttonText = await this.getPaginationContainer(scope)
-      .locator('[data-test-subj="tablePaginationPopoverButton"]')
-      .innerText();
+    const buttonText = await this.getRowsPerPageButton(scope).innerText();
     const rowsPerPage = buttonText.match(/Rows per page:\s*(\d+)/)?.[1];
 
     if (!rowsPerPage) {
@@ -632,6 +649,48 @@ export class DataGrid {
       state: 'hidden',
       timeout: 30_000,
     });
+  }
+
+  /**
+   * Scrolls the virtualized grid body to the bottom. In `singlePage` pagination the footer only
+   * mounts once a scroll event lands within `scrollBottomMargin` (100 px) of the bottom, and only
+   * on a grid that is actually scrollable — so this polls the scroll position instead of sleeping
+   * between increments, and fails if there is nothing to scroll. Works for the main Discover table
+   * and for an embedded grid (e.g. a dashboard panel): `discoverDocTable` is set by
+   * `UnifiedDataTable` in both.
+   */
+  async scrollToBottom() {
+    const container = this.page.testSubj.locator('discoverDocTable');
+
+    // `discoverDataGridUpdating` only exists in Discover's layout, so it is no readiness signal in
+    // a dashboard panel. `data-render-complete` is set by UnifiedDataTable in both contexts.
+    await expect(container).toHaveAttribute('data-render-complete', 'true');
+
+    const grid = container.locator(`.${EUI_DATA_GRID_VIRTUALIZED_CLASS}`);
+
+    // UnifiedDataTable ignores scroll events unless the grid overflows its container, so a grid
+    // with nothing to scroll would leave the footer unmounted and make an absence assertion pass
+    // for the wrong reason. Fail loudly instead. 10s (over the 5s default) covers a slow first
+    // paint on CI, where rows can still be measuring right after `data-render-complete` flips.
+    await expect
+      .poll(() => grid.evaluate((el) => el.scrollHeight - el.clientHeight), { timeout: 10_000 })
+      .toBeGreaterThan(0);
+
+    // 20s: the grid re-measures row heights as virtualized rows mount, so `scrollHeight` can grow
+    // across several iterations before it settles. The interval stays above the app's 200 ms scroll
+    // throttle, and a fetch in flight (which makes the app drop scroll events) is absorbed by the
+    // next tick.
+    await expect
+      .poll(
+        () =>
+          grid.evaluate((el) => {
+            // Assigning scrollTop fires a real scroll event that react-window forwards.
+            el.scrollTop = el.scrollHeight;
+            return el.scrollHeight - (el.scrollTop + el.clientHeight);
+          }),
+        { timeout: 20_000, intervals: [250] }
+      )
+      .toBeLessThanOrEqual(100);
   }
 
   /**

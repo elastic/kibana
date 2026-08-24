@@ -8,9 +8,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import {
   spaceTest,
+  createNonLogsDiscoverSession,
   LOGS,
   LOGS_EXPERIENCE_TAGS,
   setupLogsExperience,
@@ -70,23 +70,10 @@ spaceTest.describe(
       async ({ page, apiServices, discoverScoutSpace, pageObjects }) => {
         const { discover, unifiedFieldList } = pageObjects;
 
-        const sessionId = await apiServices.discover.create(
-          {
-            title: `non-logs-no-recommended-${discoverScoutSpace.id}`,
-            tabs: [
-              {
-                id: 'main',
-                label: 'Untitled',
-                data_source: {
-                  type: 'data_view_spec',
-                  index_pattern: LOGS.NON_LOGS_DATA_VIEW,
-                  time_field: '@timestamp',
-                  name: LOGS.NON_LOGS_DATA_VIEW,
-                },
-              },
-            ],
-          } satisfies DiscoverSessionApiDataInput,
-          discoverScoutSpace.id
+        const sessionId = await createNonLogsDiscoverSession(
+          apiServices,
+          discoverScoutSpace.id,
+          'non-logs-no-recommended'
         );
 
         // Open by id rather than through the "Open search" flyout: that flyout filters via a

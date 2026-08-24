@@ -72,8 +72,11 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
     },
   });
 
-  const intervalMs = 10 * 60 * 1000;
-  const documents = Array.from({ length: 1 + (to - from) / intervalMs }, (_, i) => ({
+  // 31 docs at a 2-minute interval over the 1 h window. EuiDataGrid hides the whole pagination row
+  // when rowCount < min(pageSizeOptions), so this must stay above ROWS_PER_PAGE_OPTIONS[0] = 10; it
+  // stays below 100 so the default rows-per-page still fits on a single page.
+  const intervalMs = 2 * 60 * 1000;
+  const documents = Array.from({ length: 31 }, (_, i) => ({
     '@timestamp': new Date(from + i * intervalMs).toISOString(),
     'host.name': 'synth-metrics-host-01',
     'system.cpu.total.norm.pct': 0.98,
