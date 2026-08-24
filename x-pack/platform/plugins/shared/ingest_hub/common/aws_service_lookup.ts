@@ -112,6 +112,62 @@ export const AWS_SERVICE_LOOKUP: Readonly<Record<string, AwsServiceLookupEntry>>
   sns: { packageName: 'aws', policyTemplate: 'sns', inputs: ['aws/metrics'] },
   sqs: { packageName: 'aws', policyTemplate: 'sqs', inputs: ['aws/metrics'] },
 
+  // ── PT-keyed aliases (union of all data-stream inputs for each policy template) ─
+  // The service matrix is now keyed by policy-template name. These entries let the
+  // server-side permissions endpoint resolve IAM requirements when the UI sends a PT id.
+  apigateway: {
+    packageName: 'aws',
+    policyTemplate: 'apigateway',
+    inputs: ['aws-s3', 'aws-cloudwatch', 'aws/metrics'],
+  },
+  ec2: {
+    packageName: 'aws',
+    policyTemplate: 'ec2',
+    inputs: ['aws-s3', 'aws-cloudwatch', 'aws/metrics'],
+  },
+  ecs: { packageName: 'aws', policyTemplate: 'ecs', inputs: ['aws/metrics'] },
+  emr: {
+    packageName: 'aws',
+    policyTemplate: 'emr',
+    inputs: ['aws-s3', 'aws-cloudwatch', 'aws/metrics'],
+  },
+  cloudwatch: {
+    packageName: 'aws',
+    policyTemplate: 'cloudwatch',
+    inputs: ['aws-cloudwatch', 'aws/metrics'],
+  },
+  firewall: {
+    packageName: 'aws',
+    policyTemplate: 'firewall',
+    inputs: ['aws-s3', 'aws-cloudwatch', 'aws/metrics'],
+  },
+  securityhub: { packageName: 'aws', policyTemplate: 'securityhub', inputs: ['httpjson'] },
+  cloudfront: { packageName: 'aws', policyTemplate: 'cloudfront', inputs: ['aws-s3'] },
+  elb: {
+    packageName: 'aws',
+    policyTemplate: 'elb',
+    inputs: ['aws-s3', 'aws-cloudwatch', 'aws/metrics'],
+  },
+  route53: { packageName: 'aws', policyTemplate: 'route53', inputs: ['aws-cloudwatch', 'aws-s3'] },
+  s3: { packageName: 'aws', policyTemplate: 's3', inputs: ['aws/metrics', 'aws-s3'] },
+  kafka: { packageName: 'aws', policyTemplate: 'kafka', inputs: ['aws/metrics'] },
+  aws_bedrock: {
+    packageName: 'aws_bedrock',
+    policyTemplate: 'aws_bedrock',
+    inputs: ['aws/metrics', 'aws-s3', 'aws-cloudwatch'],
+  },
+  aws_bedrock_agentcore: {
+    packageName: 'aws_bedrock_agentcore',
+    policyTemplate: 'aws_bedrock_agentcore',
+    inputs: [],
+  },
+  awsfargate: {
+    packageName: 'awsfargate',
+    policyTemplate: 'awsfargate',
+    inputs: ['awsfargate/metrics'],
+  },
+  amazon_mq: { packageName: 'aws_mq', policyTemplate: 'amazon_mq', inputs: [] },
+
   // ── aws_bedrock package ─────────────────────────────────────────────────
   guardrails: {
     packageName: 'aws_bedrock',

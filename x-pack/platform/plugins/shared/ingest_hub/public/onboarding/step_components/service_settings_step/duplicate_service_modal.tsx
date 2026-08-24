@@ -25,7 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { ServiceVars } from './use_service_settings';
+import { makeDsView } from '../../aws_service_matrix';
+import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
 import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
 import { ServiceFieldsForm } from './service_fields_form';
 import { isDuplicateNameTaken } from './duplicate_name';
@@ -40,8 +41,8 @@ interface DuplicateServiceModalProps {
   globalRegion: string;
   onAdd: (
     name: string,
-    varsByInput: Record<string, Record<string, string>>,
-    enabledInputs: string[]
+    varsByDataStream: Record<string, ServiceDataStreamVars>,
+    enabledDataStreams: string[]
   ) => void;
   onCancel: () => void;
 }
@@ -58,39 +59,40 @@ export function DuplicateServiceModal({
   const [name, setName] = useState(suggestedName);
   const [nameTouched, setNameTouched] = useState(false);
 
-  const [draft, setDraft] = useState<Record<string, Record<string, string>>>(() => ({
-    ...sourceConfig.varsByInput,
+  const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
+    ...sourceConfig.varsByDataStream,
   }));
-  const [draftEnabledInputs, setDraftEnabledInputs] = useState<string[]>(
-    sourceConfig.enabledInputs
+  const [draftEnabledDataStreams, setDraftEnabledDataStreams] = useState<string[]>(
+    sourceConfig.enabledDataStreams
   );
-
-  const handleFieldChange = (input: string, fieldName: string, value: string) => {
-    setDraft((prev) => ({
-      ...prev,
-      [input]: { ...(prev[input] ?? {}), [fieldName]: value },
-    }));
-  };
 
   const trimmedName = name.trim();
   const nameEmpty = trimmedName === '';
   const nameTaken = !nameEmpty && isDuplicateNameTaken(trimmedName, existingNames);
   const nameInvalid = nameEmpty || nameTaken;
 
-  const activeInputs = draftEnabledInputs.length
-    ? draftEnabledInputs
-    : service.defaultEnabledInputs?.length
-    ? service.defaultEnabledInputs
-    : service.inputs?.slice(0, 1) ?? [];
-  const anyRequiredEmpty = activeInputs.some((inp) =>
-    getRequiredTextFields(service, inp).some((f) => {
-      const meta = resolveFieldMeta(service, inp, f);
-      const raw = draft[inp]?.[f];
-      const effective = meta ? toTyped(raw, meta) : raw ?? '';
-      if (Array.isArray(effective)) return effective.length === 0;
-      return typeof effective === 'string' && !effective.trim();
-    })
-  );
+  const activeDataStreams =
+    draftEnabledDataStreams.length > 0 ? draftEnabledDataStreams : service.dataStreams;
+
+  const anyRequiredEmpty = activeDataStreams.some((dsId) => {
+    const dsInfo = service.varDefsByDataStream?.[dsId];
+    const dsVars = draftByDs[dsId] ?? { enabledInputs: [], varsByInput: {} };
+    const activeInputs = dsVars.enabledInputs.length
+      ? dsVars.enabledInputs
+      : dsInfo?.defaultEnabledInputs?.length
+      ? dsInfo.defaultEnabledInputs
+      : dsInfo?.inputs?.slice(0, 1) ?? [];
+    const dsView = makeDsView(service, dsId);
+    return activeInputs.some((inp) =>
+      getRequiredTextFields(dsView, inp).some((f) => {
+        const meta = resolveFieldMeta(dsView, inp, f);
+        const raw = dsVars.varsByInput[inp]?.[f];
+        const effective = meta ? toTyped(raw, meta) : raw ?? '';
+        if (Array.isArray(effective)) return effective.length === 0;
+        return typeof effective === 'string' && !effective.trim();
+      })
+    );
+  });
 
   const canAdd = !nameInvalid && !anyRequiredEmpty;
 
@@ -109,7 +111,7 @@ export function DuplicateServiceModal({
       setNameTouched(true);
       return;
     }
-    onAdd(trimmedName, draft, draftEnabledInputs);
+    onAdd(trimmedName, draftByDs, draftEnabledDataStreams);
   };
 
   return (
@@ -164,14 +166,42 @@ export function DuplicateServiceModal({
 
         <ServiceFieldsForm
           service={service}
-          varsByInput={draft}
-          enabledInputs={draftEnabledInputs}
+          varsByDataStream={draftByDs}
+          enabledDataStreams={draftEnabledDataStreams}
           globalRegion={globalRegion}
-          onFieldChange={handleFieldChange}
-          onInputToggle={(input, enabled) =>
-            setDraftEnabledInputs((prev) =>
-              enabled ? [...prev, input] : prev.filter((i) => i !== input)
+          onFieldChange={(dsId, input, fieldName, value) =>
+            setDraftByDs((prev) => {
+              const existing = prev[dsId] ?? { enabledInputs: [], varsByInput: {} };
+              return {
+                ...prev,
+                [dsId]: {
+                  ...existing,
+                  varsByInput: {
+                    ...existing.varsByInput,
+                    [input]: { ...(existing.varsByInput[input] ?? {}), [fieldName]: value },
+                  },
+                },
+              };
+            })
+          }
+          onDataStreamToggle={(dsId, enabled) =>
+            setDraftEnabledDataStreams((prev) =>
+              enabled ? [...prev, dsId] : prev.filter((id) => id !== dsId)
             )
+          }
+          onInputToggle={(dsId, input, enabled) =>
+            setDraftByDs((prev) => {
+              const existing = prev[dsId] ?? { enabledInputs: [], varsByInput: {} };
+              return {
+                ...prev,
+                [dsId]: {
+                  ...existing,
+                  enabledInputs: enabled
+                    ? [...existing.enabledInputs, input]
+                    : existing.enabledInputs.filter((i) => i !== input),
+                },
+              };
+            })
           }
         />
       </EuiModalBody>

@@ -49,41 +49,66 @@ export interface DeploymentMethodEntry {
   preferred?: boolean;
 }
 
+/**
+ * Per-data-stream metadata derived from the Fleet package manifest.
+ * Used by the settings flyout to render per-data-stream sections.
+ */
+export interface DataStreamInfo {
+  /** Data stream display title from the manifest. */
+  title?: string;
+  /** Whether this data stream produces logs or metrics. */
+  type?: SignalType;
+  /** Fleet input types used by this data stream. */
+  inputs: string[];
+  /** Inputs enabled by default (stream.enabled !== false in the manifest). */
+  defaultEnabledInputs: string[];
+  /** Manifest var definitions keyed by input type, then var name. */
+  varDefsByInput: Record<string, Record<string, RegistryVarsEntry>>;
+  /** Var names the user must configure to activate this data stream. */
+  requiredConfig?: string[];
+  /** Var names that are optional and surfaced in the UI. */
+  optionalConfig?: string[];
+}
+
 export interface AwsServiceMatrixEntry {
-  /** Data stream identifier, matching packages/<packageName>/data_stream/<id> */
+  /** Policy template identifier, matching packages/<packageName>/policy_templates[].name. */
   id: string;
+  /** Data stream ids included under this policy template (derived from the manifest). */
+  dataStreams: string[];
   name: string;
   category: ServiceCategory;
-  signalType: SignalType;
+  /** Signal types produced by this policy template (may include both logs and metrics). */
+  signalTypes: SignalType[];
   deploymentMethods: DeploymentMethodEntry[];
   /** Whether OIDC-based IAM role assumption is supported.
    *  Derived from the package manifest: true when none of the service's inputs hide
    *  the 'identity_federation' option in the 'credential_type' var_group. */
   identityFederationSupported?: boolean;
-  /** Fleet integration input types required by this data stream (e.g. 'aws-s3', 'aws-cloudwatch') */
+  /** Fleet integration input types across all data streams (union; acts as an allowlist when set statically). */
   inputs?: string[];
-  /** Manifest var names the user must configure to activate this data stream */
+  /** Manifest var names the user must configure (union across all data streams). */
   requiredConfig?: string[];
-  /** Manifest var names that are optional and surfaced in the UI. Derived from manifest vars with required: false && show_user: true. */
+  /** Manifest var names that are optional and surfaced in the UI (union). */
   optionalConfig?: string[];
   /**
-   * Manifest var definitions grouped by stream input type, then by var name.
-   * Mirrors Fleet's positional scoping — a var's input is where it sits in the manifest,
-   * not a field on the var entry. e.g. { 'aws-s3': { bucket_arn: RegistryVarsEntry } }
+   * Manifest var definitions grouped by input type, then var name (union across all data streams).
+   * Mirrors Fleet's positional scoping. Used by resolveFieldMeta and ECF config builders.
    */
   varDefsByInput?: Record<string, Record<string, RegistryVarsEntry>>;
+  /**
+   * Per-data-stream var metadata. Keys are data stream ids.
+   * Used by the settings flyout to render per-data-stream sections with their own input toggles.
+   */
+  varDefsByDataStream?: Record<string, DataStreamInfo>;
   packageName: string;
-  /** Fleet policy template name derived from policy_templates[].data_streams lookup in the manifest. */
-  policyTemplate?: string;
-  /** Whether the data stream is enabled by default when the integration is installed. Derived from the package manifest. */
+  /** Whether the service is enabled by default when the integration is installed. */
   defaultEnabled: boolean;
   /**
-   * Input types that are enabled by default (stream.enabled !== false in the manifest).
-   * Used to seed enabledInputs when a user first opens a service — inputs explicitly
-   * marked enabled:false in the manifest are excluded.
+   * Input types that are enabled by default across all data streams (union).
+   * Used to seed enabledInputs when a user first opens a service.
    */
   defaultEnabledInputs: string[];
-  /** Whether this service should be shown in the AWS onboarding UI. Defaults to true. */
+  /** Whether this service should be shown in the AWS onboarding UI. */
   showInUI: boolean;
   badge?: Badge;
   /**
@@ -99,24 +124,28 @@ export interface AwsServiceMatrixEntry {
 
 /**
  * Internal type for the static routing table.
- * signalType, defaultEnabled, and defaultEnabledInputs are derived at runtime from the Fleet package manifest.
+ * Derived fields (signalTypes, dataStreams, defaultEnabled, defaultEnabledInputs, etc.) are omitted
+ * and computed at runtime from the Fleet package manifest.
  */
 type AwsServiceStaticEntry = Omit<
   AwsServiceMatrixEntry,
   | 'deploymentMethods'
-  | 'signalType'
+  | 'signalTypes'
+  | 'dataStreams'
   | 'defaultEnabled'
   | 'defaultEnabledInputs'
   | 'showInUI'
   | 'optionalConfig'
   | 'name'
   | 'varDefsByInput'
+  | 'varDefsByDataStream'
 > & {
   deploymentMethods?: DeploymentMethodEntry[];
-  signalType?: SignalType;
   showInUI?: boolean;
-  /** Override when the data stream title from the manifest isn't the right display name. */
+  /** Override when the policy template title from the manifest isn't the right display name. */
   name?: string;
+  /** Data stream ids to exclude from this policy template (e.g. firewall_metrics until agentless ships). */
+  excludedDataStreams?: string[];
 };
 
 // TODO aws_cloudwatch_input_otel for otel versions
@@ -124,49 +153,33 @@ type AwsServiceStaticEntry = Omit<
 const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Application Integration ──────────────────────────────
   {
-    id: 'apigateway_logs',
-    category: 'networking_content_delivery',
-    packageName: 'aws',
-  },
-  {
-    id: 'apigateway_metrics',
+    id: 'apigateway',
+    name: 'AWS API Gateway',
     category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'lambda',
-    category: 'compute',
-    packageName: 'aws',
-  },
-  {
-    id: 'lambda_logs',
+    name: 'AWS Lambda',
     category: 'compute',
     packageName: 'aws',
   },
 
   // ── aws package — Compute ───────────────────────────────────────────────
   {
-    id: 'ec2_logs',
+    id: 'ec2',
+    name: 'Amazon EC2',
     category: 'compute',
     packageName: 'aws',
   },
   {
-    id: 'ec2_metrics',
+    id: 'ecs',
     category: 'compute',
     packageName: 'aws',
   },
   {
-    id: 'ecs_metrics',
-    category: 'compute',
-    packageName: 'aws',
-  },
-  {
-    id: 'emr_logs',
-    category: 'compute',
-    packageName: 'aws',
-  },
-  {
-    id: 'emr_metrics',
+    id: 'emr',
+    name: 'Amazon EMR',
     category: 'compute',
     packageName: 'aws',
   },
@@ -178,12 +191,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
   },
   {
-    id: 'cloudwatch_logs',
-    category: 'management_governance',
-    packageName: 'aws',
-  },
-  {
-    id: 'cloudwatch_metrics',
+    id: 'cloudwatch',
     category: 'management_governance',
     packageName: 'aws',
   },
@@ -238,32 +246,16 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
   },
   {
-    id: 'firewall_logs',
+    id: 'firewall',
+    name: 'AWS Network Firewall',
     category: 'security_identity_compliance',
     packageName: 'aws',
+    // firewall_metrics has no agentless support yet (tracked: elastic/integrations#19301).
+    excludedDataStreams: ['firewall_metrics'],
   },
   {
-    id: 'firewall_metrics',
-    category: 'security_identity_compliance',
-    deploymentMethods: [{ method: 'agent_based', preferred: true }],
-    packageName: 'aws',
-    showInUI: false, // TODO confirm if only agent_based and if should be included in onboarding flow
-  },
-  {
-    id: 'securityhub_findings',
+    id: 'securityhub',
     name: 'AWS Security Hub',
-    category: 'security_identity_compliance',
-    packageName: 'aws',
-  },
-  {
-    id: 'securityhub_findings_full_posture',
-    name: 'AWS Security Hub (Full Posture / CSPM)',
-    category: 'security_identity_compliance',
-    packageName: 'aws',
-  },
-  {
-    id: 'securityhub_insights',
-    name: 'AWS Security Hub (Insights)',
     category: 'security_identity_compliance',
     packageName: 'aws',
   },
@@ -274,9 +266,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     ecfLogType: 'waf',
-    // TODO: WAF only supports S3 input in ECF deployment mode
-    // if users choose Agent-based deployment, cloudwatch should become available
-    // and all package vars should be displayed
+    // ECF only supports S3 for WAF; CloudWatch input is intentionally excluded.
     inputs: ['aws-s3'],
   },
   // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
@@ -292,7 +282,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
 
   // ── aws package — Networking and Content Delivery ─────────────────────────
   {
-    id: 'cloudfront_logs',
+    id: 'cloudfront',
     category: 'networking_content_delivery',
     // ECF: CloudFront is in the edot-cloud-forwarder-aws#452 DoD but no released template yet
     deploymentMethods: [{ method: 'ecf', preferred: true }],
@@ -300,12 +290,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
   },
   {
-    id: 'elb_logs',
-    category: 'networking_content_delivery',
-    packageName: 'aws',
-  },
-  {
-    id: 'elb_metrics',
+    id: 'elb',
+    name: 'AWS ELB',
     category: 'networking_content_delivery',
     packageName: 'aws',
   },
@@ -315,12 +301,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
   },
   {
-    id: 'route53_public_logs',
-    category: 'networking_content_delivery',
-    packageName: 'aws',
-  },
-  {
-    id: 'route53_resolver_logs',
+    id: 'route53',
+    name: 'AWS Route 53',
     category: 'networking_content_delivery',
     packageName: 'aws',
   },
@@ -360,17 +342,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
   },
   {
-    id: 's3_daily_storage',
-    category: 'storage',
-    packageName: 'aws',
-  },
-  {
-    id: 's3_request',
-    category: 'storage',
-    packageName: 'aws',
-  },
-  {
-    id: 's3access',
+    id: 's3',
+    name: 'Amazon S3',
     category: 'storage',
     packageName: 'aws',
   },
@@ -397,9 +370,9 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
   },
 
-  // ── aws package — management_governance ─────────────────────────────────
+  // ── aws package — Messaging / Analytics ─────────────────────────────────
   {
-    id: 'kafka_metrics',
+    id: 'kafka',
     category: 'management_governance',
     packageName: 'aws',
   },
@@ -421,26 +394,14 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
 
   // ── aws_bedrock package — Machine Learning ──────────────────────────────
   {
-    id: 'guardrails',
-    name: 'AWS Bedrock (Guardrails)',
-    category: 'machine_learning',
-    packageName: 'aws_bedrock',
-  },
-  {
-    id: 'invocation',
-    name: 'AWS Bedrock (Invocation)',
-    category: 'machine_learning',
-    packageName: 'aws_bedrock',
-  },
-  {
-    id: 'runtime',
-    name: 'AWS Bedrock (Runtime)',
+    id: 'aws_bedrock',
+    name: 'AWS Bedrock',
     category: 'machine_learning',
     packageName: 'aws_bedrock',
   },
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
-    id: 'bedrock_agentcore',
+    id: 'aws_bedrock_agentcore',
     name: 'AWS Bedrock AgentCore',
     category: 'machine_learning',
     packageName: 'aws_bedrock_agentcore',
@@ -449,7 +410,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
 
   // ── awsfargate package — Containers ─────────────────────────────────────
   {
-    id: 'task_stats',
+    id: 'awsfargate',
     name: 'AWS Fargate',
     category: 'containers',
     packageName: 'awsfargate',
@@ -458,12 +419,11 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws_mq package — application_integration ────────────────────────────
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
-    id: 'mq',
+    id: 'amazon_mq',
     name: 'AWS MQ',
     category: 'application_integration',
     packageName: 'aws_mq',
     showInUI: false,
-    policyTemplate: 'amazon_mq',
   },
 
   // ── aws_logs package — Management and Governance ──────────────────────────
@@ -477,8 +437,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
 
 /**
  * Merge the static routing table with data from any Fleet package manifest.
- * Derives managed_integration, signalType, inputs, requiredConfig, optionalConfig,
- * defaultEnabled, and identityFederationSupported from the manifest.
+ * Derives signalTypes, dataStreams, inputs, requiredConfig, optionalConfig, varDefsByInput,
+ * varDefsByDataStream, defaultEnabled, and identityFederationSupported from the manifest.
  * Static fallback values are used when the manifest does not provide a field.
  */
 export function buildAwsServiceMatrix(
@@ -486,120 +446,187 @@ export function buildAwsServiceMatrix(
   staticEntries: AwsServiceStaticEntry[]
 ): AwsServiceMatrixEntry[] {
   return staticEntries.map((entry) => {
-    const { deploymentMethods: staticMethods, ...rest } = entry;
+    const { deploymentMethods: staticMethods, excludedDataStreams, ...rest } = entry;
 
     let name = entry.name;
-    let signalType = entry.signalType;
     let inputs = entry.inputs;
     let requiredConfig = entry.requiredConfig;
     let optionalConfig: string[] | undefined;
     let defaultEnabled = true;
-    let defaultEnabledInputs: string[] = [];
+    const defaultEnabledInputs: string[] = [];
     let identityFederationSupported: boolean | undefined;
     let managedIntegrations = false;
     let pt: any;
     const varDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
+    const varDefsByDataStream: Record<string, DataStreamInfo> = {};
+    const signalTypesSet = new Set<SignalType>();
+    const dataStreams: string[] = [];
 
     const packageInfo = packages[entry.packageName];
     const badge = entry.badge ?? releaseToBadge((packageInfo as any)?.release);
+
     if (packageInfo) {
-      pt =
-        (packageInfo.policy_templates ?? []).find((p: any) =>
-          (p.data_streams ?? []).includes(entry.id)
-        ) ?? packageInfo.policy_templates?.[0];
-      const ds = (packageInfo.data_streams ?? []).find((d: any) => d.path === entry.id);
+      // Find the policy template by name (entry.id IS the PT name).
+      pt = (packageInfo.policy_templates ?? []).find((p: any) => p.name === entry.id);
 
-      // Agentless is read at the policy-template level, which may cover both logs and metrics
-      // data streams (e.g. ec2 has ec2_logs + ec2_metrics under one template; dynamodb, rds,
-      // and s3 are similar). Both signal types inherit managed_integration from the same flag,
-      // which is the correct behaviour today — all those templates are intended for agentless.
-      // The latent risk is a future template that covers signal types with different deployment
-      // requirements; the clean fix for that case is per-data-stream deployment fields in the
-      // manifest.
-      managedIntegrations = (pt as any)?.deployment_modes?.agentless?.enabled === true;
+      if (pt) {
+        // Agentless is read at the policy-template level, which may cover both logs and metrics
+        // data streams (e.g. ec2 has ec2_logs + ec2_metrics under one template). Both signal
+        // types inherit managed_integration from the same flag, which is the correct behaviour
+        // today — all those templates are intended for agentless.
+        managedIntegrations = (pt as any)?.deployment_modes?.agentless?.enabled === true;
 
-      if (!name && (ds as any)?.title) {
-        name = (ds as any).title as string;
-      }
-
-      if ((ds as any)?.type === 'logs' || (ds as any)?.type === 'metrics') {
-        signalType = (ds as any).type as SignalType;
-      }
-
-      const dsStreams: Array<{ input?: string; enabled?: boolean }> = (ds as any)?.streams ?? [];
-      const dsInputs: string[] = [...new Set(dsStreams.map((s) => s.input as string))];
-      if (dsInputs.length > 0) {
-        // Static entry inputs act as an allowlist — skip manifest-derived inputs when already set.
-        if (!entry.inputs) {
-          inputs = dsInputs;
+        if (!name && (pt as any)?.title) {
+          name = (pt as any).title as string;
         }
-        const effectiveInputs = inputs ?? dsInputs;
-        defaultEnabledInputs = effectiveInputs.filter((input) => {
-          const stream = dsStreams.find((s) => s.input === input);
-          return stream?.enabled !== false;
-        });
-      }
 
-      // Walk streams building a positional var map: input → varName → definition.
-      // Matches Fleet's scope model — a var's input is where it sits in the manifest, not a field.
-      // First-wins within each input bucket when the same var name appears in multiple streams
-      // of the same input type.
-      for (const s of ((ds as any)?.streams ?? []) as Array<{
-        input?: string;
-        vars?: RegistryVarsEntry[];
-      }>) {
-        if (!s.input) continue;
-        const bucket = (varDefsByInput[s.input] ??= {});
-        for (const v of s.vars ?? []) {
-          if (!v.name) continue;
-          bucket[v.name] ??= v;
-        }
-      }
+        // Collect all data streams for this policy template, excluding any blocked ones.
+        const ptDataStreamIds: string[] = (pt as any).data_streams ?? [];
+        const includedDsIds = ptDataStreamIds.filter(
+          (dsId) => !(excludedDataStreams ?? []).includes(dsId)
+        );
 
-      const allVars: RegistryVarsEntry[] = Object.values(varDefsByInput).flatMap((byName) =>
-        Object.values(byName)
-      );
+        for (const dsId of includedDsIds) {
+          const ds = (packageInfo.data_streams ?? []).find((d: any) => d.path === dsId);
+          if (!ds) continue;
 
-      // All required vars (shown or hidden) go into requiredConfig. field_config functions
-      // use show_user from varDefs to split them into user-visible and mandatory-hidden sections.
-      const reqVars: string[] = [
-        ...new Set(allVars.filter((v: any) => v.required).map((v: any) => v.name as string)),
-      ];
-      if (reqVars.length > 0) {
-        requiredConfig = reqVars;
-      }
+          dataStreams.push(dsId);
 
-      const reqVarSet = new Set(reqVars);
-      const optVars: string[] = [
-        ...new Set(
-          allVars
-            .filter((v: any) => !v.required && v.show_user && !reqVarSet.has(v.name as string))
-            .map((v: any) => v.name as string)
-        ),
-      ];
-      if (optVars.length > 0) {
-        optionalConfig = optVars;
-      }
+          if ((ds as any)?.type === 'logs' || (ds as any)?.type === 'metrics') {
+            signalTypesSet.add((ds as any).type as SignalType);
+          }
 
-      if ((ds as any)?.streams?.length > 0) {
-        defaultEnabled = !(ds as any).streams.some((s: any) => s.enabled === false);
-      }
+          const dsStreams: Array<{
+            input?: string;
+            enabled?: boolean;
+            vars?: RegistryVarsEntry[];
+          }> = (ds as any)?.streams ?? [];
+          const dsManifestInputs: string[] = [
+            ...new Set(dsStreams.map((s) => s.input as string).filter(Boolean)),
+          ];
 
-      // Derive identityFederationSupported: true when at least one of this data stream's
-      // inputs does NOT hide 'identity_federation' in the 'credential_type' var_group.
-      // False only when every applicable input blocks it (no IF-compatible input path exists).
-      const ptInputs: any[] = (pt as any)?.inputs ?? [];
-      const dsInputTypes = new Set(((ds as any)?.streams ?? []).map((s: any) => s.input as string));
-      if (ptInputs.length > 0 && dsInputTypes.size > 0) {
-        const relevantInputs = ptInputs.filter((i: any) => dsInputTypes.has(i.type));
-        if (relevantInputs.length > 0) {
-          identityFederationSupported = relevantInputs.some(
-            (i: any) =>
-              !(i.hide_in_var_group_options?.credential_type ?? []).includes('identity_federation')
+          // Static entry inputs act as an allowlist — restrict per-DS inputs when the static
+          // entry already sets them (e.g. WAF → S3 only for ECF).
+          const dsEffectiveInputs =
+            entry.inputs && dsManifestInputs.some((i) => entry.inputs!.includes(i))
+              ? entry.inputs.filter((i) => dsManifestInputs.includes(i))
+              : dsManifestInputs;
+
+          const dsDefaultEnabledInputs = dsEffectiveInputs.filter((input) => {
+            const stream = dsStreams.find((s) => s.input === input);
+            return stream?.enabled !== false;
+          });
+
+          // Build per-DS var defs (input → varName → definition). First-wins within each input
+          // bucket when the same var name appears in multiple streams of the same input type.
+          const dsVarDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
+          for (const s of dsStreams) {
+            if (!s.input || !dsEffectiveInputs.includes(s.input)) continue;
+            const bucket = (dsVarDefsByInput[s.input] ??= {});
+            for (const v of (s.vars ?? []) as RegistryVarsEntry[]) {
+              if (!(v as any).name) continue;
+              bucket[(v as any).name] ??= v;
+            }
+          }
+
+          // Derive per-DS required/optional config.
+          const dsAllVars: RegistryVarsEntry[] = Object.values(dsVarDefsByInput).flatMap((byName) =>
+            Object.values(byName)
           );
+          const dsReqVars: string[] = [
+            ...new Set(dsAllVars.filter((v: any) => v.required).map((v: any) => v.name as string)),
+          ];
+          const dsReqVarSet = new Set(dsReqVars);
+          const dsOptVars: string[] = [
+            ...new Set(
+              dsAllVars
+                .filter(
+                  (v: any) => !v.required && v.show_user && !dsReqVarSet.has(v.name as string)
+                )
+                .map((v: any) => v.name as string)
+            ),
+          ];
+
+          varDefsByDataStream[dsId] = {
+            title: (ds as any).title as string | undefined,
+            type: (ds as any).type as SignalType | undefined,
+            inputs: dsEffectiveInputs,
+            defaultEnabledInputs: dsDefaultEnabledInputs,
+            varDefsByInput: dsVarDefsByInput,
+            requiredConfig: dsReqVars.length > 0 ? dsReqVars : undefined,
+            optionalConfig: dsOptVars.length > 0 ? dsOptVars : undefined,
+          };
+
+          // Merge into the union varDefsByInput (first-wins per input+var).
+          for (const [input, byName] of Object.entries(dsVarDefsByInput)) {
+            const bucket = (varDefsByInput[input] ??= {});
+            for (const [varName, varDef] of Object.entries(byName)) {
+              bucket[varName] ??= varDef;
+            }
+          }
+
+          // Accumulate the inputs union (only when not overridden by a static allowlist).
+          if (!entry.inputs) {
+            for (const input of dsEffectiveInputs) {
+              if (!inputs) inputs = [];
+              if (!inputs.includes(input)) inputs.push(input);
+            }
+          }
+
+          // Merge defaultEnabledInputs into the union.
+          for (const input of dsDefaultEnabledInputs) {
+            if (!defaultEnabledInputs.includes(input)) defaultEnabledInputs.push(input);
+          }
+        }
+
+        // Derive union requiredConfig / optionalConfig from all data streams' vars.
+        const allVars: RegistryVarsEntry[] = Object.values(varDefsByInput).flatMap((byName) =>
+          Object.values(byName)
+        );
+
+        const reqVars: string[] = [
+          ...new Set(allVars.filter((v: any) => v.required).map((v: any) => v.name as string)),
+        ];
+        if (reqVars.length > 0) {
+          requiredConfig = reqVars;
+        }
+
+        const reqVarSet = new Set(reqVars);
+        const optVars: string[] = [
+          ...new Set(
+            allVars
+              .filter((v: any) => !v.required && v.show_user && !reqVarSet.has(v.name as string))
+              .map((v: any) => v.name as string)
+          ),
+        ];
+        if (optVars.length > 0) {
+          optionalConfig = optVars;
+        }
+
+        // defaultEnabled: true unless the PT has no enabled inputs at all.
+        if (dataStreams.length > 0) {
+          defaultEnabled = defaultEnabledInputs.length > 0;
+        }
+
+        // Derive identityFederationSupported: true when at least one of the PT's inputs does NOT
+        // hide 'identity_federation' in the 'credential_type' var_group.
+        const ptInputs: any[] = (pt as any)?.inputs ?? [];
+        const allDsInputTypes = new Set(Object.keys(varDefsByInput));
+        if (ptInputs.length > 0 && allDsInputTypes.size > 0) {
+          const relevantInputs = ptInputs.filter((i: any) => allDsInputTypes.has(i.type));
+          if (relevantInputs.length > 0) {
+            identityFederationSupported = relevantInputs.some(
+              (i: any) =>
+                !(i.hide_in_var_group_options?.credential_type ?? []).includes(
+                  'identity_federation'
+                )
+            );
+          }
         }
       }
     }
+
+    const signalTypes: SignalType[] = [...signalTypesSet];
 
     // Build the merged deploymentMethods array.
     // managed_integration is always preferred when present; static methods are demoted.
@@ -616,7 +643,6 @@ export function buildAwsServiceMatrix(
     }
     const deploymentMethods: DeploymentMethodEntry[] = methods;
 
-    // When managed_integration is absent, ensure exactly one static method is preferred.
     if (
       !managedIntegrations &&
       deploymentMethods.length > 0 &&
@@ -626,11 +652,8 @@ export function buildAwsServiceMatrix(
     }
 
     // Auto-hide when no deployment methods are available and not explicitly shown.
-    // Once agentless is enabled in the manifest or ECF is added statically, the service
-    // gets deployment methods and becomes visible without a manual showInUI update.
     const showInUI = entry.showInUI ?? deploymentMethods.length > 0;
 
-    // ECF trigger vars are expected to be the only required vars for ECF-only services
     // For ECF-only services, ECF manages all configuration internally.
     // Only the trigger-source var needs user input: bucket_arn (S3) or log_group_arn (CloudWatch).
     // Restrict to the effective inputs so services with a static input allowlist (e.g. WAF → S3
@@ -652,25 +675,46 @@ export function buildAwsServiceMatrix(
       }
     }
 
-    const merged = {
+    return {
       ...rest,
       name: (name ?? entry.id) as string,
-      policyTemplate: (pt as any)?.name as string | undefined,
+      dataStreams,
+      signalTypes,
       deploymentMethods,
-      signalType: (signalType ?? entry.signalType) as SignalType,
       inputs,
       requiredConfig,
       optionalConfig,
       varDefsByInput: Object.keys(varDefsByInput).length > 0 ? varDefsByInput : undefined,
+      varDefsByDataStream:
+        Object.keys(varDefsByDataStream).length > 0 ? varDefsByDataStream : undefined,
       defaultEnabled,
       defaultEnabledInputs,
       showInUI,
       badge,
       identityFederationSupported,
     } as AwsServiceMatrixEntry;
-
-    return merged;
   });
+}
+
+/**
+ * Create a view of a service scoped to a single data stream.
+ * Scopes `inputs`, `defaultEnabledInputs`, `requiredConfig`, `optionalConfig`, and `varDefsByInput`
+ * to the given DS so that field-config helpers and the flyout form operate on just that DS.
+ */
+export function makeDsView(service: AwsServiceMatrixEntry, dsId: string): AwsServiceMatrixEntry {
+  const dsInfo = service.varDefsByDataStream?.[dsId];
+  if (!dsInfo) return service;
+  return {
+    ...service,
+    dataStreams: [dsId],
+    signalTypes: dsInfo.type ? [dsInfo.type] : service.signalTypes,
+    inputs: dsInfo.inputs,
+    defaultEnabledInputs: dsInfo.defaultEnabledInputs,
+    requiredConfig: dsInfo.requiredConfig,
+    optionalConfig: dsInfo.optionalConfig,
+    varDefsByInput: dsInfo.varDefsByInput,
+    varDefsByDataStream: { [dsId]: dsInfo },
+  };
 }
 
 /** Internal static entries — exported for use by buildAwsServiceMatrix in the hook. */
@@ -681,19 +725,22 @@ export const AWS_SERVICES_STATIC: AwsServiceStaticEntry[] = AWS_SERVICES_MATRIX_
  * (name, category, showInUI, etc.).
  * For manifest-enriched values (deploymentMethods, identityFederationSupported)
  * use useAwsServicesMap() in React components.
- * Note: signalType and defaultEnabled are derived from the manifest at runtime;
+ * Note: signalTypes, dataStreams, and defaultEnabled are derived from the manifest at runtime;
  * values here are placeholders — use useAwsServicesMap() where these fields matter.
  */
 export const AWS_SERVICES_MAP = new Map<string, AwsServiceMatrixEntry>(
   AWS_SERVICES_STATIC.map((entry) => {
-    const { deploymentMethods: staticMethods, ...rest } = entry;
+    const { deploymentMethods: staticMethods, excludedDataStreams: _excl, ...rest } = entry;
     const deploymentMethods: DeploymentMethodEntry[] = staticMethods ?? [];
     const base = {
       ...rest,
       name: (entry.name ?? entry.id) as string,
+      dataStreams: [],
+      signalTypes: [],
       deploymentMethods,
       showInUI: entry.showInUI ?? true,
       defaultEnabled: true,
+      defaultEnabledInputs: [],
     } as unknown as AwsServiceMatrixEntry;
     return [entry.id, base];
   })

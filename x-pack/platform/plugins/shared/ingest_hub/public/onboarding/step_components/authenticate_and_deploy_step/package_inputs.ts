@@ -6,9 +6,13 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { makeDsView } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
 import { resolveFieldMeta, toTyped } from '../service_settings_step/field_config';
-import type { ServiceVars } from '../service_settings_step/use_service_settings';
+import type {
+  ServiceVars,
+  ServiceDataStreamVars,
+} from '../service_settings_step/use_service_settings';
 
 interface PackageInputEntry {
   enabled: boolean;
@@ -27,15 +31,20 @@ export function getRegionFieldName(
   return '';
 }
 
+/**
+ * Build Fleet stream vars for a single input of a single data stream.
+ * `service` should already be scoped to the DS (via makeDsView) so that
+ * requiredConfig/optionalConfig/varDefsByInput are DS-specific.
+ */
 export function buildStreamVars(
   service: AwsServiceMatrixEntry,
-  serviceVars: ServiceVars,
+  dsVars: ServiceDataStreamVars,
   globalRegion: string,
   activeInput: string
 ): Record<string, string | boolean | string[]> {
   const result: Record<string, string | boolean | string[]> = {};
 
-  for (const [key, value] of Object.entries(serviceVars.varsByInput[activeInput] ?? {})) {
+  for (const [key, value] of Object.entries(dsVars.varsByInput[activeInput] ?? {})) {
     const meta = resolveFieldMeta(service, activeInput, key);
     if (!meta) {
       result[key] = value;
@@ -74,29 +83,44 @@ export function buildPackageInputs(
 
   for (const service of services) {
     const serviceVars: ServiceVars = storedServiceVars[service.id] ?? {
-      enabledInputs: [],
-      varsByInput: {},
+      enabledDataStreams: [],
+      varsByDataStream: {},
     };
-    // Fall back to the first manifest input when no explicit selection has been saved.
-    const activeInputs =
-      serviceVars.enabledInputs.length > 0
-        ? serviceVars.enabledInputs
+
+    const activeDataStreams =
+      serviceVars.enabledDataStreams.length > 0
+        ? serviceVars.enabledDataStreams
+        : service.dataStreams;
+
+    for (const dsId of activeDataStreams) {
+      const dsInfo = service.varDefsByDataStream?.[dsId];
+      const dsVars = serviceVars.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
+
+      // Determine which inputs are active for this data stream.
+      const activeInputs = dsVars.enabledInputs.length
+        ? dsVars.enabledInputs
+        : dsInfo?.defaultEnabledInputs?.length
+        ? dsInfo.defaultEnabledInputs
+        : dsInfo?.inputs?.length
+        ? dsInfo.inputs.slice(0, 1)
         : service.defaultEnabledInputs?.length
-        ? service.defaultEnabledInputs
-        : service.inputs?.slice(0, 1) ?? [];
+        ? service.defaultEnabledInputs.slice(0, 1)
+        : (service.inputs ?? []).slice(0, 1);
 
-    const streamKey = `${service.packageName}.${service.id}`;
+      // Fleet stream key: <packageName>.<dataStreamPath>
+      const streamKey = `${service.packageName}.${dsId}`;
+      // Fleet input key: <policyTemplateName>-<inputType>  (service.id is now the PT name)
+      const dsView = makeDsView(service, dsId);
 
-    for (const inputType of activeInputs) {
-      const inputKey = service.policyTemplate
-        ? `${service.policyTemplate}-${inputType}`
-        : inputType;
-      const streamVars = buildStreamVars(service, serviceVars, globalRegion, inputType);
+      for (const inputType of activeInputs) {
+        const inputKey = `${service.id}-${inputType}`;
+        const streamVars = buildStreamVars(dsView, dsVars, globalRegion, inputType);
 
-      if (!inputs[inputKey]) {
-        inputs[inputKey] = { enabled: true, streams: {} };
+        if (!inputs[inputKey]) {
+          inputs[inputKey] = { enabled: true, streams: {} };
+        }
+        inputs[inputKey].streams[streamKey] = { enabled: true, vars: streamVars };
       }
-      inputs[inputKey].streams[streamKey] = { enabled: true, vars: streamVars };
     }
   }
 

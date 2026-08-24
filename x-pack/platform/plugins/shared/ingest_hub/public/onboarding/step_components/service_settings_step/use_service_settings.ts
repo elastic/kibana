@@ -9,25 +9,34 @@ import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
 
-export interface ServiceVars {
-  /** Input types that are enabled for this service instance (e.g. ['httpjson'], ['aws-s3']). */
+export interface ServiceDataStreamVars {
+  /** Input types enabled for this data stream. */
   enabledInputs: string[];
   /**
    * Var values keyed by input type, then var name.
-   * Mirrors Fleet's positional scoping (inputs[].streams[].vars).
    * e.g. { 'aws-s3': { bucket_arn: 'arn:...' } }
    */
   varsByInput: Record<string, Record<string, string>>;
 }
 
+export interface ServiceVars {
+  /** Data stream ids enabled for this service instance. */
+  enabledDataStreams: string[];
+  /**
+   * Per-data-stream var values. Keys are data stream ids (e.g. 'vpcflow', 'ec2_logs').
+   */
+  varsByDataStream: Record<string, ServiceDataStreamVars>;
+}
+
 /**
  * A row in the step-2 table. `instanceId` is the stable row identity;
- * `serviceId` is the data-stream / Fleet join key and remains unchanged.
+ * `serviceId` is the policy-template / Fleet join key and remains unchanged.
  * Original instances keep instanceId === serviceId for backward compat with
  * session storage written by earlier builds.
  */
@@ -96,6 +105,31 @@ function reconcileInstances(
   return [...kept, ...added];
 }
 
+/**
+ * Migrate a persisted ServiceVars value that may be in the old flat shape
+ * ({enabledInputs, varsByInput}) to the new per-DS shape.
+ * Old sessions stored a flat structure before ingest-dev#9304 restructured to PT granularity.
+ */
+function migrateServiceVars(raw: unknown, service: AwsServiceMatrixEntry | undefined): ServiceVars {
+  if (!raw || typeof raw !== 'object') {
+    return { enabledDataStreams: service?.dataStreams ?? [], varsByDataStream: {} };
+  }
+  const r = raw as Record<string, unknown>;
+  // Detect old flat shape: has enabledInputs but not enabledDataStreams
+  if ('enabledInputs' in r && !('enabledDataStreams' in r)) {
+    const oldInputs = (r.enabledInputs as string[]) ?? [];
+    const oldVarsByInput = (r.varsByInput as Record<string, Record<string, string>>) ?? {};
+    const dsIds = service?.dataStreams ?? [];
+    const varsByDataStream: Record<string, ServiceDataStreamVars> = {};
+    // Assign the flat vars to the first (primary) DS.
+    if (dsIds.length > 0) {
+      varsByDataStream[dsIds[0]] = { enabledInputs: oldInputs, varsByInput: oldVarsByInput };
+    }
+    return { enabledDataStreams: dsIds, varsByDataStream };
+  }
+  return raw as ServiceVars;
+}
+
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const { servicesStep, removeDeployInstance, awsServicesMap } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
@@ -128,39 +162,44 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   const getServiceVars = useCallback(
     (instanceId: string): ServiceVars => {
-      const raw = persisted?.serviceVars?.[instanceId] as ServiceVars | undefined;
-      if (raw) {
-        return raw;
-      }
+      const raw = persisted?.serviceVars?.[instanceId];
       const inst = instances.find((i) => i.instanceId === instanceId);
       const service = inst ? awsServicesMap?.get(inst.serviceId) : undefined;
+      if (raw) {
+        return migrateServiceVars(raw, service);
+      }
       return {
-        enabledInputs: service?.defaultEnabledInputs ?? [],
-        varsByInput: {},
+        enabledDataStreams: service?.dataStreams ?? [],
+        varsByDataStream: {},
       };
     },
     [persisted, instances, awsServicesMap]
   );
 
-  // Applies multiple field changes (and optional enabled-inputs update) in a single write to avoid
+  // Applies multiple field changes (and optional enabled-data-streams update) in a single write to avoid
   // stale-closure overwrites when several vars are committed at once (flyout Save).
   const setServiceFieldsAndInputs = useCallback(
     (
       instanceId: string,
-      fieldsByInput: Record<string, Record<string, string>>,
-      enabledInputs: string[]
+      newVarsByDataStream: Record<string, ServiceDataStreamVars>,
+      enabledDataStreams: string[]
     ) => {
       const current = getServiceVars(instanceId);
-      const merged: Record<string, Record<string, string>> = { ...current.varsByInput };
-      for (const [input, fields] of Object.entries(fieldsByInput)) {
-        merged[input] = { ...(merged[input] ?? {}), ...fields };
+      const merged: Record<string, ServiceDataStreamVars> = { ...current.varsByDataStream };
+      for (const [dsId, dsVars] of Object.entries(newVarsByDataStream)) {
+        const existing = merged[dsId] ?? { enabledInputs: [], varsByInput: {} };
+        const mergedByInput: Record<string, Record<string, string>> = { ...existing.varsByInput };
+        for (const [input, fields] of Object.entries(dsVars.varsByInput)) {
+          mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
+        }
+        merged[dsId] = { enabledInputs: dsVars.enabledInputs, varsByInput: mergedByInput };
       }
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         instances,
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
-          [instanceId]: { enabledInputs, varsByInput: merged },
+          [instanceId]: { enabledDataStreams, varsByDataStream: merged },
         },
       });
     },
@@ -171,8 +210,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     (
       sourceInstanceId: string,
       newName: string,
-      fieldsByInput: Record<string, Record<string, string>>,
-      enabledInputs: string[]
+      newVarsByDataStream: Record<string, ServiceDataStreamVars>,
+      enabledDataStreams: string[]
     ) => {
       const source = instances.find((i) => i.instanceId === sourceInstanceId);
       if (!source) return;
@@ -185,10 +224,18 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       }
 
       const sourceVars = getServiceVars(sourceInstanceId);
-      const mergedByInput: Record<string, Record<string, string>> = { ...sourceVars.varsByInput };
-      for (const [input, fields] of Object.entries(fieldsByInput)) {
-        mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
+      const mergedByDs: Record<string, ServiceDataStreamVars> = {
+        ...sourceVars.varsByDataStream,
+      };
+      for (const [dsId, dsVars] of Object.entries(newVarsByDataStream)) {
+        const existing = mergedByDs[dsId] ?? { enabledInputs: [], varsByInput: {} };
+        const mergedByInput: Record<string, Record<string, string>> = { ...existing.varsByInput };
+        for (const [input, fields] of Object.entries(dsVars.varsByInput)) {
+          mergedByInput[input] = { ...(mergedByInput[input] ?? {}), ...fields };
+        }
+        mergedByDs[dsId] = { enabledInputs: dsVars.enabledInputs, varsByInput: mergedByInput };
       }
+
       const newInstance: ServiceInstance = {
         instanceId: newInstanceId,
         serviceId: source.serviceId,
@@ -202,8 +249,10 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         serviceVars: {
           ...(persisted?.serviceVars ?? {}),
           [newInstanceId]: {
-            enabledInputs: enabledInputs.length ? enabledInputs : sourceVars.enabledInputs,
-            varsByInput: mergedByInput,
+            enabledDataStreams: enabledDataStreams.length
+              ? enabledDataStreams
+              : sourceVars.enabledDataStreams,
+            varsByDataStream: mergedByDs,
           },
         },
       });
@@ -236,7 +285,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     return instances.filter((inst) => {
       const service = awsServicesMap?.get(inst.serviceId);
       if (!service) return false;
-      if (signalFilter !== 'all' && service.signalType !== signalFilter) return false;
+      if (signalFilter !== 'all' && !service.signalTypes.includes(signalFilter)) return false;
       if (q !== '' && !inst.name.toLowerCase().includes(q)) return false;
       return true;
     });
@@ -248,20 +297,27 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         const service = awsServicesMap?.get(inst.serviceId);
         if (!service) return false;
         const config = getServiceVars(inst.instanceId);
-        const activeInputs = config.enabledInputs?.length
-          ? config.enabledInputs
-          : service.defaultEnabledInputs?.length
-          ? service.defaultEnabledInputs
-          : service.inputs?.slice(0, 1) ?? [];
-        return activeInputs.some((inp) =>
-          getRequiredTextFields(service, inp).some((f) => {
-            const meta = resolveFieldMeta(service, inp, f);
-            const raw = config.varsByInput?.[inp]?.[f];
-            const effective = meta ? toTyped(raw, meta) : raw ?? '';
-            if (Array.isArray(effective)) return effective.length === 0;
-            return typeof effective === 'string' && effective.trim() === '';
-          })
-        );
+        const activeDataStreams =
+          config.enabledDataStreams.length > 0 ? config.enabledDataStreams : service.dataStreams;
+        return activeDataStreams.some((dsId) => {
+          const dsInfo = service.varDefsByDataStream?.[dsId];
+          const dsVars = config.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
+          const activeInputs = dsVars.enabledInputs.length
+            ? dsVars.enabledInputs
+            : dsInfo?.defaultEnabledInputs?.length
+            ? dsInfo.defaultEnabledInputs
+            : dsInfo?.inputs?.slice(0, 1) ?? [];
+          const dsView = makeDsView(service, dsId);
+          return activeInputs.some((inp) =>
+            getRequiredTextFields(dsView, inp).some((f) => {
+              const meta = resolveFieldMeta(dsView, inp, f);
+              const raw = dsVars.varsByInput?.[inp]?.[f];
+              const effective = meta ? toTyped(raw, meta) : raw ?? '';
+              if (Array.isArray(effective)) return effective.length === 0;
+              return typeof effective === 'string' && effective.trim() === '';
+            })
+          );
+        });
       }),
     [instances, getServiceVars, awsServicesMap]
   );
@@ -280,8 +336,6 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
   const handleNext = useCallback(() => {
     // Flush instances to session storage so step 4 can read them without going through step 2 again.
-    // instances is computed in-memory (reconcileInstances) and only written on explicit saves;
-    // without this flush, step 4 sees serviceSettings.instances === undefined → [] → no ECF section.
     setPersisted({
       ...(persisted ?? { globalRegion: '', serviceVars: {} }),
       instances,
