@@ -169,7 +169,7 @@ interface HandleAlertsArgs {
   caseId: string;
 }
 
-const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
+export const handleAlerts = async ({ alertsService, attachments, caseId }: HandleAlertsArgs) => {
   const alerts = getAlertInfoFromComments(attachments);
 
   if (alerts.length === 0) {
@@ -186,7 +186,7 @@ interface UpdateCaseAttachmentStats {
   user: CasesClientArgs['user'];
 }
 
-const updateCaseAttachmentStats = async ({
+export const updateCaseAttachmentStats = async ({
   caseService,
   attachmentService,
   caseId,
