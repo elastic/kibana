@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { Query } from '@elastic/eui';
+import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
+import { EuiFieldSearch, EuiText } from '@elastic/eui';
 import { SelectableFilterPopover, StandardFilterOption } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
-import { filter } from '@kbn/content-list-toolbar';
+import { filter, useFieldQueryFilter } from '@kbn/content-list-toolbar';
 import { i18n } from '@kbn/i18n';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { ENABLED_FILTER_ID, KIND_FILTER_ID, TAG_FILTER_ID } from './rules_query_params';
+
+const TAG_SEARCH_DEBOUNCE_MS = 300;
 
 const STATUS_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.statusFilter.label', {
   defaultMessage: 'Status',
 });
 
-const MODE_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.modeFilter.label', {
-  defaultMessage: 'Mode',
+const KIND_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.kindFilter.label', {
+  defaultMessage: 'Outcome',
 });
 
 const TAGS_FILTER_TITLE = i18n.translate('xpack.alertingV2.rulesList.tagsFilter.label', {
@@ -41,18 +47,14 @@ export const STATUS_FILTER_OPTIONS = [
   },
 ];
 
-export const MODE_FILTER_OPTIONS = [
+export const KIND_FILTER_OPTIONS = [
   {
     key: 'alert' as const,
-    label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.alert', {
-      defaultMessage: 'Alert',
-    }),
+    label: RULE_KIND_LABELS.alert,
   },
   {
     key: 'signal' as const,
-    label: i18n.translate('xpack.alertingV2.rulesList.modeFilter.signal', {
-      defaultMessage: 'Signal',
-    }),
+    label: RULE_KIND_LABELS.signal,
   },
 ];
 
@@ -85,7 +87,7 @@ export const StatusFilter = filter.createComponent({
   }),
 });
 
-const ModeFilterComponent = ({
+const KindFilterComponent = ({
   query,
   onChange,
 }: {
@@ -94,23 +96,23 @@ const ModeFilterComponent = ({
 }) => (
   <SelectableFilterPopover
     fieldName={KIND_FILTER_ID}
-    title={MODE_FILTER_TITLE}
+    title={KIND_FILTER_TITLE}
     query={query}
     hideSearch={true}
     onChange={onChange}
-    options={MODE_FILTER_OPTIONS}
+    options={KIND_FILTER_OPTIONS}
     renderOption={(option, { isActive }) => (
       <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
     )}
     singleSelection
-    data-test-subj="rulesListModeFilter"
+    data-test-subj="rulesListKindFilter"
   />
 );
 
-export const ModeFilter = filter.createComponent({
+export const KindFilter = filter.createComponent({
   resolve: () => ({
     type: 'custom_component' as const,
-    component: ModeFilterComponent,
+    component: KindFilterComponent,
   }),
 });
 
@@ -121,8 +123,27 @@ const TagsFilterComponent = ({
   query?: Query;
   onChange?: (query: Query) => void;
 }) => {
-  const { data: tagNames = [] } = useFetchRuleTags();
-  const options = useMemo(() => tagNames.map((tag) => ({ key: tag, label: tag })), [tagNames]);
+  const [tagSearch, setTagSearch] = useState('');
+  const debouncedTagSearch = useDebouncedValue(tagSearch, TAG_SEARCH_DEBOUNCE_MS);
+  const { selection } = useFieldQueryFilter({
+    fieldName: TAG_FILTER_ID,
+    query,
+    onChange,
+  });
+  const { data: tagNames = [], isLoading } = useFetchRuleTags({
+    search: debouncedTagSearch || undefined,
+  });
+
+  const options = useMemo(() => {
+    const apiTagSet = new Set(tagNames);
+    const orphans = Object.keys(selection)
+      .filter((tag) => !apiTagSet.has(tag))
+      .map((tag) => ({ key: tag, label: tag }));
+    return [...orphans, ...tagNames.map((tag) => ({ key: tag, label: tag }))];
+  }, [tagNames, selection]);
+
+  const showCapGuidance = tagNames.length >= TAGS_RESPONSE_LIMIT;
+
   return (
     <SelectableFilterPopover
       fieldName={TAG_FILTER_ID}
@@ -130,6 +151,29 @@ const TagsFilterComponent = ({
       query={query}
       onChange={onChange}
       options={options}
+      isLoading={isLoading}
+      hideSearch
+      headerContent={
+        <EuiFieldSearch
+          compressed
+          value={tagSearch}
+          onChange={(event) => setTagSearch(event.target.value)}
+          placeholder={i18n.translate('xpack.alertingV2.rulesList.tagsFilter.searchPlaceholder', {
+            defaultMessage: 'Search tags',
+          })}
+          data-test-subj="rulesListTagsFilterSearch"
+        />
+      }
+      footerContent={
+        showCapGuidance ? (
+          <EuiText size="xs" color="subdued" data-test-subj="rulesListTagsFilterCapGuidance">
+            {i18n.translate('xpack.alertingV2.rulesList.tagsFilter.capGuidance', {
+              defaultMessage: 'Showing first {cap} most-used, type to search',
+              values: { cap: TAGS_RESPONSE_LIMIT },
+            })}
+          </EuiText>
+        ) : undefined
+      }
       renderOption={(option, { isActive }) => (
         <StandardFilterOption isActive={isActive}>
           <span data-test-subj={`rulesListTagsFilterOption-${option.key}`}>{option.label}</span>
@@ -162,12 +206,12 @@ const enabledFieldDefinition: FieldDefinition = {
 
 const kindFieldDefinition: FieldDefinition = {
   fieldName: KIND_FILTER_ID,
-  resolveIdToDisplay: (id) => MODE_FILTER_OPTIONS.find((o) => o.key === id)?.label ?? id,
+  resolveIdToDisplay: (id) => KIND_FILTER_OPTIONS.find((o) => o.key === id)?.label ?? id,
   resolveDisplayToId: (displayValue) =>
-    MODE_FILTER_OPTIONS.find((o) => o.label === displayValue)?.key,
+    KIND_FILTER_OPTIONS.find((o) => o.label === displayValue)?.key,
   resolveFuzzyDisplayToIds: (partial) => {
     const lower = partial.toLowerCase();
-    return MODE_FILTER_OPTIONS.filter((o) => o.label.toLowerCase().includes(lower)).map(
+    return KIND_FILTER_OPTIONS.filter((o) => o.label.toLowerCase().includes(lower)).map(
       (o) => o.key
     );
   },

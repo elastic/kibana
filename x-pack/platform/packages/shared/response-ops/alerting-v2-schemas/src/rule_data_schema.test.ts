@@ -23,7 +23,9 @@ import {
   bulkGetRulesResponseSchema,
   bulkGetRulesParamsSchema,
   updateRuleBodySchema,
+  ruleTagsParamsSchema,
 } from './rule_data_schema';
+import { tagsResponseSchema } from './common';
 import {
   ID_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
@@ -381,6 +383,29 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(true);
     });
 
+    it('accepts a composed query without a breach block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a composed query with an empty breach segment', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: '' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
     it('rejects a composed query with a whitespace-only breach segment', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -391,6 +416,19 @@ describe('createRuleDataSchema', () => {
         },
       });
       expect(result.success).toBe(false);
+    });
+
+    it('accepts recovery_strategy "query" without a composed breach block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'query',
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          recovery: { segment: 'WHERE cpu < 0.5' },
+        },
+      });
+      expect(result.success).toBe(true);
     });
 
     it('rejects a composed query with an invalid breach segment (compose fails ES|QL validation)', () => {
@@ -1405,6 +1443,28 @@ describe('getBreachEsqlQuery', () => {
     expect(getBreachEsqlQuery(query)).toBe('FROM metrics-* | WHERE cpu > 0.9');
   });
 
+  it('returns base verbatim when the breach block is omitted', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-*');
+  });
+
+  // Storage persists a conditionless composed rule as an empty segment, so
+  // both shapes reach this helper and must not append a trailing pipe.
+  it.each([
+    ['empty', ''],
+    ['whitespace-only', '   '],
+  ])('returns base verbatim for a %s stored breach segment', (_label, segment) => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment },
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-*');
+  });
+
   it('handles a trailing comment in base without corrupting the composed query', () => {
     const query = {
       format: 'composed' as const,
@@ -1706,10 +1766,10 @@ describe('bulkGetRulesResponseSchema', () => {
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
     enabled: true,
-    createdBy: 'user-a',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedBy: 'user-a',
-    updatedAt: '2026-01-01T00:00:00.000Z',
+    created_by: 'user-a',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: 'user-a',
+    updated_at: '2026-01-01T00:00:00.000Z',
   };
 
   it('accepts an empty rules array', () => {
@@ -1725,5 +1785,52 @@ describe('bulkGetRulesResponseSchema', () => {
 
   it('rejects a missing rules field', () => {
     expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
+  });
+});
+
+describe('ruleTagsParamsSchema', () => {
+  it('accepts an empty object', () => {
+    expect(ruleTagsParamsSchema.parse({})).toEqual({});
+  });
+
+  it('accepts valid search and kind', () => {
+    expect(ruleTagsParamsSchema.parse({ search: 'cpu', kind: 'alert' })).toEqual({
+      search: 'cpu',
+      kind: 'alert',
+    });
+  });
+
+  it('accepts kind: signal', () => {
+    expect(ruleTagsParamsSchema.parse({ kind: 'signal' })).toEqual({ kind: 'signal' });
+  });
+
+  it('rejects search longer than 256 characters', () => {
+    expect(() => ruleTagsParamsSchema.parse({ search: 'a'.repeat(257) })).toThrow();
+  });
+
+  it('rejects invalid kind', () => {
+    expect(() => ruleTagsParamsSchema.parse({ kind: 'unknown' })).toThrow();
+  });
+
+  it('rejects the removed filter key', () => {
+    expect(() => ruleTagsParamsSchema.parse({ filter: 'kind:alert' })).toThrow();
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => ruleTagsParamsSchema.parse({ foo: 'bar' })).toThrow();
+  });
+});
+
+describe('tagsResponseSchema', () => {
+  it('accepts a tags array', () => {
+    expect(tagsResponseSchema.parse({ tags: ['a', 'b'] })).toEqual({ tags: ['a', 'b'] });
+  });
+
+  it('accepts an empty tags array', () => {
+    expect(tagsResponseSchema.parse({ tags: [] })).toEqual({ tags: [] });
+  });
+
+  it('rejects a missing tags field', () => {
+    expect(() => tagsResponseSchema.parse({})).toThrow();
   });
 });

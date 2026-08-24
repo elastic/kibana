@@ -23,7 +23,20 @@ export const ruleKeys = {
   details: () => [...ruleKeys.all, 'details'] as const,
   detail: (id: string) => [...ruleKeys.details(), id] as const,
   allTags: () => [...ruleKeys.all, 'tags'] as const,
-  tags: (filter?: string) => [...ruleKeys.allTags(), { filter }] as const,
+  tags: (search?: string, kind?: string) => [...ruleKeys.allTags(), { search, kind }] as const,
+};
+
+export const ruleTemplateKeys = {
+  all: ['ruleTemplate'] as const,
+  lists: () => [...ruleTemplateKeys.all, 'list'] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    tags?: string[];
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => [...ruleTemplateKeys.lists(), filters] as const,
 };
 
 export const workflowKeys = {

@@ -69,7 +69,7 @@ export const listEvalDatasetsTool = (
         );
       }
 
-      const { datasets, total, facets } = await evals.datasetService.getClient().list({
+      const { datasets, total, facets } = await evals.datasetService.getClient({ spaceId }).list({
         search,
         tags,
         maturity,

@@ -9,8 +9,9 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: PrivMonHealth
+      deprecated: true
       summary: Health check on Privilege Monitoring
-      description: Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
+      description: '**Deprecated in 9.4.0.** Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.'
 
       responses:
         "200":
@@ -20,7 +21,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  status: 
+                  status:
                     $ref: './common.schema.yaml#/components/schemas/PrivilegeMonitoringEngineStatus'
                   error:
                     type: object

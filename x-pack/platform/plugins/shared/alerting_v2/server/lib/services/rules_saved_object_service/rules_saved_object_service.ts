@@ -11,10 +11,12 @@ import { inject, injectable } from 'inversify';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
+import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { RuleSavedObjectAttributes } from '../../../saved_objects';
 import type { AlertingServerStartDependencies } from '../../../types';
 import { convertEveryToSchedulesPerMinute } from '../../duration';
+import { escapeTermsInclude } from '../../escape_terms_include';
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { RuleSavedObjectsClientToken } from './tokens';
 
@@ -24,6 +26,13 @@ import { RuleSavedObjectsClientToken } from './tokens';
  * practice; this is large enough to avoid undercounting the limit.
  */
 const SCHEDULE_INTERVAL_AGG_SIZE = 1000;
+
+/**
+ * Maximum terms-agg size for internal `findTags` / `getTags` callers.
+ * Not exposed on the HTTP route; server-side consumers that need broader
+ * enumeration (e.g. Significant Events stream discovery) may request up to this.
+ */
+const MAX_FIND_TAGS_SIZE = 10000;
 
 interface ScheduleEveryAggregationResult {
   schedule_intervals: {
@@ -118,7 +127,7 @@ export interface RulesSavedObjectServiceContract {
   }>;
   getRuleIdsByQuery(params: GetRuleIdsByQueryParams): Promise<string[]>;
   countByQuery(params: CountByQueryParams): Promise<number>;
-  findTags(params?: { filter?: string }): Promise<string[]>;
+  findTags(params?: { search?: string; filter?: string; size?: number }): Promise<string[]>;
   getTotalScheduledPerMinute(): Promise<number>;
 }
 
@@ -434,7 +443,12 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     );
   }
 
-  public async findTags({ filter }: { filter?: string } = {}): Promise<string[]> {
+  public async findTags({
+    search,
+    filter,
+    size = TAGS_RESPONSE_LIMIT,
+  }: { search?: string; filter?: string; size?: number } = {}): Promise<string[]> {
+    const resolvedSize = Math.min(Math.max(size, 1), MAX_FIND_TAGS_SIZE);
     const result = await this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 0,
@@ -443,8 +457,9 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
         tags: {
           terms: {
             field: `${RULE_SAVED_OBJECT_TYPE}.attributes.metadata.tags`,
-            size: 10000,
-            order: { _key: 'asc' },
+            size: resolvedSize,
+            order: { _count: 'desc' },
+            ...(search ? { include: `${escapeTermsInclude(search)}.*` } : {}),
           },
         },
       },

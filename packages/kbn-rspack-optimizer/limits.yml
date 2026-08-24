@@ -5,38 +5,39 @@ pageLoadAssetSize:
   agentBuilderDashboards: 3074
   agentBuilderPlatform: 21685
   agentBuilderSml: 328
-  agentBuilderVisualizations: 1284
+  agentBuilderVisualizations: 1282
   agentBuilderWorkflows: 761
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 17111
+  alertingVTwo: 50017
   apm: 31419
   apmShared: 1896
   apmSourcesAccess: 906
   automaticImport: 13257
   banners: 1157
-  canvas: 6000
+  canvas: 5965
   cases: 2799
   charts: 1188
   clientApps: 1017
   cloud: 8477
-  cloudConnect: 4998
+  cloudConnect: 5575
   cloudDataMigration: 1755
-  cloudDefend: 3060
+  cloudDefend: 3030
   cloudExperiments: 67356
   cloudFullStory: 1373
-  cloudLinks: 18005
+  cloudLinks: 17938
   cloudSecurityPosture: 12224
   console: 24516
   contentConnectors: 2789
   contentManagement: 6737
-  contextEngine: 1378
+  contextEngine: 3172
+  contextEngineAgentBuilder: 2284
   controls: 4166
   core: 320
-  cps: 5002
+  cps: 6032
   crossClusterReplication: 7691
-  customContent: 1848
+  customContent: 2127
   customIntegrations: 636
   dashboard: 452
   dashboardMarkdown: 4012
@@ -62,11 +63,11 @@ pageLoadAssetSize:
   embeddable: 990
   embeddableAlertsTable: 1263
   enterpriseSearch: 28188
-  entityStore: 1734
+  entityStore: 1937
   esql: 306
   esqlDataGrid: 215
   esUiShared: 2284
-  evals: 4255
+  evals: 4254
   eventAnnotation: 17299
   eventAnnotationListing: 2987
   exploratoryView: 707
@@ -79,7 +80,7 @@ pageLoadAssetSize:
   expressionTagcloud: 6629
   expressionXY: 566
   features: 1218
-  feedback: 3622
+  feedback: 5142
   fieldFormats: 4136
   fieldsMetadata: 1568
   files: 3957
@@ -95,12 +96,12 @@ pageLoadAssetSize:
   home: 9251
   imageEmbeddable: 1732
   inbox: 1294
-  indexLifecycleManagement: 32081
+  indexLifecycleManagement: 32000
   indexManagement: 316
   inference: 5564
   inferenceWorkflows: 895
   infra: 45673
-  ingestHub: 7958
+  ingestHub: 7845
   ingestPipelines: 270
   inputControlVis: 3216
   inspectComponent: 1152
@@ -132,20 +133,21 @@ pageLoadAssetSize:
   navigation: 332
   newsfeed: 10708
   nightshift: 1961
+  nightshiftInvestigations: 419
   noDataPage: 630
   notificationCenter: 332
   observability: 3614
   observabilityAgentBuilder: 679
   observabilityAIAssistant: 1967
-  observabilityAIAssistantApp: 6377
+  observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
-  observabilityOnboarding: 7767
+  observabilityOnboarding: 8873
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
-  pnd: 3034
-  presentationUtil: 669
+  pnd: 4489
+  presentationUtil: 350
   productDocBase: 4218
   productIntercept: 4738
   profiling: 12944
@@ -185,9 +187,9 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 379
-  shared-core: 348361
-  shared-misc: 114567
-  shared-packages: 4546017
+  shared-core: 316496
+  shared-misc: 141281
+  shared-packages: 5010040
   shared-plugins: 13536562
   shared-solution-packages: 347767
   significantEvents: 3153
@@ -225,7 +227,7 @@ pageLoadAssetSize:
   visTypeTagcloud: 3118
   visTypeTimelion: 6660
   visTypeTimeseries: 12718
-  visTypeVega: 4860
+  visTypeVega: 3994
   visTypeVislib: 21971
   visTypeXy: 24402
   visualizationListing: 1339
