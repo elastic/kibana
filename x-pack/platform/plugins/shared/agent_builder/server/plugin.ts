@@ -21,6 +21,7 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
+import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
 import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
@@ -112,6 +113,8 @@ export class AgentBuilderPlugin
 
     registerFeatures({ features: setupDeps.features });
 
+    coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
+
     // Phantom capability: not a registered feature privilege. Used as an admin check
     // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
     coreSetup.capabilities.registerProvider(() => ({
@@ -180,6 +183,10 @@ export class AgentBuilderPlugin
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
+      },
+      getInference: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.inference;
       },
     });
     connectorTools.forEach((tool) => {
