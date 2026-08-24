@@ -1,0 +1,73 @@
+# alerting_v2 Scout tests (`scout_alerting_v2`)
+
+Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can schedule them as independent Playwright configs. They share the `alerting_v2` server config set (`xpack.alerting_v2.enabled=true` and relaxed schedule guardrails).
+
+`test/scout/` is a **different** Scout root on purpose: it uses the default server config so `alerting:v2:enabled` stays unpinned for the Agent Builder skill-gating suite.
+
+## Namespaces
+
+| Namespace | API | UI | Notes |
+|---|---|---|---|
+| `rules` | Rule HTTP CRUD, error-envelope contract, matcher data-field suggestions | Rules list, builder, Discover flyout | Local-only (`@local-stateful-classic`) |
+| `action_policies` | Action-policy HTTP CRUD | — | Local-only. API-only. |
+| `alerts` | Alert actions, execution history | Alert episodes, Discover compose, execution-history smoke | Local-only |
+| `engine` | Executor, director, dispatcher, end-to-end, telemetry | — | Every `tags.stateful.classic` spec (local **and** cloud). API-only. |
+| `management` | — | `management_required_privileges` | `tags.deploymentAgnostic`. UI-only. |
+
+`common/` is shared utilities and Playwright fixtures. It is **not** a namespace (no `playwright.config.ts`).
+
+### Where a new spec goes
+
+- HTTP route for rules / action policies / alert actions / execution history → that family's namespace, `api/tests/`.
+- Executor → director → dispatcher pipeline, or anything that polls `.rule-events` / `.alert-actions` with `POLL_TIMEOUT_MS` → `engine`.
+- UI for a management page → the matching namespace's `ui/tests/`.
+- Cross-page privilege interstitial → `management`.
+
+Every spec must live under some namespace's `testDir` (`<namespace>/{api,ui}/tests/`). There
+is no catch-all config, so a spec outside those directories is silently never run. After
+adding or moving a spec, run `update-test-config-manifests` and confirm the `.meta/`
+manifest lists it.
+
+## Layout
+
+```text
+test/scout_alerting_v2/
+├── common/{assertions,builders,constants,roles,urls}.ts
+├── common/services/
+├── common/alerting_api_services.ts   # buildAlertingApiServices
+├── common/api/fixtures/              # apiTest + alertingV2 apiServices
+├── common/ui/fixtures/               # test + page objects
+├── rules/{api,ui}/
+├── action_policies/api/
+├── alerts/{api,ui}/
+├── engine/api/
+└── management/ui/
+```
+
+Each namespace category has `playwright.config.ts` (`testDir: './tests'`) and a one-line fixture re-export from `common/`. Specs import `../fixtures`.
+
+These suites are sequential (`workers: 1`). Do not add a parallel API lane until cleanup is isolated — almost every spec calls cluster-wide `*.cleanUp()`.
+
+## Run
+
+```bash
+# discovery (`scout_alerting_v2` is a custom server config set)
+node scripts/scout.js discover-playwright-configs --target local --include-custom-servers
+
+# long-running stack (custom config set is inferred from scout_alerting_v2)
+node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet alerting_v2
+
+# one namespace
+node scripts/scout.js run-tests --arch stateful --domain classic \
+  --config x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/playwright.config.ts
+
+# by file (Scout picks playwright.config.ts from the path)
+node scripts/scout.js run-tests --arch stateful --domain classic \
+  --testFiles x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/create_rule.spec.ts
+```
+
+Manifests live at `test/scout_alerting_v2/<namespace>/.meta/{api,ui}/`. Regenerate with:
+
+```bash
+node scripts/scout.js update-test-config-manifests
+```

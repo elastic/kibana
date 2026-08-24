@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public';
+import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { EntityTabContent } from './entity_tab_content';
 import {
@@ -75,9 +75,9 @@ const caseDataWithEntity = {
       metadata: { entityName: 'alice', entityType: 'user' },
     },
   ],
-} as unknown as CommonAttachmentTabViewProps['caseData'];
+} as unknown as CommonAttachmentListViewProps['caseData'];
 
-const renderTab = (props?: Partial<CommonAttachmentTabViewProps>) =>
+const renderTab = (props?: Partial<CommonAttachmentListViewProps>) =>
   render(
     <TestProvidersComponent>
       <EntityTabContent caseData={caseDataWithEntity} {...props} />
@@ -174,7 +174,7 @@ describe('EntityTabContent', () => {
       <TestProvidersComponent>
         <EntityTabContent
           caseData={
-            { id: 'case-1', comments: [] } as unknown as CommonAttachmentTabViewProps['caseData']
+            { id: 'case-1', comments: [] } as unknown as CommonAttachmentListViewProps['caseData']
           }
         />
       </TestProvidersComponent>

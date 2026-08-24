@@ -474,7 +474,7 @@ describe('CaseFormFields', () => {
       // so take the first (visible) match.
       expect(
         within(callout).getAllByText(
-          /Contact your administrator to confirm the fields have been migrated/i
+          /Contact your administrator to remove the deprecated fields/i
         )[0]
       ).toBeInTheDocument();
     });

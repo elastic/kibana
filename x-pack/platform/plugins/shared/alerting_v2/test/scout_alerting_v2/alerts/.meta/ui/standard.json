@@ -1,0 +1,204 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "0d4530450053d38-b8b452a1ef0f11e",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow: open flyout, define query, step through, and submit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 134,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-039ec3b1b89e8b7",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow: pencil icon opens flyout with pre-populated name, save updates rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 219,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-1899347aefdfa01",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow (sad path): a rule with no resolvable time field triggers validation and blocks Next",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 284,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-ae0b63e156b2b3a",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow (sad path): broken standalone alert can select timestamp and save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 342,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-fa08c7c1ae41791",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow: manually selected sandbox time field holds and persists (#281806)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 398,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-0c425fb80a2c090",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow (sad path): time field populates when base and alert condition cannot be determined",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 450,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-e637125d8c52fd6",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow: signal (standalone) mode can select timestamp and create",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 489,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-8c58be25f025b7d",
+      "title": "ComposeDiscoverFlyout — create and edit flows step validation: Next disabled without query, name validation blocks advancement",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 532,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-34e6c15d6389044",
+      "title": "ComposeDiscoverFlyout — create and edit flows sandbox: Apply commits query, closing without Apply discards changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 596,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-43c1efc18e6e617",
+      "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: Apply without typing anything shows the empty callout and disables Next",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 626,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-69d20993f3d1ca1",
+      "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: base-only query shows the no-alert-condition callout and disables Next",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 647,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-1ce1898f97e3c19",
+      "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: no callout when the query splits into base + alert condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 676,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-d40f526988a4922",
+      "title": "ComposeDiscoverFlyout — create and edit flows alert condition validation: a base-only query keeps the user on the Alert Condition step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 698,
+        "column": 9
+      }
+    },
+    {
+      "id": "f2c98da5f1e0e29-4b8fd1fab72dd63",
+      "title": "Discover Alerts menu with alerting v2 should show Alerts menu with the v2 ES|QL rule row and hide v1 entries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/discover_alerts_menu.spec.ts",
+        "line": 41,
+        "column": 9
+      }
+    },
+    {
+      "id": "91934fe96cfad7d-73c89e4070ac6f5",
+      "title": "Execution history — smoke loads the page and shows the empty state when there are no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/execution_history_smoke.spec.ts",
+        "line": 32,
+        "column": 7
+      }
+    }
+  ]
+}
