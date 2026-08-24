@@ -6,27 +6,7 @@
  */
 
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
-import { smlAiIndexDescription, smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
-
-interface KnownAiIndex {
-  /** The Elasticsearch index or data stream to query, i.e. what goes in a `FROM` clause. */
-  name: string;
-  description: string;
-  /** Extra advice for this index, printed after the description. */
-  guidance?: string;
-}
-
-// The AI indices we can name without asking the Context Engine.
-const knownAiIndices: Record<string, KnownAiIndex> = {
-  [agentBuilderDefaultAiIndexId]: {
-    name: smlIndexName,
-    description: smlAiIndexDescription,
-    guidance:
-      "Entries can be attached to the conversation, which loads an entry's full specification; " +
-      'querying the index returns only its summary. Attach an entry before acting on it.',
-  },
-};
+import { defaultAiIndices } from '../../../../agents/default_ai_indices';
 
 /**
  * Builds the AI INDICES section: what AI indices are, which ones this agent can reach, and how to
@@ -45,7 +25,7 @@ export const getAiIndicesInstructions = ({
     return '';
   }
 
-  const described = aiIndices.flatMap((id) => knownAiIndices[id] ?? []);
+  const described = aiIndices.flatMap((id) => defaultAiIndices[id] ?? []);
   const catalog: string[] = [];
 
   if (described.length > 0) {
