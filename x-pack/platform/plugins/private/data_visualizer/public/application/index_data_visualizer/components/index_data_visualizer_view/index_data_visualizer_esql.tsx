@@ -67,7 +67,7 @@ const maxInlineSizeStyles = css`
 
 export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVisualizerProps) => {
   const { services } = useDataVisualizerKibana();
-  const { data, http } = services;
+  const { data, http, cps } = services;
   const { euiTheme } = useEuiTheme();
 
   // Query that has been typed, but has not submitted with cmd + enter
@@ -273,6 +273,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                   setFrozenDataPreference={() => {}}
                   dataView={currentDataView}
                   query={undefined}
+                  projectRouting={cps?.cpsManager?.getProjectRouting()}
                   disabled={false}
                   timefilter={timefilter}
                 />

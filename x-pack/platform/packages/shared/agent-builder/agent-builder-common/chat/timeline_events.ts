@@ -18,9 +18,14 @@ import type {
 import type { RoundState } from './round_state';
 
 /**
- * Marks a conversation document as events native (see `isEventsNativeVersion`).
+ * The projection format that new writes are stamped at.
  */
 export const CONVERSATION_SCHEMA_VERSION = 1;
+
+/**
+ * The floor for "this document carries a stored events projection".
+ */
+export const MIN_EVENTS_NATIVE_SCHEMA_VERSION = 1;
 
 /** The kind of participant that produced a timeline event. */
 export enum EventActorType {
