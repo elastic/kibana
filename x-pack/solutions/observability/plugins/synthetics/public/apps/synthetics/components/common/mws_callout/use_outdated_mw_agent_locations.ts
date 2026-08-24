@@ -11,7 +11,6 @@ import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import type { OutdatedMwAgentLocationsResponse } from '../../../../../../common/utils/agent_mw_support';
 import { apiService } from '../../../../../utils/api_service/api_service';
 import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
-import { useSyntheticsRefreshContext } from '../../../contexts';
 
 /**
  * Private location ids with at least one enrolled agent whose version
@@ -19,7 +18,6 @@ import { useSyntheticsRefreshContext } from '../../../contexts';
  * window there may keep running through it.
  */
 export const useOutdatedMwAgentLocationIds = () => {
-  const { lastRefresh } = useSyntheticsRefreshContext();
   const spaceId = useUrlSpaceId();
   const { data } = useFetcher(
     () =>
@@ -27,7 +25,7 @@ export const useOutdatedMwAgentLocationIds = () => {
         SYNTHETICS_API_URLS.PRIVATE_LOCATION_OUTDATED_MW_AGENTS,
         { spaceId }
       ),
-    [lastRefresh, spaceId]
+    [spaceId]
   );
 
   const outdatedLocationIds = useMemo(() => new Set(data?.outdatedLocationIds ?? []), [data]);
