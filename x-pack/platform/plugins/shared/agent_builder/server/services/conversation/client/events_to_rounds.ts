@@ -6,6 +6,7 @@
  */
 
 import type {
+  Conversation,
   ConversationRound,
   ConversationRoundAuthor,
   ExecutionTerminatedEvent,
@@ -19,6 +20,15 @@ import {
   TimelineEventType,
 } from '@kbn/agent-builder-common';
 import { EXECUTION_ID_SUFFIX } from './rounds_to_events';
+
+/**
+ * The rounds the execution layer uses as context: derived from the event timeline (the source of
+ * truth) when present, falling back to the stored rounds for a conversation with no events yet.
+ */
+export const roundsForContext = (conversation: Conversation): ConversationRound[] =>
+  conversation.events && conversation.events.length > 0
+    ? eventsToRounds(conversation.events)
+    : conversation.rounds;
 
 /**
  * Reconstructs rounds from a timeline.
