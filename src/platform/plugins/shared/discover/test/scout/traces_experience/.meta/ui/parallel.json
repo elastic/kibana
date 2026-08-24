@@ -1,21 +1,10 @@
 {
-  "sha1": "",
+  "sha1": "bb3796873b30d51788f0c4de5f18af10f02c7401",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
-    {
-      "id": "d4d97e00130eace-d89fd2ade65d14f",
-      "title": "Teardown Discover tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/global.teardown.ts",
-        "line": 13,
-        "column": 19
-      }
-    },
     {
       "id": "ee40a7482a9e189-70753e6cedbcd4d",
       "title": "Setup Discover tests data",
@@ -725,7 +714,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
+        "line": 36,
         "column": 16
       }
     },
@@ -745,7 +734,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 60,
+        "line": 55,
         "column": 16
       }
     },
@@ -765,7 +754,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 77,
+        "line": 72,
         "column": 16
       }
     },
@@ -785,7 +774,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
+        "line": 36,
         "column": 16
       }
     },
@@ -805,7 +794,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 60,
+        "line": 55,
         "column": 16
       }
     },
@@ -825,7 +814,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 77,
+        "line": 72,
         "column": 16
       }
     },
@@ -845,7 +834,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
+        "line": 36,
         "column": 16
       }
     },
@@ -865,7 +854,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 60,
+        "line": 55,
         "column": 16
       }
     },
@@ -885,7 +874,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 77,
+        "line": 72,
         "column": 16
       }
     },
@@ -1151,6 +1140,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/waterfall_flyout_usage.spec.ts",
         "line": 313,
         "column": 14
+      }
+    },
+    {
+      "id": "d4d97e00130eace-d89fd2ade65d14f",
+      "title": "Teardown Discover tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/global.teardown.ts",
+        "line": 13,
+        "column": 19
       }
     }
   ]
