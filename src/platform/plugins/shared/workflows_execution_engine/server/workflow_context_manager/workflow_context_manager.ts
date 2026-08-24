@@ -20,6 +20,7 @@ import {
 } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
+import { extractReferencedStepIds } from './extract_referenced_step_ids';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
@@ -32,6 +33,47 @@ import {
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId, isTemplateExpression } from '../utils';
 import { isSerializedError } from '../utils/errors';
+
+/**
+ * Resolves the set of step execution IDs whose outputs must be in the LRU
+ * cache before the upcoming context build for `node`. Combines:
+ *
+ * 1. Template-referenced steps (static analysis via `extractReferencedStepIds`).
+ *    Falls back to all predecessors when analysis is ambiguous (`null`) or when
+ *    the node references no steps explicitly (size === 0) — conservative to
+ *    guard against analysis gaps.
+ * 2. Active scope-stack frames — needed by `enrichStepContextAccordingToStepScope`.
+ */
+export function resolveRehydrationTargets(
+  node: GraphNodeUnion,
+  predecessors: ReadonlyArray<GraphNodeUnion>,
+  state: WorkflowExecutionState
+): Set<string> {
+  const neededIds = new Set<string>();
+  const referencedStepIds = extractReferencedStepIds(node);
+
+  if (referencedStepIds === null || referencedStepIds.size === 0) {
+    for (const pred of predecessors) {
+      const latestExec = state.getLatestStepExecution(pred.stepId);
+      if (latestExec) neededIds.add(latestExec.id);
+    }
+  } else {
+    for (const stepId of referencedStepIds) {
+      const latestExec = state.getLatestStepExecution(stepId);
+      if (latestExec) neededIds.add(latestExec.id);
+    }
+  }
+
+  const executionId = state.getWorkflowExecutionId();
+  let currentScope = WorkflowScopeStack.fromStackFrames(state.getWorkflowExecutionScopeStack());
+  while (!currentScope.isEmpty()) {
+    const frame = currentScope.getCurrentScope();
+    currentScope = currentScope.exitScope();
+    neededIds.add(buildStepExecutionId(executionId, frame.stepId, currentScope.stackFrames));
+  }
+
+  return neededIds;
+}
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -107,10 +149,12 @@ export class WorkflowContextManager {
    * outputs are already in cache, this is a no-op with zero overhead.
    */
   public async ensureContextReady(): Promise<void> {
-    await this.stepIoService.prepareForRead({
-      node: this.node,
-      predecessorsResolver: () => this.predecessors,
-    });
+    const neededIds = resolveRehydrationTargets(
+      this.node,
+      this.predecessors,
+      this.workflowExecutionState
+    );
+    await this.stepIoService.rehydrate([...neededIds]);
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work

@@ -8,6 +8,7 @@
  */
 
 import { LRUCache } from 'lru-cache';
+import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import { safeOutputSize } from '../step/errors';
 
@@ -32,11 +33,21 @@ interface CacheEntry {
 export class StepIoCache {
   private readonly lru: LRUCache<string, CacheEntry>;
 
-  constructor(maxBytes: number) {
+  constructor(maxBytes: number, logger?: Logger) {
+    const cacheLogger = logger?.get('step_io_cache');
     this.lru = new LRUCache({
       maxSize: maxBytes,
       // Fallback size used when the caller does not supply an explicit byte count.
       sizeCalculation: (entry: CacheEntry) => safeOutputSize(entry.value) ?? 0,
+      dispose: cacheLogger
+        ? (_entry, key, reason) => {
+            if (reason === 'evict') {
+              cacheLogger.debug(
+                `evicted step output [key=${key}] [cacheBytes=${this.lru.calculatedSize}]`
+              );
+            }
+          }
+        : undefined,
     });
   }
 

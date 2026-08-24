@@ -159,6 +159,7 @@ export async function setupDependencies(
     stepRepository: stepExecutionRepository,
     state: workflowExecutionState,
     maxBytes: config.eviction.maxCacheSize.getValueInBytes(),
+    logger,
   });
 
   // Create telemetry client

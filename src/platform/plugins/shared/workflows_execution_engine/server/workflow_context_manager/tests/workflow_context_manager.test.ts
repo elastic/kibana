@@ -127,7 +127,7 @@ describe('WorkflowContextManager', () => {
     };
     const stepIoService = {
       hasEvictedOutputs: jest.fn().mockReturnValue(false),
-      prepareForRead: jest.fn().mockResolvedValue(undefined),
+      rehydrate: jest.fn().mockResolvedValue(undefined),
       rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
       releaseReadPins: jest.fn(),
       releaseTransientlyRehydratedOutputs: jest.fn(),
@@ -1979,26 +1979,15 @@ describe('WorkflowContextManager', () => {
       testContainer = createTestContainer(workflow);
     });
 
-    // ensureContextReady is a thin pass-through to stepIoService.prepareForRead.
-    // The full coverage of static-analysis branches (targeted vs. fallback,
-    // scope-stack walk, no-op when nothing evicted) lives in
-    // step_io_service.test.ts where prepareForRead is exercised directly.
-    it('delegates to stepIoService.prepareForRead with the current node', async () => {
+    // ensureContextReady resolves rehydration targets (via resolveRehydrationTargets)
+    // and then delegates the actual cache-miss fetch to stepIoService.rehydrate.
+    // Full coverage of the static-analysis branches lives in the
+    // resolveRehydrationTargets unit tests.
+    it('delegates to stepIoService.rehydrate with resolved IDs', async () => {
       await testContainer.underTest.ensureContextReady();
 
-      expect(testContainer.stepIoService.prepareForRead).toHaveBeenCalledWith(
-        expect.objectContaining({ node: testContainer.underTest.node })
-      );
-    });
-
-    it('passes a predecessorsResolver that returns predecessors from the graph', async () => {
-      await testContainer.underTest.ensureContextReady();
-
-      const args = (testContainer.stepIoService.prepareForRead as jest.Mock).mock.calls[0][0];
-      expect(typeof args.predecessorsResolver).toBe('function');
-      // Resolver delegates to graph.getAllPredecessors — for step_a (no
-      // predecessors) the resolver returns [].
-      expect(args.predecessorsResolver(testContainer.underTest.node)).toEqual([]);
+      // step_a has no predecessors and no scope-stack frames → empty ID set.
+      expect(testContainer.stepIoService.rehydrate).toHaveBeenCalledWith([]);
     });
   });
 

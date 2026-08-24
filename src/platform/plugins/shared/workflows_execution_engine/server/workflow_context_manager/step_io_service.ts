@@ -7,33 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { SerializedError } from '@kbn/workflows';
-import type { GraphNodeUnion } from '@kbn/workflows/graph';
-import { extractReferencedStepIds } from './extract_referenced_step_ids';
+import { StepIoCache } from './step_io_cache';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { safeOutputSize } from '../step/errors';
-import { buildStepExecutionId } from '../utils';
-import { StepIoCache } from './step_io_cache';
 
 export type { StepIoType } from './step_io_cache';
-
-/** Resolves predecessors for a node. Supplied at call time so the service does not depend on `WorkflowGraph`. */
-export type PredecessorsResolver = (node: GraphNodeUnion) => ReadonlyArray<GraphNodeUnion>;
 
 export interface StepIoServiceInit {
   stepRepository: StepExecutionRepository;
   state: WorkflowExecutionState;
   /** Maximum total byte size for the output LRU cache. `Infinity` disables eviction entirely. */
   maxBytes?: number;
-}
-
-export interface PrepareForReadArgs {
-  node: GraphNodeUnion;
-  predecessorsResolver: PredecessorsResolver;
+  logger?: Logger;
 }
 
 /**
@@ -67,7 +57,7 @@ export interface StepIoWriter extends StepIoReader {
  * Lifecycle surface used by the workflow execution loop and runtime manager only.
  */
 export interface StepIoLifecycle {
-  prepareForRead(args: PrepareForReadArgs): Promise<void>;
+  rehydrate(ids: ReadonlyArray<string>): Promise<void>;
   getOutputSizeStats(): OutputSizeStats;
 }
 
@@ -79,7 +69,7 @@ export interface StepIoLifecycle {
  *   - Output LRU cache (`StepIoCache` → `lru-cache`)
  *   - `write(id, type, value)` — routes outputs to both cache and state, inputs to state only
  *   - `read(id, type)` — LRU hit or state fallback
- *   - `prepareForRead` — pre-warms the LRU from ES for cache misses
+ *   - `rehydrate(ids)` — fetches cache-missing IDs from ES before context build
  *   - `getOutputSizeStats` — telemetry
  *
  * Flush, load, eviction, and pin machinery have all been removed. Flush is
@@ -91,10 +81,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private readonly state: WorkflowExecutionState;
   private readonly cache: StepIoCache;
 
-  constructor({ stepRepository, state, maxBytes = Infinity }: StepIoServiceInit) {
+  constructor({ stepRepository, state, maxBytes = Infinity, logger }: StepIoServiceInit) {
     this.stepRepository = stepRepository;
     this.state = state;
-    this.cache = new StepIoCache(maxBytes);
+    this.cache = new StepIoCache(maxBytes, logger);
   }
 
   // ----- IO reads -----------------------------------------------------------
@@ -103,14 +93,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * Reads a step's input or output. For outputs: LRU hit first, then state
    * fallback. For inputs: state only (inputs are not cached in the LRU).
    *
-   * Callers must ensure `prepareForRead` has run before reading outputs — the
+   * Callers must ensure `rehydrate` has run before reading outputs — the
    * pre-warm guarantee makes the state fallback a safety net rather than a
    * normal code path.
    */
-  public read(
-    stepExecutionId: string,
-    type: 'input' | 'output'
-  ): JsonValue | null | undefined {
+  public read(stepExecutionId: string, type: 'input' | 'output'): JsonValue | null | undefined {
     const cached = this.cache.get(stepExecutionId, type);
     if (cached !== undefined) return cached;
     return this.state.getStepIo(stepExecutionId, type);
@@ -169,21 +156,17 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   // ----- Lifecycle ----------------------------------------------------------
 
   /**
-   * Pre-warms the LRU with outputs the upcoming step will need synchronously.
-   * Fetches cache misses from Elasticsearch. A no-op when `maxBytes` is
-   * `Infinity` (eviction disabled) since all outputs are served from state.
+   * Ensures the given step execution IDs are resident in the LRU cache,
+   * fetching any cache misses from Elasticsearch. A no-op when `maxBytes` is
+   * `Infinity` (eviction disabled) or when all IDs are already cached.
    *
-   * Must be called before the step's synchronous context build. Execution is
-   * single-threaded, so once this async call resolves, no other writes will
-   * happen before `read` is called — all pre-warmed entries are guaranteed to
-   * be in the cache when they are needed.
+   * Callers (WorkflowContextManager.ensureContextReady) are responsible for
+   * resolving which IDs are needed before calling this method.
    */
-  public async prepareForRead({ node, predecessorsResolver }: PrepareForReadArgs): Promise<void> {
+  public async rehydrate(ids: ReadonlyArray<string>): Promise<void> {
     if (this.cache.totalBytes === Infinity) return;
 
-    const neededIds = this.computeRehydrationTargets(node, predecessorsResolver);
-
-    const missing = [...neededIds].filter((id) => !this.cache.has(id, 'output'));
+    const missing = ids.filter((id) => !this.cache.has(id, 'output'));
     if (missing.length === 0) return;
 
     const docs = await this.stepRepository.getStepExecutionsByIds(missing, ['id', 'output']);
@@ -192,88 +175,4 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       this.cache.set(doc.id, 'output', doc.output ?? null, bytes);
     }
   }
-
-  // ----- Private helpers ----------------------------------------------------
-
-  /**
-   * Resolves the set of step execution IDs whose outputs need to be in the
-   * cache before the upcoming context build. Combines:
-   *
-   * 1. Template-referenced steps (static analysis).
-   * 2. Active scope-stack frames (uniform — no foreach/while-specific branches).
-   *
-   * Conservative fallback: when static analysis returns an empty set but a
-   * predecessor is not in the cache, fall back to all predecessors to guard
-   * against analysis gaps.
-   */
-  private computeRehydrationTargets(
-    node: GraphNodeUnion,
-    predecessorsResolver: PredecessorsResolver
-  ): Set<string> {
-    const neededIds = new Set<string>();
-    const referencedStepIds = extractReferencedStepIds(node);
-
-    const fallbackToPredecessors = (): void => {
-      for (const pred of predecessorsResolver(node)) {
-        const latestExec = this.state.getLatestStepExecution(pred.stepId);
-        if (latestExec) {
-          neededIds.add(latestExec.id);
-        }
-      }
-    };
-
-    if (referencedStepIds === null) {
-      fallbackToPredecessors();
-    } else {
-      this.addLatestExecutionIdsForStepIds(neededIds, referencedStepIds);
-      if (referencedStepIds.size === 0 && this.hasCacheMissPredecessor(node, predecessorsResolver)) {
-        fallbackToPredecessors();
-      }
-    }
-
-    // Scope-stack entries — needed by enrichStepContextAccordingToStepScope.
-    // All scope types are treated uniformly (no foreach/while-specific input reads).
-    const executionId = this.state.getWorkflowExecutionId();
-    let currentScope = WorkflowScopeStack.fromStackFrames(
-      this.state.getWorkflowExecutionScopeStack()
-    );
-    while (!currentScope.isEmpty()) {
-      const frame = currentScope.getCurrentScope();
-      currentScope = currentScope.exitScope();
-      const scopeStepExecutionId = buildStepExecutionId(
-        executionId,
-        frame.stepId,
-        currentScope.stackFrames
-      );
-      neededIds.add(scopeStepExecutionId);
-    }
-
-    return neededIds;
-  }
-
-  private addLatestExecutionIdsForStepIds(
-    neededIds: Set<string>,
-    referencedStepIds: ReadonlySet<string>
-  ): void {
-    for (const stepId of referencedStepIds) {
-      const latestExec = this.state.getLatestStepExecution(stepId);
-      if (latestExec) {
-        neededIds.add(latestExec.id);
-      }
-    }
-  }
-
-  private hasCacheMissPredecessor(
-    node: GraphNodeUnion,
-    predecessorsResolver: PredecessorsResolver
-  ): boolean {
-    for (const pred of predecessorsResolver(node)) {
-      const latestExec = this.state.getLatestStepExecution(pred.stepId);
-      if (latestExec && !this.cache.has(latestExec.id, 'output')) {
-        return true;
-      }
-    }
-    return false;
-  }
-
 }
