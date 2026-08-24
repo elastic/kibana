@@ -38,6 +38,7 @@ import { suggest } from './autocomplete';
 import { datasets, editorExtensions, views } from '../../__tests__/language/helpers';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
+import { PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED } from '../../commands/definitions/utils/autocomplete/expressions/positions/after_complete';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
   fromCommand: string,
@@ -1191,12 +1192,7 @@ describe('autocomplete', () => {
 
   describe('IN operator with lists', () => {
     testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ',' }]);
-    testSuggestions('FROM index | WHERE integerField IN (1, 2) /', [
-      '\n',
-      'AND $0',
-      'OR $0',
-      '| ',
-    ]);
+    testSuggestions('FROM index | WHERE integerField IN (1, 2) /', ['\n', 'AND $0', 'OR $0', '| ']);
 
     it('suggests expressions inside an incomplete multi-column tuple', async () => {
       const { suggest: suggestFn } = await setup();
@@ -1220,15 +1216,18 @@ describe('autocomplete', () => {
       expect(labels).not.toContain(',');
     });
 
-    it('suggests a comma alongside operators inside a parenthesized expression', async () => {
-      const { suggest: suggestFn } = await setup();
-      const suggestions = await suggestFn('FROM index | WHERE (keywordField /)');
-      const labels = suggestions.map(({ label }) => label);
-      const commaSuggestion = suggestions.find(({ label }) => label === ',');
+    (PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED ? it : it.skip)(
+      'suggests a comma alongside operators inside a parenthesized expression',
+      async () => {
+        const { suggest: suggestFn } = await setup();
+        const suggestions = await suggestFn('FROM index | WHERE (keywordField /)');
+        const labels = suggestions.map(({ label }) => label);
+        const commaSuggestion = suggestions.find(({ label }) => label === ',');
 
-      expect(labels).toEqual(expect.arrayContaining([',', '==', 'IN']));
-      expect(commaSuggestion?.command?.id).toBe('editor.action.triggerSuggest');
-    });
+        expect(labels).toEqual(expect.arrayContaining([',', '==', 'IN']));
+        expect(commaSuggestion?.command?.id).toBe('editor.action.triggerSuggest');
+      }
+    );
 
     it('suggests a comma after a complete tuple item', async () => {
       const { suggest: suggestFn } = await setup();

@@ -32,7 +32,7 @@ import {
 import { isTupleExpression } from '../utils';
 
 // TODO: Remove this flag when multi-column IN subqueries become generally available in Elasticsearch.
-const PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED = false;
+export const PARENTHESIZED_EXPRESSION_COMMA_AUTOCOMPLETE_ENABLED = false;
 
 /**
  * Handler for autocomplete suggestions after complete expressions.
