@@ -17,6 +17,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { investigationTemplate } from './conversation_templates/investigation';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -46,6 +47,10 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
     this.workflowsManagement = plugins.workflowsManagement;
+
+    if (plugins.agentBuilder) {
+      plugins.agentBuilder.conversationTemplates.register(investigationTemplate);
+    }
 
     const getInvestigationsClient = (request: KibanaRequest, spaceId?: string) =>
       new NightshiftInvestigationsClient(

@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -18,6 +19,7 @@ export interface NightshiftInvestigationsServerStart {
 }
 
 export interface NightshiftInvestigationsSetupDeps {
+  agentBuilder?: AgentBuilderPluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
 }

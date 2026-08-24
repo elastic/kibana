@@ -11,6 +11,7 @@
     "server": true,
     "requiredPlugins": [],
     "optionalPlugins": [
+      "agentBuilder",
       "spaces",
       "workflowsExtensions",
       "workflowsManagement"

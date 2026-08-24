@@ -49,6 +49,7 @@ export interface GetInvestigationResponse {
   completed_at?: string;
   conclusions?: string;
   error?: string;
+  conversation_id?: string;
 }
 
 export interface ListInvestigationsRequest {

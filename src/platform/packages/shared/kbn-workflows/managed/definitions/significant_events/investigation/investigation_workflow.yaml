@@ -69,6 +69,7 @@ steps:
     aggregate-by: 'significant_events'
     create-conversation: true
     public-conversation: true
+    template-id: 'observability.nightshift.investigation'
     timeout: 1800s
     with:
       # Tag the agent execution with the workflow execution id so callers that already know

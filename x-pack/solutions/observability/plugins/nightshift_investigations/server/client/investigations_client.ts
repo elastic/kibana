@@ -223,6 +223,13 @@ export class NightshiftInvestigationsClient {
 
     const subject = recoverSubjectFromInput(rawInput);
 
+    const conversationStep = execution.stepExecutions?.find(
+      (s) => isPlainObject(s.output) && typeof s.output.conversation_id === 'string'
+    );
+    const conversationId = isPlainObject(conversationStep?.output)
+      ? (conversationStep!.output.conversation_id as string)
+      : undefined;
+
     return {
       investigation_id: investigationId,
       subject: subject ?? { type: 'significant_event', id: '' },
@@ -240,6 +247,7 @@ export class NightshiftInvestigationsClient {
         }
         return 'Investigation failed';
       })(),
+      conversation_id: conversationId,
     };
   }
 
