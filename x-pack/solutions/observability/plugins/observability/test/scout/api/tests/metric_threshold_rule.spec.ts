@@ -22,8 +22,8 @@ import { pollUntilTrue, retryForSuccess } from '../fixtures/poll';
  * Ported from FTR
  * `x-pack/solutions/observability/test/alerting_api_integration/observability/metric_threshold_rule.ts`.
  *
- * Runs against stateful classic only (matching the original trial-license FTR
- * config). The endpoints under test are driven through `apiClient` with an admin
+ * Runs against stateful classic only (the metric threshold rule is not enabled on Serverless.)
+ * The endpoints under test are driven through `apiClient` with an admin
  * API key; `esClient` is used for data-forge setup and alert/action document
  * assertions. These tests verify rule execution and parameter persistence, not
  * RBAC, so an admin-scoped key maps cleanly to the FTR superuser pattern.
