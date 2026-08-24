@@ -136,7 +136,7 @@
         "eis/openai-gpt-5.6-terra",
         "eis/openai-gpt-oss-120b"
       ],
-      "specs": [
+      "specModelGroups": [
         {
           "files": ["evals/discovery/discovery.spec.ts"],
           "models": [

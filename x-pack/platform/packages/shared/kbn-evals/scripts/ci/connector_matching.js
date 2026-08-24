@@ -6,9 +6,9 @@
  */
 
 // Maps requested model groups (e.g. `eis/openai-gpt-5.4`, `llm-gateway/gpt-4o`, or a connector id)
-// to the ids of the connectors in a `KIBANA_TESTING_AI_CONNECTORS` map that satisfy them. Shared by
-// `get_connector_ids.js` (connector fanout) and `get_fanout_matrix.js` (per-spec fanout) so the
-// matching rule lives in one place.
+// to the ids of the connectors in a `KIBANA_TESTING_AI_CONNECTORS` map that satisfy them. Used by
+// `get_fanout_matrix.js` to build the connector/per-spec fanout, keeping the matching rule in one
+// place.
 
 // Whether a single connector satisfies a single requested model group.
 function connectorMatchesModelGroup(connectorId, connector, requestedValue) {

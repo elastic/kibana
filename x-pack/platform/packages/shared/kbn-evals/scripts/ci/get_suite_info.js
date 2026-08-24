@@ -37,7 +37,7 @@ process.stdout.write(
     stepTimeoutInMinutes: suite.stepTimeoutInMinutes,
     // Per-spec model config and the suite-level fallback, so `get_fanout_matrix.js` can resolve each
     // spec's models without re-reading the suites config.
-    specs: Array.isArray(suite.specs) ? suite.specs : [],
+    specModelGroups: Array.isArray(suite.specModelGroups) ? suite.specModelGroups : [],
     weeklyEisModelGroups: Array.isArray(suite.weeklyEisModelGroups)
       ? suite.weeklyEisModelGroups
       : [],

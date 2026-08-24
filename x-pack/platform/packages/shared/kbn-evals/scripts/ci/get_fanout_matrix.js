@@ -6,17 +6,18 @@
  * 2.0.
  */
 
-// Builds the fanout matrix for `run_suite.sh`: one row per Buildkite step, written to stdout as
-// `connectorId<TAB>shardId<TAB>specFiles` (spec files space-joined). Empty shard id is written as
-// `-` so bash `IFS=$'\t'` does not collapse the field.
+// Builds the fanout matrix for `run_suite.sh`: one JSON object per line (JSONL) on stdout, each
+// `{ connectorId, shardId, specFiles }` (`specFiles` is an array). `run_suite.sh` reads the fields
+// with `jq`, so there is no positional/tab parsing that could mangle an empty shard id.
 //
-// Weekly (`KBN_EVALS_WEEKLY`) + `specs[]` with models: for each shard (or one virtual batch of
-// `specs[].files` when there are no shards), each connector matching EVAL_MODEL_GROUPS gets only
-// the spec files in that batch that listed it. A spec in a shard with no `specs[]` entry keeps the
-// full weekly list. `specs[]` and `shards[]` stay independent: models vs CI batching.
+// Weekly (`KBN_EVALS_WEEKLY`) + `specModelGroups[]` with models: for each shard (or one virtual
+// batch of `specModelGroups[].files` when there are no shards), each connector matching
+// EVAL_MODEL_GROUPS gets only the spec files in that batch that listed it. A spec in a shard with no
+// `specModelGroups[]` entry keeps the full weekly list. `specModelGroups[]` and `shards[]` stay
+// independent: models vs CI batching.
 //
-// Otherwise (PR, on-demand, grep, or no `specs` overrides): every requested connector runs every
-// spec, batched by `shards` when present, else the whole suite.
+// Otherwise (PR, on-demand, grep, or no `specModelGroups` overrides): every requested connector runs
+// every spec, batched by `shards` when present, else the whole suite.
 
 const { parseMaybeBase64Json } = require('./ai_connectors');
 const {
@@ -28,11 +29,8 @@ const {
 
 const isTruthy = (value) => /^(1|true)$/i.test(String(value || '').trim());
 
-// Placeholder so an unsharded TSV row is `connector\t-\tspecs`, not `connector\t\tspecs`.
-const EMPTY_SHARD_ID = '-';
-
-const hasSpecModelOverrides = (specs) =>
-  specs.some(
+const hasSpecModelOverrides = (specModelGroups) =>
+  specModelGroups.some(
     (spec) =>
       Array.isArray(spec?.files) &&
       spec.files.length > 0 &&
@@ -58,9 +56,9 @@ const assertRequestedConnectors = (connectors, requestedModelGroups) => {
   return connectorIds;
 };
 
-const modelsByFileFromSpecs = (specs) => {
+const modelsByFileFromSpecs = (specModelGroups) => {
   const modelsByFile = new Map();
-  for (const spec of specs) {
+  for (const spec of specModelGroups) {
     const files = Array.isArray(spec?.files) ? spec.files : [];
     const models = Array.isArray(spec?.models) ? spec.models : [];
     if (models.length === 0) {
@@ -119,9 +117,9 @@ function buildConnectorShardMatrix({ connectors, shards, requestedModelGroups })
  *
  * @param {object} params
  * @param {object} params.connectors           parsed KIBANA_TESTING_AI_CONNECTORS map
- * @param {object} params.suiteInfo            get_suite_info.js output (shards, specs, weeklyEisModelGroups)
+ * @param {object} params.suiteInfo            get_suite_info.js output (shards, specModelGroups, weeklyEisModelGroups)
  * @param {string[]} params.requestedModelGroups  EVAL_MODEL_GROUPS (the provisioned universe)
- * @param {boolean} params.perSpec            weekly run (`KBN_EVALS_WEEKLY`); apply `specs` overrides
+ * @param {boolean} params.perSpec            weekly run (`KBN_EVALS_WEEKLY`); apply `specModelGroups` overrides
  * @param {boolean} params.grepOverride       whether EVAL_GREP / EVAL_GREP_INVERT is set
  * @returns {Array<{connectorId: string, shardId: string, specFiles: string[]}>}
  */
@@ -132,13 +130,13 @@ function buildFanoutMatrix({
   perSpec: perSpecFlag,
   grepOverride,
 }) {
-  const specs = Array.isArray(suiteInfo.specs) ? suiteInfo.specs : [];
+  const specModelGroups = Array.isArray(suiteInfo.specModelGroups) ? suiteInfo.specModelGroups : [];
   const suiteWeeklyModelGroups = Array.isArray(suiteInfo.weeklyEisModelGroups)
     ? suiteInfo.weeklyEisModelGroups
     : [];
   const configuredShards = Array.isArray(suiteInfo.shards) ? suiteInfo.shards : [];
 
-  const perSpec = perSpecFlag && !grepOverride && hasSpecModelOverrides(specs);
+  const perSpec = perSpecFlag && !grepOverride && hasSpecModelOverrides(specModelGroups);
 
   if (!perSpec) {
     const shards = grepOverride ? [] : configuredShards;
@@ -146,14 +144,14 @@ function buildFanoutMatrix({
   }
 
   const connectorIds = assertRequestedConnectors(connectors, requestedModelGroups);
-  const modelsByFile = modelsByFileFromSpecs(specs);
+  const modelsByFile = modelsByFileFromSpecs(specModelGroups);
   const batches =
     configuredShards.length > 0
       ? configuredShards
       : [
           {
             id: '',
-            specFiles: specs.flatMap((spec) =>
+            specFiles: specModelGroups.flatMap((spec) =>
               Array.isArray(spec?.files) && Array.isArray(spec?.models) && spec.models.length > 0
                 ? spec.files
                 : []
@@ -199,10 +197,12 @@ function buildFanoutMatrix({
   return rows;
 }
 
+// One JSON object per line (JSONL). `run_suite.sh` reads each field with `jq`, so an empty shardId
+// or specFiles array round-trips unambiguously (no tab collapsing).
 function formatFanoutMatrix(rows) {
   return rows
     .map(({ connectorId, shardId, specFiles }) =>
-      [connectorId, shardId || EMPTY_SHARD_ID, specFiles.join(' ')].join('\t')
+      JSON.stringify({ connectorId, shardId: shardId || '', specFiles })
     )
     .join('\n');
 }
@@ -239,4 +239,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { buildFanoutMatrix, formatFanoutMatrix, EMPTY_SHARD_ID };
+module.exports = { buildFanoutMatrix, formatFanoutMatrix };

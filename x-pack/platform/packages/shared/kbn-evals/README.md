@@ -204,10 +204,10 @@ results and triage.
 #### Per-spec model groups
 
 By default every model in a suite's list runs against every spec. A suite can instead pin a model
-list per spec with `specs` in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json).
+list per spec with `specModelGroups` in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json).
 Each entry lists spec `files` (paths relative to the suite config directory) and the `models` those
-specs run against. `specs` (model config) and `shards` (CI batching) are independent: a spec's models
-come from `specs`, its CI step from `shards`, and either can be absent.
+specs run against. `specModelGroups` (model config) and `shards` (CI batching) are independent: a
+spec's models come from `specModelGroups`, its CI step from `shards`, and either can be absent.
 
 ```jsonc
 {
@@ -215,7 +215,7 @@ come from `specs`, its CI step from `shards`, and either can be absent.
   "weeklyEisModelGroups": [
     /* suite fallback + provisioning universe */
   ],
-  "specs": [
+  "specModelGroups": [
     {
       "files": ["evals/discovery/discovery.spec.ts"],
       "models": ["eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4"]
@@ -231,13 +231,14 @@ come from `specs`, its CI step from `shards`, and either can be absent.
 }
 ```
 
-A spec resolves its models in this order: its own `specs` list, then the suite's
+A spec resolves its models in this order: its own `specModelGroups` list, then the suite's
 `weeklyEisModelGroups`, then the requested `EVAL_MODEL_GROUPS`. `models` is optional (omit it to use
 the weekly list), and each model must be within `weeklyEisModelGroups` (the list CI provisions
-connectors for). The set of specs to run is discovered from the suite directory, so per-spec model
-config works with or without shards. Per-spec resolution applies to the weekly run and the
-`models:weekly-eis-models` label; an explicit `models:<model-group>` selection overrides it and runs
-that set against every spec. Suites without `specs` model overrides fan out unchanged.
+connectors for). The specs to run come from `specModelGroups[].files` plus `shards[].specFiles` in
+`evals.suites.json` (the single source of truth), so per-spec model config works with or without
+shards. Per-spec resolution applies only to the weekly run (`KBN_EVALS_WEEKLY` in `llm_evals.yml`);
+an explicit `models:<model-group>` selection overrides it and runs that set against every spec.
+Suites without `specModelGroups` overrides fan out unchanged.
 
 ---
 

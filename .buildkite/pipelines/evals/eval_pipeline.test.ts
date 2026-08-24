@@ -249,23 +249,17 @@ describe('eval_pipeline', () => {
     });
   });
 
-  describe('per-spec model resolution (EVAL_PER_SPEC_MODELS)', () => {
-    it('turns on per-spec resolution for the weekly-eis default', () => {
+  describe('per-spec model resolution (weekly-only, fanout-time)', () => {
+    // Per-spec resolution is decided at fanout time by KBN_EVALS_WEEKLY in get_fanout_matrix.js, not
+    // by a pipeline env var, so the pipeline must not emit the removed EVAL_PER_SPEC_MODELS toggle.
+    it('does not emit the removed EVAL_PER_SPEC_MODELS env for the weekly-eis default', () => {
       const yaml = getEvalPipeline('evals:agent-builder,models:weekly-eis-models') as string;
-
-      expect(yaml).toContain("EVAL_PER_SPEC_MODELS: '1'");
-    });
-
-    it('leaves per-spec resolution off for an explicit model selection (override)', () => {
-      const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
 
       expect(yaml).not.toContain('EVAL_PER_SPEC_MODELS');
     });
 
-    it('an explicit model alongside the weekly alias overrides, so per-spec stays off', () => {
-      const yaml = getEvalPipeline(
-        'evals:agent-builder,models:weekly-eis-models,models:eis/openai-gpt-5.4'
-      ) as string;
+    it('does not emit EVAL_PER_SPEC_MODELS for an explicit model selection either', () => {
+      const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
 
       expect(yaml).not.toContain('EVAL_PER_SPEC_MODELS');
     });

@@ -5,7 +5,7 @@ set -euo pipefail
 # NOTE: Keep this Buildkite *step* script mostly bash + orchestration.
 # - If you need non-trivial logic (parsing/transforming JSON, label/model selection, connector merging, etc),
 #   put it in a standalone script under `x-pack/platform/packages/shared/kbn-evals/scripts/ci/`
-#   and call it from here (see `get_connector_ids.js`, `merge_ai_connectors.js`, `generate_eis_connectors.js`).
+#   and call it from here (see `get_fanout_matrix.js`, `merge_ai_connectors.js`, `generate_eis_connectors.js`).
 # - Avoid inline `node - <<'NODE'` heredocs in this file; ops/reviewers will ask to extract them anyway.
 
 EVAL_SUITE_ID="${EVAL_SUITE_ID:-}"
@@ -167,8 +167,8 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
   if ! command -v buildkite-agent >/dev/null 2>&1; then
     echo "EVAL_FANOUT=1 requires buildkite-agent; falling back to running all projects in-process"
   else
-    # One row per fanout step: "connectorId<TAB>shardId<TAB>specFiles". Empty shard id is `-`.
-    # Weekly runs apply specs[] so a connector only gets the specs in a shard that asked for it.
+    # One JSON object per line: { connectorId, shardId, specFiles }. Read below with `jq`.
+    # Weekly runs apply specModelGroups[] so a connector only gets the specs in a shard that asked for it.
     FANOUT_MATRIX="$(
       EVAL_SUITE_INFO="${EVAL_SUITE_INFO}" \
         node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_fanout_matrix.js
@@ -200,13 +200,16 @@ EOF
         fanout_preemptible=false
       fi
 
-      # The fanout matrix's third column lists the spec files each step runs (space-joined; empty for
-      # a whole-suite step). A moved or renamed spec would otherwise just stop running with the step
-      # still green, so check every referenced file here, before any stack is booted, and fail fast.
+      # Each matrix row is a JSON object { connectorId, shardId, specFiles }; specFiles lists the spec
+      # files that step runs (empty for a whole-suite step). A moved or renamed spec would otherwise
+      # just stop running with the step still green, so check every referenced file here, before any
+      # stack is booted, and fail fast.
       suite_root="$(dirname "$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.configPath // ""')")"
       if [[ -n "${suite_root}" && "${suite_root}" != "." ]]; then
         missing_spec_files=()
-        while IFS=$'\t' read -r _connector_id _shard_id row_spec_files; do
+        while IFS= read -r row; do
+          [[ -z "$row" ]] && continue
+          row_spec_files="$(jq -r '.specFiles | join(" ")' <<<"$row")"
           [[ -z "$row_spec_files" ]] && continue
           read -r -a row_spec_file_list <<<"$row_spec_files"
           for spec_file in ${row_spec_file_list[@]+"${row_spec_file_list[@]}"}; do
@@ -218,7 +221,7 @@ EOF
         if ((${#missing_spec_files[@]} > 0)); then
           echo "Spec files missing from ${suite_root}/:" >&2
           printf '  %s\n' "${missing_spec_files[@]}" | sort -u >&2
-          echo "Update the suite's shards/specs in .buildkite/pipelines/evals/evals.suites.json." >&2
+          echo "Update the suite's shards/specModelGroups in .buildkite/pipelines/evals/evals.suites.json." >&2
           exit 1
         fi
       fi
@@ -229,14 +232,14 @@ EOF
 
       fanout_step_keys=()
       fanout_connector_ids=()
-      # Each matrix row is one step: connector id, shard id (`-` when unsharded), and spec files
-      # (space-joined; empty for an unsharded whole-suite step).
-      while IFS=$'\t' read -r connector_id shard_id shard_spec_file_args; do
+      # Each matrix row is one step, a JSON object { connectorId, shardId, specFiles }. shardId is ""
+      # for an unsharded whole-suite step; specFiles is the (possibly empty) space-joined spec list.
+      while IFS= read -r row; do
+        [[ -z "$row" ]] && continue
+        connector_id="$(jq -r '.connectorId' <<<"$row")"
+        shard_id="$(jq -r '.shardId' <<<"$row")"
+        shard_spec_file_args="$(jq -r '.specFiles | join(" ")' <<<"$row")"
         [[ -z "$connector_id" ]] && continue
-        # `-` is the unsharded placeholder from get_fanout_matrix.js (avoids collapsed TSV tabs).
-        if [[ "$shard_id" == "-" ]]; then
-          shard_id=""
-        fi
         key_safe="$(printf '%s' "$connector_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
         fanout_connector_ids+=("$connector_id")
 
