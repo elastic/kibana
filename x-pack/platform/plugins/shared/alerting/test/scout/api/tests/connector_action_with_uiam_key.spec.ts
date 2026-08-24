@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
