@@ -56,10 +56,15 @@ spaceTest.describe(
       await expect(page.testSubj.locator(`embeddablePanelHeading-${pieTitle}`)).toHaveText(
         pieTitle
       );
-      expect(await filterBar.hasFilter({ field: 'geo.dest', value: 'AL' })).toBe(true);
+      await expect(
+        page.testSubj.locator('~filter-key-geo.dest & ~filter-value-AL')
+      ).toBeVisible();
+
       await filterBar.addFilter({ field: 'geo.src', operator: 'is', value: 'US' });
       await filterBar.toggleFilterPinned('geo.src');
-      expect(await filterBar.hasFilter({ field: 'geo.src', value: 'US', pinned: true })).toBe(true);
+      await expect(
+        page.testSubj.locator('~filter-key-geo.src & ~filter-value-US & ~filter-pinned')
+      ).toBeVisible();
     });
 
     spaceTest(
