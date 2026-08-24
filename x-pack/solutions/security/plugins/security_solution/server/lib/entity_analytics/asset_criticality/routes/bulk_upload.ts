@@ -22,6 +22,7 @@ import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_c
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 export const assetCriticalityPublicBulkUploadRoute = ({
   router,
@@ -83,30 +84,38 @@ export const assetCriticalityPublicBulkUploadRoute = ({
         const siemResponse = buildSiemResponse(response);
 
         try {
-          await checkAndInitAssetCriticalityResources(context, logger);
-          const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
+          return await runWithSpan({
+            name: ENTITY_ANALYTICS_SPAN_NAMES.assetCriticalityBulk,
+            namespace: securitySolution.getSpaceId(),
+            attributes: { 'entity_analytics.records.count': records.length },
+            cb: async () => {
+              await checkAndInitAssetCriticalityResources(context, logger);
+              const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
 
-          const formattedRecords = records.map((record) => ({
-            idField: record.id_field,
-            idValue: record.id_value,
-            criticalityLevel: record.criticality_level,
-          }));
+              const formattedRecords = records.map((record) => ({
+                idField: record.id_field,
+                idValue: record.id_value,
+                criticalityLevel: record.criticality_level,
+              }));
 
-          const recordsStream = Readable.from(formattedRecords, { objectMode: true });
+              const recordsStream = Readable.from(formattedRecords, { objectMode: true });
 
-          const { errors, stats } = await assetCriticalityClient.bulkUpsertFromStream({
-            recordsStream,
-            retries: errorRetries,
-            flushBytes: maxBulkRequestBodySizeBytes,
+              const { errors, stats } = await assetCriticalityClient.bulkUpsertFromStream({
+                recordsStream,
+                retries: errorRetries,
+                flushBytes: maxBulkRequestBodySizeBytes,
+              });
+              const end = new Date();
+
+              const tookMs = end.getTime() - start.getTime();
+              logger.debug(
+                () =>
+                  `Asset criticality Bulk upload completed in ${tookMs}ms ${JSON.stringify(stats)}`
+              );
+
+              return response.ok({ body: { errors, stats } });
+            },
           });
-          const end = new Date();
-
-          const tookMs = end.getTime() - start.getTime();
-          logger.debug(
-            () => `Asset criticality Bulk upload completed in ${tookMs}ms ${JSON.stringify(stats)}`
-          );
-
-          return response.ok({ body: { errors, stats } });
         } catch (e) {
           logger.error(`Error during asset criticality bulk upload: ${e}`);
           const error = transformError(e);
