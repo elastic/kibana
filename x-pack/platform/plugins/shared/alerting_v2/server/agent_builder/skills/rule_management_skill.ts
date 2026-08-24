@@ -17,7 +17,7 @@ import { manageRuleTool } from '../tools/manage_rule';
 import {
   generateRuleOperationsDoc,
   generateRuleKindDoc,
-  generateEpisodeLifecycleDoc,
+  generateAlertLifecycleDoc,
   generateSeverityDoc,
   generateRecoveryStrategyDoc,
   generateNoDataStrategyDoc,
@@ -40,9 +40,9 @@ export const createRuleManagementSkill = (deps: ManageRuleToolDeps) =>
         content: generateRuleKindDoc(),
       },
       {
-        name: 'episode-lifecycle',
+        name: 'alert-lifecycle',
         relativePath: './references',
-        content: generateEpisodeLifecycleDoc(),
+        content: generateAlertLifecycleDoc(),
       },
       {
         name: 'alert-event-severity',
@@ -181,8 +181,8 @@ If the user agrees, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via 
 ### Rule Kind
 When the user asks whether a rule should notify, record events only, or about the difference between Alerts and Events, consult the [rule-kind reference](./references/rule-kind.md).
 
-### Episode Lifecycle
-When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\` means, why an alert has not fired yet, or how group state works, consult the [episode-lifecycle reference](./references/episode-lifecycle.md).
+### Alert Lifecycle
+When the user asks what \`active\` / \`pending\` / \`recovering\` / \`inactive\` means, why an alert has not fired yet, or how group state works, consult the [alert-lifecycle reference](./references/alert-lifecycle.md).
 
 ### Severity
 When the user specifies a severity (e.g. "make this a critical alert"), add an \`EVAL severity = "..."\` pipe to the breach query or segment via \`set_query\`. Consult the [alert-event-severity reference](./references/alert-event-severity.md) for valid values, the extraction model, and literal vs conditional patterns.

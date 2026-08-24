@@ -11,17 +11,17 @@ import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import {
   ALERT_EPISODE_STATUS,
-  EPISODE_ATTACHMENT_TYPE,
+  ALERT_ATTACHMENT_TYPE,
   type AlertEpisode,
 } from '@kbn/alerting-v2-schemas';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
-import { useEpisodeAutoAttach } from './use_episode_auto_attach';
+import { useAlertAutoAttach } from './use_alert_auto_attach';
 
 jest.mock('@kbn/core-di-browser');
-jest.mock('../../common/agent_builder/episode_mappers', () => ({
-  alertEpisodeToEpisodeAttachment: (episode: unknown) => ({
+jest.mock('../../common/agent_builder/alert_mappers', () => ({
+  alertEpisodeToAlertAttachment: (episode: unknown) => ({
     ...(episode as Record<string, unknown>),
     __mapped: true,
   }),
@@ -41,7 +41,7 @@ const episode: AlertEpisode = {
   duration: 3600000,
 };
 
-describe('useEpisodeAutoAttach', () => {
+describe('useAlertAutoAttach', () => {
   let addAttachment: jest.Mock;
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
@@ -90,14 +90,14 @@ describe('useEpisodeAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useEpisodeAutoAttach(episode, { ruleName: 'Rule A' }));
+    renderHook(() => useAlertAutoAttach(episode, { ruleName: 'Rule A' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'episode:ep-1',
-        type: EPISODE_ATTACHMENT_TYPE,
+        id: 'alert:ep-1',
+        type: ALERT_ATTACHMENT_TYPE,
         origin: 'ep-1',
       })
     );
@@ -106,7 +106,7 @@ describe('useEpisodeAutoAttach', () => {
   it('does not stage on mount when sidebar is closed', () => {
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useEpisodeAutoAttach(episode));
+    renderHook(() => useAlertAutoAttach(episode));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('useEpisodeAutoAttach', () => {
   it('stages when sidebar opens after mount', () => {
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useEpisodeAutoAttach(episode));
+    renderHook(() => useAlertAutoAttach(episode));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -133,7 +133,7 @@ describe('useEpisodeAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useEpisodeAutoAttach(episode));
+    renderHook(() => useAlertAutoAttach(episode));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -144,14 +144,14 @@ describe('useEpisodeAutoAttach', () => {
     activeConversation$.next({ id: undefined });
     const episode2 = { ...episode, 'episode.id': 'ep-2' } as AlertEpisode;
 
-    const { rerender } = renderHook(({ ep }) => useEpisodeAutoAttach(ep), {
+    const { rerender } = renderHook(({ ep }) => useAlertAutoAttach(ep), {
       initialProps: { ep: episode },
     });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'episode:ep-1', origin: 'ep-1' })
+      expect.objectContaining({ id: 'alert:ep-1', origin: 'ep-1' })
     );
 
     rerender({ ep: episode2 });
@@ -159,7 +159,7 @@ describe('useEpisodeAutoAttach', () => {
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'episode:ep-2', origin: 'ep-2' })
+      expect.objectContaining({ id: 'alert:ep-2', origin: 'ep-2' })
     );
   });
 
@@ -168,19 +168,19 @@ describe('useEpisodeAutoAttach', () => {
     activeConversation$.next({ id: undefined });
     const episode2 = { ...episode, 'episode.id': 'ep-2' } as AlertEpisode;
 
-    const { unmount } = renderHook(() => useEpisodeAutoAttach(episode));
+    const { unmount } = renderHook(() => useAlertAutoAttach(episode));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
     unmount();
 
-    renderHook(() => useEpisodeAutoAttach(episode2));
+    renderHook(() => useAlertAutoAttach(episode2));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'episode:ep-2', origin: 'ep-2' })
+      expect.objectContaining({ id: 'alert:ep-2', origin: 'ep-2' })
     );
   });
 
@@ -188,7 +188,7 @@ describe('useEpisodeAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useEpisodeAutoAttach(undefined));
+    renderHook(() => useAlertAutoAttach(undefined));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -207,7 +207,7 @@ describe('useEpisodeAutoAttach', () => {
     });
 
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    renderHook(() => useEpisodeAutoAttach(episode));
+    renderHook(() => useAlertAutoAttach(episode));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -216,7 +216,7 @@ describe('useEpisodeAutoAttach', () => {
   it('cleans up subscriptions on unmount', () => {
     activeConversation$.next({ id: undefined });
 
-    const { unmount } = renderHook(() => useEpisodeAutoAttach(episode));
+    const { unmount } = renderHook(() => useAlertAutoAttach(episode));
     unmount();
 
     act(() => {

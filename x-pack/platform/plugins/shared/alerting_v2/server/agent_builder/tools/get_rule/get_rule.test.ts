@@ -61,7 +61,7 @@ describe('getRuleTool', () => {
   const createTool = (canReadResult: boolean = true) =>
     getRuleTool({
       attachmentId: 'attach-1',
-      episodeId: 'ep-1',
+      alertId: 'ep-1',
       ruleId: 'rule-1',
       logger: loggerService,
       getRulesClient: () => ({ getRule } as unknown as RulesClient),

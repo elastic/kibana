@@ -11,7 +11,7 @@ import { parseEpisodeDataJson, getValueByFieldPath } from '@kbn/alerting-v2-util
 
 const GROUP_NAME_SEPARATOR = ' · ';
 
-export interface ResolveEpisodeLabelParams {
+export interface ResolveAlertLabelParams {
   episode: AlertEpisode;
   ruleName?: string;
   groupingFields?: readonly string[];
@@ -38,17 +38,17 @@ const resolveGroupName = (
   return values.length > 0 ? values.join(GROUP_NAME_SEPARATOR) : undefined;
 };
 
-export const resolveEpisodeLabel = ({
+export const resolveAlertLabel = ({
   episode,
   ruleName,
   groupingFields,
-}: ResolveEpisodeLabelParams): string => {
+}: ResolveAlertLabelParams): string => {
   const resolvedRuleName = ruleName?.trim() || undefined;
   const groupName = resolveGroupName(episode, groupingFields);
 
   const buildLabel = (): string => {
     if (resolvedRuleName && groupName) {
-      return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabelFromRuleAndGroup', {
+      return i18n.translate('xpack.alertingV2.alertAttachment.alertLabelFromRuleAndGroup', {
         defaultMessage: '{ruleName} alert for {groupName}',
         values: { ruleName: resolvedRuleName, groupName },
       });
@@ -56,13 +56,13 @@ export const resolveEpisodeLabel = ({
 
     const resolvedLabel = resolvedRuleName ?? groupName;
     if (resolvedLabel) {
-      return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabel', {
+      return i18n.translate('xpack.alertingV2.alertAttachment.alertLabel', {
         defaultMessage: '{label} alert',
         values: { label: resolvedLabel },
       });
     }
 
-    return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabelFromRuleId', {
+    return i18n.translate('xpack.alertingV2.alertAttachment.alertLabelFromRuleId', {
       defaultMessage: 'Alert for rule {ruleId}',
       values: { ruleId: episode['rule.id'] },
     });

@@ -23,13 +23,13 @@ import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/p
 
 const getRuleSchema = z.object({});
 
-/** Bounded tool id — unique per attachment instance when multiple episodes are present. */
+/** Bounded tool id — unique per attachment instance when multiple alerts are present. */
 export const getRuleToolId = (attachmentId: string): string =>
   `${ALERTING_NAMESPACE}.get_rule.${attachmentId}`;
 
 export interface GetRuleToolParams {
   attachmentId: string;
-  episodeId: string;
+  alertId: string;
   ruleId: string;
   logger: LoggerServiceContract;
   getRulesClient: (context: AttachmentFormatContext) => RulesClient;
@@ -40,7 +40,7 @@ export interface GetRuleToolParams {
 
 export const getRuleTool = ({
   attachmentId,
-  episodeId,
+  alertId,
   ruleId,
   logger,
   getRulesClient,
@@ -48,7 +48,7 @@ export const getRuleTool = ({
 }: GetRuleToolParams): BuiltinAttachmentBoundedTool<typeof getRuleSchema> => ({
   id: getRuleToolId(attachmentId),
   type: ToolType.builtin,
-  description: `Fetch the platform alert rule "${ruleId}" associated with episode "${episodeId}" (attachment "${attachmentId}"), including name, schedule, query, source indices, enabled state, and metadata. This is not a Security/SIEM detection rule. This tool is read-only. To create, explain, or modify the rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
+  description: `Fetch the platform alert rule "${ruleId}" associated with alert "${alertId}" (attachment "${attachmentId}"), including name, schedule, query, source indices, enabled state, and metadata. This is not a Security/SIEM detection rule. This tool is read-only. To create, explain, or modify the rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
   schema: getRuleSchema,
   handler: async (_args, toolContext) => {
     const unauthorized = await ensureToolPrivilege({
@@ -86,7 +86,7 @@ export const getRuleTool = ({
           code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_FAILED,
           labels: {
             rule_id: ruleId,
-            episode_id: episodeId,
+            episode_id: alertId,
             space_id: toolContext.spaceId,
           },
           error,
@@ -97,7 +97,7 @@ export const getRuleTool = ({
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to fetch rule "${ruleId}" for episode "${episodeId}": ${message}`,
+              message: `Failed to fetch rule "${ruleId}" for episode "${alertId}": ${message}`,
             },
           },
         ],

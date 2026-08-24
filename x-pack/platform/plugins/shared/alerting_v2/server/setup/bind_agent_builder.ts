@@ -11,7 +11,7 @@ import { CoreStart } from '@kbn/core-di-server';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
-import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
+import { createAlertAttachmentType } from '../agent_builder/attachments/alert_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
@@ -75,7 +75,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
   );
   bind(AttachmentTypeToken).toResolvedValue(
     (loggerService: LoggerServiceContract, injection) =>
-      createEpisodeAttachmentType({
+      createAlertAttachmentType({
         logger: loggerService.forSubsystem('agentBuilder'),
         getEpisodesClient: (context) =>
           resolveRequestScoped(injection, context.request, EpisodesClient),

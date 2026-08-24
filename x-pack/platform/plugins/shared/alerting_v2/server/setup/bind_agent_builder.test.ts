@@ -11,7 +11,7 @@ import { CoreStart } from '@kbn/core-di-server';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
-import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
+import { createAlertAttachmentType } from '../agent_builder/attachments/alert_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { registerSkills } from '../agent_builder/skills/register_skills';
 import { createActionPolicySmlType } from '../agent_builder/sml/action_policy_sml_type';
@@ -30,8 +30,8 @@ jest.mock('../agent_builder/attachments/rule_attachment_type', () => ({
 jest.mock('../agent_builder/attachments/action_policy_attachment_type', () => ({
   createActionPolicyAttachmentType: jest.fn(),
 }));
-jest.mock('../agent_builder/attachments/episode_attachment_type', () => ({
-  createEpisodeAttachmentType: jest.fn(),
+jest.mock('../agent_builder/attachments/alert_attachment_type', () => ({
+  createAlertAttachmentType: jest.fn(),
 }));
 jest.mock('../agent_builder/sml/rule_sml_type', () => ({
   createRuleSmlType: jest.fn(),
@@ -48,8 +48,8 @@ const createRuleAttachmentTypeMock = createRuleAttachmentType as jest.MockedFunc
 >;
 const createActionPolicyAttachmentTypeMock =
   createActionPolicyAttachmentType as jest.MockedFunction<typeof createActionPolicyAttachmentType>;
-const createEpisodeAttachmentTypeMock = createEpisodeAttachmentType as jest.MockedFunction<
-  typeof createEpisodeAttachmentType
+const createAlertAttachmentTypeMock = createAlertAttachmentType as jest.MockedFunction<
+  typeof createAlertAttachmentType
 >;
 const createRuleSmlTypeMock = createRuleSmlType as jest.MockedFunction<typeof createRuleSmlType>;
 const createActionPolicySmlTypeMock = createActionPolicySmlType as jest.MockedFunction<
@@ -67,7 +67,7 @@ const actionPolicyAttachment = { id: 'action-policy-attachment' } as unknown as 
   typeof createActionPolicyAttachmentType
 >;
 const episodeAttachment = { id: 'episode-attachment' } as unknown as ReturnType<
-  typeof createEpisodeAttachmentType
+  typeof createAlertAttachmentType
 >;
 const ruleSmlType = { id: 'rule-sml' };
 const actionPolicySmlType = { id: 'action-policy-sml' };
@@ -103,14 +103,14 @@ describe('bindAgentBuilder', () => {
 
     createRuleAttachmentTypeMock.mockReset();
     createActionPolicyAttachmentTypeMock.mockReset();
-    createEpisodeAttachmentTypeMock.mockReset();
+    createAlertAttachmentTypeMock.mockReset();
     createRuleSmlTypeMock.mockReset();
     createActionPolicySmlTypeMock.mockReset();
     registerSkillsMock.mockReset();
 
     createRuleAttachmentTypeMock.mockReturnValue(ruleAttachment);
     createActionPolicyAttachmentTypeMock.mockReturnValue(actionPolicyAttachment);
-    createEpisodeAttachmentTypeMock.mockReturnValue(episodeAttachment);
+    createAlertAttachmentTypeMock.mockReturnValue(episodeAttachment);
     createRuleSmlTypeMock.mockReturnValue(ruleSmlType as ReturnType<typeof createRuleSmlType>);
     createActionPolicySmlTypeMock.mockReturnValue(
       actionPolicySmlType as ReturnType<typeof createActionPolicySmlType>

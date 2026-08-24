@@ -12,9 +12,9 @@ import type {
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ALERTING_NAMESPACE } from '@kbn/alerting-v2-constants';
-import { episodeAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
+import { alertAttachmentDataSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
-import { alertEpisodeToEpisodeAttachment } from '../../../../common/agent_builder/episode_mappers';
+import { alertEpisodeToAlertAttachment } from '../../../../common/agent_builder/alert_mappers';
 import { loadRuleMetadata } from '../../common/load_rule_metadata';
 import { ensureToolPrivilege } from '../../common/unauthorized_tool_result';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
@@ -23,15 +23,15 @@ import type { RulesClient } from '../../../lib/rules_client';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 
-const refreshEpisodeSchema = z.object({});
+const refreshAlertSchema = z.object({});
 
-/** Bounded tool id — unique per attachment instance when multiple episodes are present. */
-export const refreshEpisodeToolId = (attachmentId: string): string =>
-  `${ALERTING_NAMESPACE}.refresh_episode.${attachmentId}`;
+/** Bounded tool id — unique per attachment instance when multiple alerts are present. */
+export const refreshAlertToolId = (attachmentId: string): string =>
+  `${ALERTING_NAMESPACE}.refresh_alert.${attachmentId}`;
 
-export interface RefreshEpisodeToolParams {
+export interface RefreshAlertToolParams {
   attachmentId: string;
-  episodeId: string;
+  alertId: string;
   logger: LoggerServiceContract;
   getEpisodesClient: (context: AttachmentFormatContext) => EpisodesClient;
   getRulesClient: (context: AttachmentFormatContext) => RulesClient;
@@ -40,18 +40,18 @@ export interface RefreshEpisodeToolParams {
   }) => PrivilegeChecker;
 }
 
-export const refreshEpisodeTool = ({
+export const refreshAlertTool = ({
   attachmentId,
-  episodeId,
+  alertId,
   logger,
   getEpisodesClient,
   getRulesClient,
   getPrivilegeChecker,
-}: RefreshEpisodeToolParams): BuiltinAttachmentBoundedTool<typeof refreshEpisodeSchema> => ({
-  id: refreshEpisodeToolId(attachmentId),
+}: RefreshAlertToolParams): BuiltinAttachmentBoundedTool<typeof refreshAlertSchema> => ({
+  id: refreshAlertToolId(attachmentId),
   type: ToolType.builtin,
-  description: `Refresh alert episode "${episodeId}" (attachment "${attachmentId}") with the latest status, timestamps, severity, tags, assignee, and snooze state from Elasticsearch. Call when the snapshot may be outdated or the user asks about current episode state.`,
-  schema: refreshEpisodeSchema,
+  description: `Refresh platform alert "${alertId}" (attachment "${attachmentId}") with the latest status, timestamps, severity, tags, assignee, and snooze state from Elasticsearch. Call when the snapshot may be outdated or the user asks about current alert state.`,
+  schema: refreshAlertSchema,
   handler: async (_args, toolContext) => {
     const unauthorized = await ensureToolPrivilege({
       privilegeChecker: getPrivilegeChecker({ request: toolContext.request }),
@@ -68,14 +68,14 @@ export const refreshEpisodeTool = ({
         request: toolContext.request,
         spaceId: toolContext.spaceId,
       });
-      const episode = await client.get(episodeId);
+      const episode = await client.get(alertId);
       if (!episode) {
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: `Episode "${episodeId}" not found`,
+                message: `Episode "${alertId}" not found`,
               },
             },
           ],
@@ -91,8 +91,8 @@ export const refreshEpisodeTool = ({
         logger
       );
 
-      const data = episodeAttachmentDataSchema.parse(
-        alertEpisodeToEpisodeAttachment(episode, { ruleName, groupingFields })
+      const data = alertAttachmentDataSchema.parse(
+        alertEpisodeToAlertAttachment(episode, { ruleName, groupingFields })
       );
 
       return {
@@ -109,7 +109,7 @@ export const refreshEpisodeTool = ({
         message: 'Failed to refresh episode',
         code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_REFRESH_FAILED,
         labels: {
-          episode_id: episodeId,
+          episode_id: alertId,
           space_id: toolContext.spaceId,
         },
         error,
@@ -119,7 +119,7 @@ export const refreshEpisodeTool = ({
           {
             type: ToolResultType.error,
             data: {
-              message: `Failed to refresh episode "${episodeId}": ${message}`,
+              message: `Failed to refresh episode "${alertId}": ${message}`,
             },
           },
         ],
