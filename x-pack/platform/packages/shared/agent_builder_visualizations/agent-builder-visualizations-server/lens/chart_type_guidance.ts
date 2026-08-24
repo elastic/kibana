@@ -10,25 +10,21 @@ import { chartTypeRegistry } from './chart_type_registry';
 
 export const getChartTypeSelectionPromptContent = () =>
   [
-    'Available chart types:',
+    "Available chart types — choose the one that best fits the user's intent and the nature of the data being visualized:",
     ...Object.entries(chartTypeRegistry).map(
-      ([chartType, { prompt }]) => `- ${chartType}: ${prompt.selection.description}`
+      ([chartType, { prompt }]) => `- ${chartType}: ${prompt.selection}`
     ),
-    '',
-    'Guidelines:',
-    ...Object.entries(chartTypeRegistry).map(([, { prompt }]) => `- ${prompt.selection.guideline}`),
-    "- Consider the user's intent and the nature of the data being visualized",
   ].join('\n');
 
 export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) => {
-  const perChartTypeRules = chartTypeRegistry[chartType].prompt.config?.perChartTypeRules;
+  const rules = chartTypeRegistry[chartType].prompt.config?.rules;
 
-  if (!perChartTypeRules?.length) {
+  if (!rules?.length) {
     return '';
   }
 
   return [
     `CHART-SPECIFIC RULES FOR ${chartType.toUpperCase()}:`,
-    ...perChartTypeRules.map((rule) => `- ${rule}`),
+    ...rules.map((rule) => `- ${rule}`),
   ].join('\n');
 };

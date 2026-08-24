@@ -10,9 +10,14 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { parse as yamlParse } from 'yaml';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { CreateTemplatePage } from './page';
-import { TestProviders } from '../../../../common/mock';
-import { LOCAL_STORAGE_KEYS } from '../../../../../common/constants';
+import { mockedTestProvidersOwner, TestProviders } from '../../../../common/mock';
+import {
+  CASES_TEMPLATE_CREATED_EVENT_TYPE,
+  LOCAL_STORAGE_KEYS,
+} from '../../../../../common/constants';
 import { exampleTemplateDefinition } from '../../field_types/constants';
 import * as i18n from '../../translations';
 
@@ -81,8 +86,11 @@ const nameTemplateFromPageTitle = async (name: string) => {
 };
 
 describe('CreateTemplatePage', () => {
+  let coreStart: CoreStart;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    coreStart = coreMock.createStart() as unknown as CoreStart;
     localStorage.clear();
     // Create resolves to the new template; the page then switches to edit mode for that id.
     mockMutateAsync.mockResolvedValue({ templateId: 'new-tpl-id' });
@@ -275,5 +283,52 @@ describe('CreateTemplatePage', () => {
     const storedConfig = localStorage.getItem(configKey);
     const parsedConfig = storedConfig ? JSON.parse(storedConfig) : {};
     expect(parsedConfig.settings).toEqual({ syncAlerts: true, extractObservables: true });
+  });
+
+  describe('telemetry', () => {
+    it('reports one created event with the blank mode when the save succeeds', async () => {
+      render(
+        <TestProviders coreStart={coreStart}>
+          <CreateTemplatePage />
+        </TestProviders>
+      );
+
+      // Opening the editor is not a confirmed action.
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+
+      await nameTemplateFromPageTitle('My template');
+      await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
+
+      await waitFor(() => {
+        expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      });
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_TEMPLATE_CREATED_EVENT_TYPE,
+        {
+          owner: mockedTestProvidersOwner[0],
+          entry_point: 'template_editor',
+          creation_mode: 'blank',
+        }
+      );
+    });
+
+    it('reports nothing when the save fails', async () => {
+      mockMutateAsync.mockRejectedValueOnce(new Error('Creation failed'));
+
+      render(
+        <TestProviders coreStart={coreStart}>
+          <CreateTemplatePage />
+        </TestProviders>
+      );
+
+      await nameTemplateFromPageTitle('My template');
+      await userEvent.click(screen.getByTestId('saveTemplateHeaderButton'));
+
+      await waitFor(() => {
+        expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+      });
+
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+    });
   });
 });
