@@ -8,24 +8,8 @@
  */
 
 export {
-  FeedbackTriggerButton,
-  FeedbackContainer,
   FeedbackSuccessToastTitle,
   FeedbackSuccessToastBody,
   FEEDBACK_SUCCESS_TOAST_LIFE_TIME_MS,
-} from './src';
-
-export type {
-  FeedbackTriggerButtonProps,
-  FeedbackContainerProps,
-  FeedbackSuccessToastBodyProps,
-} from './src';
-
-export type {
-  FeedbackRegistryEntry,
-  FeedbackSubmittedData,
-  FeedbackQuestion,
-  FeedbackContext,
-  FeedbackFormData,
-  AppDetails,
-} from './src/types';
+} from './feedback_success_toast';
+export type { FeedbackSuccessToastBodyProps } from './feedback_success_toast';
