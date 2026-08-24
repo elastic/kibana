@@ -131,9 +131,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id={modalTitleId} aria-label={DASHBOARDS_MIGRATION_DATA_INPUT_FLYOUT_TITLE}>
-                {i18n.DATA_INPUT_FLYOUT_TITLE}
-              </h2>
+              <h2 id={modalTitleId}>{i18n.DATA_INPUT_FLYOUT_TITLE}</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
