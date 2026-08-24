@@ -45,15 +45,23 @@ triggers:
           additionalProperties: true
           description: Optional Elasticsearch DSL filter applied during alert retrieval.
       additionalProperties: false
+# Declared in JSON Schema object format (not the legacy name/type array): the
+# legacy `array` type constrains items to string/number/boolean, so an array of
+# recommended-action objects is rejected by output validation at emit_result.
+# The object format lets recommended_actions be an array of objects.
 outputs:
-  - name: discovery_count
-    type: number
-  - name: execution_uuid
-    type: string
-  - name: status
-    type: string
-  - name: recommended_actions
-    type: array
+  properties:
+    discovery_count:
+      type: number
+    execution_uuid:
+      type: string
+    status:
+      type: string
+    recommended_actions:
+      type: array
+      description: Structured recommended actions accumulated across discoveries.
+      items:
+        type: object
 steps:
   # Run the full pipeline (retrieve -> generate -> validate -> persist) in sync
   # mode (the default), so the step blocks until the run is terminal and returns
