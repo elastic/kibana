@@ -224,9 +224,20 @@ export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilt
  * doc, so the column is always current — callers do **not** derive an
  * `effective_status` by joining `.alert-actions` audit rows back in.
  */
-export const buildEpisodesBaseQuery = (spaceId: string, search?: string): ComposerQuery => {
+export const buildEpisodesBaseQuery = (
+  spaceId: string,
+  search?: string,
+  groupHash?: string
+): ComposerQuery => {
   const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source'])
     .where`space_id == ${spaceId}`;
+
+  // Narrowing to a single series before the INLINE STATS lets ES skip the
+  // space-wide aggregation: all the event and action docs of an episode carry
+  // its `group_hash`, so the aggregated row is identical.
+  if (groupHash) {
+    query.where`group_hash == ${groupHash}`;
+  }
 
   const trimmedSearch = search?.trim();
   if (trimmedSearch) {
