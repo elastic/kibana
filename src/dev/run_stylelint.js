@@ -9,29 +9,45 @@
 
 import { spawnSync } from 'child_process';
 import { dirname, resolve } from 'path';
+import { pathToFileURL } from 'url';
 
-const args = process.argv.slice(2);
-const stylelintConfigPath = resolve(__dirname, '..', '..', '.stylelintrc');
-const stylelintIgnorePath = resolve(__dirname, '..', '..', '.stylelintignore');
-const { bin } = require('stylelint/package.json');
-const stylelintExecutable = resolve(
-  dirname(require.resolve('stylelint/package.json')),
-  bin.stylelint
-);
+async function main() {
+  const args = process.argv.slice(2);
+  const { default: meow } = await import('meow');
+  const { input } = meow({
+    argv: args,
+    allowUnknownFlags: true,
+    booleanDefault: undefined,
+    importMeta: { url: pathToFileURL(__filename).href },
+  });
+  const stylelintConfigPath = resolve(__dirname, '..', '..', '.stylelintrc');
+  const stylelintIgnorePath = resolve(__dirname, '..', '..', '.stylelintignore');
+  const { bin } = require('stylelint/package.json');
+  const stylelintExecutable = resolve(
+    dirname(require.resolve('stylelint/package.json')),
+    bin.stylelint
+  );
 
-if (!args.length) {
-  args.push('**/*.s+(a|c)ss');
+  if (!input.length) {
+    args.push('**/*.s+(a|c)ss');
+  }
+  args.push('--max-warnings', '0'); // return nonzero exit code on any warnings
+  args.push('--config', stylelintConfigPath); // configuration file
+  args.push('--ignore-path', stylelintIgnorePath); // ignore file
+
+  const { error, status } = spawnSync(process.execPath, [stylelintExecutable, ...args], {
+    stdio: 'inherit',
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  process.exitCode = status ?? 1;
 }
-args.push('--max-warnings', '0'); // return nonzero exit code on any warnings
-args.push('--config', stylelintConfigPath); // configuration file
-args.push('--ignore-path', stylelintIgnorePath); // ignore file
 
-const { error, status } = spawnSync(process.execPath, [stylelintExecutable, ...args], {
-  stdio: 'inherit',
+main().catch((error) => {
+  process.nextTick(() => {
+    throw error;
+  });
 });
-
-if (error) {
-  throw error;
-}
-
-process.exitCode = status ?? 1;
