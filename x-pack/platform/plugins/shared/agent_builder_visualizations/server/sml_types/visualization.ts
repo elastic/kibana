@@ -17,6 +17,8 @@ import {
   extractEsqlFromLens,
 } from '../lens_reference';
 
+const VISUALIZATION_SAVED_OBJECT_TYPE = 'lens';
+
 const getChartType = (attributes: LensAttributes): string => {
   return attributes.visualizationType ?? '';
 };
