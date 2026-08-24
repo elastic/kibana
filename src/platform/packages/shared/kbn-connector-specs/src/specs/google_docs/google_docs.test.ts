@@ -216,6 +216,37 @@ describe('GoogleDocsConnector', () => {
       );
     });
 
+    it('does not split a non-BMP character (emoji) at a page boundary', async () => {
+      // '🎉' is U+1F389, a surrogate pair (2 UTF-16 code units) at code-point index 999.
+      // With max_characters:1000 the old `string.slice(0, 1000)` would cut inside the
+      // surrogate pair, emitting a lone high surrogate. The code-point fix keeps it whole.
+      const content = 'a'.repeat(999) + '\u{1F389}' + 'ef'; // 1002 code points
+      mockGet.mockResolvedValueOnce(META_RESPONSE).mockResolvedValueOnce({ data: content });
+
+      const input = parse('readDoc', { document_id: DOC_ID, max_characters: 1000 });
+      const page1 = (await GoogleDocsConnector.actions.readDoc.handler(mockContext, input)) as {
+        content: string;
+        next_offset: number;
+        truncated: boolean;
+      };
+
+      // Page 1 ends with the emoji intact (not a lone high surrogate)
+      expect(page1.content).toBe('a'.repeat(999) + '\u{1F389}');
+      expect(page1.truncated).toBe(true);
+      expect(page1.next_offset).toBe(1000);
+
+      // Page 2 starts with 'e', not the emoji's low surrogate
+      mockGet.mockResolvedValueOnce(META_RESPONSE).mockResolvedValueOnce({ data: content });
+      const input2 = parse('readDoc', { document_id: DOC_ID, offset: 1000, max_characters: 1000 });
+      const page2 = (await GoogleDocsConnector.actions.readDoc.handler(mockContext, input2)) as {
+        content: string;
+        truncated: boolean;
+      };
+
+      expect(page2.content).toBe('ef');
+      expect(page2.truncated).toBe(false);
+    });
+
     it('throws when the file is not a Google Doc', async () => {
       mockGet.mockResolvedValueOnce({
         data: {

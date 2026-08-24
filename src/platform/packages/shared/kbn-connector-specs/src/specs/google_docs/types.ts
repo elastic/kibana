@@ -69,7 +69,7 @@ export const UpdateDocInputSchema = lazySchema(() =>
       )
       .min(1)
       .max(100)
-      .refine((arr) => JSON.stringify(arr).length <= 102_400, {
+      .refine((arr) => new TextEncoder().encode(JSON.stringify(arr)).byteLength <= 102_400, {
         message: 'Total size of requests must not exceed 100 KB',
       })
       .describe(
