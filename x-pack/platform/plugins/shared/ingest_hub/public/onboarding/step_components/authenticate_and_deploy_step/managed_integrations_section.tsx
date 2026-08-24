@@ -262,9 +262,20 @@ export function ManagedIntegrationsSection({
             </EuiCallOut>
             )}
 
-            {!hasFailed && (
+            {isDone && (
+              <EuiText size="s" data-test-subj="managedIntegrationsSection-successMessage">
+                <p>
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.successMessage"
+                    defaultMessage="Managed integrations deployed. Data detection is running in the background — check Detect & Review for arrival status."
+                  />
+                </p>
+              </EuiText>
+            )}
+
+            {!hasFailed && !isDone && (
               <EuiButton
-                isDisabled={!isDeployReady || isDone}
+                isDisabled={!isDeployReady}
                 isLoading={isDeploying}
                 onClick={onDeploy}
                 data-test-subj="managedIntegrationsSection-deployButton"

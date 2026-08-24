@@ -271,10 +271,16 @@ describe('ManagedIntegrationsSection', () => {
       expect(screen.getByText('Done')).toBeInTheDocument();
     });
 
-    it('deploy button is disabled when isDone', () => {
+    it('deploy button is absent when isDone', () => {
       renderSection({ isDone: true });
       fireEvent.click(screen.getByTestId('managedIntegrationsSection-headerButton'));
-      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+      expect(screen.queryByTestId('managedIntegrationsSection-deployButton')).not.toBeInTheDocument();
+    });
+
+    it('shows success message when isDone and section is open', () => {
+      renderSection({ isDone: true });
+      fireEvent.click(screen.getByTestId('managedIntegrationsSection-headerButton'));
+      expect(screen.getByTestId('managedIntegrationsSection-successMessage')).toBeInTheDocument();
     });
   });
 
