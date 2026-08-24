@@ -2,6 +2,11 @@
   "title": "Persona Matrix \u2014 per-prompt proprietary sweep",
   "branch": "main",
   "lookbackDays": 3,
+  "scoring": {
+    "useVerdictLadder": true,
+    "requireEisJudge": true,
+    "excludeSelfJudged": true
+  },
   "defaultScale": 10,
   "decimals": 2,
   "notRecommendedBelow": 0,
@@ -340,6 +345,9 @@
       "MinExpectedSteps evaluator added 2026-08-22: scores 0 when a run made fewer tool calls than the declared expectedTools count — flags premature-termination / 'gave up without trying' (complements FinalAnswerPresent). Folded into every cell mean.",
       "Repetition depth varies by model: determinism-sweep models ran 3 reps/example, batch models 1 rep. Trace cards carry an N reps badge; 1-rep cells have proportionally higher variance.",
       "Scores are means over 10 evaluators (8 score-typed + FinalAnswerPresent + MinExpectedSteps), scaled to 0-10. Token/latency/tool-count observability evaluators are excluded from cell means and shown separately in the token-cost table.",
+      "Judged evaluators (Groundedness, Factuality, Relevance) are scored from their categorical verdict via an ordinal ladder since 2026-08-24, not the per-run geometric mean over a re-extracted claim list. Repetitions re-run the agent, which emits semantically equivalent but textually different answers (inter-rep output similarity 0.172, zero identical across 8,482 measured docs); the judge then extracts a different claim list from different prose and the continuous mean wobbles. Measured on 312 multi-repetition cells, rank flip between repetitions falls from 83.3% to 33.3%. Contract evaluators are deterministic and unaffected.",
+      "Scores from judges that are not EIS-pinned are excluded since 2026-08-24 (2,077 docs, 5.7%), as are 807 self-judged docs where a model graded its own output. A non-EIS judge id (LiteLLM alias, HuggingFace repo path, local quantisation) cannot be re-run to reproduce a number. Cells whose only grades came from excluded judges are absent rather than estimated.",
+      "Scores in this matrix are NOT comparable to matrices generated before 2026-08-24: the judged-evaluator scoring basis changed from continuous mean to verdict ladder, and the judge population changed. Compare model-to-model within this matrix, not cell-to-cell across generations.",
       "Fixture fingerprint pins the dataset/tool seeds this matrix was scored against; comparing across fingerprints is a cross-generation comparison, not a model delta."
     ]
   }
