@@ -222,11 +222,10 @@ spaceTest.describe('Lens add to dashboard save matrix', { tag: '@local-stateful-
         await dashboard.waitForRenderComplete();
         await dashboard.expectPanelCount(expectedPanelCount);
 
-        const { title, value } = await lens.metric.getLegacyMetricData();
-        expect(title).toBe(expectedLabel);
+        await expect(lens.metric.legacyMetricLabel).toHaveText(expectedLabel);
         // Backend-computed aggregation: assert it renders as a formatted number rather
         // than pinning the exact FTR figure.
-        expect(value).toMatch(/^[\d,.]+$/);
+        await expect(lens.metric.legacyMetricValue).toHaveText(/^[\d,.]+$/);
 
         await dashboard.expectNotLinkedToLibrary(lensTitle);
       });
@@ -254,9 +253,8 @@ spaceTest.describe('Lens add to dashboard save matrix', { tag: '@local-stateful-
         await dashboard.waitForRenderComplete();
         await dashboard.expectPanelCount(expectedPanelCount);
 
-        const { title, value } = await lens.metric.getLegacyMetricData();
-        expect(title).toBe(expectedLabel);
-        expect(value).toMatch(/^[\d,.]+$/);
+        await expect(lens.metric.legacyMetricLabel).toHaveText(expectedLabel);
+        await expect(lens.metric.legacyMetricValue).toHaveText(/^[\d,.]+$/);
 
         await dashboard.expectLinkedToLibrary(lensTitle);
       });

@@ -37,7 +37,6 @@ export class LensEditorApp extends LensApp {
    */
   public readonly dragDrop: LensDragDrop;
   private readonly addToLibraryCheckbox;
-  private readonly addToLibraryCheckboxLabel;
   private readonly newDashboardOption;
   private readonly existingDashboardOption;
   private readonly openDashboardPicker;
@@ -67,7 +66,6 @@ export class LensEditorApp extends LensApp {
       waitForVisualization: (chartTestSubj: string) => this.waitForVisualization(chartTestSubj),
     });
     this.addToLibraryCheckbox = this.page.locator('input#add-to-library-checkbox');
-    this.addToLibraryCheckboxLabel = this.page.locator('label[for="add-to-library-checkbox"]');
     this.newDashboardOption = this.page.locator('#new-dashboard-option');
     this.existingDashboardOption = this.page.locator('#existing-dashboard-option');
     this.openDashboardPicker = this.page.testSubj.locator('open-dashboard-picker');
@@ -85,14 +83,10 @@ export class LensEditorApp extends LensApp {
     await this.savedObjectTitleInput.fill(title);
   }
 
-  /** Sets the add-to-library checkbox to `saveToLibrary` via the label click. */
+  /** Sets the add-to-library checkbox. Uses the input (`setChecked`) so we do not read-then-branch. */
   private async setAddToLibrary(saveToLibrary: boolean): Promise<void> {
     await this.addToLibraryCheckbox.waitFor({ state: 'attached' });
-    const isChecked = await this.addToLibraryCheckbox.isChecked();
-    if (isChecked === saveToLibrary) {
-      return;
-    }
-    await this.addToLibraryCheckboxLabel.click();
+    await this.addToLibraryCheckbox.setChecked(saveToLibrary);
   }
 
   /**
