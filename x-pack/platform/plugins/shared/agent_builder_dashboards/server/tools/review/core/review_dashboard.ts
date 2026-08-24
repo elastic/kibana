@@ -31,7 +31,7 @@ import {
   buildErrorPanelFacts,
   buildSuccessPanelFacts,
 } from './panel_facts';
-import type { JudgeResult } from './judge';
+import type { JudgeResult, ReviewScope } from './judge';
 import { judgeDashboard } from './judge';
 
 /** Per-query execution timeout in milliseconds. */
@@ -128,6 +128,8 @@ export interface ReviewDashboardParams {
   /** Attachment version being reviewed — stamped on the result. */
   version: number;
   focus: string | undefined;
+  /** Review scope — defaults to the high-precision "recent_changes" self-review. */
+  scope?: ReviewScope;
   esClient: IScopedClusterClient;
   modelProvider: ModelProvider;
   logger: Logger;
@@ -138,6 +140,8 @@ export interface ReviewDashboardResult {
   time_range: { from: string; to: string };
   overall_assessment: string;
   findings: JudgeResult['findings'];
+  /** Panels whose full-audit batch failed — their per-panel checks did not run. */
+  unreviewed_panel_ids?: string[];
 }
 
 /** Flatten all panels from top-level and sections into a single list. */
@@ -242,6 +246,7 @@ export const reviewDashboard = async ({
   dashboardData,
   version,
   focus,
+  scope,
   esClient,
   modelProvider,
   logger,
@@ -275,10 +280,15 @@ export const reviewDashboard = async ({
     })
   );
 
-  const { overall_assessment, findings } = await judgeDashboard({
+  const {
+    overall_assessment,
+    findings,
+    unreviewed_panel_ids: unreviewedPanelIds,
+  } = await judgeDashboard({
     dashboardData,
     panelFacts,
     focus,
+    scope,
     modelProvider,
     logger,
   });
@@ -288,5 +298,6 @@ export const reviewDashboard = async ({
     time_range: timeRange,
     overall_assessment,
     findings,
+    ...(unreviewedPanelIds ? { unreviewed_panel_ids: unreviewedPanelIds } : {}),
   };
 };

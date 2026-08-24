@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { panelSizeReferencePromptContent } from './panel_sizes';
+
 export const gridLayoutPrompt = `## Panel Layout
 
 The dashboard uses a **48-column grid**. On a 16:9 screen, roughly **20–24 rows** are visible without scrolling. Aim for **8–12 panels above the fold**.
@@ -15,20 +17,7 @@ Every \`add_panels.panels[]\` item and every \`add_section.panels[]\` item requi
 
 Use these sizes — **do not make metric or gauge panels full-width**:
 
-- **Metric** → \`w: 6, 8, or 12, h: 5–6\`. These are single-number panels — keep them **small**. Fit 4–8 per row.
-  - 8 metrics in a row: each \`w: 6, h: 5\`
-  - 6 metrics in a row: each \`w: 8, h: 5\`
-  - 4 metrics in a row: each \`w: 12, h: 5\`
-- **Gauge** → \`w: 12, h: 8\`. Fit up to 4 per row.
-- **XY (line / area / bar)** → \`w: 24, h: 10\`. Use full-width (\`w: 48\`) for the primary time series.
-- **Heatmap** → \`w: 24, h: 10\`. Needs height for the color matrix.
-- **Tagcloud** → \`w: 24, h: 10\`.
-- **Pie** → \`w: 12, h: 10\`.
-- **Treemap / Waffle / Mosaic** → \`w: 24, h: 10\`.
-- **Markdown** → \`w: 24–48, h: 4–9\`. Size based on content length and layout needs — not always full-width.
-- **Datatable** → \`w: 24–48, h: 12–16\`. Prefer full-width so columns are readable.
-
-Prefer \`w\` values that divide 48 evenly: **6, 8, 12, 24, 48**.
+${panelSizeReferencePromptContent}
 
 **Grid Packing Rules:**
 

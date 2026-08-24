@@ -19,6 +19,12 @@ const reviewDashboardSchema = z.object({
     .string()
     .max(256)
     .describe('The id of the dashboard attachment to review, as returned by generate_dashboard.'),
+  scope: z
+    .enum(['recent_changes', 'full_audit'])
+    .default('recent_changes')
+    .describe(
+      'Review scope. "recent_changes" (default): high-precision self-review of content you just generated — only clear, observable defects are reported. "full_audit": exhaustive audit of an existing dashboard that enforces the authoring guidelines fully — use when the user asks to review, improve, clean up, or prettify a dashboard they already have.'
+    ),
   focus: z
     .string()
     .max(2048)
@@ -38,14 +44,16 @@ export const reviewDashboardTool = (): BuiltinSkillBoundedTool<typeof reviewDash
   type: ToolType.builtin,
   description: `Review an existing dashboard and return structured findings.
 
-Re-executes every panel's ES|QL query using the dashboard's current time range, then calls a holistic judge that evaluates the full dashboard — data correctness (empty/all-zero results, broken queries), composition (ordering, redundancy, sections), readability (chart type fit, legend placement, cardinality), and intent alignment — against the authoring guidelines.
+Re-executes every panel's ES|QL query using the dashboard's current time range, then judges the dashboard — data correctness (empty/all-zero results, broken queries), composition (ordering, redundancy, sections), consistency (units, formats, titles), readability (chart type fit, cardinality), controls, and metadata — against the authoring guidelines.
 
-Returns findings with severity (critical / warning / suggestion) and plain-prose suggestions. Use the findings to drive follow-up generate_dashboard calls.
+Two scopes: "recent_changes" (default) is a high-precision self-review of content you just generated; "full_audit" is an exhaustive audit of an existing dashboard that fully enforces the guidelines — use it when the user asks to review, improve, or prettify their dashboard.
+
+Returns findings with severity (critical / warning / suggestion), affected panel_ids, and plain-prose suggestions. Use the findings to drive follow-up generate_dashboard calls. A full_audit result may include unreviewed_panel_ids — panels whose review failed and whose per-panel checks did not run.
 
 **Call this tool in a separate turn from generate_dashboard.** The attachment it reads must already be persisted before this tool runs.`,
   schema: reviewDashboardSchema,
   handler: async (
-    { dashboardAttachmentId, focus },
+    { dashboardAttachmentId, scope, focus },
     { logger, attachments, esClient, modelProvider, events }
   ) => {
     try {
@@ -65,6 +73,7 @@ Returns findings with severity (critical / warning / suggestion) and plain-prose
         dashboardData: latestVersion.data,
         version: latestVersion.version,
         focus,
+        scope,
         esClient,
         modelProvider,
         logger,

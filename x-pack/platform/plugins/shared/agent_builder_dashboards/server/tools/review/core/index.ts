@@ -7,4 +7,4 @@
 
 export { reviewDashboard } from './review_dashboard';
 export type { ReviewDashboardResult } from './review_dashboard';
-export type { ReviewFinding, JudgeResult } from './judge';
+export type { ReviewFinding, JudgeResult, ReviewScope } from './judge';
