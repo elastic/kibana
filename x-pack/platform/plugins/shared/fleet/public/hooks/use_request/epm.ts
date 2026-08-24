@@ -170,6 +170,7 @@ export const useGetPackageInfoByKeyQuery = (
     enabled?: boolean;
     suspense?: boolean;
     refetchOnMount?: boolean | 'always';
+    staleTime?: number;
   } = {
     enabled: true,
   }
@@ -195,6 +196,7 @@ export const useGetPackageInfoByKeyQuery = (
       suspense: queryOptions.suspense,
       enabled: queryOptions.enabled,
       refetchOnMount: queryOptions.refetchOnMount,
+      staleTime: queryOptions.staleTime,
       retry: (_, error) => !isUserError(error) && !isRegistryConnectionError(error),
       refetchOnWindowFocus: false,
     }
