@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.errors).to.eql([]);
         expect(body.results).to.have.length(1);
         expect(body.results[0].id).to.eql(list.id);
-        expect(body.summary).to.eql({ total: 1, succeeded: 1, failed: 0, skipped: 1 });
+        expect(body.summary).to.eql({ total: 2, succeeded: 1, failed: 0, skipped: 1 });
       });
 
       it('should reject an exception list item saved object id without deleting its list or item', async () => {

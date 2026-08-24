@@ -169,7 +169,7 @@ export const bulkDeleteExceptionList = async ({
       errors: [],
       results: [],
       success: true,
-      summary: { failed: 0, skipped: skippedCount, succeeded: 0, total: 0 },
+      summary: { failed: 0, skipped: skippedCount, succeeded: 0, total: ids.length },
     };
   }
 
@@ -241,7 +241,7 @@ export const bulkDeleteExceptionList = async ({
       failed: allErrors.length,
       skipped: skippedCount,
       succeeded: results.length,
-      total: uniqueIds.length,
+      total: ids.length,
     },
   };
 };

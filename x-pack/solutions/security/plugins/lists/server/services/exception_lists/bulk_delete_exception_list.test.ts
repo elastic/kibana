@@ -231,7 +231,7 @@ describe('bulkDeleteExceptionList', () => {
       expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
       expect(result.success).toBe(true);
       expect(result.results).toEqual([list]);
-      expect(result.summary).toEqual({ failed: 0, skipped: 1, succeeded: 1, total: 1 });
+      expect(result.summary).toEqual({ failed: 0, skipped: 1, succeeded: 1, total: 2 });
     });
 
     test('reports per-list error when item cascade fails, without affecting other lists', async () => {
