@@ -11,6 +11,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     this.tags(['esGate']);
 
     // load new oblt APM-only deployment-agnostic test here
-    loadTestFile(require.resolve('../../apis/apm/part_2'));
+    loadTestFile(require.resolve('../../apis/apm/index.group1'));
   });
 }

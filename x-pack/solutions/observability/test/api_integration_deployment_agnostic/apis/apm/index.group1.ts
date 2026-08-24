@@ -7,7 +7,7 @@
 
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
-export default function apmApiIntegrationTests({
+export default function apmApiIntegrationTestsGroup1({
   loadTestFile,
 }: DeploymentAgnosticFtrProviderContext) {
   describe('APM', function () {

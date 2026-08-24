@@ -11,8 +11,8 @@ import { services } from '../../services';
 export default createServerlessTestConfig<typeof services>({
   services,
   serverlessProject: 'oblt',
-  testFiles: [require.resolve('./oblt.apm_2.index.ts')],
+  testFiles: [require.resolve('./oblt.apm.group2.index.ts')],
   junit: {
-    reportName: 'Serverless Observability - Deployment-agnostic APM API Integration Tests (2)',
+    reportName: 'Serverless Observability - Deployment-agnostic APM API Integration Tests (group2)',
   },
 });
