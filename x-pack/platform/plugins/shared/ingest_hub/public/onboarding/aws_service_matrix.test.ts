@@ -135,6 +135,13 @@ describe('AWS service matrix', () => {
         expect(typeof entry.defaultEnabled).toBe('boolean');
       });
 
+      it('has defaultEnabledInputs as an array of strings', () => {
+        expect(Array.isArray(entry.defaultEnabledInputs)).toBe(true);
+        for (const input of entry.defaultEnabledInputs) {
+          expect(typeof input).toBe('string');
+        }
+      });
+
       it('has a boolean showInUI', () => {
         expect(typeof entry.showInUI).toBe('boolean');
       });
@@ -250,6 +257,46 @@ describe('AWS service matrix', () => {
   )('managed_integration service "%s"', (_id, entry) => {
     it('has managed_integration as a deployment method', () => {
       expect(entry.deploymentMethods.some((dm) => dm.method === 'managed_integration')).toBe(true);
+    });
+  });
+
+  describe('defaultEnabledInputs derivation', () => {
+    it('excludes inputs whose stream has enabled:false', () => {
+      const pkg = {
+        policy_templates: [{ name: 'elb', data_streams: ['elb_logs'] }],
+        data_streams: [
+          {
+            path: 'elb_logs',
+            type: 'logs',
+            streams: [
+              { input: 'aws-s3', enabled: true },
+              { input: 'aws-cloudwatch', enabled: false },
+            ],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
+        { id: 'elb_logs', category: 'networking_content_delivery', packageName: 'aws' },
+      ]);
+      expect(result.inputs).toEqual(['aws-s3', 'aws-cloudwatch']);
+      expect(result.defaultEnabledInputs).toEqual(['aws-s3']);
+    });
+
+    it('includes all inputs when enabled is absent (implicit true)', () => {
+      const pkg = {
+        policy_templates: [{ name: 'elb', data_streams: ['elb_logs'] }],
+        data_streams: [
+          {
+            path: 'elb_logs',
+            type: 'logs',
+            streams: [{ input: 'aws-s3' }, { input: 'aws-cloudwatch' }],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
+        { id: 'elb_logs', category: 'networking_content_delivery', packageName: 'aws' },
+      ]);
+      expect(result.defaultEnabledInputs).toEqual(['aws-s3', 'aws-cloudwatch']);
     });
   });
 });
