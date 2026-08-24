@@ -41,6 +41,8 @@ export interface ProcessedConversation {
   attachmentStateManager: AttachmentStateManager;
   /** Compaction summary covering older rounds that were replaced by this summary */
   compactionSummary?: CompactionSummary;
+  /** Persistent sub-agent roster */
+  subagentRosterFallback?: Record<string, string>;
   /**
    * Deserialized metadata from the active conversation template.
    * Populated from `conversation.metadata` at prepare time so prompt factories
