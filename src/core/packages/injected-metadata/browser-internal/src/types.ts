@@ -43,9 +43,13 @@ export interface InternalInjectedMetadataSetup {
   };
   getTheme: () => InjectedMetadataTheme;
   getElasticsearchInfo: () => InjectedMetadataClusterInfo;
+  /** Returns the display-language values injected at render time for EBT context. */
   getI18nInfo: () => {
+    /** The locale Kibana rendered this page in. */
     locale: string;
+    /** Accept-Language resolved to a servable Kibana locale id. Undefined when nothing the browser asked for can be served. */
     browserPreferredLocale: string | undefined;
+    /** True when `i18n.defaultLocale` is set to anything other than `en`. */
     configOverride: boolean;
   };
   /**

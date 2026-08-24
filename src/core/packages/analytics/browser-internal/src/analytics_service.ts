@@ -198,7 +198,7 @@ export class AnalyticsService {
           _meta: {
             optional: true,
             description:
-              "The Kibana locale the browser’s Accept-Language header resolves to. Absent when no configured locale can be served.",
+              "The Kibana locale id the browser’s Accept-Language header would resolve to, regardless of what actually won (profile/cookie/config). Absent when no configured locale can be served.",
           },
         },
         display_language_config_override: {
