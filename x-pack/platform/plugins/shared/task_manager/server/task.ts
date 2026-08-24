@@ -623,6 +623,9 @@ export type ScheduleOptions = Record<string, unknown> &
      * Asks background task nodes to claim this task immediately instead of waiting for the
      * next poll_interval, for latency-sensitive callers. Best-effort: if the nudge fails,
      * the task still runs on the next regular poll.
+     *
+     * Only applies when the call creates the task: an `ensureScheduled()` that finds the task
+     * already scheduled does not nudge, since nothing became claimable. Use `runSoon()` instead.
      */
     requestImmediateClaim?: boolean;
   };

@@ -231,6 +231,26 @@ describe('TaskScheduling', () => {
     expect(result.id).toEqual('my-foo-id');
   });
 
+  test('does not notify the claim nudge when ensureScheduled finds the task already scheduled', async () => {
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    // Nothing became claimable: the existing task keeps its own runAt.
+    await taskScheduling.ensureScheduled(
+      {
+        id: 'my-foo-id',
+        taskType: 'foo',
+        params: {},
+        state: {},
+      },
+      { requestImmediateClaim: true }
+    );
+
+    expect(claimNudgeService.notify).not.toHaveBeenCalled();
+  });
+
   test('tries to updates schedule for tasks that have already been scheduled', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);

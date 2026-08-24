@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { TaskManagerClaimNudgeService } from './claim_nudge_service';
+import { ERROR_RETRY_MAX_DELAY_MS, TaskManagerClaimNudgeService } from './claim_nudge_service';
 
 // `lodash.random` binds `Math.random` at load time, so spying on the global doesn't work.
 // Mock it directly; defaults to returning its input so backoff tests land exactly on the
@@ -458,6 +458,62 @@ describe('TaskManagerClaimNudgeService', () => {
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(4);
       await jest.advanceTimersByTimeAsync(1);
       expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(5);
+    });
+
+    it('cancels a pending retry delay on stop(), leaving no timer behind', async () => {
+      jest.useFakeTimers();
+
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient });
+
+      (esClient.fleet.globalCheckpoints as jest.Mock).mockRejectedValue(
+        new Error('ES temporarily unavailable')
+      );
+
+      service.start();
+      await jest.advanceTimersByTimeAsync(0);
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
+
+      service.stop();
+      await jest.advanceTimersByTimeAsync(0);
+
+      // A timer left pending here would keep the event loop alive well past plugin shutdown.
+      expect(jest.getTimerCount()).toBe(0);
+
+      await jest.advanceTimersByTimeAsync(ERROR_RETRY_MAX_DELAY_MS);
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not resume the old loop when start() is called during a retry delay', async () => {
+      jest.useFakeTimers();
+
+      const esClient = createEsClientMock();
+      const { service } = createService({ esClient });
+
+      (esClient.fleet.globalCheckpoints as jest.Mock)
+        .mockRejectedValueOnce(new Error('ES temporarily unavailable'))
+        .mockImplementation(
+          () =>
+            new Promise(() => {
+              /* never resolves; simulates an in-flight long-poll */
+            })
+        );
+
+      service.start();
+      await jest.advanceTimersByTimeAsync(0);
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(1);
+
+      // Restart while the first loop is still waiting out its backoff.
+      service.stop();
+      service.start();
+      await jest.advanceTimersByTimeAsync(0);
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(2);
+
+      // Once the abandoned loop's delay would have elapsed, only the new loop should be polling.
+      await jest.advanceTimersByTimeAsync(ERROR_RETRY_MAX_DELAY_MS);
+      expect(esClient.fleet.globalCheckpoints).toHaveBeenCalledTimes(2);
+
+      service.stop();
     });
 
     it('can be started again after stop() aborts the in-flight request', async () => {

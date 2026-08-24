@@ -76,6 +76,11 @@ apiTest.describe('Task Manager claim nudge', { tag: tags.stateful.classic }, () 
     if (response.statusCode === 404) {
       return true;
     }
+    if (response.statusCode !== 200) {
+      // An error body has no `status`, which would read as "not idle" and pass. Keep polling so
+      // a blip is tolerated and a broken route fails on the timeout instead.
+      return false;
+    }
 
     const { status, runAt } = response.body as { status: string; runAt: string };
     return status !== 'idle' || new Date(runAt).getTime() > runSoonAt + NUDGE_BUDGET_MS;

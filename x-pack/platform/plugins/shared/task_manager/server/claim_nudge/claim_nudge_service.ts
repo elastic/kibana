@@ -40,7 +40,7 @@ const REQUEST_TIMEOUT_MS = 65_000;
 // Base and cap for the exponential backoff computed in calculateRetryDelayMs(); the failure
 // count resets on any resolved response, including a timeout.
 const ERROR_RETRY_BASE_DELAY_MS = 1_000;
-const ERROR_RETRY_MAX_DELAY_MS = 60_000;
+export const ERROR_RETRY_MAX_DELAY_MS = 60_000;
 // Avoid flooding the logs with a warning on every failed long-poll iteration.
 const ERROR_LOG_THROTTLE_MS = 60_000;
 
@@ -72,7 +72,8 @@ export class TaskManagerClaimNudgeService {
   private readonly isServerless: boolean;
   private readonly claimNudgeSubject = new Subject<void>();
   private started = false;
-  private abortController: AbortController | undefined;
+  private runController: AbortController | undefined;
+  private requestController: AbortController | undefined;
   private baselineSet = false;
   private lastErrorLoggedAt = 0;
   private ensureIndexPromise: Promise<void> | undefined;
@@ -104,16 +105,19 @@ export class TaskManagerClaimNudgeService {
 
     this.started = true;
     this.baselineSet = false;
-    void this.watchCheckpoints();
+    this.runController = new AbortController();
+    void this.watchCheckpoints(this.runController.signal);
   }
 
   /**
-   * Stop long-polling and abort any in-flight request.
+   * Stop long-polling, aborting the in-flight request and any pending retry delay.
    */
   public stop() {
     this.started = false;
-    this.abortController?.abort();
-    this.abortController = undefined;
+    this.runController?.abort();
+    this.runController = undefined;
+    this.requestController?.abort();
+    this.requestController = undefined;
   }
 
   /**
@@ -172,11 +176,18 @@ export class TaskManagerClaimNudgeService {
     }
   }
 
-  private async watchCheckpoints() {
+  /**
+   * `runSignal` is aborted by `stop()`: it cancels a pending retry delay and keeps a loop
+   * abandoned mid-retry from resuming if `start()` is called before that delay elapses.
+   */
+  private async watchCheckpoints(runSignal: AbortSignal) {
     let checkpoints: estypes.FleetCheckpoint[] = [];
 
-    while (this.started) {
-      this.abortController = new AbortController();
+    while (this.started && !runSignal.aborted) {
+      // Not `runSignal`: the ES client dispatches a synthetic abort event on the signal it is
+      // given when its request timeout fires, which would spill into later iterations.
+      const requestController = new AbortController();
+      this.requestController = requestController;
 
       try {
         // wait_for_index lets this watch an index that doesn't exist yet (see ensureIndexExists).
@@ -190,7 +201,7 @@ export class TaskManagerClaimNudgeService {
               timeout: CHECKPOINT_WAIT_TIMEOUT,
             },
             {
-              signal: this.abortController.signal,
+              signal: requestController.signal,
               requestTimeout: REQUEST_TIMEOUT_MS,
               retryOnTimeout: false,
             }
@@ -211,8 +222,8 @@ export class TaskManagerClaimNudgeService {
           this.claimNudgeSubject.next();
         }
       } catch (err) {
-        if (!this.started) {
-          // Expected: `stop()` set `started` to false before aborting the in-flight request.
+        if (!this.started || runSignal.aborted) {
+          // Expected: `stop()` aborted the in-flight request.
           this.logger.debug(`Task Manager claim nudge watch loop for index ${this.index} stopped.`);
           return;
         }
@@ -220,9 +231,12 @@ export class TaskManagerClaimNudgeService {
         this.consecutiveErrors += 1;
         const retryDelayMs = this.calculateRetryDelayMs();
         this.logThrottledWarning(err, retryDelayMs);
-        await this.delay(retryDelayMs);
+        await this.delay(retryDelayMs, runSignal);
       } finally {
-        this.abortController = undefined;
+        // Identity-checked so an abandoned loop can't clear a newer loop's controller.
+        if (this.requestController === requestController) {
+          this.requestController = undefined;
+        }
       }
     }
   }
@@ -259,7 +273,24 @@ export class TaskManagerClaimNudgeService {
     return err instanceof Error ? err.message : String(err);
   }
 
-  private delay(ms: number) {
-    return new Promise<void>((resolve) => setTimeout(resolve, ms));
+  /**
+   * Resolves after `ms`, or early on abort so `stop()` doesn't leave a timer holding the event
+   * loop open for up to a minute.
+   */
+  private delay(ms: number, signal: AbortSignal) {
+    return new Promise<void>((resolve) => {
+      if (signal.aborted) {
+        resolve();
+        return;
+      }
+
+      const finish = () => {
+        clearTimeout(timeout);
+        signal.removeEventListener('abort', finish);
+        resolve();
+      };
+      const timeout = setTimeout(finish, ms);
+      signal.addEventListener('abort', finish, { once: true });
+    });
   }
 }
