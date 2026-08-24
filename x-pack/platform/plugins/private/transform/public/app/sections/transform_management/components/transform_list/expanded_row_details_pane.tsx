@@ -14,12 +14,14 @@ import { EuiButtonEmpty, EuiBadge, EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 
 import { mapEsHealthStatus2TransformHealthStatus } from '../../../../../../common/constants';
 import { isTransformStats } from '../../../../../../common/types/transform_stats';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 import type { TransformListRow } from '../../../../common';
+import { useAppDependencies } from '../../../../app_dependencies';
 import { useEnabledFeatures } from '../../../../serverless_context';
 import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { useGetTransformStats } from '../../../../hooks';
@@ -102,6 +104,8 @@ export const SourceIndexDescription: FC<{ index: string | string[] }> = ({ index
 
 export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, onAlertEdit }) => {
   const { data: fullStats, isError, isLoading } = useGetTransformStats(item.id, false, true);
+  const { cps } = useAppDependencies();
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
 
   let displayStats = {};
 
@@ -143,7 +147,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
         title: 'source_index',
         description: <SourceIndexDescription index={item.config.source.index} />,
       },
-      ...(isDefined(item.config.source.project_routing)
+      ...(isCpsMultiProject && isDefined(item.config.source.project_routing)
         ? [
             {
               title: i18n.translate(
@@ -174,7 +178,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({ item, 
     return configs;
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item?.config]);
+  }, [item?.config, isCpsMultiProject]);
 
   const checkpointingItems: SectionItem[] = [];
   if (isTransformStats(displayStats)) {

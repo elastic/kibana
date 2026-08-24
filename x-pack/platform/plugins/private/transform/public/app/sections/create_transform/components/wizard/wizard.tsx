@@ -40,6 +40,7 @@ import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
 import { TRANSFORM_FUNCTION, type TransformFunction } from '../../../../../../common/constants';
@@ -119,7 +120,10 @@ export const Wizard: FC<WizardProps> = React.memo(
     const appDependencies = useAppDependencies();
     const { uiSettings, data, dataViewEditor, fieldFormats, charts, cps } = appDependencies;
     const cpsManager = cps?.cpsManager;
-    const shouldUseProjectScope = Boolean(cps?.isTierEligible && cpsManager && !cloneConfig);
+    const isCpsMultiProject = useIsCpsMultiProject(cpsManager);
+    const shouldUseProjectScope = Boolean(
+      cps?.isTierEligible && cpsManager && isCpsMultiProject && !cloneConfig
+    );
     const dataView = searchItems?.dataView;
     const defaultTransformFunction = getInitialTransformFunction(
       cloneConfig,

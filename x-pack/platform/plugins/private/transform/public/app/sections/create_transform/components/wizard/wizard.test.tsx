@@ -178,6 +178,7 @@ describe('Transform: <Wizard />', () => {
       isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => true),
         fetchProjects: jest.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
@@ -216,6 +217,7 @@ describe('Transform: <Wizard />', () => {
       isTierEligible: false,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => true),
         fetchProjects: jest.fn(),
         getDefaultProjectRouting,
       },
@@ -235,12 +237,41 @@ describe('Transform: <Wizard />', () => {
     expect(getDefaultProjectRouting).not.toHaveBeenCalled();
   });
 
+  test('does not render project scope or inject default routing when there are no linked projects', async () => {
+    const appDeps = appDependencies.useAppDependencies();
+    const getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ALL);
+    const whenReady = jest.fn().mockResolvedValue(undefined);
+    appDeps.cps = {
+      isTierEligible: true,
+      cpsManager: {
+        whenReady,
+        hasLinkedProjects: jest.fn(() => false),
+        fetchProjects: jest.fn(),
+        getDefaultProjectRouting,
+      },
+    } as any;
+
+    renderWizard({
+      initialTransformFunction: TRANSFORM_FUNCTION.LATEST,
+      searchItems: createSearchItems('current-data-view-id', 'current-data-view'),
+      setSavedObjectId: jest.fn(),
+    });
+
+    await waitFor(() => {
+      expect(whenReady).toHaveBeenCalled();
+    });
+    expect(screen.queryByTestId('transformProjectScopePicker')).not.toBeInTheDocument();
+    expect(mockStepDefineFormProps.overrides.projectRouting).toBeUndefined();
+    expect(getDefaultProjectRouting).not.toHaveBeenCalled();
+  });
+
   test('shows a visible project scope error when project fetch fails', async () => {
     const appDeps = appDependencies.useAppDependencies();
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => true),
         fetchProjects: jest.fn().mockRejectedValue(new Error('Project fetch failed')),
         getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
       },
@@ -292,6 +323,7 @@ describe('Transform: <Wizard />', () => {
       isTierEligible: true,
       cpsManager: {
         whenReady: jest.fn().mockResolvedValue(undefined),
+        hasLinkedProjects: jest.fn(() => true),
         fetchProjects: jest.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
@@ -344,6 +376,7 @@ describe('Transform: <Wizard />', () => {
               resolveWhenReady = resolve;
             })
         ),
+        hasLinkedProjects: jest.fn(() => true),
         fetchProjects: jest.fn().mockResolvedValue({
           origin: {
             _id: 'origin-id',
