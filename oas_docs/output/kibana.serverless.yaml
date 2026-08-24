@@ -82733,11 +82733,11 @@ components:
           type: string
         breach:
           additionalProperties: false
-          description: Breach detection configuration (required).
+          description: Breach detection configuration. Omit to treat every base row as a breach.
           type: object
           properties:
             segment:
-              description: Appendable ES|QL segment for breach detection (required).
+              description: A clause appended to the end of the rule's ES|QL query. Required in breach blocks.
               maxLength: 10000
               minLength: 1
               type: string
@@ -82762,7 +82762,6 @@ components:
       required:
         - format
         - base
-        - breach
     Kibana_HTTP_APIs_alerting_deactivate_alert_action:
       additionalProperties: false
       type: object
