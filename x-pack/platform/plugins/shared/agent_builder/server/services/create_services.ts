@@ -34,6 +34,7 @@ import {
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
+import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -46,6 +47,7 @@ interface ServiceInstances {
   metering: MeteringService;
   consumption: ConsumptionService;
   callbackDelivery: CallbackDeliveryService;
+  conversationTemplates: ConversationTemplatesService;
 }
 
 export class ServiceManager {
@@ -80,6 +82,7 @@ export class ServiceManager {
       }),
       consumption: createConsumptionService(),
       callbackDelivery: new CallbackDeliveryService({ actions }),
+      conversationTemplates: new ConversationTemplatesService(),
     };
 
     const skillsSetup = this.services.skills.setup();
@@ -97,6 +100,7 @@ export class ServiceManager {
       skills: skillsSetup,
       plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
+      conversationTemplates: this.services.conversationTemplates.setup(),
     };
 
     return this.internalSetup;
@@ -140,6 +144,8 @@ export class ServiceManager {
       }
       return executionService;
     };
+
+    const conversationTemplatesStart = this.services.conversationTemplates.start();
 
     const attachments = this.services.attachments.start({
       spaces,
@@ -188,6 +194,14 @@ export class ServiceManager {
       trackingService,
     });
 
+    const conversations = new ConversationServiceImpl({
+      logger: logger.get('conversations'),
+      security,
+      elasticsearch,
+      spaces,
+      agents,
+    });
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
@@ -200,6 +214,7 @@ export class ServiceManager {
       actions,
       toolsService: tools,
       agentsService: agents,
+      conversationService: conversations,
       attachmentsService: attachments,
       renderersService: renderers,
       skillServiceStart: skillsServiceStart,
@@ -209,16 +224,9 @@ export class ServiceManager {
       hooks,
       getExecutionService,
       searchInferenceEndpoints,
+      conversationTemplates: conversationTemplatesStart,
     });
     runner = runnerFactory.getRunner();
-
-    const conversations = new ConversationServiceImpl({
-      logger: logger.get('conversations'),
-      security,
-      elasticsearch,
-      spaces,
-      agents,
-    });
 
     const workspaces = createWorkspaceService({
       logger: logger.get('workspaces'),
@@ -293,6 +301,7 @@ export class ServiceManager {
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
       spaceSettings,
+      conversationTemplates: conversationTemplatesStart,
     };
 
     return this.internalStart;
