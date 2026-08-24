@@ -161,6 +161,11 @@ export interface BuiltInToolSpecificConfig<
    * Set to `Infinity` to fully exempt this tool's results from truncation.
    */
   maxResultTokens?: number;
+  /**
+   * When true, this tool is excluded from the MCP server's tool list but
+   * remains available to 1P Agent Builder chat via the builtin tool registry.
+   */
+  excludeFromMcp?: boolean;
 }
 
 /**
@@ -208,11 +213,20 @@ export interface BuiltinToolDefinition<
   availability?: ToolAvailabilityConfig;
   /**
    * MCP annotations for this tool. Required for all builtin tools exposed via the MCP server.
-   * Optional during the rollout period — will become required once all tools have been annotated.
    * See {@link McpToolAnnotations} for the full guide.
    */
-  annotations?: McpToolAnnotations;
+  annotations: McpToolAnnotations;
 }
+
+/**
+ * Tool definition for internal agent-runner tools (bash, sleep, etc.) that use
+ * BuiltinToolDefinition but are never exposed via the MCP server.
+ * Omits annotations since these tools bypass MCP registration.
+ */
+export type InternalBuiltinToolDefinition<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  TResult extends ToolResult = ToolResult
+> = Omit<BuiltinToolDefinition<RunInput, TResult>, 'annotations'>;
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'experimental'> &
   BuiltInToolSpecificConfig;
