@@ -939,6 +939,8 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
 
   const makeCausal = (featureId: string): CausalFeature => ({
     feature_id: featureId,
+    type: 'entity',
+    subtype: 'service',
     name: featureId,
     stream_name: 'logs.app',
   });
