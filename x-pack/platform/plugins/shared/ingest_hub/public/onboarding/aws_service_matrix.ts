@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-// AWS service delivery matrix.
-// Source of truth for delivery mechanism, signal types, auth, and required config per AWS service.
+// AWS service deployment matrix.
+// Source of truth for deployment mechanism, signal types, auth, and required config per AWS service.
 // Drives the Services UI badges and Deployment UI stack composition in the AWS onboarding flow.
 
-import {
-  AWS_SERVICE_PROVIDER_PERMISSIONS,
-  type ProviderPermissions,
-} from './aws_provider_permissions';
+import type { PackageInfo, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+
+import type { ServiceCategory } from './service_categories';
+
+export type { ServiceCategory };
 
 export type SignalType = 'logs' | 'metrics';
 
-export type DeliveryMethod = 'agentless' | 'cloud_forwarder' | 'firehose' | 'agent_based';
+export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
 
 /**
  * Log type identifiers used by the ECF CloudFormation templates.
@@ -33,28 +34,26 @@ export type EcfLogType = 'vpcflow' | 'cloudtrail' | 'waf';
  */
 export type EcfDedicatedTemplate = 'otel' | 'crowdstrike_fdr';
 
-export type AuthType = 'identity_federation' | 'api_key';
-
 export type Badge = 'technical_preview' | 'beta';
 
-export type ServiceCategory =
-  | 'Analytics'
-  | 'Application Integration'
-  | 'Cloud Financial Management'
-  | 'Compute'
-  | 'Containers'
-  | 'Databases'
-  | 'Machine Learning'
-  | 'Management and Governance'
-  | 'Networking and Content Delivery'
-  | 'Security, Identity and Compliance'
-  | 'Storage';
+function releaseToBadge(release: string | undefined): Badge | undefined {
+  if (release === 'experimental') return 'technical_preview';
+  if (release === 'beta') return 'beta';
+  return undefined;
+}
 
-export interface DeliveryMethodEntry {
-  method: DeliveryMethod;
+export interface DeploymentMethodEntry {
+  method: DeploymentMethod;
   /** When true, this is the mechanism used by default in the onboarding deployment step.
    *  Exactly one entry per service should be preferred. */
   preferred?: boolean;
+}
+
+/** A manifest var definition plus the input types it appears under. */
+export interface ServiceVarDef {
+  def: RegistryVarsEntry;
+  /** streams[].input values this var appears under, e.g. ['aws-s3'] */
+  inputs: string[];
 }
 
 export interface AwsServiceMatrixEntry {
@@ -63,860 +62,617 @@ export interface AwsServiceMatrixEntry {
   name: string;
   category: ServiceCategory;
   signalType: SignalType;
-  deliveryMethods: DeliveryMethodEntry[];
-  /** Authentication types available per delivery method. Populated once IF rollout status is confirmed. */
-  authTypes?: AuthType[];
-  /** Whether OIDC-based IAM role assumption is supported. Populated once Security team confirms per-service status. */
+  deploymentMethods: DeploymentMethodEntry[];
+  /** Whether OIDC-based IAM role assumption is supported.
+   *  Derived from the package manifest: true when none of the service's inputs hide
+   *  the 'identity_federation' option in the 'credential_type' var_group. */
   identityFederationSupported?: boolean;
   /** Fleet integration input types required by this data stream (e.g. 'aws-s3', 'aws-cloudwatch') */
   inputs?: string[];
   /** Manifest var names the user must configure to activate this data stream */
   requiredConfig?: string[];
-  /** Manifest var names that are optional but surfaced in the UI (e.g. regions, metrics) */
+  /** Manifest var names that are optional and surfaced in the UI. Derived from manifest vars with required: false && show_user: true. */
   optionalConfig?: string[];
-  /** Boolean manifest vars that are required: true in the package but have default values */
-  mandatoryFields?: string[];
+  /** Manifest var type by name — 'bool', 'text', 'integer', etc. Derived from the package manifest. */
+  varTypes?: Record<string, string>;
+  /** Full manifest var definitions keyed by name, with the inputs each var appears under. Derived from the package manifest. */
+  varDefs?: Record<string, ServiceVarDef>;
   packageName: string;
-  /** Fleet policy template name (policy_templates[].name in the package manifest) */
+  /** Fleet policy template name derived from policy_templates[].data_streams lookup in the manifest. */
   policyTemplate?: string;
-  /** Override for the data stream name used in Fleet input stream keys when it differs from `id` */
-  dataStream?: string;
-  /** Whether the data stream is enabled by default when the integration is installed */
+  /** Whether the data stream is enabled by default when the integration is installed. Derived from the package manifest. */
   defaultEnabled: boolean;
-  /** Whether this service should be shown in the AWS onboarding UI */
+  /** Whether this service should be shown in the AWS onboarding UI. Defaults to true. */
   showInUI: boolean;
   badge?: Badge;
-  /** Hardcoded AWS IAM permissions required to ingest this data stream.
-   *  Temporary until packages expose provider_permissions in the manifest. */
-  providerPermissions?: ProviderPermissions;
   /**
    * ECF log type identifier passed as the `LogTypes` parameter in the CloudFormation template.
    * Present only for services deployable via the Elastic Cloud Forwarder (ECF).
-   * Applies to both the unified ECS template and the OTel template.
    */
   ecfLogType?: EcfLogType;
   /**
    * When set, this service uses a dedicated ECF CloudFormation template instead of the unified one.
-   * The value identifies which dedicated template to use.
    */
   ecfDedicatedTemplate?: EcfDedicatedTemplate;
 }
 
-function hasAgentlessDelivery(entry: AwsServiceMatrixEntry): boolean {
-  return entry.deliveryMethods.some(({ method }) => method === 'agentless');
-}
+/**
+ * Internal type for the static routing table.
+ * signalType and defaultEnabled are derived at runtime from the Fleet package manifest.
+ */
+type AwsServiceStaticEntry = Omit<
+  AwsServiceMatrixEntry,
+  | 'deploymentMethods'
+  | 'signalType'
+  | 'defaultEnabled'
+  | 'showInUI'
+  | 'optionalConfig'
+  | 'name'
+  | 'varDefs'
+> & {
+  deploymentMethods?: DeploymentMethodEntry[];
+  signalType?: SignalType;
+  showInUI?: boolean;
+  /** Override when the data stream title from the manifest isn't the right display name. */
+  name?: string;
+};
 
-function enrichWithProviderPermissions(
-  entry: Omit<AwsServiceMatrixEntry, 'providerPermissions'>
-): AwsServiceMatrixEntry {
-  if (!hasAgentlessDelivery(entry)) {
-    return entry;
-  }
+// TODO aws_cloudwatch_input_otel for otel versions
 
-  const providerPermissions = AWS_SERVICE_PROVIDER_PERMISSIONS[entry.id];
-  return providerPermissions ? { ...entry, providerPermissions } : entry;
-}
-
-const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'>[] = [
+const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Application Integration ──────────────────────────────
   {
     id: 'apigateway_logs',
-    name: 'AWS API Gateway',
-    category: 'Networking and Content Delivery',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
+    category: 'networking_content_delivery',
     packageName: 'aws',
-    policyTemplate: 'apigateway',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'apigateway_metrics',
-    name: 'AWS API Gateway',
-    category: 'Networking and Content Delivery',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'networking_content_delivery',
     packageName: 'aws',
-    policyTemplate: 'apigateway',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'lambda',
-    name: 'AWS Lambda',
-    category: 'Compute',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
-    mandatoryFields: ['collect_esm_metrics'],
+    category: 'compute',
     packageName: 'aws',
-    policyTemplate: 'lambda',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'lambda_logs',
-    name: 'AWS Lambda',
-    category: 'Compute',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws-cloudwatch'],
-    requiredConfig: ['log_group_arn', 'region_name'],
-    mandatoryFields: ['preserve_original_event'],
+    category: 'compute',
     packageName: 'aws',
-    policyTemplate: 'lambda',
-    defaultEnabled: true,
-    showInUI: true,
   },
 
   // ── aws package — Compute ───────────────────────────────────────────────
   {
     id: 'ec2_logs',
-    name: 'AWS EC2',
-    category: 'Compute',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
+    category: 'compute',
     packageName: 'aws',
-    policyTemplate: 'ec2',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'ec2_metrics',
-    name: 'AWS EC2',
-    category: 'Compute',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'compute',
     packageName: 'aws',
-    policyTemplate: 'ec2',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'ecs_metrics',
-    name: 'AWS ECS',
-    category: 'Compute',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'compute',
     packageName: 'aws',
-    policyTemplate: 'ecs',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'emr_logs',
-    name: 'AWS EMR',
-    category: 'Compute',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['preserve_original_event'],
+    category: 'compute',
     packageName: 'aws',
-    policyTemplate: 'emr',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'emr_metrics',
-    name: 'AWS EMR',
-    category: 'Compute',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'compute',
     packageName: 'aws',
-    policyTemplate: 'emr',
-    defaultEnabled: true,
-    showInUI: true,
   },
 
   // ── aws package — Management and Governance ──────────────────────────────
   {
     id: 'awshealth',
-    name: 'AWS Health',
-    category: 'Management and Governance',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'management_governance',
     packageName: 'aws',
-    policyTemplate: 'awshealth',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'cloudwatch_logs',
-    name: 'AWS CloudWatch',
-    category: 'Management and Governance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws-cloudwatch'],
-    requiredConfig: ['log_group_arn', 'region_name'],
-    mandatoryFields: ['preserve_original_event'],
+    category: 'management_governance',
     packageName: 'aws',
-    policyTemplate: 'cloudwatch',
-    defaultEnabled: false,
-    showInUI: true,
   },
   {
     id: 'cloudwatch_metrics',
-    name: 'AWS CloudWatch',
-    category: 'Management and Governance',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions', 'metrics'],
+    category: 'management_governance',
     packageName: 'aws',
-    policyTemplate: 'cloudwatch',
-    defaultEnabled: false,
-    showInUI: true,
   },
 
   // ── aws package — Cloud Financial Management ────────────────────────────
   {
     id: 'billing',
-    name: 'AWS Billing',
-    category: 'Cloud Financial Management',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    requiredConfig: [],
-    mandatoryFields: ['leaderelection'],
+    category: 'cloud_financial_management',
     packageName: 'aws',
-    policyTemplate: 'billing',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'usage',
-    name: 'AWS Usage',
-    category: 'Cloud Financial Management',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'cloud_financial_management',
     packageName: 'aws',
-    policyTemplate: 'usage',
-    defaultEnabled: true,
-    showInUI: true,
   },
 
-  // ── aws package — Management and Governance / Security, Identity and Compliance ──
+  // ── aws package — management_governance / security_identity_compliance ──
   {
     id: 'cloudtrail',
     name: 'AWS CloudTrail',
-    category: 'Management and Governance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
+    category: 'management_governance',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    policyTemplate: 'cloudtrail',
-    defaultEnabled: true,
-    showInUI: true,
     ecfLogType: 'cloudtrail',
+  },
+  // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
+  {
+    id: 'cloudtrail_otel',
+    category: 'management_governance',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    packageName: 'aws',
+    ecfLogType: 'cloudtrail',
+    showInUI: false,
+    ecfDedicatedTemplate: 'otel',
   },
   {
     id: 'config',
     name: 'AWS Config',
-    category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['cel'],
-    requiredConfig: ['aws_region'],
-    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
+    category: 'security_identity_compliance',
     packageName: 'aws',
-    policyTemplate: 'config',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'guardduty',
     name: 'AWS GuardDuty',
-    category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws-s3', 'httpjson'],
-    requiredConfig: ['aws_region', 'detector_id', 'bucket_arn', 'region'],
-    mandatoryFields: [
-      'collect_s3_logs',
-      'preserve_duplicate_custom_fields',
-      'preserve_original_event',
-    ],
+    category: 'security_identity_compliance',
     packageName: 'aws',
-    policyTemplate: 'guardduty',
-    defaultEnabled: true,
-    showInUI: true,
-    identityFederationSupported: true,
   },
   {
     id: 'inspector',
     name: 'AWS Inspector',
-    category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['httpjson'],
-    requiredConfig: ['aws_region'],
-    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
+    category: 'security_identity_compliance',
     packageName: 'aws',
-    policyTemplate: 'inspector',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'firewall_logs',
-    name: 'AWS Network Firewall',
-    category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
+    category: 'security_identity_compliance',
     packageName: 'aws',
-    policyTemplate: 'firewall',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'firewall_metrics',
-    name: 'AWS Network Firewall',
-    category: 'Security, Identity and Compliance',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'security_identity_compliance',
+    deploymentMethods: [{ method: 'agent_based', preferred: true }],
     packageName: 'aws',
-    policyTemplate: 'firewall',
-    defaultEnabled: true,
-    showInUI: true,
+    showInUI: false, // TODO confirm if only agent_based and if should be included in onboarding flow
   },
   {
     id: 'securityhub_findings',
     name: 'AWS Security Hub',
-    category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['httpjson'],
-    requiredConfig: ['aws_region'],
-    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
+    category: 'security_identity_compliance',
     packageName: 'aws',
-    policyTemplate: 'securityhub',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'securityhub_findings_full_posture',
     name: 'AWS Security Hub (Full Posture / CSPM)',
-    category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['httpjson'],
-    requiredConfig: ['aws_region'],
-    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
+    category: 'security_identity_compliance',
     packageName: 'aws',
-    policyTemplate: 'securityhub',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'securityhub_insights',
     name: 'AWS Security Hub (Insights)',
-    category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['httpjson'],
-    requiredConfig: ['aws_region'],
-    mandatoryFields: ['preserve_duplicate_custom_fields', 'preserve_original_event'],
+    category: 'security_identity_compliance',
     packageName: 'aws',
-    policyTemplate: 'securityhub',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'waf',
     name: 'AWS WAF',
-    category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
+    category: 'security_identity_compliance',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    policyTemplate: 'waf',
-    defaultEnabled: true,
-    showInUI: true,
     ecfLogType: 'waf',
+  },
+  // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
+  {
+    id: 'waf_otel',
+    category: 'management_governance',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    packageName: 'aws',
+    ecfLogType: 'waf',
+    showInUI: false,
+    ecfDedicatedTemplate: 'otel',
   },
 
   // ── aws package — Networking and Content Delivery ─────────────────────────
   {
     id: 'cloudfront_logs',
-    name: 'AWS CloudFront',
-    category: 'Networking and Content Delivery',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws-s3'],
-    requiredConfig: ['bucket_arn', 'region'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
+    category: 'networking_content_delivery',
+    // ECF: CloudFront is in the edot-cloud-forwarder-aws#452 DoD but no released template yet
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    showInUI: false,
     packageName: 'aws',
-    policyTemplate: 'cloudfront',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'elb_logs',
-    name: 'AWS ELB',
-    category: 'Networking and Content Delivery',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
+    category: 'networking_content_delivery',
     packageName: 'aws',
-    policyTemplate: 'elb',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'elb_metrics',
-    name: 'AWS ELB',
-    category: 'Networking and Content Delivery',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'networking_content_delivery',
     packageName: 'aws',
-    policyTemplate: 'elb',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'natgateway',
-    name: 'AWS NAT Gateway',
-    category: 'Networking and Content Delivery',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'networking_content_delivery',
     packageName: 'aws',
-    policyTemplate: 'natgateway',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'route53_public_logs',
-    name: 'AWS Route 53 Public DNS',
-    category: 'Networking and Content Delivery',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws-cloudwatch'],
-    requiredConfig: ['log_group_arn', 'region_name'],
-    mandatoryFields: ['preserve_original_event'],
+    category: 'networking_content_delivery',
     packageName: 'aws',
-    policyTemplate: 'route53',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'route53_resolver_logs',
-    name: 'AWS Route 53 Resolver',
-    category: 'Networking and Content Delivery',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
+    category: 'networking_content_delivery',
     packageName: 'aws',
-    policyTemplate: 'route53',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'transitgateway',
-    name: 'AWS Transit Gateway',
-    category: 'Networking and Content Delivery',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'networking_content_delivery',
     packageName: 'aws',
-    policyTemplate: 'transitgateway',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'vpcflow',
     name: 'AWS VPC Flow',
-    category: 'Networking and Content Delivery',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
+    category: 'networking_content_delivery',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    policyTemplate: 'vpcflow',
-    defaultEnabled: true,
-    showInUI: true,
     ecfLogType: 'vpcflow',
+  },
+  // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
+  {
+    id: 'vpcflow_otel',
+    category: 'management_governance',
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    packageName: 'aws',
+    ecfLogType: 'vpcflow',
+    showInUI: false,
+    ecfDedicatedTemplate: 'otel',
   },
   {
     id: 'vpn',
-    name: 'AWS VPN',
-    category: 'Networking and Content Delivery',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'networking_content_delivery',
     packageName: 'aws',
-    policyTemplate: 'vpn',
-    defaultEnabled: true,
-    showInUI: true,
   },
 
   // ── aws package — Storage ───────────────────────────────────────────────
   {
     id: 'ebs',
-    name: 'AWS EBS',
-    category: 'Storage',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'storage',
     packageName: 'aws',
-    policyTemplate: 'ebs',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 's3_daily_storage',
-    name: 'AWS S3 (Storage metrics)',
-    category: 'Storage',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'storage',
     packageName: 'aws',
-    policyTemplate: 's3',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 's3_request',
-    name: 'AWS S3 (Request metrics)',
-    category: 'Storage',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'storage',
     packageName: 'aws',
-    policyTemplate: 's3',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 's3access',
-    name: 'AWS S3 (Access logs)',
-    category: 'Storage',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: ['aws-s3'],
-    requiredConfig: ['bucket_arn', 'region'],
-    mandatoryFields: ['collect_s3_logs', 'preserve_original_event'],
+    category: 'storage',
     packageName: 'aws',
-    policyTemplate: 's3',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 's3_storage_lens',
-    name: 'AWS S3 Storage Lens',
-    category: 'Storage',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'storage',
     packageName: 'aws',
-    policyTemplate: 's3_storage_lens',
-    defaultEnabled: true,
-    showInUI: true,
   },
 
   // ── aws package — Databases ──────────────────────────────────────────────
   {
     id: 'dynamodb',
-    name: 'AWS DynamoDB',
-    category: 'Databases',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'databases',
     packageName: 'aws',
-    policyTemplate: 'dynamodb',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'rds',
-    name: 'AWS RDS',
-    category: 'Databases',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'databases',
     packageName: 'aws',
-    policyTemplate: 'rds',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'redshift',
-    name: 'AWS Redshift',
-    category: 'Databases',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'databases',
     packageName: 'aws',
-    policyTemplate: 'redshift',
-    defaultEnabled: true,
-    showInUI: true,
   },
 
-  // ── aws package — Analytics / Application Integration ───────────────────
+  // ── aws package — management_governance ─────────────────────────────────
   {
     id: 'kafka_metrics',
-    name: 'AWS MSK (Kafka)',
-    category: 'Management and Governance',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'management_governance',
     packageName: 'aws',
-    policyTemplate: 'kafka',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'kinesis',
-    name: 'AWS Kinesis',
-    category: 'Management and Governance',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'management_governance',
     packageName: 'aws',
-    policyTemplate: 'kinesis',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'sns',
-    name: 'AWS SNS',
-    category: 'Management and Governance',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'management_governance',
     packageName: 'aws',
-    policyTemplate: 'sns',
-    defaultEnabled: true,
-    showInUI: true,
   },
   {
     id: 'sqs',
-    name: 'AWS SQS',
-    category: 'Management and Governance',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'management_governance',
     packageName: 'aws',
-    policyTemplate: 'sqs',
-    defaultEnabled: true,
-    showInUI: true,
   },
 
   // ── aws_bedrock package — Machine Learning ──────────────────────────────
   {
     id: 'guardrails',
     name: 'AWS Bedrock (Guardrails)',
-    category: 'Machine Learning',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'machine_learning',
     packageName: 'aws_bedrock',
-    defaultEnabled: true,
-    showInUI: true,
-    policyTemplate: 'aws_bedrock',
   },
   {
     id: 'invocation',
     name: 'AWS Bedrock (Invocation)',
-    category: 'Machine Learning',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
+    category: 'machine_learning',
     packageName: 'aws_bedrock',
-    defaultEnabled: true,
-    showInUI: true,
-    policyTemplate: 'aws_bedrock',
   },
   {
     id: 'runtime',
     name: 'AWS Bedrock (Runtime)',
-    category: 'Machine Learning',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
+    category: 'machine_learning',
     packageName: 'aws_bedrock',
-    defaultEnabled: true,
-    showInUI: true,
-    policyTemplate: 'aws_bedrock',
   },
-  // TODO(PM): delivery method and signal type TBD — awaiting PM ratification
+  // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'bedrock_agentcore',
     name: 'AWS Bedrock AgentCore',
-    category: 'Machine Learning',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: [],
-    requiredConfig: [],
+    category: 'machine_learning',
     packageName: 'aws_bedrock_agentcore',
-    defaultEnabled: false,
     showInUI: false,
-    policyTemplate: 'aws_bedrock_agentcore',
   },
 
   // ── awsfargate package — Containers ─────────────────────────────────────
   {
-    id: 'fargate',
+    id: 'task_stats',
     name: 'AWS Fargate',
-    category: 'Containers',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: ['awsfargate/metrics'],
-    optionalConfig: ['regions'],
+    category: 'containers',
     packageName: 'awsfargate',
-    defaultEnabled: true,
-    showInUI: true,
-    policyTemplate: 'awsfargate',
-    dataStream: 'task_stats',
   },
 
-  // ── aws_mq package — Application Integration ────────────────────────────
-  // TODO(PM): delivery method and signal type TBD — awaiting PM ratification
+  // ── aws_mq package — application_integration ────────────────────────────
+  // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'mq',
     name: 'AWS MQ',
-    category: 'Application Integration',
-    signalType: 'metrics',
-    deliveryMethods: [{ method: 'agentless', preferred: true }],
-    inputs: [],
-    requiredConfig: [],
+    category: 'application_integration',
     packageName: 'aws_mq',
-    defaultEnabled: false,
     showInUI: false,
     policyTemplate: 'amazon_mq',
-  },
-
-  // ── OTel packages — Technical preview ───────────────────────────────────
-  {
-    id: 'cloudtrail_otel',
-    name: 'AWS CloudTrail (OTel)',
-    category: 'Management and Governance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: ['aws-s3'],
-    requiredConfig: ['bucket_arn'],
-    packageName: 'aws_cloudtrail_otel',
-    defaultEnabled: false,
-    showInUI: true,
-    badge: 'technical_preview',
-    ecfLogType: 'cloudtrail',
-    ecfDedicatedTemplate: 'otel',
-  },
-  {
-    id: 'vpcflow_otel',
-    name: 'AWS VPC Flow (OTel)',
-    category: 'Networking and Content Delivery',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: ['aws-s3'],
-    requiredConfig: ['bucket_arn'],
-    packageName: 'aws_vpcflow_otel',
-    defaultEnabled: false,
-    showInUI: true,
-    badge: 'technical_preview',
-    ecfLogType: 'vpcflow',
-    ecfDedicatedTemplate: 'otel',
-  },
-  {
-    id: 'waf_otel',
-    name: 'AWS WAF (OTel)',
-    category: 'Security, Identity and Compliance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
-    inputs: ['aws-s3'],
-    requiredConfig: ['bucket_arn'],
-    packageName: 'aws_waf_otel',
-    defaultEnabled: false,
-    showInUI: true,
-    badge: 'technical_preview',
-    ecfLogType: 'waf',
-    ecfDedicatedTemplate: 'otel',
   },
 
   // ── aws_logs package — Management and Governance ──────────────────────────
   {
     id: 'aws_logs',
     name: 'AWS Logs (Generic)',
-    category: 'Management and Governance',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'agent_based', preferred: true }],
-    inputs: ['aws-s3', 'aws-cloudwatch'],
-    requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
+    category: 'management_governance',
     packageName: 'aws_logs',
-    defaultEnabled: false,
-    showInUI: true,
-    policyTemplate: 'aws_logs',
-  },
-
-  // ── awsfirehose package — Analytics ─────────────────────────────────────
-  {
-    id: 'firehose',
-    name: 'AWS Firehose (Receiver)',
-    category: 'Analytics',
-    signalType: 'logs',
-    deliveryMethods: [{ method: 'firehose', preferred: true }],
-    inputs: [],
-    requiredConfig: [],
-    packageName: 'awsfirehose',
-    defaultEnabled: false,
-    showInUI: true,
   },
 ];
 
-export const AWS_SERVICES_MATRIX: AwsServiceMatrixEntry[] = AWS_SERVICES_MATRIX_RAW.map(
-  enrichWithProviderPermissions
-);
+/**
+ * Merge the static routing table with data from any Fleet package manifest.
+ * Derives managed_integration, signalType, inputs, requiredConfig, optionalConfig,
+ * defaultEnabled, and identityFederationSupported from the manifest.
+ * Static fallback values are used when the manifest does not provide a field.
+ */
+export function buildAwsServiceMatrix(
+  packages: Record<string, PackageInfo>,
+  staticEntries: AwsServiceStaticEntry[]
+): AwsServiceMatrixEntry[] {
+  return staticEntries.map((entry) => {
+    const { deploymentMethods: staticMethods, ...rest } = entry;
 
-export const AWS_SERVICES_MAP = new Map(AWS_SERVICES_MATRIX.map((s) => [s.id, s]));
+    let name = entry.name;
+    let signalType = entry.signalType;
+    let inputs = entry.inputs;
+    let requiredConfig = entry.requiredConfig;
+    let optionalConfig: string[] | undefined;
+    let defaultEnabled = true;
+    let identityFederationSupported: boolean | undefined;
+    let managedIntegrations = false;
+    let pt: any;
+    const varTypes: Record<string, string> = {};
+    const varDefs: Record<string, ServiceVarDef> = {};
+
+    const packageInfo = packages[entry.packageName];
+    const badge = entry.badge ?? releaseToBadge((packageInfo as any)?.release);
+    if (packageInfo) {
+      pt =
+        (packageInfo.policy_templates ?? []).find((p: any) =>
+          (p.data_streams ?? []).includes(entry.id)
+        ) ?? packageInfo.policy_templates?.[0];
+      const ds = (packageInfo.data_streams ?? []).find((d: any) => d.path === entry.id);
+
+      // Agentless is read at the policy-template level, which may cover both logs and metrics
+      // data streams (e.g. ec2 has ec2_logs + ec2_metrics under one template; dynamodb, rds,
+      // and s3 are similar). Both signal types inherit managed_integration from the same flag,
+      // which is the correct behaviour today — all those templates are intended for agentless.
+      // The latent risk is a future template that covers signal types with different deployment
+      // requirements; the clean fix for that case is per-data-stream deployment fields in the
+      // manifest.
+      managedIntegrations = (pt as any)?.deployment_modes?.agentless?.enabled === true;
+
+      if (!name && (ds as any)?.title) {
+        name = (ds as any).title as string;
+      }
+
+      if ((ds as any)?.type === 'logs' || (ds as any)?.type === 'metrics') {
+        signalType = (ds as any).type as SignalType;
+      }
+
+      const dsInputs: string[] = [
+        ...new Set(((ds as any)?.streams ?? []).map((s: any) => s.input as string) as string[]),
+      ];
+      if (dsInputs.length > 0) {
+        inputs = dsInputs;
+      }
+
+      // Walk streams preserving input attribution and full var definitions.
+      // First-wins on name collision: when a var appears under multiple inputs,
+      // the definition from the first stream wins and the additional input is appended.
+      for (const s of ((ds as any)?.streams ?? []) as Array<{
+        input?: string;
+        vars?: RegistryVarsEntry[];
+      }>) {
+        for (const v of s.vars ?? []) {
+          if (!v.name) continue;
+          const existing = varDefs[v.name];
+          if (existing) {
+            if (s.input && !existing.inputs.includes(s.input)) existing.inputs.push(s.input);
+            continue;
+          }
+          varDefs[v.name] = { def: v, inputs: s.input ? [s.input] : [] };
+        }
+      }
+
+      const allVars: RegistryVarsEntry[] = Object.values(varDefs).map((d) => d.def);
+
+      for (const v of allVars) {
+        if (v.name && v.type) varTypes[v.name] = v.type;
+      }
+
+      // All required vars (shown or hidden) go into requiredConfig. field_config functions
+      // use show_user from varDefs to split them into user-visible and mandatory-hidden sections.
+      const reqVars: string[] = [
+        ...new Set(allVars.filter((v: any) => v.required).map((v: any) => v.name as string)),
+      ];
+      if (reqVars.length > 0) {
+        requiredConfig = reqVars;
+      }
+
+      const optVars: string[] = [
+        ...new Set(
+          allVars.filter((v: any) => !v.required && v.show_user).map((v: any) => v.name as string)
+        ),
+      ];
+      if (optVars.length > 0) {
+        optionalConfig = optVars;
+      }
+
+      if ((ds as any)?.streams?.length > 0) {
+        defaultEnabled = !(ds as any).streams.some((s: any) => s.enabled === false);
+      }
+
+      // Derive identityFederationSupported: true when at least one of this data stream's
+      // inputs does NOT hide 'identity_federation' in the 'credential_type' var_group.
+      // False only when every applicable input blocks it (no IF-compatible input path exists).
+      const ptInputs: any[] = (pt as any)?.inputs ?? [];
+      const dsInputTypes = new Set(((ds as any)?.streams ?? []).map((s: any) => s.input as string));
+      if (ptInputs.length > 0 && dsInputTypes.size > 0) {
+        const relevantInputs = ptInputs.filter((i: any) => dsInputTypes.has(i.type));
+        if (relevantInputs.length > 0) {
+          identityFederationSupported = relevantInputs.some(
+            (i: any) =>
+              !(i.hide_in_var_group_options?.credential_type ?? []).includes('identity_federation')
+          );
+        }
+      }
+    }
+
+    // Build the merged deploymentMethods array.
+    // managed_integration is always preferred when present; static methods are demoted.
+    const methods: DeploymentMethodEntry[] = [];
+    if (managedIntegrations) {
+      methods.push({ method: 'managed_integration', preferred: true });
+    }
+    if (staticMethods?.length) {
+      methods.push(
+        ...(managedIntegrations
+          ? staticMethods.map((m) => ({ ...m, preferred: false }))
+          : staticMethods)
+      );
+    }
+    const deploymentMethods: DeploymentMethodEntry[] = methods;
+
+    // When managed_integration is absent, ensure exactly one static method is preferred.
+    if (
+      !managedIntegrations &&
+      deploymentMethods.length > 0 &&
+      !deploymentMethods.some((dm) => dm.preferred)
+    ) {
+      deploymentMethods[0] = { ...deploymentMethods[0], preferred: true };
+    }
+
+    // Auto-hide when no deployment methods are available and not explicitly shown.
+    // Once agentless is enabled in the manifest or ECF is added statically, the service
+    // gets deployment methods and becomes visible without a manual showInUI update.
+    const showInUI = entry.showInUI ?? deploymentMethods.length > 0;
+
+    // For ECF-only services, ECF manages all configuration internally.
+    // Only the trigger-source var needs user input: bucket_arn (S3) or log_group_arn (CloudWatch).
+    // Suppress the rest of the manifest vars so the flyout stays minimal.
+    const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
+    if (deploymentMethods.length > 0 && deploymentMethods.every((m) => m.method === 'ecf')) {
+      const ecfVarNames = Object.keys(varDefs).filter((v) => ECF_TRIGGER_VARS.has(v));
+      if (ecfVarNames.length > 0) {
+        requiredConfig = ecfVarNames;
+        optionalConfig = undefined;
+      }
+    }
+
+    const merged = {
+      ...rest,
+      name: (name ?? entry.id) as string,
+      policyTemplate: (pt as any)?.name as string | undefined,
+      deploymentMethods,
+      signalType: (signalType ?? entry.signalType) as SignalType,
+      inputs,
+      requiredConfig,
+      optionalConfig,
+      varTypes: Object.keys(varTypes).length > 0 ? varTypes : undefined,
+      varDefs: Object.keys(varDefs).length > 0 ? varDefs : undefined,
+      defaultEnabled,
+      showInUI,
+      badge,
+      identityFederationSupported,
+    } as AwsServiceMatrixEntry;
+
+    return merged;
+  });
+}
+
+/** Internal static entries — exported for use by buildAwsServiceMatrix in the hook. */
+export const AWS_SERVICES_STATIC: AwsServiceStaticEntry[] = AWS_SERVICES_MATRIX_RAW;
+
+/**
+ * Static metadata map for service lookups that do not require the manifest
+ * (name, category, showInUI, etc.).
+ * For manifest-enriched values (deploymentMethods, identityFederationSupported)
+ * use useAwsServicesMap() in React components.
+ * Note: signalType and defaultEnabled are derived from the manifest at runtime;
+ * values here are placeholders — use useAwsServicesMap() where these fields matter.
+ */
+export const AWS_SERVICES_MAP = new Map<string, AwsServiceMatrixEntry>(
+  AWS_SERVICES_STATIC.map((entry) => {
+    const { deploymentMethods: staticMethods, ...rest } = entry;
+    const deploymentMethods: DeploymentMethodEntry[] = staticMethods ?? [];
+    const base = {
+      ...rest,
+      name: (entry.name ?? entry.id) as string,
+      deploymentMethods,
+      showInUI: entry.showInUI ?? true,
+      defaultEnabled: true,
+    } as unknown as AwsServiceMatrixEntry;
+    return [entry.id, base];
+  })
+);

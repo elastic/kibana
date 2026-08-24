@@ -7,7 +7,7 @@
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
-import { FIELD_CONFIG } from '../service_settings_step/field_config';
+import { resolveFieldMeta, toTyped } from '../service_settings_step/field_config';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
 interface PackageInputEntry {
@@ -15,14 +15,6 @@ interface PackageInputEntry {
   vars?: Record<string, string | boolean | string[]>;
   streams: Record<string, { enabled: boolean; vars: Record<string, string | boolean | string[]> }>;
 }
-
-const BOOLEAN_VAR_NAMES = new Set([
-  'preserve_original_event',
-  'collect_s3_logs',
-  'preserve_duplicate_custom_fields',
-  'collect_esm_metrics',
-  'leaderelection',
-]);
 
 export function getRegionFieldName(
   service: AwsServiceMatrixEntry,
@@ -43,16 +35,26 @@ export function buildStreamVars(
   const result: Record<string, string | boolean | string[]> = {};
 
   for (const [key, value] of Object.entries(serviceVars.vars)) {
-    if (BOOLEAN_VAR_NAMES.has(key)) {
-      result[key] = value === 'true';
-    } else if (FIELD_CONFIG[key]?.multi) {
-      const parts = value
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (parts.length > 0) result[key] = parts;
+    const meta = resolveFieldMeta(service, key);
+    if (meta) {
+      result[key] = toTyped(value, meta);
     } else {
       result[key] = value;
+    }
+  }
+
+  // Emit manifest defaults for show_user fields not explicitly set by the user.
+  // This ensures required fields with manifest defaults are sent to Fleet even when
+  // the user never opened the flyout.
+  const allShowUserFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  for (const key of allShowUserFields) {
+    if (key in result) continue;
+    const meta = resolveFieldMeta(service, key);
+    if (!meta) continue;
+    const typed = toTyped(undefined, meta);
+    // Only emit when there is an actual manifest default (non-empty string or explicit bool).
+    if (meta.isBool || (typeof typed === 'string' && typed !== '')) {
+      result[key] = typed;
     }
   }
 
@@ -79,7 +81,7 @@ export function buildPackageInputs(
     if (!inputType) continue;
 
     const inputKey = service.policyTemplate ? `${service.policyTemplate}-${inputType}` : inputType;
-    const streamKey = `${service.packageName}.${service.dataStream ?? service.id}`;
+    const streamKey = `${service.packageName}.${service.id}`;
     const streamVars = buildStreamVars(service, serviceVars, globalRegion);
 
     if (!inputs[inputKey]) {

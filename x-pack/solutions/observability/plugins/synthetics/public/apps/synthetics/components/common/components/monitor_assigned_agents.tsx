@@ -18,6 +18,10 @@ import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
 import { useAgentStats } from '../../settings/private_locations/hooks/use_agent_stats';
+import {
+  isAgentVersionMwCompatible,
+  MIN_MW_SUPPORTED_AGENT_VERSION,
+} from '../../../../../../common/utils/agent_mw_support';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../common/runtime_types';
 
 /**
@@ -29,8 +33,11 @@ import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../common/r
  */
 export const MonitorAssignedAgents = ({
   monitorLocations,
+  hasMaintenanceWindows = false,
 }: {
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
+  /** Whether the monitor has a maintenance window assigned, to gate the agent-version warning below. */
+  hasMaintenanceWindows?: boolean;
 }) => {
   const { byLocation } = useAgentStats();
   const { basePath } = useSyntheticsSettingsContext();
@@ -97,6 +104,14 @@ export const MonitorAssignedAgents = ({
                         ({agent.agentId})
                       </EuiText>
                     )}
+                    {hasMaintenanceWindows && !isAgentVersionMwCompatible(agent.agentVersion) && (
+                      <EuiIconTip
+                        type="warning"
+                        color="warning"
+                        content={MW_UNSUPPORTED_AGENT_TOOLTIP(agent.agentVersion)}
+                        data-test-subj="syntheticsAssignedAgentMwWarning"
+                      />
+                    )}
                   </EuiHealth>
                 );
               })}
@@ -130,6 +145,16 @@ const LOCATION_AGENTS_HELP = i18n.translate('xpack.synthetics.monitorDetails.loc
   defaultMessage:
     "On a private location this monitor runs on every enrolled agent of the location's agent policy.",
 });
+
+const MW_UNSUPPORTED_AGENT_TOOLTIP = (agentVersion: string | null) =>
+  i18n.translate('xpack.synthetics.monitorDetails.locationAgents.mwUnsupportedTooltip', {
+    defaultMessage:
+      'Agent version {agentVersion} predates {minVersion} — maintenance window scheduling is not supported, so this monitor may keep running during one.',
+    values: {
+      agentVersion: agentVersion ?? '',
+      minVersion: MIN_MW_SUPPORTED_AGENT_VERSION,
+    },
+  });
 
 const POLICY_CAPTION = (policyName: string) =>
   i18n.translate('xpack.synthetics.monitorDetails.assignedAgentPolicy', {
