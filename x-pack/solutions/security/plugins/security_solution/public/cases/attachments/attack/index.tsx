@@ -7,21 +7,66 @@
 
 import React, { Suspense, type ComponentType } from 'react';
 import type {
+  CaseAttachmentsWithoutOwner,
   CommonAttachmentListViewProps,
   UnifiedReferenceAttachmentViewProps,
 } from '@kbn/cases-plugin/public';
 import { defineAttachment } from '@kbn/cases-plugin/public';
-import { AttachmentActionType, SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import {
+  AttachmentActionType,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common';
+import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { getOriginalAlertIds, type Replacements } from '@kbn/elastic-assistant-common';
 import type {
   AttackAttachmentMetadata,
   AttackAttachmentPayload,
 } from '../../../../common/cases/attachments/attack';
-import { AttackAttachmentPayloadSchema } from '../../../../common/cases/attachments/attack';
+import {
+  AttackAttachmentPayloadSchema,
+  MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH,
+  MAX_ATTACK_TITLE_LENGTH,
+} from '../../../../common/cases/attachments/attack';
 
 export type { AttackAttachmentMetadata };
+
+/**
+ * The attack a call site is attaching, normalised out of whichever surface it came from — the
+ * Attacks page table row or the attack flyout.
+ */
+export interface AttackToAttach {
+  /** The attack document `_id`. */
+  id: string;
+  /**
+   * The index the attack document came from — either the scheduled
+   * (`.alerts-security.attack.discovery.alerts-*`) or the adhoc
+   * (`.adhoc.alerts-security.attack.discovery.alerts-*`) index. Both are attachable; the caller
+   * passes whichever the document was read from so the distinction is preserved.
+   */
+  index: string;
+  /** The attack's plain-text title. Truncated to the schema bound if longer. */
+  title: string;
+  /** The attack's summary markdown. Truncated to the schema bound if longer. */
+  summaryMarkdown?: string;
+  /** The attack's risk score. The attack document has no `severity`. */
+  riskScore?: number;
+  /**
+   * Distinct entity count for the attack. Not stored on the attack document and not cheap to
+   * derive (two cardinality aggregations), so call sites that already have it pass it and the
+   * rest leave it out — the metadata field is optional.
+   */
+  entityCount?: number;
+  /** Raw `kibana.alert.attack_discovery.alert_ids`, which may still be anonymised. */
+  alertIds?: string[];
+  /** `kibana.alert.attack_discovery.replacements`, used to reverse the anonymisation. */
+  replacements?: Replacements;
+  /** The index the constituent detection alerts live in. */
+  alertsIndex: string;
+}
 
 const AttackAttachmentChildrenLazy = React.lazy(() => import('./components/attachment_children'));
 const AttackTabContentLazy = React.lazy(() => import('./components/attack_tab_content'));
@@ -91,3 +136,117 @@ export const getAttackAttachment = () =>
       children: AttackTabContentWrapper,
     }),
   });
+
+const truncate = (value: string, maxLength: number): string =>
+  value.length > maxLength ? value.slice(0, maxLength) : value;
+
+/** The `security.attack` attachment as posted to a case — the cases UI injects the `owner`. */
+export type AttackAttachmentWithoutOwner = Omit<AttackAttachmentPayload, 'owner'>;
+
+/** One constituent alert, posted alongside the attack it belongs to. */
+export interface AlertAttachmentWithoutOwner {
+  type: typeof SECURITY_ALERT_ATTACHMENT_TYPE;
+  attachmentId: string;
+  metadata: { index: string };
+}
+
+/** The attachments to post to a case, plus what had to be dropped to build them. */
+export interface AttackAttachmentsResult {
+  /**
+   * The `security.attack` attachment first, then one `security.alert` attachment per alert.
+   *
+   * Typed narrower than the framework's `CaseAttachmentsWithoutOwner` union so callers and tests
+   * can reach `metadata` without re-narrowing; assignability to the framework type is checked by
+   * {@link generateAttackAttachmentsWithoutOwner}.
+   */
+  attachments: Array<AttackAttachmentWithoutOwner | AlertAttachmentWithoutOwner>;
+  /** The attack's full de-anonymised, deduplicated constituent alert count. */
+  alertCount: number;
+  /** How many alert attachments were actually built — at most `MAX_ALERTS_PER_CASE`. */
+  attachedAlertCount: number;
+  /** True when the attack has more constituent alerts than a single request may carry. */
+  truncated: boolean;
+}
+
+/**
+ * Builds the attachments for attaching one attack to a case: the `security.attack` attachment
+ * carrying the metadata snapshot the activity card renders from, followed by one `security.alert`
+ * attachment per de-anonymised constituent alert.
+ *
+ * The constituent alerts are always included — attaching an attack means attaching the alerts it
+ * comprises, so there is no at-attach-time choice about them.
+ *
+ * Returns the truncation counts alongside the attachments so the caller can warn the user when
+ * an attack carries more alerts than one request may hold. Use
+ * {@link generateAttackAttachmentsWithoutOwner} where that reporting isn't needed.
+ *
+ * @param attack the attack we're attaching to a case
+ */
+export const buildAttackAttachments = ({
+  id,
+  index,
+  title,
+  summaryMarkdown,
+  riskScore,
+  entityCount,
+  alertIds,
+  replacements,
+  alertsIndex,
+}: AttackToAttach): AttackAttachmentsResult => {
+  if (!id) {
+    return { attachments: [], alertCount: 0, attachedAlertCount: 0, truncated: false };
+  }
+
+  // De-anonymise before deduping: distinct anonymised ids can resolve to the same original alert,
+  // so deduping the raw ids first would leave duplicates behind.
+  const originalAlertIds = [
+    ...new Set(getOriginalAlertIds({ alertIds: alertIds ?? [], replacements })),
+  ];
+  // Cases rejects a request carrying more than MAX_ALERTS_PER_CASE alerts, so cap the batch and
+  // let the caller surface what was left off rather than failing the whole attach.
+  const attachedAlertIds = originalAlertIds.slice(0, MAX_ALERTS_PER_CASE);
+
+  const attackAttachment: AttackAttachmentWithoutOwner = {
+    type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+    attachmentId: id,
+    metadata: {
+      title: truncate(title, MAX_ATTACK_TITLE_LENGTH),
+      // The attack's own alert count, which is what the preview card means by "alerts" — it can
+      // exceed the number of alert attachments created when the batch above was capped.
+      alertCount: originalAlertIds.length,
+      // Lets the Cases platform pair this attachment's id with an index so the "already attached"
+      // duplicate check works, and so status sync knows which index to write to.
+      index,
+      ...(summaryMarkdown != null
+        ? { summaryMarkdown: truncate(summaryMarkdown, MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH) }
+        : {}),
+      ...(riskScore != null ? { riskScore } : {}),
+      ...(entityCount != null ? { entityCount } : {}),
+    } satisfies AttackAttachmentMetadata,
+  };
+
+  const alertAttachments = attachedAlertIds.map<AlertAttachmentWithoutOwner>((alertId) => ({
+    type: SECURITY_ALERT_ATTACHMENT_TYPE,
+    attachmentId: alertId,
+    // The index is what makes the duplicate check and status sync work for these alerts too.
+    metadata: { index: alertsIndex },
+  }));
+
+  return {
+    attachments: [attackAttachment, ...alertAttachments],
+    alertCount: originalAlertIds.length,
+    attachedAlertCount: attachedAlertIds.length,
+    truncated: originalAlertIds.length > attachedAlertIds.length,
+  };
+};
+
+/**
+ * {@link buildAttackAttachments} narrowed to the cases-framework "without owner" payload — the
+ * cases UI injects the `owner` at creation time, so callers hand the attachments over without it.
+ * Returns an empty array when the attack has no id.
+ *
+ * @param attack the attack we're attaching to a case
+ */
+export const generateAttackAttachmentsWithoutOwner = (
+  attack: AttackToAttach
+): CaseAttachmentsWithoutOwner => buildAttackAttachments(attack).attachments;

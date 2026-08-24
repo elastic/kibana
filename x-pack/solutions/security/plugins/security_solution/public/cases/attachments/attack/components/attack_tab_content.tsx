@@ -46,7 +46,7 @@ interface AttackRow {
   isUnresolved: boolean;
 }
 
-const PAGINATION = { initialPageSize: 10, pageSizeOptions: [10, 25, 50] } as const;
+const PAGINATION = { initialPageSize: 10, pageSizeOptions: [10, 25, 50] };
 const SORTING = { sort: { field: 'createdAt' as const, direction: 'desc' as const } };
 
 const UNKNOWN_USER = i18n.translate(

@@ -9,6 +9,15 @@ import { z } from '@kbn/zod/v4';
 import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 
 /**
+ * Upper bounds for the metadata strings snapshotted at attach time. Exported so the payload
+ * builder truncates against the same numbers the schema validates, rather than duplicating them
+ * and risking a 400 on an over-long attack title or summary.
+ */
+export const MAX_ATTACK_TITLE_LENGTH = 1000;
+export const MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH = 2048;
+export const MAX_ATTACK_INDEX_LENGTH = 256;
+
+/**
  * Snapshot of the attack document taken at attach time. The activity-log preview card
  * renders entirely from this metadata so the feed needs no per-attachment query, and so
  * it still says something useful once the attack ages into a cold or frozen tier.
@@ -21,9 +30,9 @@ import { SECURITY_ATTACK_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 const AttackAttachmentMetadataSchema = z
   .object({
     /** The attack's plain-text title, used as the link label in the attachment view. */
-    title: z.string().max(1000),
+    title: z.string().max(MAX_ATTACK_TITLE_LENGTH),
     /** Truncated attack summary markdown captured at attach time. */
-    summaryMarkdown: z.string().max(2048).optional(),
+    summaryMarkdown: z.string().max(MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH).optional(),
     /** Optional risk score captured at attach time. The attack document has no `severity`. */
     riskScore: z.number().int().min(0).optional(),
     /** Number of de-anonymised constituent alerts attached alongside the attack. */
@@ -44,7 +53,7 @@ const AttackAttachmentMetadataSchema = z
      * Required here (unlike `security.alert`) because there is no legacy attachment
      * shape to stay compatible with.
      */
-    index: z.string().max(256),
+    index: z.string().max(MAX_ATTACK_INDEX_LENGTH),
   })
   .strict();
 
