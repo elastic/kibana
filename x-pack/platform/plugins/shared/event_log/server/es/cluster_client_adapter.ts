@@ -29,10 +29,6 @@ import type { EsNames } from './names';
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
 
-// Default throttle for `_update_by_query` to avoid saturating write threadpools
-// on the shared event-log data stream.
-const DEFAULT_UPDATE_BY_QUERY_REQUESTS_PER_SECOND = 1000;
-
 export interface SoftDeleteByQueryParams {
   query: estypes.QueryDslQueryContainer;
   field: string;
@@ -753,7 +749,7 @@ export class ClusterClientAdapter<
     field,
     conflicts = 'proceed',
     slices = 'auto',
-    requestsPerSecond = DEFAULT_UPDATE_BY_QUERY_REQUESTS_PER_SECOND,
+    requestsPerSecond,
   }: SoftDeleteByQueryParams): Promise<estypes.UpdateByQueryResponse> {
     const source = buildSetFieldTrueScript(field);
     const esClient = await this.elasticsearchClientPromise;
@@ -761,12 +757,13 @@ export class ClusterClientAdapter<
       index: this.esNames.dataStream,
       conflicts,
       slices,
-      requests_per_second: requestsPerSecond,
       query,
       script: {
         source,
         lang: 'painless',
       },
+      // Optional trottling param
+      ...(requestsPerSecond == null ? {} : { requests_per_second: requestsPerSecond }),
     });
   }
 

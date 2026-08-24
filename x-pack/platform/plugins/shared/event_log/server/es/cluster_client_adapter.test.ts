@@ -2849,7 +2849,6 @@ describe('softDeleteByQuery', () => {
       index: 'kibana-event-log-ds',
       conflicts: 'proceed',
       slices: 'auto',
-      requests_per_second: 1000,
       query: gapQuery,
       script: {
         source:
@@ -2899,6 +2898,15 @@ describe('softDeleteByQuery', () => {
 
     const [call] = clusterClient.updateByQuery.mock.calls[0];
     expect(call).not.toHaveProperty('wait_for_completion');
+  });
+
+  // `requests_per_second` caps documents per second across the whole operation,
+  // so a default value would throttle throughput rather than limit round trips.
+  test('does not throttle by default', async () => {
+    await clusterClientAdapter.softDeleteByQuery({ query: gapQuery, field: 'a.b' });
+
+    const [call] = clusterClient.updateByQuery.mock.calls[0];
+    expect(call).not.toHaveProperty('requests_per_second');
   });
 
   test('honors conflicts, slices, and requestsPerSecond overrides', async () => {
