@@ -143,6 +143,13 @@ describe('ConnectorsTab', () => {
     expect(screen.queryByTestId('contextCreateConnectorButton')).not.toBeInTheDocument();
   });
 
+  it('shows admin-contact copy in the empty state when the user cannot save connectors', () => {
+    renderConnectorsTab({ connectors: [], canCreateConnector: false });
+
+    expect(screen.getByText('Ask your administrator to create a connector.')).toBeInTheDocument();
+    expect(screen.queryByText('Create a connector to use it as a source.')).not.toBeInTheDocument();
+  });
+
   it('hides the create button footer when the user cannot save connectors', () => {
     renderConnectorsTab({ canCreateConnector: false });
 
@@ -258,7 +265,7 @@ describe('ConnectorsTab', () => {
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['context_engine', 'connectors', 'list'],
     });
-    expect(invalidateQueries).toHaveBeenCalledWith({
+    expect(invalidateQueries).not.toHaveBeenCalledWith({
       queryKey: ['context_engine', 'connectors', 'types'],
     });
     expect(onToggle).toHaveBeenCalledWith({
@@ -293,7 +300,7 @@ describe('ConnectorsTab', () => {
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['context_engine', 'connectors', 'list'],
     });
-    expect(invalidateQueries).toHaveBeenCalledWith({
+    expect(invalidateQueries).not.toHaveBeenCalledWith({
       queryKey: ['context_engine', 'connectors', 'types'],
     });
     expect(screen.getByTestId('contextCreateConnectorFlyout')).toBeInTheDocument();

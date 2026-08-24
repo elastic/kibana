@@ -52,6 +52,7 @@ export const EditSourcesFlyout = ({ aiIndex, onClose, onSaved }: EditSourcesFlyo
       onClose={onClose}
       aria-labelledby={flyoutTitleId}
       size="m"
+      session="start"
       data-test-subj="contextEditSourcesFlyout"
     >
       <EuiFlyoutHeader hasBorder>

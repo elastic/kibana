@@ -48,6 +48,7 @@ interface ConnectorsTabContentProps {
     changedOption: EuiSelectableOption
   ) => void;
   createConnectorButton: React.ReactNode;
+  canCreateConnector: boolean;
 }
 
 const ConnectorsTabContent = ({
@@ -57,6 +58,7 @@ const ConnectorsTabContent = ({
   options,
   onConnectorSelectionChange,
   createConnectorButton,
+  canCreateConnector,
 }: ConnectorsTabContentProps) => {
   if (isLoading) {
     return <EuiSkeletonText lines={3} data-test-subj="contextConnectorsLoading" />;
@@ -104,10 +106,17 @@ const ConnectorsTabContent = ({
         }
         body={
           <p>
-            <FormattedMessage
-              id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
-              defaultMessage="Create a connector to use it as a source."
-            />
+            {canCreateConnector ? (
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.connectors.emptyBody"
+                defaultMessage="Create a connector to use it as a source."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.contextEngine.sourcePicker.connectors.emptyBodyNoAccess"
+                defaultMessage="Ask your administrator to create a connector."
+              />
+            )}
           </p>
         }
         actions={createConnectorButton}
@@ -194,7 +203,6 @@ export const ConnectorsTab = ({
 
   const invalidateConnectorQueries = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.connectors.list() });
-    queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.connectors.types() });
   }, [queryClient]);
 
   const handleConnectorCreated = useCallback(
@@ -240,6 +248,7 @@ export const ConnectorsTab = ({
         options={options}
         onConnectorSelectionChange={handleConnectorSelectionChange}
         createConnectorButton={createConnectorButton}
+        canCreateConnector={canCreateConnector}
       />
       {createConnectorFlyout}
     </>
