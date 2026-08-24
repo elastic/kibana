@@ -17,10 +17,7 @@ import type { GetOutputHealthResponse } from '../../../../../../../common/types'
 
 import { sendGetOutputHealth, useStartServices } from '../../../../hooks';
 import type { Output } from '../../../../types';
-import {
-  isBeatsOutput,
-  isOtlpOutput,
-} from '../../../../../../../common/services/output_helpers';
+import { isBeatsOutput, isOtlpOutput } from '../../../../../../../common/services/output_helpers';
 
 interface Props {
   output: Output;
