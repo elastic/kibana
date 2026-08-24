@@ -10,9 +10,7 @@ import {
   NEEDS_ACTION_STATUSES,
   RESOLVED_STATUSES,
   byCriticalityAndUpdatedAtDesc,
-  clearRememberedInvestigationTerminalFailuresForTests,
   getNeedsActionEvents,
-  getRememberedInvestigationTerminalFailure,
   getResolvedEvents,
   getInvestigationStatusLabel,
   getLatestInvestigation,
@@ -22,7 +20,6 @@ import {
   isInvestigationRunning,
   isNeedsActionStatus,
   isResolvedStatus,
-  rememberInvestigationTerminalFailure,
 } from './significant_event_status';
 
 const mockEvent = (
@@ -174,21 +171,8 @@ describe('significant_event_status', () => {
     expect(hasRunningInvestigations([completed])).toBe(false);
   });
 
-  it('stops treating a workflow as running after a remembered terminal failure', () => {
-    clearRememberedInvestigationTerminalFailuresForTests();
-    const failed = mockEvent({
-      investigations: [
-        {
-          workflow_execution_id: 'exec-failed',
-          started_at: '2026-01-01T00:00:00.000Z',
-        },
-      ],
-    });
-
-    expect(isInvestigationRunning(failed)).toBe(true);
-    rememberInvestigationTerminalFailure('exec-failed', 'failed');
-    expect(isInvestigationRunning(failed)).toBe(false);
-    expect(getRememberedInvestigationTerminalFailure('exec-failed')).toBe('failed');
-    clearRememberedInvestigationTerminalFailuresForTests();
+  it('treats an event without investigations as not running', () => {
+    expect(isInvestigationRunning(mockEvent())).toBe(false);
+    expect(hasRunningInvestigations([mockEvent()])).toBe(false);
   });
 });

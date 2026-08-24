@@ -20,7 +20,15 @@ import {
   shouldCloneApiKeyFromRequest,
 } from '../lib/api_key_utils';
 
-jest.mock('../lib/api_key_utils');
+// `getUiamApiKeySecret` is a pure format helper the assertions below rely on, so it keeps its real
+// implementation while the credential-minting helpers are stubbed.
+jest.mock('../lib/api_key_utils', () => ({
+  ...jest.requireActual('../lib/api_key_utils'),
+  createApiKey: jest.fn(),
+  hasApiKey: jest.fn(),
+  getApiKeyFromRequest: jest.fn(),
+  shouldCloneApiKeyFromRequest: jest.fn(),
+}));
 const createApiKeyMock = createApiKey as jest.MockedFunction<typeof createApiKey>;
 const hasApiKeyMock = hasApiKey as jest.MockedFunction<typeof hasApiKey>;
 const getApiKeyFromRequestMock = getApiKeyFromRequest as jest.MockedFunction<
@@ -89,6 +97,16 @@ describe('EsAndUiamApiKeyStrategy', () => {
     test('returns uiamApiKey when typeToUse is UIAM and uiamApiKey exists', () => {
       const { strategy } = createStrategy(ApiKeyType.UIAM);
       const task = mockTaskInstance({ apiKey: 'es-key', uiamApiKey: 'essu_uiam-key' });
+
+      expect(strategy.getApiKeyForFakeRequest(task)).toBe('essu_uiam-key');
+    });
+
+    test('returns the raw secret when uiamApiKey is stored in the `base64(id:secret)` format written by UIAM provisioning', () => {
+      const { strategy } = createStrategy(ApiKeyType.UIAM);
+      const task = mockTaskInstance({
+        apiKey: 'es-key',
+        uiamApiKey: Buffer.from('uiam-key-id:essu_uiam-key').toString('base64'),
+      });
 
       expect(strategy.getApiKeyForFakeRequest(task)).toBe('essu_uiam-key');
     });
@@ -175,6 +193,21 @@ describe('EsAndUiamApiKeyStrategy', () => {
         expect.objectContaining({ tags: expect.any(Array) })
       );
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    test('normalizes a `base64(id:secret)` uiamApiKey on the ES-strategy fallback path', () => {
+      const { strategy } = createStrategy(ApiKeyType.ES);
+      const task = mockTaskInstance({
+        uiamApiKey: Buffer.from('uiam-key-id:essu_uiam-key').toString('base64'),
+        userScope: {
+          apiKeyId: 'uiam-key-id',
+          uiamApiKeyId: 'uiam-key-id',
+          spaceId: 'default',
+          apiKeyCreatedByUser: false,
+        },
+      });
+
+      expect(strategy.getApiKeyForFakeRequest(task)).toBe('essu_uiam-key');
     });
 
     test('returns undefined and does not log when task has no keys', () => {
@@ -319,6 +352,66 @@ describe('EsAndUiamApiKeyStrategy', () => {
       expect(strategy.getApiKeyForFakeRequest(mockTaskInstance({ ...fields }))).toBe(
         'essu_fresh-secret'
       );
+    });
+
+    test('persists a raw user-created UIAM API key as-is (UIAM-only, no id) without minting any keys', async () => {
+      const { strategy, coreStart, mockUiam } = createStrategy();
+      // User-created Cloud API keys are presented as the raw `essu_` secret, not `base64(id:key)`
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_user_created_key' },
+      });
+
+      hasApiKeyMock.mockReturnValue(true);
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+        username: 'testuser',
+        authentication_type: 'api_key',
+      });
+      getApiKeyFromRequestMock.mockReturnValue({ api_key: 'essu_user_created_key' });
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
+
+      const fields = result.get('task-1');
+      // No keys are minted: the user's raw key is reused directly, UIAM-only.
+      expect(createApiKeyMock).not.toHaveBeenCalled();
+      expect(mockUiam.grant).not.toHaveBeenCalled();
+      expect(fields?.apiKey).toBeUndefined();
+      expect(fields?.uiamApiKey).toBe('essu_user_created_key');
+      // User-created keys carry no key id.
+      expect(fields?.userScope.apiKeyId).toBe('');
+      expect(fields?.userScope.uiamApiKeyId).toBeUndefined();
+      expect(fields?.userScope.apiKeyCreatedByUser).toBe(true);
+      // The user's key is the one used to build the fake request for execution...
+      expect(strategy.getApiKeyForFakeRequest(mockTaskInstance({ ...fields }))).toBe(
+        'essu_user_created_key'
+      );
+      // ...and it is never invalidated by task manager.
+      expect(strategy.getApiKeyIdsForInvalidation(mockTaskInstance({ ...fields }))).toEqual([]);
+    });
+
+    test('persists uiamApiKeyExternal when UIAM reports the key as external', async () => {
+      const { strategy, coreStart, mockUiam } = createStrategy();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_user_created_key' },
+      });
+
+      hasApiKeyMock.mockReturnValue(true);
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+        username: 'testuser',
+        authentication_type: 'api_key',
+        // UIAM reported the authenticated API key as external
+        api_key: { id: '72kse5wBzbyj5dh9Iz13', name: 'org key', internal: false },
+      });
+      getApiKeyFromRequestMock.mockReturnValue({ api_key: 'essu_user_created_key' });
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security);
+
+      const fields = result.get('task-1');
+      expect(mockUiam.grant).not.toHaveBeenCalled();
+      expect(fields?.uiamApiKey).toBe('essu_user_created_key');
+      expect(fields?.userScope.uiamApiKeyExternal).toBe(true);
+      expect(fields?.userScope.apiKeyCreatedByUser).toBe(true);
     });
 
     test('grants both ES and UIAM keys when request has UIAM credential', async () => {

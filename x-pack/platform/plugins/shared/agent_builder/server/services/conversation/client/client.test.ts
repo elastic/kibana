@@ -7,20 +7,35 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  CONVERSATION_SCHEMA_VERSION,
+  ConversationRoundStatus,
+  EventActorType,
+  TimelineEventType,
+  TimelineTriggerType,
   createAgentNotFoundError,
   createAgentUnavailableError,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
-import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control';
-import type { ConversationTemplate, SerializedMetadataValue } from '@kbn/agent-builder-common';
+import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
+import {
+  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
+  CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  ConversationAccessControlMode,
+  ConversationAccessControlRole,
+} from '@kbn/agent-builder-common/chat/access_control';
+import type {
+  ConversationTemplate,
+  SerializedMetadataValue,
+  TimelineEvent,
+} from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 
-jest.mock('../templates/registry');
-import { getTemplate } from '../templates/registry';
-const getTemplateMock = getTemplate as jest.MockedFn<typeof getTemplate>;
+jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const getTemplateMock: jest.Mock = require('../templates/registry').getTemplate;
 
 const testSpace = 'default';
 
@@ -54,6 +69,7 @@ describe('ConversationClient', () => {
     userId = 'user-1',
     username = 'test-user',
     accessMode = ConversationAccessControlMode.Private,
+    entries = [],
     seqNo = 1,
     primaryTerm = 1,
     // ES omits both fields entirely when `seq_no_primary_term` is not requested
@@ -63,12 +79,15 @@ describe('ConversationClient', () => {
     attachments,
     workspaceId,
     read = false,
+    schemaVersion,
+    events,
   }: {
     id?: string;
     agentId?: string;
     userId?: string;
     username?: string;
     accessMode?: ConversationAccessControlMode;
+    entries?: ConversationAccessControlEntry[];
     seqNo?: number;
     primaryTerm?: number;
     versioned?: boolean;
@@ -77,6 +96,8 @@ describe('ConversationClient', () => {
     attachments?: unknown[];
     workspaceId?: string;
     read?: boolean;
+    schemaVersion?: number;
+    events?: TimelineEvent[];
   } = {}): Document =>
     ({
       _id: id,
@@ -93,8 +114,11 @@ describe('ConversationClient', () => {
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
+        ...(schemaVersion !== undefined ? { schema_version: schemaVersion } : {}),
+        ...(events !== undefined ? { events } : {}),
         access_control: {
           access_mode: accessMode,
+          entries,
         },
       },
     } as Document);
@@ -107,15 +131,17 @@ describe('ConversationClient', () => {
       getIds: jest.fn().mockResolvedValue(['agent-1']),
     };
 
+    getTemplateMock.mockReset();
+
     client = createClient({
       space: testSpace,
       logger: loggerMock.create(),
       esClient: {} as never,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
-      isAdmin: false,
       user: {
         id: 'user-1',
         username: 'test-user',
+        isAdmin: false,
       },
     });
   });
@@ -225,6 +251,8 @@ describe('ConversationClient', () => {
                     ],
                   },
                 },
+                // Hide sub-agent conversations from the nav list
+                { bool: { must_not: [{ exists: { field: 'parent_conversation' } }] } },
               ],
             },
           },
@@ -410,7 +438,7 @@ describe('ConversationClient', () => {
     });
 
     it('indexes with op_type create so existing conversations are never overwritten', async () => {
-      await client.create({
+      const result = await client.create({
         id: 'conversation-1',
         title: 'Conversation 1',
         agent_id: 'agent-1',
@@ -423,9 +451,14 @@ describe('ConversationClient', () => {
           op_type: 'create',
         })
       );
+      expect(result.permissions).toEqual({
+        rename: true,
+        delete: true,
+        update_access_control: true,
+      });
     });
 
-    it('throws a not found error when the id already exists', async () => {
+    it('throws an already-exists error when the id already exists', async () => {
       const conflictError = Object.assign(new Error('version conflict'), { statusCode: 409 });
       mockEsClient.index.mockRejectedValueOnce(conflictError);
 
@@ -437,7 +470,7 @@ describe('ConversationClient', () => {
           rounds: [],
         })
       ).rejects.toMatchObject({
-        message: 'Conversation conversation-1 not found',
+        message: 'Conversation conversation-1 already exists',
       });
     });
 
@@ -1154,6 +1187,53 @@ describe('ConversationClient', () => {
       },
     } as Document);
 
+  describe('template metadata response conversion', () => {
+    const template = makeTemplate('template-1', {
+      enabled: { input_type: 'TOGGLE', description: 'Enabled' },
+    });
+
+    beforeEach(() => {
+      getTemplateMock.mockReturnValue(template);
+    });
+
+    it('deserializes template metadata when getting a conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: template.id,
+              metadata: { enabled: 'true' },
+            }),
+          ],
+        },
+      });
+
+      await expect(client.get('conversation-1')).resolves.toMatchObject({
+        metadata: { enabled: true },
+      });
+    });
+
+    it('requests and deserializes template metadata when listing conversations', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: template.id,
+              metadata: { enabled: 'true' },
+            }),
+          ],
+        },
+      });
+
+      await expect(client.list()).resolves.toMatchObject([{ metadata: { enabled: true } }]);
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: expect.arrayContaining(['template_id', 'template_version', 'metadata']),
+        })
+      );
+    });
+  });
+
   describe('applyTemplate', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -1623,7 +1703,7 @@ describe('ConversationClient', () => {
     });
   });
 
-  describe('permissions', () => {
+  describe('access checks', () => {
     const publicConversationOwnedByAnotherUser = () =>
       createConversationDocument({
         userId: 'other-user-id',
@@ -1631,7 +1711,7 @@ describe('ConversationClient', () => {
         accessMode: ConversationAccessControlMode.Public,
       });
 
-    it('grants rename and delete to the owner on get', async () => {
+    it('returns owner permissions with conversations from get', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocument()] },
       });
@@ -1643,9 +1723,13 @@ describe('ConversationClient', () => {
         delete: true,
         update_access_control: true,
       });
+      expect(result.access_control).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [],
+      });
     });
 
-    it('denies rename and delete to a participant of a public conversation on get', async () => {
+    it('returns public participant permissions with conversations from get', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [publicConversationOwnedByAnotherUser()] },
       });
@@ -1659,7 +1743,7 @@ describe('ConversationClient', () => {
       });
     });
 
-    it('resolves permissions per conversation on list', async () => {
+    it('returns per-conversation permissions from list', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -1671,42 +1755,276 @@ describe('ConversationClient', () => {
 
       const results = await client.list();
 
-      expect(results.map(({ id, permissions }) => ({ id, permissions }))).toEqual([
-        {
-          id: 'owned',
-          permissions: { rename: true, delete: true, update_access_control: true },
-        },
-        {
-          id: 'participating',
-          permissions: { rename: false, delete: false, update_access_control: false },
-        },
+      expect(results.map(({ permissions }) => permissions)).toEqual([
+        { rename: true, delete: true, update_access_control: true },
+        { rename: false, delete: false, update_access_control: false },
       ]);
+      results.forEach((conversation) => expect(conversation).not.toHaveProperty('rounds'));
+      expect(results.map(({ id }) => id)).toEqual(['owned', 'participating']);
     });
 
-    it('reports the denial that delete then enforces', async () => {
+    it('enforces delete denial for public participants', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [publicConversationOwnedByAnotherUser()] },
       });
 
-      const { permissions } = await client.get('conversation-1');
+      const result = await client.get('conversation-1');
 
-      expect(permissions.delete).toBe(false);
+      expect(result.permissions).toEqual({
+        rename: false,
+        delete: false,
+        update_access_control: false,
+      });
       await expect(client.delete('conversation-1')).rejects.toThrow(
         'Conversation conversation-1 not found'
       );
     });
 
-    it('reports the denial that rename then enforces', async () => {
+    it('enforces rename denial for public participants', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [publicConversationOwnedByAnotherUser()] },
       });
 
-      const { permissions } = await client.get('conversation-1');
+      const result = await client.get('conversation-1');
 
-      expect(permissions.rename).toBe(false);
+      expect(result.permissions).toEqual({
+        rename: false,
+        delete: false,
+        update_access_control: false,
+      });
       await expect(
         client.update({ id: 'conversation-1', title: 'renamed' }, { access: 'rename' })
       ).rejects.toThrow('Conversation conversation-1 not found');
+    });
+  });
+
+  describe('updateAccessControl', () => {
+    const newMember: Omit<ConversationAccessControlEntry, 'added_at'> = {
+      type: 'user',
+      id: 'user-2',
+      role: ConversationAccessControlRole.Member,
+    };
+
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+      jest.useFakeTimers().setSystemTime(new Date('2026-08-11T10:00:00.000Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('stamps added_at on new entries and persists the requested mode', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const result = await client.updateAccessControl('conversation-1', {
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [newMember],
+      });
+
+      expect(result).toEqual({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [{ ...newMember, added_at: '2026-08-11T10:00:00.000Z' }],
+      });
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conversation-1',
+          document: expect.objectContaining({ access_control: result }),
+        })
+      );
+    });
+
+    it('rejects entries when publishing the conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Public,
+          entries: [newMember],
+        })
+      ).rejects.toThrow('ACL entries are not supported when access_mode is "public"');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('allows publishing the conversation with an empty entries list', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const result = await client.updateAccessControl('conversation-1', {
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      });
+
+      expect(result).toEqual({ access_mode: ConversationAccessControlMode.Public, entries: [] });
+    });
+
+    it('preserves added_at for members that are already listed', async () => {
+      const existing: ConversationAccessControlEntry = {
+        ...newMember,
+        added_at: '2026-01-01T00:00:00.000Z',
+      };
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ entries: [existing] })] },
+      });
+
+      const result = await client.updateAccessControl('conversation-1', {
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [newMember, { ...newMember, id: 'user-3' }],
+      });
+
+      expect(result.entries).toEqual([
+        existing,
+        { type: 'user', id: 'user-3', role: 'member', added_at: '2026-08-11T10:00:00.000Z' },
+      ]);
+    });
+
+    it('drops an entry naming the owner', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const result = await client.updateAccessControl('conversation-1', {
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [{ ...newMember, id: 'user-1' }, newMember],
+      });
+
+      expect(result.entries).toEqual([{ ...newMember, added_at: '2026-08-11T10:00:00.000Z' }]);
+    });
+
+    it('rejects repeated ids with a bad request error', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [newMember, newMember],
+        })
+      ).rejects.toThrow('Duplicate ACL entry for user "user-2"');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects an invalid role with a bad request error', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [{ ...newMember, role: 'manager' as ConversationAccessControlRole }],
+        })
+      ).rejects.toThrow('Unknown ACL role: manager');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects more entries than the maximum', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const entries = Array.from(
+        { length: CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES + 1 },
+        (_, index) => ({ ...newMember, id: `user-${index}` })
+      );
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries,
+        })
+      ).rejects.toThrow(`ACL entries exceed maximum of ${CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES}`);
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects a non-user principal type', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [
+            { ...newMember, type: 'role' } as unknown as Omit<
+              ConversationAccessControlEntry,
+              'added_at'
+            >,
+          ],
+        })
+      ).rejects.toThrow('Each ACL entry requires a type of "user"');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects an empty id', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [{ ...newMember, id: '' }],
+        })
+      ).rejects.toThrow('Each ACL entry requires a non-empty id');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects an id longer than the maximum', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [
+            {
+              ...newMember,
+              id: 'a'.repeat(CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH + 1),
+            },
+          ],
+        })
+      ).rejects.toThrow(
+        `ACL principal id exceeds maximum length of ${CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`
+      );
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('masks non-owners as not found, even for members of a public conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      await expect(
+        client.updateAccessControl('conversation-1', {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [],
+        })
+      ).rejects.toThrow('Conversation conversation-1 not found');
+
+      expect(mockEsClient.index).not.toHaveBeenCalled();
     });
   });
 
@@ -1726,10 +2044,10 @@ describe('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: {} as never,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
-        isAdmin: true,
         user: {
           id: 'admin-user-id',
           username: 'admin-user',
+          isAdmin: true,
         },
       });
     });
@@ -1757,16 +2075,6 @@ describe('ConversationClient', () => {
       );
 
       expect(updated.title).toBe('renamed by admin');
-    });
-
-    it('reports rename and delete permissions on a public conversation owned by another user', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: { hits: [conversationOwnedByAnotherUser(ConversationAccessControlMode.Public)] },
-      });
-
-      const { permissions } = await adminClient.get('conversation-1');
-
-      expect(permissions).toEqual({ rename: true, delete: true, update_access_control: false });
     });
 
     it('cannot rename or delete a private conversation owned by another user', async () => {
@@ -1806,6 +2114,205 @@ describe('ConversationClient', () => {
       await expect(
         adminClient.update({ id: 'conversation-1', title: 'renamed by admin' })
       ).rejects.toThrow('Conversation conversation-1 not found');
+    });
+  });
+
+  describe('events persistence', () => {
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('promotes new conversations to events-native on create (schema_version + events written atomically)', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ schemaVersion: 1 })] },
+      });
+
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          schema_version?: number;
+          events?: Array<{ id: string; type: string }>;
+          conversation_rounds: Array<{ id: string }>;
+        };
+      };
+      expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+      ]);
+      expect(indexed.conversation_rounds).toHaveLength(1);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('round-trips attachment_refs through the stored events projection', async () => {
+      const attachmentRefs = [
+        { attachment_id: 'attachment-a', version: 1 },
+        { attachment_id: 'attachment-b', version: 2 },
+      ];
+
+      const written = createConversationDocument({
+        schemaVersion: 1,
+        rounds: [
+          {
+            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+            input: { message: 'hi', attachment_refs: attachmentRefs },
+          },
+        ],
+      });
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [written] } });
+
+      const created = await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [
+          {
+            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+            input: { message: 'hi', attachment_refs: attachmentRefs },
+          },
+        ],
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: { events?: Array<{ data: { attachment_refs?: unknown[] } }> };
+      };
+      expect(indexed.events?.[0]?.data.attachment_refs).toEqual(attachmentRefs);
+
+      expect(created.events?.[0]?.data).toMatchObject({ attachment_refs: attachmentRefs });
+      expect(created.rounds[0].input.attachment_refs).toEqual(attachmentRefs);
+    });
+
+    it('reconciles stored events when a round completes (crash-recovery: in_progress → completed = exactly one terminal)', async () => {
+      const inProgressRound = createRound({
+        id: 'round-crash',
+        status: ConversationRoundStatus.inProgress,
+      });
+      const stalePartialEvents: TimelineEvent[] = [
+        {
+          id: 'round-crash::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: '2025-08-04T07:42:20.789Z',
+          actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+          data: inProgressRound.input,
+        },
+        {
+          id: 'round-crash::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:42:20.789Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: 'round-crash::execution',
+          trigger_event_id: 'round-crash::user_message',
+          data: { trigger_type: TimelineTriggerType.userMessage },
+        },
+      ];
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              schemaVersion: 1,
+              rounds: [inProgressRound],
+              events: stalePartialEvents,
+            }),
+          ],
+        },
+      });
+
+      await client.upsertRound({
+        id: 'conversation-1',
+        round: {
+          ...inProgressRound,
+          status: ConversationRoundStatus.completed,
+          response: { message: 'now finished' },
+        },
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: { events?: Array<{ id: string; type: string }> };
+      };
+      const terminals = indexed.events?.filter(
+        (event) => event.type === TimelineEventType.executionTerminated
+      );
+      expect(terminals).toHaveLength(1);
+      expect(terminals?.[0]?.id).toBe('round-crash::execution_terminated');
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-crash::user_message',
+        'round-crash::execution_started',
+        'round-crash::execution_terminated',
+      ]);
+    });
+
+    it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+            }),
+          ],
+        },
+      });
+
+      await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          title: string;
+          schema_version?: number;
+          events?: unknown[];
+        };
+      };
+      expect(indexed.title).toBe('Renamed');
+      expect(indexed.schema_version).toBeUndefined();
+      expect(indexed.events).toBeUndefined();
+    });
+
+    it('keeps events-native docs events-native on update (re-stamps schema_version, regenerates events)', async () => {
+      const existingRound = createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+      });
+      const storedEvents: TimelineEvent[] = [
+        {
+          id: 'round-1::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: existingRound.started_at,
+          actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+          data: existingRound.input,
+        },
+      ];
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              schemaVersion: 1,
+              rounds: [existingRound],
+              events: storedEvents,
+            }),
+          ],
+        },
+      });
+
+      await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          schema_version?: number;
+          events?: Array<{ id: string; type: string }>;
+        };
+      };
+      expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+      ]);
     });
   });
 });

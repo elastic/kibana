@@ -69,6 +69,27 @@ export async function getPackagePolicyForMonitor(
 }
 
 /**
+ * `GET /api/fleet/agent_policies/{id}` -- returns the agent policy's current
+ * revision. A monitor write against a scalable (condition-sharded) private
+ * location opts out of Fleet's own immediate bump and instead schedules a
+ * batched bump on the shared agent policy; the revision strictly increasing
+ * is the directly-observable side effect of that batched bump actually
+ * running, as opposed to a write that returns 200 without one.
+ */
+export async function getAgentPolicyRevision(
+  apiClient: ApiClientFixture,
+  headers: Record<string, string>,
+  agentPolicyId: string
+): Promise<number> {
+  const res = await apiClient.get(`api/fleet/agent_policies/${agentPolicyId}`, {
+    headers,
+    responseType: 'json',
+  });
+  expect(res).toHaveStatusCode(200);
+  return (res.body as { item: { revision: number } }).item.revision;
+}
+
+/**
  * Force-deletes a single Fleet package policy by id. Mirrors the FTR
  * `deletePackagePolicyDirectly` helper used to simulate a corrupted/missing
  * package policy before a reset.

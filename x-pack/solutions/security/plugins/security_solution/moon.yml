@@ -286,8 +286,6 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/workflows-ui'
   - '@kbn/workflows'
-  - '@kbn/deeplinks-workflows'
-  - '@kbn/core-rendering-browser'
   - '@kbn/controls-constants'
   - '@kbn/anonymization-plugin'
   - '@kbn/anonymization-common'
@@ -306,6 +304,8 @@ dependsOn:
   - '@kbn/discoveries-schemas'
   - '@kbn/chart-icons'
   - '@kbn/core-mount-utils-browser'
+  - '@kbn/ui-callout'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod
