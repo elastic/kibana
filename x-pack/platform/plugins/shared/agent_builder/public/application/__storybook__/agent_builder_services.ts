@@ -8,7 +8,7 @@
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
   AttachmentType,
-  AGENT_BUILDER_IMAGE_FILE_KIND,
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
 } from '@kbn/agent-builder-common/attachments';
 import type { ImageAttachmentData, UnknownAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
@@ -50,7 +50,7 @@ const storybookImageAttachmentDefinition: AttachmentUIDefinition<StorybookImageA
     const { file_id: fileId } = attachment.data;
     if (!fileId) return undefined;
     return kibanaServices.http.basePath.prepend(
-      `/api/files/files/${AGENT_BUILDER_IMAGE_FILE_KIND}/${fileId}/blob`
+      `/api/files/files/${CHAT_ATTACHMENT_IMAGES_FILE_KIND}/${fileId}/blob`
     );
   },
 };
@@ -80,6 +80,7 @@ const defaultServices: AgentBuilderInternalService = {
   renderersService: {} as never,
   chatService: {} as never,
   conversationsService: {} as never,
+  conversationTemplatesService: {} as never,
   docLinksService: {} as never,
   navigationService: {} as never,
   toolsService: {} as never,

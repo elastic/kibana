@@ -15,7 +15,7 @@ import {
 import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
-  AGENT_BUILDER_IMAGE_FILE_KIND,
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   MAX_IMAGE_BYTES,
   SUPPORTED_IMAGE_MIME_TYPES,
 } from '@kbn/agent-builder-common/attachments';
@@ -121,7 +121,7 @@ export class AgentBuilderPlugin
     this.isEarsExperimentalEnabled = deps.actions.isEarsExperimentalEnabled;
 
     deps.files.registerFileKind({
-      id: AGENT_BUILDER_IMAGE_FILE_KIND,
+      id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
       allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
       maxSizeBytes: MAX_IMAGE_BYTES,
     });
@@ -167,7 +167,7 @@ export class AgentBuilderPlugin
     );
 
     const filesClient = startDependencies.files.filesClientFactory.asScoped(
-      AGENT_BUILDER_IMAGE_FILE_KIND
+      CHAT_ATTACHMENT_IMAGES_FILE_KIND
     );
 
     const agentService = new AgentService({ http });

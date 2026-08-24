@@ -49,14 +49,14 @@ const makeAddErrorToast = () => jest.fn();
 
 describe('processImageFile', () => {
   it('calls create then upload then upsertAttachments on success', async () => {
-    const filesClient = makeFilesClient() as never;
+    const filesClient = makeFilesClient();
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
 
     await processImageFile({
       file: makeFile('shot.png', 'image/png', 100),
       name: 'shot.png',
-      filesClient,
+      filesClient: filesClient as never,
       upsertAttachments,
       addErrorToast,
     });
@@ -75,14 +75,14 @@ describe('processImageFile', () => {
   });
 
   it('shows an error toast and skips upload for unsupported mime type', async () => {
-    const filesClient = makeFilesClient() as never;
+    const filesClient = makeFilesClient();
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
 
     await processImageFile({
       file: makeFile('image.gif', 'image/gif', 100),
       name: 'image.gif',
-      filesClient,
+      filesClient: filesClient as never,
       upsertAttachments,
       addErrorToast,
     });
@@ -93,14 +93,14 @@ describe('processImageFile', () => {
   });
 
   it('shows an error toast and skips upload when file is too large', async () => {
-    const filesClient = makeFilesClient() as never;
+    const filesClient = makeFilesClient();
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
 
     await processImageFile({
       file: makeFile('big.png', 'image/png', MAX_IMAGE_BYTES + 1),
       name: 'big.png',
-      filesClient,
+      filesClient: filesClient as never,
       upsertAttachments,
       addErrorToast,
     });
@@ -120,14 +120,14 @@ describe('processImageFile', () => {
         const err = new DOMException('aborted', 'AbortError');
         return Promise.reject(err);
       }),
-    }) as never;
+    });
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
 
     await processImageFile({
       file: makeFile('shot.png', 'image/png', 100),
       name: 'shot.png',
-      filesClient,
+      filesClient: filesClient as never,
       upsertAttachments,
       addErrorToast,
       abortSignal: controller.signal,
@@ -141,14 +141,14 @@ describe('processImageFile', () => {
     const filesClient = makeFilesClient({
       create: jest.fn().mockResolvedValue({ file: { id: 'file-xyz' } }),
       upload: jest.fn().mockRejectedValue(new Error('network error')),
-    }) as never;
+    });
     const upsertAttachments = jest.fn();
     const addErrorToast = makeAddErrorToast();
 
     await processImageFile({
       file: makeFile('shot.png', 'image/png', 100),
       name: 'shot.png',
-      filesClient,
+      filesClient: filesClient as never,
       upsertAttachments,
       addErrorToast,
     });
