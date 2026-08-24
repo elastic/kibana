@@ -45,7 +45,11 @@ export async function yarnInstallDeps(log, { offline, quiet }) {
   if (quiet) args.push('--silent');
 
   log.info('installing dependencies with yarn');
-  await run('yarn', args, { cwd: process.cwd(), pipe: !quiet });
+  // Some packages in node_modules (e.g. es-toolkit, monaco-yaml) declare `workspaces` without
+  // `"private": true`, which causes yarn to emit a harmless warning for each one during install.
+  const noWorkspaceWarning = (chunk) =>
+    !chunk.toString().includes('Workspaces can only be enabled in private projects');
+  await run('yarn', args, { cwd: process.cwd(), pipe: !quiet, filter: noWorkspaceWarning });
   log.success('yarn dependencies installed');
 
   await run('yarn', ['playwright', 'install'], {
