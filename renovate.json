@@ -5,11 +5,7 @@
     "helpers:pinGitHubActionDigests",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
-  "ignorePaths": [
-    "**/__fixtures__/**",
-    "**/fixtures/**",
-    ".github/workflows/*.lock.yml"
-  ],
+  "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**", ".github/workflows/*.lock.yml"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "9.5", "9.4", "8.19"],
   "labels": ["release_note:skip", "backport:all-open"],
@@ -75,11 +71,7 @@
       "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
-      "labels": [
-        "Team:Operations",
-        "backport:skip",
-        "release_note:skip"
-      ],
+      "labels": ["Team:Operations", "backport:skip", "release_note:skip"],
       "minimumReleaseAge": "30 days",
       "enabled": true
     },
@@ -104,13 +96,7 @@
       "matchPackageNames": ["docker.elastic.co/wolfi/chainguard-base-fips"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "/^9.[1-9].*/", "8.19"],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:skip",
-        "ci:build-docker-fips",
-        "ci:cloud-deploy"
-      ],
+      "labels": ["Team:Operations", "release_note:skip", "backport:skip", "ci:build-docker-fips"],
       "enabled": true
     },
     {
@@ -521,7 +507,13 @@
     },
     {
       "groupName": "@elastic/contextual-security-apps dependencies",
-      "matchDepNames": ["@mswjs/http-middleware", "@types/byte-size", "byte-size", "msw", "@xterm/xterm"],
+      "matchDepNames": [
+        "@mswjs/http-middleware",
+        "@types/byte-size",
+        "byte-size",
+        "msw",
+        "@xterm/xterm"
+      ],
       "reviewers": ["team:contextual-security-apps"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
@@ -1947,10 +1939,7 @@
     },
     {
       "groupName": "minify",
-      "matchDepNames": [
-        "gulp-brotli",
-        "terser-webpack-plugin"
-      ],
+      "matchDepNames": ["gulp-brotli", "terser-webpack-plugin"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -2581,9 +2570,7 @@
       "description": "Update gh-aw CLI version used to validate generated agentic workflows",
       "customType": "regex",
       "fileMatch": ["^\\.github/workflows/validate-agentic-workflow-locks\\.yml$"],
-      "matchStrings": [
-        "GH_AW_VERSION:\\s(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)"
-      ],
+      "matchStrings": ["GH_AW_VERSION:\\s(?<currentValue>v[0-9]+\\.[0-9]+\\.[0-9]+)"],
       "depNameTemplate": "github/gh-aw",
       "packageNameTemplate": "github/gh-aw",
       "datasourceTemplate": "github-releases",
