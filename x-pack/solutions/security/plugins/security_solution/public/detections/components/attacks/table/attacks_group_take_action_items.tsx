@@ -30,6 +30,7 @@ import { useAttackViewInAiAssistantContextMenuItems } from '../../../hooks/attac
 import type { AttacksActionTelemetrySource } from '../../../../common/lib/telemetry/events/attacks/types';
 import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import type { AttackToAttach } from '../../../../cases/attachments/attack';
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -157,11 +158,41 @@ export function AttacksGroupTakeActionItems({
     [attack, baseAttackProps]
   );
 
+  // Only attachable as a `security.attack` when we know which index the attack document came
+  // from — the attachment metadata requires it for the duplicate check and for status sync — so
+  // without it the menu falls back to the markdown-comment payload.
+  const attackToAttach = useMemo<Omit<AttackToAttach, 'alertsIndex'> | undefined>(
+    () =>
+      attack.index != null
+        ? {
+            id: attack.id,
+            index: attack.index,
+            title: attack.title,
+            summaryMarkdown: attack.summaryMarkdown,
+            riskScore: attack.riskScore,
+            // Raw (possibly anonymised) ids plus the replacements that reverse them; the payload
+            // builder de-anonymises and dedupes.
+            alertIds: attack.alertIds,
+            replacements: attack.replacements,
+          }
+        : undefined,
+    [
+      attack.alertIds,
+      attack.id,
+      attack.index,
+      attack.replacements,
+      attack.riskScore,
+      attack.summaryMarkdown,
+      attack.title,
+    ]
+  );
+
   const { items: casesItems } = useAttackCaseContextMenuItems({
     closePopover,
     title: attack.title,
     attacksWithCase,
     telemetrySource,
+    attackToAttach,
   });
   const { items: viewInAiAssistantItems } = useAttackViewInAiAssistantContextMenuItems({
     attack,

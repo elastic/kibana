@@ -300,6 +300,35 @@ describe('AttacksGroupTakeActionItems', () => {
     });
   });
 
+  describe('attack case attachment', () => {
+    it('passes the attack to attach to the cases hook', () => {
+      const attack = { ...mockAttack, index: '.alerts-security.attack.discovery.alerts-default' };
+      renderAttack(attack);
+
+      expect(mockUseAttackCaseContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({
+          attackToAttach: {
+            id: attack.id,
+            index: attack.index,
+            title: attack.title,
+            summaryMarkdown: attack.summaryMarkdown,
+            riskScore: attack.riskScore,
+            alertIds: attack.alertIds,
+            replacements: attack.replacements,
+          },
+        })
+      );
+    });
+
+    it('omits the attack to attach when the source index is unknown', () => {
+      renderAttack({ ...mockAttack, index: undefined });
+
+      expect(mockUseAttackCaseContextMenuItems).toHaveBeenCalledWith(
+        expect.objectContaining({ attackToAttach: undefined })
+      );
+    });
+  });
+
   describe('view in ai assistant', () => {
     it('should render the `View in AI Assistant` action item', async () => {
       const { findByText } = renderAttack(mockAttack);
