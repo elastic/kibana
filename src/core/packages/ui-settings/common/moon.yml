@@ -20,7 +20,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/analytics'
   - '@kbn/core-http-server'
-  - '@kbn/projects-solutions-groups'
+  - '@kbn/core-chrome-browser'
 tags:
   - shared-common
   - package
