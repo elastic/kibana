@@ -15,6 +15,9 @@ const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin
  * @typedef {(import('./src/worker_factory').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
  */
 
+/**
+ * @param {WorkerType[number]} language
+ */
 const getWorkerEntry = (language) => {
   switch (language) {
     case 'default':
@@ -43,12 +46,18 @@ const workerConfig = (languages) => ({
   entry: languages.reduce((entries, language) => {
     entries[language] = getWorkerEntry(language);
     return entries;
-  }, {}),
+  }, /** @type {Record<WorkerType[number], string>} */ ({})),
   devtool: process.env.NODE_ENV === 'production' ? false : 'cheap-source-map',
   target: 'web',
   output: {
     path: path.resolve(__dirname, 'target_workers'),
-    filename: ({ chunk }) => `${chunk.name}.editor.worker.js`,
+    filename: ({ chunk }) => {
+      if (!chunk) {
+        throw new Error('Chunk for worker is required, but was not provided');
+      }
+
+      return `${chunk.name}.editor.worker.js`;
+    },
   },
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
