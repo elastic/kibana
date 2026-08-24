@@ -650,6 +650,7 @@ describe('autocomplete_utils', () => {
           endLineNumber: 3,
           endColumn: 17, // includes the auto-closed closing quote
         });
+        expect(primitive?.filterText).toBe('"false');
         expect(stringTerm?.range).toEqual({
           startLineNumber: 3,
           startColumn: 15, // string terms re-insert the quotes themselves
@@ -681,6 +682,7 @@ describe('autocomplete_utils', () => {
           endLineNumber: 3,
           endColumn: 16,
         });
+        expect(primitive?.filterText).toBe('"-1');
         const acc = acceptSuggestion(editorLines, primitive!);
         expect(JSON.parse(`{${acc}}`)).toEqual({ value: -1 });
         expect(acc).toBe('  "value": -1');
@@ -705,6 +707,7 @@ describe('autocomplete_utils', () => {
           endLineNumber: 3,
           endColumn: 16,
         });
+        expect(primitive?.filterText).toBe('"0.5');
         const acc = acceptSuggestion(editorLines, primitive!);
         expect(JSON.parse(`{${acc}}`)).toEqual({ value: 0.5 });
         expect(acc).toBe('  "value": 0.5');
@@ -729,6 +732,7 @@ describe('autocomplete_utils', () => {
           endLineNumber: 3,
           endColumn: 18,
         });
+        expect(primitive?.filterText).toBe('"0.5');
         const acc = acceptSuggestion(editorLines, primitive!);
         expect(JSON.parse(`{${acc}}`)).toEqual({ values: [0.5] });
         expect(acc).toBe('  "values": [0.5]');
@@ -838,6 +842,7 @@ describe('autocomplete_utils', () => {
           endLineNumber: 3,
           endColumn: 16, // includes the auto-closed closing quote
         });
+        expect(primitive?.filterText).toBe('"false');
         expect(stringTerm?.range).toEqual({
           startLineNumber: 3,
           startColumn: 15,
@@ -870,6 +875,7 @@ describe('autocomplete_utils', () => {
           endLineNumber: 3,
           endColumn: 15,
         });
+        expect(primitive?.filterText).toBeUndefined();
         expect(acceptSuggestion(editorLines, primitive!)).toBe('  "refresh": false');
       });
     });

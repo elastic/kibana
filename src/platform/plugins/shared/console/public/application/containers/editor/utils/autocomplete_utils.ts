@@ -506,6 +506,10 @@ const getSuggestions = (
     openingQuoteStartColumn !== false && openingQuoteStartColumn !== undefined
       ? { ...range, startColumn: openingQuoteStartColumn }
       : range;
+  const primitiveTermFilterText =
+    openingQuoteStartColumn !== false && openingQuoteStartColumn !== undefined
+      ? (name: ResultTerm['name']) => `"${String(name)}`
+      : undefined;
   const quotedValueRange =
     openingQuoteStartColumn !== false &&
     openingQuoteStartColumn !== undefined &&
@@ -545,6 +549,9 @@ const getSuggestions = (
           // the kind is only used to configure the icon
           kind: monaco.languages.CompletionItemKind.Constant,
           range: typeof item.name !== 'string' ? primitiveTermRange : quotedValueRange,
+          ...(typeof item.name !== 'string' && primitiveTermFilterText
+            ? { filterText: primitiveTermFilterText(item.name) }
+            : {}),
           insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           ...(endsInsideEmptyContainer
             ? { command: { id: 'editor.action.triggerSuggest', title: '' } }
