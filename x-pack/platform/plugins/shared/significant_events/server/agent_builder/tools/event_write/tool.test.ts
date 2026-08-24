@@ -113,6 +113,80 @@ describe('events_write tool', () => {
     });
   });
 
+  describe('open high-severity confirms invariant', () => {
+    const signalWith = (verdict: 'confirms' | 'off_topic') => ({
+      type: 'detection' as const,
+      stream_name: 'logs.test',
+      description: 'Found: error. Impact: requests failed.',
+      verdict,
+      evidence: { esql_query: 'FROM logs.test', result: 'found' as const },
+      metadata: {
+        rule_uuid: 'rule-1',
+        detection_id: 'detection-1',
+        change_point_type: 'spike' as const,
+        p_value: 0.01,
+      },
+    });
+
+    it('rejects an open 60-high item whose grounded signals lack a confirms verdict', () => {
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...input, signals: [signalWith('off_topic')] }],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.at(-1)?.message).toContain('requires at least one confirms');
+      }
+    });
+
+    it('accepts an open 60-high item backed by a confirms signal', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [{ ...input, signals: [signalWith('confirms')] }],
+        }).success
+      ).toBe(true);
+    });
+
+    it('rejects mixing confirms and not_checked on the same item', () => {
+      const quiet = {
+        type: 'detection' as const,
+        stream_name: 'logs.test',
+        description: 'Rule Y: no backed query KI matched this detection.',
+        verdict: 'not_checked' as const,
+        metadata: {
+          rule_uuid: 'rule-2',
+          detection_id: 'detection-2',
+          change_point_type: 'spike' as const,
+          p_value: 0.2,
+        },
+      };
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...input, signals: [signalWith('confirms'), quiet] }],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.at(-1)?.message).toContain('cannot include not_checked');
+      }
+    });
+
+    it('accepts an open 60-high item whose signals carry no evidence (quiet rules)', () => {
+      const quiet = {
+        type: 'detection' as const,
+        stream_name: 'logs.test',
+        description: 'Rule X: no backed query KI matched this detection.',
+        verdict: 'not_checked',
+        metadata: {
+          rule_uuid: 'rule-1',
+          detection_id: 'detection-1',
+          change_point_type: 'spike' as const,
+          p_value: 0.01,
+        },
+      };
+      expect(eventsWriteSchema.safeParse({ items: [{ ...input, signals: [quiet] }] }).success).toBe(
+        true
+      );
+    });
+  });
+
   it('normalizes an empty event_id to an omitted event_id', () => {
     const result = eventsWriteSchema.parse({
       items: [{ ...input, event_id: '' }],

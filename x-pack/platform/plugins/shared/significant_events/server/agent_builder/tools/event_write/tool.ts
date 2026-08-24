@@ -94,7 +94,33 @@ export const eventsWriteItemSchema = significantEventSchema
     {
       message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
     }
-  );
+  )
+  .superRefine((item, ctx) => {
+    const signals = item.signals ?? [];
+    const grounded = signals.filter((s) => s.evidence != null);
+    const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
+    const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
+
+    if (hasConfirms && hasNotChecked) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          'A confirms item cannot include not_checked signals; emit each not_checked detection as its own dismissed item.',
+      });
+    }
+    if (
+      item.status === 'open' &&
+      (item.severity === '60-high' || item.severity === '80-critical') &&
+      grounded.length > 0 &&
+      !hasConfirms
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          'An open event at "60-high" or above whose signals carry query evidence requires at least one confirms signal; without a confirmed, newly elevated failure use a lower severity or a non-open status.',
+      });
+    }
+  });
 
 const ITEMS_REQUIRED_MESSAGE = 'Pass items as a non-empty array of event objects.';
 
@@ -120,7 +146,7 @@ const eventsWriteItemsSchema = z
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
       defaultMessage:
-        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item.',
+        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals.',
     })
   );
 
@@ -151,10 +177,11 @@ export function createEventsWriteTool({
     id: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Write a batch of significant events. Call once with the completed object
-      \`{ "items": [ ... ] }\`. A bare call or \`{}\` is invalid and writes nothing.
-      If that specific argument error occurs, submit the already-completed object once. Do not
-      retry a populated payload rejected for ownership or field validation.
+       Write a batch of significant events. Always pass the completed object
+      \`{ "items": [ ... ] }\` with at least one event item. Never pass \`{}\` or
+      \`{ "items": [] }\`. If that missing-items argument error occurs, submit the
+      already-completed object once. Do not retry a populated payload rejected for
+      ownership or field validation.
 
       **With event_id**: append a version to an existing event with the supplied status.
       Signals and topology are merged with prior versions. No-op if severity and status are
