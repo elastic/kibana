@@ -115,13 +115,10 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
   },
 
   /**
-   * Workflow chunks are gated by the dedicated `ai_index:workflow/read` action, not by the
-   * Workflows Management read API action the workflows API itself checks. The Workflows
-   * Management feature grants it by declaring `aiIndex: { read: [WORKFLOW_KI_TYPE] }` (see
-   * `workflows_management/server/features.ts`), so the `kiType` here must stay in step with that
-   * declaration. Workflows are stored in a dedicated Elasticsearch index rather than as Kibana
-   * saved objects, but that no longer affects how permissions are declared — every SML type goes
-   * through the same helper.
+   * Workflow chunks are gated by the dedicated `ai_index:workflow/read` action.
+   * The Workflows Management feature grants it by declaring `aiIndex: { read: [WORKFLOW_KI_TYPE] }`
+   * (see `workflows_management/server/features.ts`), so the `kiType` here must stay in step
+   * with that declaration.
    */
   getPermissions: () => kibanaPermissions({ kiType: WORKFLOW_KI_TYPE }),
 
