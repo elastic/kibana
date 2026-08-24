@@ -13,6 +13,18 @@ import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-bui
 import { css } from '@emotion/react';
 import { roundedBorderRadiusStyles } from '../../../common.styles';
 
+const EMOJI_FONT_STACK = "'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif";
+
+const isEmojiSymbol = (str: string): boolean =>
+  /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(str);
+
+const AVATAR_SIZE_PX: Record<NonNullable<EuiAvatarProps['size']>, number> = {
+  s: 24,
+  m: 32,
+  l: 40,
+  xl: 56,
+};
+
 // Icon size should be one size larger than the avatar size
 const getIconSize = ({ size }: { size: 's' | 'm' | 'l' | 'xl' | undefined }) => {
   switch (size) {
@@ -109,6 +121,26 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
         <EuiIcon type={iconType} size={iconSize} aria-hidden={true} />
       </EuiPanel>
     );
+  }
+
+  if (symbol && isEmojiSymbol(symbol)) {
+    const dimension = size ? AVATAR_SIZE_PX[size] : AVATAR_SIZE_PX.m;
+    const emojiDisplayStyles = css`
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: ${dimension}px;
+      height: ${dimension}px;
+      font-size: 18px;
+      font-family: ${EMOJI_FONT_STACK};
+      background-color: ${color || euiTheme.colors.backgroundBaseSubdued};
+      ${shape === 'circle'
+        ? css`
+            border-radius: 50%;
+          `
+        : roundedBorderRadiusStyles}
+    `;
+    return <div css={emojiDisplayStyles}>{symbol}</div>;
   }
 
   let type: 'user' | 'space' | undefined;

@@ -49,7 +49,7 @@ export const EsqlEditorField = React.memo(() => {
             hideQueryHistory
             disableAutoFocus
             initialState={{
-              editorHeight: 360,
+              editorHeight: 200,
             }}
             errors={[]} // Hides the initial error message, won't prevent future errors
           />
