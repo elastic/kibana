@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -38,6 +39,7 @@ fileGroups:
     - common/**/*
     - server/**/*
     - public/**/*
+    - test/scout*/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
