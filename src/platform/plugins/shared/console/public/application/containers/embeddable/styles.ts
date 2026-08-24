@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  makeHighContrastColor,
-  tint,
-  useEuiScrollBar,
-  useEuiTheme,
-  useIsDarkMode,
-} from '@elastic/eui';
+import { useEuiScrollBar, useEuiTheme, useIsDarkMode } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
@@ -23,8 +17,9 @@ export const useEmbeddableConsoleStyleVariables = () => {
   const background = isDark ? euiTheme.colors.plainDark : euiTheme.colors.backgroundBasePlain;
   const text = euiTheme.colors.textParagraph;
   const initialHeight = euiTheme.size.xxl;
-  const maxHeight = `calc(${layoutVar('application.content.height', '100vh')} - ${euiTheme.size.base
-    })`;
+  const maxHeight = `calc(${layoutVar('application.content.height', '100vh')} - ${
+    euiTheme.size.base
+  })`;
   return {
     background,
     text,

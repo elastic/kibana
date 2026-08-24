@@ -27,7 +27,6 @@ export const useStyles = () => {
     `,
 
     embeddableConsole: css`
-      
       color: ${variables.text};
       display: flex;
       flex-direction: column;

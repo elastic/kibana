@@ -221,9 +221,12 @@ export const EmbeddableConsole = ({
                       css={styles.embeddableConsoleControlsButton}
                       data-test-subj="consoleEmbeddedControlBar"
                       data-telemetry-id="console-embedded-controlbar-button"
-                      aria-label={i18n.translate('console.embeddableConsole.toggleButtonAriaLabel', {
-                        defaultMessage: 'Toggle console',
-                      })}
+                      aria-label={i18n.translate(
+                        'console.embeddableConsole.toggleButtonAriaLabel',
+                        {
+                          defaultMessage: 'Toggle console',
+                        }
+                      )}
                     >
                       {i18n.translate('console.embeddableConsole.title', {
                         defaultMessage: 'Console',
