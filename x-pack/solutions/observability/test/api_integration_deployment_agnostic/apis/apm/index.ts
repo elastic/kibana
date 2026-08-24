@@ -10,8 +10,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 export default function apmApiIntegrationTests({
   loadTestFile,
 }: DeploymentAgnosticFtrProviderContext) {
-  describe('APM', function () {
-    loadTestFile(require.resolve('./part_1'));
-    loadTestFile(require.resolve('./part_2'));
-  });
+  // part_1 and part_2 each declare their own `describe('APM', ...)` block
+  loadTestFile(require.resolve('./part_1'));
+  loadTestFile(require.resolve('./part_2'));
 }
