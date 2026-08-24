@@ -109,7 +109,6 @@ export const eventsWriteItemSchema = significantEventSchema
       });
     }
     if (
-      !item.event_id &&
       item.status === 'open' &&
       (item.severity === '60-high' || item.severity === '80-critical') &&
       grounded.length > 0 &&
