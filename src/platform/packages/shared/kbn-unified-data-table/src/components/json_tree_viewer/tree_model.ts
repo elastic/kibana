@@ -31,6 +31,10 @@ export const CHILDREN_INCREMENT = 10;
 // We need to put a limit to not blow up the DOM.
 export const MAX_SEARCH_REVEAL = 100;
 
+// Safety budget for bulk expansion (Expand all / recursive Cmd-click)
+// indices-stats is a good index to test this limit.
+export const MAX_EXPANDED_ROWS = 500;
+
 export const ROOT_ID = 'json-viewer-$root';
 
 export const OPEN_BRACKET = { object: '{', array: '[' } as const;
@@ -308,14 +312,41 @@ export const getNodeId = (path: readonly string[]): string =>
   path.reduce((id, key) => `${id}/${key.length}:${key}`, 'json-viewer');
 
 /**
- * Returns a list of Node ids that can be expanded. Empty coollections can't be expanded.
+ * Collects the ids of collections to expand, breadth-first, until expanding one more would exceed
+ * the rendered-row budget. Empty collections can't be expanded. Breadth-first so the first levels
+ * expand first; deeper nodes stay collapsed and can be expanded on demand.
  */
-export const collectExpandableIds = (nodes: JsonNode[]): string[] =>
-  nodes.flatMap((node) => {
-    if (node.kind !== 'collection') return [];
-    const childIds = collectExpandableIds(node.children);
-    return node.children.length > 0 ? [node.id, ...childIds] : childIds;
-  });
+export const collectExpandableIds = (
+  roots: JsonNode[],
+  budget: number = MAX_EXPANDED_ROWS
+): string[] => {
+  const ids: string[] = [];
+  let remaining = budget;
+  const queue: CollectionNode[] = [];
+  const enqueue = (nodes: JsonNode[]) => {
+    for (const node of nodes) {
+      if (node.kind === 'collection' && node.children.length > 0) {
+        queue.push(node);
+      }
+    }
+  };
+
+  enqueue(roots);
+  for (let head = 0; head < queue.length; head++) {
+    const node = queue[head];
+    // Expanding a collection reveals up to INITIAL_CHILDREN child rows (the pager caps the rest).
+    const cost = Math.min(node.children.length, INITIAL_CHILDREN);
+    if (cost > remaining) {
+      // Budget spent for this branch; keep scanning — a smaller sibling may still fit.
+      continue;
+    }
+    ids.push(node.id);
+    remaining -= cost;
+    enqueue(node.children);
+  }
+
+  return ids;
+};
 
 /** Serialize a subtree back to JSON (used by the copy-value / copy-subtree features) */
 export const nodeToJsonString = (node: JsonNode): string =>

@@ -72,6 +72,8 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   const styles = useEuiMemoizedStyles(treeStyles);
 
   const nodes = useMemo(() => buildNodes(json), [json]);
+  // Bulk expansion (Expand all + isAllExpanded) is budgeted so a deeply nested document can't
+  // explode the DOM.
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
 
   const searchTermLower = expandNodesContainingTerm?.trim().toLowerCase() ?? '';
@@ -193,7 +195,8 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
                 rowRef={registerRow(row.node.id)}
                 onActivate={(event) => {
                   if (!row.hasChildren) return;
-                  // Cmd/Ctrl-click expands the whole subtree.
+                  // Cmd/Ctrl-click expands the whole subtree, budgeted so a deep subtree can't
+                  // explode the DOM.
                   if (event.metaKey || event.ctrlKey) {
                     expandIds(collectExpandableIds([row.node]));
                   } else {
