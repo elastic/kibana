@@ -15,17 +15,15 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import type { ActionPolicyResponse, CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ACTION_POLICY_API_PATH,
-  ALERTING_V2_ENABLED_SETTING_ID,
   ALERTING_V2_RULE_API_PATH,
 } from '@kbn/alerting-v2-constants';
 import {
   ALERTING_V2_FEATURES,
   ALERTING_V2_UI_CAPABILITIES,
-} from '../../../../common/feature_privileges';
-import { COMMON_HEADERS } from '../fixtures/constants';
+} from '../../../../../common/feature_privileges';
+import { COMMON_HEADERS } from '../../../common/constants';
 
 const TOOLS_EXECUTE_API = '/api/agent_builder/tools/_execute';
-const GLOBAL_SETTINGS_API = '/api/kibana/global_settings';
 const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
 const CRAWL_POLL_TIMEOUT_MS = 45_000;
 const CRAWL_POLL_INTERVAL_MS = 1_000;
@@ -56,6 +54,26 @@ const LIMITED_ALERTING_V2_CHAT_ROLE: KibanaRole = {
         agentBuilder: ['read'],
         [ALERTING_V2_FEATURES.rules.id]: [ALERTING_V2_UI_CAPABILITIES.rules.read],
         [ALERTING_V2_FEATURES.actionPolicies.id]: [ALERTING_V2_UI_CAPABILITIES.actionPolicies.read],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/**
+ * Same Agent Builder execute privilege as chat, without alerting v2 reads.
+ * Hits stamped with `api:read_alerting-v2-*` must be filtered out.
+ */
+const AGENT_BUILDER_READ_WITHOUT_ALERTING_V2_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        agentBuilder: ['read'],
       },
       spaces: ['*'],
     },
@@ -100,6 +118,10 @@ const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<
  * Agent Builder chat discovers alerting v2 rules/policies via the builtin
  * `platform.core.sml_search` tool. `POST /api/agent_builder/tools/_execute`
  * runs that same handler without a conversation, LLM, or connector.
+ *
+ * This suite lives under `scout_alerting_v2` so `alerting:v2:enabled` stays
+ * pinned on. The generic Scout config leaves that setting unpinned, and
+ * `rule_management_skill_gating.spec.ts` toggles it at runtime.
  */
 apiTest.describe(
   'Agent Builder — alerting V2 SML type access',
@@ -111,6 +133,7 @@ apiTest.describe(
     const policyTitle = `${searchToken} slack action policy`;
 
     let limitedCredentials: RoleApiCredentials;
+    let agentBuilderOnlyCredentials: RoleApiCredentials;
     let ruleId: string;
     let policyId: string;
     let ruleAttachmentId: string;
@@ -118,10 +141,11 @@ apiTest.describe(
 
     const executeSmlSearch = async (
       apiClient: ApiClientFixture,
+      credentials: RoleApiCredentials,
       toolParams: { query: string; size?: number; types?: string[] }
     ) => {
       const response = await apiClient.post(TOOLS_EXECUTE_API, {
-        headers: { ...EXECUTE_HEADERS, ...limitedCredentials.apiKeyHeader },
+        headers: { ...EXECUTE_HEADERS, ...credentials.apiKeyHeader },
         body: {
           tool_id: platformCoreTools.smlSearch,
           tool_params: { size: 20, ...toolParams },
@@ -135,13 +159,6 @@ apiTest.describe(
     apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient }) => {
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-      });
-
-      const { apiKeyHeader: adminApiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-      await apiClient.post(`${GLOBAL_SETTINGS_API}/${ALERTING_V2_ENABLED_SETTING_ID}`, {
-        headers: { ...COMMON_HEADERS, ...adminApiKeyHeader },
-        body: { value: true },
-        responseType: 'json',
       });
 
       const createRuleData: CreateRuleData = {
@@ -186,11 +203,16 @@ apiTest.describe(
       ]);
 
       limitedCredentials = await requestAuth.getApiKeyForCustomRole(LIMITED_ALERTING_V2_CHAT_ROLE);
+      agentBuilderOnlyCredentials = await requestAuth.getApiKeyForCustomRole(
+        AGENT_BUILDER_READ_WITHOUT_ALERTING_V2_ROLE
+      );
 
       await expect
         .poll(
           async () => {
-            const hits = getSearchHits(await executeSmlSearch(apiClient, { query: searchToken }));
+            const hits = getSearchHits(
+              await executeSmlSearch(apiClient, limitedCredentials, { query: searchToken })
+            );
             const attachmentIds = hits.map((hit) => hit.attachment_id);
             return (
               attachmentIds.includes(ruleAttachmentId) && attachmentIds.includes(policyAttachmentId)
@@ -201,7 +223,7 @@ apiTest.describe(
         .toBe(true);
     });
 
-    apiTest.afterAll(async ({ apiClient, kbnClient, requestAuth }) => {
+    apiTest.afterAll(async ({ kbnClient }) => {
       if (ruleId) {
         await kbnClient.request({
           method: 'DELETE',
@@ -222,17 +244,14 @@ apiTest.describe(
       }
 
       await kbnClient.uiSettings.unset(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-      const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
-      await apiClient.delete(
-        `${GLOBAL_SETTINGS_API}/${encodeURIComponent(ALERTING_V2_ENABLED_SETTING_ID)}`,
-        { headers: { ...COMMON_HEADERS, ...apiKeyHeader }, responseType: 'json' }
-      );
     });
 
     apiTest(
       'limited privilege user can search alerting v2 rule and action policy SML types',
       async ({ apiClient }) => {
-        const hits = getSearchHits(await executeSmlSearch(apiClient, { query: searchToken }));
+        const hits = getSearchHits(
+          await executeSmlSearch(apiClient, limitedCredentials, { query: searchToken })
+        );
 
         expect(hits.find((hit) => hit.attachment_id === ruleAttachmentId)).toMatchObject({
           type: RULE_KI_TYPE,
@@ -249,7 +268,7 @@ apiTest.describe(
       'limited privilege user can filter SML search to the rule type',
       async ({ apiClient }) => {
         const hits = getSearchHits(
-          await executeSmlSearch(apiClient, {
+          await executeSmlSearch(apiClient, limitedCredentials, {
             query: searchToken,
             types: [RULE_KI_TYPE],
           })
@@ -264,7 +283,7 @@ apiTest.describe(
       'limited privilege user can filter SML search to the action policy type',
       async ({ apiClient }) => {
         const hits = getSearchHits(
-          await executeSmlSearch(apiClient, {
+          await executeSmlSearch(apiClient, limitedCredentials, {
             query: searchToken,
             types: [ACTION_POLICY_KI_TYPE],
           })
@@ -272,6 +291,18 @@ apiTest.describe(
         const attachmentIds = hits.map((hit) => hit.attachment_id);
         expect(attachmentIds).toContain(policyAttachmentId);
         expect(attachmentIds).not.toContain(ruleAttachmentId);
+      }
+    );
+
+    apiTest(
+      'user with agent builder read but without alerting v2 read cannot see rule or action policy SML hits',
+      async ({ apiClient }) => {
+        const hits = getSearchHits(
+          await executeSmlSearch(apiClient, agentBuilderOnlyCredentials, { query: searchToken })
+        );
+        const attachmentIds = hits.map((hit) => hit.attachment_id);
+        expect(attachmentIds).not.toContain(ruleAttachmentId);
+        expect(attachmentIds).not.toContain(policyAttachmentId);
       }
     );
   }
