@@ -111,19 +111,52 @@ describe('assignAgentById', () => {
 });
 
 describe('countMonitorsByAssignedAgent', () => {
-  it('counts package policies per stamped agent id and skips unassigned', () => {
-    const counts = countMonitorsByAssignedAgent([
-      { condition: agentIdCondition('agent-a') },
-      { condition: agentIdCondition('agent-a') },
-      { condition: agentIdCondition('agent-b') },
-      { condition: UNASSIGNED_CONDITION },
-      { condition: null },
-    ]);
+  const locationId = 'loc-1';
+
+  it('counts unique monitors per stamped agent id and skips unassigned', () => {
+    const counts = countMonitorsByAssignedAgent(
+      [
+        { id: `mon-a-${locationId}`, condition: agentIdCondition('agent-a') },
+        { id: `mon-b-${locationId}`, condition: agentIdCondition('agent-a') },
+        { id: `mon-c-${locationId}`, condition: agentIdCondition('agent-b') },
+        { id: `mon-d-${locationId}`, condition: UNASSIGNED_CONDITION },
+        { id: `mon-e-${locationId}`, condition: null },
+      ],
+      locationId
+    );
 
     expect(counts.get('agent-a')).toBe(2);
     expect(counts.get('agent-b')).toBe(1);
     expect(counts.has('__synthetics_unassigned__')).toBe(false);
     expect(counts.size).toBe(2);
+  });
+
+  it('counts a new-format policy and its leftover legacy twin as one monitor', () => {
+    const counts = countMonitorsByAssignedAgent(
+      [
+        { id: `mon-1-${locationId}`, condition: agentIdCondition('agent-a') },
+        { id: `mon-1-${locationId}-default`, condition: agentIdCondition('agent-a') },
+        { id: `mon-2-${locationId}`, condition: agentIdCondition('agent-b') },
+      ],
+      locationId
+    );
+
+    expect(counts.get('agent-a')).toBe(1);
+    expect(counts.get('agent-b')).toBe(1);
+    expect(counts.size).toBe(2);
+  });
+
+  it('prefers the new-format policy when a twin is pinned to a different agent', () => {
+    const counts = countMonitorsByAssignedAgent(
+      [
+        { id: `mon-1-${locationId}-default`, condition: agentIdCondition('legacy-agent') },
+        { id: `mon-1-${locationId}`, condition: agentIdCondition('new-agent') },
+      ],
+      locationId
+    );
+
+    expect(counts.get('new-agent')).toBe(1);
+    expect(counts.has('legacy-agent')).toBe(false);
   });
 });
 

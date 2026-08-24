@@ -14,28 +14,39 @@ import { useSyntheticsRefreshContext } from '../../../../contexts';
  * Per-location agents that run a monitor. Slim assignment payload — not the
  * full agent_stats capacity row.
  */
-export const useMonitorAgentAssignments = (monitorId?: string) => {
+export const useMonitorAgentAssignments = (
+  monitorId?: string
+): {
+  assignments: MonitorLocationAssignment[];
+  loading: boolean;
+  error: boolean;
+} => {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const [assignments, setAssignments] = useState<MonitorLocationAssignment[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(Boolean(monitorId));
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (!monitorId) {
       setAssignments([]);
+      setLoading(false);
+      setError(false);
       return;
     }
 
     let cancelled = false;
     setLoading(true);
+    setError(false);
     fetchMonitorAgentAssignments(monitorId)
       .then((result) => {
         if (!cancelled) {
           setAssignments(result);
+          setError(false);
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setAssignments([]);
+          setError(true);
         }
       })
       .finally(() => {
@@ -49,5 +60,5 @@ export const useMonitorAgentAssignments = (monitorId?: string) => {
     };
   }, [monitorId, lastRefresh]);
 
-  return { assignments, loading };
+  return { assignments, loading, error };
 };

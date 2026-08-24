@@ -234,9 +234,9 @@ describe('getPrivateLocationAgentStats route', () => {
       agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
     });
     mockListByAgentPolicy.mockResolvedValue([
-      { condition: agentIdCondition('agent-1') },
-      { condition: agentIdCondition('agent-1') },
-      { condition: agentIdCondition('other-agent') },
+      { id: 'mon-a-loc-1', condition: agentIdCondition('agent-1') },
+      { id: 'mon-b-loc-1', condition: agentIdCondition('agent-1') },
+      { id: 'mon-c-loc-1', condition: agentIdCondition('other-agent') },
     ]);
     const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
     const { routeContext } = makeContext({ listAgentsImpl: listAgents });

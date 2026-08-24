@@ -44,7 +44,7 @@ const assignment = (
 
 describe('MonitorAssignedAgents', () => {
   beforeEach(() => {
-    mockUseAssignments.mockReturnValue({ assignments: [], loading: false });
+    mockUseAssignments.mockReturnValue({ assignments: [], loading: false, error: false });
   });
 
   it('renders nothing when the monitor has no private-location assignments', () => {
@@ -59,10 +59,57 @@ describe('MonitorAssignedAgents', () => {
     expect(mockUseAssignments).toHaveBeenCalledWith(undefined);
   });
 
+  it('keeps the block visible while assignments are loading', () => {
+    mockUseAssignments.mockReturnValue({
+      assignments: [],
+      loading: true,
+      error: false,
+    });
+
+    render(
+      <MonitorAssignedAgents
+        configId="mon-1"
+        monitorLocations={[
+          {
+            id: 'loc-1',
+            label: 'Local Docker PL',
+            isServiceManaged: false,
+            agentPolicyId: 'policy-1',
+            isAgentSharding: true,
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByText('Assigned agent')).toBeInTheDocument();
+    expect(screen.getByTestId('monitorAssignedAgentsLoading')).toBeInTheDocument();
+  });
+
+  it('shows an error when assignment fetch failed', () => {
+    mockUseAssignments.mockReturnValue({
+      assignments: [],
+      loading: false,
+      error: true,
+    });
+
+    render(
+      <MonitorAssignedAgents
+        configId="mon-1"
+        monitorLocations={[{ id: 'loc-1', label: 'Local Docker PL', isServiceManaged: false }]}
+      />
+    );
+
+    expect(screen.getByText('Location agents')).toBeInTheDocument();
+    expect(screen.getByTestId('monitorAssignedAgentsError')).toHaveTextContent(
+      'Unable to load assigned agents.'
+    );
+  });
+
   it('lists every enrolled agent on a classic location', () => {
     mockUseAssignments.mockReturnValue({
       assignments: [assignment()],
       loading: false,
+      error: false,
     });
 
     render(
@@ -87,6 +134,7 @@ describe('MonitorAssignedAgents', () => {
         }),
       ],
       loading: false,
+      error: false,
     });
 
     render(
@@ -105,6 +153,7 @@ describe('MonitorAssignedAgents', () => {
     mockUseAssignments.mockReturnValue({
       assignments: [assignment({ isAgentSharding: true, agents: [] })],
       loading: false,
+      error: false,
     });
 
     render(

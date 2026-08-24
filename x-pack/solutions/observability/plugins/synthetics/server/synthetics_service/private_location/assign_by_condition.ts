@@ -94,13 +94,51 @@ export const agentIdFromCondition = (condition?: string | null): string | undefi
   return match ? match[1] : undefined;
 };
 
-/** Counts monitors pinned to each agent via a stamped `${agent.id}` condition. */
+/**
+ * Config id embedded in a package-policy id, or undefined when the id doesn't
+ * belong to this location. New format is `${configId}-${locationId}`; legacy
+ * space-suffixed format is `${configId}-${locationId}-${spaceId}`, so the
+ * location id is an infix — `indexOf` (not a fixed trailing strip) handles both.
+ */
+export const configIdOf = (policyId: string, locationId: string): string | undefined => {
+  const idx = policyId.indexOf(`-${locationId}`);
+  return idx > 0 ? policyId.slice(0, idx) : undefined;
+};
+
+const isNewFormatPolicyId = (policyId: string, locationId: string): boolean =>
+  policyId.endsWith(`-${locationId}`);
+
+/**
+ * Counts unique monitors pinned to each agent via a stamped `${agent.id}`
+ * condition. A monitor can have both a new-format package policy
+ * (`${configId}-${locationId}`) and a leftover legacy twin
+ * (`${configId}-${locationId}-${spaceId}`); those count as one monitor. The
+ * new-format policy wins when both exist. Policies with no condition, or the
+ * all-agents sentinel, are skipped.
+ */
 export const countMonitorsByAssignedAgent = (
-  packagePolicies: ReadonlyArray<{ condition?: string | null }>
+  packagePolicies: ReadonlyArray<{ id: string; condition?: string | null }>,
+  locationId: string
 ): Map<string, number> => {
-  const counts = new Map<string, number>();
+  const chosen = new Map<string, { condition?: string | null; isNewFormat: boolean }>();
   for (const policy of packagePolicies) {
-    const agentId = agentIdFromCondition(policy.condition);
+    const configId = configIdOf(policy.id, locationId);
+    if (!configId) {
+      continue;
+    }
+    const isNewFormat = isNewFormatPolicyId(policy.id, locationId);
+    const existing = chosen.get(configId);
+    if (existing?.isNewFormat && !isNewFormat) {
+      continue;
+    }
+    if (!existing || isNewFormat) {
+      chosen.set(configId, { condition: policy.condition, isNewFormat });
+    }
+  }
+
+  const counts = new Map<string, number>();
+  for (const { condition } of chosen.values()) {
+    const agentId = agentIdFromCondition(condition);
     if (!agentId) {
       continue;
     }

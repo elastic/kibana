@@ -12,6 +12,7 @@ import {
   EuiHealth,
   EuiIconTip,
   EuiLink,
+  EuiSkeletonText,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -40,11 +41,15 @@ export const MonitorAssignedAgents = ({
   hasMaintenanceWindows?: boolean;
 }) => {
   const privateLocations = (monitorLocations ?? []).filter((loc) => !loc.isServiceManaged);
-  const { assignments } = useMonitorAgentAssignments(
+  const { assignments, loading, error } = useMonitorAgentAssignments(
     privateLocations.length > 0 ? configId : undefined
   );
   const { basePath } = useSyntheticsSettingsContext();
   const { canReadAgents, canReadAgentPolicies } = useFleetPermissions();
+
+  if (privateLocations.length === 0) {
+    return null;
+  }
 
   const privateLocationIds = new Set(privateLocations.map((loc) => loc.id));
   const entries = assignments.filter(
@@ -52,23 +57,55 @@ export const MonitorAssignedAgents = ({
       privateLocationIds.has(entry.locationId) && (entry.isAgentSharding || entry.agents.length > 0)
   );
 
+  const allSharded =
+    entries.length > 0
+      ? entries.every((entry) => entry.isAgentSharding)
+      : privateLocations.every(
+          (location) => 'isAgentSharding' in location && location.isAgentSharding === true
+        );
+
+  const title = (
+    <EuiDescriptionListTitle>
+      {allSharded ? ASSIGNED_AGENT_LABEL : LOCATION_AGENTS_LABEL}{' '}
+      <EuiIconTip
+        content={allSharded ? ASSIGNED_AGENT_HELP : LOCATION_AGENTS_HELP}
+        position="right"
+        type="question"
+      />
+    </EuiDescriptionListTitle>
+  );
+
+  if (loading && entries.length === 0) {
+    return (
+      <>
+        {title}
+        <EuiDescriptionListDescription data-test-subj="monitorAssignedAgentsLoading">
+          <EuiSkeletonText lines={2} size="s" />
+        </EuiDescriptionListDescription>
+      </>
+    );
+  }
+
+  if (error && entries.length === 0) {
+    return (
+      <>
+        {title}
+        <EuiDescriptionListDescription data-test-subj="monitorAssignedAgentsError">
+          {ASSIGNED_AGENTS_ERROR_LABEL}
+        </EuiDescriptionListDescription>
+      </>
+    );
+  }
+
   if (entries.length === 0) {
     return null;
   }
 
-  const allSharded = entries.every((entry) => entry.isAgentSharding);
   const showLocationLabel = entries.length > 1;
 
   return (
     <>
-      <EuiDescriptionListTitle>
-        {allSharded ? ASSIGNED_AGENT_LABEL : LOCATION_AGENTS_LABEL}{' '}
-        <EuiIconTip
-          content={allSharded ? ASSIGNED_AGENT_HELP : LOCATION_AGENTS_HELP}
-          position="right"
-          type="question"
-        />
-      </EuiDescriptionListTitle>
+      {title}
       <EuiDescriptionListDescription>
         {entries.map((stats) => (
           <AssignmentEntry
@@ -194,6 +231,13 @@ const UNASSIGNED_LABEL = i18n.translate(
   'xpack.synthetics.monitorDetails.assignedAgentUnassignedLabel',
   {
     defaultMessage: 'Not yet assigned',
+  }
+);
+
+const ASSIGNED_AGENTS_ERROR_LABEL = i18n.translate(
+  'xpack.synthetics.monitorDetails.assignedAgentsError',
+  {
+    defaultMessage: 'Unable to load assigned agents.',
   }
 );
 

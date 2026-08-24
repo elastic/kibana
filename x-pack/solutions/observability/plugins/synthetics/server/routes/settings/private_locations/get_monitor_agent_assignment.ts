@@ -78,14 +78,16 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
 
       const packagePolicies =
         shardedMonitorLocations.length > 0
-          ? await new PackagePolicyService(server).getByIds({
-              spaceId,
-              packagePolicyIds: shardedMonitorLocations.flatMap((location) => [
-                `${monitorId}-${location.id}`,
-                `${monitorId}-${location.id}-${spaceId}`,
-              ]),
-              fields: ['name', 'condition'],
-            })
+          ? await new PackagePolicyService(server)
+              .getByIds({
+                spaceId,
+                packagePolicyIds: shardedMonitorLocations.flatMap((location) => [
+                  `${monitorId}-${location.id}`,
+                  `${monitorId}-${location.id}-${spaceId}`,
+                ]),
+                fields: ['id', 'name', 'condition'],
+              })
+              .catch(() => [])
           : [];
 
       const enrolledByPolicyId = new Map<string, Awaited<ReturnType<typeof getEnrolledAgents>>>();

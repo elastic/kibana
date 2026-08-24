@@ -218,7 +218,7 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
           isAgentSharding
             ? packagePolicyService
                 .listByAgentPolicy({ agentPolicyId: location.agentPolicyId })
-                .then(countMonitorsByAssignedAgent)
+                .then((policies) => countMonitorsByAssignedAgent(policies, location.id))
                 .catch(() => new Map<string, number>())
             : Promise.resolve(new Map<string, number>()),
         ]);

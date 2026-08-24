@@ -187,7 +187,7 @@ describe('getMonitorAgentAssignment route', () => {
       expect.objectContaining({
         spaceId: 'default',
         packagePolicyIds: expect.arrayContaining(['mon-1-loc-1', 'mon-1-loc-1-default']),
-        fields: ['name', 'condition'],
+        fields: ['id', 'name', 'condition'],
       })
     );
   });
@@ -211,6 +211,30 @@ describe('getMonitorAgentAssignment route', () => {
 
     const result = (await run(routeContext)) as MonitorLocationAssignment[];
 
+    expect(result[0].agents).toEqual([]);
+  });
+
+  it('returns the sharded location unassigned when package-policy reads fail', async () => {
+    mockGetLocations.mockResolvedValue({
+      locations: [
+        { id: 'loc-1', label: 'Location 1', agentPolicyId: 'policy-1', isAgentSharding: true },
+      ],
+      agentPolicies: [{ id: 'policy-1', name: 'Policy One' }],
+    });
+    mockGetByIds.mockRejectedValue(new Error('Fleet unavailable'));
+    const getMonitor = jest.fn().mockResolvedValue({
+      attributes: { locations: [{ id: 'loc-1', isServiceManaged: false }] },
+    });
+    const listAgents = jest.fn().mockResolvedValue({ agents: [agent()], total: 1 });
+    const { routeContext } = makeContext({
+      listAgentsImpl: listAgents,
+      getMonitorImpl: getMonitor,
+    });
+
+    const result = (await run(routeContext)) as MonitorLocationAssignment[];
+
+    expect(result).toHaveLength(1);
+    expect(result[0].isAgentSharding).toBe(true);
     expect(result[0].agents).toEqual([]);
   });
 });
