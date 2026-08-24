@@ -167,7 +167,7 @@ A matching sample proves the authored mechanism is present. It does not prove th
    - **Large counts** (hundreds to tens of thousands): single-digit percent is background. Confirm only a clear step-up (tens of percent), at global level or on a grouped entity from step 3.
    - **First-onset:** near-empty pre and sustained post mass with an on-topic sample is elevation. Empty pre is not a veto. An absent `pre` row (or `pre_rows = 0`) means the pre count is zero — treat it as first-onset input, never as a missing bucket. A KI-filtered aggregate that returns only `post` is that shape: matching pre count is 0, not “baseline unmeasurable.” Do not infer index coverage from a matching-only aggregate. Unmeasurable coverage applies only when there is evidence the stream had **no documents of any kind** before `t`; without that evidence, apply first-onset.
    - **Tiny counts** (ones or tens on both sides): ignore percent (2 vs 8 is noise) → `inconclusive`. Tiny-counts applies only when the post rate is comparable to the pre rate; a near-zero pre with a clearly higher post rate is first-onset.
-   - Tool error, unapplied range, missing `post` bucket, or unknown duration → `inconclusive`.
+   - **Tool error, unapplied range, missing `post` bucket, or unknown duration → `inconclusive`.** A missing `pre` bucket is NOT in this list — absent pre means first-onset (zero pre count); apply the first-onset rule above, not `inconclusive`. Confusing missing pre with missing post is the most common verdict error.
    - A flat global total with one grouped entity that is clearly elevated → `confirms`. A flat global and flat groups → `inconclusive`.
 
 ---
@@ -188,7 +188,7 @@ A matching sample proves the authored mechanism is present. It does not prove th
 
 2. **Set `verdict` from the row content and result**:
    - **Completeness gate first:** list every row-level failure KI whose sample was on-topic; each must have an executed rate aggregate in your context. If any is missing, return to the Rate evidence step and run the missing aggregates now — do not record verdicts yet. `confirms` from sample rows alone and any rate-based reasoning ("no elevation", "background rate", "not newly elevated") without an executed aggregate are both invalid.
-   - For an eligible row-level failure KI, a found row that directly supports the rule's failure, degradation, exposure, or evidenced cascade is `confirms` **only** after its rate evidence meets the policy above. Otherwise it is `inconclusive`.
+   - For an eligible row-level failure KI, a found row that directly supports the rule's failure, degradation, exposure, or evidenced cascade is `confirms` **only** after its rate evidence meets the policy above. The error signature in the found row is itself the mechanism — do not require a separate independent confirmation of the dependency path on top of a clearly on-topic error row. Otherwise it is `inconclusive`.
    - Aggregation KIs retain their existing behavior: `confirms` only for a found result that directly supports the rule's failure, degradation, exposure, or evidenced cascade.
    - `refutes` for successful healthy, positive, or no-failure found rows.
    - `off_topic` for a found row that does not address the authored rule hypothesis.
