@@ -3,7 +3,7 @@ navigation_title: "Google Docs"
 type: reference
 description: "Use the Google Docs connector to read and update documents in Google Docs."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.6
   serverless: preview
 ---
 
