@@ -79,7 +79,9 @@ export const sourceSchema = z
       ),
     data: z
       .record(z.string().min(1).max(MAX_FIELD_NAME_LENGTH), z.unknown())
-      .describe('Per-type payload. Shape is a consumer-side convention, not enforced by the framework.'),
+      .describe(
+        'Per-type payload. Shape is a consumer-side convention, not enforced by the framework.'
+      ),
   })
   .strict()
   .check((ctx) => {
