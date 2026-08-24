@@ -149,6 +149,7 @@ import {
 
 import { bulkInstallPackages, getPackageInfo } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
+import { runWithCache, isRunningWithCache } from './epm/packages/cache';
 import { unenrollForAgentPolicyId } from './agents';
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
 import {
@@ -1296,18 +1297,27 @@ class AgentPolicyService {
     }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
-      const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
-        await this.computeMinAgentVersionData(soClient, id);
-      await this._update(soClient, esClient, id, {}, options?.user, {
-        bumpRevision: true,
-        removeProtection: options?.removeProtection ?? false,
-        skipValidation: options?.skipValidation ?? true,
-        returnUpdatedPolicy: false,
-        asyncDeploy: options?.asyncDeploy,
-        hasAgentVersionConditions,
-        minAgentVersion: minAgentVersion ?? null,
-        packageAgentVersionConditions: packageAgentVersionConditions ?? null,
-      });
+      const run = async () => {
+        const { hasAgentVersionConditions, minAgentVersion, packageAgentVersionConditions } =
+          await this.computeMinAgentVersionData(soClient, id);
+        await this._update(soClient, esClient, id, {}, options?.user, {
+          bumpRevision: true,
+          removeProtection: options?.removeProtection ?? false,
+          skipValidation: options?.skipValidation ?? true,
+          returnUpdatedPolicy: false,
+          asyncDeploy: options?.asyncDeploy,
+          hasAgentVersionConditions,
+          minAgentVersion: minAgentVersion ?? null,
+          packageAgentVersionConditions: packageAgentVersionConditions ?? null,
+        });
+      };
+
+      // Reuse an already-active cache session (e.g. a bulk caller wrapping many bumpRevision
+      // calls in one runWithCache) rather than starting a new, narrower one that would shadow it
+      // for this call's duration. When called standalone, open a session so the getPackageInfo
+      // fallback lookup in computeMinAgentVersionData is still cached across this policy's own
+      // package policies.
+      return isRunningWithCache() ? run() : runWithCache(run);
     });
   }
 
@@ -1326,7 +1336,10 @@ class AgentPolicyService {
       let versionCondition = pp.package_agent_version_condition;
 
       // For package policies created before this field was introduced, fall back
-      // to looking up the installed package info to get the version condition.
+      // to looking up the installed package info to get the version condition. getPackageInfo
+      // is itself cached per name+version for the lifetime of the enclosing runWithCache session
+      // (see bumpRevision below), so this stays cheap even when several package policies on the
+      // same agent policy share a package+version.
       if (!versionCondition && pp.package?.name && pp.package?.version) {
         try {
           const pkgInfo = await getPackageInfo({

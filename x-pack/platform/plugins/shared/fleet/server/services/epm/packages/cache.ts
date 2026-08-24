@@ -139,3 +139,13 @@ export async function runWithCache<T = any>(cb: () => Promise<T>): Promise<T> {
 
   return cacheStore.run(cache, cb);
 }
+
+/**
+ * Whether the current async context is already inside a `runWithCache` session. Callers that may
+ * run either standalone or nested inside a caller's own `runWithCache` (e.g. a bulk operation) can
+ * use this to avoid starting a new, narrower-scoped session that would shadow the caller's cache
+ * for its duration instead of sharing it.
+ */
+export function isRunningWithCache(): boolean {
+  return cacheStore.getStore() !== undefined;
+}
