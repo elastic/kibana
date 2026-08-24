@@ -18,7 +18,6 @@ const EXPLORE_DATA_ACTION = 'embeddablePanelAction-ACTION_EXPLORE_DATA';
 const EXPORT_CSV_ACTION = 'embeddablePanelAction-ACTION_EXPORT_CSV';
 const SAVE_TO_LIBRARY_ACTION = 'embeddablePanelAction-saveToLibrary';
 const UNLINK_FROM_LIBRARY_ACTION = 'embeddablePanelAction-unlinkFromLibrary';
-const MAX_BYTES_VALUE = '19,986' as const;
 
 spaceTest.describe(
   'Lens dashboard library and panel actions',
@@ -63,7 +62,7 @@ spaceTest.describe(
         await dashboard.waitForPanelsToLoad(1);
 
         await expect(lens.metric.legacyMetricLabel).toHaveText(testData.MAX_BYTES_LABEL);
-        await expect(lens.metric.legacyMetricValue).toHaveText(MAX_BYTES_VALUE);
+        await expect(lens.metric.legacyMetricValue).toHaveText('19,986');
       }
     );
 
