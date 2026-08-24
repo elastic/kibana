@@ -87,7 +87,7 @@ function useFallbackProps(): FallbackProps {
         backTargets.push({
           href: crumb.href,
           onClick: crumb.onClick,
-          label: getBreadcrumbText(crumb),
+          label: getBreadcrumbText(crumb) ?? '',
         });
       }
     }
