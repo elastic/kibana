@@ -109,6 +109,7 @@ describe('RulesClient', () => {
         run: { alerts: { max: 10000 }, query: { maxResponseSize: 50 * 1024 * 1024 } },
         ...rulesConfigOverrides,
       },
+      esql: { responseFormat: 'json' },
     };
 
     const pluginConfigAccessor =
