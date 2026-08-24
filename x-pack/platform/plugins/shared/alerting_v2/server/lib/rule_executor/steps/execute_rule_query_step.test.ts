@@ -136,7 +136,28 @@ describe('ExecuteRuleQueryStep', () => {
       expect.objectContaining({
         query: `FROM metrics-* | STATS AVG(cpu) BY host.name | WHERE AVG(cpu) > 0.9\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
       }),
-      expect.any(Object)
+      expect.objectContaining({ signal: state.input.executionContext.signal })
+    );
+  });
+
+  it('runs base with LIMIT for a conditionless composed rule', async () => {
+    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+
+    const rule = createRuleResponse({
+      query: {
+        format: 'composed',
+        base: 'FROM metrics-* | STATS avg(cpu) BY host.name',
+      },
+    });
+    const state = createRulePipelineState({ rule });
+
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: `FROM metrics-* | STATS avg(cpu) BY host.name\n| LIMIT ${DEFAULT_MAX_ALERTS_PER_RUN}`,
+      }),
+      expect.objectContaining({ signal: state.input.executionContext.signal })
     );
   });
 
@@ -153,7 +174,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM logs-*\n| LIMIT 500' }),
-      expect.any(Object)
+      expect.objectContaining({ signal: state.input.executionContext.signal })
     );
   });
 
@@ -172,7 +193,7 @@ describe('ExecuteRuleQueryStep', () => {
     // smaller LIMIT still wins - appending the configured max is always safe.
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM logs-* | LIMIT 10\n| LIMIT 500' }),
-      expect.any(Object)
+      expect.objectContaining({ signal: state.input.executionContext.signal })
     );
   });
 
