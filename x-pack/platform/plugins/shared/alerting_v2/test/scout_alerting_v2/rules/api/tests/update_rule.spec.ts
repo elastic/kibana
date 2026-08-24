@@ -333,6 +333,169 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  apiTest(
+    'update: should set metadata.source without id and persist it',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-add-source-no-id' } })
+      );
+      expect(created.metadata.source).toBeUndefined();
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          metadata: {
+            source: { type: 'prebuilt_rule', data: { rule_id: 'abc-123', version: 1 } },
+          },
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.source).toStrictEqual({
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc-123', version: 1 },
+      });
+
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.metadata.source).toStrictEqual({
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc-123', version: 1 },
+      });
+    }
+  );
+
+  apiTest(
+    'validation: should reject empty metadata.source.id',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-empty-source-id' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          metadata: { source: { id: '', type: 'prebuilt_rule', data: {} } },
+        },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
+    'validation: should reject metadata.source.id exceeding 256 characters',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-long-source-id' } })
+      );
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          metadata: { source: { id: 'a'.repeat(257), type: 'prebuilt_rule', data: {} } },
+        },
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
+    'update: should set metadata.source and persist it',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'rule-add-source' } })
+      );
+      expect(created.metadata.source).toBeUndefined();
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: {
+          metadata: {
+            source: {
+              id: 'prebuilt-spec-1',
+              type: 'prebuilt_rule',
+              data: { rule_id: 'abc-123', version: 1 },
+            },
+          },
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.source).toStrictEqual({
+        id: 'prebuilt-spec-1',
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc-123', version: 1 },
+      });
+
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.metadata.source).toStrictEqual({
+        id: 'prebuilt-spec-1',
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc-123', version: 1 },
+      });
+    }
+  );
+
+  apiTest(
+    'update: should preserve metadata.source when not included in update',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: {
+            name: 'rule-preserve-source',
+            source: {
+              id: 'prebuilt-spec-1',
+              type: 'prebuilt_rule',
+              data: { rule_id: 'abc-123', version: 1 },
+            },
+          },
+        })
+      );
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { name: 'renamed-rule' } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.name).toBe('renamed-rule');
+      expect(response.body.metadata.source).toStrictEqual({
+        id: 'prebuilt-spec-1',
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc-123', version: 1 },
+      });
+    }
+  );
+
+  apiTest(
+    'update: should clear metadata.source when set to null',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: {
+            name: 'rule-clear-source',
+            source: {
+              id: 'prebuilt-spec-1',
+              type: 'prebuilt_rule',
+              data: { rule_id: 'abc-123', version: 1 },
+            },
+          },
+        })
+      );
+      expect(created.metadata.source).toBeDefined();
+
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { source: null } },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata.source).toBeUndefined();
+
+      const persisted = await apiServices.alertingV2.rules.get(created.id);
+      expect(persisted.metadata.source).toBeUndefined();
+    }
+  );
+
   apiTest('status: should return 404 when the rule does not exist', async ({ apiClient }) => {
     const response = await apiClient.patch(getRuleUrl('does-not-exist'), {
       headers: writerHeaders,

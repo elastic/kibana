@@ -12,16 +12,16 @@ import { ruleMetadataSchema as ruleMetadataSchemaV2 } from './v2';
 /**
  * v4 adds optional `metadata.source`, a framework-agnostic envelope that
  * tracks the originating rule spec or content pack. The shape follows the
- * same rationale as artifacts: `{ id, type, data }` where `id` is a
- * stable spec identifier, `type` is a discriminator, and `data` is a
- * per-type payload the framework does not interpret. Pre-existing
+ * same rationale as artifacts: `{ id?, type, data }` where `id` is an
+ * optional stable spec identifier, `type` is a discriminator, and `data`
+ * is a per-type payload the framework does not interpret. Pre-existing
  * (user-authored) rules have no source; no backfill.
  */
 export const ruleSavedObjectAttributesSchema = ruleSavedObjectAttributesSchemaV3.extends({
   metadata: ruleMetadataSchemaV2.extends({
     source: schema.maybe(
       schema.object({
-        id: schema.string(),
+        id: schema.maybe(schema.string()),
         type: schema.string(),
         data: schema.recordOf(schema.string(), schema.any()),
       })

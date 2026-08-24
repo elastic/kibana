@@ -1133,6 +1133,63 @@ describe('createRuleDataSchema', () => {
       expect(result.metadata.source).toBeUndefined();
     });
 
+    it('accepts source without id (optional)', () => {
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: {
+          name: 'test rule',
+          source: { type: 'prebuilt_rule', data: { rule_id: 'abc', version: 1 } },
+        },
+      });
+
+      expect(result.metadata.source).toEqual({
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc', version: 1 },
+      });
+    });
+
+    it('accepts source with an id of 256 characters', () => {
+      const id = 'a'.repeat(256);
+      const result = createRuleDataSchema.parse({
+        ...validCreateData,
+        metadata: { name: 'test rule', source: { id, type: 'prebuilt_rule', data: {} } },
+      });
+      expect(result.metadata.source?.id).toBe(id);
+    });
+
+    it('rejects source with an empty id', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', source: { id: '', type: 'prebuilt_rule', data: {} } },
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ path: ['metadata', 'source', 'id'] }),
+          ])
+        );
+      }
+    });
+
+    it('rejects source with an id exceeding 256 characters', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: {
+          name: 'test rule',
+          source: { id: 'a'.repeat(257), type: 'prebuilt_rule', data: {} },
+        },
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ path: ['metadata', 'source', 'id'] }),
+          ])
+        );
+      }
+    });
+
     it('rejects source with an empty type', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -1491,6 +1548,55 @@ describe('updateRuleDataSchema', () => {
         type: 'prebuilt_rule',
         data: { rule_id: 'abc', version: 2 },
       });
+    });
+
+    it('accepts source with id in update payload', () => {
+      const result = updateRuleDataSchema.parse({
+        metadata: {
+          source: { id: 'spec-1', type: 'prebuilt_rule', data: { rule_id: 'abc', version: 2 } },
+        },
+      });
+      expect(result.metadata?.source).toEqual({
+        id: 'spec-1',
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc', version: 2 },
+      });
+    });
+
+    it('accepts source with an id of 256 characters in update', () => {
+      const id = 'a'.repeat(256);
+      const result = updateRuleDataSchema.parse({
+        metadata: { source: { id, type: 'prebuilt_rule', data: {} } },
+      });
+      expect(result.metadata?.source?.id).toBe(id);
+    });
+
+    it('rejects source with an empty id in update', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { source: { id: '', type: 'prebuilt_rule', data: {} } },
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ path: ['metadata', 'source', 'id'] }),
+          ])
+        );
+      }
+    });
+
+    it('rejects source with an id exceeding 256 characters in update', () => {
+      const result = updateRuleDataSchema.safeParse({
+        metadata: { source: { id: 'a'.repeat(257), type: 'prebuilt_rule', data: {} } },
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ path: ['metadata', 'source', 'id'] }),
+          ])
+        );
+      }
     });
 
     it('clears source with an explicit null', () => {

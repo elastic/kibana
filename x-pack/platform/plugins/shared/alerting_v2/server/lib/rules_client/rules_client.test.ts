@@ -779,6 +779,33 @@ describe('RulesClient', () => {
       });
     });
 
+    it('creates a rule with metadata.source.id when provided', async () => {
+      const client = createClient();
+      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-id-source-id' });
+
+      const source = {
+        id: 'spec-1',
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc', version: 1 },
+      };
+
+      const res = await client.createRule({
+        data: {
+          ...baseCreateData,
+          metadata: { name: 'rule-with-source-id', source },
+        },
+        options: { id: 'rule-id-source-id' },
+      });
+
+      expect(rulesSavedObjectService.create).toHaveBeenCalledWith({
+        attrs: expect.objectContaining({
+          metadata: expect.objectContaining({ source }),
+        }),
+        id: 'rule-id-source-id',
+      });
+      expect(res.metadata.source).toEqual(source);
+    });
+
     it('preserves metadata.source when update omits it', async () => {
       const client = createClient();
 

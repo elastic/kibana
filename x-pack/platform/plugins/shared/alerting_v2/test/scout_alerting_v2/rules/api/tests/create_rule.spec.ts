@@ -526,6 +526,115 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  apiTest(
+    'create: returns 201 with metadata.source and persists it',
+    async ({ apiClient, apiServices }) => {
+      const body = buildCreateRuleData({
+        metadata: {
+          name: 'rule-with-source',
+          source: {
+            id: 'prebuilt-spec-1',
+            type: 'prebuilt_rule',
+            data: { rule_id: 'abc-123', version: 1 },
+          },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.metadata.source).toStrictEqual({
+        id: 'prebuilt-spec-1',
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc-123', version: 1 },
+      });
+
+      const persisted = await apiServices.alertingV2.rules.get(response.body.id);
+      expect(persisted.metadata.source).toStrictEqual({
+        id: 'prebuilt-spec-1',
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc-123', version: 1 },
+      });
+    }
+  );
+
+  apiTest(
+    'create: returns 201 without source when omitted (optional)',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({ metadata: { name: 'rule-no-source' } });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.metadata.source).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'create: returns 201 with metadata.source when id is omitted (optional)',
+    async ({ apiClient, apiServices }) => {
+      const body = buildCreateRuleData({
+        metadata: {
+          name: 'rule-source-without-id',
+          source: { type: 'prebuilt_rule', data: { rule_id: 'abc-123', version: 1 } },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.metadata.source).toStrictEqual({
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc-123', version: 1 },
+      });
+
+      const persisted = await apiServices.alertingV2.rules.get(response.body.id);
+      expect(persisted.metadata.source).toStrictEqual({
+        type: 'prebuilt_rule',
+        data: { rule_id: 'abc-123', version: 1 },
+      });
+    }
+  );
+
+  apiTest(
+    'validation: rejects body with empty metadata.source.id',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: {
+          name: 'rule-empty-source-id',
+          source: { id: '', type: 'prebuilt_rule', data: {} },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
+    'validation: rejects body when metadata.source.id exceeds 256 characters',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData({
+        metadata: {
+          name: 'rule-long-source-id',
+          source: { id: 'a'.repeat(257), type: 'prebuilt_rule', data: {} },
+        },
+      });
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body,
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
   apiTest('validation: rejects body with missing kind', async ({ apiClient }) => {
     const { kind: _kind, ...rest } = buildCreateRuleData({ metadata: { name: 'no-kind' } });
     const response = await apiClient.post(testData.RULE_API_PATH, {

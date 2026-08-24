@@ -67,8 +67,9 @@ export const sourceSchema = z
       .string()
       .min(1)
       .max(256)
+      .optional()
       .describe(
-        'Stable identifier of the originating spec, e.g. a prebuilt rule id or content pack id.'
+        'Optional stable identifier of the originating spec, e.g. a prebuilt rule id or template id. Use to filter by source id.'
       ),
     type: z
       .string()
