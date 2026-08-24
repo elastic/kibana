@@ -19,8 +19,6 @@ import type {
 } from '@kbn/dashboard-plugin/server';
 import { DASHBOARD_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
-const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
-
 interface CreateDashboardSmlTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
 }
