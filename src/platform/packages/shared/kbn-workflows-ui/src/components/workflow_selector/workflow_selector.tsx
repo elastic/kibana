@@ -31,7 +31,7 @@ import * as i18n from './translations';
 import { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
 import {
   getSelectedWorkflowDisabledError,
-  getVisibilityContext,
+  getWorkflowsListQueryParams,
   processWorkflowsToOptions,
 } from './workflow_utils';
 import type { WorkflowOption, WorkflowSelectorConfig } from './workflow_utils';
@@ -76,11 +76,6 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
 
   const finalConfig = useMemo(() => ({ ...defaultConfig, ...config }), [config]);
 
-  const visibilityContext = useMemo(
-    () => getVisibilityContext(finalConfig.visibility),
-    [finalConfig.visibility]
-  );
-
   // Include managed workflows only when: (a) the caller declared a visibility context, and
   // (b) the user has the canReadManagedWorkflow capability. Without a visibility context the
   // server would return every managed workflow in the space, leaking other solutions' workflows.
@@ -88,14 +83,12 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     data: workflowsData,
     isLoading,
     error: fetchError,
-  } = useWorkflows({
-    size: 1000,
-    page: 1,
-    query: '',
-    ...(visibilityContext && canReadManagedWorkflow
-      ? { managed: 'all' as const, visibilityContext }
-      : {}),
-  });
+  } = useWorkflows(
+    getWorkflowsListQueryParams({
+      visibility: finalConfig.visibility,
+      canReadManagedWorkflow,
+    })
+  );
 
   // Process workflows using utility function
   const workflowOptions = useMemo(

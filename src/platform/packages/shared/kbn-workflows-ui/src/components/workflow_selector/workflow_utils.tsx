@@ -13,6 +13,7 @@ import type {
   ManagedWorkflowSelector,
   ManagedWorkflowSolution,
   WorkflowListDto,
+  WorkflowsSearchParams,
 } from '@kbn/workflows';
 import {
   getManagedWorkflowSelectorVisibilityContext,
@@ -37,6 +38,25 @@ export const getVisibilityContext = (
   ];
 
   return contexts.length > 0 ? contexts : undefined;
+};
+
+export const getWorkflowsListQueryParams = ({
+  visibility,
+  canReadManagedWorkflow,
+}: {
+  visibility: WorkflowSelectorVisibility | undefined;
+  canReadManagedWorkflow: boolean;
+}): WorkflowsSearchParams => {
+  const visibilityContext = getVisibilityContext(visibility);
+
+  return {
+    size: 1000,
+    page: 1,
+    query: '',
+    ...(visibilityContext && canReadManagedWorkflow
+      ? { managed: 'all' as const, visibilityContext }
+      : {}),
+  };
 };
 
 export interface WorkflowValidationResult {

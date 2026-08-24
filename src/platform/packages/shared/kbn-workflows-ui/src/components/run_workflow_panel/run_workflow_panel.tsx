@@ -26,7 +26,7 @@ import { useWorkflows } from '../../hooks/use_workflows';
 import { useWorkflowsCapabilities } from '../../hooks/use_workflows_capabilities';
 import { WorkflowSelector } from '../workflow_selector/workflow_selector';
 import {
-  getVisibilityContext,
+  getWorkflowsListQueryParams,
   type WorkflowSelectorVisibility,
 } from '../workflow_selector/workflow_utils';
 
@@ -88,19 +88,10 @@ export const RunWorkflowPanel = ({
 
   const { canReadManagedWorkflow } = useWorkflowsCapabilities();
 
-  // Mirror WorkflowSelector's visibilityContext derivation exactly so both components hit the
-  // same react-query cache entry — no second fetch.
-  const visibilityContext = useMemo(() => getVisibilityContext(visibility), [visibility]);
-
   // Share the query key with WorkflowSelector so this is a cache hit — no extra fetch.
-  const { data: workflowsData } = useWorkflows({
-    size: 1000,
-    page: 1,
-    query: '',
-    ...(visibilityContext && canReadManagedWorkflow
-      ? { managed: 'all' as const, visibilityContext }
-      : {}),
-  });
+  const { data: workflowsData } = useWorkflows(
+    getWorkflowsListQueryParams({ visibility, canReadManagedWorkflow })
+  );
   const selectedWorkflow = useMemo(
     () => workflowsData?.results.find((w) => w.id === selectedId),
     [workflowsData, selectedId]
