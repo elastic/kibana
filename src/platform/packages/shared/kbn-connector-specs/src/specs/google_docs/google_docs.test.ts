@@ -377,8 +377,7 @@ describe('GoogleDocsConnector', () => {
         expect.objectContaining({ params: { fields: 'user' } })
       );
       expect(mockGet).toHaveBeenCalledWith(
-        expect.stringContaining('docs.googleapis.com/v1/documents/'),
-        expect.anything()
+        expect.stringContaining('KibanaConnectivityCheckAAAAAAAAAAAAAAAAAAAA')
       );
       expect(result).toEqual({});
     });

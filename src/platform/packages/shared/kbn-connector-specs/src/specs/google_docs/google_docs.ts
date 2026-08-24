@@ -114,7 +114,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
         const encodedId = encodeURIComponent(document_id);
 
         let title: string;
-        let webViewLink: string;
+        let webViewLink: string | undefined;
         try {
           const metaResponse = await ctx.client.get(`${DRIVE_API_BASE}/files/${encodedId}`, {
             params: { fields: 'id,name,mimeType,webViewLink', supportsAllDrives: true },
@@ -122,7 +122,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
           const meta = metaResponse.data as {
             name: string;
             mimeType: string;
-            webViewLink: string;
+            webViewLink?: string;
           };
           if (meta.mimeType !== GOOGLE_DOCS_MIME_TYPE) {
             throw new Error(
@@ -171,7 +171,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
           ...(truncated ? { next_offset: offset + max_characters } : {}),
           total_characters: totalCharacters,
           truncated,
-          web_view_link: webViewLink,
+          ...(webViewLink ? { web_view_link: webViewLink } : {}),
         };
       },
     },
@@ -220,8 +220,11 @@ export const GoogleDocsConnector: ConnectorSpec = {
       // Verify the Docs API is enabled and the documents scope is present. A 404 (document
       // not found) is the expected response for a nonexistent ID and confirms access; any
       // other error (403 missing scope, 403 API not enabled, network error) is a real failure.
+      // The ID is a valid-format alphanumeric string that will not exist in any real Drive.
       try {
-        await ctx.client.get(`${DOCS_API_BASE}/documents/__kibana_connectivity_check__`);
+        await ctx.client.get(
+          `${DOCS_API_BASE}/documents/KibanaConnectivityCheckAAAAAAAAAAAAAAAAAAAA`
+        );
       } catch (error: unknown) {
         const axiosError = error as { response?: { data?: { error?: { code?: number } } } };
         if (axiosError.response?.data?.error?.code !== 404) {

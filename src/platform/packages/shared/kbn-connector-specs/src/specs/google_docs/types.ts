@@ -38,7 +38,10 @@ export const ReadDocInputSchema = lazySchema(() =>
       .number()
       .int()
       .min(0)
-      .max(10_000_000)
+      // Must be at least offset_max + max_characters (10M + 200k) so that a caller
+      // passing back next_offset from the previous response never hits a Zod validation
+      // error when reading the final page of a very large document.
+      .max(10_200_000)
       .default(0)
       .describe(
         'Character offset to start reading from (default 0). ' +
