@@ -56,6 +56,7 @@ export async function getConnectorSpecAsJsonSchema({
         name,
         isTool: Boolean(def.isTool),
         ...(def.description !== undefined ? { description: def.description } : {}),
+        ...(def.scope !== undefined ? { scope: def.scope } : {}),
       })),
     };
   } catch (error) {

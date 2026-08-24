@@ -11,9 +11,10 @@ import { TEST_CONNECTOR_SUB_ACTION } from './connector_spec';
 import {
   filterActionsBySelection,
   formatConnectorActionLine,
-  HITL_ACTION_CONFIRMATION_SUFFIX,
+  getEffectiveScope,
   isSelectedActionEnabled,
   isSpecificActionsSelection,
+  resolveActionScope,
 } from './selected_actions';
 
 const ACTIONS = {
@@ -21,6 +22,8 @@ const ACTIONS = {
   send: { isTool: true, description: 'Send things' },
   approve: { isTool: false, description: 'Approve things' },
   noDesc: { isTool: true },
+  writeAction: { isTool: true, scope: 'write' as const, description: 'Create things' },
+  destroyAction: { isTool: true, scope: 'destroy' as const, description: 'Delete things' },
 };
 
 describe('selected_actions helpers', () => {
@@ -64,6 +67,8 @@ describe('selected_actions helpers', () => {
         'send',
         'approve',
         'noDesc',
+        'writeAction',
+        'destroyAction',
       ]);
     });
 
@@ -73,10 +78,12 @@ describe('selected_actions helpers', () => {
         'send',
         'approve',
         'noDesc',
+        'writeAction',
+        'destroyAction',
       ]);
     });
 
-    it('returns allowlisted actions in specific mode, including HITL', () => {
+    it('returns allowlisted actions in specific mode', () => {
       expect(filterActionsBySelection(ACTIONS, ['send', 'approve']).map(([name]) => name)).toEqual([
         'send',
         'approve',
@@ -86,18 +93,77 @@ describe('selected_actions helpers', () => {
     it('can require descriptions', () => {
       expect(
         filterActionsBySelection(ACTIONS, null, { requireDescription: true }).map(([name]) => name)
-      ).toEqual(['search', 'send', 'approve']);
+      ).toEqual(['search', 'send', 'approve', 'writeAction', 'destroyAction']);
+    });
+  });
+
+  describe('resolveActionScope', () => {
+    it('returns the explicit scope when set', () => {
+      expect(resolveActionScope({ scope: 'write' })).toBe('write');
+      expect(resolveActionScope({ scope: 'destroy' })).toBe('destroy');
+      expect(resolveActionScope({ scope: 'read' })).toBe('read');
+    });
+
+    it('maps isTool:false without scope to destroy', () => {
+      expect(resolveActionScope({ isTool: false })).toBe('destroy');
+    });
+
+    it('defaults to read for isTool:true or unset', () => {
+      expect(resolveActionScope({ isTool: true })).toBe('read');
+      expect(resolveActionScope({})).toBe('read');
+    });
+
+    it('scope field wins over isTool', () => {
+      expect(resolveActionScope({ scope: 'write', isTool: false })).toBe('write');
+    });
+  });
+
+  describe('getEffectiveScope', () => {
+    const actionList = [
+      { name: 'search', isTool: true as const },
+      { name: 'writeAction', isTool: true as const, scope: 'write' as const },
+      { name: 'destroyAction', isTool: true as const, scope: 'destroy' as const },
+    ];
+
+    it('returns null for empty selection', () => {
+      expect(getEffectiveScope(actionList, [])).toBeNull();
+    });
+
+    it('returns read for read-only selections', () => {
+      expect(getEffectiveScope(actionList, ['search'])).toBe('read');
+    });
+
+    it('returns write when write actions are selected', () => {
+      expect(getEffectiveScope(actionList, ['search', 'writeAction'])).toBe('write');
+    });
+
+    it('returns destroy when destroy actions are selected', () => {
+      expect(getEffectiveScope(actionList, ['search', 'writeAction', 'destroyAction'])).toBe(
+        'destroy'
+      );
     });
   });
 
   describe('formatConnectorActionLine', () => {
-    it('formats tool actions without a HITL suffix', () => {
+    it('formats read actions without annotation', () => {
       expect(formatConnectorActionLine('search', ACTIONS.search)).toBe('search: Search things');
     });
 
-    it('appends a HITL suffix for non-tool actions', () => {
+    it('annotates isTool:false actions with [DESTROY]', () => {
       expect(formatConnectorActionLine('approve', ACTIONS.approve)).toBe(
-        `approve: Approve things${HITL_ACTION_CONFIRMATION_SUFFIX}`
+        'approve [DESTROY]: Approve things'
+      );
+    });
+
+    it('annotates scope:write actions with [WRITE]', () => {
+      expect(formatConnectorActionLine('writeAction', ACTIONS.writeAction)).toBe(
+        'writeAction [WRITE]: Create things'
+      );
+    });
+
+    it('annotates scope:destroy actions with [DESTROY]', () => {
+      expect(formatConnectorActionLine('destroyAction', ACTIONS.destroyAction)).toBe(
+        'destroyAction [DESTROY]: Delete things'
       );
     });
 

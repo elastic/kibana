@@ -27,7 +27,9 @@ const getConnectorInstanceConfig = (
     connector.actionTypeId === '.inference'
       ? (connector.config?.taskType as string | undefined)
       : undefined;
-  const selectedActions = connector.config?.selectedActions as string[] | undefined;
+  const selectedActions = Array.isArray(connector.config?.selectedActions)
+    ? (connector.config?.selectedActions as string[])
+    : undefined;
 
   if (taskType !== undefined || selectedActions !== undefined) {
     return {

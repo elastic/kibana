@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorMetadata } from '@kbn/connector-specs';
+import type { ActionScope, ConnectorMetadata } from '@kbn/connector-specs';
 
 export interface ConnectorActionDef {
   name: string;
   description?: string;
   isTool: boolean;
+  scope?: ActionScope;
 }
 
 /**
@@ -39,6 +40,7 @@ export interface ConnectorActionWireDef {
   name: string;
   description?: string;
   is_tool: boolean;
+  scope?: 'read' | 'write' | 'destroy';
 }
 
 /** Client-side connector spec after normalising API casing. */
@@ -78,10 +80,11 @@ export function transformConnectorSpecResponse(
     isTestable: wire.is_testable ?? false,
     ...(wire.actions !== undefined
       ? {
-          actions: wire.actions.map(({ name, description: desc, is_tool: isTool }) => ({
+          actions: wire.actions.map(({ name, description: desc, is_tool: isTool, scope }) => ({
             name,
             isTool,
             ...(desc !== undefined ? { description: desc } : {}),
+            ...(scope !== undefined ? { scope } : {}),
           })),
         }
       : {}),

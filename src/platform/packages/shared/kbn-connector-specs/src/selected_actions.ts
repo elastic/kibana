@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ActionScope } from './connector_spec';
 import { TEST_CONNECTOR_SUB_ACTION } from './connector_spec';
 
 /**
@@ -15,8 +16,6 @@ import { TEST_CONNECTOR_SUB_ACTION } from './connector_spec';
  * - `string[]` = specific allowlist (empty array = none enabled)
  */
 export type SelectedActions = string[] | null | undefined;
-
-export const HITL_ACTION_CONFIRMATION_SUFFIX = ' (requires user confirmation before calling)';
 
 export const isSpecificActionsSelection = (
   selectedActions: SelectedActions
@@ -46,7 +45,9 @@ export const isSelectedActionEnabled = (
  * Filters a connector's actions by instance selection.
  * Unset (`null`/`undefined`) returns all actions; specific mode (`string[]`) returns the allowlist.
  */
-export const filterActionsBySelection = <T extends { isTool?: boolean; description?: string }>(
+export const filterActionsBySelection = <
+  T extends { isTool?: boolean; description?: string; scope?: ActionScope }
+>(
   actions: Record<string, T>,
   selectedActions: SelectedActions,
   options?: { requireDescription?: boolean }
@@ -63,13 +64,56 @@ export const filterActionsBySelection = <T extends { isTool?: boolean; descripti
 };
 
 /**
- * Formats `name: description` for agent-facing listings, with a HITL note when needed.
+ * Resolves the effective scope of an action.
+ * - `scope` field wins when present.
+ * - `isTool: false` without a scope maps to `destroy` (legacy HITL, most restrictive).
+ * - Everything else defaults to `read`.
+ */
+export const resolveActionScope = (action: {
+  scope?: ActionScope;
+  isTool?: boolean;
+}): ActionScope => {
+  if (action.scope) return action.scope;
+  return action.isTool === false ? 'destroy' : 'read';
+};
+
+const SCOPE_ORDER: Record<ActionScope, number> = { read: 0, write: 1, destroy: 2 };
+
+/**
+ * Returns the maximum scope implied by the selected actions, or `null` when nothing is selected.
+ */
+export const getEffectiveScope = (
+  actions: ReadonlyArray<{ name: string; scope?: ActionScope; isTool?: boolean }>,
+  selected: string[]
+): ActionScope | null => {
+  if (selected.length === 0) return null;
+  const selectedSet = new Set(selected);
+  let max: ActionScope = 'read';
+  for (const action of actions) {
+    if (!selectedSet.has(action.name)) continue;
+    const s = resolveActionScope(action);
+    if (SCOPE_ORDER[s] > SCOPE_ORDER[max]) {
+      max = s;
+      if (max === 'destroy') break;
+    }
+  }
+  return max;
+};
+
+const SCOPE_ANNOTATIONS: Partial<Record<ActionScope, string>> = {
+  write: ' [WRITE]',
+  destroy: ' [DESTROY]',
+};
+
+/**
+ * Formats `name[SCOPE]: description` for agent-facing action listings.
  */
 export const formatConnectorActionLine = (
   actionName: string,
-  action: { description?: string; isTool?: boolean }
+  action: { description?: string; isTool?: boolean; scope?: ActionScope }
 ): string => {
   const description = action.description ?? actionName;
-  const hitlSuffix = action.isTool ? '' : HITL_ACTION_CONFIRMATION_SUFFIX;
-  return `${actionName}: ${description}${hitlSuffix}`;
+  const scope = resolveActionScope(action);
+  const annotation = SCOPE_ANNOTATIONS[scope] ?? '';
+  return `${actionName}${annotation}: ${description}`;
 };

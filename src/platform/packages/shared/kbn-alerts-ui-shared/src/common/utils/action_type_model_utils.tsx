@@ -12,10 +12,9 @@ import type { ActionType } from '@kbn/actions-types';
 import type { DocLinksStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IconType } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
-import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
-import type { ConnectorZodSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
-import { getMeta, setMeta } from '@kbn/connector-specs/src/connector_spec_ui';
-import { narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs/src/lib/narrow_secrets_schema_for_auth_mode';
+import { fromConnectorSpecSchema, narrowSecretsSchemaForAuthMode } from '@kbn/connector-specs';
+import type { ConnectorZodSchema } from '@kbn/connector-specs';
+import { getMeta, setMeta } from '@kbn/connector-specs';
 import { UseField, type FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ConnectorActionSelector } from '../components/connector_action_selector';
 import type {
@@ -30,8 +29,8 @@ export type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
 
 const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
 
-// isTool:false actions are intended for human-in-the-loop (HITL) use.
-const EXPOSE_ALL_ACTIONS = true;
+// isTool:false actions are intended for human-in-the-loop (HITL) use and are shown alongside
+// isTool:true actions; formatConnectorActionLine annotates them with a confirmation suffix.
 
 export function shouldHideWorkflowsOnlyConnector(
   supportedFeatureIds: string[],
@@ -137,7 +136,7 @@ export function transformSpecToActionTypeModel(
         throw new Error(`Invalid connector spec schema for "${spec.metadata.id}"`);
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
-      const specActions = (spec.actions ?? []).filter((a) => EXPOSE_ALL_ACTIONS || a.isTool);
+      const specActions = spec.actions ?? [];
 
       // Bridges UseField's FieldHook API to ConnectorActionSelector's value/onChange props.
       const ConnectorActionSelectorField = ({
@@ -200,7 +199,7 @@ export function transformSpecToActionTypeModel(
           ...(secrets?.authType ? { authType: secrets.authType } : {}),
         };
 
-        if (updatedConfig.selectedActions === undefined) {
+        if (updatedConfig.selectedActions == null) {
           delete updatedConfig.selectedActions;
         }
 
