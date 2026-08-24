@@ -17,6 +17,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
+import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -35,6 +37,8 @@ export class NightshiftInvestigationsPlugin
 {
   private readonly logger: Logger;
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
+  // Only set in start(); emitters are built lazily from request handlers, which always run after start.
+  private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
 
   constructor(ctx: PluginInitializerContext) {
@@ -46,6 +50,14 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
     this.workflowsManagement = plugins.workflowsManagement;
+    registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+
+    const getTriggerEmitter = (request: KibanaRequest): TriggerEmitter | undefined =>
+      createTriggerEmitter({
+        workflowsExtensions: this.workflowsExtensionsStart,
+        request,
+        logger: this.logger,
+      });
 
     const getInvestigationsClient = (request: KibanaRequest, spaceId?: string) =>
       new NightshiftInvestigationsClient(
@@ -53,7 +65,8 @@ export class NightshiftInvestigationsPlugin
         this.workflowsManagement,
         this.spaces,
         this.logger,
-        spaceId
+        spaceId,
+        getTriggerEmitter(request)
       );
 
     if (plugins.workflowsManagement) {
@@ -65,7 +78,7 @@ export class NightshiftInvestigationsPlugin
 
       registerRoutes({
         repository: nightshiftInvestigationsRouteRepository,
-        dependencies: { getInvestigationsClient },
+        dependencies: { getInvestigationsClient, getTriggerEmitter },
         core,
         logger: this.logger,
         runDevModeChecks: false,
@@ -82,6 +95,7 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsStartDeps
   ): NightshiftInvestigationsServerStart {
     this.spaces = plugins.spaces;
+    this.workflowsExtensionsStart = plugins.workflowsExtensions;
 
     return {
       getInvestigationsClient: (request) =>
@@ -89,7 +103,13 @@ export class NightshiftInvestigationsPlugin
           request,
           this.workflowsManagement,
           this.spaces,
-          this.logger
+          this.logger,
+          undefined,
+          createTriggerEmitter({
+            workflowsExtensions: this.workflowsExtensionsStart,
+            request,
+            logger: this.logger,
+          })
         ),
     };
   }

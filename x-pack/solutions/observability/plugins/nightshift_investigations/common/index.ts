@@ -43,3 +43,14 @@ export interface GetInvestigationResponse {
   conclusions?: string;
   error?: string;
 }
+
+export {
+  INVESTIGATION_STARTED_TRIGGER_ID,
+  INVESTIGATION_COMPLETED_TRIGGER_ID,
+  INVESTIGATION_FAILED_TRIGGER_ID,
+  type InvestigationsTriggerId,
+  type InvestigationsTriggerPayloadMap,
+  type InvestigationsTriggerBasePayload,
+  type InvestigationCompletedTriggerPayload,
+  type InvestigationFailedTriggerPayload,
+} from './workflows/triggers';

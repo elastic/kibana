@@ -6,10 +6,16 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import {
   createNightshiftInvestigationsRepositoryClient,
   type NightshiftInvestigationsRepositoryClient,
 } from './api';
+import { registerInvestigationsWorkflowTriggers } from './workflows/triggers';
+
+export interface NightshiftInvestigationsPublicSetupDeps {
+  workflowsExtensions?: WorkflowsExtensionsPublicPluginSetup;
+}
 
 export type NightshiftInvestigationsPublicSetup = void;
 
@@ -20,7 +26,12 @@ export interface NightshiftInvestigationsPublicStart {
 export class NightshiftInvestigationsPublicPlugin
   implements Plugin<NightshiftInvestigationsPublicSetup, NightshiftInvestigationsPublicStart>
 {
-  setup(_core: CoreSetup): NightshiftInvestigationsPublicSetup {}
+  setup(
+    _core: CoreSetup,
+    { workflowsExtensions }: NightshiftInvestigationsPublicSetupDeps
+  ): NightshiftInvestigationsPublicSetup {
+    registerInvestigationsWorkflowTriggers(workflowsExtensions);
+  }
 
   start(core: CoreStart): NightshiftInvestigationsPublicStart {
     return {

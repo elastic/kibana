@@ -110,3 +110,80 @@ describe('GET /internal/nightshift/investigations/{id}', () => {
     expect(caught.message).toBe('workflowsManagement is not available');
   });
 });
+
+describe('POST /internal/nightshift/investigations/{id}/lifecycle_events', () => {
+  const lifecycleEndpoint =
+    'POST /internal/nightshift/investigations/{id}/lifecycle_events' as const;
+  const { handler } = nightshiftInvestigationsRouteRepository[lifecycleEndpoint];
+
+  const makeLifecycleResources = (
+    emitter: jest.Mock | undefined,
+    params: Record<string, unknown>
+  ) => ({
+    request: mockRequest,
+    params,
+    getInvestigationsClient: jest.fn(),
+    getTriggerEmitter: jest.fn().mockReturnValue(emitter),
+  });
+
+  it('emits the completed trigger with the expected payload', async () => {
+    const emitter = jest.fn();
+    const resources = makeLifecycleResources(emitter, {
+      path: { id: 'exec-1' },
+      body: {
+        status: 'completed',
+        started_at: '2024-01-01T00:00:00Z',
+        subject: { type: 'alert', id: 'alert-1' },
+      },
+    });
+
+    const result = await handler(resources as any);
+
+    expect(result).toEqual({ emitted: true });
+    expect(emitter).toHaveBeenCalledWith('nightshift-investigations.completed', {
+      investigation_id: 'exec-1',
+      status: 'completed',
+      subject: { type: 'alert', id: 'alert-1' },
+      started_at: '2024-01-01T00:00:00Z',
+      completed_at: expect.any(String),
+    });
+  });
+
+  it('emits the failed trigger when status is failed', async () => {
+    const emitter = jest.fn();
+    const resources = makeLifecycleResources(emitter, {
+      path: { id: 'exec-2' },
+      body: {
+        status: 'failed',
+        started_at: '2024-01-01T00:00:00Z',
+        subject: { type: 'significant_event', id: '' },
+      },
+    });
+
+    const result = await handler(resources as any);
+
+    expect(result).toEqual({ emitted: true });
+    expect(emitter).toHaveBeenCalledWith('nightshift-investigations.failed', {
+      investigation_id: 'exec-2',
+      status: 'failed',
+      subject: { type: 'significant_event', id: '' },
+      started_at: '2024-01-01T00:00:00Z',
+      completed_at: expect.any(String),
+    });
+  });
+
+  it('is a no-op when no trigger emitter is available (workflowsExtensions absent)', async () => {
+    const resources = makeLifecycleResources(undefined, {
+      path: { id: 'exec-3' },
+      body: {
+        status: 'completed',
+        started_at: '2024-01-01T00:00:00Z',
+        subject: { type: 'alert', id: 'alert-2' },
+      },
+    });
+
+    const result = await handler(resources as any);
+
+    expect(result).toEqual({ emitted: false });
+  });
+});

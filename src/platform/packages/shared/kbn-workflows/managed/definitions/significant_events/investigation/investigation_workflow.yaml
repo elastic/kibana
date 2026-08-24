@@ -616,3 +616,42 @@ steps:
         Read the current _gaps/overview page with platform_sig_events_memory_read. Compare the filtered gaps against it. If every gap is already reflected there, stop and write nothing. If there are genuinely new gaps, weave them into the existing sections (do not add a separate section) and save the page with platform_sig_events_memory_write using categories ["_system/gaps"].
     on-failure:
       continue: true
+
+  # Emits the nightshift-investigations.completed / nightshift-investigations.failed workflow
+  # triggers so subscribers are notified of the investigation outcome regardless of how the
+  # investigation was initiated (significant event, alert, manual). Exactly one of the two steps
+  # runs, keyed on whether the investigate step recorded an error (its own on-failure continues
+  # the run). on-failure: continue so a failed emission never fails the overall workflow run.
+  - name: emit_investigation_completed
+    type: kibana.request
+    if: '${{ steps.investigate.error == null }}'
+    with:
+      method: POST
+      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: 'completed'
+        started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+        subject:
+          type: "{{ inputs.context.source | default: 'significant_event' }}"
+          id: "{{ inputs.context.significant_event_id | default: inputs.context.alert_id | default: '' }}"
+    on-failure:
+      continue: true
+
+  - name: emit_investigation_failed
+    type: kibana.request
+    if: '${{ steps.investigate.error != null }}'
+    with:
+      method: POST
+      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: 'failed'
+        started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+        subject:
+          type: "{{ inputs.context.source | default: 'significant_event' }}"
+          id: "{{ inputs.context.significant_event_id | default: inputs.context.alert_id | default: '' }}"
+    on-failure:
+      continue: true
