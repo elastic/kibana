@@ -34,7 +34,6 @@ const SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS = [
   .map((id) => `body [id^='echTooltipPortalMainTooltip__${id}']`)
   .join(',\n  ');
 
-
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
   alerts: 'alerts',
