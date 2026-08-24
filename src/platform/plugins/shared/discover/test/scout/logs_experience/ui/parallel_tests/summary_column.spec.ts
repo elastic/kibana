@@ -90,12 +90,9 @@ spaceTest.describe(
         await discover.waitUntilTabIsLoaded();
         const columnText = await dataGrid.getCell(0, 'custom_bytes').innerText();
 
-        // `network.bytes` defaults to 500-10000, so doubling it always yields a thousands
-        // separator. Extract rather than anchor: cell text carries surrounding chrome.
         const formattedValue = columnText.match(/\d{1,3},\d{3}/)?.[0];
         expect(formattedValue).toBeDefined();
 
-        // The point is that both renderings of the same row agree, not the specific value.
         expect(summaryText).toContain(formattedValue);
       }
     );
