@@ -1137,10 +1137,14 @@ describe('Agent policy', () => {
         asyncDeploy: true,
       });
 
-      // computeMinAgentVersionData always fetches package policies once, but `_update`'s eager
-      // full fetch (for the deploy event it never triggers on this branch) should now be skipped,
-      // so the total should stay at 1 instead of the 2 it would be if `_update` also fetched.
-      expect(mockedPackagePolicyService.findAllForAgentPolicy).toHaveBeenCalledTimes(1);
+      // computeMinAgentVersionData reads package policies via a direct, field-projected
+      // soClient.find (not packagePolicyService.findAllForAgentPolicy), and `_update`'s eager
+      // full fetch (for the deploy event it never triggers on this branch) is skipped for async
+      // deploys — so findAllForAgentPolicy should never be called on this path.
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
+      );
+      expect(mockedPackagePolicyService.findAllForAgentPolicy).not.toHaveBeenCalled();
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
   });
