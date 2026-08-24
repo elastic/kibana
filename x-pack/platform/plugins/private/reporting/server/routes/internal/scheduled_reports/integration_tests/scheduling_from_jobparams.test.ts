@@ -181,7 +181,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toThrow('invalid params: browserTimezone: Invalid timezone')
+        expect(body.message).toEqual('invalid params: browserTimezone: Invalid timezone')
       );
   });
 
