@@ -35,7 +35,7 @@ making them available for rehydration after eviction or across process restarts.
 The previous `StepIoService` (~1300 lines) maintained a background eviction loop,
 a pin/unpin lifecycle, and a static-analysis planner to minimise ES round-trips.
 That combination produced four distinct bug classes, all documented in
-[eviction_rehydration_bugs.md](eviction_rehydration_bugs.md).
+[eviction_rehydration_bugs.md](https://github.com/skynetigor/kibana/blob/eviction_rehydration_workflows/src/platform/plugins/shared/workflows_execution_engine/docs/step_io/eviction_rehydration_bugs.md).
 
 **TOCTOU race — eviction fired after the plan ran, before the read**
 ([#17766](https://github.com/elastic/security-team/issues/17766),
