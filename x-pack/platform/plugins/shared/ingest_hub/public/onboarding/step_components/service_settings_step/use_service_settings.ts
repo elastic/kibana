@@ -250,7 +250,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         const config = getServiceVars(inst.instanceId);
         const activeInputs = config.enabledInputs?.length
           ? config.enabledInputs
-          : service.inputs ?? [];
+          : service.defaultEnabledInputs?.length
+          ? service.defaultEnabledInputs
+          : service.inputs?.slice(0, 1) ?? [];
         return activeInputs.some((inp) =>
           getRequiredTextFields(service, inp).some((f) => {
             const meta = resolveFieldMeta(service, inp, f);
