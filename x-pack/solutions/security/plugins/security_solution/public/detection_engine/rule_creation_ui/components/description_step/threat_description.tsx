@@ -13,27 +13,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import type { BuildThreatDescription } from './types';
-import type {
-  MitreSubTechnique,
-  MitreTactic,
-  MitreTechnique,
-} from '../../../../../common/detection_engine/mitre/types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-};
+import { useMitreConfiguration } from '../../../rule_management/api/hooks/use_mitre_configuration';
 
 const threatEuiFlexGroupStyles = css`
   .euiFlexItem {
@@ -75,19 +60,10 @@ export const ThreatEuiFlexGroup = ({
   'data-test-subj': dataTestSubj = 'threat',
 }: BuildThreatDescription) => {
   const { euiTheme } = useEuiTheme();
-  const [techniquesOptions, setTechniquesOptions] = useState<MitreTechnique[]>([]);
-  const [tacticsOptions, setTacticsOptions] = useState<MitreTactic[]>([]);
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
-
-  useEffect(() => {
-    async function getMitre() {
-      const mitreConfig = await lazyMitreConfiguration();
-      setSubtechniquesOptions(mitreConfig.subtechniques);
-      setTechniquesOptions(mitreConfig.techniques);
-      setTacticsOptions(mitreConfig.tactics);
-    }
-    getMitre();
-  }, []);
+  const { mitreConfig } = useMitreConfiguration();
+  const techniquesOptions = mitreConfig?.techniques ?? [];
+  const tacticsOptions = mitreConfig?.tactics ?? [];
+  const subtechniquesOptions = mitreConfig?.subtechniques ?? [];
 
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'

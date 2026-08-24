@@ -6,7 +6,6 @@
  */
 
 import { kebabCase } from 'lodash';
-import { tacticOrder } from '../../../../../common/detection_engine/mitre/mitre_tactics_order';
 import type {
   MitreTactic,
   MitreTechnique,
@@ -69,13 +68,12 @@ export function buildCoverageOverviewMitreGraph(
     }
   }
 
-  const sortedTactics = tactics.sort(
-    (a, b) => tacticOrder.indexOf(a.id) - tacticOrder.indexOf(b.id)
-  );
-
+  // Tactics are expected to arrive pre-sorted by the caller:
+  //   - managed source: useMitreConfiguration adapter sorts by position ascending
+  //   - legacy blob: buildCoverageOverviewDashboardModel pre-sorts by tacticOrder
   const result: CoverageOverviewMitreTactic[] = [];
 
-  for (const tactic of sortedTactics) {
+  for (const tactic of tactics) {
     result.push({
       id: tactic.id,
       name: tactic.name,

@@ -73,6 +73,7 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EsqlPluginSetup } from '@kbn/esql/public';
+import type { MitreAttackPublicPluginStart } from '@kbn/mitre-attack-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -181,6 +182,7 @@ export interface StartPlugins {
   agentBuilder?: AgentBuilderPluginStart;
   cps?: CPSPluginStart;
   evals?: EvalsPublicStart;
+  mitreAttack?: MitreAttackPublicPluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {

@@ -17,22 +17,9 @@ import {
 const mockTactics = getMockCoverageOverviewTactics();
 const mockTechniques = getMockCoverageOverviewTechniques();
 const mockSubtechniques = getMockCoverageOverviewSubtechniques();
+const mockMitreData = { tactics: mockTactics, techniques: mockTechniques, subtechniques: mockSubtechniques };
 
 describe('buildCoverageOverviewDashboardModel', () => {
-  beforeEach(() => {
-    jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => {
-      return {
-        tactics: mockTactics,
-        techniques: mockTechniques,
-        subtechniques: mockSubtechniques,
-      };
-    });
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('maps API response', async () => {
     const mockApiResponse: CoverageOverviewResponse = {
       coverage: {
@@ -56,7 +43,7 @@ describe('buildCoverageOverviewDashboardModel', () => {
       },
     };
 
-    const model = await buildCoverageOverviewDashboardModel(mockApiResponse);
+    const model = await buildCoverageOverviewDashboardModel(mockApiResponse, mockMitreData);
 
     expect(model).toEqual({
       metrics: {
@@ -192,7 +179,7 @@ describe('buildCoverageOverviewDashboardModel', () => {
       },
     };
 
-    const model = await buildCoverageOverviewDashboardModel(mockApiResponse);
+    const model = await buildCoverageOverviewDashboardModel(mockApiResponse, mockMitreData);
 
     expect(model.mitreTactics).toEqual([
       expect.objectContaining({
@@ -245,7 +232,7 @@ describe('buildCoverageOverviewDashboardModel', () => {
       },
     };
 
-    const model = await buildCoverageOverviewDashboardModel(mockApiResponse);
+    const model = await buildCoverageOverviewDashboardModel(mockApiResponse, mockMitreData);
 
     expect(model.unmappedRules).toEqual({
       availableRules: [],
@@ -286,7 +273,7 @@ describe('buildCoverageOverviewDashboardModel', () => {
       },
     };
 
-    const model = await buildCoverageOverviewDashboardModel(mockApiResponse);
+    const model = await buildCoverageOverviewDashboardModel(mockApiResponse, mockMitreData);
 
     expect(model.metrics).toEqual({
       totalEnabledRulesCount: 2,
@@ -309,7 +296,7 @@ describe('buildCoverageOverviewDashboardModel', () => {
       },
     };
 
-    const model = await buildCoverageOverviewDashboardModel(mockApiResponse);
+    const model = await buildCoverageOverviewDashboardModel(mockApiResponse, mockMitreData);
 
     expect(model.invalidlyMappedRules).toEqual({
       enabledRules: [
@@ -338,7 +325,7 @@ describe('buildCoverageOverviewDashboardModel', () => {
       },
     };
 
-    const model = await buildCoverageOverviewDashboardModel(mockApiResponse);
+    const model = await buildCoverageOverviewDashboardModel(mockApiResponse, mockMitreData);
 
     expect(model.invalidlyMappedRules).toEqual({
       enabledRules: [],
@@ -360,7 +347,7 @@ describe('buildCoverageOverviewDashboardModel', () => {
       rules_data: {},
     };
 
-    const model = await buildCoverageOverviewDashboardModel(mockApiResponse);
+    const model = await buildCoverageOverviewDashboardModel(mockApiResponse, mockMitreData);
 
     expect(model.invalidlyMappedRules).toEqual({
       enabledRules: [],

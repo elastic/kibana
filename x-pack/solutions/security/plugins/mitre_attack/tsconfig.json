@@ -1,0 +1,24 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "server/**/*",
+    "public/**/*",
+    // must declare *.json explicitly per https://github.com/microsoft/TypeScript/issues/25636
+    "server/**/*.json",
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/config-schema",
+    "@kbn/lock-manager"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

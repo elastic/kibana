@@ -16,6 +16,7 @@ import { buildCoverageOverviewDashboardModel } from '../../logic/coverage_overvi
 import type { CoverageOverviewDashboard } from '../../model/coverage_overview/dashboard';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useMitreConfiguration } from './use_mitre_configuration';
 
 const COVERAGE_OVERVIEW_QUERY_KEY = ['POST', RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL];
 
@@ -32,13 +33,16 @@ export const useFetchCoverageOverviewQuery = (
   options?: UseQueryOptions<CoverageOverviewDashboard>
 ) => {
   const { addError } = useAppToasts();
+  const { mitreConfig } = useMitreConfiguration();
 
   return useQuery<CoverageOverviewDashboard>(
     [...COVERAGE_OVERVIEW_QUERY_KEY, filter],
     async ({ signal }) => {
       const response = await fetchCoverageOverview({ signal, filter });
 
-      return buildCoverageOverviewDashboardModel(response);
+      // Pass mitreConfig when available; buildCoverageOverviewDashboardModel falls
+      // back to the lazy legacy blob when undefined (e.g. mitreConfig still loading).
+      return buildCoverageOverviewDashboardModel(response, mitreConfig ?? undefined);
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
