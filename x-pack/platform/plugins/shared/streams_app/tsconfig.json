@@ -116,6 +116,7 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/utility-types",
     "@kbn/xstate-utils",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/ui-callout"
   ]
 }
