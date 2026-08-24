@@ -191,6 +191,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     getBlacklist: {
       isTool: true,
+      scope: 'read',
       description:
         'Fetch the AbuseIPDB blacklist feed of most-reported IPs at or above a confidence threshold. Use for blocklist generation and enrichment feeds. Prefer confidenceMinimum 75-100 for denial-of-service style blocking.',
       input: lazySchema(() =>
