@@ -16,6 +16,7 @@ import { PreconfiguredActionDisabledModificationError } from '../../../../lib/er
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
+import { ensureNotInternalAuthType } from '../../../../lib/ensure_not_internal_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
@@ -75,6 +76,9 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const currentAuthMode = authMode ?? 'shared';
   const currentAuthTypeId = getAuthTypeId(attributes.secrets, attributes.config);
   const requestedAuthTypeId = getAuthTypeId(secrets, config);
+
+  ensureNotInternalAuthType({ actionTypeId, secrets, config });
+
   const requestedAuthMode = inferAuthMode({
     authTypeRegistry: context.authTypeRegistry,
     secrets,

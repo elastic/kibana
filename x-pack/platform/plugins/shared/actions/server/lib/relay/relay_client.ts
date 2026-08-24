@@ -20,6 +20,8 @@ import type {
   RelayInstallRequest,
   RelayInstallResponse,
   RelayListBindingsOptions,
+  RelayTriggerInput,
+  RelayTriggerResponse,
 } from './types';
 
 export interface RelayClientOptions {
@@ -39,6 +41,12 @@ interface RelayErrorResponse {
 interface RelayBindingsListResponse {
   bindings?: RelayBinding[];
   next_cursor?: string;
+}
+
+/** Raw shape of the `POST /v1/trigger` acknowledgement body. */
+interface RelayTriggerResponseBody {
+  ref?: string;
+  tenant_key?: string;
 }
 
 export class RelayClient implements RelayClientContract {
@@ -138,6 +146,25 @@ export class RelayClient implements RelayClientContract {
         channelId
       )}/unbind`
     );
+  }
+
+  /** Post to a bound channel. One this deployment does not own is rejected with a 403, not delivered. */
+  async trigger({
+    tenantKey,
+    channel,
+    message,
+    threadTs,
+  }: RelayTriggerInput): Promise<RelayTriggerResponse> {
+    const response = await this.post('/v1/trigger', {
+      surface: 'slack',
+      tenant_key: tenantKey,
+      channel,
+      message,
+      ...(threadTs ? { thread_ts: threadTs } : {}),
+    });
+
+    const body = response.data as RelayTriggerResponseBody | undefined;
+    return { ref: body?.ref ?? '', tenantKey: body?.tenant_key ?? tenantKey };
   }
 
   isRelayOrigin(url: string): boolean {

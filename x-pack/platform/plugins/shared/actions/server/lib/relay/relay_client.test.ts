@@ -219,6 +219,63 @@ describe('RelayClient', () => {
     });
   });
 
+  describe('trigger', () => {
+    it('posts the snake_case outbound body with the Relay SSL overrides', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ok: true, surface: 'slack', tenant_key: 'team-A', ref: '1700000000.000100' },
+      } as never);
+
+      await expect(
+        createClient().trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+      ).resolves.toEqual({ ref: '1700000000.000100', tenantKey: 'team-A' });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/trigger',
+          method: 'post',
+          data: { surface: 'slack', tenant_key: 'team-A', channel: 'C123', message: 'hello' },
+          sslOverrides: relaySSLSettings,
+        })
+      );
+    });
+
+    it('includes thread_ts only when replying in a thread', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000200', tenant_key: 'team-A' },
+      } as never);
+
+      await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'in thread',
+        threadTs: '1700000000.000100',
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ thread_ts: '1700000000.000100' }),
+        })
+      );
+    });
+
+    it.each([403, 409, 502])(
+      'turns a %s into a RelayRequestError carrying the status',
+      async (status) => {
+        requestMock.mockResolvedValue({ status, data: { message: 'nope' } } as never);
+
+        const error = await createClient()
+          .trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+          .then(() => undefined)
+          .catch((cause) => cause);
+
+        expect(error).toBeInstanceOf(RelayRequestError);
+        expect(error).toMatchObject({ statusCode: status, relayMessage: 'nope' });
+      }
+    );
+  });
+
   it('preserves Relay errors', async () => {
     requestMock.mockResolvedValue({
       status: 400,

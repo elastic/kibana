@@ -336,6 +336,66 @@ describe('create()', () => {
     });
   });
 
+  describe('internal auth types', () => {
+    test('throws an error when creating a connector with an internal auth type', async () => {
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.slack2',
+            config: {},
+            secrets: { authType: 'relay', tenantKey: 'tenant-A' },
+          },
+        })
+      ).rejects.toThrow(
+        'Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .slack2.'
+      );
+    });
+
+    test('throws when the internal auth type is only present in config', async () => {
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.slack2',
+            config: { authType: 'relay' },
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow(
+        'Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .slack2.'
+      );
+    });
+
+    test('allows a user-facing auth type on the same connector type', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: '.slack2',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.slack2',
+            config: {},
+            secrets: { authType: 'bearer', token: 'xoxb-token' },
+          },
+        })
+      ).resolves.toEqual(expect.objectContaining({ actionTypeId: '.slack2' }));
+    });
+  });
+
   describe('basic connector creation', () => {
     test('creates an action with all given properties', async () => {
       const savedObjectCreateResult = {

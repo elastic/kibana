@@ -608,7 +608,7 @@ describe('MultiOptionUnionWidget', () => {
     });
   });
 
-  describe('legacy options', () => {
+  describe('legacy and internal options', () => {
     const renderOptions = (
       options: Array<z.ZodObject<z.ZodRawShape>>,
       fieldConfig: Record<string, unknown> = {}
@@ -666,6 +666,37 @@ describe('MultiOptionUnionWidget', () => {
 
       expect(screen.getByText('Bearer (legacy)')).toBeInTheDocument();
       expect(screen.getByLabelText('Legacy Token', { selector: 'input' })).toBeInTheDocument();
+    });
+
+    const internalRelay = () =>
+      z
+        .object({
+          type: z.literal('relay'),
+          tenantKey: z.string().meta({ label: 'Tenant Key' }),
+        })
+        .meta({ label: 'Elastic app', isInternal: true });
+
+    it('does not render an internal option that is not selected', () => {
+      renderOptions([ears(), internalRelay()]);
+
+      expect(screen.getByText('Quick Connect')).toBeInTheDocument();
+      expect(screen.queryByText('Elastic app')).toBeNull();
+    });
+
+    it('skips internal options when picking the default', () => {
+      // internal option listed FIRST — default selection should still land on the other option
+      renderOptions([internalRelay(), ears()]);
+
+      expect(screen.getByLabelText('Quick Token', { selector: 'input' })).toBeInTheDocument();
+      expect(screen.queryByText('Elastic app')).toBeNull();
+    });
+
+    it('renders an internal option when it is the active selection (e.g. provisioned connector)', () => {
+      renderOptions([ears(), internalRelay()], {
+        defaultValue: { type: 'relay', tenantKey: 'tenant-A' },
+      });
+
+      expect(screen.getByText('Elastic app')).toBeInTheDocument();
     });
   });
 

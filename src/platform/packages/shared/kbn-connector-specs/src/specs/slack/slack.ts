@@ -12,6 +12,14 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import {
+  getRelayConnection,
+  relayListChannels,
+  relayResolveChannelId,
+  relaySendMessage,
+  relayTest,
+  withRelayGuards,
+} from './relay';
+import {
   SlackCreateConversationInputSchema,
   SlackGetConversationHistoryInputSchema,
   SlackGetConversationInfoInputSchema,
@@ -258,13 +266,23 @@ export const Slack: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'relay',
+        isInternal: true, // set when the Elastic Slack app connects, never by a user
+        defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.slack.auth.relay.label', {
+            defaultMessage: 'Elastic Slack app',
+          }),
+        },
+      },
     ],
   },
 
   // No additional configuration needed beyond OAuth credentials
   schema: lazySchema(() => z.object({})),
 
-  actions: {
+  actions: withRelayGuards({
     // https://api.slack.com/methods/assistant.search.context
     searchMessages: {
       isTool: true,
@@ -369,6 +387,11 @@ export const Slack: ConnectorSpec = {
         'List Slack channels/conversations the token can see (one page per call). Use this to answer which channels exist or to browse IDs before sendMessage. Pass nextCursor from the previous response to fetch the next page. Prefer this over many resolveChannelId calls for discovery.',
       input: SlackListChannelsInputSchema,
       handler: async (ctx, input: SlackListChannelsInput) => {
+        const relayConnection = getRelayConnection(ctx);
+        if (relayConnection) {
+          return relayListChannels(relayConnection, ctx, input);
+        }
+
         const params: SlackConversationsListParams = {
           types: input.types.join(','),
           exclude_archived: input.excludeArchived,
@@ -426,6 +449,11 @@ export const Slack: ConnectorSpec = {
         'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use before sendMessage when you already know the target name but need its ID. To list or explore channels, use listChannels instead of many resolveChannelId calls.',
       input: SlackResolveChannelIdInputSchema,
       handler: async (ctx, input: SlackResolveChannelIdInput) => {
+        const relayConnection = getRelayConnection(ctx);
+        if (relayConnection) {
+          return relayResolveChannelId(relayConnection, ctx, input);
+        }
+
         const nameNorm = input.name.trim().replace(/^#/, '').toLowerCase();
 
         let cursor = input.cursor;
@@ -1050,6 +1078,11 @@ export const Slack: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
 
+        const relayConnection = getRelayConnection(ctx);
+        if (relayConnection) {
+          return relaySendMessage(relayConnection, ctx, typedInput);
+        }
+
         const payload: Record<string, unknown> = {
           channel: typedInput.channel,
           text: typedInput.text,
@@ -1101,7 +1134,7 @@ export const Slack: ConnectorSpec = {
         }
       },
     },
-  },
+  }),
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.slack.test.description', {
@@ -1109,6 +1142,14 @@ export const Slack: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Slack test handler');
+
+      // withRelayGuards cannot reach this: it is registered under the reserved `_test` key, outside
+      // spec.actions.
+      const relayConnection = getRelayConnection(ctx);
+      if (relayConnection) {
+        return relayTest(relayConnection, ctx);
+      }
+
       // Test connection by calling auth.test which validates the token
       const response = await ctx.client.get(`${SLACK_API_BASE}/auth.test`);
       if (!response.data.ok) {
@@ -1137,5 +1178,6 @@ export const Slack: ConnectorSpec = {
     'listUserConversations returns the channels a given user (or the authenticated user, if user is omitted) is a member of. Prefer it over listChannels when you only care about a specific user’s memberships.',
     'When a user identity comes back from one action as an ID (e.g. a message author_user_id) and you need their email or profile, resolve it via listUsers or by feeding a known email to lookupUserByEmail.',
     'For Slack files: use getFileInfo with a file ID (F...) when a message references a file you need metadata for, and listFiles when browsing or scoping by channel/user/time range. Both are paginated; listFiles supports a `types` filter (e.g. "images,pdfs").',
+    'A connector using the Elastic Slack app supports only sendMessage, listChannels and resolveChannelId, and only over the channels connected to this deployment — listChannels returns those channels, not the whole workspace. Reading history or searching messages, users, and files fails, so answer from the channel list and the messages you send rather than trying to read the workspace.',
   ].join('\n'),
 };

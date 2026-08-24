@@ -24,6 +24,11 @@ import {
 } from './saved_object';
 import { SlackAppUnavailableError } from './errors';
 import { getKibanaUrl } from './get_kibana_url';
+import {
+  getRegisteredTenantKey,
+  registerElasticAppsSlackConnector,
+  unregisterElasticAppsSlackConnector,
+} from './connector';
 
 /** Pagination options for a single page of connected channels. */
 export interface ListBindingsOptions {
@@ -60,6 +65,42 @@ export class SlackAppService {
     return this.server.core.savedObjects.getScopedClient(request, {
       includedHiddenTypes: [RELAY_APP_CONNECTION_SO_TYPE],
     });
+  }
+
+  private publishConnector(tenantKey: string): void {
+    registerElasticAppsSlackConnector({
+      actions: this.server.actions,
+      logger: this.logger,
+      tenantKey,
+    });
+  }
+
+  private withdrawConnector(): void {
+    unregisterElasticAppsSlackConnector({ actions: this.server.actions, logger: this.logger });
+  }
+
+  /**
+   * Brings this process's connector in line with the stored connection. In-memory connectors are
+   * per-process, so a connect handled by another node only reaches here. Safe to call repeatedly.
+   */
+  async reconcileConnector(soClient: SavedObjectsClientContract): Promise<void> {
+    // Gated like every request, so disabling the app also withdraws the connector rather than
+    // leaving one that can only fail.
+    const available = await this.getRelayClient();
+    const connection = available ? await this.readConnection(soClient) : undefined;
+    const desiredTenantKey =
+      connection?.status === RELAY_APP_CONNECTION_STATUS.connected
+        ? connection.tenantKey ?? undefined
+        : undefined;
+
+    if (desiredTenantKey === getRegisteredTenantKey(this.server.actions)) {
+      return;
+    }
+    if (!desiredTenantKey) {
+      this.withdrawConnector();
+      return;
+    }
+    this.publishConnector(desiredTenantKey);
   }
 
   private async readConnection(
@@ -218,6 +259,10 @@ export class SlackAppService {
       createdAt: now,
     });
 
+    // The install may land on a different workspace, so any leftover connector now carries a stale
+    // tenant key. Republished once the claim completes.
+    this.withdrawConnector();
+
     return { authorizeUrl: installResponse.authorize_url };
   }
 
@@ -243,6 +288,7 @@ export class SlackAppService {
       apiKeyId: null,
       error: message,
     });
+    this.withdrawConnector();
 
     return { available: true, status: RELAY_APP_CONNECTION_STATUS.error, error: message };
   }
@@ -298,6 +344,7 @@ export class SlackAppService {
             tenantKey: claim.tenant_key,
             status: RELAY_APP_CONNECTION_STATUS.connected,
           });
+          this.publishConnector(claim.tenant_key);
           return { available: true, status: RELAY_APP_CONNECTION_STATUS.connected };
         }
       } catch (error) {
@@ -406,6 +453,10 @@ export class SlackAppService {
     if (!connection) {
       return { status: 'disconnected' };
     }
+
+    // Up front, not on the success path: a failed unbind below leaves the connection in `error` for
+    // the user to retry, and rules must not keep posting through a connection being torn down.
+    this.withdrawConnector();
 
     if (connection.apiKeyId) {
       await this.invalidateApiKey(connection.apiKeyId, 'on disconnect');

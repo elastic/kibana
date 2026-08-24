@@ -64,6 +64,17 @@ describe('Slack', () => {
     expect(types).toContain('oauth_authorization_code');
     expect(types).toContain('ears');
     expect(types).toContain('bearer');
+    expect(types).toContain('relay');
+  });
+
+  it('marks the relay auth type internal so a user can never configure it', () => {
+    const relayType = (Slack.auth?.types as Array<string | { type: string }>).find(
+      (t) => typeof t !== 'string' && t.type === 'relay'
+    ) as { isInternal?: boolean; defaults?: Record<string, unknown> } | undefined;
+
+    expect(relayType).toBeDefined();
+    expect(relayType?.isInternal).toBe(true);
+    expect(relayType?.defaults).toEqual({});
   });
 
   it('supports oauth_authorization_code with correct Slack defaults', () => {
@@ -1500,6 +1511,101 @@ describe('Slack', () => {
           text: 'Hello',
         })
       ).rejects.toThrow('Slack sendMessage error: channel_not_found');
+    });
+  });
+
+  describe('relay auth', () => {
+    const relayTrigger = jest.fn();
+    const relayListBindings = jest.fn();
+    const relayContext = {
+      ...mockContext,
+      secrets: { authType: 'relay', tenantKey: 'team-A' },
+      relay: { trigger: relayTrigger, listBindings: relayListBindings },
+    } as unknown as ActionContext;
+
+    it('sendMessage posts through the relay and never touches the Slack client', async () => {
+      relayTrigger.mockResolvedValue({ ref: '1234567890.123456', tenantKey: 'team-A' });
+
+      const result = await Slack.actions.sendMessage.handler(relayContext, {
+        channel: 'C123',
+        text: 'Hello from Kibana',
+      });
+
+      expect(relayTrigger).toHaveBeenCalledWith({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'Hello from Kibana',
+      });
+      expect(mockClient.post).not.toHaveBeenCalled();
+      expect(result).toEqual({ ok: true, channel: 'C123', ts: '1234567890.123456' });
+    });
+
+    it('listChannels returns the connected channels and never touches the Slack client', async () => {
+      relayListBindings.mockResolvedValue({
+        bindings: [{ scope_id: 'C123', display_name: 'general', visibility: 'public' }],
+      });
+
+      const result = await Slack.actions.listChannels.handler(
+        relayContext,
+        SlackListChannelsInputSchema.parse({})
+      );
+
+      expect(relayListBindings).toHaveBeenCalledWith('team-A', { limit: 200 });
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        ok: true,
+        source: 'relay-bindings',
+        channels: [{ id: 'C123', name: 'general', is_private: false }],
+        nextCursor: undefined,
+        hasMore: false,
+      });
+    });
+
+    it('resolveChannelId resolves against the connected channels', async () => {
+      relayListBindings.mockResolvedValue({
+        bindings: [{ scope_id: 'C123', display_name: 'general' }],
+      });
+
+      const result = await Slack.actions.resolveChannelId.handler(
+        relayContext,
+        SlackResolveChannelIdInputSchema.parse({ name: '#general' })
+      );
+
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(result).toMatchObject({ found: true, id: 'C123', source: 'relay-bindings' });
+    });
+
+    it('the test handler checks the relay instead of auth.test', async () => {
+      relayListBindings.mockResolvedValue({ bindings: [] });
+
+      await expect(Slack.test.handler(relayContext)).resolves.toEqual({});
+
+      expect(relayListBindings).toHaveBeenCalledWith('team-A', { limit: 1 });
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('fails an action the relay has no route for, naming what is supported', async () => {
+      await expect(
+        Slack.actions.searchMessages.handler(relayContext, { query: 'anything' })
+      ).rejects.toThrow(
+        'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, listChannels, resolveChannelId.'
+      );
+
+      expect(mockClient.post).not.toHaveBeenCalled();
+    });
+
+    it('leaves the Slack path intact for a connector holding its own token', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { ok: true, channels: [], response_metadata: { next_cursor: '' } },
+      });
+
+      await Slack.actions.listChannels.handler(
+        { ...mockContext, secrets: { authType: 'bearer', token: 'xoxb-fake' } } as ActionContext,
+        SlackListChannelsInputSchema.parse({})
+      );
+
+      expect(mockClient.get).toHaveBeenCalled();
+      expect(relayListBindings).not.toHaveBeenCalled();
     });
   });
 

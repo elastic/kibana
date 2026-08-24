@@ -18,6 +18,7 @@ import type { HookServices, ActionResult } from '../../../../types';
 import { tryCatch } from '../../../../lib';
 import { invokePostCreateListeners } from '../../../../lib/invoke_lifecycle_listeners';
 import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
+import { ensureNotInternalAuthType } from '../../../../lib/ensure_not_internal_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
 import { validateConnectorId } from '../../../../../common/validate_connector_id';
 
@@ -72,6 +73,8 @@ export async function create({
       })
     );
   }
+
+  ensureNotInternalAuthType({ actionTypeId, secrets, config });
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
   const configurationUtilities = context.actionTypeRegistry.getUtils();

@@ -13,6 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
@@ -20,7 +21,11 @@ import { combineLatest, distinctUntilChanged, filter, skip, switchMap } from 'rx
 import type { Subscription } from 'rxjs';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
-import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
+import {
+  getRelayAppConnectionSavedObjectType,
+  RELAY_APP_CONNECTION_SO_TYPE,
+} from './lib/slack_app/saved_object';
+import { createElasticAppsSlackConnectorPoller } from './lib/slack_app/connector_poller';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
   createSignificantEventsMaintenanceService,
@@ -384,6 +389,22 @@ export class SignificantEventsPlugin
       this.server.agentBuilder = plugins.agentBuilder;
 
       this.server.relayClient = plugins.actions.getRelayClient();
+
+      // The Elastic Slack connector is in-memory, so it survives neither a restart nor a connect
+      // handled by another node. The connection document is namespace-agnostic, so one internal
+      // client covers the deployment. Relay config is static at start, so skip the poller when the
+      // client is absent rather than ticking a reconcile loop that can never do anything.
+      if (this.server.relayClient) {
+        this.subscriptions.push(
+          createElasticAppsSlackConnectorPoller({
+            server: this.server,
+            logger: this.logger,
+            soClient: new SavedObjectsClient(
+              core.savedObjects.createInternalRepository([RELAY_APP_CONNECTION_SO_TYPE])
+            ),
+          }).subscribe()
+        );
+      }
     }
 
     // Availability is the same requirement registry that gates requests, so a deployment never gets
