@@ -878,6 +878,52 @@ describe('autocomplete_utils', () => {
         expect(primitive?.filterText).toBeUndefined();
         expect(acceptSuggestion(editorLines, primitive!)).toBe('  "refresh": false');
       });
+
+      it('SHOULD replace a bare minus prefix for negative primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": -'];
+        const position = { lineNumber: 3, column: 13 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 13, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find((item) => item.label === '-1' && item.insertText === '-1');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 13,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: -1 });
+        expect(acc).toBe('  "value": -1');
+      });
+
+      it('SHOULD replace a bare decimal prefix for numeric primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": 0.'];
+        const position = { lineNumber: 3, column: 14 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 14, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find((item) => item.label === '0.5' && item.insertText === '0.5');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 14,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: 0.5 });
+        expect(acc).toBe('  "value": 0.5');
+      });
     });
 
     it('ignores quotes inside comments when completing in the middle of a quoted field', async () => {

@@ -370,6 +370,18 @@ const findOpeningQuoteStartColumn = (lineContentBeforePosition: string): number 
   }
 };
 
+const findUnquotedPrimitiveValueStartColumn = (
+  lineContentBeforePosition: string
+): number | undefined => {
+  const primitivePrefixMatch = lineContentBeforePosition.match(
+    /(?:^|[\s:[,])(-?(?:\d+(?:\.\d*)?|\.\d*)|-)$/
+  );
+  const primitivePrefix = primitivePrefixMatch?.[1];
+  return primitivePrefix
+    ? lineContentBeforePosition.length - primitivePrefix.length + 1
+    : undefined;
+};
+
 const isCompletingObjectKey = (bodyTokens: string[]): boolean => bodyTokens.at(-1) === '{';
 
 // If there is a closing `"` after the cursor, include it in the replacement range so accepting
@@ -498,13 +510,17 @@ const getSuggestions = (
     endColumn,
   };
 
-  // Primitive terms insert bare JSON literals (`true`, `0`), so when the cursor is inside a
-  // quoted string the replacement range must also cover the opening quote. Monaco can start the
-  // current word after JSON punctuation (`-`, `.`), so scan back to the string boundary instead
-  // of shifting by one column.
+  // Primitive terms insert bare JSON literals (`true`, `0`), so their replacement range must
+  // cover any quote or numeric punctuation that Monaco leaves outside the current word.
+  const unquotedPrimitiveValueStartColumn =
+    openingQuoteStartColumn === false || openingQuoteStartColumn === undefined
+      ? findUnquotedPrimitiveValueStartColumn(lineContentBeforePosition)
+      : undefined;
   const primitiveTermRange =
     openingQuoteStartColumn !== false && openingQuoteStartColumn !== undefined
       ? { ...range, startColumn: openingQuoteStartColumn }
+      : unquotedPrimitiveValueStartColumn !== undefined
+      ? { ...range, startColumn: unquotedPrimitiveValueStartColumn }
       : range;
   const primitiveTermFilterText =
     openingQuoteStartColumn !== false && openingQuoteStartColumn !== undefined
