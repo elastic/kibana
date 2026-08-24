@@ -131,9 +131,7 @@ describe('DetectionRulesClient.bulkUpgradePrebuiltRules', () => {
   });
 
   it('same-type: keeps existing actions', async () => {
-    const actions = [
-      { group: 'default', id: 'connector-1', action_type_id: '.index', params: {} },
-    ];
+    const actions = [{ group: 'default', id: 'connector-1', action_type_id: '.index', params: {} }];
     const existing = { ...getRulesSchemaMock(), id: 'so-1', rule_id: 'same-type', actions };
     (getRuleByRuleId as jest.Mock).mockResolvedValue(existing);
     (applyRuleUpdate as jest.Mock).mockResolvedValueOnce({
