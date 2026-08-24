@@ -50312,7 +50312,6 @@
     "xpack.securitySolution.useInputHints.exampleInstructions": "例：[ {exampleUsage} ]",
     "xpack.securitySolution.useInputHints.noArguments": "Enterを押すと実行します",
     "xpack.securitySolution.useInputHints.unknownCommand": "不明なコマンド{commandName}",
-    "xpack.securitySolution.useInputHints.viewInputHistory": "上矢印キーを押して、以前に入力したコマンドを表示",
     "xpack.securitySolution.user.details.overview.familyTitle": "ファミリー",
     "xpack.securitySolution.user.details.overview.inspectTitle": "ユーザー概要",
     "xpack.securitySolution.user.details.overview.ipAddressesTitle": "IP アドレス",

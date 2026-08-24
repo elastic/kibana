@@ -50315,7 +50315,6 @@
     "xpack.securitySolution.useInputHints.exampleInstructions": "例如：[ {exampleUsage} ]",
     "xpack.securitySolution.useInputHints.noArguments": "按 Enter 键以执行",
     "xpack.securitySolution.useInputHints.unknownCommand": "未知命令 {commandName}",
-    "xpack.securitySolution.useInputHints.viewInputHistory": "按向上箭头键可访问以前输入的命令",
     "xpack.securitySolution.user.details.overview.familyTitle": "系列",
     "xpack.securitySolution.user.details.overview.inspectTitle": "用户概览",
     "xpack.securitySolution.user.details.overview.ipAddressesTitle": "IP 地址",

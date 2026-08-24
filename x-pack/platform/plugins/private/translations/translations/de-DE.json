@@ -50144,7 +50144,6 @@
     "xpack.securitySolution.useInputHints.exampleInstructions": "Bsp.: [ {exampleUsage} ]",
     "xpack.securitySolution.useInputHints.noArguments": "Eingabetaste drücken, um den Befehl auszuführen",
     "xpack.securitySolution.useInputHints.unknownCommand": "Unbekannter Befehl {commandName}",
-    "xpack.securitySolution.useInputHints.viewInputHistory": "Drücken Sie die Aufwärtspfeiltaste, um auf zuvor eingegebene Befehle zuzugreifen",
     "xpack.securitySolution.user.details.overview.familyTitle": "Familie",
     "xpack.securitySolution.user.details.overview.inspectTitle": "Nutzerübersicht",
     "xpack.securitySolution.user.details.overview.ipAddressesTitle": "IP-Adressen",

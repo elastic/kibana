@@ -49916,7 +49916,6 @@
     "xpack.securitySolution.useInputHints.exampleInstructions": "Ex : [ {exampleUsage} ]",
     "xpack.securitySolution.useInputHints.noArguments": "Appuyez sur Entrée pour exécuter",
     "xpack.securitySolution.useInputHints.unknownCommand": "Commande inconnue {commandName}",
-    "xpack.securitySolution.useInputHints.viewInputHistory": "Appuyez sur la touche fléchée vers le haut pour accéder aux commandes saisies précédemment",
     "xpack.securitySolution.user.details.overview.familyTitle": "Famille",
     "xpack.securitySolution.user.details.overview.inspectTitle": "Aperçu de l'utilisateur",
     "xpack.securitySolution.user.details.overview.ipAddressesTitle": "Adresses IP",
