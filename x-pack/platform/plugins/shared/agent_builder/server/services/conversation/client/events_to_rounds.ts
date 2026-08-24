@@ -21,10 +21,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from './rounds_to_events';
 
-/**
- * The rounds the execution layer uses as context: derived from the event timeline (the source of
- * truth) when present, falling back to the stored rounds for a conversation with no events yet.
- */
+/** Rounds derived from events timeline with a fallback to rounds if no events are present. */
 export const roundsForContext = (conversation: Conversation): ConversationRound[] =>
   conversation.events && conversation.events.length > 0
     ? eventsToRounds(conversation.events)
