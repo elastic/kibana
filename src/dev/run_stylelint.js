@@ -7,20 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { resolve } from 'path';
-import { buildCLI } from 'stylelint/lib/cli';
+import { spawnSync } from 'child_process';
+import { dirname, resolve } from 'path';
 
-const options = buildCLI(process.argv.slice(2));
-
+const args = process.argv.slice(2);
 const stylelintConfigPath = resolve(__dirname, '..', '..', '.stylelintrc');
 const stylelintIgnorePath = resolve(__dirname, '..', '..', '.stylelintignore');
+const { bin } = require('stylelint/package.json');
+const stylelintExecutable = resolve(
+  dirname(require.resolve('stylelint/package.json')),
+  bin.stylelint
+);
 
-if (!options.input.length) {
-  process.argv.push('**/*.s+(a|c)ss');
+if (!args.length) {
+  args.push('**/*.s+(a|c)ss');
 }
-process.argv.push('--max-warnings', '0'); // return nonzero exit code on any warnings
-process.argv.push('--config', stylelintConfigPath); // configuration file
-process.argv.push('--ignore-path', stylelintIgnorePath); // ignore file
+args.push('--max-warnings', '0'); // return nonzero exit code on any warnings
+args.push('--config', stylelintConfigPath); // configuration file
+args.push('--ignore-path', stylelintIgnorePath); // ignore file
 
-// common-js is required so that logic before this executes before loading sass-lint
-require('stylelint/bin/stylelint');
+const { error, status } = spawnSync(process.execPath, [stylelintExecutable, ...args], {
+  stdio: 'inherit',
+});
+
+if (error) {
+  throw error;
+}
+
+process.exitCode = status ?? 1;
