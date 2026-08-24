@@ -8,6 +8,7 @@ Single skill covering all anomaly detection work. Use the **Mode Selector** belo
 - Source-data ES|QL only: `platform.core.execute_esql` (current user) for RCA evidence / ingest latency against datafeed indices
 - ES|QL query templates are in the referenced content files (`esql-read-queries`, `esql-metadata-queries`, `esql-score-queries`)
 - ML API write/state operations: `ml.ad_get_job_info`, `ml.ad_create_job`, `ml.ad_manage_job_state`, `ml.ad_update_job_config`
+- Inline chart rendering (Platinum+): `ml.create_ml_charts` — renders anomaly swim lane, anomaly charts, or single metric viewer directly in the conversation
 - **Run `ml.ad_get_job_info` with `operation=validate_permissions` first** when tools return empty/misleading results — missing privileges are the most common cause of false negatives.
 
 ### Calling `ml.query_anomalies`
@@ -510,6 +511,43 @@ GET  _ml/anomaly_detectors/<job_id>/results  # 4. Read results      (ml.query_an
 6. **Fix memory before `query_delay`.** `hard_limit` invalidates downstream diagnostics.
 7. **Stop datafeed → close job → update config → open job → start datafeed** for any config change to memory or query delay.
 8. **Confirm RCAs with `ad_rca_source_evidence`.** Raw source documents are ground truth.
+
+---
+
+## Visualize — Inline Charts
+
+**License**: Platinum or higher. The `ml.create_ml_charts` tool returns an error on non-Platinum licenses — surface it clearly to the user.
+**Tool**: `ml.create_ml_charts`
+**Job IDs**: always from prior `ml.ad_get_job_info` results or explicit user input. Never invent.
+
+Use `ml.create_ml_charts` to render ML charts directly in the conversation. After the tool succeeds, emit:
+
+```
+<render_attachment id="{attachment_id}" version="{version}" />
+```
+
+The `attachment_id` and `version` are returned in the tool result. Always render the chart immediately after creation unless the user asks only for the config.
+
+### When to use inline charts vs dashboard
+
+| Situation | Inline chart | Dashboard |
+| --- | --- | --- |
+| Investigation in progress, showing results inline | ✓ | — |
+| User explicitly asks for a dashboard | — | ✓ |
+| User asks to "show" / "visualise" / "chart" anomalies | ✓ | — |
+| User wants to save or share results | — | ✓ |
+
+Charts created inline can also be forwarded to `platform.dashboard.generate_dashboard` — the `config` field in the tool result is the panel config payload (with `source: "config"` and the appropriate `type`).
+
+### `ml.create_ml_charts` — chart_type values
+
+Same decision logic as Dashboard Panels (see below) applies for which chart type and how to derive `swimlane_type`, `view_by`, `selected_entities`, etc.
+
+| `chart_type` | When to use |
+| --- | --- |
+| `anomaly_swimlane` | Overview — which entity was anomalous and when |
+| `anomaly_charts` | Compare actual vs model bounds across several entities |
+| `single_metric_viewer` | Drill down on one entity + detector |
 
 ---
 

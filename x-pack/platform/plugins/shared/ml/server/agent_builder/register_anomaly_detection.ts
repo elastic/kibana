@@ -13,6 +13,11 @@ import type { MlAuthorizationService } from '../lib/capabilities/check_capabilit
 import type { MlClientFactoryDeps } from './ml_client_factory';
 import { createMlClientFactory, createDataRecognizerFactory } from './ml_client_factory';
 import { createAnomalyDetectionSkill } from './skills/anomaly_detection';
+import {
+  createAnomalySwimLaneAttachmentType,
+  createAnomalyChartsAttachmentType,
+  createSingleMetricViewerAttachmentType,
+} from './attachment_types';
 
 export const registerAnomalyDetectionAgentBuilder = ({
   agentBuilder,
@@ -31,6 +36,11 @@ export const registerAnomalyDetectionAgentBuilder = ({
 }): void => {
   const buildMlClient = createMlClientFactory(mlClientFactoryDeps);
   const buildDataRecognizer = createDataRecognizerFactory(mlClientFactoryDeps);
+
+  agentBuilder.attachments.registerType(createAnomalySwimLaneAttachmentType());
+  agentBuilder.attachments.registerType(createAnomalyChartsAttachmentType());
+  agentBuilder.attachments.registerType(createSingleMetricViewerAttachmentType());
+
   agentBuilder.skills.register(
     createAnomalyDetectionSkill(
       resolveMlCapabilities,
