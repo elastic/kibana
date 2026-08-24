@@ -274,7 +274,9 @@ describe('ManagedIntegrationsSection', () => {
     it('deploy button is absent when isDone', () => {
       renderSection({ isDone: true });
       fireEvent.click(screen.getByTestId('managedIntegrationsSection-headerButton'));
-      expect(screen.queryByTestId('managedIntegrationsSection-deployButton')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('managedIntegrationsSection-deployButton')
+      ).not.toBeInTheDocument();
     });
 
     it('shows success message when isDone and section is open', () => {

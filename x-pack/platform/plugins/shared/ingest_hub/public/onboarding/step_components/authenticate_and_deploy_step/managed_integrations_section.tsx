@@ -232,34 +232,34 @@ export function ManagedIntegrationsSection({
 
             {hasFailed && !isDeploying && (
               <EuiCallOut
-                  title={
-                    <FormattedMessage
-                      id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.errorCallout.title"
-                      defaultMessage="Deployment failed"
-                    />
-                  }
+                title={
+                  <FormattedMessage
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.errorCallout.title"
+                    defaultMessage="Deployment failed"
+                  />
+                }
+                color="danger"
+                iconType="error"
+                announceOnMount
+                data-test-subj="managedIntegrationsSection-errorCallout"
+              >
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.errorCallout.body"
+                  defaultMessage="One or more integrations could not be deployed. Check your credentials and try again."
+                />
+                <EuiSpacer size="s" />
+                <EuiButton
+                  size="s"
                   color="danger"
-                  iconType="error"
-                  announceOnMount
-                  data-test-subj="managedIntegrationsSection-errorCallout"
+                  onClick={onDeploy}
+                  data-test-subj="managedIntegrationsSection-retryButton"
                 >
                   <FormattedMessage
-                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.errorCallout.body"
-                    defaultMessage="One or more integrations could not be deployed. Check your credentials and try again."
+                    id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.retryButton"
+                    defaultMessage="Retry"
                   />
-                  <EuiSpacer size="s" />
-                  <EuiButton
-                    size="s"
-                    color="danger"
-                    onClick={onDeploy}
-                    data-test-subj="managedIntegrationsSection-retryButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.retryButton"
-                      defaultMessage="Retry"
-                    />
-                  </EuiButton>
-            </EuiCallOut>
+                </EuiButton>
+              </EuiCallOut>
             )}
 
             {isDone && (
