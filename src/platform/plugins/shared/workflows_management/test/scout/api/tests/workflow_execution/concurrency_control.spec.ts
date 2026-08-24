@@ -42,11 +42,13 @@ steps:
   - name: wait_step_1
     type: wait
     with:
-      duration: 5s
+      # Stay under the 5s engine threshold so waits sleep in-process instead of
+      # parking on a workflow:resume Task Manager task (see handleExecutionDelay).
+      duration: 2s
   - name: wait_step_2
     type: wait
     with:
-      duration: 5s
+      duration: 2s
   - name: hello_world_step_2
     type: console
     with:
@@ -185,18 +187,19 @@ spaceTest.describe(
     spaceTest(
       'queue strategy queues new executions and runs them sequentially until all complete',
       async ({ apiServices }) => {
-        // Scout's default test timeout is 60s. Queue serialises 3 ~10s runs for
-        // the same key (~30s) plus ~6s of inter-run delays, so 120s leaves CI headroom.
-        spaceTest.setTimeout(120_000);
+        // Scout's default test timeout is 60s. Queue serialises 3 ~4s runs for
+        // the same key (~12s), so 90s leaves CI headroom for Task Manager pickup.
+        spaceTest.setTimeout(90_000);
 
         const isolationKey = randomUUID();
         const createdWorkflow = await apiServices.workflowsApi.create(
           getConcurrencyWorkflowYaml('queue', isolationKey)
         );
 
-        // The queue strategy serialises executions per concurrency key. With 3 queued
-        // dev/issue-1 runs each taking ~10s, the last one finishes at ~30s. We use a
-        // 60s timeout so waitForTermination does not expire prematurely.
+        // The queue strategy serialises executions per concurrency key. Waits are 2s
+        // (under the 5s in-process vs workflow:resume threshold) so 3 queued runs
+        // finish in ~12s without parking on Task Manager. 60s is still enough
+        // headroom if the initial workflow:run claim is slow.
         const groupedExecutionsByConcurrencyKey = await runConcurrencyWorkflow(
           apiServices.workflowsApi,
           createdWorkflow.id,
