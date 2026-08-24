@@ -38,7 +38,7 @@ import { createFadeOverlayBackground } from '../common/fade_overlay_background';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { nightshiftOpacityTransition, nightshiftReducedMotionStyles } from '../common/transition';
 import {
-  getConclusionBody,
+  getConclusionText,
   getInvestigationCompleteStatusLabel,
   getInvestigationGoalText,
   getInvestigationHeadline,
@@ -289,7 +289,7 @@ export function InvestigationSummaryCard({
   const isRunning = status === 'running' || status === 'loading';
   const headline = getInvestigationHeadline({ eventTitle, state, status });
   const goalText = getInvestigationGoalText(state);
-  const conclusionBody = getConclusionBody(state?.conclusion);
+  const conclusionBody = getConclusionText(state);
   const primaryRecommendation = status === 'complete' ? getPrimaryRecommendation(state) : undefined;
   const blindSpots =
     status === 'complete' ? (state?.blind_spots ?? []).slice(0, INLINE_BLIND_SPOT_LIMIT) : [];
