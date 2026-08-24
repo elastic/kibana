@@ -95,6 +95,7 @@ function mockGate(options?: {
   isServerless?: boolean;
   isTierEligible?: boolean;
   hasManager?: boolean;
+  defaultProjectRouting?: string;
 }) {
   usePluginContextMock.mockReturnValue({
     ...pluginContextDefaultValue,
@@ -110,6 +111,9 @@ function mockGate(options?: {
             ? undefined
             : {
                 fetchProjects: jest.fn(),
+                getDefaultProjectRouting: jest
+                  .fn()
+                  .mockReturnValue(options?.defaultProjectRouting ?? LOCAL_PROJECT_ROUTING),
               },
       },
     },
@@ -161,11 +165,20 @@ describe('ProjectRoutingsSelector', () => {
     expect(screen.queryByTestId('sloProjectRoutingsSelector')).not.toBeInTheDocument();
   });
 
-  it('seeds LOCAL on create when the field is undefined', async () => {
+  it('seeds the space default on create when the field is undefined', async () => {
     const getProjectRoutings = renderSelector();
 
     await waitFor(() => {
       expect(getProjectRoutings()).toBe(LOCAL_PROJECT_ROUTING);
+    });
+  });
+
+  it('seeds ALL when the space default is ALL_PROJECT_ROUTING', async () => {
+    mockGate({ defaultProjectRouting: ALL_PROJECT_ROUTING });
+    const getProjectRoutings = renderSelector();
+
+    await waitFor(() => {
+      expect(getProjectRoutings()).toBe(ALL_PROJECT_ROUTING);
     });
   });
 

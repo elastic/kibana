@@ -27,7 +27,7 @@ import type { CreateSLOForm } from '../../types';
 
 export function ProjectRoutingsSelector() {
   const { watch, setValue } = useFormContext<CreateSLOForm>();
-  const { showProjectScopeUI, fetchProjects } = useCpsProjectScope();
+  const { showProjectScopeUI, fetchProjects, cpsManager } = useCpsProjectScope();
   const projectRoutings = watch('settings.projectRoutings');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -63,8 +63,11 @@ export function ProjectRoutingsSelector() {
     if (!showProjectScopeUI || linkedProjects.length === 0 || projectRoutings !== undefined) {
       return;
     }
-    setValue('settings.projectRoutings', LOCAL_PROJECT_ROUTING);
-  }, [showProjectScopeUI, linkedProjects.length, projectRoutings, setValue]);
+    setValue(
+      'settings.projectRoutings',
+      cpsManager?.getDefaultProjectRouting() ?? LOCAL_PROJECT_ROUTING
+    );
+  }, [showProjectScopeUI, linkedProjects.length, projectRoutings, setValue, cpsManager]);
 
   const handleProjectRoutingChange = useCallback(
     (nextProjectRouting: ProjectRouting) => {
