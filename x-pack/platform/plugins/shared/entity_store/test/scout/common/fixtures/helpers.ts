@@ -35,8 +35,12 @@ export const normalizeKeywordList = (value: unknown): string[] => {
   return Array.isArray(value) ? value.map((v) => String(v)) : [String(value)];
 };
 
+/** Logs-compatible data stream used by extraction tests to seed source log events. */
+export const LOGS_TEST_INDEX = 'logs-entity-store-tests-default';
+
 /**
- * Deletes all Entity Store data indices: latest, updates, and history snapshots.
+ * Deletes all Entity Store data indices: latest, updates, history snapshots, and
+ * the test-only logs source data stream populated by ingestLogDoc / esArchiver (logs archive).
  * Call in afterAll / afterEach to prevent stale data from leaking between
  * sequential test-target runs that share the same ES cluster.
  */
@@ -44,8 +48,12 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
   const resolved = await esClient.indices.resolveIndex({ name: HISTORY_INDEX_PATTERN });
   const historyIndices = resolved.indices.map((i) => i.name);
 
+  // Delete regular indices (latest, updates, history snapshots)
   const toDelete = [LATEST_INDEX, UPDATES_INDEX, ...historyIndices];
   await esClient.indices.delete({ index: toDelete, ignore_unavailable: true }, { ignore: [404] });
+
+  // LOGS_TEST_INDEX is a data stream — must use deleteDataStream, not indices.delete
+  await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
 };
 
 /**
@@ -65,10 +73,43 @@ export interface ForceLogExtractionApiClient {
 
 export const ingestDoc = async (esClient: EsClient, body: Record<string, unknown>) =>
   esClient.index({
-    index: UPDATES_INDEX,
+    index: LOGS_TEST_INDEX,
     refresh: 'wait_for',
     body,
   });
+
+export const ingestLogDoc = async (esClient: EsClient, body: Record<string, unknown>) =>
+  esClient.index({
+    index: LOGS_TEST_INDEX,
+    refresh: 'wait_for',
+    body,
+  });
+
+/**
+ * Creates an index template that overrides data_stream.dataset from constant_keyword
+ * to keyword for the test data stream, then resets it so the new mapping applies.
+ * Must be called before esArchiver.loadIfNeeded for the logs test archive.
+ *
+ * The standard `logs` component template locks data_stream.dataset as constant_keyword
+ * (one value per backing index). Our test archive has multiple dataset values, so we
+ * override the mapping before the data stream is created.
+ */
+export const setupLogsTestDataStream = async (esClient: EsClient) => {
+  await esClient.indices.putIndexTemplate({
+    name: 'entity-store-test-logs-override',
+    index_patterns: ['logs-entity-store-tests-*'],
+    data_stream: {},
+    template: {
+      mappings: {
+        properties: {
+          data_stream: { properties: { dataset: { type: 'keyword' } } },
+        },
+      },
+    },
+    priority: 500,
+  });
+  await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
+};
 
 export const searchDocById = async (esClient: EsClient, id: string) => {
   await esClient.indices.refresh({ index: LATEST_ALIAS });

@@ -11,9 +11,13 @@ import {
   PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  UPDATES_INDEX,
 } from '../../../common/fixtures/constants';
-import { clearEntityStoreIndices, ingestDoc } from '../../../common/fixtures/helpers';
+import {
+  clearEntityStoreIndices,
+  ingestDoc,
+  LOGS_TEST_INDEX,
+  setupLogsTestDataStream,
+} from '../../../common/fixtures/helpers';
 import { deriveUserEntityPreAggMetadata } from '../fixtures/user_entity_pre_agg_metadata';
 import {
   USER_TS_EXTRACTION_CASES,
@@ -37,7 +41,7 @@ const userRuntimeSearchBody = {
 
 async function runUserRuntimeSearch(esClient: EsClient, query: object, size = 10) {
   return esClient.search({
-    index: UPDATES_INDEX,
+    index: LOGS_TEST_INDEX,
     body: {
       ...userRuntimeSearchBody,
       query,
@@ -93,7 +97,7 @@ function assertRuntimeEuidMatchesEntityTypeFormat(
 apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, esClient, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -111,8 +115,9 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
     });
     expect(response.statusCode).toBe(201);
 
+    await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
-      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/updates'
+      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
     );
   });
 
@@ -131,7 +136,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
       `should match in-memory euid for every document using getEuidPainlessRuntimeMapping (${entityType})`,
       async ({ esClient }) => {
         const result = await esClient.search({
-          index: UPDATES_INDEX,
+          index: LOGS_TEST_INDEX,
           body: {
             query: { match_all: {} },
             runtime_mappings: {

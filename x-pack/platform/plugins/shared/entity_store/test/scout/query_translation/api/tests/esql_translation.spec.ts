@@ -11,10 +11,14 @@ import {
   PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  UPDATES_INDEX,
 } from '../../../common/fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
-import { clearEntityStoreIndices, ingestDoc } from '../../../common/fixtures/helpers';
+import {
+  clearEntityStoreIndices,
+  ingestDoc,
+  LOGS_TEST_INDEX,
+  setupLogsTestDataStream,
+} from '../../../common/fixtures/helpers';
 import { getEuidEsqlFilterBasedOnDocument } from '../../../../../common/domain/euid/esql';
 import {
   USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES,
@@ -24,7 +28,7 @@ import {
 apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, esClient, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -43,8 +47,9 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     });
     expect(response.statusCode).toBe(201);
 
+    await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
-      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/updates'
+      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
     );
   });
 
@@ -65,7 +70,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('generic', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${LOGS_TEST_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
       });
@@ -85,7 +90,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('host', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${LOGS_TEST_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
       });
@@ -108,7 +113,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('host', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${LOGS_TEST_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
       });
@@ -125,7 +130,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     'user: synthetic invalid docs should not return per-document ESQL filter (documentsFilter or postAgg gate)',
     async ({ esClient }) => {
       await esClient.esql.query({
-        query: `FROM ${UPDATES_INDEX} | LIMIT 1`,
+        query: `FROM ${LOGS_TEST_INDEX} | LIMIT 1`,
       });
       for (const example of USER_SCOUT_INVALID_PER_DOCUMENT_FILTER_EXAMPLES) {
         expect(getEuidEsqlFilterBasedOnDocument('user', example.doc)).toBeUndefined();
@@ -143,7 +148,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${LOGS_TEST_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
       });
@@ -169,7 +174,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${LOGS_TEST_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
       });
@@ -193,7 +198,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${LOGS_TEST_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
       });
@@ -213,7 +218,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('user', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${LOGS_TEST_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
       });
@@ -242,7 +247,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         const filter = getEuidEsqlFilterBasedOnDocument('user', scenario.dslFilterSource);
         expect(filter).toBeDefined();
 
-        const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+        const query = `FROM ${LOGS_TEST_INDEX} | WHERE ${filter} | LIMIT 10`;
         const result = await esClient.esql.query({
           query,
           drop_null_columns: true,
@@ -258,7 +263,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         expect(values[0][userNameIdx]).toBe(expectedUserName);
 
         await esClient.deleteByQuery({
-          index: UPDATES_INDEX,
+          index: LOGS_TEST_INDEX,
           refresh: true,
           query: scenario.query as object,
         });
@@ -273,7 +278,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('service', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${LOGS_TEST_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
       });
@@ -293,7 +298,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
       const filter = getEuidEsqlFilterBasedOnDocument('service', docSource);
       expect(filter).toBeDefined();
 
-      const query = `FROM ${UPDATES_INDEX} | WHERE ${filter} | LIMIT 10`;
+      const query = `FROM ${LOGS_TEST_INDEX} | WHERE ${filter} | LIMIT 10`;
       const result = await esClient.esql.query({
         query,
       });

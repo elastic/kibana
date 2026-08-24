@@ -19,7 +19,7 @@ import {
   assertEntitiesEqual,
   expectedHostEntities,
 } from '../../../common/fixtures/entity_extraction_expected';
-import { clearEntityStoreIndices } from '../../../common/fixtures/helpers';
+import { clearEntityStoreIndices, setupLogsTestDataStream } from '../../../common/fixtures/helpers';
 
 apiTest.describe(
   'Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage)',
@@ -28,7 +28,7 @@ apiTest.describe(
     let defaultHeaders: Record<string, string>;
     let internalHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver, kbnClient }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
         ...credentials.cookieHeader,
@@ -56,8 +56,9 @@ apiTest.describe(
       });
       expect(response.statusCode).toBe(201);
 
+      await setupLogsTestDataStream(esClient);
       await esArchiver.loadIfNeeded(
-        'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/updates'
+        'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
       );
     });
 

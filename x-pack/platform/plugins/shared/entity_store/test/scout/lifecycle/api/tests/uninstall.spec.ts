@@ -13,7 +13,6 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
-  UPDATES_INDEX,
 } from '../../../common/fixtures/constants';
 import { forceLogExtraction } from '../../../common/fixtures/helpers';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';

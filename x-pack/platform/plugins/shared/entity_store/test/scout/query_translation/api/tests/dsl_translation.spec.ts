@@ -11,10 +11,14 @@ import {
   PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  UPDATES_INDEX,
 } from '../../../common/fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
-import { clearEntityStoreIndices, ingestDoc } from '../../../common/fixtures/helpers';
+import {
+  clearEntityStoreIndices,
+  ingestDoc,
+  LOGS_TEST_INDEX,
+  setupLogsTestDataStream,
+} from '../../../common/fixtures/helpers';
 import {
   getEuidDslFilterBasedOnDocument,
   getEuidDslDocumentsContainsIdFilter,
@@ -47,7 +51,7 @@ async function searchWithFilter(
   size = 100
 ) {
   return esClient.search({
-    index: UPDATES_INDEX,
+    index: LOGS_TEST_INDEX,
     query: query ? { ...query } : {},
     size,
   }) as Promise<{
@@ -76,7 +80,7 @@ function hasDocWith(
 apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esArchiver, esClient, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -94,8 +98,9 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     });
     expect(response.statusCode).toBe(201);
 
+    await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
-      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/updates'
+      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
     );
   });
 
@@ -236,7 +241,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         });
 
         await esClient.deleteByQuery({
-          index: UPDATES_INDEX,
+          index: LOGS_TEST_INDEX,
           refresh: true,
           query: scenario.query as object,
         });

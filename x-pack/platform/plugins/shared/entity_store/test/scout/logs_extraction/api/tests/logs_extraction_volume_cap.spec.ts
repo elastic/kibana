@@ -13,10 +13,13 @@ import {
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
-  UPDATES_INDEX,
 } from '../../../common/fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
-import { clearEntityStoreIndices, ingestDoc } from '../../../common/fixtures/helpers';
+import {
+  clearEntityStoreIndices,
+  ingestLogDoc,
+  LOGS_TEST_INDEX,
+} from '../../../common/fixtures/helpers';
 import {
   LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
   LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
@@ -92,7 +95,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
 
       try {
         for (let i = 0; i < HOST_TIMESTAMPS.length; i++) {
-          await ingestDoc(esClient, {
+          await ingestLogDoc(esClient, {
             '@timestamp': HOST_TIMESTAMPS[i],
             host: { name: `cap-defer-host-${i + 1}` },
           });
@@ -152,7 +155,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
       } finally {
         // Remove ingested docs and restore config to defaults
         await esClient.deleteByQuery({
-          index: UPDATES_INDEX,
+          index: LOGS_TEST_INDEX,
           refresh: true,
           query: { prefix: { 'host.name': 'cap-defer-host-' } },
         });
@@ -189,7 +192,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
 
       try {
         for (let i = 0; i < HOST_TIMESTAMPS.length; i++) {
-          await ingestDoc(esClient, {
+          await ingestLogDoc(esClient, {
             '@timestamp': HOST_TIMESTAMPS[i],
             host: { name: `cap-drop-host-${i + 1}` },
           });
@@ -214,7 +217,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
         expect(response.body.lastSearchTimestamp).toBe(TO_DATE);
       } finally {
         await esClient.deleteByQuery({
-          index: UPDATES_INDEX,
+          index: LOGS_TEST_INDEX,
           refresh: true,
           query: { prefix: { 'host.name': 'cap-drop-host-' } },
         });
@@ -250,7 +253,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
 
       try {
         for (let i = 0; i < HOST_TIMESTAMPS.length; i++) {
-          await ingestDoc(esClient, {
+          await ingestLogDoc(esClient, {
             '@timestamp': HOST_TIMESTAMPS[i],
             host: { name: `cap-disabled-host-${i + 1}` },
           });
@@ -272,7 +275,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
         expect(response.body.logsProcessed).toBe(HOST_TIMESTAMPS.length);
       } finally {
         await esClient.deleteByQuery({
-          index: UPDATES_INDEX,
+          index: LOGS_TEST_INDEX,
           refresh: true,
           query: { prefix: { 'host.name': 'cap-disabled-host-' } },
         });

@@ -1,9 +1,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "jkzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:05Z",
       "entity": {
@@ -16,9 +16,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "d0zh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:00Z",
       "host": {
@@ -37,9 +37,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "eEzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:01Z",
       "host": {
@@ -59,9 +59,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "eEzh_5sBzpZGGHYpLUFD",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:02Z",
       "host": {
@@ -78,9 +78,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "eUzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:02Z",
       "host": {
@@ -94,9 +94,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "ekzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:03Z",
       "host": {
@@ -110,9 +110,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "e0zh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:04Z",
       "host": {
@@ -125,9 +125,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "fEzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:05Z",
       "host": {
@@ -140,9 +140,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "fUzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:06Z",
       "host": {
@@ -157,9 +157,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "fkzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:07Z",
       "host": {
@@ -174,9 +174,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "f0zh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:08Z",
       "host": {
@@ -191,9 +191,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "gEzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:09Z",
       "host": {
@@ -208,9 +208,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "gUzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:10Z",
       "host": {
@@ -225,9 +225,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "gkzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:11Z",
       "host": {
@@ -242,9 +242,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "g0zh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:12Z",
       "host": {
@@ -259,9 +259,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "hEzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:13Z",
       "host": {
@@ -275,9 +275,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "hUzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:14Z",
       "host": {
@@ -291,9 +291,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "hkzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:15Z",
       "host": {
@@ -307,9 +307,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "h0zh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:16Z",
       "host": {
@@ -323,9 +323,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "iEzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:17Z",
       "host": {
@@ -340,9 +340,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "iUzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:18Z",
       "host": {
@@ -355,9 +355,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "ikzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:04Z",
       "host": {
@@ -372,9 +372,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "i0zh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:04Z",
       "host": {
@@ -389,9 +389,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "jEzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:04Z",
       "service": {
@@ -407,9 +407,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "jUzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:05Z",
       "service": {
@@ -422,9 +422,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "Ykzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:00Z",
       "event": { "kind": "asset", "module": "okta" },
@@ -443,9 +443,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "Y0zh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:01Z",
       "event": { "kind": "asset", "module": "azure" },
@@ -462,9 +462,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "ZEzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:02Z",
       "event": { "kind": "asset", "module": "entityanalytics_entra_id" },
@@ -481,9 +481,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "ZUzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:03Z",
       "event": { "kind": "asset", "module": "o365" },
@@ -498,9 +498,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "Zkzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:04Z",
       "event": { "kind": "asset", "module": "o365_metrics" },
@@ -514,9 +514,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "Z0zh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:04Z",
       "event": { "kind": "asset", "module": "entityanalytics_ad" },
@@ -534,9 +534,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "aEzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:05Z",
       "event": { "kind": "asset", "module": "entityanalytics_okta" },
@@ -550,9 +550,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "aUzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:06Z",
       "event": { "kind": "asset", "module": "aws" },
@@ -567,9 +567,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "akzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:07Z",
       "event": { "kind": "asset", "module": "gcp" },
@@ -583,9 +583,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "a0zh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:08Z",
       "event": { "kind": "asset", "module": "okta" },
@@ -600,9 +600,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "bEzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:09Z",
       "event": { "kind": "asset", "module": "azure" },
@@ -617,9 +617,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "bUzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:10Z",
       "event": { "kind": "asset", "module": "o365" },
@@ -639,9 +639,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "bkzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:11Z",
       "event": { "kind": "asset", "module": "entityanalytics_ad" },
@@ -662,9 +662,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "b0zh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:12Z",
       "event": { "kind": "asset", "module": "okta" },
@@ -686,9 +686,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "cEzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:13Z",
       "event": { "kind": "asset", "module": "entityanalytics_entra_id" },
@@ -702,9 +702,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "cUzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:14Z",
       "event": { "kind": "asset", "module": "aws" },
@@ -719,9 +719,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "ckzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:15Z",
       "event": { "kind": "asset", "module": "gcp" },
@@ -736,9 +736,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "c0zh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:16Z",
       "event": { "kind": "any-random", "category": "iam", "type": "user", "module": "okta" },
@@ -758,9 +758,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "dEzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:17Z",
       "event": { "kind": null, "category": "iam", "type": "creation", "module": "azure" },
@@ -778,9 +778,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "dUzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:18Z",
       "event": { "category": "iam", "type": "group", "module": "entityanalytics_ad" },
@@ -798,9 +798,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "nocap1_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:19Z",
       "event": { "kind": "asset" },
@@ -812,9 +812,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "nocap2_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:19Z",
       "user": { "name": "not-captured-no-event" }
@@ -825,9 +825,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "dset1_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:20Z",
       "event": { "category": "iam", "type": "deletion" },
@@ -840,9 +840,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "dset9_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:20Z",
       "event": { "category": "iam", "type": "deletion", "outcome": "failure" },
@@ -855,9 +855,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "dset2_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:21Z",
       "event": { "kind": "asset" },
@@ -870,9 +870,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "none1_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:22Z",
       "event": { "kind": "asset" },
@@ -884,9 +884,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "dkzh_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:19Z"
     }
@@ -896,9 +896,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "nonidp1_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:23Z",
       "user": { "name": "alice.local" },
@@ -910,9 +910,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "illegal1_5sBzpZGGHYpLUFB",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:24Z",
       "user": { "email": "invalid-idp-illegal@test.com" },
@@ -924,9 +924,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "dset2_5sBzpZGGHYpLUFV",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:23Z",
       "event": { "kind": "asset" },
@@ -940,9 +940,9 @@
 {
   "type": "doc",
   "value": {
-    "data_stream": ".entities.v2.updates.default",
+    "data_stream": "logs-entity-store-tests-default",
     "id": "dset2_5sBzpZGGHYpLUFD",
-    "index": ".ds-.entities.v2.updates.default-2026.01.27-000001",
+    "index": ".ds-logs-entity-store-tests-default-2026.01.27-000001",
     "source": {
       "@timestamp": "2026-01-20T12:05:24Z",
       "event": { "kind": "asset" },
