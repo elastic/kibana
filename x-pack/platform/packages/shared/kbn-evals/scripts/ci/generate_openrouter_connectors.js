@@ -188,6 +188,16 @@ async function generateOpenrouterConnectors({
         resolved.push(modelId);
       }
     }
+
+    if (evalConnectorId.startsWith('openrouter-')) {
+      const judgeModelId = resolveModelId(evalConnectorId, available);
+      if (!judgeModelId) {
+        missing.push(evalConnectorId);
+      } else if (!resolved.includes(judgeModelId)) {
+        // Judges only need chat completions, not tool calling.
+        resolved.push(judgeModelId);
+      }
+    }
   } else {
     for (const token of requested) {
       const modelId = resolveModelId(token, available);
