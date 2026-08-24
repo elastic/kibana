@@ -685,11 +685,7 @@ export const OutputResponseItemSchema = schema
       { ...KafkaSchema, ...OutputResponseSharedSchema },
       { meta: { id: 'output_response_kafka' } }
     ),
-<<<<<<< HEAD
     schema.object({ ...OtlpResponseSchema }, { meta: { id: 'output_response_otlp' } }),
-=======
-    schema.object({ ...OtlpSchema }, { meta: { id: 'output_response_otlp' } }),
->>>>>>> 0a6a9fa920de (Add otlp output schema and validation)
   ])
   .extendsDeep({
     unknowns: 'allow',
