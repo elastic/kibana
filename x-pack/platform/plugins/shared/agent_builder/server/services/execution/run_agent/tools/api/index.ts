@@ -7,4 +7,5 @@
 
 export { createDiscoverApisTool } from './discover';
 export { createDescribeApiTool } from './describe';
+export { createDescribeTypeTool } from './describe_type';
 export { createExecuteApiTool } from './execute';
