@@ -25184,7 +25184,6 @@
     "xpack.idxMgmt.indexDetails.overviewTab.health.yellowLabel": "警告",
     "xpack.idxMgmt.indexDetails.overviewTab.status.cardTitle": "状态",
     "xpack.idxMgmt.indexDetails.overviewTab.status.closedLabel": "已关闭",
-    "xpack.idxMgmt.indexDetails.overviewTab.status.docCountErrorLabel": "无法检索",
     "xpack.idxMgmt.indexDetails.overviewTab.status.docCountErrorTooltip": "无法检索文件数量。请刷新页面或稍后再试。",
     "xpack.idxMgmt.indexDetails.overviewTab.status.documentsDeletedLabel": "已删除 {documentsDeleted}",
     "xpack.idxMgmt.indexDetails.overviewTab.status.documentsLabel": "{documents, plural, one {# Document} other {# 个文档}}/{documentsDeleted} 已删除",
