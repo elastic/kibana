@@ -15,6 +15,13 @@ paths:
         which deletes multiple exception lists by their saved object `id`. Lists that are
         referenced by one or more detection rules cannot be deleted; unlink the list from
         all rules before retrying.
+
+        The reference check is provided by the Security Solution plugin and requires the
+        caller to have detection rule read access. A caller who holds the `exceptions` Kibana
+        privilege but lacks detection rule read access will receive a per-list error for every
+        non-artifact list in the request, even when no rules reference those lists, because
+        the endpoint cannot verify the absence of references. The list is not deleted in
+        that case.
       requestBody:
         required: true
         content:
@@ -241,7 +248,7 @@ paths:
                   value:
                     statusCode: 403
                     error: Forbidden
-                    message: 'API [POST /api/exception_lists/_bulk_action] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
+                    message: 'API [POST /api/exception_lists/_bulk_action] is unauthorized for user, this action is granted by the Kibana privileges [exceptions-all]'
         500:
           description: Internal server error response
           content:

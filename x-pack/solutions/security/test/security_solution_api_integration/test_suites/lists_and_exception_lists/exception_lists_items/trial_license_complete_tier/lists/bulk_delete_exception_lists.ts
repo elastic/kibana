@@ -379,14 +379,18 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('@skipInServerless with read rules and all exceptions role', () => {
         const role = ROLES.rules_read_exceptions_all;
+        const roleUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
 
         beforeEach(async () => {
           await deleteAndReCreateUserRole(getService, role);
         });
 
+        afterEach(async () => {
+          await deleteAllRules(supertest, log);
+        });
+
         it('should bulk delete exception lists', async () => {
-          const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
-          const restrictedApis = exceptionsApi.withUser(restrictedUser);
+          const restrictedApis = exceptionsApi.withUser(roleUser);
 
           const { body: list } = await createList({ list_id: 'list-1' });
 
@@ -395,6 +399,36 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           expect(body.results).to.have.length(1);
+        });
+
+        it('should block a referenced detection list and delete an unreferenced one', async () => {
+          const restrictedApis = exceptionsApi.withUser(roleUser);
+
+          const referenced = await createDetectionList('referenced-list-role-check');
+          const unreferenced = await createDetectionList('unreferenced-list-role-check');
+
+          await createRuleReferencingList('role-check-rule', 'Role check rule', {
+            id: referenced.id,
+            list_id: referenced.list_id,
+          });
+
+          const { body } = await restrictedApis
+            .bulkDeleteExceptionLists({
+              body: { action: 'delete', ids: [referenced.id, unreferenced.id] },
+            })
+            .expect(200);
+
+          expect(body.success).to.eql(false);
+          expect(body.results).to.have.length(1);
+          expect(body.results[0].list_id).to.eql('unreferenced-list-role-check');
+          expect(body.errors).to.have.length(1);
+          expect(body.errors[0].status_code).to.eql(409);
+          expect(body.errors[0].lists).to.eql([
+            { id: referenced.id, list_id: 'referenced-list-role-check' },
+          ]);
+
+          await getList('referenced-list-role-check').expect(200);
+          await getList('unreferenced-list-role-check').expect(404);
         });
       });
 
@@ -414,6 +448,39 @@ export default ({ getService }: FtrProviderContext) => {
           await restrictedApis
             .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list.id] } })
             .expect(403);
+        });
+      });
+
+      // A caller with exceptions-all but no detection rule read access cannot verify
+      // whether a list is referenced by a rule. The endpoint refuses every list in
+      // that case (fail-closed) rather than silently deleting potentially referenced lists.
+      describe('@skipInServerless with exceptions-all and no rule read', () => {
+        const role = ROLES.exceptions_all_no_rules_read;
+
+        beforeEach(async () => {
+          await deleteAndReCreateUserRole(getService, role);
+        });
+
+        it('should refuse all detection-type lists when the caller cannot read detection rules, and leave them intact', async () => {
+          const list = await createDetectionList('detection-list-no-rule-access');
+
+          const restrictedUser = { username: 'exceptions_all_no_rules_read', password: 'changeme' };
+          const restrictedApis = exceptionsApi.withUser(restrictedUser);
+
+          const { body } = await restrictedApis
+            .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list.id] } })
+            .expect(200);
+
+          expect(body.success).to.eql(false);
+          expect(body.results).to.eql([]);
+          expect(body.errors).to.have.length(1);
+          expect(body.errors[0].lists).to.eql([
+            { id: list.id, list_id: 'detection-list-no-rule-access' },
+          ]);
+          expect(body.errors[0].message).to.contain('not authorized to read detection rules');
+
+          // The list must survive the refused delete.
+          await getList('detection-list-no-rule-access').expect(200);
         });
       });
     });
