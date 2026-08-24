@@ -7,10 +7,12 @@
 
 import { Container, ContainerModule } from 'inversify';
 import { Logger } from '@kbn/core-di';
-import { CoreStart, Request } from '@kbn/core-di-server';
+import { CoreStart, PluginInitializer, Request } from '@kbn/core-di-server';
+import { coreMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { configSchema } from '../config';
 import {
   EsServiceInternalToken,
   EsServiceScopedToken,
@@ -35,6 +37,9 @@ describe('bindServices - Elasticsearch client routing', () => {
     container.bind(CoreStart('elasticsearch')).toConstantValue(elasticsearch);
     container.bind(Request).toConstantValue(request);
     container.bind(Logger).toConstantValue(loggingSystemMock.createLogger());
+    container
+      .bind(PluginInitializer('config'))
+      .toConstantValue(coreMock.createPluginInitializerContext(configSchema.validate({})).config);
 
     container.load(new ContainerModule((options) => bindServices(options)));
   });

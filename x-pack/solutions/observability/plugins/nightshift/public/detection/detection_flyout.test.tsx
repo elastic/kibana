@@ -91,6 +91,7 @@ const mockEvent: SignificantEvent = {
   blast_radius: [
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'feat-web-frontend',
       name: 'web-frontend',
       stream_name: 'logs.web-frontend',
