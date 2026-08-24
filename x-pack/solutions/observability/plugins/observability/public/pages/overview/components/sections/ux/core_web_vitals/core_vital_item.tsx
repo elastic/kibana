@@ -150,20 +150,5 @@ export function CoreVitalItem({
     </>
   );
 
-  if (!compact) {
-    return content;
-  }
-
-  return (
-    <div
-      style={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-      }}
-    >
-      {content}
-    </div>
-  );
+  return content;
 }

@@ -48,17 +48,20 @@ const remainingLabel = (item: RumBudgetItem): string => {
 export function BudgetChips({
   items,
   templateId,
+  templateIds,
   pagePath,
   includeAppWide = true,
 }: {
   items: RumBudgetItem[];
   templateId?: RumBudgetTemplateId;
+  templateIds?: readonly RumBudgetTemplateId[];
   pagePath?: string;
   includeAppWide?: boolean;
 }) {
   const history = useHistory();
+  const metricIds = templateIds ?? (templateId ? [templateId] : undefined);
   const visible = items.filter((item) => {
-    if (templateId && !budgetAppliesToMetric(item, templateId)) {
+    if (metricIds && !metricIds.some((id) => budgetAppliesToMetric(item, id))) {
       return false;
     }
     return budgetAppliesToPage(item, pagePath, { includeAppWide });

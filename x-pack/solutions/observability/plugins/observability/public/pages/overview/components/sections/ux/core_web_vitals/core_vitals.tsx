@@ -69,11 +69,7 @@ export default function CoreVitals({
   const isColumn = layout === 'column';
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      style={isColumn ? { flex: 1, minHeight: 0 } : undefined}
-    >
+    <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
         <WebCoreVitalsTitle
           loading={loading}
@@ -88,13 +84,9 @@ export default function CoreVitals({
           <ServiceName name={serviceName!} />
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={isColumn} style={isColumn ? { minHeight: 0 } : undefined}>
-        <EuiFlexGroup
-          gutterSize="l"
-          direction={layout}
-          style={isColumn ? { height: '100%' } : undefined}
-        >
-          <EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize={isColumn ? 'm' : 'l'} direction={layout}>
+          <EuiFlexItem grow={!isColumn}>
             <CoreVitalItem
               title={LCP_LABEL}
               value={formatToMilliseconds(lcp)}
@@ -107,7 +99,7 @@ export default function CoreVitals({
               compact={isColumn}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={!isColumn}>
             <CoreVitalItem
               title={INP_LABEL}
               value={formatToMilliseconds(inp)}
@@ -120,7 +112,7 @@ export default function CoreVitals({
               compact={isColumn}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={!isColumn}>
             <CoreVitalItem
               title={CLS_LABEL}
               value={cls?.toFixed(3) ?? null}

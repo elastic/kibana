@@ -31,7 +31,6 @@ import { getRumSearchClient } from '../../lib/rum_search_client';
 import {
   PAGE_VIEW_FILTER,
   facetFromScriptTerms,
-  luceneEscape,
   pagePathTerms,
   rumBaseFilters,
   rumListQueryCodec,
@@ -74,14 +73,6 @@ const CLICK_COORD_FILTER = {
 
 const CLICK_SOURCE = ['event_name', 'name', 'attributes', 'resource.attributes'];
 
-const REPLAY_SESSION_ID_SCRIPT = `
-  def rum = doc.containsKey('attributes.rum.sessionId') ? doc['attributes.rum.sessionId'] : null;
-  if (rum != null && rum.size() > 0) { return rum.value; }
-  def sid = doc.containsKey('attributes.session.id') ? doc['attributes.session.id'] : null;
-  if (sid != null && sid.size() > 0) { return sid.value; }
-  return '';
-`;
-
 const sessionIdFromHit = (source: Record<string, unknown>): string | null =>
   attrString(source, 'session.id') || attrString(source, 'rum.sessionId');
 
@@ -101,11 +92,55 @@ const parseClick = (
   };
 };
 
-const sessionIdTerms = (ids: string[]) => ({
+const sessionIdTerms = (ids: string[], fields: readonly string[] = SESSION_ID_FIELDS) => ({
   bool: {
-    should: SESSION_ID_FIELDS.map((field) => ({ terms: { [field]: ids } })),
+    should: fields.map((field) => ({ terms: { [field]: ids } })),
     minimum_should_match: 1,
   },
+});
+
+/** Mapped on `logs-rum.replay-*`. Painless terms over 200k docs is the slow path. */
+const REPLAY_SESSION_ID_FIELDS = [
+  'attributes.session.id',
+  'attributes.rum.sessionId',
+  'resource.attributes.session.id',
+] as const;
+
+const RRWEB_TYPE_FIELD = 'attributes.rrweb.type';
+const RRWEB_SNAPSHOT_TYPES = [2, 4] as const;
+const RRWEB_CLICK_TYPES = [2, 3, 4] as const;
+const REPLAY_SESSION_CAP = 2;
+const REPLAY_SNAPSHOT_SIZE = 200;
+const REPLAY_CLICK_SAMPLE_SIZE = 2500;
+
+export const replayBackdropEventsQuery = ({
+  sessionId,
+  needClicks,
+}: {
+  sessionId: string;
+  needClicks: boolean;
+}) => ({
+  index: SESSION_REPLAY_INDEX,
+  ignore_unavailable: true,
+  allow_no_indices: true,
+  size: needClicks ? REPLAY_CLICK_SAMPLE_SIZE : REPLAY_SNAPSHOT_SIZE,
+  query: {
+    bool: {
+      filter: [
+        sessionIdTerms([sessionId], REPLAY_SESSION_ID_FIELDS),
+        {
+          terms: {
+            [RRWEB_TYPE_FIELD]: needClicks ? [...RRWEB_CLICK_TYPES] : [...RRWEB_SNAPSHOT_TYPES],
+          },
+        },
+      ],
+    },
+  },
+  sort: [
+    { 'attributes.rr-web.event': { order: 'asc' as const, unmapped_type: 'long' as const } },
+    { 'attributes.rr-web.chunk': { order: 'asc' as const, unmapped_type: 'long' as const } },
+  ],
+  _source: ['body', 'attributes', '@timestamp'],
 });
 
 export const getRumClickMapRoute = createUxServerRoute({
@@ -119,47 +154,51 @@ export const getRumClickMapRoute = createUxServerRoute({
     const baseFilters = rumBaseFilters(params.query);
     const clickFilters = [...baseFilters, CLICK_FILTER, CLICK_COORD_FILTER];
 
-    const pagesResult = await client.search(
-      {
-        index: RUM_SESSION_SOURCE_INDEX,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        size: requestedPage ? 1500 : 0,
-        query: { bool: { filter: clickFilters } },
-        aggs: { pages: pagePathTerms(15) },
-        ...(requestedPage
-          ? { _source: CLICK_SOURCE, sort: [{ '@timestamp': { order: 'desc' as const } }] }
-          : {}),
-      },
-      rumEsSearchOptions
-    );
-
-    let pages = facetFromScriptTerms(
-      (pagesResult.aggregations as { pages?: unknown } | undefined)?.pages
-    );
-
-    if (pages.length === 0) {
-      const pageViews = await client.search(
+    const [clickPagesResult, viewPagesResult] = await Promise.all([
+      client.search(
         {
           index: RUM_SESSION_SOURCE_INDEX,
           ignore_unavailable: true,
           allow_no_indices: true,
-          size: 0,
-          query: { bool: { filter: [...baseFilters, PAGE_VIEW_FILTER] } },
+          size: requestedPage ? 1500 : 0,
+          query: { bool: { filter: clickFilters } },
           aggs: { pages: pagePathTerms(15) },
+          ...(requestedPage
+            ? { _source: CLICK_SOURCE, sort: [{ '@timestamp': { order: 'desc' as const } }] }
+            : {}),
         },
         rumEsSearchOptions
-      );
+      ),
+      requestedPage
+        ? Promise.resolve(null)
+        : client.search(
+            {
+              index: RUM_SESSION_SOURCE_INDEX,
+              ignore_unavailable: true,
+              allow_no_indices: true,
+              size: 0,
+              query: { bool: { filter: [...baseFilters, PAGE_VIEW_FILTER] } },
+              aggs: { pages: pagePathTerms(15) },
+            },
+            rumEsSearchOptions
+          ),
+    ]);
+
+    let pages = facetFromScriptTerms(
+      (clickPagesResult.aggregations as { pages?: unknown } | undefined)?.pages
+    );
+    const hasCoordClicks = pages.length > 0;
+    if (!hasCoordClicks && viewPagesResult) {
       pages = facetFromScriptTerms(
-        (pageViews.aggregations as { pages?: unknown } | undefined)?.pages
+        (viewPagesResult.aggregations as { pages?: unknown } | undefined)?.pages
       );
     }
 
     const pagePath = requestedPage || pages[0]?.key || null;
 
-    let clickHits: OtelHit[] = requestedPage ? (pagesResult.hits.hits as OtelHit[]) ?? [] : [];
+    let clickHits: OtelHit[] = requestedPage ? (clickPagesResult.hits.hits as OtelHit[]) ?? [] : [];
 
-    if (!requestedPage && pagePath) {
+    if (!requestedPage && pagePath && hasCoordClicks) {
       const sampled = await client.search(
         {
           index: RUM_SESSION_SOURCE_INDEX,
@@ -197,7 +236,8 @@ export const getRumClickMapRoute = createUxServerRoute({
           params.query.rangeTo,
           params.query.serviceName,
           pagePath,
-          clickSessionIds
+          clickSessionIds,
+          parsed.length === 0
         )
       : { snapshot: null, clicks: [] as Array<{ x: number; y: number }> };
 
@@ -253,18 +293,6 @@ const replayServiceFilter = (serviceName?: string): object[] => {
   ];
 };
 
-const replayPageFilter = (pagePath: string): object => {
-  const needle = luceneEscape(pagePath.trim().replace(/[*?]/g, '')).slice(0, 200);
-  return {
-    query_string: {
-      query: `*${needle}*`,
-      fields: ['attributes.page.url.path', 'attributes.page.url', 'page.url.path', 'page.url'],
-      lenient: true,
-      analyze_wildcard: true,
-    },
-  };
-};
-
 const loadReplayBackdrop = async (
   client: {
     search: (
@@ -279,46 +307,18 @@ const loadReplayBackdrop = async (
   rangeTo: string | undefined,
   serviceName: string | undefined,
   pagePath: string,
-  clickSessionIds: string[]
+  clickSessionIds: string[],
+  needReplayClicks: boolean
 ): Promise<{
   snapshot: RumClickMapResponse['snapshot'];
   clicks: Array<{ x: number; y: number }>;
 }> => {
-  const timeFilter = {
-    range: { '@timestamp': { gte: rangeFrom || 'now-24h', lte: rangeTo || 'now' } },
-  };
-  const filters: object[] = [
-    timeFilter,
-    ...replayServiceFilter(serviceName),
-    replayPageFilter(pagePath),
-  ];
-  if (clickSessionIds.length > 0) {
-    filters.push(sessionIdTerms(clickSessionIds));
-  }
-
-  const replayAgg = await client.search(
-    {
-      index: SESSION_REPLAY_INDEX,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      size: 0,
-      query: { bool: { filter: filters } },
-      aggs: {
-        sessions: {
-          terms: { script: { source: REPLAY_SESSION_ID_SCRIPT, lang: 'painless' }, size: 8 },
-        },
-      },
-    },
-    rumEsSearchOptions
-  );
-
-  let sessionIds =
-    replayAgg.aggregations?.sessions?.buckets
-      ?.map((bucket) => String(bucket.key))
-      .filter((id) => id.length > 0) ?? [];
-
+  let sessionIds = clickSessionIds.slice(0, REPLAY_SESSION_CAP);
   if (sessionIds.length === 0) {
-    const fallback = await client.search(
+    const timeFilter = {
+      range: { '@timestamp': { gte: rangeFrom || 'now-24h', lte: rangeTo || 'now' } },
+    };
+    const replayAgg = await client.search(
       {
         index: SESSION_REPLAY_INDEX,
         ignore_unavailable: true,
@@ -327,14 +327,14 @@ const loadReplayBackdrop = async (
         query: { bool: { filter: [timeFilter, ...replayServiceFilter(serviceName)] } },
         aggs: {
           sessions: {
-            terms: { script: { source: REPLAY_SESSION_ID_SCRIPT, lang: 'painless' }, size: 8 },
+            terms: { field: 'attributes.session.id', size: REPLAY_SESSION_CAP, exclude: '' },
           },
         },
       },
       rumEsSearchOptions
     );
     sessionIds =
-      fallback.aggregations?.sessions?.buckets
+      replayAgg.aggregations?.sessions?.buckets
         ?.map((bucket) => String(bucket.key))
         .filter((id) => id.length > 0) ?? [];
   }
@@ -344,26 +344,17 @@ const loadReplayBackdrop = async (
 
   for (const sessionId of sessionIds) {
     const eventsResult = await client.search(
-      {
-        index: SESSION_REPLAY_INDEX,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        size: 10000,
-        query: { bool: { filter: [sessionIdTerms([sessionId])] } },
-        sort: [
-          { 'attributes.rr-web.event': { order: 'asc', unmapped_type: 'long' } },
-          { 'attributes.rr-web.chunk': { order: 'asc', unmapped_type: 'long' } },
-        ],
-        _source: ['body', 'attributes', '@timestamp'],
-      },
+      replayBackdropEventsQuery({ sessionId, needClicks: needReplayClicks }),
       rumEsSearchOptions
     );
 
     const events = reassembleReplayEvents(
       (eventsResult.hits?.hits ?? []).map((hit) => (hit._source ?? {}) as ReplayEventHitSource)
     );
-    const replayClicks = extractReplayClicks(events, pagePath);
-    clicks.push(...(replayClicks.length > 0 ? replayClicks : extractReplayClicks(events)));
+    if (needReplayClicks) {
+      const replayClicks = extractReplayClicks(events, pagePath);
+      clicks.push(...(replayClicks.length > 0 ? replayClicks : extractReplayClicks(events)));
+    }
     if (!snapshot) {
       const extracted = extractPageSnapshot(events, pagePath) ?? extractPageSnapshot(events);
       if (extracted) {
@@ -375,6 +366,9 @@ const loadReplayBackdrop = async (
           events: extracted.events,
         };
       }
+    }
+    if (snapshot && (!needReplayClicks || clicks.length > 0)) {
+      break;
     }
   }
 

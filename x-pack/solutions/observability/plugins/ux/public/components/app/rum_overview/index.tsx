@@ -499,13 +499,9 @@ export function RumOverviewV2() {
 
       <EuiSpacer />
 
-      <EuiFlexGroup>
-        <EuiFlexItem grow={2} style={{ display: 'flex' }}>
-          <EuiPanel
-            hasBorder
-            paddingSize="m"
-            style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
-          >
+      <EuiFlexGroup alignItems="stretch">
+        <EuiFlexItem grow={2}>
+          <EuiPanel hasBorder paddingSize="m" style={{ height: '100%' }}>
             <EuiTitle size="xs">
               <h3>
                 <EuiLink
@@ -519,17 +515,13 @@ export function RumOverviewV2() {
               </h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-              {CoreVitals}
-            </div>
+            {CoreVitals}
             <EuiSpacer size="s" />
-            <BudgetChips items={budgets} templateId="lcp" pagePath={pageUrl} />
-            <EuiSpacer size="xs" />
-            <BudgetChips items={budgets} templateId="fcp" pagePath={pageUrl} />
-            <EuiSpacer size="xs" />
-            <BudgetChips items={budgets} templateId="cls" pagePath={pageUrl} />
-            <EuiSpacer size="xs" />
-            <BudgetChips items={budgets} templateId="ttfb" pagePath={pageUrl} />
+            <BudgetChips
+              items={budgets}
+              templateIds={['lcp', 'fcp', 'cls', 'ttfb']}
+              pagePath={pageUrl}
+            />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={5} style={{ display: 'flex' }}>
