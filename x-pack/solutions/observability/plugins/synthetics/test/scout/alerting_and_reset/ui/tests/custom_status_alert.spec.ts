@@ -56,18 +56,18 @@ test.describe(
         await pageObjects.syntheticsApp.openManageStatusRule();
         await page.testSubj.click('createNewStatusRule');
 
-        let requestMade = false;
-        page.on('request', (request) => {
-          if (request.url().includes('api/alerting/rule') && request.method() === 'POST') {
-            requestMade = true;
-          }
-        });
+        const ruleCreationResponse = page.waitForResponse(
+          (response) =>
+            response.url().includes('api/alerting/rule') && response.request().method() === 'POST'
+        );
 
         await page.testSubj.click('ruleFormStep-details');
         await expect(page.getByText('Related dashboards')).toBeVisible();
         await page.testSubj.click('ruleFlyoutFooterSaveButton');
         await page.testSubj.click('confirmModalConfirmButton');
-        expect(requestMade).toBe(true);
+
+        const response = await ruleCreationResponse;
+        expect(response.ok()).toBe(true);
       });
 
       await test.step('verify rule creation', async () => {
