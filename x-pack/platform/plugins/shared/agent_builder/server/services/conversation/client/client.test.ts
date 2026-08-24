@@ -7,6 +7,11 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  CONVERSATION_SCHEMA_VERSION,
+  ConversationRoundStatus,
+  EventActorType,
+  TimelineEventType,
+  TimelineTriggerType,
   createAgentNotFoundError,
   createAgentUnavailableError,
   isConversationWriteConflictError,
@@ -18,7 +23,11 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common/chat/access_control';
-import type { ConversationTemplate, SerializedMetadataValue } from '@kbn/agent-builder-common';
+import type {
+  ConversationTemplate,
+  SerializedMetadataValue,
+  TimelineEvent,
+} from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
@@ -70,6 +79,8 @@ describe('ConversationClient', () => {
     attachments,
     workspaceId,
     read = false,
+    schemaVersion,
+    events,
   }: {
     id?: string;
     agentId?: string;
@@ -85,6 +96,8 @@ describe('ConversationClient', () => {
     attachments?: unknown[];
     workspaceId?: string;
     read?: boolean;
+    schemaVersion?: number;
+    events?: TimelineEvent[];
   } = {}): Document =>
     ({
       _id: id,
@@ -101,6 +114,8 @@ describe('ConversationClient', () => {
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
+        ...(schemaVersion !== undefined ? { schema_version: schemaVersion } : {}),
+        ...(events !== undefined ? { events } : {}),
         access_control: {
           access_mode: accessMode,
           entries,
@@ -2099,6 +2114,205 @@ describe('ConversationClient', () => {
       await expect(
         adminClient.update({ id: 'conversation-1', title: 'renamed by admin' })
       ).rejects.toThrow('Conversation conversation-1 not found');
+    });
+  });
+
+  describe('events persistence', () => {
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('promotes new conversations to events-native on create (schema_version + events written atomically)', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ schemaVersion: 1 })] },
+      });
+
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          schema_version?: number;
+          events?: Array<{ id: string; type: string }>;
+          conversation_rounds: Array<{ id: string }>;
+        };
+      };
+      expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+      ]);
+      expect(indexed.conversation_rounds).toHaveLength(1);
+      expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+    });
+
+    it('round-trips attachment_refs through the stored events projection', async () => {
+      const attachmentRefs = [
+        { attachment_id: 'attachment-a', version: 1 },
+        { attachment_id: 'attachment-b', version: 2 },
+      ];
+
+      const written = createConversationDocument({
+        schemaVersion: 1,
+        rounds: [
+          {
+            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+            input: { message: 'hi', attachment_refs: attachmentRefs },
+          },
+        ],
+      });
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [written] } });
+
+      const created = await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [
+          {
+            ...createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+            input: { message: 'hi', attachment_refs: attachmentRefs },
+          },
+        ],
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: { events?: Array<{ data: { attachment_refs?: unknown[] } }> };
+      };
+      expect(indexed.events?.[0]?.data.attachment_refs).toEqual(attachmentRefs);
+
+      expect(created.events?.[0]?.data).toMatchObject({ attachment_refs: attachmentRefs });
+      expect(created.rounds[0].input.attachment_refs).toEqual(attachmentRefs);
+    });
+
+    it('reconciles stored events when a round completes (crash-recovery: in_progress → completed = exactly one terminal)', async () => {
+      const inProgressRound = createRound({
+        id: 'round-crash',
+        status: ConversationRoundStatus.inProgress,
+      });
+      const stalePartialEvents: TimelineEvent[] = [
+        {
+          id: 'round-crash::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: '2025-08-04T07:42:20.789Z',
+          actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+          data: inProgressRound.input,
+        },
+        {
+          id: 'round-crash::execution_started',
+          type: TimelineEventType.executionStarted,
+          created_at: '2025-08-04T07:42:20.789Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: 'round-crash::execution',
+          trigger_event_id: 'round-crash::user_message',
+          data: { trigger_type: TimelineTriggerType.userMessage },
+        },
+      ];
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              schemaVersion: 1,
+              rounds: [inProgressRound],
+              events: stalePartialEvents,
+            }),
+          ],
+        },
+      });
+
+      await client.upsertRound({
+        id: 'conversation-1',
+        round: {
+          ...inProgressRound,
+          status: ConversationRoundStatus.completed,
+          response: { message: 'now finished' },
+        },
+      });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: { events?: Array<{ id: string; type: string }> };
+      };
+      const terminals = indexed.events?.filter(
+        (event) => event.type === TimelineEventType.executionTerminated
+      );
+      expect(terminals).toHaveLength(1);
+      expect(terminals?.[0]?.id).toBe('round-crash::execution_terminated');
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-crash::user_message',
+        'round-crash::execution_started',
+        'round-crash::execution_terminated',
+      ]);
+    });
+
+    it('leaves legacy conversations rounds-only on update (no events / no schema_version written)', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.completed })],
+            }),
+          ],
+        },
+      });
+
+      await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          title: string;
+          schema_version?: number;
+          events?: unknown[];
+        };
+      };
+      expect(indexed.title).toBe('Renamed');
+      expect(indexed.schema_version).toBeUndefined();
+      expect(indexed.events).toBeUndefined();
+    });
+
+    it('keeps events-native docs events-native on update (re-stamps schema_version, regenerates events)', async () => {
+      const existingRound = createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.completed,
+      });
+      const storedEvents: TimelineEvent[] = [
+        {
+          id: 'round-1::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: existingRound.started_at,
+          actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+          data: existingRound.input,
+        },
+      ];
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              schemaVersion: 1,
+              rounds: [existingRound],
+              events: storedEvents,
+            }),
+          ],
+        },
+      });
+
+      await client.update({ id: 'conversation-1', title: 'Renamed' }, { access: 'rename' });
+
+      const { document: indexed } = mockEsClient.index.mock.calls[0][0] as {
+        document: {
+          schema_version?: number;
+          events?: Array<{ id: string; type: string }>;
+        };
+      };
+      expect(indexed.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(indexed.events?.map((event) => event.id)).toEqual([
+        'round-1::user_message',
+        'round-1::execution_started',
+        'round-1::execution_terminated',
+      ]);
     });
   });
 });
