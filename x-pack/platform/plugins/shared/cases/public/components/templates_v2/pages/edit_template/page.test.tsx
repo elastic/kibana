@@ -7,11 +7,16 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import type { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { EditTemplatePage } from './page';
+import { mockedTestProvidersOwner, TestProviders } from '../../../../common/mock';
+import { CASES_TEMPLATE_UPDATED_EVENT_TYPE } from '../../../../../common/constants';
 
 const mockUseTemplateViewParams = jest.fn();
 const mockNavigateToCasesTemplates = jest.fn();
 jest.mock('../../../../common/navigation', () => ({
+  ...jest.requireActual('../../../../common/navigation'),
   useTemplateViewParams: () => mockUseTemplateViewParams(),
   useCasesTemplatesNavigation: () => ({
     navigateToCasesTemplates: mockNavigateToCasesTemplates,
@@ -69,8 +74,18 @@ jest.mock('../../components/template_form_layout', () => ({
 }));
 
 describe('EditTemplatePage', () => {
+  let coreStart: CoreStart;
+
+  const renderEditTemplatePage = () =>
+    render(
+      <TestProviders coreStart={coreStart}>
+        <EditTemplatePage />
+      </TestProviders>
+    );
+
   beforeEach(() => {
     jest.clearAllMocks();
+    coreStart = coreMock.createStart() as unknown as CoreStart;
     mockMutateAsync.mockResolvedValue(undefined);
     mockTemplateFormLayout.mockImplementation(({ initialMetadata, isLoading }) => (
       <div>
@@ -100,7 +115,7 @@ describe('EditTemplatePage', () => {
       isLoading: false,
     });
 
-    render(<EditTemplatePage />);
+    renderEditTemplatePage();
 
     expect(screen.getByTestId('layout-title')).toHaveTextContent('Test Template');
     expect(screen.getByTestId('layout-loaded')).toBeInTheDocument();
@@ -111,9 +126,17 @@ describe('EditTemplatePage', () => {
     mockUseTemplateViewParams.mockReturnValue({ templateId: 'template-123' });
     mockUseGetTemplate.mockReturnValue({ data: undefined, isLoading: true });
 
-    const { container } = render(<EditTemplatePage />);
+    // Scoped to a slot of its own, because the surrounding providers render markup into the
+    // container and would defeat an assertion made on the container itself.
+    render(
+      <TestProviders coreStart={coreStart}>
+        <div data-test-subj="edit-page-slot">
+          <EditTemplatePage />
+        </div>
+      </TestProviders>
+    );
 
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.getByTestId('edit-page-slot')).toBeEmptyDOMElement();
   });
 
   it('sends empty description and empty tags when metadata is cleared', async () => {
@@ -136,7 +159,7 @@ describe('EditTemplatePage', () => {
       isLoading: false,
     });
 
-    render(<EditTemplatePage />);
+    renderEditTemplatePage();
 
     await capturedTemplateFormLayoutProps.onCreate?.(
       { definition: 'name: Updated\nfields: []' },
@@ -177,7 +200,7 @@ describe('EditTemplatePage', () => {
       isLoading: false,
     });
 
-    render(<EditTemplatePage />);
+    renderEditTemplatePage();
 
     // The metadata form folds undefined identity fields to '' / []. A no-op Save must NOT coerce
     // those into a persisted '' / [] via the PATCH `?? existing` fallback.
@@ -198,6 +221,66 @@ describe('EditTemplatePage', () => {
           isEnabled: true,
         },
       });
+    });
+  });
+
+  describe('telemetry', () => {
+    const loadedTemplate = {
+      data: {
+        templateId: 'template-123',
+        name: 'Test Template',
+        owner: 'cases',
+        definition: { name: 'Test Template', fields: [] },
+        definitionString: 'name: Test Template\nfields: []',
+        templateVersion: 2,
+        deletedAt: null,
+        isLatest: true,
+        latestVersion: 2,
+        isEnabled: true,
+      },
+      isLoading: false,
+    };
+
+    beforeEach(() => {
+      mockUseTemplateViewParams.mockReturnValue({ templateId: 'template-123' });
+      mockUseGetTemplate.mockReturnValue(loadedTemplate);
+    });
+
+    it('reports one updated event with the editor entry point when the save succeeds', async () => {
+      renderEditTemplatePage();
+
+      // Opening an existing template is not a confirmed action.
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+
+      await capturedTemplateFormLayoutProps.onCreate?.(
+        { definition: 'name: Updated\nfields: []' },
+        { name: 'Test Template', description: '', tags: [] },
+        true
+      );
+
+      await waitFor(() => {
+        expect(coreStart.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      });
+      expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        CASES_TEMPLATE_UPDATED_EVENT_TYPE,
+        { owner: mockedTestProvidersOwner[0], entry_point: 'template_editor' }
+      );
+    });
+
+    it('reports nothing when the save fails', async () => {
+      mockMutateAsync.mockRejectedValueOnce(new Error('Update failed'));
+
+      renderEditTemplatePage();
+
+      await expect(
+        capturedTemplateFormLayoutProps.onCreate?.(
+          { definition: 'name: Updated\nfields: []' },
+          { name: 'Test Template', description: '', tags: [] },
+          true
+        )
+      ).rejects.toThrow('Update failed');
+
+      expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
     });
   });
 });

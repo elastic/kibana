@@ -207,6 +207,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
         notifications: coreStart.notifications,
         application: coreStart.application,
         uiSettings: coreStart.uiSettings,
+        featureFlags: coreStart.featureFlags,
         data: diContainer.get(PluginStart('data')) as DataPublicPluginStart,
         dataViews: diContainer.get(PluginStart('dataViews')) as DataViewsPublicPluginStart,
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
@@ -255,6 +256,20 @@ const pluginModule = new ContainerModule(({ bind }) => {
               createActionPolicyAttachmentDefinition({
                 container: diContainer,
               })
+            );
+          }
+        );
+        import(
+          /* webpackChunkName: "alerting_v2_episode_attachment" */
+          './agent_builder/attachments/episode_attachment_definition'
+        ).then(
+          ({
+            createEpisodeAttachmentDefinition,
+            EPISODE_ATTACHMENT_TYPE: episodeAttachmentType,
+          }) => {
+            agentBuilder.attachments.addAttachmentType(
+              episodeAttachmentType,
+              createEpisodeAttachmentDefinition()
             );
           }
         );
