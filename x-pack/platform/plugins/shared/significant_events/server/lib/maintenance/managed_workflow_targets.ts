@@ -74,10 +74,16 @@ export const DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS = [
 /**
  * Every workflow id that installers may create. Used by the drift test so a
  * new install target cannot land without also joining the maintenance sweep.
+ *
+ * The investigation workflow is deliberately excluded: its managed-workflow
+ * ownership (and install responsibility) moved to `nightshiftInvestigations`.
+ * It stays in `GLOBAL_MAINTENANCE_WORKFLOW_IDS` above because Pause/Resume
+ * still needs to disable/cancel it via the unrestricted `management` API
+ * (not the ownership-gated plugin-scoped client) — SE still triggers this
+ * workflow, it just no longer installs/reconciles it.
  */
 export const ALL_INSTALLABLE_WORKFLOW_IDS = [
   ...GLOBAL_CORE_WORKFLOW_IDS,
-  SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   ...MEMORY_WORKFLOW_IDS,

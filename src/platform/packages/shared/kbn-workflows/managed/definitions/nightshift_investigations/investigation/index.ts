@@ -13,10 +13,15 @@ import type { ManagedWorkflowDefinition } from '../../../types';
 export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID =
   'system-significant-events-investigation';
 
+// Ownership transferred from 'significantEvents' to 'nightshiftInvestigations' so the
+// workflow can be triggered for any entity (alerts, synthetics monitors, etc.), not just
+// significant events. The `version` bump (6 -> 7) is required to force a managed rewrite
+// of `managedBy` on the persisted document — the YAML content is unchanged, and without a
+// version/hash change the install path would short-circuit and never touch `managedBy`.
 export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-  pluginId: 'significantEvents',
-  version: 6,
+  pluginId: 'nightshiftInvestigations',
+  version: 7,
   billable: false,
   yaml: INVESTIGATION_WORKFLOW_YAML,
   management: {
