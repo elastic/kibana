@@ -7,3 +7,4 @@
 
 export { ApiKeysApp } from './api_keys_app';
 export type { ApiKeyExpiryFilter, ApiKeyTypeFilter } from './api_keys_app';
+export { UserProfilePage } from './user_profile_page';
