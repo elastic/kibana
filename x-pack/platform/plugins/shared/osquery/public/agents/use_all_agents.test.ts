@@ -11,6 +11,7 @@ import { QueryClientProvider, QueryClient } from '@kbn/react-query';
 import { useKibana } from '../common/lib/kibana';
 import { useAllAgents } from './use_all_agents';
 import { useOsqueryPolicies } from './use_osquery_policies';
+import { buildPolicyIdKuery } from '../../common/utils/build_policy_id_kuery';
 
 jest.mock('../common/lib/kibana');
 jest.mock('../common/hooks/use_error_toast', () => ({
@@ -22,9 +23,6 @@ jest.mock('./use_osquery_policies', () => ({
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useOsqueryPoliciesMock = useOsqueryPolicies as jest.MockedFunction<typeof useOsqueryPolicies>;
-
-const generatePolicyIds = (count: number): string[] =>
-  Array.from({ length: count }, (_, i) => `policy-${i.toString().padStart(8, '0')}`);
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
@@ -57,42 +55,43 @@ describe('useAllAgents', () => {
     expect(query.kuery).not.toMatch(/policy_id:/);
   });
 
-  it('URL-budget regression: 300 policies produce a query string under 2048 chars with no policy_id clause', async () => {
+  it('escapes the search value so it cannot break out of the server policy scope', async () => {
     useOsqueryPoliciesMock.mockReturnValue({
-      data: generatePolicyIds(300),
+      data: ['policy-1', 'policy-2'],
       isFetched: true,
     } as unknown as ReturnType<typeof useOsqueryPolicies>);
 
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    renderHook(() => useAllAgents(), { wrapper: createWrapper(queryClient) });
+    renderHook(() => useAllAgents('a) or (b'), { wrapper: createWrapper(queryClient) });
     await waitFor(() => expect(httpGet).toHaveBeenCalled());
 
     const [, { query }] = httpGet.mock.calls[0];
-    expect(query.kuery).not.toMatch(/policy_id:/);
-    const queryStringLength = new URLSearchParams({ kuery: query.kuery ?? '' }).toString().length;
-    expect(queryStringLength).toBeLessThan(2048);
+    expect(query.kuery).not.toMatch(/[^\\]\)/);
+    expect(query.kuery).toContain('a\\) \\or \\(b');
   });
 
-  it('scale-invariance: query string length is identical for 1 policy vs 300 policies with no search term', async () => {
-    const runWith = async (policyIds: string[]) => {
-      jest.clearAllMocks();
-      useKibanaMock.mockReturnValue({
-        services: { http: { get: httpGet } },
-      } as unknown as ReturnType<typeof useKibana>);
-      useOsqueryPoliciesMock.mockReturnValue({
-        data: policyIds,
-        isFetched: true,
-      } as unknown as ReturnType<typeof useOsqueryPolicies>);
-      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-      renderHook(() => useAllAgents(), { wrapper: createWrapper(queryClient) });
-      await waitFor(() => expect(httpGet).toHaveBeenCalled());
-      const [, { query }] = httpGet.mock.calls[0];
+  // Asserted on the builder rather than the hook so the test has a real subject — this
+  // would have caught #277283, which doubled the per-policy cost.
+  describe('buildPolicyIdKuery URL budget', () => {
+    // Real Fleet policy ids are 36-char UUIDs; synthetic short ids understate the cost.
+    const generateUuidPolicyIds = (count: number): string[] =>
+      Array.from(
+        { length: count },
+        (_, i) =>
+          `3c9a7e1${i.toString().padStart(2, '0')}-1a2b-4c3d-8e9f-${i.toString().padStart(12, '0')}`
+      );
 
-      return new URLSearchParams({ kuery: query.kuery ?? '' }).toString().length;
-    };
+    it('exceeds the 16 KB header limit at 300 real-length policy ids — which is why it must not travel in the URL', () => {
+      const kuery = buildPolicyIdKuery(generateUuidPolicyIds(300));
+      expect(new URLSearchParams({ kuery }).toString().length).toBeGreaterThan(16 * 1024);
+    });
 
-    const lengthWith1 = await runWith(generatePolicyIds(1));
-    const lengthWith300 = await runWith(generatePolicyIds(300));
-    expect(lengthWith1).toBe(lengthWith300);
+    it('costs no more than ~200 chars per policy (guards against per-policy cost growth)', () => {
+      const encodedLength = (count: number) =>
+        new URLSearchParams({ kuery: buildPolicyIdKuery(generateUuidPolicyIds(count)) }).toString()
+          .length;
+      const marginalCost = (encodedLength(300) - encodedLength(100)) / 200;
+      expect(marginalCost).toBeLessThan(200);
+    });
   });
 });

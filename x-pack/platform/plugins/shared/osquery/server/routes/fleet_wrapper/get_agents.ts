@@ -13,6 +13,7 @@ import type { PackagePolicy } from '@kbn/fleet-plugin/server/types';
 import { satisfies } from 'semver';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { fromKueryExpression } from '@kbn/es-query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { mergeVersionSuffixedPolicyBuckets } from '../../utils/merge_version_suffixed_policy_buckets';
 import { buildPolicyIdKuery } from '../../../common/utils/build_policy_id_kuery';
@@ -81,7 +82,7 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
           return response.ok({
             body: {
               total: 0,
-              groups: { platforms: [], overlap: 0, policies: [] },
+              groups: { platforms: [], overlap: {}, policies: [] },
               agents: [],
             },
           });
@@ -89,9 +90,7 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
 
         const agentPolicies = await agentPolicyService?.getByIds(spaceScopedClient, agentPolicyIds);
 
-        // Build the mandatory scope clause from the server's own policy list (not client-supplied).
-        // This moves scoping server-side, keeping the client URL size constant regardless of
-        // policy count, and preventing HTTP 414/431 at large policy counts (#266739).
+        // Scope derived from the server's own policy list, not client-supplied (#266739).
         const policyScope = buildPolicyIdKuery(agentPolicyIds);
 
         // FIND agents by policy_name
@@ -105,23 +104,49 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
             )
           : [];
 
-        // Compose kuery explicitly instead of slicing strings, to avoid truncating non-parenthesized input.
-        // Shape: (<search terms> or <policy-name matches>) and <policy scope>
-        // Each part is omitted cleanly when empty.
+        // `searchKuery` is free-form text from the wire. Unbalanced input (`a) or (b`) would
+        // otherwise rebalance the parentheses below and lift branches out of the policy scope,
+        // since KQL binds `and` tighter than `or`. Each fragment is therefore parsed standalone
+        // first, then wrapped in its own parens so it cannot reassociate with the scope clause.
+        //
+        // Must stay a string: Fleet's `includeUnenrolled` calls `.toLowerCase()` on it, even
+        // though `ListWithKuery` types kuery as `string | KueryNode`. `toKqlExpression` can't
+        // build it either — it does not round-trip escaped keywords (it emits a bare `\or`).
         let composedKuery: string;
 
-        if (foundPolicyByName?.length) {
-          const policyNameScope = buildPolicyIdKuery(foundPolicyByName.map((p) => p.id));
-          // Include both the raw search clause (which may contain policy_name:x and other terms)
-          // and the resolved policy-id matches for version-suffixed agents
-          const searchClause = searchKuery
-            ? `(${searchKuery} or ${policyNameScope})`
-            : policyNameScope;
-          composedKuery = `${searchClause} and ${policyScope}`;
-        } else if (searchKuery) {
-          composedKuery = `(${searchKuery}) and ${policyScope}`;
-        } else {
-          composedKuery = policyScope;
+        try {
+          if (searchKuery) {
+            fromKueryExpression(searchKuery);
+          }
+
+          const scopeClause = `(${policyScope})`;
+
+          let searchClause: string | undefined;
+          if (foundPolicyByName?.length) {
+            // Keep the raw search terms alongside the resolved policy ids so version-suffixed
+            // agents (`<id>#<major.minor>`) still match.
+            const policyNameScope = buildPolicyIdKuery(foundPolicyByName.map((p) => p.id));
+            searchClause = searchKuery
+              ? `((${searchKuery}) or (${policyNameScope}))`
+              : `(${policyNameScope})`;
+          } else if (searchKuery) {
+            searchClause = `(${searchKuery})`;
+          }
+
+          composedKuery = searchClause ? `${searchClause} and ${scopeClause}` : scopeClause;
+
+          // A top-level `or` here would mean the scope is bypassable — fail closed instead.
+          const composedNode = fromKueryExpression(composedKuery);
+          if (searchClause && composedNode.function !== 'and') {
+            throw new Error('composed kuery lost its policy scope');
+          }
+        } catch (error) {
+          // Reject rather than fall back to a broader scope. Parser internals stay server-side.
+          osqueryContext.logFactory
+            .get('get_agents')
+            .debug(`Rejected malformed agent search kuery: ${error.message}`);
+
+          return response.badRequest({ body: { message: 'Invalid search query' } });
         }
 
         const agentPolicyById = mapKeys(agentPolicies, 'id');

@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
+import { escapeKuery } from '@kbn/es-query';
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 import type { processAggregations } from '../../common/utils/aggregations';
@@ -37,10 +38,12 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
     // osqueryPolicies kept in queryKey so the picker refetches if the set of osquery policies changes
     queryKey: ['agents', osqueryPolicies, searchValue, perPage, agentIds],
     queryFn: () => {
-      // Policy-id scoping is enforced server-side; the client sends only search terms.
-      // Sending policy ids in the URL caused HTTP 414/431 at ~50–200+ policies (see #266739).
+      // Policy-id scoping is enforced server-side; sending the ids here overflowed the 16 KB
+      // request header at ~175 policies (#266739). Escaping is not cosmetic: an unescaped
+      // `)` + `or` can lift clauses out of the server's policy scope.
+      const escapedSearch = escapeKuery(searchValue);
       const kuery = searchValue
-        ? `local_metadata.host.hostname.keyword:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}* or policy_id: *${searchValue}* or local_metadata.os.platform: *${searchValue}* or policy_name:${searchValue}`
+        ? `local_metadata.host.hostname.keyword:*${escapedSearch}* or local_metadata.elastic.agent.id:*${escapedSearch}* or policy_id: *${escapedSearch}* or local_metadata.os.platform: *${escapedSearch}* or policy_name:${escapedSearch}`
         : '';
 
       return http.get(`/internal/osquery/fleet_wrapper/agents`, {
