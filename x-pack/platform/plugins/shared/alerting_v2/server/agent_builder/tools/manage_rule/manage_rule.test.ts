@@ -326,9 +326,13 @@ describe('manageRuleTool', () => {
       );
 
       expect(ctx.attachments.add).not.toHaveBeenCalled();
-      const { results } = result as { results: Array<{ type: string; data?: { message?: string } }> };
+      const { results } = result as {
+        results: Array<{ type: string; data?: { message?: string } }>;
+      };
       expect(results[0].type).toBe(ToolResultType.error);
-      expect(results[0].data?.message).toMatch(/Dashboard saved object\(s\) not found: missing-dash/);
+      expect(results[0].data?.message).toMatch(
+        /Dashboard saved object\(s\) not found: missing-dash/
+      );
     });
 
     it('updates an persisted attachment when ruleAttachmentId is provided', async () => {

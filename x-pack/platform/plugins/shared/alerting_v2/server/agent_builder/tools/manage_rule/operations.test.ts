@@ -26,9 +26,7 @@ const createMockEsClient = () => {
   return esClient;
 };
 
-const createMockSoClient = (
-  existingIds?: string[]
-): jest.Mocked<SavedObjectsClientContract> => {
+const createMockSoClient = (existingIds?: string[]): jest.Mocked<SavedObjectsClientContract> => {
   const soClient = savedObjectsClientMock.create();
   soClient.bulkGet.mockImplementation(async (objects) => ({
     saved_objects: objects.map((obj) =>
@@ -598,7 +596,9 @@ describe('executeRuleOperations', () => {
     it('throws when isNew is true and no name is provided', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'alert' }];
 
-      await expect(executeRuleOperations({}, ops, undefined, createMockSoClient(), { isNew: true })).rejects.toThrow(
+      await expect(
+        executeRuleOperations({}, ops, undefined, createMockSoClient(), { isNew: true })
+      ).rejects.toThrow(
         'A rule name is required when creating a new rule. Use a set_metadata operation with a name.'
       );
     });
@@ -606,7 +606,9 @@ describe('executeRuleOperations', () => {
     it('does not throw when isNew is true and a name is provided', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule' }];
 
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.name).toBe('My Rule');
     });
@@ -616,7 +618,9 @@ describe('executeRuleOperations', () => {
     it('stamps the agent-builder tag on a newly created rule', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule' }];
 
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
     });
@@ -626,7 +630,9 @@ describe('executeRuleOperations', () => {
         { operation: 'set_metadata', name: 'My Rule', tags: ['production', 'cpu'] },
       ];
 
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual(['production', 'cpu', AGENT_BUILDER_TAG]);
     });
@@ -636,7 +642,9 @@ describe('executeRuleOperations', () => {
         { operation: 'set_metadata', name: 'My Rule', tags: [AGENT_BUILDER_TAG] },
       ];
 
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
     });
@@ -645,7 +653,9 @@ describe('executeRuleOperations', () => {
       const maxTags = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
       const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule', tags: maxTags }];
 
-      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual(maxTags);
       expect(result.data.metadata?.tags).toHaveLength(20);
@@ -657,7 +667,9 @@ describe('executeRuleOperations', () => {
       };
       const ops: RuleOperation[] = [{ operation: 'set_metadata', description: 'updated' }];
 
-      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), { isNew: false });
+      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), {
+        isNew: false,
+      });
 
       expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
     });
@@ -668,7 +680,9 @@ describe('executeRuleOperations', () => {
       };
       const ops: RuleOperation[] = [{ operation: 'set_metadata', tags: ['cpu'] }];
 
-      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), { isNew: false });
+      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), {
+        isNew: false,
+      });
 
       expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
     });
@@ -1095,12 +1109,12 @@ describe('executeRuleOperations', () => {
         { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'missing-dash'] },
       ];
 
-      await expect(
-        executeRuleOperations({}, ops, undefined, soClient)
-      ).rejects.toThrow(RuleOperationValidationError);
-      await expect(
-        executeRuleOperations({}, ops, undefined, soClient)
-      ).rejects.toThrow(/Dashboard saved object\(s\) not found: missing-dash/);
+      await expect(executeRuleOperations({}, ops, undefined, soClient)).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations({}, ops, undefined, soClient)).rejects.toThrow(
+        /Dashboard saved object\(s\) not found: missing-dash/
+      );
       expect(soClient.bulkGet).toHaveBeenCalledWith([
         { type: 'dashboard', id: 'dash-1' },
         { type: 'dashboard', id: 'missing-dash' },
