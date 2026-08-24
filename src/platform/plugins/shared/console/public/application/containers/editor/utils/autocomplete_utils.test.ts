@@ -622,6 +622,8 @@ describe('autocomplete_utils', () => {
             { name: false },
             { name: -1 },
             { name: 0.5 },
+            { name: 1e-7 },
+            { name: 1e21 },
             { name: 'false' },
             { name: 'some_string_value' },
           ] as unknown as AutoCompleteContext['autoCompleteSet'];
@@ -923,6 +925,54 @@ describe('autocomplete_utils', () => {
         const acc = acceptSuggestion(editorLines, primitive!);
         expect(JSON.parse(`{${acc}}`)).toEqual({ value: 0.5 });
         expect(acc).toBe('  "value": 0.5');
+      });
+
+      it('SHOULD replace a bare negative exponent prefix for numeric primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": 1e-'];
+        const position = { lineNumber: 3, column: 15 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 15, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find((item) => item.label === '1e-7' && item.insertText === '1e-7');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 15,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: 1e-7 });
+        expect(acc).toBe('  "value": 1e-7');
+      });
+
+      it('SHOULD replace a bare positive exponent prefix for numeric primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": 1e+'];
+        const position = { lineNumber: 3, column: 15 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 15, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find(
+          (item) => item.label === '1e+21' && item.insertText === '1e+21'
+        );
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 15,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: 1e21 });
+        expect(acc).toBe('  "value": 1e+21');
       });
     });
 

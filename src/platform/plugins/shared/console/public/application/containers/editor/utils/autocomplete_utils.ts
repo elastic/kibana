@@ -374,7 +374,7 @@ const findUnquotedPrimitiveValueStartColumn = (
   lineContentBeforePosition: string
 ): number | undefined => {
   const primitivePrefixMatch = lineContentBeforePosition.match(
-    /(?:^|[\s:[,])(-?(?:\d+(?:\.\d*)?|\.\d*)|-)$/
+    /(?:^|[\s:[,])(-?(?:(?:\d+(?:\.\d*)?|\.\d*)(?:[eE][+-]?\d*)?)|-)$/
   );
   const primitivePrefix = primitivePrefixMatch?.[1];
   return primitivePrefix
