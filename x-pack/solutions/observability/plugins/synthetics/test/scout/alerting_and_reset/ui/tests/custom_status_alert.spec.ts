@@ -9,7 +9,8 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/268088
+test.describe.skip(
   'CustomStatusAlert',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -23,7 +24,8 @@ test.describe(
       await syntheticsServices.cleanUp();
     });
 
-    test('creates a custom status alert rule', async ({
+    // Failing: See https://github.com/elastic/kibana/issues/268088
+    test.skip('creates a custom status alert rule', async ({
       pageObjects,
       page,
       browserAuth,
