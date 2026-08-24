@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -15,10 +14,6 @@ import {
 } from './agent_policy_revision_batcher';
 
 describe('AgentPolicyRevisionBatcher', () => {
-  const client = {
-    getCurrentNamespace: () => 'test-space',
-  } as SavedObjectsClientContract;
-
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -35,13 +30,13 @@ describe('AgentPolicyRevisionBatcher', () => {
       random: () => 0,
     });
 
-    const requests = Array.from({ length: 20 }, () => batcher.schedule(client, ['policy-1']));
+    const requests = Array.from({ length: 20 }, () => batcher.schedule(['policy-1']));
 
     await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await Promise.all(requests);
 
     expect(bumpRevision).toHaveBeenCalledTimes(1);
-    expect(bumpRevision).toHaveBeenCalledWith(client, 'policy-1');
+    expect(bumpRevision).toHaveBeenCalledWith('policy-1');
   });
 
   it('keeps separate policies in separate batches', async () => {
@@ -52,20 +47,17 @@ describe('AgentPolicyRevisionBatcher', () => {
       random: () => 0,
     });
 
-    const request = batcher.schedule(client, ['policy-1', 'policy-1', 'policy-2']);
+    const request = batcher.schedule(['policy-1', 'policy-1', 'policy-2']);
 
     await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await request;
 
     expect(bumpRevision).toHaveBeenCalledTimes(2);
-    expect(bumpRevision).toHaveBeenCalledWith(client, 'policy-1');
-    expect(bumpRevision).toHaveBeenCalledWith(client, 'policy-2');
+    expect(bumpRevision).toHaveBeenCalledWith('policy-1');
+    expect(bumpRevision).toHaveBeenCalledWith('policy-2');
   });
 
-  it('coalesces a shared policy written through different spaces', async () => {
-    const otherSpaceClient = {
-      getCurrentNamespace: () => 'other-space',
-    } as SavedObjectsClientContract;
+  it('coalesces independent callers of the same policy into one bump', async () => {
     const bumpRevision = jest.fn().mockResolvedValue(undefined);
     const batcher = new AgentPolicyRevisionBatcher({
       logger: loggerMock.create(),
@@ -73,10 +65,10 @@ describe('AgentPolicyRevisionBatcher', () => {
       random: () => 0,
     });
 
-    const requests = [
-      batcher.schedule(client, ['policy-1']),
-      batcher.schedule(otherSpaceClient, ['policy-1']),
-    ];
+    // Batches key on policyId alone, so writes reaching the same agent policy
+    // from different spaces share one bump. The bump carries no caller state —
+    // PackagePolicyService resolves the space from the agent policy itself.
+    const requests = [batcher.schedule(['policy-1']), batcher.schedule(['policy-1'])];
 
     await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     await Promise.all(requests);
@@ -96,11 +88,11 @@ describe('AgentPolicyRevisionBatcher', () => {
       random: () => 0,
     });
 
-    const firstRequest = batcher.schedule(client, ['policy-1']);
+    const firstRequest = batcher.schedule(['policy-1']);
     await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
     expect(bumpRevision).toHaveBeenCalledTimes(1);
 
-    const secondRequest = batcher.schedule(client, ['policy-1']);
+    const secondRequest = batcher.schedule(['policy-1']);
     finishFirstBump();
     await firstRequest;
     await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
@@ -119,7 +111,7 @@ describe('AgentPolicyRevisionBatcher', () => {
       bumpRevision,
       random: () => 0,
     });
-    const request = batcher.schedule(client, ['policy-1']);
+    const request = batcher.schedule(['policy-1']);
 
     await jest.advanceTimersByTimeAsync(
       AGENT_POLICY_REVISION_BATCH_WINDOW_MS + AGENT_POLICY_REVISION_RETRY_DELAY_MS
@@ -136,7 +128,7 @@ describe('AgentPolicyRevisionBatcher', () => {
       bumpRevision,
       random: () => 0,
     });
-    const request = batcher.schedule(client, ['policy-1']);
+    const request = batcher.schedule(['policy-1']);
     const rejection = expect(request).rejects.toThrow('deployment failed');
 
     await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);

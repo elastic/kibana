@@ -36,7 +36,9 @@ const makeServer = () => {
   const fleetBulkUpdate = jest.fn().mockResolvedValue({ updatedPolicies: [], failedPolicies: [] });
   const fleetGetByIDs = jest.fn().mockResolvedValue([]);
   const fleetDelete = jest.fn().mockResolvedValue([]);
-  const getByIds = jest.fn();
+  // Serves both the create/edit space routing and the batched bump's
+  // agent-policy space lookup; individual tests override as needed.
+  const getByIds = jest.fn().mockResolvedValue([]);
   const bumpRevision = jest.fn().mockResolvedValue(undefined);
 
   const server = {
@@ -261,6 +263,76 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
   });
 });
 
+describe('PackagePolicyService batched revision bump space resolution', () => {
+  const scalablePolicy = () => policy({ condition: "agent.id == 'agent-1'" });
+
+  const bumpForScalableCreate = async (server: SyntheticsServerSetup) => {
+    const request = new PackagePolicyService(server).bulkCreate({
+      newPolicies: [scalablePolicy()],
+      spaceId: DEFAULT_SPACE_ID,
+    });
+    await jest.advanceTimersByTimeAsync(AGENT_POLICY_REVISION_BATCH_WINDOW_MS);
+    await request;
+  };
+
+  it('looks the agent policy up across all spaces with an unscoped client', async () => {
+    const { server, fleetBulkCreate, getByIds } = makeServer();
+    fleetBulkCreate.mockImplementation(async (_client, _esClient, policies) => ({
+      created: policies,
+      failed: [],
+    }));
+
+    await bumpForScalableCreate(server);
+
+    expect(getByIds).toHaveBeenCalledWith(
+      expect.anything(),
+      [{ id: 'policyId', spaceId: ALL_SPACES_ID }],
+      expect.objectContaining({ ignoreMissing: true })
+    );
+  });
+
+  it('bumps through a space the agent policy lives in rather than the writing space', async () => {
+    const { server, fleetBulkCreate, getByIds, bumpRevision, asScopedToNamespace } = makeServer();
+    fleetBulkCreate.mockImplementation(async (_client, _esClient, policies) => ({
+      created: policies,
+      failed: [],
+    }));
+    // The agent policy lives only in team-x. A batch can be won by a client
+    // scoped elsewhere (bulkUpdateInSpace scopes to each package policy's own
+    // recorded space), so the bump must resolve the space from the agent policy.
+    getByIds.mockResolvedValue([{ id: 'policyId', space_ids: ['team-x'] }]);
+
+    await bumpForScalableCreate(server);
+
+    expect(asScopedToNamespace).toHaveBeenCalledWith('team-x');
+    expect(bumpRevision).toHaveBeenCalledWith(
+      { __space: 'team-x' },
+      expect.anything(),
+      'policyId',
+      { asyncDeploy: true }
+    );
+  });
+
+  it('bumps through the default space for an all-spaces agent policy', async () => {
+    const { server, fleetBulkCreate, getByIds, bumpRevision } = makeServer();
+    fleetBulkCreate.mockImplementation(async (_client, _esClient, policies) => ({
+      created: policies,
+      failed: [],
+    }));
+    // `*` is not a writable namespace, so an all-spaces policy bumps via default.
+    getByIds.mockResolvedValue([{ id: 'policyId', space_ids: [ALL_SPACES_ID] }]);
+
+    await bumpForScalableCreate(server);
+
+    expect(bumpRevision).toHaveBeenCalledWith(
+      { __space: DEFAULT_SPACE_ID },
+      expect.anything(),
+      'policyId',
+      { asyncDeploy: true }
+    );
+  });
+});
+
 describe('PackagePolicyService.bulkDelete', () => {
   it('still deletes an orphaned package policy whose policy_ids is an empty array', async () => {
     const { server, fleetGetByIDs, fleetDelete, getByIds } = makeServer();
@@ -334,7 +406,7 @@ describe('PackagePolicyService.bulkUpdateInSpace', () => {
       return client;
     });
     const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [], updatedPolicies: [] });
-    const getByIds = jest.fn();
+    const getByIds = jest.fn().mockResolvedValue([]);
     const bumpRevision = jest.fn().mockResolvedValue(undefined);
     const server = {
       logger: loggerMock.create(),

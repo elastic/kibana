@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 export const AGENT_POLICY_REVISION_BATCH_WINDOW_MS = 100;
@@ -18,7 +18,6 @@ interface Waiter {
 }
 
 interface PendingPolicyRevision {
-  client: SavedObjectsClientContract;
   policyId: string;
   running: boolean;
   timer?: ReturnType<typeof setTimeout>;
@@ -27,30 +26,32 @@ interface PendingPolicyRevision {
 
 interface AgentPolicyRevisionBatcherDependencies {
   logger: Logger;
-  bumpRevision: (client: SavedObjectsClientContract, policyId: string) => Promise<void>;
+  bumpRevision: (policyId: string) => Promise<void>;
   random?: () => number;
 }
 
-/** Coalesces concurrent revision bumps for the same Fleet agent policy. */
+/**
+ * Coalesces concurrent revision bumps for the same Fleet agent policy.
+ *
+ * Batches are keyed on `policyId` alone and carry no caller state: writes for
+ * one agent policy are deliberately coalesced across spaces, so there is no
+ * single requesting space that is correct for the resulting bump. `bumpRevision`
+ * resolves its own client instead — see PackagePolicyService.
+ */
 export class AgentPolicyRevisionBatcher {
   private readonly pendingByPolicy = new Map<string, PendingPolicyRevision>();
 
   constructor(private readonly dependencies: AgentPolicyRevisionBatcherDependencies) {}
 
-  public async schedule(
-    client: SavedObjectsClientContract,
-    policyIds: readonly string[]
-  ): Promise<void> {
-    await Promise.all(
-      [...new Set(policyIds)].map((policyId) => this.schedulePolicy(client, policyId))
-    );
+  public async schedule(policyIds: readonly string[]): Promise<void> {
+    await Promise.all([...new Set(policyIds)].map((policyId) => this.schedulePolicy(policyId)));
   }
 
-  private schedulePolicy(client: SavedObjectsClientContract, policyId: string): Promise<void> {
+  private schedulePolicy(policyId: string): Promise<void> {
     let pending = this.pendingByPolicy.get(policyId);
 
     if (!pending) {
-      pending = { client, policyId, running: false, waiters: [] };
+      pending = { policyId, running: false, waiters: [] };
       this.pendingByPolicy.set(policyId, pending);
     }
 
@@ -79,7 +80,7 @@ export class AgentPolicyRevisionBatcher {
     const waiters = pending.waiters.splice(0);
 
     try {
-      await this.bumpRevisionWithRetry(pending.client, pending.policyId);
+      await this.bumpRevisionWithRetry(pending.policyId);
       waiters.forEach(({ resolve }) => resolve());
     } catch (error) {
       waiters.forEach(({ reject }) => reject(error as Error));
@@ -93,13 +94,10 @@ export class AgentPolicyRevisionBatcher {
     }
   }
 
-  private async bumpRevisionWithRetry(
-    client: SavedObjectsClientContract,
-    policyId: string
-  ): Promise<void> {
+  private async bumpRevisionWithRetry(policyId: string): Promise<void> {
     for (let retry = 0; ; retry += 1) {
       try {
-        await this.dependencies.bumpRevision(client, policyId);
+        await this.dependencies.bumpRevision(policyId);
         return;
       } catch (error) {
         if (
