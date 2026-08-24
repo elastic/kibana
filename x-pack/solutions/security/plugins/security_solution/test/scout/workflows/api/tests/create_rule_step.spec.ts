@@ -61,7 +61,7 @@ steps:
         timeline_id: "some-timeline-id"
 `;
 
-apiTest.describe('security.createRule workflow step', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('security.createRule workflow step', { tag: [...tags.stateful.classic] }, () => {
   let editorHeaders: Record<string, string>;
   let validWorkflowId: string;
   let invalidWorkflowId: string;
