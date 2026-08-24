@@ -8392,7 +8392,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a paginated list of action policies with optional filtering and sorting.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
+        Get a paginated list of action policies with optional filtering and sorting.<br/><br/>[Required authorization] Route required privileges: read_alerting-action-policies.
       operationId: get-alerting-v2-action-policies
       parameters:
         - description: The page number to return. Defaults to 1.
@@ -8583,7 +8583,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
+        Creates an action policy with a server-generated identifier. To create or replace an action policy with a client-supplied identifier, use PUT /api/alerting/v2/action_policies/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-action-policies AND read_alerting-rules.
       operationId: post-alerting-v2-action-policies
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -8737,7 +8737,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        [Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-bulk-delete
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -8860,7 +8860,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        [Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-bulk-disable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -8983,7 +8983,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        [Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-bulk-enable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9106,7 +9106,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        [Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-bulk-snooze
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9230,7 +9230,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        [Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-bulk-unsnooze
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9353,7 +9353,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        [Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-bulk-update-api-key
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9476,7 +9476,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns action policies that match a given rule, categorised as direct, global, or global-filtered.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
+        Returns action policies that match a given rule, categorised as direct, global, or global-filtered.<br/><br/>[Required authorization] Route required privileges: read_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-match-for-rule
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9627,7 +9627,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Delete an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: delete-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -9750,7 +9750,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
+        Get an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: read_alerting-action-policies.
       operationId: get-alerting-v2-action-policies-id
       parameters:
         - description: The action policy identifier.
@@ -9898,7 +9898,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.<br/><br/>[Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: patch-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -10081,7 +10081,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates an action policy with the given identifier, or fully replaces it if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
+        Creates an action policy with the given identifier, or fully replaces it if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-action-policies AND read_alerting-rules.
       operationId: put-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -10305,7 +10305,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Disable an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Disable an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-id-disable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -10476,7 +10476,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Enable an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Enable an action policy by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-id-enable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -10647,7 +10647,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Snooze an action policy until a specified time.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Snooze an action policy until a specified time.<br/><br/>[Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-id-snooze
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -10828,7 +10828,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Remove the snooze from an action policy.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Remove the snooze from an action policy.<br/><br/>[Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-id-unsnooze
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -10999,7 +10999,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Rotate the API key for an action policy.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies.
+        Rotate the API key for an action policy.<br/><br/>[Required authorization] Route required privileges: manage_alerting-action-policies.
       operationId: post-alerting-v2-action-policies-id-update-api-key
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11138,7 +11138,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get unique tags used across action policies.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-action-policies.
+        Get unique tags used across action policies.<br/><br/>[Required authorization] Route required privileges: read_alerting-action-policies.
       operationId: get-alerting-v2-action-policies-tags
       parameters:
         - description: Prefix to filter tags by. Returns all most-used tags when omitted.
@@ -11261,7 +11261,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create actions for multiple alert groups in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create actions for multiple alert groups in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-alerts.
       operationId: post-alerting-v2-alerts-bulk-action
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11385,7 +11385,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-alerts.
       operationId: post-alerting-v2-alerts-group-hash-ack
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11517,7 +11517,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-alerts.
       operationId: post-alerting-v2-alerts-group-hash-activate
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11650,7 +11650,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-alerts.
       operationId: post-alerting-v2-alerts-group-hash-assign
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11783,7 +11783,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-alerts.
       operationId: post-alerting-v2-alerts-group-hash-deactivate
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -11916,7 +11916,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-alerts.
       operationId: post-alerting-v2-alerts-group-hash-snooze
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12048,7 +12048,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-alerts.
       operationId: post-alerting-v2-alerts-group-hash-tag
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12182,7 +12182,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-alerts.
       operationId: post-alerting-v2-alerts-group-hash-unack
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12314,7 +12314,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert group.<br/><br/>[Required authorization] Route required privileges: manage_alerting-alerts.
       operationId: post-alerting-v2-alerts-group-hash-unsnooze
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -12445,7 +12445,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a paginated list of dispatcher summary events for action policies in the current space.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-execution-history.
+        Get a paginated list of dispatcher summary events for action policies in the current space.<br/><br/>[Required authorization] Route required privileges: read_alerting-execution-history.
       operationId: get-alerting-v2-execution-history-action-policies
       parameters:
         - description: Page number (1-indexed). Defaults to 1.
@@ -12635,7 +12635,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a paginated list of rule execution events.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-execution-history.
+        Get a paginated list of rule execution events.<br/><br/>[Required authorization] Route required privileges: read_alerting-execution-history.
       operationId: get-alerting-v2-execution-history-rules
       parameters:
         - description: 'Rule id filter. '
@@ -12830,7 +12830,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: read_alerting-v2-rules.
+        [Required authorization] Route required privileges: read_alerting-rules.
       operationId: get-alerting-v2-rules
       parameters:
         - description: The page number to return. Defaults to 1.
@@ -13014,7 +13014,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.<br/><br/>[Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13181,7 +13181,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+        [Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules-bulk-delete
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13301,7 +13301,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+        [Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules-bulk-disable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13421,7 +13421,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+        [Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules-bulk-enable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13541,7 +13541,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: read_alerting-v2-rules.
+        [Required authorization] Route required privileges: read_alerting-rules.
       operationId: post-alerting-v2-rules-bulk-get
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13703,7 +13703,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Rotates each rule executor task API key to one derived from the current user’s credentials.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Rotates each rule executor task API key to one derived from the current user’s credentials.<br/><br/>[Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules-bulk-update-api-key
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13823,7 +13823,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+        [Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules-delete-by-query
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -13945,7 +13945,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+        [Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules-disable-by-query
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14067,7 +14067,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+        [Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules-enable-by-query
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14189,7 +14189,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Rotates each matching rule executor task API key to one derived from the current user’s credentials.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Rotates each matching rule executor task API key to one derived from the current user’s credentials.<br/><br/>[Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules-update-api-key-by-query
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14311,7 +14311,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+        [Required authorization] Route required privileges: manage_alerting-rules.
       operationId: delete-alerting-v2-rules-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14434,7 +14434,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: read_alerting-v2-rules.
+        [Required authorization] Route required privileges: read_alerting-rules.
       operationId: get-alerting-v2-rules-id
       parameters:
         - description: The identifier for the rule.
@@ -14588,7 +14588,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+        [Required authorization] Route required privileges: manage_alerting-rules.
       operationId: patch-alerting-v2-rules-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -14774,7 +14774,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Creates a rule with the given identifier, or fully replaces it if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Creates a rule with the given identifier, or fully replaces it if one already exists.<br/><br/>[Required authorization] Route required privileges: manage_alerting-rules.
       operationId: put-alerting-v2-rules-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15019,7 +15019,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Disable a rule by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Disable a rule by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules-id-disable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15196,7 +15196,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Enable a rule by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Enable a rule by identifier.<br/><br/>[Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules-id-enable
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15369,7 +15369,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+        [Required authorization] Route required privileges: manage_alerting-rules.
       operationId: post-alerting-v2-rules-id-run
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15503,7 +15503,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a paginated list of prior configurations for a rule from change history. List rows are lean (diff summary only); use the detail route for full snapshots.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-rules.
+        Get a paginated list of prior configurations for a rule from change history. List rows are lean (diff summary only); use the detail route for full snapshots.<br/><br/>[Required authorization] Route required privileges: read_alerting-rules.
       operationId: get-alerting-v2-rules-id-history
       parameters:
         - description: The identifier for the rule.
@@ -15715,7 +15715,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get the full detail for a single rule change-history event, including the rule configuration snapshot.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-rules.
+        Get the full detail for a single rule change-history event, including the rule configuration snapshot.<br/><br/>[Required authorization] Route required privileges: read_alerting-rules.
       operationId: get-alerting-v2-rules-id-history-eventid
       parameters:
         - description: The identifier for the rule.
@@ -15952,7 +15952,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: read_alerting-v2-rules.
+        [Required authorization] Route required privileges: read_alerting-rules.
       operationId: get-alerting-v2-rules-tags
       parameters:
         - description: Prefix to filter tags by. Returns all most-used tags when omitted.
@@ -16079,7 +16079,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get suggestions for matcher data fields.<br/><br/>[Required authorization] Route required privileges: read_alerting-v2-alerts.
+        Get suggestions for matcher data fields.<br/><br/>[Required authorization] Route required privileges: read_alerting-alerts.
       operationId: get-alerting-v2-suggestions-rule-event-fields
       parameters:
         - description: Optional matcher expression used to scope suggested data field names.
