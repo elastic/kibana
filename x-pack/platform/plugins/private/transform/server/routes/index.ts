@@ -16,6 +16,7 @@ import { registerRoute as registerTransformsStatsAllRoute } from './api/transfor
 import { registerRoute as registerTransformsStatsSingleRoute } from './api/transforms_stats_single/register_route';
 import { registerRoute as registerTransformsCreateRoute } from './api/transforms_create/register_route';
 import { registerRoute as registerTransformsUpdateRoute } from './api/transforms_update/register_route';
+import { registerRoute as registerUpdateTransformsProjectScopeRoute } from './api/update_transforms_project_scope/register_route';
 import { registerRoute as registerReauthorizeTransformsRoute } from './api/reauthorize_transforms/register_route';
 import { registerRoute as registerResetTransformsRoute } from './api/reset_transforms/register_route';
 import { registerRoute as registerTransformsPreviewRoute } from './api/transforms_preview/register_route';
@@ -34,6 +35,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
   registerTransformsStatsSingleRoute(dependencies);
   registerTransformsCreateRoute(dependencies);
   registerTransformsUpdateRoute(dependencies);
+  registerUpdateTransformsProjectScopeRoute(dependencies);
   registerReauthorizeTransformsRoute(dependencies);
   registerResetTransformsRoute(dependencies);
   registerTransformsPreviewRoute(dependencies);

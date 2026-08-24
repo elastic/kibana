@@ -13,3 +13,4 @@ export {
 export { normalizeTags } from './normalize_tags';
 export { resolveArtifactId } from './resolve_artifact_id';
 export { resolveTimeField, type ResolveTimeFieldParams } from './time_field';
+export { parseEpisodeDataJson, getValueByFieldPath } from './episode_data';

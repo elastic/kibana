@@ -53,6 +53,7 @@ const localStorage = new Storage(window.localStorage);
 export interface DataVisualizerStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
   getAdditionalLinks?: GetAdditionalLinks;
+  projectRouting?: string;
 }
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
@@ -114,6 +115,7 @@ const DataVisualizerESQLStateContextProvider = () => {
 const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
   IndexDataVisualizerComponent,
   getAdditionalLinks,
+  projectRouting,
 }) => {
   const { services } = useDataVisualizerKibana();
   const {
@@ -291,6 +293,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
           currentSavedSearch={currentSavedSearch}
           currentSessionId={currentSessionId}
           getAdditionalLinks={getAdditionalLinks}
+          projectRouting={projectRouting}
         />
       ) : (
         <DataVisualizerDataSourcePicker currentDataView={null} />
@@ -303,12 +306,14 @@ export interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   showFrozenDataTierChoice?: boolean;
   esql?: boolean;
+  projectRouting?: string;
 }
 
 export const IndexDataVisualizer: FC<Props> = ({
   getAdditionalLinks,
   showFrozenDataTierChoice = true,
   esql,
+  projectRouting,
 }) => {
   const coreStart = getCoreStart();
   const {
@@ -324,6 +329,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     uiActions,
     charts,
     unifiedSearch,
+    cps,
   } = getPluginsStart();
   const services = {
     ...coreStart,
@@ -339,6 +345,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     uiActions,
     charts,
     unifiedSearch,
+    cps,
   };
 
   const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
@@ -351,6 +358,7 @@ export const IndexDataVisualizer: FC<Props> = ({
       'uiSettings',
       'userProfile',
       'i18n',
+      'cps',
     ]),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice,
@@ -365,6 +373,7 @@ export const IndexDataVisualizer: FC<Props> = ({
               <DataVisualizerStateContextProvider
                 IndexDataVisualizerComponent={IndexDataVisualizerView}
                 getAdditionalLinks={getAdditionalLinks}
+                projectRouting={projectRouting}
               />
             ) : (
               <DataVisualizerESQLStateContextProvider />

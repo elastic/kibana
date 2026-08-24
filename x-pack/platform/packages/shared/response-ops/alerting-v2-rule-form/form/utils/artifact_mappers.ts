@@ -21,7 +21,11 @@ export interface RuleArtifactSlices {
 
 export const mapArtifacts = (
   artifacts: RuleArtifactPayload | undefined
-): RuleArtifactPayload | undefined => (artifacts?.length ? artifacts : undefined);
+): RuleArtifactPayload | undefined =>
+  artifacts?.length
+    ? // Drop any leftover legacy keys (e.g. migrated `value`) before write.
+      artifacts.map(({ id, type, data }) => ({ id, type, data }))
+    : undefined;
 
 export const splitArtifactsByType = (
   artifacts: RuleArtifactPayload | undefined
