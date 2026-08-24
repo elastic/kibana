@@ -194,7 +194,7 @@ describe('validateJobParams', () => {
     );
   });
 
-  it('validates layout width', () => {
+  it('validates layout width minimum', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
@@ -206,6 +206,51 @@ describe('validateJobParams', () => {
 
     expect(() => validateJobParams(validParams)).toThrow(
       'layout.dimensions.width: Too small: expected number to be >0'
+    );
+  });
+
+  it('validates layout width maximum', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.enum.print, dimensions: { width: 14401, height: 600 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions.width: Dashboard width exceeds the maximum dimensions (14400px) supported by Chromium rendering engine. Try splitting the dashboard into smaller chunks or using print format PDF'
+    );
+  });
+
+  it('validates layout height minimum', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: -600 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions.height: Too small: expected number to be >0'
+    );
+  });
+
+  it('validates layout height maximum', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 16001 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions.height: Dashboard height exceeds the maximum dimensions (16000px) supported by Chromium rendering engine. Try splitting the dashboard into smaller chunks or using print format PDF'
     );
   });
 
