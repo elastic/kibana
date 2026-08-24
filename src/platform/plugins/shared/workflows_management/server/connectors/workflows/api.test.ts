@@ -26,11 +26,8 @@ describe('Workflows API', () => {
   });
 
   describe('run', () => {
-    it('should execute workflow when alerts are provided (summary mode)', async () => {
-      mockExternalService.runWorkflow.mockResolvedValue({
-        workflowRunId: 'workflow-run-123',
-        status: 'executed',
-      });
+    it('should schedule workflow once with all alerts (summary mode)', async () => {
+      mockExternalService.scheduleWorkflow.mockResolvedValue('workflow-run-123');
 
       const params = {
         workflowId: 'test-workflow-id',
@@ -61,10 +58,10 @@ describe('Workflows API', () => {
 
       expect(result).toEqual({
         workflowRunId: 'workflow-run-123',
-        status: 'executed',
+        status: 'scheduled',
       });
 
-      expect(mockExternalService.runWorkflow).toHaveBeenCalledWith({
+      expect(mockExternalService.scheduleWorkflow).toHaveBeenCalledWith({
         workflowId: 'test-workflow-id',
         spaceId: 'default',
         inputs: {
@@ -83,14 +80,11 @@ describe('Workflows API', () => {
           },
         },
       });
-      expect(mockExternalService.scheduleWorkflow).not.toHaveBeenCalled();
+      expect(mockExternalService.runWorkflow).not.toHaveBeenCalled();
     });
 
-    it('should execute workflow in summary mode by default (summary undefined)', async () => {
-      mockExternalService.runWorkflow.mockResolvedValue({
-        workflowRunId: 'workflow-run-123',
-        status: 'executed',
-      });
+    it('should schedule workflow in summary mode by default (summary undefined)', async () => {
+      mockExternalService.scheduleWorkflow.mockResolvedValue('workflow-run-123');
 
       const params = {
         workflowId: 'test-workflow-id',
@@ -120,11 +114,11 @@ describe('Workflows API', () => {
 
       expect(result).toEqual({
         workflowRunId: 'workflow-run-123',
-        status: 'executed',
+        status: 'scheduled',
       });
 
-      expect(mockExternalService.runWorkflow).toHaveBeenCalled();
-      expect(mockExternalService.scheduleWorkflow).not.toHaveBeenCalled();
+      expect(mockExternalService.scheduleWorkflow).toHaveBeenCalledTimes(1);
+      expect(mockExternalService.runWorkflow).not.toHaveBeenCalled();
     });
 
     it('should schedule workflow for each alert in per-alert mode', async () => {
@@ -421,7 +415,9 @@ describe('Workflows API', () => {
     });
 
     it('should handle external service errors', async () => {
-      mockExternalService.runWorkflow.mockRejectedValue(new Error('Workflow execution failed'));
+      mockExternalService.scheduleWorkflow.mockRejectedValue(
+        new Error('Workflow execution failed')
+      );
 
       const params = {
         workflowId: 'test-workflow-id',
@@ -451,7 +447,7 @@ describe('Workflows API', () => {
         })
       ).rejects.toThrow('Workflow execution failed');
 
-      expect(mockExternalService.runWorkflow).toHaveBeenCalledWith({
+      expect(mockExternalService.scheduleWorkflow).toHaveBeenCalledWith({
         workflowId: 'test-workflow-id',
         spaceId: 'default',
         inputs: {
@@ -472,11 +468,8 @@ describe('Workflows API', () => {
       });
     });
 
-    it('should execute workflow without inputs', async () => {
-      mockExternalService.runWorkflow.mockResolvedValue({
-        workflowRunId: 'workflow-run-456',
-        status: 'executed',
-      });
+    it('should schedule workflow without rule url', async () => {
+      mockExternalService.scheduleWorkflow.mockResolvedValue('workflow-run-456');
 
       const params = {
         workflowId: 'test-workflow-id',
@@ -506,10 +499,10 @@ describe('Workflows API', () => {
 
       expect(result).toEqual({
         workflowRunId: 'workflow-run-456',
-        status: 'executed',
+        status: 'scheduled',
       });
 
-      expect(mockExternalService.runWorkflow).toHaveBeenCalledWith({
+      expect(mockExternalService.scheduleWorkflow).toHaveBeenCalledWith({
         workflowId: 'test-workflow-id',
         spaceId: 'default',
         inputs: {
