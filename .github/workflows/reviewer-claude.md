@@ -124,6 +124,7 @@ jobs:
           github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
           script: |
             core.setOutput('diverted', 'false');
+            return;
 
             const pullRequest = context.payload.pull_request;
             const payloadLabels = (pullRequest?.labels || []).map((label) => label.name);

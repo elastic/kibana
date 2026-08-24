@@ -1,5 +1,5 @@
 version: 1
-enabled: true
+enabled: false
 review_drafts: false
 required_labels:
   - reviewer:libra
