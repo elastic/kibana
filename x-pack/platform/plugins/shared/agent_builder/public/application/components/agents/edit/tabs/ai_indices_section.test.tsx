@@ -25,7 +25,7 @@ jest.mock('../../../../hooks/ai_indices/use_inherited_ai_indices', () => ({
   useInheritedAiIndices: () => ({
     inheritedAiIndicesByAgentId: { [AGENT_ID]: mockInheritedIds },
     isLoading: false,
-    error: undefined,
+    error: mockInheritedError,
   }),
 }));
 
@@ -33,6 +33,7 @@ const AGENT_ID = 'my-agent';
 
 let mockIsContextEngineEnabled = true;
 let mockInheritedIds: string[] = [];
+let mockInheritedError: Error | undefined;
 let mockAiIndices: Array<{ id: string; description?: string; managed: boolean }> = [];
 let mockListError: Error | undefined;
 
@@ -80,6 +81,7 @@ describe('AiIndicesSection', () => {
     jest.clearAllMocks();
     mockIsContextEngineEnabled = true;
     mockInheritedIds = [];
+    mockInheritedError = undefined;
     mockListError = undefined;
     mockAiIndices = [
       { id: 'elastic-ai-index', description: 'Ready', managed: false },
@@ -102,8 +104,16 @@ describe('AiIndicesSection', () => {
     expect(screen.getByText('AI Indices')).toBeInTheDocument();
   });
 
-  it('says when the AI indices could not be loaded', () => {
+  it('shows a callout when the AI indices list failed to load', () => {
     mockListError = new Error('boom');
+
+    renderSection();
+
+    expect(screen.getByTestId('agentBuilderAiIndicesLoadError')).toBeInTheDocument();
+  });
+
+  it('shows a callout when the default AI indices failed to load', () => {
+    mockInheritedError = new Error('boom');
 
     renderSection();
 

@@ -2983,6 +2983,12 @@ export const labels = {
     loadErrorMessage: i18n.translate('xpack.agentBuilder.aiIndices.loadErrorMessage', {
       defaultMessage: 'Failed to fetch AI indices',
     }),
+    loadInheritedErrorMessage: i18n.translate(
+      'xpack.agentBuilder.aiIndices.loadInheritedErrorMessage',
+      {
+        defaultMessage: 'Failed to fetch default AI indices',
+      }
+    ),
     columnTitle: i18n.translate('xpack.agentBuilder.aiIndices.columnTitle', {
       defaultMessage: 'AI indices',
     }),

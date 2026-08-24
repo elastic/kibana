@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useQuery } from '@kbn/react-query';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { AgentBaseConfigurationItem } from '../../../../common/http_api/agents';
 import { queryKeys } from '../../query_keys';
+import { labels } from '../../utils/i18n';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
+import { useToasts } from '../use_toasts';
 
 interface UseInheritedAiIndicesResult {
   /** AI indices each agent inherits from its type, keyed by agent id. */
@@ -33,12 +36,22 @@ export const useInheritedAiIndices = ({
   enabled = true,
 }: { enabled?: boolean } = {}): UseInheritedAiIndicesResult => {
   const { agentService } = useAgentBuilderServices();
+  const { addErrorToast } = useToasts();
 
-  const { data, isLoading, error } = useQuery<AgentBaseConfigurationItem[], Error>({
+  const { data, isLoading, error, isError } = useQuery<AgentBaseConfigurationItem[], Error>({
     queryKey: queryKeys.agentProfiles.baseConfiguration,
     queryFn: () => agentService.listBaseConfigurations(),
     enabled,
   });
+
+  useEffect(() => {
+    if (enabled && isError) {
+      addErrorToast({
+        title: labels.aiIndices.loadInheritedErrorMessage,
+        text: formatAgentBuilderErrorMessage(error),
+      });
+    }
+  }, [enabled, isError, error, addErrorToast]);
 
   const inheritedAiIndicesByAgentId = useMemo(
     () =>
