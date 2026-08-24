@@ -49,13 +49,6 @@ export interface DeploymentMethodEntry {
   preferred?: boolean;
 }
 
-/** A manifest var definition plus the input types it appears under. */
-export interface ServiceVarDef {
-  def: RegistryVarsEntry;
-  /** streams[].input values this var appears under, e.g. ['aws-s3'] */
-  inputs: string[];
-}
-
 export interface AwsServiceMatrixEntry {
   /** Data stream identifier, matching packages/<packageName>/data_stream/<id> */
   id: string;
@@ -73,15 +66,23 @@ export interface AwsServiceMatrixEntry {
   requiredConfig?: string[];
   /** Manifest var names that are optional and surfaced in the UI. Derived from manifest vars with required: false && show_user: true. */
   optionalConfig?: string[];
-  /** Manifest var type by name — 'bool', 'text', 'integer', etc. Derived from the package manifest. */
-  varTypes?: Record<string, string>;
-  /** Full manifest var definitions keyed by name, with the inputs each var appears under. Derived from the package manifest. */
-  varDefs?: Record<string, ServiceVarDef>;
+  /**
+   * Manifest var definitions grouped by stream input type, then by var name.
+   * Mirrors Fleet's positional scoping — a var's input is where it sits in the manifest,
+   * not a field on the var entry. e.g. { 'aws-s3': { bucket_arn: RegistryVarsEntry } }
+   */
+  varDefsByInput?: Record<string, Record<string, RegistryVarsEntry>>;
   packageName: string;
   /** Fleet policy template name derived from policy_templates[].data_streams lookup in the manifest. */
   policyTemplate?: string;
   /** Whether the data stream is enabled by default when the integration is installed. Derived from the package manifest. */
   defaultEnabled: boolean;
+  /**
+   * Input types that are enabled by default (stream.enabled !== false in the manifest).
+   * Used to seed enabledInputs when a user first opens a service — inputs explicitly
+   * marked enabled:false in the manifest are excluded.
+   */
+  defaultEnabledInputs: string[];
   /** Whether this service should be shown in the AWS onboarding UI. Defaults to true. */
   showInUI: boolean;
   badge?: Badge;
@@ -98,17 +99,18 @@ export interface AwsServiceMatrixEntry {
 
 /**
  * Internal type for the static routing table.
- * signalType and defaultEnabled are derived at runtime from the Fleet package manifest.
+ * signalType, defaultEnabled, and defaultEnabledInputs are derived at runtime from the Fleet package manifest.
  */
 type AwsServiceStaticEntry = Omit<
   AwsServiceMatrixEntry,
   | 'deploymentMethods'
   | 'signalType'
   | 'defaultEnabled'
+  | 'defaultEnabledInputs'
   | 'showInUI'
   | 'optionalConfig'
   | 'name'
-  | 'varDefs'
+  | 'varDefsByInput'
 > & {
   deploymentMethods?: DeploymentMethodEntry[];
   signalType?: SignalType;
@@ -272,6 +274,10 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     ecfLogType: 'waf',
+    // TODO: WAF only supports S3 input in ECF deployment mode
+    // if users choose Agent-based deployment, cloudwatch should become available
+    // and all package vars should be displayed
+    inputs: ['aws-s3'],
   },
   // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
   {
@@ -488,11 +494,11 @@ export function buildAwsServiceMatrix(
     let requiredConfig = entry.requiredConfig;
     let optionalConfig: string[] | undefined;
     let defaultEnabled = true;
+    let defaultEnabledInputs: string[] = [];
     let identityFederationSupported: boolean | undefined;
     let managedIntegrations = false;
     let pt: any;
-    const varTypes: Record<string, string> = {};
-    const varDefs: Record<string, ServiceVarDef> = {};
+    const varDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
 
     const packageInfo = packages[entry.packageName];
     const badge = entry.badge ?? releaseToBadge((packageInfo as any)?.release);
@@ -520,36 +526,39 @@ export function buildAwsServiceMatrix(
         signalType = (ds as any).type as SignalType;
       }
 
-      const dsInputs: string[] = [
-        ...new Set(((ds as any)?.streams ?? []).map((s: any) => s.input as string) as string[]),
-      ];
+      const dsStreams: Array<{ input?: string; enabled?: boolean }> = (ds as any)?.streams ?? [];
+      const dsInputs: string[] = [...new Set(dsStreams.map((s) => s.input as string))];
       if (dsInputs.length > 0) {
-        inputs = dsInputs;
+        // Static entry inputs act as an allowlist — skip manifest-derived inputs when already set.
+        if (!entry.inputs) {
+          inputs = dsInputs;
+        }
+        const effectiveInputs = inputs ?? dsInputs;
+        defaultEnabledInputs = effectiveInputs.filter((input) => {
+          const stream = dsStreams.find((s) => s.input === input);
+          return stream?.enabled !== false;
+        });
       }
 
-      // Walk streams preserving input attribution and full var definitions.
-      // First-wins on name collision: when a var appears under multiple inputs,
-      // the definition from the first stream wins and the additional input is appended.
+      // Walk streams building a positional var map: input → varName → definition.
+      // Matches Fleet's scope model — a var's input is where it sits in the manifest, not a field.
+      // First-wins within each input bucket when the same var name appears in multiple streams
+      // of the same input type.
       for (const s of ((ds as any)?.streams ?? []) as Array<{
         input?: string;
         vars?: RegistryVarsEntry[];
       }>) {
+        if (!s.input) continue;
+        const bucket = (varDefsByInput[s.input] ??= {});
         for (const v of s.vars ?? []) {
           if (!v.name) continue;
-          const existing = varDefs[v.name];
-          if (existing) {
-            if (s.input && !existing.inputs.includes(s.input)) existing.inputs.push(s.input);
-            continue;
-          }
-          varDefs[v.name] = { def: v, inputs: s.input ? [s.input] : [] };
+          bucket[v.name] ??= v;
         }
       }
 
-      const allVars: RegistryVarsEntry[] = Object.values(varDefs).map((d) => d.def);
-
-      for (const v of allVars) {
-        if (v.name && v.type) varTypes[v.name] = v.type;
-      }
+      const allVars: RegistryVarsEntry[] = Object.values(varDefsByInput).flatMap((byName) =>
+        Object.values(byName)
+      );
 
       // All required vars (shown or hidden) go into requiredConfig. field_config functions
       // use show_user from varDefs to split them into user-visible and mandatory-hidden sections.
@@ -560,9 +569,12 @@ export function buildAwsServiceMatrix(
         requiredConfig = reqVars;
       }
 
+      const reqVarSet = new Set(reqVars);
       const optVars: string[] = [
         ...new Set(
-          allVars.filter((v: any) => !v.required && v.show_user).map((v: any) => v.name as string)
+          allVars
+            .filter((v: any) => !v.required && v.show_user && !reqVarSet.has(v.name as string))
+            .map((v: any) => v.name as string)
         ),
       ];
       if (optVars.length > 0) {
@@ -618,12 +630,22 @@ export function buildAwsServiceMatrix(
     // gets deployment methods and becomes visible without a manual showInUI update.
     const showInUI = entry.showInUI ?? deploymentMethods.length > 0;
 
+    // ECF trigger vars are expected to be the only required vars for ECF-only services
     // For ECF-only services, ECF manages all configuration internally.
     // Only the trigger-source var needs user input: bucket_arn (S3) or log_group_arn (CloudWatch).
-    // Suppress the rest of the manifest vars so the flyout stays minimal.
+    // Restrict to the effective inputs so services with a static input allowlist (e.g. WAF → S3
+    // only) don't surface trigger vars from inputs they don't support.
     const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
     if (deploymentMethods.length > 0 && deploymentMethods.every((m) => m.method === 'ecf')) {
-      const ecfVarNames = Object.keys(varDefs).filter((v) => ECF_TRIGGER_VARS.has(v));
+      const effectiveInputSet = new Set(inputs ?? []);
+      const ecfVarNames = [
+        ...new Set(
+          Object.entries(varDefsByInput)
+            .filter(([input]) => effectiveInputSet.size === 0 || effectiveInputSet.has(input))
+            .flatMap(([, byName]) => Object.keys(byName))
+            .filter((v) => ECF_TRIGGER_VARS.has(v))
+        ),
+      ];
       if (ecfVarNames.length > 0) {
         requiredConfig = ecfVarNames;
         optionalConfig = undefined;
@@ -639,9 +661,9 @@ export function buildAwsServiceMatrix(
       inputs,
       requiredConfig,
       optionalConfig,
-      varTypes: Object.keys(varTypes).length > 0 ? varTypes : undefined,
-      varDefs: Object.keys(varDefs).length > 0 ? varDefs : undefined,
+      varDefsByInput: Object.keys(varDefsByInput).length > 0 ? varDefsByInput : undefined,
       defaultEnabled,
+      defaultEnabledInputs,
       showInUI,
       badge,
       identityFederationSupported,
