@@ -355,9 +355,7 @@ export const mergeRumCountries = (
       p75Lcp: null,
     });
   }
-  return [...byIso.values()].sort(
-    (a, b) => b.pageViews - a.pageViews || b.sessions - a.sessions
-  );
+  return [...byIso.values()].sort((a, b) => b.pageViews - a.pageViews || b.sessions - a.sessions);
 };
 
 export interface RumOverviewResponse {
