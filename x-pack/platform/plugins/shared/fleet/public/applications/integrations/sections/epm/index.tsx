@@ -22,6 +22,7 @@ import { Policy } from './screens/policy';
 import { CreateIntegration } from './screens/create';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
 import { CollectionDetailPage } from './screens/collection';
+import { IntegrationsVisionPage } from './screens/integrations_vision';
 
 export const EPMApp: React.FunctionComponent = () => {
   const { automaticImport } = useStartServices();
@@ -31,6 +32,9 @@ export const EPMApp: React.FunctionComponent = () => {
 
   return (
     <Routes>
+      <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_vision}>
+        <IntegrationsVisionPage />
+      </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.add_integration_to_policy}>
         <CreatePackagePolicyPage />
       </Route>

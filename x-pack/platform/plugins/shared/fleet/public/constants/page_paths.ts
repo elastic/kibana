@@ -125,6 +125,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integration_policy_upgrade: '/edit-integration/:packagePolicyId',
   add_integration_to_policy: '/detail/:pkgkey/add-integration/:integration?',
   integration_collection: '/collection/:groupId',
+  integrations_vision: '/vision',
 };
 
 export const pagePathGetters: {
