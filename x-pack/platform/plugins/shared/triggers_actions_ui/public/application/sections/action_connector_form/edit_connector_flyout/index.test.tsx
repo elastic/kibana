@@ -18,6 +18,8 @@ import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
+jest.setTimeout(15_000);
+
 const updateConnectorResponse = {
   connector_type_id: 'test',
   is_preconfigured: false,

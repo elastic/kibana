@@ -1,5 +1,5 @@
 {
-  "sha1": "734624b72ba43a0c99220e1fa2d36082349227b3",
+  "sha1": "01203641904804048e099fe2d557eeebc513b296",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1489,7 +1489,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 113,
+        "line": 121,
         "column": 10
       }
     },
@@ -1505,7 +1505,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 139,
+        "line": 147,
+        "column": 10
+      }
+    },
+    {
+      "id": "15fad2037802d36-9941b94d0d29d96",
+      "title": "Entity Store - privilege checks install - Should fail when user lacks write privilege on target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 177,
         "column": 10
       }
     },
@@ -1521,7 +1537,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 169,
+        "line": 205,
         "column": 10
       }
     },
@@ -1537,7 +1553,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 191,
+        "line": 227,
         "column": 10
       }
     },
@@ -1553,7 +1569,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 217,
+        "line": 253,
+        "column": 10
+      }
+    },
+    {
+      "id": "15fad2037802d36-0403b3e66417e66",
+      "title": "Entity Store - privilege checks update - Should fail when user lacks write privilege on target index patterns",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 283,
         "column": 10
       }
     },
@@ -1569,7 +1601,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 247,
+        "line": 311,
         "column": 10
       }
     },
@@ -1585,7 +1617,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 271,
+        "line": 335,
         "column": 10
       }
     },
@@ -1601,7 +1633,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 293,
+        "line": 357,
         "column": 10
       }
     },
@@ -1617,7 +1649,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 315,
+        "line": 379,
         "column": 10
       }
     },

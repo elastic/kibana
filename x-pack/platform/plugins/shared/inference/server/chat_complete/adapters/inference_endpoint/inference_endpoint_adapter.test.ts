@@ -575,6 +575,108 @@ describe('inferenceEndpointAdapter', () => {
       );
     });
 
+    it('sanitizes tool schemas when the provider is googlevertexai', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      const tools = {
+        myTool: {
+          description: 'my tool',
+          schema: {
+            type: 'object' as const,
+            properties: {
+              // shape emitted by zod v4 for `z.record(z.string(), z.string())`
+              someRecord: {
+                type: 'object',
+                propertyNames: { type: 'string' },
+                additionalProperties: { type: 'string' },
+              },
+            } as Record<string, any>,
+          },
+        },
+      };
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          provider: 'googlevertexai',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            tools: [
+              {
+                type: 'function',
+                function: {
+                  name: 'myTool',
+                  description: 'my tool',
+                  parameters: {
+                    type: 'object',
+                    properties: {
+                      someRecord: {
+                        type: 'object',
+                        additionalProperties: { type: 'string' },
+                      },
+                    },
+                  },
+                },
+              },
+            ],
+          }),
+        })
+      );
+    });
+
+    it('leaves tool schemas untouched for other providers', () => {
+      executorMock.invoke.mockResolvedValue(
+        observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)
+      );
+
+      const schema = {
+        type: 'object' as const,
+        properties: {
+          someRecord: {
+            type: 'object',
+            propertyNames: { type: 'string' },
+            additionalProperties: { type: 'string' },
+          },
+        } as Record<string, any>,
+      };
+
+      inferenceEndpointAdapter
+        .chatComplete({
+          ...defaultArgs,
+          provider: 'amazonbedrock',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            myTool: { description: 'my tool', schema },
+          },
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            tools: [
+              {
+                type: 'function',
+                function: {
+                  name: 'myTool',
+                  description: 'my tool',
+                  parameters: schema,
+                },
+              },
+            ],
+          }),
+        })
+      );
+    });
+
     it('uses simulated function calling when functionCalling is "simulated"', () => {
       executorMock.invoke.mockResolvedValue(
         observableIntoEventSourceStream(of(createOpenAIChunk({ delta: { content: '' } })), logger)

@@ -50,15 +50,14 @@ export const hasWorkflowReadPrivilege = (params: CheckWorkflowPrivilegeParams): 
   hasAllApiPrivileges({ ...params, actions: [WorkflowsManagementApiActions.read] });
 
 /**
- * Verifies the caller holds the `workflowsManagement:execute` and
- * `workflowsManagement:read` privileges before a workflow is executed through
- * Agent Builder. Mirrors the privileges required by the direct Workflows
- * `.../run` HTTP route.
+ * Verifies the caller holds the `workflowsManagement:execute`
+ * privileges before a workflow is executed through Agent Builder.
+ * Mirrors the privileges required by the direct Workflows `.../run` HTTP route.
  */
 export const hasWorkflowExecutePrivilege = (
   params: CheckWorkflowPrivilegeParams
 ): Promise<boolean> =>
   hasAllApiPrivileges({
     ...params,
-    actions: [WorkflowsManagementApiActions.execute, WorkflowsManagementApiActions.read],
+    actions: [WorkflowsManagementApiActions.execute],
   });

@@ -23,6 +23,22 @@ const OKTA_MANAGER_FIELDS = [
   'user.profile.manager',
   'entityanalytics_okta.user.profile.manager.name',
 ] as const;
+// Okta appends personal name fragments into related.user. Bare values like
+// "Emily" / "Stone" collide across unrelated people when matched against
+// user.name / user.full_name. Display name is intentionally kept for
+// display-name bridging; only the fragment fields are excluded.
+const OKTA_NAME_FRAGMENT_FIELDS = [
+  'user.profile.first_name',
+  'user.profile.last_name',
+  'entityanalytics_okta.user.profile.first_name',
+  'entityanalytics_okta.user.profile.last_name',
+  'entityanalytics_okta.user.profile.middle_name',
+  'entityanalytics_okta.user.profile.nick_name',
+] as const;
+const OKTA_EXCLUDED_RELATED_USER_FIELDS = [
+  ...OKTA_MANAGER_FIELDS,
+  ...OKTA_NAME_FRAGMENT_FIELDS,
+] as const;
 
 const toStringValues = (value: unknown): string[] => {
   if (Array.isArray(value)) {
@@ -119,6 +135,8 @@ export const readRelatedUserBundleForSeed = async ({
 
   return {
     relatedUsers: getFieldStringValues(source, RELATED_USER_FIELD),
-    excludedValues: OKTA_MANAGER_FIELDS.flatMap((field) => getFieldStringValues(source, field)),
+    excludedValues: OKTA_EXCLUDED_RELATED_USER_FIELDS.flatMap((field) =>
+      getFieldStringValues(source, field)
+    ),
   };
 };

@@ -1,3 +1,4 @@
+@eslint-community/eslint-plugin-eslint-comments
 @xterm/xterm
 knip
 safe-stable-stringify
@@ -51,8 +52,6 @@ jszip
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
 just-bash
-<<<<<<< HEAD
-=======
 typescript-7
 immer-v9
 react-redux-v7
@@ -61,4 +60,3 @@ redux-toolkit-v1
 redux-v4
 reselect-v4
 graphql
->>>>>>> 6eb83a3d5a73 ([CI] Migrate to TypeScript 7 (#277950))

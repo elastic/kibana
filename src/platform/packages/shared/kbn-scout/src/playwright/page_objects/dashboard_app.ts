@@ -1089,6 +1089,9 @@ export class DashboardApp {
       await toggleAction.click();
     } else {
       await panelWrapper.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
+      await expect(
+        panelWrapper.locator('[data-test-subj="embeddablePanelContextMenuOpen"]')
+      ).toBeVisible();
       await this.page.testSubj.click('embeddablePanelAction-togglePanel');
     }
   }

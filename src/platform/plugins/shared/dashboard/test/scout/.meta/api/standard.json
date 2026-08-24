@@ -1,5 +1,9 @@
 {
-  "sha1": "3ff903e8a7587d73444d1fa26bff4d00f76272b9",
+  "sha1": "7667755a3ed3c4ac62edd87dc081bf233ed11ab2",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "65fe2f541b6ad11-864f48536870f42",
@@ -309,7 +313,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards_legacy.spec.ts",
-        "line": 77,
+        "line": 76,
         "column": 10
       }
     },
@@ -335,7 +339,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards_legacy.spec.ts",
-        "line": 91,
+        "line": 90,
         "column": 10
       }
     },
@@ -361,7 +365,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards_legacy.spec.ts",
-        "line": 105,
+        "line": 104,
         "column": 10
       }
     },
@@ -387,7 +391,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards_legacy.spec.ts",
-        "line": 118,
+        "line": 117,
         "column": 10
       }
     },
@@ -413,7 +417,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards_legacy.spec.ts",
-        "line": 136,
+        "line": 134,
         "column": 10
       }
     },
@@ -439,7 +443,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards_legacy.spec.ts",
-        "line": 152,
+        "line": 150,
         "column": 10
       }
     },
@@ -465,7 +469,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards_legacy.spec.ts",
-        "line": 167,
+        "line": 165,
         "column": 10
       }
     },
@@ -491,7 +495,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards_legacy.spec.ts",
-        "line": 184,
+        "line": 182,
         "column": 10
       }
     },
@@ -543,7 +547,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 64,
+        "line": 63,
         "column": 10
       }
     },
@@ -569,7 +573,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 80,
+        "line": 79,
         "column": 10
       }
     },
@@ -595,7 +599,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 96,
+        "line": 95,
         "column": 10
       }
     },
@@ -621,7 +625,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 108,
+        "line": 107,
         "column": 10
       }
     },
@@ -647,7 +651,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 128,
+        "line": 126,
         "column": 10
       }
     },
@@ -673,7 +677,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 146,
+        "line": 144,
         "column": 10
       }
     },
@@ -699,7 +703,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 163,
+        "line": 161,
         "column": 10
       }
     },
@@ -725,7 +729,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 182,
+        "line": 180,
         "column": 10
       }
     },

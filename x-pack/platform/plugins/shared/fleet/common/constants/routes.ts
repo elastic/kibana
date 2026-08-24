@@ -65,6 +65,7 @@ export const EPM_API_ROUTES = {
   REAUTHORIZE_TRANSFORMS: `${EPM_PACKAGES_ONE}/transforms/authorize`,
   REVIEW_UPGRADE_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/review_upgrade`,
   ILM_POLICIES_PATTERN: `${INTERNAL_ROOT}/epm/ilm_policies`,
+  NAMESPACE_PREFLIGHT_CHECK_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/namespace_customization/_preflight_check`,
 };
 
 // Data stream API routes

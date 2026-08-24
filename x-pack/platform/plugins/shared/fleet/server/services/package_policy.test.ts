@@ -4183,6 +4183,96 @@ describe('Package policy service', () => {
       );
     });
 
+    it('should forward request context to packagePolicyUpdate external callbacks', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockPackagePolicy = createPackagePolicyMock();
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+      const context = coreMock.createCustomRequestHandlerContext(
+        xpackMocks.createRequestHandlerContext()
+      );
+      const updateCallback = jest.fn(async (policy) => policy);
+
+      appContextService.addExternalCallback('packagePolicyUpdate', updateCallback);
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes,
+          },
+        ],
+      });
+
+      soClient.update.mockResolvedValue({
+        id: 'test-package-policy',
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes,
+      });
+
+      await packagePolicyService.update(
+        soClient,
+        esClient,
+        'test-package-policy',
+        {
+          ...mockPackagePolicy,
+          inputs: [],
+        },
+        undefined,
+        context
+      );
+
+      expect(updateCallback).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'test-package-policy' }),
+        soClient,
+        esClient,
+        context,
+        undefined
+      );
+    });
+
+    it('should rethrow packagePolicyUpdate callback errors with apiPassThrough', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockPackagePolicy = createPackagePolicyMock();
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+      const callbackError = Object.assign(new Error('validation failed'), {
+        apiPassThrough: true,
+      });
+      const updateCallback = jest.fn(async () => {
+        throw callbackError;
+      });
+
+      appContextService.addExternalCallback('packagePolicyUpdate', updateCallback);
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes,
+          },
+        ],
+      });
+
+      await expect(
+        packagePolicyService.update(soClient, esClient, 'test-package-policy', {
+          ...mockPackagePolicy,
+          inputs: [],
+        })
+      ).rejects.toThrow('validation failed');
+    });
+
     describe('remove protections', () => {
       beforeEach(() => {
         mockAgentPolicyService.bumpRevision.mockReset();

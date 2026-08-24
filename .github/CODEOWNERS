@@ -1598,8 +1598,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_data_source_profile @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_document_profile @elastic/obs-exploration-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting
-/src/platform/plugins/shared/discover/test/scout/ui/fixtures/security_experience/ @elastic/security-threat-hunting
-/src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/security_experience/ @elastic/security-threat-hunting
+/src/platform/plugins/shared/discover/test/scout/security_experience/ @elastic/security-threat-hunting
 
 # Platform Docs
 /x-pack/solutions/security/test/serverless/functional/test_suites/screenshot_creation/index.ts @elastic/platform-docs
@@ -2032,11 +2031,8 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-exploration-team
 /x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-exploration-team
-/src/platform/plugins/shared/discover/test/scout/ui/parallel.playwright.config.ts @elastic/obs-exploration-team
-/src/platform/plugins/shared/discover/test/scout/ui/fixtures/metrics_experience/ @elastic/obs-exploration-team
-/src/platform/plugins/shared/discover/test/scout/ui/fixtures/traces_experience/ @elastic/obs-exploration-team
-/src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/metrics_experience/ @elastic/obs-exploration-team
-/src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/ @elastic/obs-exploration-team
+/src/platform/plugins/shared/discover/test/scout/metrics_experience/ @elastic/obs-exploration-team
+/src/platform/plugins/shared/discover/test/scout/traces_experience/ @elastic/obs-exploration-team
 /x-pack/performance/journeys_e2e/metrics_* @elastic/obs-exploration-team
 /x-pack/performance/utils/metrics_experience_setup.ts @elastic/obs-exploration-team
  # streams-ui
@@ -2070,11 +2066,9 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/obs-sig-events-team @elastic/streams-ui
 /x-pack/platform/test/api_integration/apis/streams @elastic/obs-sig-events-team @elastic/streams-ui
 /x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/obs-sig-events-team @elastic/streams-ui
-/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests @elastic/obs-sig-events-team @elastic/streams-ui
-/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts @elastic/kibana-management
-/x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention @elastic/kibana-management
-/x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/data_lifecycle_helpers.ts @elastic/kibana-management
-/x-pack/platform/plugins/shared/streams_app/test/scout/ui/fixtures/pin_failure_store.ts @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams_app/test/scout @elastic/obs-sig-events-team @elastic/streams-ui
+/x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle @elastic/kibana-management
+/x-pack/platform/plugins/shared/streams_app/test/scout/data_quality @elastic/kibana-management
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/doc_counts.ts @elastic/kibana-management
 /x-pack/performance/configs/streams_* @elastic/obs-sig-events-team @elastic/streams-ui
 /x-pack/performance/journeys_e2e/streams_* @elastic/obs-sig-events-team @elastic/streams-ui
@@ -3592,10 +3586,11 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/screens/asset_i
 x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/asset_inventory @elastic/contextual-security-apps
 
 # Security integrations
-x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/integration-experience
-x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/integration-experience
-x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/integration-experience
-x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/cloud-services
+x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/cloud-services
+x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/cloud-services
+x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/cloud-services
+x-pack/solutions/security/plugins/security_solution/test/scout/security_integrations/ @elastic/cloud-services
 
 # Kibana design
 # scss overrides should be below this line for specificity
