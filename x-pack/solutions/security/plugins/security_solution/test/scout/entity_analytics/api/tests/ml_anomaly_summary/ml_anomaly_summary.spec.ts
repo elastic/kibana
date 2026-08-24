@@ -6,9 +6,12 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { ScoutLogger } from '@kbn/scout-security';
 import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
+import type { Client } from '@elastic/elasticsearch';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   AnomalyOverviewResponse,
   AnomalySummaryResponse,
@@ -46,23 +49,7 @@ const KEYWORD_SOURCE_EVENT_FIELDS = [
   ['event', 'code'],
 ] as const;
 
-interface BulkOpResult {
-  error?: { type?: string; reason?: string };
-  _id?: string;
-  status?: number;
-}
-
-interface BulkResponseLike {
-  errors?: boolean;
-  items?: Array<{
-    create?: BulkOpResult;
-    index?: BulkOpResult;
-    update?: BulkOpResult;
-    delete?: BulkOpResult;
-  }>;
-}
-
-const formatBulkFailures = (response: BulkResponseLike): string[] =>
+const formatBulkFailures = (response: BulkResponse): string[] =>
   (response.items ?? []).flatMap((item) => {
     const op = item.create ?? item.index ?? item.update ?? item.delete;
     if (!op?.error) {
@@ -72,7 +59,7 @@ const formatBulkFailures = (response: BulkResponseLike): string[] =>
   });
 
 const assertBulkIndexed = (
-  response: BulkResponseLike,
+  response: BulkResponse,
   label: string,
   expectedCount: number,
   log: { info: (msg: string) => void }
@@ -156,16 +143,8 @@ const SOURCE_EVENTS_INDEX_MAPPINGS = {
 };
 
 const ensureSourceEventsIndexIsAggregatable = async (
-  esClient: {
-    indices: {
-      putIndexTemplate: (req: Record<string, unknown>) => Promise<unknown>;
-      exists: (req: { index: string }) => Promise<boolean>;
-      getMapping: (req: { index: string }) => Promise<Record<string, { mappings?: unknown }>>;
-      deleteDataStream: (req: { name: string }, opts?: { ignore?: number[] }) => Promise<unknown>;
-      delete: (req: { index: string; ignore_unavailable?: boolean }) => Promise<unknown>;
-    };
-  },
-  log: { info: (msg: string) => void }
+  esClient: Client,
+  log: ScoutLogger
 ): Promise<void> => {
   // Fleet logs-* templates on serverless often dynamically map strings as
   // match_only_text. A more specific, higher-priority template wins for this
