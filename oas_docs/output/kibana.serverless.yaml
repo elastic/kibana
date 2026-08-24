@@ -10969,7 +10969,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the episode to apply the action to.
+        - description: Identifier of the alert episode to apply the action to.
           in: path
           name: episode_id
           required: true
@@ -11099,7 +11099,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the episode to apply the action to.
+        - description: Identifier of the alert episode to apply the action to.
           in: path
           name: episode_id
           required: true
@@ -11230,7 +11230,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the episode to apply the action to.
+        - description: Identifier of the alert episode to apply the action to.
           in: path
           name: episode_id
           required: true
@@ -11361,7 +11361,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the episode to apply the action to.
+        - description: Identifier of the alert episode to apply the action to.
           in: path
           name: episode_id
           required: true
@@ -11492,7 +11492,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Identifier of the episode to apply the action to.
+        - description: Identifier of the alert episode to apply the action to.
           in: path
           name: episode_id
           required: true
@@ -15246,7 +15246,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create actions for multiple alert series in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create actions for multiple alert episode series in a single request.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-series-bulk-action
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15261,7 +15261,7 @@ paths:
           application/json:
             examples:
               bulkCreateSeriesActionRequest:
-                summary: Tag, snooze, and unsnooze three alert series
+                summary: Tag, snooze, and unsnooze three alert episode series
                 value:
                   - action_type: tag
                     group_hash: group-hash-1
@@ -15286,7 +15286,7 @@ paths:
                     errors:
                       - error:
                           code: ALERT_GROUP_NOT_FOUND
-                          message: No alert event found for group [group-hash-3]
+                          message: Alert series with group_hash [group-hash-3] not found
                         id: group-hash-3
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_operation_response'
@@ -15360,7 +15360,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Bulk create alert series actions
+      summary: Bulk create alert episode series actions
       tags:
         - alerting-v2
       x-state: Experimental
@@ -15376,7 +15376,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert series.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert episode series.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-series-group-hash-snooze
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15386,7 +15386,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Hash identifying the alert series to apply the action to.
+        - description: Hash identifying the alert episode series to apply the action to.
           in: path
           name: group_hash
           required: true
@@ -15455,7 +15455,7 @@ paths:
             application/json:
               examples:
                 alertSeriesNotFound:
-                  summary: No alert series exists for the given group_hash
+                  summary: No alert episode series exists for the given group_hash
                   value:
                     code: ALERT_EVENT_NOT_FOUND
                     details:
@@ -15464,7 +15464,7 @@ paths:
                     message: Alert series with group_hash [group-hash-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert series was not found.
+          description: Indicates the alert episode series was not found.
         '500':
           content:
             application/json:
@@ -15491,7 +15491,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Snooze an alert series
+      summary: Snooze an alert episode series
       tags:
         - alerting-v2
       x-state: Experimental
@@ -15507,7 +15507,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert series.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert episode series.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-series-group-hash-tag
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15517,7 +15517,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Hash identifying the alert series to apply the action to.
+        - description: Hash identifying the alert episode series to apply the action to.
           in: path
           name: group_hash
           required: true
@@ -15530,7 +15530,7 @@ paths:
           application/json:
             examples:
               createTagSeriesActionRequest:
-                summary: Tag the alert series with production and investigating
+                summary: Tag the alert episode series with production and investigating
                 value:
                   tags:
                     - production
@@ -15588,7 +15588,7 @@ paths:
             application/json:
               examples:
                 alertSeriesNotFound:
-                  summary: No alert series exists for the given group_hash
+                  summary: No alert episode series exists for the given group_hash
                   value:
                     code: ALERT_EVENT_NOT_FOUND
                     details:
@@ -15597,7 +15597,7 @@ paths:
                     message: Alert series with group_hash [group-hash-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert series was not found.
+          description: Indicates the alert episode series was not found.
         '500':
           content:
             application/json:
@@ -15624,7 +15624,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Tag an alert series
+      summary: Tag an alert episode series
       tags:
         - alerting-v2
       x-state: Experimental
@@ -15640,7 +15640,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an action for a specific alert series.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
+        Create an action for a specific alert episode series.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-alerts.
       operationId: post-alerting-v2-series-group-hash-unsnooze
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15650,7 +15650,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: Hash identifying the alert series to apply the action to.
+        - description: Hash identifying the alert episode series to apply the action to.
           in: path
           name: group_hash
           required: true
@@ -15718,7 +15718,7 @@ paths:
             application/json:
               examples:
                 alertSeriesNotFound:
-                  summary: No alert series exists for the given group_hash
+                  summary: No alert episode series exists for the given group_hash
                   value:
                     code: ALERT_EVENT_NOT_FOUND
                     details:
@@ -15727,7 +15727,7 @@ paths:
                     message: Alert series with group_hash [group-hash-1] not found
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
-          description: Indicates the alert series was not found.
+          description: Indicates the alert episode series was not found.
         '500':
           content:
             application/json:
@@ -15754,7 +15754,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alerting engine is disabled by the `alerting:v2:enabled` advanced setting.
-      summary: Unsnooze an alert series
+      summary: Unsnooze an alert episode series
       tags:
         - alerting-v2
       x-state: Experimental
@@ -88426,7 +88426,7 @@ components:
           type: object
           properties:
             episode_id:
-              description: Identifier of the episode to apply the action to.
+              description: Identifier of the alert episode to apply the action to.
               maxLength: 150
               minLength: 1
               type: string
@@ -88447,7 +88447,7 @@ components:
           type: object
           properties:
             group_hash:
-              description: Hash identifying the alert series to apply the action to.
+              description: Hash identifying the alert episode series to apply the action to.
               maxLength: 256
               minLength: 1
               type: string
