@@ -187,6 +187,7 @@ export interface PagerRow {
   collectionId: string;
   collectionType: CollectionType;
   hiddenCount: number;
+  totalCount: number;
   canShowFewer: boolean;
 }
 
@@ -273,6 +274,7 @@ const flattenRows = (
       collectionId: listId,
       collectionType: listType,
       hiddenCount: hidden,
+      totalCount: nodes.length,
       canShowFewer,
     });
   }

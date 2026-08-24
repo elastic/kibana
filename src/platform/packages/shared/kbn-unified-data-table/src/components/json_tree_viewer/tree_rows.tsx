@@ -126,7 +126,11 @@ export const PagerRowView = memo(function PagerRowView({
 
   // The primary control shows more while items remain, otherwise it collapses back ("show fewer").
   const primaryLabel = showMore
-    ? showMoreLabel(row.collectionType, Math.min(CHILDREN_INCREMENT, row.hiddenCount))
+    ? showMoreLabel(
+        row.collectionType,
+        Math.min(CHILDREN_INCREMENT, row.hiddenCount),
+        row.totalCount
+      )
     : showFewerLabel(row.collectionType);
 
   // "Show fewer" unmounts the focused button — move focus to the pager row first so it isn't lost.
@@ -558,15 +562,15 @@ const collectionCountLabel = (node: CollectionNode) => {
       });
 };
 
-const showMoreLabel = (collectionType: CollectionType, count: number) =>
+const showMoreLabel = (collectionType: CollectionType, count: number, total: number) =>
   collectionType === 'array'
     ? i18n.translate('unifiedDataTable.jsonTreeViewer.showMoreItems', {
-        defaultMessage: 'Show {count} more {count, plural, one {item} other {items}}',
-        values: { count },
+        defaultMessage: 'Show {count} more of {total} {total, plural, one {item} other {items}}',
+        values: { count, total },
       })
     : i18n.translate('unifiedDataTable.jsonTreeViewer.showMoreFields', {
-        defaultMessage: 'Show {count} more {count, plural, one {field} other {fields}}',
-        values: { count },
+        defaultMessage: 'Show {count} more of {total} {total, plural, one {field} other {fields}}',
+        values: { count, total },
       });
 
 const showFewerLabel = (collectionType: CollectionType) =>

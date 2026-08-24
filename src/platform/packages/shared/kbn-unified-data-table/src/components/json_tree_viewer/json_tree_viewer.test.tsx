@@ -112,6 +112,13 @@ describe('JsonTreeViewer', () => {
     expect(pager).toHaveFocus();
   });
 
+  it('labels the pager with how many more of the total fields will be shown', () => {
+    const doc = Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`field_${i}`, i]));
+    render(<JsonTreeViewer json={doc} />);
+
+    expect(screen.getByTestId(moreTestId())).toHaveTextContent('Show 2 more of 12 fields');
+  });
+
   describe('keyboard navigation', () => {
     it('steps from a leaf row into its copy-value button with ArrowRight', async () => {
       render(<JsonTreeViewer json={{ message: 'hello' }} />);
@@ -123,7 +130,7 @@ describe('JsonTreeViewer', () => {
     });
 
     it('steps from a pager row into its first button with ArrowRight', async () => {
-      // 12 fields capped at 10 renders a "Show 2 more fields" pager row.
+      // 12 fields capped at 10 renders a "Show 2 more of 12 fields" pager row.
       const doc = Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`field_${i}`, i]));
       render(<JsonTreeViewer json={doc} />);
 
@@ -148,7 +155,7 @@ describe('JsonTreeViewer', () => {
     });
 
     it('moves between the two pager buttons with the Right and Left arrows', async () => {
-      // 25 fields: after one reveal the pager row shows both "Show 5 more" and "Show fewer".
+      // 25 fields: after one reveal the pager row shows both "Show 5 more of 25 fields" and "Show fewer".
       const doc = Object.fromEntries(Array.from({ length: 25 }, (_, i) => [`field_${i}`, i]));
       render(<JsonTreeViewer json={doc} />);
       await userEvent.click(screen.getByTestId(moreTestId()));
