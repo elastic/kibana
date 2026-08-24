@@ -53,12 +53,21 @@ const getInternalEsClientFor = (server: SyntheticsServerSetup) =>
  * from the agent policy itself: `spaceId: ALL_SPACES_ID` on an unscoped client
  * finds it wherever it lives (agent policies are `namespaceType: 'multiple'`,
  * so the write itself still needs a single concrete namespace).
+ *
+ * Uses `createInternalRepository()`, not `getUnsafeInternalClient()`: the
+ * latter always attaches a spaces extension backed by a synthetic, headerless
+ * request (core has no real request to attach here — this runs off a
+ * `setTimeout`, not an HTTP handler), and resolving the `*` namespace made
+ * that extension issue an ES `_has_privileges` check with no credentials,
+ * failing every scalable-location write outright. `createInternalRepository()`
+ * attaches no extensions, matching {@link listByAgentPolicy}'s existing
+ * cross-space Fleet lookup in this same file.
  */
 const bumpAgentPolicyRevision = async (
   server: SyntheticsServerSetup,
   policyId: string
 ): Promise<void> => {
-  const unscopedSoClient = server.coreStart.savedObjects.getUnsafeInternalClient();
+  const unscopedSoClient = server.coreStart.savedObjects.createInternalRepository();
   const [agentPolicy] = await server.fleet.agentPolicyService.getByIds(
     unscopedSoClient,
     [{ id: policyId, spaceId: ALL_SPACES_ID }],
