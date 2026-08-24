@@ -16,7 +16,8 @@ import type { ConversationEventBus } from './conversation_event_bus';
 export function registerConversationWorkflowEventBridge(
   conversationEventBus: ConversationEventBus,
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined,
-  logger: Logger
+  logger: Logger,
+  isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>
 ): void {
   if (!workflowsExtensions) {
     return;
@@ -24,6 +25,9 @@ export function registerConversationWorkflowEventBridge(
 
   const forward = async (eventType: string, payload: unknown, request: KibanaRequest) => {
     try {
+      if (!(await isExperimentalEnabled(request))) {
+        return;
+      }
       const client = await workflowsExtensions.getClient(request);
       await client.emitEvent(eventType, payload as Record<string, unknown>);
     } catch (error) {

@@ -13,13 +13,14 @@ import { conversationMetadataUpdatedTriggerCommonDefinition } from '../../common
 
 export function registerConversationWorkflowSteps(
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup,
-  getConversationClient: (request: KibanaRequest) => Promise<ConversationClient>
+  getConversationClient: (request: KibanaRequest) => Promise<ConversationClient>,
+  isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>
 ) {
   workflowsExtensions.registerTriggerDefinition(
     conversationMetadataUpdatedTriggerCommonDefinition
   );
 
   for (const factory of conversationStepRegistry) {
-    workflowsExtensions.registerStepDefinition(factory(getConversationClient));
+    workflowsExtensions.registerStepDefinition(factory(getConversationClient, isExperimentalEnabled));
   }
 }

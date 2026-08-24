@@ -14,7 +14,8 @@ import { updateConversationMetadataStepDefinition } from './steps/update_convers
 type GetConversationClientFn = (request: KibanaRequest) => Promise<ConversationClient>;
 
 type ConversationStepFactory = (
-  getConversationClient: GetConversationClientFn
+  getConversationClient: GetConversationClientFn,
+  isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>
 ) => ServerStepDefinition;
 
 /**

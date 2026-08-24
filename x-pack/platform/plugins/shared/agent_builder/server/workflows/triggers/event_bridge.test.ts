@@ -18,6 +18,8 @@ const flushMicrotasks = async () => {
   await new Promise<void>((resolve) => setTimeout(resolve, 0));
 };
 
+const isExperimentalEnabled = jest.fn().mockResolvedValue(true);
+
 describe('registerConversationWorkflowEventBridge', () => {
   const workflowsExtensions = workflowsExtensionsMock.createStart();
   const logger = loggingSystemMock.createLogger();
@@ -28,8 +30,9 @@ describe('registerConversationWorkflowEventBridge', () => {
   beforeEach(() => {
     eventBus = new ConversationEventBus();
     mockClient = createWorkflowsClientMock();
+    isExperimentalEnabled.mockResolvedValue(true);
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
-    registerConversationWorkflowEventBridge(eventBus, workflowsExtensions, logger);
+    registerConversationWorkflowEventBridge(eventBus, workflowsExtensions, logger, isExperimentalEnabled);
   });
 
   it('forwards metadata patched events to workflows extensions', async () => {
@@ -69,7 +72,7 @@ describe('registerConversationWorkflowEventBridge', () => {
 
   it('does nothing when workflowsExtensions is undefined', async () => {
     const isolatedBus = new ConversationEventBus();
-    registerConversationWorkflowEventBridge(isolatedBus, undefined, logger);
+    registerConversationWorkflowEventBridge(isolatedBus, undefined, logger, isExperimentalEnabled);
 
     isolatedBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',
@@ -82,13 +85,28 @@ describe('registerConversationWorkflowEventBridge', () => {
     expect(mockClient.emitEvent).not.toHaveBeenCalled();
   });
 
+  it('does not emit the trigger when experimental features are disabled', async () => {
+    isExperimentalEnabled.mockResolvedValue(false);
+    const disabledBus = new ConversationEventBus();
+    registerConversationWorkflowEventBridge(disabledBus, workflowsExtensions, logger, isExperimentalEnabled);
+
+    disabledBus.emitMetadataPatched(request, {
+      conversationId: 'conv-1',
+      changedFields: ['status'],
+    });
+
+    await flushMicrotasks();
+
+    expect(mockClient.emitEvent).not.toHaveBeenCalled();
+  });
+
   it('logs a warning when forwarding fails', async () => {
     const failingClient = createWorkflowsClientMock({
       emitEvent: jest.fn().mockRejectedValue(new Error('network error')),
     });
     workflowsExtensions.getClient.mockResolvedValue(failingClient);
     const failBus = new ConversationEventBus();
-    registerConversationWorkflowEventBridge(failBus, workflowsExtensions, logger);
+    registerConversationWorkflowEventBridge(failBus, workflowsExtensions, logger, isExperimentalEnabled);
 
     failBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',

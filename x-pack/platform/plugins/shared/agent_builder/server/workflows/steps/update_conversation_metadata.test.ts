@@ -8,6 +8,9 @@
 import { updateConversationMetadataStepDefinition } from './update_conversation_metadata';
 import { createStepHandlerContext, createConversationClientMock } from './test_utils';
 
+const experimentalEnabled = jest.fn().mockResolvedValue(true);
+const experimentalDisabled = jest.fn().mockResolvedValue(false);
+
 describe('updateConversationMetadataStepDefinition', () => {
   const baseInput = {
     conversation_id: 'conv-1',
@@ -16,7 +19,7 @@ describe('updateConversationMetadataStepDefinition', () => {
 
   it('creates expected step definition structure', () => {
     const { getConversationClient } = createConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition(getConversationClient);
+    const definition = updateConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
 
     expect(definition.id).toBe('agentBuilder.conversation.metadata.patch');
     expect(typeof definition.handler).toBe('function');
@@ -34,7 +37,7 @@ describe('updateConversationMetadataStepDefinition', () => {
       }),
     });
 
-    const definition = updateConversationMetadataStepDefinition(getConversationClient);
+    const definition = updateConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
     const result = await definition.handler(
       createStepHandlerContext({
         input: baseInput,
@@ -60,7 +63,7 @@ describe('updateConversationMetadataStepDefinition', () => {
       }),
     });
 
-    const definition = updateConversationMetadataStepDefinition(getConversationClient);
+    const definition = updateConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
     const result = await definition.handler(
       createStepHandlerContext({ input: { conversation_id: 'conv-1', updates: { status: 'open' } } })
     );
@@ -79,7 +82,7 @@ describe('updateConversationMetadataStepDefinition', () => {
       patchMetadata: jest.fn().mockRejectedValue(new Error('validation failed')),
     });
 
-    const definition = updateConversationMetadataStepDefinition(getConversationClient);
+    const definition = updateConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
     const result = await definition.handler(
       createStepHandlerContext({ input: baseInput })
     );
@@ -91,7 +94,7 @@ describe('updateConversationMetadataStepDefinition', () => {
 
   it('rejects an empty updates object', () => {
     const { getConversationClient } = createConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition(getConversationClient);
+    const definition = updateConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
 
     expect(
       definition.inputSchema.safeParse({ conversation_id: 'conv-1', updates: {} }).success
@@ -100,10 +103,23 @@ describe('updateConversationMetadataStepDefinition', () => {
 
   it('rejects input without conversation_id', () => {
     const { getConversationClient } = createConversationClientMock();
-    const definition = updateConversationMetadataStepDefinition(getConversationClient);
+    const definition = updateConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
 
     expect(
       definition.inputSchema.safeParse({ updates: { status: 'open' } }).success
     ).toBe(false);
+  });
+
+  it('returns an error when experimental features are disabled', async () => {
+    const { getConversationClient } = createConversationClientMock();
+    const definition = updateConversationMetadataStepDefinition(getConversationClient, experimentalDisabled);
+
+    const result = await definition.handler(
+      createStepHandlerContext({ input: baseInput })
+    );
+
+    expect(result).toEqual({
+      error: expect.objectContaining({ message: expect.stringContaining('experimental features') }),
+    });
   });
 });
