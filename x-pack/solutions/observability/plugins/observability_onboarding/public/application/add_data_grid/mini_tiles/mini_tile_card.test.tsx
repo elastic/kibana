@@ -33,4 +33,9 @@ describe('MiniTileCard', () => {
     await user.click(screen.getByTestId('mini-slack'));
     expect(onClick).toHaveBeenCalled();
   });
+
+  it('renders the host-provided badge under the title', () => {
+    render(<MiniTileCard tile={{ ...baseTile, badge: <span data-test-subj="miniTileBadge" /> }} />);
+    expect(screen.getByTestId('miniTileBadge')).toBeInTheDocument();
+  });
 });

@@ -7,12 +7,12 @@
       "branchType": "development"
     },
     {
-      "version": "9.5.1",
+      "version": "9.5.3",
       "branch": "9.5",
       "branchType": "release"
     },
     {
-      "version": "9.4.5",
+      "version": "9.4.6",
       "branch": "9.4",
       "branchType": "release"
     },

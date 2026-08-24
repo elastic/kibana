@@ -12,6 +12,7 @@ import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { DataGrid } from './data_grid';
 import { expect } from '..';
+import { SavedObjectSaveModal } from './saved_object_save_modal';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 import { resolveSelector } from '../utils';
 
@@ -21,6 +22,8 @@ export type DiscoverQueryMode = 'esql' | 'classic';
 
 export interface DiscoverGotoOptions {
   queryMode: DiscoverQueryMode;
+  /** Open a Discover session by id (`#/view/{id}`) instead of a blank Discover page. */
+  savedSearchId?: string;
 }
 
 export interface DataViewOptions {
@@ -39,16 +42,22 @@ const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly dataGrid: DataGrid;
+  /** Save modal locators/actions, shared with other apps (e.g. Maps) via `SavedObjectSaveModal`. */
+  public readonly saveModal: SavedObjectSaveModal;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.dataGrid = new DataGrid(page);
+    this.saveModal = new SavedObjectSaveModal(page);
   }
 
   async goto(options: DiscoverGotoOptions) {
     await this.setQueryMode(options.queryMode);
 
-    await this.page.gotoApp('discover');
+    await this.page.gotoApp(
+      'discover',
+      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
+    );
     await this.waitForDiscoverPage();
   }
 
@@ -339,7 +348,15 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
-  async createRuntimeField(fieldName: string, script: string) {
+  async createRuntimeField({
+    fieldName,
+    script,
+    popularity,
+  }: {
+    fieldName: string;
+    script: string;
+    popularity?: number;
+  }) {
     await this.openDataViewSwitcher();
     await this.page.testSubj.click('indexPattern-add-field');
     const fieldEditor = this.page.getByRole('dialog', { name: 'Create field' });
@@ -351,6 +368,11 @@ export class DiscoverApp {
       .getByRole('textbox', { name: /Editor content/ })
       .waitFor({ state: 'visible' });
     await this.codeEditor.setCodeEditorValue(script);
+
+    if (typeof popularity === 'number') {
+      await this.setPopularity(popularity);
+    }
+
     await fieldEditor.getByRole('button', { name: 'Save' }).click();
     await fieldEditor.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
@@ -402,6 +424,13 @@ export class DiscoverApp {
     await this.page.testSubj.click('confirmModalConfirmButton');
     await fieldEditor.waitFor({ state: 'hidden' });
     await this.waitUntilTabIsLoaded();
+  }
+
+  async setPopularity(popularity: number) {
+    await this.page.testSubj.click('toggleAdvancedSetting');
+    const row = this.page.testSubj.locator('popularityRow');
+    await row.locator('[data-test-subj="toggle"]').click();
+    await this.page.testSubj.locator('editorFieldCount').fill(String(popularity));
   }
 
   async setCustomLabel(label: string, { enableToggle = false }: { enableToggle?: boolean } = {}) {
@@ -550,6 +579,106 @@ export class DiscoverApp {
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
     await this.confirmSaveModal();
     await this.waitUntilSearchingHasFinished();
+  }
+
+  /**
+   * Creates an ES|QL control from the editor: types a query ending in a variable position,
+   * picks "Create control" from the suggestion widget and saves the flyout. Returns once
+   * the control group is rendered.
+   */
+  async createEsqlControl(
+    query: string,
+    {
+      variableName,
+      label,
+      values,
+    }: { variableName?: string; label?: string; values?: string[] } = {}
+  ) {
+    // Monaco registers its text model only once the editor has mounted, and the ES|QL
+    // editor can still be mounting after the tab reports loaded, for instance right after
+    // adding a new Discover panel. Setting a value or triggering suggestions before then
+    // has no model to act on.
+    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
+    await this.codeEditor.setCodeEditorValue(query);
+    await this.codeEditor.triggerSuggest(query);
+
+    const suggestionWidget = this.codeEditor.getCodeEditorSuggestWidget();
+    await suggestionWidget.waitFor({ state: 'visible' });
+    await suggestionWidget.locator('.monaco-list-row', { hasText: 'Create control' }).click();
+
+    const flyout = this.page.testSubj.locator('create_esql_control_flyout');
+    await flyout.waitFor({ state: 'visible' });
+
+    if (variableName !== undefined) {
+      await this.page.testSubj.fill('esqlVariableName', variableName);
+    }
+    if (label !== undefined) {
+      await this.page.testSubj.fill('esqlControlLabel', label);
+    }
+    if (values) {
+      const valuesComboBox = this.page.components.comboBox('esqlValuesOptions');
+      for (const value of values) {
+        await valuesComboBox.setCustomSelectedOptions([value]);
+      }
+    }
+
+    // Save stays disabled until `available_options` is populated (see `formIsInvalid` in
+    // esql/public/triggers/esql_controls/control_flyout/index.tsx), and the click waits for
+    // it to become enabled. That means waiting on the control's own ES|QL query rather than
+    // on rendering, so query latency sets the budget.
+    await this.page.testSubj.locator('saveEsqlControlsFlyoutButton').click({ timeout: 30_000 });
+    await flyout.waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Clicks "Save and return" in the top nav, available when Discover is opened as
+   * the editor for a by-value dashboard panel. Transfers the panel state straight
+   * back to the dashboard without opening a save modal.
+   */
+  async saveAndReturnToEditor() {
+    await this.clickAppMenuItem('discoverSaveButton');
+  }
+
+  /**
+   * Clicks "Cancel" in the top nav save split-button, available when Discover is
+   * opened as the editor for a by-value dashboard panel. Discards the edits and
+   * returns to the dashboard.
+   */
+  async cancelEditorChanges() {
+    await this.page.testSubj.click('discoverSaveButton-secondary-button');
+    await this.page.testSubj.locator('discoverCancelButton').click();
+  }
+
+  /**
+   * Saves the current Discover table (including any ES|QL controls) as a by-value
+   * panel on a brand-new dashboard, then navigates to that dashboard.
+   */
+  async saveTableToNewDashboard(title: string) {
+    await this.page.testSubj.click('saveDiscoverTableToDashboardButton');
+    await this.saveModal.modal.waitFor({ state: 'visible' });
+
+    // Pick "new" before the title: filling the title re-renders the modal and would reset
+    // the radio (confirm stays disabled on "existing" with no pick).
+    await this.saveModal.selectNewDashboard();
+    await this.saveModal.fillTitle(title);
+    // Not `saveModal.confirm()`: it waits for the modal to close, which cannot happen yet.
+    // Saving navigates away, and a session with unsaved changes raises the app-leave prompt
+    // first, which keeps the save modal mounted until it is dismissed below.
+    await this.page.testSubj.click('confirmSaveSavedObjectButton');
+
+    // The leave prompt can also unmount on its own once navigation starts, so confirming it
+    // is best effort.
+    await this.page.testSubj
+      .locator('appLeaveConfirmModal')
+      .getByTestId('confirmModalConfirmButton')
+      .click()
+      .catch(() => {});
+
+    await this.saveModal.modal.waitFor({ state: 'hidden', timeout: DEFAULT_SAVE_MODAL_TIMEOUT });
+    // The panel travels to the dashboard in session storage and is consumed on arrival, so
+    // the method only returns once the dashboard is reached.
+    await this.page.waitForURL(/\/app\/dashboards/);
   }
 
   async getSharedUrl(): Promise<string> {
@@ -731,6 +860,10 @@ export class DiscoverApp {
     return Number(await fetchCounter.getAttribute('data-fetch-counter'));
   }
 
+  getErrorCalloutTitle(): Locator {
+    return this.page.testSubj.locator('discoverErrorCalloutTitle');
+  }
+
   getErrorCalloutMessage(): Locator {
     return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
@@ -840,7 +973,14 @@ export class DiscoverApp {
    * (e.g. `"Breakdown by geo.src"` or `"No breakdown"`.
    */
   async getBreakdownFieldValue(): Promise<string> {
-    return this.page.testSubj.innerText('unifiedHistogramBreakdownSelectorButton');
+    const visibleText = await this.page.testSubj.innerText(
+      'unifiedHistogramBreakdownSelectorButton'
+    );
+
+    // The button label truncates long field names via an absolutely positioned
+    // overlay, which the browser's visible-text computation renders as if it
+    // were on its own line. Collapse that whitespace since it isn't visible on screen.
+    return visibleText.replace(/\s+/g, ' ').trim();
   }
 
   /**
@@ -888,16 +1028,17 @@ export class DiscoverApp {
       this.page.locator(`[data-test-subj='control-frame']:has([data-control-id='${controlId}'])`),
     getControlFrameSelectedValue: (controlId: string, value: string): Locator =>
       this.controls.getControlFrame(controlId).getByText(value),
+    /**
+     * Locator for an options-list control's selected-values label, e.g. `AE` for a
+     * single selection or `AE, CN` for multiple. Unlike
+     * {@link getControlFrameSelectedValue} this matches the whole label, so it can
+     * assert that a value is the *only* selection.
+     */
+    getSelectionsLocator: (controlId: string): Locator =>
+      this.page.testSubj
+        .locator(`optionsList-control-${controlId}`)
+        .getByTestId('optionsListSelections'),
   };
-
-  async clickFieldSort(field: string, sortOption: string) {
-    const header = this.dataGrid.getColumnHeader(field);
-    await header.click();
-    await this.page.testSubj.waitForSelector(`dataGridHeaderCellActionGroup-${field}`, {
-      state: 'visible',
-    });
-    await this.page.locator(`button:has-text("${sortOption}")`).click();
-  }
 
   getDocHeaderLabels(): Locator {
     return this.page.locator(
@@ -952,10 +1093,22 @@ export class DiscoverApp {
 
   async showChart() {
     await this.page.testSubj.click('dscShowHistogramButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   async hideChart() {
     await this.page.testSubj.click('dscHideHistogramButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async showTable() {
+    await this.page.testSubj.click('dscShowTableButton');
+    await this.waitUntilTabIsLoaded();
+  }
+
+  async hideTable() {
+    await this.page.testSubj.click('dscHideTableButton');
+    await this.waitUntilTabIsLoaded();
   }
 
   async expectXYVisChartVisible() {
@@ -1088,6 +1241,12 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
     const queryMode = await this.getCurrentQueryMode();
     expect(queryMode).toBe('classic');
+  }
+
+  async selectFieldStatisticsView() {
+    await this.page.testSubj.click('dscViewModeToggleButton');
+    await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('dscViewModeFieldStatsOption');
   }
 
   async writeAndSubmitEsqlQuery(query: string) {
@@ -1360,8 +1519,27 @@ export class DiscoverApp {
     return this.page.testSubj.locator('data-cascade');
   }
 
+  /**
+   * Trigger for the "Group by" popover in the cascade layout toolbar. Despite
+   * the `...Switch` test subject it is a popover button, not a toggle — use
+   * {@link optOutOfCascadeLayout} to actually leave the cascade layout.
+   */
   getCascadeLayoutSwitch(): Locator {
     return this.page.testSubj.locator('discoverEnableCascadeLayoutSwitch');
+  }
+
+  /**
+   * Leaves the cascade ("grouped results") layout that Discover switches to for
+   * `STATS ... BY` ES|QL queries, restoring the flat doc table. Expects the
+   * cascade layout to be showing — it fails rather than silently doing nothing
+   * if the layout is absent, so callers notice when the trigger stops applying.
+   */
+  async optOutOfCascadeLayout() {
+    await this.getCascadeLayoutSwitch().click();
+    await this.page.testSubj.locator('discoverGroupBySelectionList').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('discoverCascadeLayoutOptOutButton');
+    await this.waitUntilTabIsLoaded();
+    await this.getCascadeLayout().waitFor({ state: 'hidden' });
   }
 
   async isShowingCascadeLayout(): Promise<boolean> {
@@ -1418,6 +1596,17 @@ export class DiscoverApp {
   }
 
   /**
+   * Waits until the cascade row with the given id reports the given expansion
+   * state, without waiting for the data of an expanded row to load.
+   */
+  async waitForCascadeLayoutRowExpanded(rowId: string, expanded: boolean): Promise<void> {
+    await this.page
+      .locator(`[id="${rowId}"]`)
+      .and(this.page.locator(`[aria-expanded="${expanded}"]`))
+      .waitFor({ state: 'attached' });
+  }
+
+  /**
    * Toggles (expands/collapses) the cascade row with the given id and waits
    * for the `aria-expanded` state to flip before returning. Waits for the doc
    * table to finish rendering after an expand, since that triggers a fetch.
@@ -1427,9 +1616,7 @@ export class DiscoverApp {
     const wasExpanded = (await row.getAttribute('aria-expanded')) === 'true';
 
     await this.clickCascadeRowToggle(rowId);
-    await row
-      .and(this.page.locator(`[aria-expanded="${!wasExpanded}"]`))
-      .waitFor({ state: 'attached' });
+    await this.waitForCascadeLayoutRowExpanded(rowId, !wasExpanded);
 
     if (!wasExpanded) {
       await this.dataGrid.waitForDocTableRendered();
