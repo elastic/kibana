@@ -135,7 +135,7 @@ export function ManagedIntegrationsSection({
           <EuiFlexItem grow={false}>
             <EuiIcon type="package" size="m" color="subdued" aria-hidden />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiText size="s">
               <strong>
                 <FormattedMessage
@@ -156,13 +156,13 @@ export function ManagedIntegrationsSection({
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">
+            <EuiText size="s" color="subdued">
               <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.servicesLink"
+                id="xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.serviceCount"
                 defaultMessage="{count, plural, one {# service} other {# services}}"
                 values={{ count: serviceCount }}
               />
-            </EuiBadge>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </button>
