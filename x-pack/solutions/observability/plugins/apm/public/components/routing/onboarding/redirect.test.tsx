@@ -37,9 +37,7 @@ describe('TutorialRedirect', () => {
   });
 
   it('copies search onto the home tutorial hash', () => {
-    renderRedirect(
-      '/tutorial?returnAppId=observabilityOnboarding&returnPath=%3F'
-    );
+    renderRedirect('/tutorial?returnAppId=observabilityOnboarding&returnPath=%3F');
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('home', {
       path: '#/tutorial/apm?returnAppId=observabilityOnboarding&returnPath=%3F',
@@ -58,9 +56,7 @@ describe('TutorialRedirect', () => {
 
   it('does not copy search onto serverless onboarding', () => {
     mockServerlessOnboarding = true;
-    renderRedirect(
-      '/tutorial?returnAppId=observabilityOnboarding&returnPath=%3F'
-    );
+    renderRedirect('/tutorial?returnAppId=observabilityOnboarding&returnPath=%3F');
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('apm', {
       path: '/onboarding',

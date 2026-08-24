@@ -98,7 +98,6 @@ describe('GettingStartedPage', () => {
     expect(link).toHaveAttribute('href', '/app/observabilityOnboarding?');
   });
 
-
   it('shows need agent flyout when isAddingNewPrivateLocation is true and agentPolicies.length === 0', async () => {
     jest.spyOn(settingsHooks, 'useSyntheticsSettingsContext').mockReturnValue({
       canSave: true,
