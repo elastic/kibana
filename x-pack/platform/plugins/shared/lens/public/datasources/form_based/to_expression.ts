@@ -185,23 +185,7 @@ function getExpressionForLayer(
 
     // Only generate ES|QL query when ES|QL mode is enabled
     const esqlLayer = canUseESQL
-      ? generateEsqlQuery(
-          esAggEntries,
-          layer,
-          indexPattern,
-          uiSettings,
-          dateRange,
-          nowInstant,
-          undefined,
-          (col, colColumns, colIndexPattern) =>
-            operationDefinitionMap[col.operationType].getDefaultLabel(
-              col,
-              colColumns,
-              colIndexPattern,
-              uiSettings,
-              dateRange
-            )
-        )
+      ? generateEsqlQuery(esAggEntries, layer, indexPattern, uiSettings, dateRange, nowInstant)
       : undefined;
     const isFormBasedEsqlMode = canUseESQL && !!esqlLayer && isEsqlQuerySuccess(esqlLayer);
 

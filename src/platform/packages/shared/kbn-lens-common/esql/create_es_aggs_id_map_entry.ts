@@ -12,19 +12,8 @@ import type { DateHistogramIndexPatternColumn } from '../datasources/operations'
 import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
 import { isColumnOfType } from '../datasources/form_based/helpers';
 import { getTimeZoneAndInterval } from './operations/date_histogram_helpers';
+import { defaultLabelRegistry } from './operations/default_labels';
 import type { UiSettingsReader } from './operations/types';
-
-/**
- * Resolves the default (non custom) label for a column.
- * Browser consumers back this with `operationDefinitionMap[...].getDefaultLabel`.
- */
-export type GetDefaultLabelFn = (
-  column: GenericIndexPatternColumn,
-  columns: Record<string, GenericIndexPatternColumn>,
-  indexPattern: IndexPattern,
-  uiSettings: UiSettingsReader,
-  dateRange: DateRange
-) => string;
 
 export interface CreateEsAggsIdMapEntryParams {
   col: GenericIndexPatternColumn;
@@ -39,8 +28,6 @@ export interface CreateEsAggsIdMapEntryParams {
   interval?: number;
   /** Whether to include sourceField in the output (for bucket columns) */
   includeSourceField?: boolean;
-  /** Resolves default labels; falls back to `col.label` when not provided */
-  getDefaultLabel?: GetDefaultLabelFn;
 }
 
 /**
@@ -57,12 +44,16 @@ export function createEsAggsIdMapEntry({
   uiSettings,
   dateRange,
   includeSourceField = false,
-  getDefaultLabel,
 }: CreateEsAggsIdMapEntryParams): OriginalColumn[] {
-  const label =
-    col.customLabel || !getDefaultLabel
-      ? col.label
-      : getDefaultLabel(col, layer.columns, indexPattern, uiSettings, dateRange);
+  const label = col.customLabel
+    ? col.label
+    : defaultLabelRegistry[col.operationType]?.(
+        col,
+        layer.columns,
+        indexPattern,
+        uiSettings,
+        dateRange
+      ) ?? col.label;
 
   // Build the entry with proper typing for the discriminated union
   if (

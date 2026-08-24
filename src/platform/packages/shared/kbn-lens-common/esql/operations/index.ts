@@ -19,7 +19,25 @@ export { percentileToESQL } from './percentile_to_esql';
 export { buildMetricToESQL } from './metric_to_esql';
 export { dateHistogramToESQL, getDateHistogramSerializedFormat } from './date_histogram_to_esql';
 export { rangesToESQL } from './ranges_to_esql';
-export { toEsqlRegistry, DATE_HISTOGRAM_ID, RANGE_ID } from './registry';
+export { toEsqlRegistry, DATE_HISTOGRAM_ID, RANGE_ID, STATIC_VALUE_ID } from './registry';
+export type { GetDefaultLabelFn } from './default_labels';
+export {
+  defaultLabelRegistry,
+  getCountDefaultLabel,
+  getCardinalityDefaultLabel,
+  getPercentileDefaultLabel,
+  getDateHistogramDefaultLabel,
+  getStaticValueDefaultLabel,
+  buildMetricDefaultLabel,
+  countLabel,
+  ofNameCount,
+  ofNameCardinality,
+  ofNamePercentile,
+  ofNameMetric,
+  ofNameStaticValue,
+  staticValueLabelDefault,
+  ALLOWED_DECIMAL_DIGITS,
+} from './default_labels';
 export {
   AUTO_INTERVAL,
   DEFAULT_DATE_HISTOGRAM_INTERVAL,

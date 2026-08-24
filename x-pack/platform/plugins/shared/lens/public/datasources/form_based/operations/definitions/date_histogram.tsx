@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,24 +22,22 @@ import {
 } from '@elastic/eui';
 import type { AggFunctionsMapping, AggParamOption } from '@kbn/data-plugin/public';
 import { search, UI_SETTINGS } from '@kbn/data-plugin/public';
-import {
-  extendedBoundsToAst,
-  intervalOptions,
-  getCalculateAutoTimeExpression,
-} from '@kbn/data-plugin/common';
+import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { DateHistogramIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
 import {
   toEsqlRegistry,
   DATE_HISTOGRAM_ID,
+  getDateHistogramDefaultLabel,
+  getDateHistogramSerializedFormat,
   AUTO_INTERVAL,
   getTimeZoneAndInterval,
   restrictedInterval,
 } from '@kbn/lens-common';
 import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
-import { getInvalidFieldMessage, getSafeName } from './helpers';
+import { getInvalidFieldMessage } from './helpers';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
 
 const { isValidInterval } = search.aggs;
@@ -119,24 +116,7 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, columns, indexPattern, uiSettings, dateRange) => {
-    const field = getSafeName(column.sourceField, indexPattern);
-    let interval = column.params?.interval || AUTO_INTERVAL;
-    if (dateRange && uiSettings) {
-      const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
-      interval =
-        calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }, interval, false)
-          ?.description || 'hour';
-      return i18n.translate('xpack.lens.indexPattern.dateHistogram.interval', {
-        defaultMessage: `{field} per {interval}`,
-        values: {
-          field: field || '',
-          interval,
-        },
-      });
-    }
-    return field;
-  },
+  getDefaultLabel: getDateHistogramDefaultLabel,
   buildColumn({ field }, columnParams) {
     return {
       label: field.displayName,
@@ -168,29 +148,7 @@ export const dateHistogramOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  getSerializedFormat: (column, targetColumn, indexPattern, uiSettings, dateRange) => {
-    if (!indexPattern || !dateRange || !uiSettings)
-      return {
-        id: 'date',
-      };
-    const { interval } = getTimeZoneAndInterval(column, indexPattern);
-    const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
-    const usedInterval =
-      calcAutoInterval(
-        { from: dateRange.fromDate, to: dateRange.toDate },
-        interval,
-        false
-      )?.asMilliseconds() || 3600000;
-    const rules = uiSettings?.get('dateFormat:scaled');
-    for (let i = rules.length - 1; i >= 0; i--) {
-      const rule = rules[i];
-      if (!Array.isArray(rule) || rule.length !== 2) continue;
-      if (!rule[0] || (usedInterval && usedInterval >= moment.duration(rule[0]).asMilliseconds())) {
-        return { id: 'date', params: { pattern: rule[1] } };
-      }
-    }
-    return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
-  },
+  getSerializedFormat: getDateHistogramSerializedFormat,
   toESQL: toEsqlRegistry[DATE_HISTOGRAM_ID],
   toEsAggsFn: (column, columnId, indexPattern) => {
     const sourceField = column.sourceField ? column.sourceField : indexPattern.timeFieldName ?? '';

@@ -29,6 +29,7 @@ import type { GetSerializedFormatFn, ToEsqlFn } from './types';
 
 export const DATE_HISTOGRAM_ID = 'date_histogram';
 export const RANGE_ID = 'range';
+export const STATIC_VALUE_ID = 'static_value';
 
 /**
  * UI-free registry of per-operation DSL-to-ES|QL conversion functions,

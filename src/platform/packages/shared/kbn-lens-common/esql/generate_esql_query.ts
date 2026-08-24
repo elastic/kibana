@@ -24,7 +24,6 @@ import { AUTO_TARGET_NUMBER_OF_BUCKETS, DEFAULT_STATIC_VALUE } from './constants
 import { convertToAbsoluteDateRange } from './date_range';
 import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
-import type { GetDefaultLabelFn } from './create_es_aggs_id_map_entry';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
 import { toEsqlRegistry, esqlOperationMetaRegistry } from './operations/registry';
 import {
@@ -115,8 +114,7 @@ export function generateEsqlQuery(
   uiSettings: UiSettingsReader,
   dateRange: DateRange,
   nowInstant: Date,
-  columnRoles?: ColumnRoles,
-  getDefaultLabel?: GetDefaultLabelFn
+  columnRoles?: ColumnRoles
 ): EsqlQueryResult {
   // esql mode variables
   const partialRows = true;
@@ -193,7 +191,6 @@ export function generateEsqlQuery(
       indexPattern,
       uiSettings,
       dateRange,
-      getDefaultLabel,
     });
 
     // Generate EVAL statement using composer literal helpers
@@ -287,7 +284,6 @@ export function generateEsqlQuery(
       indexPattern,
       uiSettings,
       dateRange,
-      getDefaultLabel,
     });
 
     return { esql: statsMetricFragment } satisfies EsqlConversionResult;
@@ -406,7 +402,6 @@ export function generateEsqlQuery(
       uiSettings,
       dateRange,
       includeSourceField: true,
-      getDefaultLabel,
     });
 
     return { esql: rawResult.template };

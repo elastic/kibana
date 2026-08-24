@@ -34,17 +34,20 @@ import type {
   StandardDeviationIndexPatternColumn,
   SumIndexPatternColumn,
 } from '@kbn/lens-common';
-import { toEsqlRegistry } from '@kbn/lens-common';
+import {
+  toEsqlRegistry,
+  ofNameMetric,
+  adjustTimeScaleLabelSuffix,
+  getSafeName,
+} from '@kbn/lens-common';
 import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
-  getSafeName,
   getFilter,
   hasOperationType,
   getBooleanParam,
 } from './helpers';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
@@ -241,11 +244,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
 export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
   type: MIN_ID,
   displayName: MIN_NAME,
-  ofName: (name) =>
-    i18n.translate('xpack.lens.indexPattern.minOf', {
-      defaultMessage: 'Minimum of {name}',
-      values: { name },
-    }),
+  ofName: (name) => ofNameMetric(MIN_ID, name),
   description: i18n.translate('xpack.lens.indexPattern.min.description', {
     defaultMessage:
       'A single-value metrics aggregation that returns the minimum value among the numeric values extracted from the aggregated documents.',
@@ -263,11 +262,7 @@ export const minOperation = buildMetricOperation<MinIndexPatternColumn>({
 export const maxOperation = buildMetricOperation<MaxIndexPatternColumn>({
   type: MAX_ID,
   displayName: MAX_NAME,
-  ofName: (name) =>
-    i18n.translate('xpack.lens.indexPattern.maxOf', {
-      defaultMessage: 'Maximum of {name}',
-      values: { name },
-    }),
+  ofName: (name) => ofNameMetric(MAX_ID, name),
   description: i18n.translate('xpack.lens.indexPattern.max.description', {
     defaultMessage:
       'A single-value metrics aggregation that returns the maximum value among the numeric values extracted from the aggregated documents.',
@@ -286,11 +281,7 @@ export const averageOperation = buildMetricOperation<AvgIndexPatternColumn>({
   type: AVG_ID,
   priority: 2,
   displayName: AVG_NAME,
-  ofName: (name) =>
-    i18n.translate('xpack.lens.indexPattern.avgOf', {
-      defaultMessage: 'Average of {name}',
-      values: { name },
-    }),
+  ofName: (name) => ofNameMetric(AVG_ID, name),
   description: i18n.translate('xpack.lens.indexPattern.avg.description', {
     defaultMessage:
       'A single-value metric aggregation that computes the average of numeric values that are extracted from the aggregated documents',
@@ -307,11 +298,7 @@ export const standardDeviationOperation = buildMetricOperation<StandardDeviation
   {
     type: STD_DEVIATION_ID,
     displayName: STD_DEVIATION_NAME,
-    ofName: (name) =>
-      i18n.translate('xpack.lens.indexPattern.standardDeviationOf', {
-        defaultMessage: 'Standard deviation of {name}',
-        values: { name },
-      }),
+    ofName: (name) => ofNameMetric(STD_DEVIATION_ID, name),
     description: i18n.translate('xpack.lens.indexPattern.standardDeviation.description', {
       defaultMessage:
         'A single-value metric aggregation that computes the standard deviation of numeric values that are extracted from the aggregated documents',
@@ -333,11 +320,7 @@ export const sumOperation = buildMetricOperation<SumIndexPatternColumn>({
   type: SUM_ID,
   priority: 1,
   displayName: SUM_NAME,
-  ofName: (name) =>
-    i18n.translate('xpack.lens.indexPattern.sumOf', {
-      defaultMessage: 'Sum of {name}',
-      values: { name },
-    }),
+  ofName: (name) => ofNameMetric(SUM_ID, name),
   optionalTimeScaling: true,
   description: i18n.translate('xpack.lens.indexPattern.sum.description', {
     defaultMessage:
@@ -356,11 +339,7 @@ export const medianOperation = buildMetricOperation<MedianIndexPatternColumn>({
   type: MEDIAN_ID,
   priority: 3,
   displayName: MEDIAN_NAME,
-  ofName: (name) =>
-    i18n.translate('xpack.lens.indexPattern.medianOf', {
-      defaultMessage: 'Median of {name}',
-      values: { name },
-    }),
+  ofName: (name) => ofNameMetric(MEDIAN_ID, name),
   description: i18n.translate('xpack.lens.indexPattern.median.description', {
     defaultMessage:
       'A single-value metrics aggregation that computes the median value that are extracted from the aggregated documents.',

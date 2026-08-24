@@ -427,6 +427,7 @@ export {
   cleanupFormulaReferenceColumns,
   isColumnOfType,
   isColumnFormatted,
+  getSafeName,
 } from './datasources/form_based/helpers';
 
 export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from './editor/constants';
@@ -460,10 +461,32 @@ export {
   esqlConversionFailureReasonMessages,
   getFailureTooltip,
 } from './esql/to_esql_failure_reasons';
-export type {
-  CreateEsAggsIdMapEntryParams,
-  GetDefaultLabelFn,
-} from './esql/create_es_aggs_id_map_entry';
+export type { CreateEsAggsIdMapEntryParams } from './esql/create_es_aggs_id_map_entry';
+export type { GetDefaultLabelFn } from './esql/operations';
+export {
+  defaultLabelRegistry,
+  getCountDefaultLabel,
+  getCardinalityDefaultLabel,
+  getPercentileDefaultLabel,
+  getDateHistogramDefaultLabel,
+  getStaticValueDefaultLabel,
+  buildMetricDefaultLabel,
+  countLabel,
+  ofNameCount,
+  ofNameCardinality,
+  ofNamePercentile,
+  ofNameMetric,
+  ofNameStaticValue,
+  staticValueLabelDefault,
+  ALLOWED_DECIMAL_DIGITS,
+  STATIC_VALUE_ID,
+} from './esql/operations';
+export {
+  DEFAULT_TIME_SCALE,
+  unitSuffixes,
+  unitSuffixesLong,
+  adjustTimeScaleLabelSuffix,
+} from './datasources/time_scale_utils';
 export { createEsAggsIdMapEntry } from './esql/create_es_aggs_id_map_entry';
 export type { ColumnRoles, EsqlQueryResult } from './esql/generate_esql_query';
 export {

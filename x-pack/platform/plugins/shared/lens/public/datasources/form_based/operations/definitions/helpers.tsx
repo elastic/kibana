@@ -126,15 +126,6 @@ export const generateMissingFieldMessage = (
   ],
 });
 
-export function getSafeName(name: string, indexPattern: IndexPattern | undefined): string {
-  const field = indexPattern?.getFieldByName(name);
-  return field
-    ? field.displayName
-    : i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
-        defaultMessage: 'Missing field',
-      });
-}
-
 function areDecimalsValid(inputValue: string | number, digits: number) {
   const [, decimals = ''] = `${inputValue}`.split('.');
   return decimals.length <= digits;

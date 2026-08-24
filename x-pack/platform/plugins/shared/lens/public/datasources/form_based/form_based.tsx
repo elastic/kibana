@@ -210,11 +210,8 @@ export function columnToOperation(
 
 export type { FormatColumnArgs, TimeScaleArgs, CounterRateArgs } from '../../../common/expressions';
 
-export {
-  getSuffixFormatter,
-  unitSuffixesLong,
-  suffixFormatterId,
-} from '../../../common/suffix_formatter';
+export { unitSuffixesLong } from '@kbn/lens-common';
+export { getSuffixFormatter, suffixFormatterId } from '../../../common/suffix_formatter';
 
 export function getFormBasedDatasource({
   core,

@@ -154,15 +154,7 @@ export const useEsqlConversionCheck = (
         coreStart.uiSettings,
         framePublicAPI.dateRange,
         startDependencies.data.nowProvider.get(),
-        columnRoles,
-        (col, cols, colIndexPattern) =>
-          operationDefinitionMap[col.operationType].getDefaultLabel(
-            col,
-            cols,
-            colIndexPattern,
-            coreStart.uiSettings,
-            framePublicAPI.dateRange
-          )
+        columnRoles
       );
     } catch (e) {
       // Layer remains non-convertible
@@ -329,15 +321,7 @@ function tryConvertTrendlineLayer(
       coreStart.uiSettings,
       framePublicAPI.dateRange,
       startDependencies.data.nowProvider.get(),
-      columnRoles,
-      (col, cols, colIndexPattern) =>
-        operationDefinitionMap[col.operationType].getDefaultLabel(
-          col,
-          cols,
-          colIndexPattern,
-          coreStart.uiSettings,
-          framePublicAPI.dateRange
-        )
+      columnRoles
     );
     if (!isEsqlQuerySuccess(esqlLayer)) {
       return { success: false, reason: esqlLayer?.reason };
