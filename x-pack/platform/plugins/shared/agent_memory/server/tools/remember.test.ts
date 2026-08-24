@@ -48,6 +48,11 @@ describe('createRememberTool', () => {
       getCoreSecurity,
     });
 
+    expect(tool.description.replace(/\s+/g, ' ')).toContain(
+      'When the user corrects or replaces stored information, identify related memories first ' +
+        '(recall if needed). Save the replacement, then call platform.memory.forget only for ' +
+        'memories that are clearly outdated or contradictory.'
+    );
     expect(tool.confirmation?.askUser).toBe('always');
     const confirmation = await tool.confirmation?.getConfirmation?.({
       toolParams: {

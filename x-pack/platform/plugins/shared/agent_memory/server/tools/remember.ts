@@ -46,6 +46,10 @@ Use this tool to persist information that is:
 Do NOT use this tool for ephemeral context, search results, or intermediate reasoning steps.
 Only call this tool when you have concrete, user-relevant information to save.
 
+When the user corrects or replaces stored information, identify related memories first (recall if
+needed). Save the replacement, then call platform.memory.forget only for memories that are clearly
+outdated or contradictory.
+
 On success returns { id, revision, action } where action is 'created' or 'updated'.
   `.trim(),
   schema: rememberInputSchema,
