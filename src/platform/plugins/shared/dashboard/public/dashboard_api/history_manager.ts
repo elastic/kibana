@@ -16,6 +16,7 @@ import {
   switchMap,
   withLatestFrom,
   type Observable,
+  type Subject,
 } from 'rxjs';
 
 import { startTrackingHistory } from '@kbn/rxjs-history';
@@ -30,12 +31,14 @@ export function initializeHistoryManager({
   setState,
   getState,
   dataLoading$,
+  historyUpdated$,
 }: {
   anyStateChange$: ReturnType<typeof initializeLayoutManager>['internalApi']['anyStateChange$'];
   hasOverlays$: ReturnType<typeof initializeTrackOverlay>['hasOverlays$'];
   getState: () => DashboardState;
   setState: (state: DashboardState) => Promise<void>;
   dataLoading$: Observable<boolean>;
+  historyUpdated$: Subject<void>;
 }): {
   api: ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
   cleanup: () => void;
@@ -72,6 +75,7 @@ export function initializeHistoryManager({
     )
     .subscribe(([[, loading]]) => {
       dashboardCurrentState$.next(getState());
+      historyUpdated$.next();
     });
 
   // when the history's state updates, respond by setting state on the Dashboard

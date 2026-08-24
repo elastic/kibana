@@ -16,6 +16,7 @@ import {
   combineLatestWith,
   debounceTime,
   distinctUntilChanged,
+  firstValueFrom,
   map,
   merge,
   mergeMap,
@@ -90,7 +91,8 @@ export function initializeLayoutManager(
   incomingEmbeddables: EmbeddablePackageState[] | undefined,
   initialPanels: DashboardState['panels'],
   initialPinnedPanels: DashboardState['pinned_panels'],
-  trackPanel: ReturnType<typeof initializeTrackPanel>['api']
+  trackPanel: ReturnType<typeof initializeTrackPanel>['api'],
+  historyUpdated$: Observable<void>
 ) {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
@@ -246,43 +248,50 @@ export function initializeLayoutManager(
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
       const sameType = existingPanel?.type === type;
 
-      const updatedLayout = existingPanel
-        ? {
-            ...layout$.value,
-            panels: {
-              ...layout$.value.panels,
-              [uuid]: { grid: existingPanel.grid, type },
-            },
-          }
-        : runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
-            currentLayout: layout$.value,
-            newPanel: {
-              uuid,
-              type,
-              grid: {
-                w: size?.width ?? DEFAULT_PANEL_WIDTH,
-                h: size?.height ?? DEFAULT_PANEL_HEIGHT,
+      const child = children$.getValue()[uuid]; // preserve existing child API if it exists
+      if (child && sameType) {
+        child.applySerializedState(serializedState);
+      } else {
+        const updatedLayout = existingPanel
+          ? {
+              ...layout$.value,
+              panels: {
+                ...layout$.value.panels,
+                [uuid]: { grid: existingPanel.grid, type },
               },
-            },
-            /**
-             * We can assume that all panels being sent as a single package are related; so,
-             * place them close together by grouping them around the first embeddable.
-             */
-            beside: uuid === first.embeddableId ? undefined : first.embeddableId,
-          });
-      currentChildState[uuid] = {
-        ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
-        ...serializedState,
-      };
+            }
+          : runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
+              currentLayout: layout$.value,
+              newPanel: {
+                uuid,
+                type,
+                grid: {
+                  w: size?.width ?? DEFAULT_PANEL_WIDTH,
+                  h: size?.height ?? DEFAULT_PANEL_HEIGHT,
+                },
+              },
+              /**
+               * We can assume that all panels being sent as a single package are related; so,
+               * place them close together by grouping them around the first embeddable.
+               */
+              beside: uuid === first.embeddableId ? undefined : first.embeddableId,
+            });
 
-      layout$.next(updatedLayout);
+        currentChildState[uuid] = {
+          ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
+          ...serializedState,
+        };
+        layout$.next(updatedLayout);
+      }
     }
     trackPanel.setScrollToPanelId(first.embeddableId);
     trackPanel.setHighlightPanelId(first.embeddableId);
   };
 
   // On initialization, place incoming embeddables if there is at least one
-  addIncomingEmbeddables(incomingEmbeddables);
+  firstValueFrom(historyUpdated$).then(() => {
+    addIncomingEmbeddables(incomingEmbeddables);
+  });
 
   // --------------------------------------------------------------------------------------
   // API definition
@@ -606,6 +615,7 @@ export function initializeLayoutManager(
         layout$.next(layout);
       },
       registerChildApi: (api: DefaultEmbeddableApi) => {
+        console.log('REGISTER API');
         children$.next({
           ...children$.value,
           [api.uuid]: api,
