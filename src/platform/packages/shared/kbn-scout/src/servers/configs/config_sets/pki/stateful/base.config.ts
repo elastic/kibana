@@ -8,6 +8,7 @@
  */
 
 import { readFileSync } from 'fs';
+import { format as formatUrl } from 'url';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import {
   MOCK_IDP_ATTRIBUTE_EMAIL,
@@ -16,7 +17,6 @@ import {
   MOCK_IDP_ATTRIBUTE_ROLES,
   MOCK_IDP_ENTITY_ID,
   MOCK_IDP_REALM_NAME,
-  MOCK_IDP_SP_BASE_URL,
 } from '@kbn/mock-idp-utils';
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
@@ -31,6 +31,11 @@ const addOrReplaceArg = (serverArgs: string[], argName: string, newValue: string
     serverArgs[idx] = `${argPrefix}${newValue}`;
   }
 };
+
+// SAML SP args must point at the Kibana test server so `configureHTTP2` can rewrite
+// them to https, and so the URLs match the assertions produced by the mock IDP.
+const { protocol, hostname, port } = defaultConfig.servers.kibana;
+const kbnUrl = formatUrl({ protocol, hostname, port: port?.toString() });
 
 const kbnServerArgs = [...defaultConfig.kbnTestServer.serverArgs];
 
@@ -75,9 +80,9 @@ export const pkiConfig: ScoutServerConfig = {
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=2`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${STATEFUL_IDP_METADATA_PATH}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${MOCK_IDP_SP_BASE_URL}`,
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`,
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${MOCK_IDP_SP_BASE_URL}/logout`,
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kbnUrl}`,
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kbnUrl}/api/security/saml/callback`,
+      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${kbnUrl}/logout`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
