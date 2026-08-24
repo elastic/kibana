@@ -24,9 +24,6 @@ import { useServiceFlyoutCapabilities } from './hooks/use_service_flyout_capabil
 import { useApmIndices } from './hooks/use_apm_indices';
 export type { ServiceFlyoutService } from './types';
 
-// Chart ids used by the service overview page. The tooltip portals for these charts are pinned
-// below flyout level while this flyout is open (see https://github.com/elastic/kibana/issues/286822).
-// `body` prefix (specificity 0,2,0) beats the global Lens rule from #280957 (0,1,0).
 const SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS = [
   'latencyChart',
   'throughput',
@@ -36,6 +33,7 @@ const SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS = [
 ]
   .map((id) => `body [id^='echTooltipPortalMainTooltip__${id}']`)
   .join(',\n  ');
+
 
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
