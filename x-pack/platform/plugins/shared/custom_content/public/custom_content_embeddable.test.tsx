@@ -392,12 +392,14 @@ describe('customContentEmbeddableFactory', () => {
     it('applies template update from RoundCompleteEvent attachment', async () => {
       const chatEvents$ = new Subject<unknown>();
       const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
+      const mockAddAttachment = jest.fn();
 
       mockAgentBuilder = {
         events: {
           ui: { activeConversation$ },
           getChatEvents$: jest.fn(() => chatEvents$),
         },
+        addAttachment: mockAddAttachment,
       };
 
       const { embeddable } = await buildEmbeddable(baseState);
@@ -440,6 +442,11 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => chatEvents$.next(roundCompleteEvent));
 
       expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
+      expect(mockAddAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ panel_template: '<p>agent result</p>' }),
+        })
+      );
     });
 
     it('ignores events for a different embeddable_id', async () => {

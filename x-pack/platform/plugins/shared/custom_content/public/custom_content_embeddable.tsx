@@ -351,6 +351,14 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
               template$.next(data.panel_template);
               esqlQuery$.next(data.esql_query);
+              agentBuilder.addAttachment(
+                buildCustomContentContextAttachment(
+                  data.panel_template,
+                  data.esql_query,
+                  uuid,
+                  titleManager.api.title$.getValue() ?? undefined
+                )
+              );
             });
 
           return () => sub.unsubscribe();
