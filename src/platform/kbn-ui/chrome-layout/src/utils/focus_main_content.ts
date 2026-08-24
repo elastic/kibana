@@ -22,9 +22,12 @@ const focusElement = (element: HTMLElement) => {
  * Focuses the main content landmark.
  */
 export const focusMainContent = () => {
-  const mainElement = document.querySelector(MAIN_CONTENT_SELECTORS.join(','));
+  for (const selector of MAIN_CONTENT_SELECTORS) {
+    const mainElement = document.querySelector(selector);
 
-  if (mainElement instanceof HTMLElement) {
-    focusElement(mainElement);
+    if (mainElement instanceof HTMLElement) {
+      focusElement(mainElement);
+      return;
+    }
   }
 };
