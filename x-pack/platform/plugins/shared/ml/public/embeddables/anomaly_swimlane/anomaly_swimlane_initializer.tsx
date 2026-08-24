@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useEffect, useRef, useState } from 'react';
+import React, { type FC, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -28,6 +28,7 @@ import type {
   AnomalySwimLaneEmbeddableState,
   SwimlaneType,
 } from '@kbn/ml-server-schemas/embeddables/anomaly_swimlane';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { SWIMLANE_TYPE } from '@kbn/ml-common-types/embeddables/swimlane_type';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlLink } from '../../application/contexts/kibana';
@@ -37,6 +38,11 @@ import { JobSelectorControl } from '../../alerting/job_selector';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { getJobSelectionErrors } from '../utils';
+import {
+  SelectSeverityUI,
+  type TableSeverity,
+} from '../../application/components/controls/select_severity';
+import { useSeverityOptions } from '../../application/explorer/hooks/use_severity_options';
 
 export interface AnomalySwimlaneInitializerProps {
   initialInput?: Partial<AnomalySwimLaneEmbeddableState>;
@@ -81,6 +87,13 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
   );
   const [viewBySwimlaneFieldName, setViewBySwimlaneFieldName] = useState(
     initialInput?.swimlane_type === SWIMLANE_TYPE.VIEW_BY ? initialInput.view_by : undefined
+  );
+
+  const severityOptions = useSeverityOptions();
+  const allThresholds = useMemo(() => severityOptions.map((o) => o.threshold), [severityOptions]);
+
+  const [severityThresholds, setSeverityThresholds] = useState<SeverityThreshold[]>(
+    () => initialInput?.severity_threshold ?? allThresholds
   );
 
   useEffect(
@@ -132,11 +145,13 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
           job_ids: jobIds,
           swimlane_type: SWIMLANE_TYPE.VIEW_BY,
           view_by: viewBySwimlaneFieldName,
+          severity_threshold: severityThresholds,
         }
       : {
           ...titleField,
           job_ids: jobIds,
           swimlane_type: SWIMLANE_TYPE.OVERALL,
+          severity_threshold: severityThresholds,
         };
 
   const newJobUrl = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
@@ -214,6 +229,23 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
                   options={swimlaneTypeOptions}
                   idSelected={swimlaneType}
                   onChange={(id) => setSwimlaneType(id as SwimlaneType)}
+                />
+              </EuiFormRow>
+
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.ml.swimlaneEmbeddable.setupModal.severityThresholdLabel"
+                    defaultMessage="Severity threshold"
+                  />
+                }
+                fullWidth
+              >
+                <SelectSeverityUI
+                  severity={severityThresholds}
+                  onChange={(selected: TableSeverity[]) =>
+                    setSeverityThresholds(selected.map((s) => s.threshold))
+                  }
                 />
               </EuiFormRow>
             </>
