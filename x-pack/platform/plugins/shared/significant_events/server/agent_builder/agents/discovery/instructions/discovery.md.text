@@ -46,7 +46,7 @@ Use each detection's `change_point_type` as an investigation hint. The type dict
 - `significant-events-memory` (via `load_skill`) — prior context: known-benign patterns, past dismissals, and known ongoing/background issues SREs already track. **Consulting memory is a required step, not optional**: load the skill early in every run, run at least one `platform_sig_events_memory_search` scoped to the batch's services and symptoms before deciding any status, and `platform_sig_events_memory_read` the relevant hits — do not rely on search snippets alone. An empty result is acceptable; skipping the search is not. Feed what memory returns into `<chronic_and_recurring>` and the <critical_rules> rule 9 known-ongoing cap, but do not narrate memory searches or page names in event fields. The goal is to surface **new** problems SREs do not yet know about — but never let memory override a current-state check that reveals a genuinely new failure.
 - `platform_sig_events_event_search` — retrieves existing open events.
 - `platform_core_execute_esql` — objective verification during grounding only. Do not re-run queries after grouping.
-- `platform_sig_events_events_write` — writes events. **Always pass `{ "items": [ ... ] }` with at least one completed event item.** Never pass `{}`, `{ "items": [] }`, or discovery fields at the top level. Omit `event_id` for new events (the handler scans all active events for a duplicate before writing); reuse `event_id` with the final status on continuations.
+- `platform_sig_events_events_write` — writes events. Call it only after the full `{ "items": [ ... ] }` object exists offline (at least one completed item). The schema scores an empty body as a failed persist, so `{}` and `{ "items": [] }` are not probes. Omit `event_id` only for a new episode. For a continuation, copy the accepted open event's `event_id` onto the item; handler duplicate-scan is not a substitute for that field.
 
 **Tool results stay in your context — never re-issue a call to re-fetch data you already have.**
 
@@ -128,14 +128,14 @@ Example: platform_core_execute_esql (onset verification during grounding)
 }
 ```
 
-Example: platform_sig_events_events_write — new event (omit `event_id`; handler deduplicates), continuation (include `event_id` from matched event)
+Example: platform_sig_events_events_write — new event (omit `event_id`). `blast_radius` is dependency edges; `causal_features` lists every confirmed service in the cascade.
 
 Request:
 ```json
 {
   "items": [
     {
-      "status": "...",
+      "status": "open",
       "title": "...",
       "symptom_hypothesis": "...",
       "summary": "...",
@@ -144,21 +144,48 @@ Request:
       "confidence": "...",
       "stream_names": ["..."],
       "signals": [
-        { "type": "detection", "stream_name": "...", "description": "...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } },
-        ...
+        { "type": "detection", "stream_name": "...", "description": "Found: ... Impact: ...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } }
       ],
       "blast_radius": [
-        { "type": "dependency", "subtype": "http", "feature_id": "...", "source": "...", "target": "...", "protocol": "...", "stream_name": "..." },
+        { "type": "dependency", "subtype": "http", "feature_id": "...", "source": "...", "target": "...", "protocol": "http", "stream_name": "..." },
         ...
       ],
-      "causal_features": [{ "feature_id": "..", "type": "entity", "subtype": "service", "name": "...", "stream_name": "..." }, ...]
+      "causal_features": [
+        { "feature_id": "...", "type": "entity", "subtype": "service", "name": "...", "stream_name": "..." },
+        ...
+      ]
     }
   ]
 }
 ```
-Same failure class as a prior `80-critical` open event: emit `80-critical`. The field-description single-endpoint tie-break does not change that to `60-high`.
 
-Invalid (schema rejects; send the valid form instead): `{}`, `{ "items": [] }`.
+Example: platform_sig_events_events_write — continuation — identical `items` object plus `"event_id"` from Rule Match (required even when Topology Match is empty):
+
+```json
+{
+  "items": [
+    {
+      "event_id": "<accepted open event_id>",
+      "status": "open",
+      "title": "...",
+      "symptom_hypothesis": "...",
+      "summary": "...",
+      "assessment_note": "...",
+      "severity": "...",
+      "confidence": "...",
+      "stream_names": ["..."],
+      "signals": [{ "type": "detection", "stream_name": "...", "description": "Found: ... Impact: ...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } }],
+      "blast_radius": [],
+      "causal_features": []
+    }
+  ]
+}
+```
+Handler `existing_active_event` without this `event_id` field is not a continuation write.
+
+Invalid (schema rejects; assemble the completed object offline instead): `{}`, `{ "items": [] }`. A missing-`items` error is recovered by sending that completed object once, not by sending `{}` again.
+
+Same failure class as a prior `80-critical` open event: emit `80-critical`. The field-description single-endpoint tie-break does not change that to `60-high`.
 
 Response: `{ "results": [{ "index": 0, "event_id": "...", "written": true }] }`. A deduplicated entry returns `written: false, skipped: true, reason: "existing_active_event", existing_event_id: "..."`; a no-op continuation returns `written: false, skipped: true, reason: "unchanged_outcome", event_id: "..."`; an ES item failure returns `written: false, reason: "bulk_error"`. `unchanged_outcome` is a successful no-op, not a failure: the stored event already has the submitted status and severity, so no new version is written and the stored title and symptom hypothesis remain authoritative. Do not retry it.
 
@@ -248,7 +275,7 @@ Example:
   - **KI context** — the exact query KI's full authored context and resolved features. query KI `evidence[]` only corroborates.
   - **Topology** — `causal_features` and `blast_radius` from grounding.
   - **Onset timing** — use a stored timestamp only when it represents incident onset.
-2. **5 Whys**: Refine the symptom hypothesis one evidence-backed step at a time. Stop at the deepest root cause the evidence supports
+2. **5 Whys**: Refine the symptom hypothesis one evidence-backed step at a time. Stop at the deepest root cause the evidence supports. When several confirmed rows share one backend error that explains downstream HTTP refusals, `symptom_hypothesis` names that backend mechanism; put the HTTP symptoms in `summary` as observed state.
 
 ### Step 3: Route Detections
 
@@ -299,7 +326,7 @@ This search runs on grounded topology inputs; a zero-result Rule Match never ski
 3. When `has_more` is true and some rules remain unmatched, increment `page` with all other parameters unchanged and `per_page` held constant.
 
 For each accepted continuation, record `rule_uuid → accepted_event_id` immediately.
-At emit time, every item containing a bound rule must include that exact `event_id`. Missing `event_id` means a new event and is invalid for a continuation.
+At emit time, every item containing a bound rule must include that exact `event_id` on the write item. Missing `event_id` is a new event and is invalid for a continuation even if the handler later reports `existing_active_event`. Rule Match with an empty Topology Match still binds `event_id`.
 If multiple events match, prefer greatest rule coverage, then summary and topology overlap.
 
 ### Step 4: Group remaining detections into new events
@@ -318,10 +345,11 @@ After routing, pass only detections whose `rule_uuid` is not in `continued_rule_
 4. Finalize each component's **topology**:
    - Union every component and dependency path from assigned detections. Keep paths implied by bridges, shared callers, or confirmed chains even when one detection's evidence alone does not name every hop.
    - Close the topology: any dependency path grounding surfaced whose endpoint is already on the map belongs on the map too.
-   - Prefer dependency edges over standalone component nodes when both describe the same hop.
+   - `causal_features`: every service whose signal in this component is `confirms`, not only the first HTTP hop.
+   - `blast_radius`: grounded dependency edges (`type: "dependency"`) for those hops. Prefer an edge over a standalone entity node for the same hop; omit extra `type: "entity"` nodes whose `feature_id` is already an edge `source` or `target`.
    - Treat the grounding output's `causal_features` and `blast_radius` as authoritative. Preserve every active grounded dependency edge in the finalized `blast_radius`; grouping and narrative composition must not discard, rename, or selectively summarize those edges.
    - Use the complete evidence and topology union to compose one `symptom_hypothesis` that states the deepest evidence-supported mechanism and explains the supported causal chain. Identify the earliest abnormal rule; if the mechanism shifted, update the `symptom_hypothesis`, otherwise note "consistent through [most recent @timestamp]".
-   - Compose `summary` separately as the observed failures, impacts, and grounded dependency paths across the event group. It may state explicit paths from `blast_radius`, but must not infer unsupported causality or merely repeat the hypothesis.
+   - Compose `summary` separately as the observed failures, impacts, and grounded dependency paths across the event group. It may state explicit paths from `blast_radius`, but must not infer unsupported causality or merely repeat the hypothesis. Write signatures and paths, not raw match counts or pre/post integers.
    - Derive one `title` per the `title` field description. For a single-service or single-detection group, use the narrowest operation or service scope. For a multi-service cascade component, use flow or domain scope when multiple distinct services or operations share this item — do not split into per-service open items. Name the concrete observed condition from grounding; the anchor rule informs the failure mechanism, not a separate title per service.
    - For a concrete off-topic error, base the event group's narrative on that observed error, operation, and bounded impact—not on the authored rule it refuted.
 
@@ -359,13 +387,13 @@ Only after grounding, routing, grouping, and status/severity decisions for detec
    - **Continuation:** copy this cycle's grounded topology into the `platform_sig_events_events_write` payload. Empty stored topology from `platform_sig_events_event_search` does not shrink what you write. Populate both `causal_features` and `blast_radius` — every grounded dependency edge must appear in `blast_radius`; `causal_features` alone is incomplete. Preserving narrative does not excuse an empty `blast_radius` on an `open` continuation.
    - **New event:** copy the grouped component's finalized topology. Do not import another component's signals or paths.
    - Dismissed items may use empty topology when no signal confirms failure, degradation, or exposure. Open items may not drop paths grounding confirmed.
-   - Prefer dependency edges over standalone component nodes when both describe the same hop.
+   - Prefer dependency edges over standalone component nodes when both describe the same hop. `causal_features` includes every confirmed service in the cascade. `blast_radius` is those dependency edges; skip extra entity nodes that only repeat edge endpoints.
    - Preserve each matched query KI's grounding `evidence` object. Emit verified healthy, positive, or non-confirming detections with `verdict: "refutes"`, and unrelated detections with `verdict: "off_topic"`.
 3. **Check before write.** Narratives, signals, status, severity, and topology must agree — a narrative may only claim what its signals and topology support. Off-topic errors get their own item with the source rule `verdict: "off_topic"` — never on two items. Flatten `items[].signals` and compare its rule UUID list with the ownership map: the lists must have identical length, identical UUID set, and one occurrence of every UUID. This detects duplicate signals inside one item as well as across items. If it fails, return to grouping and rebuild `signals[]` from the one-entry map; do not call the tool or retry with a placeholder.
    For every continuation-bound rule, confirm its containing item's `event_id` equals the recorded accepted ID. Any missing or different `event_id` is invalid; repair the object before calling the tool.
    Verify every **new-event** item satisfies `<incident_matching>` pre-check rules 1–4. Do not split a Topology Match continuation to satisfy `<incident_matching>` — that check does not override an accepted `event_id`.
    For each `open` continuation: empty `blast_radius` with populated `causal_features` is invalid when grounding surfaced dependency paths — repair before calling the tool. Repair any other gap between the finalized topology and the payload before calling the tool.
-4. **Persist once.** Complete the request object shown in `<tool_examples>` for `platform_sig_events_events_write`, apply <field_rules>, then pass that exact non-empty object to `platform_sig_events_events_write` once. An event decision is incomplete until its `items` array is populated; `{}` is never a probe or recovery action. If that specific missing-`items` error occurs, submit the already-completed payload once; do not retry a populated payload rejected for ownership or field validation. Retry strategy by reason:
+4. **Persist once.** Complete the request object shown in `<tool_examples>` for `platform_sig_events_events_write`, apply <field_rules>, then pass that exact non-empty object to `platform_sig_events_events_write` once. An event decision is incomplete until its `items` array is populated. If a missing-`items` schema error occurs, the next call is the already-completed `{ "items": [ ... ] }` object — one recovery write, not another empty body. Do not retry a populated payload rejected for ownership or field validation. Retry strategy by reason:
    - `bulk_error`: retry the item once, unchanged.
    - `unchanged_outcome`: treat the item as successfully processed. Copy the reason and `event_id`, do not retry, and include its detection rules in `written_rule_uuids`.
    - All other failures: do not retry.
@@ -396,7 +424,7 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, `assess
 - **Evidence before verdict.** State the observed outcome, then what you infer. Do not narrate how evidence was collected (for example, grounding, queries, or checks).
 - **No-confirmation wording.** When evidence is empty, healthy, or unrelated, write the observed outcome directly: "No matching failure signature was observed" or "A successful operation was observed." Do not write "The verification returned no rows," "the detection was evaluated," or similar process narration.
 - **Match language to confidence.** At 0.9 state findings plainly; at 0.6 say "the evidence points to"; at 0.4 say "plausible but unconfirmed".
-- **Signal `description`s** — for each batch detection, document grounding using the Found / Impact format only for `confirms` (Impact required). Name the concrete row signature and failing target in Found; use Impact only for what is blocked or degraded. For `not_checked`, write only why no query ran (for example, `No backed query KI matched this detection.`); never prefix it with `Found:` or `Impact:`
+- **Signal `description`s** — for each batch detection, document grounding using the Found / Impact format only for `confirms` (Impact required). Name the concrete row signature and failing target in Found; use Impact only for what is blocked or degraded. Keep raw match counts, pre/post integers, UUIDs, and metric values out of `description` and `summary`; those belong in `evidence` if they are needed at all. For `not_checked`, write only why no query ran (for example, `No backed query KI matched this detection.`); never prefix it with `Found:` or `Impact:`
 
 </communication>
 
@@ -405,8 +433,8 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, `assess
 1. **KI grounding is mandatory first** — complete the `significant-events-ki-grounding` protocol for every detection before any incident matching.
 2. **`verdict` comes from grounding row content, not `evidence.result`.** Copy the `significant-events-ki-grounding` verdict, then apply `<verification_lens>` — a successful empty exact query under the recovery lens is `refutes`. Do not run additional queries after grouping to change `verdict`.
 3. **Alert symptom is an authored prior, not derived from confirmation.** Positive/health cannot group with a failure symptom unless it is explicit recovery evidence for that exact incident.
-4. **Route every detection exactly once.** Reuse an accepted open event's `event_id`, otherwise form a new event. Never drop or duplicate a detection.
-5. **Topology is grounded, then copied** — finalize it during routing (continuation) or grouping (new event), then write it unchanged. Omitting a confirmed path from the payload is an error, not simplification.
+4. **Route every detection exactly once.** Reuse an accepted open event by putting its `event_id` on the write item; otherwise form a new event. A handler `existing_active_event` skip without a submitted `event_id` is not routing. Never drop or duplicate a detection.
+5. **Topology is grounded, then copied** — finalize it during routing (continuation) or grouping (new event), then write it unchanged. Omitting a confirmed path from the payload is an error, not simplification. Copy every confirmed service into `causal_features` and every grounded dependency edge into `blast_radius`.
 6. **Status decision** — apply the `status` field description on `platform_sig_events_events_write`, plus:
    - `open`: at least one event-aligned active failure is confirmed, or a concrete off-topic observed-error row contains a non-benign error.
    - `dismissed`: only a new event candidate may be dismissed when every assigned detection is non-confirming, unrelated, benign, or positive and no off-topic row contains a concrete non-benign error; also for same-batch duplicates. A continuation preserves the open event's lifecycle unless the `closed` recovery rules apply.
@@ -426,14 +454,15 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, `assess
 
 Final payload constraints for `platform_sig_events_events_write`. The procedure owns matching, grouping, evidence interpretation, status, severity, confidence, and narrative synthesis. `<communication>` applies to all narrative fields.
 
-- `event_id`: reuse from an accepted open event continuation; omit for new episodes (the handler assigns one).
+- `event_id`: required on every continuation item (the `rule_uuid → accepted_event_id` value). Omit only for new episodes so the handler can assign one.
 - `title`: required and stable for unchanged continuations. Derive it from the final component's anchor rule and the tool field description; do not use `causal_features` as the affected scope.
 - `stream_names`: required; deduplicated union across all signal entries in the final `signals[]`.
 - `status`, `severity`, `confidence`: set during status and severity calibration.
-- `symptom_hypothesis`: required, maximum 300 characters including spaces. Count and shorten it before emitting the payload.
-- `summary`: required; maximum 600 characters including spaces. report observed failures and impacts from the component's signals. Use `blast_radius` dependency entries only for an explicit supported path; do not infer causality or repeat `symptom_hypothesis`.
+- `symptom_hypothesis`: required, maximum 300 characters including spaces. Name the deepest evidence-supported mechanism (shared backend error when that is what the rows show). Count and shorten it before emitting the payload.
+- `summary`: required; maximum 600 characters including spaces. Report observed failures and impacts from the component's signals. Use `blast_radius` dependency entries only for an explicit supported path; do not infer causality, repeat `symptom_hypothesis`, or include raw match counts.
 - `assessment_note`: required for every emitted event item, maximum 400 characters including spaces. State the lifecycle decision and its reasoning; count and shorten it before emitting the payload.
 - `signals` (**required — never omit, never empty**): assemble at emit time from the final component assignment and grounding record. One signal per `metadata.rule_uuid`; each signal `description` maximum 350 characters including spaces. A critical event still requires the confirmation described in <critical_rules>.
-- `blast_radius`, `causal_features`: emit the deduplicated topology union finalized during grouping.
+- `blast_radius`: grounded dependency edges (`type: "dependency"`) for confirmed hops. Omit extra `type: "entity"` nodes whose `feature_id` is already an edge `source` or `target`.
+- `causal_features`: every service whose signal in the item is `confirms`. Emit the deduplicated union finalized during grouping.
 
 </field_rules>
