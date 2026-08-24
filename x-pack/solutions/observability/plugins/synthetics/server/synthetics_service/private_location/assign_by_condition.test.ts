@@ -8,8 +8,10 @@
 import {
   agentIdCondition,
   agentIdFromCondition,
+  assignedAgentIdForMonitorLocation,
   assignAgentById,
   balanceAgentsByCost,
+  countMonitorsByAssignedAgent,
   isConditionShardedLocation,
   isEqlSafeLiteral,
   UNASSIGNED_CONDITION,
@@ -105,6 +107,59 @@ describe('assignAgentById', () => {
         expect(now).toBe(before.get(id));
       }
     }
+  });
+});
+
+describe('countMonitorsByAssignedAgent', () => {
+  it('counts package policies per stamped agent id and skips unassigned', () => {
+    const counts = countMonitorsByAssignedAgent([
+      { condition: agentIdCondition('agent-a') },
+      { condition: agentIdCondition('agent-a') },
+      { condition: agentIdCondition('agent-b') },
+      { condition: UNASSIGNED_CONDITION },
+      { condition: null },
+    ]);
+
+    expect(counts.get('agent-a')).toBe(2);
+    expect(counts.get('agent-b')).toBe(1);
+    expect(counts.has('__synthetics_unassigned__')).toBe(false);
+    expect(counts.size).toBe(2);
+  });
+});
+
+describe('assignedAgentIdForMonitorLocation', () => {
+  it('prefers the new-format package policy over a legacy space-suffixed id', () => {
+    const agentId = assignedAgentIdForMonitorLocation(
+      [
+        { id: 'mon-1-loc-1-default', condition: agentIdCondition('legacy-agent') },
+        { id: 'mon-1-loc-1', condition: agentIdCondition('new-agent') },
+      ],
+      'mon-1',
+      'loc-1'
+    );
+
+    expect(agentId).toBe('new-agent');
+  });
+
+  it('falls back to a legacy space-suffixed policy when the new id is absent', () => {
+    const agentId = assignedAgentIdForMonitorLocation(
+      [{ id: 'mon-1-loc-1-default', condition: agentIdCondition('legacy-agent') }],
+      'mon-1',
+      'loc-1'
+    );
+
+    expect(agentId).toBe('legacy-agent');
+  });
+
+  it('returns undefined when no matching policy is assigned', () => {
+    expect(assignedAgentIdForMonitorLocation([], 'mon-1', 'loc-1')).toBeUndefined();
+    expect(
+      assignedAgentIdForMonitorLocation(
+        [{ id: 'mon-1-loc-1', condition: UNASSIGNED_CONDITION }],
+        'mon-1',
+        'loc-1'
+      )
+    ).toBeUndefined();
   });
 });
 

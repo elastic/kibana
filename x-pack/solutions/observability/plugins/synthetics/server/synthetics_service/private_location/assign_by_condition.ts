@@ -94,6 +94,41 @@ export const agentIdFromCondition = (condition?: string | null): string | undefi
   return match ? match[1] : undefined;
 };
 
+/** Counts monitors pinned to each agent via a stamped `${agent.id}` condition. */
+export const countMonitorsByAssignedAgent = (
+  packagePolicies: ReadonlyArray<{ condition?: string | null }>
+): Map<string, number> => {
+  const counts = new Map<string, number>();
+  for (const policy of packagePolicies) {
+    const agentId = agentIdFromCondition(policy.condition);
+    if (!agentId) {
+      continue;
+    }
+    counts.set(agentId, (counts.get(agentId) ?? 0) + 1);
+  }
+  return counts;
+};
+
+/**
+ * Assigned agent for one monitor at one location. Prefers the current
+ * `${configId}-${locationId}` package policy; falls back to a legacy
+ * space-suffixed id when the new format is absent.
+ */
+export const assignedAgentIdForMonitorLocation = (
+  packagePolicies: ReadonlyArray<{ id: string; condition?: string | null }>,
+  monitorId: string,
+  locationId: string
+): string | undefined => {
+  const newId = `${monitorId}-${locationId}`;
+  const exact = packagePolicies.find((policy) => policy.id === newId);
+  if (exact) {
+    return agentIdFromCondition(exact.condition);
+  }
+  const legacyPrefix = `${newId}-`;
+  const legacy = packagePolicies.find((policy) => policy.id.startsWith(legacyPrefix));
+  return legacy ? agentIdFromCondition(legacy.condition) : undefined;
+};
+
 /**
  * Rendezvous placement of a monitor onto one of the location's enrolled agents.
  * Returns the assigned agent id and its ready-to-stamp condition, or undefined

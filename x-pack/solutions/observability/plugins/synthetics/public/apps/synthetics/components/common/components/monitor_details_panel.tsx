@@ -185,6 +185,7 @@ export const MonitorDetailsPanel = ({
 
         {!hideLocations && (
           <MonitorAssignedAgents
+            configId={configId}
             monitorLocations={monitor.locations}
             hasMaintenanceWindows={!isEmpty(maintenanceWindows)}
           />
