@@ -17,6 +17,7 @@ project:
   owner: '@elastic/rna-project-team'
   sourceRoot: x-pack/platform/plugins/shared/alerting_v2
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/task-manager-plugin'
   - '@kbn/features-plugin'

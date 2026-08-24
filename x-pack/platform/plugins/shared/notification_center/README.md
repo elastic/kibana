@@ -132,73 +132,29 @@ A notification declares which variant it is with `kind` in the registry (`kind: 
 
 ## Reading notifications: what is a query param
 
-The list route returns a **collapsed** set (one representative document per
-`notification_id`) **bounded** by a result cap. The cap is what keeps the route safe, and it
-is also what decides which narrowing operations can honestly be exposed as query params.
+The list route returns a **collapsed** set (one document per `notification_id`) bounded by a
+result cap.
 
-> **Tenet — a query param exists only if the server can apply it before the result cap.
-> Everything else is a field on the response that clients facet.**
+> **A query param exists only if it can be applied before truncation
+> and maintain an accurate representation of collapsed notification state**
 
-A filter applied *before* collapse-and-cap bounds the filtered set, so `?namespace=x` means
-"the newest N notifications in namespace x" — a real search. A filter applied *after* the cap
-narrows an already-truncated window: it can come back empty while matches exist just outside
-the window, and running it on the client instead loses nothing, because the client sees the
-same window. So the only narrowing worth doing server-side is the kind that changes **which
-items survive truncation**.
+1. **Is it on the document?**
+2. **Does it define the set, or pick a copy within it?**
 
-Two admission tests, in order:
+   - e.g. a time window defines which copies form the group, so the newest one in
+     it is the right representative. A filter on mutable state
+     picks an arbitrary copy to stand for the group.
 
-1. **Is it on the document?** Per-user state is not in the index — read state and mute live in
-   `userStorage`. Not a param.
-2. **Is it invariant across every copy of the `notification_id`?** A doc-level filter on
-   mutable state changes which copy represents the collapsed group. `severity` is mutable
-   (a condition can escalate on re-push), so it is not a param.
+| Candidate           | On document | Defines the set                             | Where          |
+| ------------------- | ----------- | ------------------------------------------- | -------------- |
+| `namespace`, `type` | yes         | yes — both are encoded in `notification_id` | server param   |
+| `from` / `to`       | yes         | yes — the window is the set                 | server param   |
+| `severity`          | yes         | no — picks an arbitrary copy                | response field |
+| read state, mute    | no          | n/a                                         | response field |
 
-Only yes-to-both qualifies:
+The server annotates per-user read state, it does not filter or order by it.
 
-| Candidate | On document | Invariant per id | Where |
-| --- | --- | --- | --- |
-| `namespace`, `type` | yes | yes — both are encoded in `notification_id` | server param |
-| `from` / `to` | yes | selects which copies form the group | server param |
-| `severity` | yes | no — mutable across copies | response field |
-| read state, mute | no | n/a | response field |
-
-Corollary: **the server annotates per-user state; it does not filter or order by it.** The
-list carries `isRead` for the caller but is ordered by recency alone, so the sequence is
-identical for every caller and a client tracking read state optimistically has nothing to
-reconcile.
-
-### Scalability fallbacks
-
-`truncated: true` in a response is the tripwire. If it starts appearing in practice, escalate
-in this order — the first three preserve the tenet, the last two deliberately change its
-premise:
-
-1. **Tighten retention.** Shrink the severity TTL horizons. This reduces the population rather
-   than the window, and it is the control already designed for the job.
-2. **Add a doc-level invariant filter** that consumers actually scope by, so the cap bounds a
-   smaller meaningful set. `kind` is the obvious candidate: it is registry metadata rather than
-   a stored field, so the server expands it to a set of `type` values and filters pre-cap.
-   Admission still requires passing both tests above.
-3. **Raise the cap.** Cheap and bounded, but the cost is linear in payload and client memory.
-   Appropriate while the whole set is still plausibly "one user's current state".
-4. **Server-side paging.** The real fix once the set exceeds what a client should hold, but it
-   is in tension with client-side faceting: you cannot facet over a set you hold one page of.
-   Note also that `search_after` does not compose cleanly with `collapse` — the representative
-   is the newest copy, so every older copy of an already-returned group sorts *after* it and
-   re-forms that group on a later page, represented by a stale copy. Paging a collapsed set is
-   awkward because the set is a query-time projection, not a stored thing. Reaching this rung is
-   the signal to move to (5), not to bolt cursors or post-collapse filters onto this shape.
-
-   Consumers should therefore treat **de-duplication by `notification_id`, keeping the first
-   occurrence, as a permanent client-side invariant**. It costs nothing today, and it stays
-   necessary under any paging scheme: on a live feed a re-pushed notification legitimately
-   resurfaces at the top, so the server can never promise id-uniqueness across a paging
-   session. Page by cursor, never by offset — new arrivals shift every offset.
-5. **Materialize current state** — an index keyed by `notification_id` holding the latest state,
-   updated on submit. This is what makes mutable attributes and per-user state legitimately
-   filterable before a cap, and it is the only route to real `severity` or unread *search*
-   rather than window narrowing.
+An older high-severity notification can now fall outside the cap; server-side pagination and/or a higher cap will address this.
 
 ## Submitting notifications (`forType`)
 

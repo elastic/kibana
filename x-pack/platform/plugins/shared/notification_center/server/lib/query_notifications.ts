@@ -61,13 +61,9 @@ const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryConta
 
 /**
  * Fetch the notification list
- * - Return only the newest in-window doc per `notification_id`, collapse duplicates.
- * - Filter by severity TTL, namespace, type and time-range, all at the document level so
- *   the result limit bounds the filtered set.
- * - Sort by newest first, independent of read state: the server reports the caller's
- *   `isRead` but does not order by it, so the ordering is the same for every caller and a
- *   client tracking read state optimistically has nothing to reconcile.
- * - With read state, annotate each item with `isRead`; without it, omit the field.
+ * - Return only the newest doc per `notification_id`, collapse duplicates.
+ * - Filter by severity TTL, namespace, type and time-range
+ * - Sort by newest first.
  */
 export const queryNotifications = async (
   deps: NotificationQueryDeps,

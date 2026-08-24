@@ -126,14 +126,7 @@ export const notificationReadSchema = notificationObject
 
 /**
  * Read-path query params. Used primarily at the HTTP GET route boundary.
- *`queryNotifications` re-parses it for extra validation..
- *
- * Every param here filters whole documents, so the result limit applies to the filtered
- * set — `?namespace=x` returns the newest N notifications in that namespace. `severity`
- * is deliberately absent: it is mutable across a notification's copies, so it cannot
- * filter at the document level without changing which copy represents the collapsed
- * group, and filtering after the collapse would narrow an already-capped window instead
- * of searching. Consumers facet on the returned `severity` field themselves.
+ *`queryNotifications` re-parses it for extra validation.
  */
 export const notificationQueryParamsSchema = z
   .object({
