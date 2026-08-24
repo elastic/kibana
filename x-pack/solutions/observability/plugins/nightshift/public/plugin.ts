@@ -23,6 +23,7 @@ import type {
   NightshiftSetupDependencies,
   NightshiftStartDependencies,
 } from './types';
+import { InvestigationOverviewTab } from './investigation/investigation_overview_tab';
 
 export class NightshiftPlugin
   implements
@@ -87,6 +88,20 @@ export class NightshiftPlugin
             .get('nightshiftAgentBuilderAttachments')
             .error(`Failed to register agent builder attachments: ${error}`);
         });
+
+      agentBuilder.conversationTemplates.registerTab('nightshift.overview', {
+        label: 'Overview',
+        content: InvestigationOverviewTab,
+      });
+
+      agentBuilder.conversationTemplates.registerTemplateUIDefinition(
+        'observability.nightshift.investigation',
+        {
+          name: 'Investigation',
+          icon: 'inspect',
+          tabs: ['nightshift.overview'],
+        }
+      );
     }
 
     // Single source of truth: aggregates rollout flag, project type, pricing tier, license and

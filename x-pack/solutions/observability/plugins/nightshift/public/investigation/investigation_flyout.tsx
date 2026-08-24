@@ -20,6 +20,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiNotificationBadge,
   EuiPanel,
   EuiSpacer,
@@ -47,6 +48,7 @@ import type {
 } from '@kbn/significant-events-schema';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { useKibana } from '../hooks/use_kibana';
+import { InvestigationOverviewTab } from './investigation_overview_tab';
 import { buildInvestigationConversationChatOptions } from '../chat/open_significant_event_in_chat';
 import {
   buildHypothesisChatOptions,
@@ -89,7 +91,7 @@ import {
   type RecommendationItem,
 } from './investigation_presentation';
 
-export type InvestigationFlyoutTabId = 'recommendations' | 'blindSpots' | 'hypotheses';
+export type InvestigationFlyoutTabId = 'overview' | 'recommendations' | 'blindSpots' | 'hypotheses';
 
 type CompletedTabId = InvestigationFlyoutTabId;
 
@@ -113,6 +115,36 @@ const hypothesisConfirmedAriaLabel = i18n.translate(
     defaultMessage: 'Hypothesis confirmed',
   }
 );
+
+function InvestigationOverviewTabWrapper({
+  conversationId,
+}: {
+  conversationId: string;
+  agentBuilder: unknown;
+}): React.ReactElement | null {
+  const { http } = useKibana().services;
+  const [conversation, setConversation] = useState<Record<string, unknown> | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!conversationId) return;
+    setLoading(true);
+    http
+      .get(`/internal/agent-builder/conversations/${conversationId}`)
+      .then((res: unknown) => {
+        const r = res as Record<string, unknown>;
+        setConversation((r.conversation as Record<string, unknown>) ?? r);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [conversationId, http]);
+
+  if (loading) return <EuiLoadingSpinner />;
+  if (!conversation) return null;
+  return (
+    <InvestigationOverviewTab conversation={conversation as Parameters<typeof InvestigationOverviewTab>[0]['conversation']} />
+  );
+}
 
 const INVESTIGATION_FLYOUT_BODY_FONT_SIZE = '14px';
 
@@ -504,7 +536,9 @@ export function InvestigationFlyout({
 }: InvestigationFlyoutProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, share } = useKibana().services;
-  const [selectedTab, setSelectedTab] = useState<CompletedTabId>(initialTab);
+  const [selectedTab, setSelectedTab] = useState<CompletedTabId>(
+    conversationId ? 'overview' : initialTab
+  );
 
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const getQueryHref = useCallback(
@@ -567,7 +601,17 @@ export function InvestigationFlyout({
     [agentBuilder]
   );
 
-  const tabs = [
+  const tabs: Array<{ id: InvestigationFlyoutTabId; name: string; count?: number }> = [
+    ...(conversationId
+      ? [
+          {
+            id: 'overview' as const,
+            name: i18n.translate('xpack.nightshift.investigation.overviewTab', {
+              defaultMessage: 'Overview',
+            }),
+          },
+        ]
+      : []),
     {
       id: 'recommendations' as const,
       name: i18n.translate('xpack.nightshift.investigation.recommendationsTab', {
@@ -660,9 +704,11 @@ export function InvestigationFlyout({
                 onClick={() => setSelectedTab(tab.id)}
                 data-test-subj={`nightshiftInvestigationFlyoutTab-${tab.id}`}
                 append={
-                  <EuiNotificationBadge color="subdued" aria-hidden={true}>
-                    {tab.count}
-                  </EuiNotificationBadge>
+                  tab.count !== undefined ? (
+                    <EuiNotificationBadge color="subdued" aria-hidden={true}>
+                      {tab.count}
+                    </EuiNotificationBadge>
+                  ) : undefined
                 }
               >
                 {tab.name}
@@ -670,6 +716,12 @@ export function InvestigationFlyout({
             ))}
           </EuiTabs>
           <EuiSpacer size="m" />
+          {selectedTab === 'overview' && conversationId && (
+            <InvestigationOverviewTabWrapper
+              conversationId={conversationId}
+              agentBuilder={agentBuilder}
+            />
+          )}
           {selectedTab === 'recommendations' && (
             <EuiFlexGroup
               direction="column"
