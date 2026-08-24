@@ -78,8 +78,8 @@ describe('workflow_yaml_validation_parity', () => {
     const fingerprint = validationResultsFingerprint(results);
 
     expect(fingerprint).toMatchInlineSnapshot(`
-      "step-name-validation\u0000error\u00003:11\u00003:25\u0000Step name \\"duplicate_step\\" is not unique. Found 2 steps with this name.
-      step-name-validation\u0000error\u00007:11\u00007:25\u0000Step name \\"duplicate_step\\" is not unique. Found 2 steps with this name."
+      "step-name-validation\u0000duplicateStepName\u0000error\u00003:11\u00003:25\u0000Step name \\"duplicate_step\\" is not unique. Found 2 steps with this name.
+      step-name-validation\u0000duplicateStepName\u0000error\u00007:11\u00007:25\u0000Step name \\"duplicate_step\\" is not unique. Found 2 steps with this name."
     `);
   });
 });

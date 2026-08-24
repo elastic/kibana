@@ -116,6 +116,8 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
   });
   const connectorsData = useAvailableConnectors();
   const validationContextRef = useWorkflowYamlValidationContextRef();
+  const connectorTypesStatus = validationContextRef.current.connectorTypes.status;
+  const previousConnectorTypesStatusRef = useRef(connectorTypesStatus);
   const workflowZodSchema = useMemo(
     () =>
       getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}, triggerSchemas.getRegisteredIds()),
@@ -350,6 +352,10 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
       return;
     }
 
+    if (validationContextRef.current.connectorTypes.status === 'loading') {
+      return;
+    }
+
     const yamlToValidate = validationYamlRef.current;
     let didWaitForYamlSchema = false;
 
@@ -519,6 +525,21 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
     syncValidationDisplay,
     validationYaml,
   ]);
+
+  useEffect(() => {
+    const previousConnectorTypesStatus = previousConnectorTypesStatusRef.current;
+    previousConnectorTypesStatusRef.current = connectorTypesStatus;
+
+    if (
+      previousConnectorTypesStatus === connectorTypesStatus ||
+      !highlightValidationErrors ||
+      !isEditorMounted
+    ) {
+      return;
+    }
+
+    void runValidationRef.current();
+  }, [connectorTypesStatus, highlightValidationErrors, isEditorMounted]);
 
   useEffect(() => {
     if (
