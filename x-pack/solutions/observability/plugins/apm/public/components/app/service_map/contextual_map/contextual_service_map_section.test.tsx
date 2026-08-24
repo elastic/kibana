@@ -17,8 +17,13 @@ import { ContextualServiceMapSection } from './contextual_service_map_section';
 import { APM_EBT_ACTIONS } from '../../ebt_constants';
 import { SERVICE_MAP_EBT_ELEMENTS } from '../ebt_constants';
 
+let embeddableProps: Record<string, unknown> | null = null;
+
 jest.mock('../../../../embeddable/service_map/service_map_embeddable', () => ({
-  ServiceMapEmbeddable: () => <div data-test-subj="mockServiceMapEmbeddable" />,
+  ServiceMapEmbeddable: (props: Record<string, unknown>) => {
+    embeddableProps = props;
+    return <div data-test-subj="mockServiceMapEmbeddable" />;
+  },
 }));
 
 const mockGetServiceMapUrl = jest.fn(
@@ -68,6 +73,13 @@ function renderSection(
 describe('ContextualServiceMapSection', () => {
   beforeEach(() => {
     mockGetServiceMapUrl.mockClear();
+    embeddableProps = null;
+  });
+
+  it('forwards the flyout options to the embeddable so the flyout inherits the host filters', () => {
+    renderSection({ flyoutOptions: { transactionType: 'request' } });
+
+    expect(embeddableProps?.flyoutOptions).toEqual({ transactionType: 'request' });
   });
 
   it('renders the map section when platinum license and service map are available', () => {

@@ -9,4 +9,5 @@ export type * from './types';
 export * from './constants';
 export * from './chart_definition';
 export * from './filters';
+export * from './query_helpers';
 export * from './chart_builders';

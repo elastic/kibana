@@ -33,6 +33,20 @@ jest.mock('../hooks/use_project_routing', () => ({
   useProjectRouting: () => undefined,
 }));
 
+// Both depend on the time range metadata context, which this test renders the overview without.
+jest.mock('../hooks/use_service_flyout_transaction_type', () => ({
+  useServiceFlyoutTransactionType: () => ({
+    transactionTypes: ['request'],
+    status: 'success',
+    selectedTransactionType: 'request',
+    isResolved: true,
+  }),
+}));
+
+jest.mock('../../../../hooks/use_preferred_data_source_and_bucket_size', () => ({
+  usePreferredDataSourceAndBucketSize: () => null,
+}));
+
 jest.mock('@kbn/apm-ui-shared', () => ({
   ServiceFlyoutTransactionsSection: (
     props: React.ComponentProps<typeof ServiceFlyoutTransactionsSection>

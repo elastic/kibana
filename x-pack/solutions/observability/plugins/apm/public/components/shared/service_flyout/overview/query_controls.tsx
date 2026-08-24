@@ -17,22 +17,28 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo } from 'react';
-import { ApmDocumentType } from '../../../../../common/document_type';
+import React, { useMemo } from 'react';
 import type { Environment } from '../../../../../common/environment_rt';
-import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
-import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useUnifiedEnvironmentsFetcher } from '../../../../hooks/use_unified_environments_fetcher';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { TimePickerQuickRange } from '../../date_picker/typings';
 import { EnvironmentSelect } from '../../environment_select';
 import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 
-export function ServiceFlyoutQueryControls() {
+// The transaction type is resolved by the overview, which needs it to build the chart queries, so it
+// is passed in rather than fetched twice.
+export function ServiceFlyoutQueryControls({
+  transactionTypes,
+  transactionTypeStatus,
+  selectedTransactionType,
+}: {
+  transactionTypes: string[];
+  transactionTypeStatus: FETCH_STATUS;
+  selectedTransactionType?: string;
+}) {
   const {
     deps: { core },
     service,
@@ -41,7 +47,6 @@ export function ServiceFlyoutQueryControls() {
       environment,
       rangeFrom,
       rangeTo,
-      transactionType = '',
       setEnvironment,
       setRange,
       onRefresh,
@@ -52,22 +57,6 @@ export function ServiceFlyoutQueryControls() {
   const showTransactionTypeFilter = capabilities.overview?.transactionTypeFilter ?? false;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const preferred = usePreferredDataSourceAndBucketSize({
-    start,
-    end,
-    kuery: '',
-    type: ApmDocumentType.TransactionMetric,
-    numBuckets: 100,
-  });
-
-  const { transactionTypes, status: transactionTypeStatus } = useServiceTransactionTypesFetcher({
-    serviceName: service.name,
-    start,
-    end,
-    documentType: preferred?.source.documentType,
-    rollupInterval: preferred?.source.rollupInterval,
-  });
 
   const { environments, status: environmentsStatus } = useUnifiedEnvironmentsFetcher({
     serviceName: service.name,
@@ -85,21 +74,6 @@ export function ServiceFlyoutQueryControls() {
       label: display,
     }));
   }, [core?.uiSettings]);
-
-  const selectedTransactionType = useMemo(
-    () => getTransactionType({ transactionType, transactionTypes, agentName: service.agentName }),
-    [service.agentName, transactionType, transactionTypes]
-  );
-
-  useEffect(() => {
-    if (
-      setTransactionType &&
-      selectedTransactionType !== undefined &&
-      selectedTransactionType !== transactionType
-    ) {
-      setTransactionType(selectedTransactionType);
-    }
-  }, [setTransactionType, selectedTransactionType, transactionType]);
 
   const transactionTypeOptions = transactionTypes.map((type) => ({ value: type, text: type }));
   const isTransactionTypeDisabled =

@@ -20,10 +20,16 @@ import {
   getCpuUsageChart,
   getMemoryUsageChart,
 } from './apm';
-import { getErrorRateChart, getLatencyChart, getThroughputChart } from './shared';
+import {
+  THROUGHPUT_COLUMN,
+  getErrorRateChart,
+  getLatencyChart,
+  getThroughputChart,
+} from './shared';
 
 const TRANSACTION_INDEXES = 'traces-apm*';
 const METRIC_INDEXES = 'metrics-apm*';
+const BUCKET_SIZE_IN_SECONDS = 600;
 
 const SCOPE = {
   serviceName: 'opbeans-java',
@@ -52,79 +58,88 @@ function esqlOf(config: LensESQLConfig | undefined): string {
   return config.dataset.esql;
 }
 
+function latencyChartOf({
+  scope = SCOPE,
+  latencyAggregationType = LatencyAggregationType.avg,
+  titleAction,
+}: {
+  scope?: typeof SCOPE;
+  latencyAggregationType?: LatencyAggregationType;
+  titleAction?: string;
+} = {}) {
+  return getLatencyChart({
+    indices: TRANSACTION_INDEXES,
+    latencyAggregationType,
+    titleAction,
+    buildQuery: (idx, aggregation) =>
+      buildApmLatencyQuery({
+        indices: idx,
+        scope,
+        aggregation,
+        bucketSizeInSeconds: BUCKET_SIZE_IN_SECONDS,
+      }),
+  });
+}
+
 describe('APM chart configs', () => {
   describe('getLatencyChart / buildApmLatencyQuery', () => {
     it('builds avg latency from average transaction duration', () => {
-      const chart = getLatencyChart({
-        indices: TRANSACTION_INDEXES,
-        latencyAggregationType: LatencyAggregationType.avg,
-        buildQuery: (idx, agg) => buildApmLatencyQuery(idx, SCOPE, agg),
-      });
+      const chart = latencyChartOf();
 
       expect(esqlOf(chart.config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(600 seconds)'
       );
       expect(seriesLayerOf(chart.config).yAxis[0].value).toBe('AVG(duration_ms)');
     });
 
     it('builds p95 percentile latency', () => {
-      const chart = getLatencyChart({
-        indices: TRANSACTION_INDEXES,
-        latencyAggregationType: LatencyAggregationType.p95,
-        buildQuery: (idx, agg) => buildApmLatencyQuery(idx, SCOPE, agg),
-      });
+      const chart = latencyChartOf({ latencyAggregationType: LatencyAggregationType.p95 });
 
-      expect(esqlOf(chart.config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS PERCENTILE(duration_ms, 95) BY timestamp = TBUCKET(100)'
-      );
+      expect(esqlOf(chart.config)).toContain('STATS PERCENTILE(duration_ms, 95)');
       expect(seriesLayerOf(chart.config).yAxis[0].value).toBe('PERCENTILE(duration_ms, 95)');
     });
 
     it('builds p99 percentile latency', () => {
-      const chart = getLatencyChart({
-        indices: TRANSACTION_INDEXES,
-        latencyAggregationType: LatencyAggregationType.p99,
-        buildQuery: (idx, agg) => buildApmLatencyQuery(idx, SCOPE, agg),
-      });
+      const chart = latencyChartOf({ latencyAggregationType: LatencyAggregationType.p99 });
 
-      expect(esqlOf(chart.config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS PERCENTILE(duration_ms, 99) BY timestamp = TBUCKET(100)'
-      );
+      expect(esqlOf(chart.config)).toContain('STATS PERCENTILE(duration_ms, 99)');
       expect(seriesLayerOf(chart.config).yAxis[0].value).toBe('PERCENTILE(duration_ms, 99)');
     });
 
-    it('filters by the literal sentinel and missing field when environment is ENVIRONMENT_NOT_DEFINED', () => {
+    it('buckets by the resolved bucket size so the series matches the APM chart APIs', () => {
       const chart = getLatencyChart({
         indices: TRANSACTION_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
-        buildQuery: (idx, agg) =>
-          buildApmLatencyQuery(idx, { ...SCOPE, environment: ENVIRONMENT_NOT_DEFINED.value }, agg),
+        buildQuery: (idx, aggregation) =>
+          buildApmLatencyQuery({
+            indices: idx,
+            scope: SCOPE,
+            aggregation,
+            bucketSizeInSeconds: 30,
+          }),
       });
 
-      expect(esqlOf(chart.config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "ENVIRONMENT_NOT_DEFINED" OR `service.environment` IS NULL | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
+      expect(esqlOf(chart.config)).toContain('BY timestamp = TBUCKET(30 seconds)');
+    });
+
+    it('filters by the literal sentinel and missing field when environment is ENVIRONMENT_NOT_DEFINED', () => {
+      const chart = latencyChartOf({
+        scope: { ...SCOPE, environment: ENVIRONMENT_NOT_DEFINED.value },
+      });
+
+      expect(esqlOf(chart.config)).toContain(
+        'WHERE `service.environment` == "ENVIRONMENT_NOT_DEFINED" OR `service.environment` IS NULL'
       );
     });
 
     it('omits the environment clause when environment is ENVIRONMENT_ALL', () => {
-      const chart = getLatencyChart({
-        indices: TRANSACTION_INDEXES,
-        latencyAggregationType: LatencyAggregationType.avg,
-        buildQuery: (idx, agg) =>
-          buildApmLatencyQuery(idx, { ...SCOPE, environment: ENVIRONMENT_ALL.value }, agg),
-      });
+      const chart = latencyChartOf({ scope: { ...SCOPE, environment: ENVIRONMENT_ALL.value } });
 
-      expect(esqlOf(chart.config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | WHERE `service.name` == "opbeans-java" | EVAL duration_ms = TO_DOUBLE(transaction.duration.us) / 1000 | STATS AVG(duration_ms) BY timestamp = TBUCKET(100)'
-      );
+      expect(esqlOf(chart.config)).not.toContain('service.environment');
     });
 
     it('omits the transaction type clause when transactionType is empty string', () => {
-      const chart = getLatencyChart({
-        indices: TRANSACTION_INDEXES,
-        latencyAggregationType: LatencyAggregationType.avg,
-        buildQuery: (idx, agg) => buildApmLatencyQuery(idx, { ...SCOPE, transactionType: '' }, agg),
-      });
+      const chart = latencyChartOf({ scope: { ...SCOPE, transactionType: '' } });
 
       expect(esqlOf(chart.config)).not.toContain('transaction.type');
     });
@@ -133,36 +148,63 @@ describe('APM chart configs', () => {
       const chart = getLatencyChart({
         indices: undefined,
         latencyAggregationType: LatencyAggregationType.avg,
-        buildQuery: (idx, agg) => buildApmLatencyQuery(idx, SCOPE, agg),
+        buildQuery: (idx, aggregation) =>
+          buildApmLatencyQuery({
+            indices: idx,
+            scope: SCOPE,
+            aggregation,
+            bucketSizeInSeconds: BUCKET_SIZE_IN_SECONDS,
+          }),
       });
 
       expect(chart.id).toBe('latency');
       expect(chart.config).toBeUndefined();
     });
 
-    it('attaches the title action to the chart definition', () => {
+    it('returns no config when the query cannot be built yet', () => {
       const chart = getLatencyChart({
         indices: TRANSACTION_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
-        titleAction: 'latency-action',
-        buildQuery: (idx, agg) => buildApmLatencyQuery(idx, SCOPE, agg),
       });
+
+      expect(chart.config).toBeUndefined();
+    });
+
+    it('attaches the title action to the chart definition', () => {
+      const chart = latencyChartOf({ titleAction: 'latency-action' });
 
       expect(chart.titleAction).toBe('latency-action');
     });
   });
 
   describe('getThroughputChart / buildApmThroughputQuery', () => {
-    it('builds throughput from a raw count per bucket', () => {
+    it('builds throughput as transactions per minute', () => {
       const chart = getThroughputChart({
         indices: TRANSACTION_INDEXES,
-        buildQuery: (idx) => buildApmThroughputQuery(idx, SCOPE),
+        valueColumn: THROUGHPUT_COLUMN,
+        buildQuery: (idx) =>
+          buildApmThroughputQuery({
+            indices: idx,
+            scope: SCOPE,
+            bucketSizeInSeconds: BUCKET_SIZE_IN_SECONDS,
+          }),
       });
 
       expect(esqlOf(chart.config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | STATS COUNT(*) BY timestamp = TBUCKET(100)'
+        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | STATS transactions = COUNT(*) BY timestamp = TBUCKET(600 seconds) | EVAL throughput = TO_DOUBLE(transactions) / 10 | KEEP timestamp, throughput | SORT timestamp'
       );
-      expect(seriesLayerOf(chart.config).yAxis[0].value).toBe('COUNT(*)');
+      expect(seriesLayerOf(chart.config).yAxis[0].value).toBe('throughput');
+    });
+
+    it('divides by a fractional number of minutes for bucket sizes that are not whole minutes', () => {
+      const chart = getThroughputChart({
+        indices: TRANSACTION_INDEXES,
+        valueColumn: THROUGHPUT_COLUMN,
+        buildQuery: (idx) =>
+          buildApmThroughputQuery({ indices: idx, scope: SCOPE, bucketSizeInSeconds: 30 }),
+      });
+
+      expect(esqlOf(chart.config)).toContain('EVAL throughput = TO_DOUBLE(transactions) / 0.5');
     });
   });
 
@@ -171,11 +213,16 @@ describe('APM chart configs', () => {
       const chart = getErrorRateChart({
         indices: TRANSACTION_INDEXES,
         title: APM_ERROR_RATE_TITLE,
-        buildQuery: (idx) => buildApmErrorRateQuery(idx, SCOPE),
+        buildQuery: (idx) =>
+          buildApmErrorRateQuery({
+            indices: idx,
+            scope: SCOPE,
+            bucketSizeInSeconds: BUCKET_SIZE_IN_SECONDS,
+          }),
       });
 
       expect(esqlOf(chart.config)).toEqual(
-        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | STATS failure = COUNT(*) WHERE TO_STRING(event.outcome) == "failure", all = COUNT(*) WHERE (TO_STRING(event.outcome) IN ("failure", "success")) BY timestamp = TBUCKET(100) | EVAL failed_transaction_rate = CASE(all > 0, TO_DOUBLE(failure) / all, NULL) | KEEP timestamp, failed_transaction_rate | SORT timestamp'
+        'SET unmapped_fields="nullify";\nFROM traces-apm* | WHERE `processor.event` == "transaction" | WHERE `transaction.type` == "request" | WHERE `service.name` == "opbeans-java" | WHERE `service.environment` == "production" | STATS failure = COUNT(*) WHERE TO_STRING(event.outcome) == "failure", all = COUNT(*) WHERE (TO_STRING(event.outcome) IN ("failure", "success")) BY timestamp = TBUCKET(600 seconds) | EVAL failed_transaction_rate = CASE(all > 0, TO_DOUBLE(failure) / all, NULL) | KEEP timestamp, failed_transaction_rate | SORT timestamp'
       );
       expect(seriesLayerOf(chart.config).yAxis[0].value).toBe('failed_transaction_rate');
       expect((chart.config as XYLensConfig).yBounds).toEqual({

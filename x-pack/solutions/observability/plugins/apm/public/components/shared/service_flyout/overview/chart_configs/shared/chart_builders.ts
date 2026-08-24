@@ -60,17 +60,20 @@ export function getLatencyChartType(latencyAggregationType: LatencyAggregationTy
 }
 
 // buildQuery receives the aggregation expression so the STATS column name matches
-// the yAxis value without the caller having to compute it twice.
+// the yAxis value without the caller having to compute it twice. Builders that cannot aggregate the
+// raw field directly, such as the rollup ones, name their output column and pass it as valueColumn.
 export function getLatencyChart({
   indices,
   buildQuery,
   latencyAggregationType,
+  valueColumn,
   titleAction,
   projectRouting,
 }: {
   indices: string | undefined;
-  buildQuery: (indices: string, aggregation: string) => ComposerQuery;
+  buildQuery?: (indices: string, aggregation: string) => ComposerQuery;
   latencyAggregationType: LatencyAggregationType;
+  valueColumn?: string;
   titleAction?: ReactNode;
   projectRouting?: string;
 }): FlyoutLensChartConfigDefinition {
@@ -83,12 +86,12 @@ export function getLatencyChart({
     }),
     titleAction,
     indices,
-    buildQuery: (idx) => buildQuery(idx, aggregation),
+    buildQuery: buildQuery && ((idx: string) => buildQuery(idx, aggregation)),
     projectRouting,
     yAxis: [
       {
         label,
-        value: aggregation,
+        value: valueColumn ?? aggregation,
         format: 'number',
         decimals: 0,
         suffix: ' ms',
@@ -101,10 +104,17 @@ export function getLatencyChart({
 export function getThroughputChart({
   indices,
   buildQuery,
+  valueColumn = 'COUNT(*)',
+  suffix,
+  decimals = 0,
   projectRouting,
 }: {
   indices: string | undefined;
-  buildQuery: (indices: string) => ComposerQuery;
+  buildQuery?: (indices: string) => ComposerQuery;
+  valueColumn?: string;
+  /** Set when the query reports a rate rather than a per-bucket count, e.g. ` tpm`. */
+  suffix?: string;
+  decimals?: number;
   projectRouting?: string;
 }): FlyoutLensChartConfigDefinition {
   return buildChartDefinition({
@@ -120,9 +130,10 @@ export function getThroughputChart({
         label: i18n.translate('xpack.apm.serviceFlyout.throughputSeriesLabel', {
           defaultMessage: 'Throughput',
         }),
-        value: 'COUNT(*)',
+        value: valueColumn,
         format: 'number',
-        decimals: 0,
+        decimals,
+        ...(suffix ? { suffix } : {}),
         seriesColor: seriesColor(ChartType.THROUGHPUT),
       },
     ],
@@ -136,7 +147,7 @@ export function getErrorRateChart({
   projectRouting,
 }: {
   indices: string | undefined;
-  buildQuery: (indices: string) => ComposerQuery;
+  buildQuery?: (indices: string) => ComposerQuery;
   title: string;
   projectRouting?: string;
 }): FlyoutLensChartConfigDefinition {

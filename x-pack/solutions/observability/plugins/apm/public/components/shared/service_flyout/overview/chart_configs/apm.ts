@@ -24,9 +24,12 @@ import {
   CGROUP_LIMIT_MAX_VALUE,
   TIME_BUCKET_BY,
   TIME_BUCKET_FIELD,
+  TRANSACTION_COUNT_COLUMN,
   applyServiceFilters,
   buildChartDefinition,
+  pipeThroughputPerMinute,
   seriesColor,
+  timeBucketBy,
 } from './shared';
 import type {
   EcsServiceScope,
@@ -53,27 +56,47 @@ function createApmBaseQuery({
   return query;
 }
 
-export function buildApmLatencyQuery(
-  indices: string,
-  scope: EcsServiceScope,
-  aggregation: string
-): ComposerQuery {
+interface ApmTransactionQueryOptions {
+  indices: string;
+  scope: EcsServiceScope;
+  bucketSizeInSeconds: number;
+}
+
+export function buildApmLatencyQuery({
+  indices,
+  scope,
+  bucketSizeInSeconds,
+  aggregation,
+}: ApmTransactionQueryOptions & { aggregation: string }): ComposerQuery {
   const query = createApmBaseQuery({ indices, processorEvent: 'transaction', scope });
   query.pipe(`EVAL duration_ms = TO_DOUBLE(${TRANSACTION_DURATION}) / 1000`);
-  query.pipe(`STATS ${aggregation} BY ${TIME_BUCKET_BY}`);
+  query.pipe(`STATS ${aggregation} BY ${timeBucketBy(bucketSizeInSeconds)}`);
   return query;
 }
 
-export function buildApmThroughputQuery(indices: string, scope: EcsServiceScope): ComposerQuery {
-  const query = createApmBaseQuery({ indices, processorEvent: 'transaction', scope });
-  query.pipe(`STATS COUNT(*) BY ${TIME_BUCKET_BY}`);
-  return query;
-}
-
-export function buildApmErrorRateQuery(indices: string, scope: EcsServiceScope): ComposerQuery {
+export function buildApmThroughputQuery({
+  indices,
+  scope,
+  bucketSizeInSeconds,
+}: ApmTransactionQueryOptions): ComposerQuery {
   const query = createApmBaseQuery({ indices, processorEvent: 'transaction', scope });
   query.pipe(
-    `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure", all = COUNT(*) WHERE (TO_STRING(${EVENT_OUTCOME}) IN ("failure", "success")) BY ${TIME_BUCKET_BY}`
+    `STATS ${TRANSACTION_COUNT_COLUMN} = COUNT(*) BY ${timeBucketBy(bucketSizeInSeconds)}`
+  );
+  pipeThroughputPerMinute(query, bucketSizeInSeconds);
+  return query;
+}
+
+export function buildApmErrorRateQuery({
+  indices,
+  scope,
+  bucketSizeInSeconds,
+}: ApmTransactionQueryOptions): ComposerQuery {
+  const query = createApmBaseQuery({ indices, processorEvent: 'transaction', scope });
+  query.pipe(
+    `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure", all = COUNT(*) WHERE (TO_STRING(${EVENT_OUTCOME}) IN ("failure", "success")) BY ${timeBucketBy(
+      bucketSizeInSeconds
+    )}`
   );
   query.pipe('EVAL failed_transaction_rate = CASE(all > 0, TO_DOUBLE(failure) / all, NULL)');
   query.pipe(`KEEP ${TIME_BUCKET_FIELD}, failed_transaction_rate`);

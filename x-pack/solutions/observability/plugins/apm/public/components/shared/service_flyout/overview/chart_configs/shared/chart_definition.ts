@@ -37,12 +37,14 @@ export function buildChartDefinition({
   title: string;
   titleAction?: ReactNode;
   indices: string | undefined;
-  buildQuery: (indices: string) => ComposerQuery;
+  buildQuery?: (indices: string) => ComposerQuery;
   yAxis: LensYAxis[];
   yBounds?: LensYBounds;
   projectRouting?: string;
 }): FlyoutLensChartConfigDefinition {
-  if (!indices) {
+  // A definition without a config renders as a loading chart, which is how callers signal that the
+  // indices or the data source behind the query are not resolved yet.
+  if (!indices || !buildQuery) {
     return { id, title, titleAction };
   }
 

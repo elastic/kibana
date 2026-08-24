@@ -7,9 +7,16 @@
 
 import type { ReactNode } from 'react';
 import type { LensConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+import type { ApmDataSourceWithSummary } from '../../../../../../../common/data_source';
 import type { LensESQLConfig } from '../../types';
 
 export type FlyoutLensChartProcessorEvent = 'transaction' | 'metric';
+
+/**
+ * The documents and bucket span the APM chart APIs resolved for the current time range. Reusing them
+ * is what keeps the flyout charts aligned with the ones on the service overview page.
+ */
+export type FlyoutChartDataSource = ApmDataSourceWithSummary & { bucketSizeInSeconds: number };
 
 export interface FlyoutLensChartConfigDefinition {
   id: string;

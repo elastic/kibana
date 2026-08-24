@@ -23,13 +23,17 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useMemo, useState } from 'react';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import type { LensESQLConfig } from './types';
+import { ApmDocumentType } from '../../../../../common/document_type';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useServiceFlyoutContext } from '../service_flyout_context';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
+import { useServiceFlyoutTransactionType } from '../hooks/use_service_flyout_transaction_type';
 import { useProjectRouting } from '../hooks/use_project_routing';
 import { getChartDefinitions } from './chart_configs';
+import { TARGET_BUCKET_COUNT } from './chart_configs/shared';
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
 
@@ -172,7 +176,7 @@ export function ServiceFlyoutOverview() {
     service,
     capabilities,
     indices,
-    filters: { environment, rangeFrom, rangeTo, transactionType, refreshToken },
+    filters: { environment, rangeFrom, rangeTo, transactionType, setTransactionType, refreshToken },
   } = useServiceFlyoutContext();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -186,6 +190,30 @@ export function ServiceFlyoutOverview() {
   // the same projects as the surrounding APM APIs (which forward it via `x-project-routing`).
   const projectRouting = useProjectRouting();
 
+  const {
+    transactionTypes,
+    status: transactionTypeStatus,
+    selectedTransactionType,
+    isResolved: isTransactionTypeResolved,
+  } = useServiceFlyoutTransactionType({
+    serviceName: service.name,
+    agentName: service.agentName,
+    start,
+    end,
+    transactionType: transactionType ?? '',
+    setTransactionType,
+  });
+
+  // Reading the documents and bucket span the APM chart APIs prefer is what keeps these charts in
+  // sync with the ones on the service overview page.
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery: '',
+    type: ApmDocumentType.ServiceTransactionMetric,
+    numBuckets: TARGET_BUCKET_COUNT,
+  });
+
   const { keyMetrics, infrastructureMetrics } = useMemo(
     () =>
       getChartDefinitions({
@@ -193,7 +221,11 @@ export function ServiceFlyoutOverview() {
         schema: capabilities.schema,
         serviceName: service.name,
         environment,
-        transactionType: transactionType ?? '',
+        transactionType: selectedTransactionType ?? transactionType ?? '',
+        isTransactionTypeResolved,
+        dataSource: preferred
+          ? { ...preferred.source, bucketSizeInSeconds: preferred.bucketSizeInSeconds }
+          : undefined,
         latencyAggregationType,
         latencyTitleAction: (
           <LatencyAggregationTypeSelect
@@ -208,7 +240,10 @@ export function ServiceFlyoutOverview() {
       capabilities.schema,
       environment,
       indices,
+      isTransactionTypeResolved,
       latencyAggregationType,
+      preferred,
+      selectedTransactionType,
       service.name,
       transactionType,
       projectRouting,
@@ -231,7 +266,11 @@ export function ServiceFlyoutOverview() {
 
   return (
     <div data-test-subj="serviceFlyoutOverview">
-      <ServiceFlyoutQueryControls />
+      <ServiceFlyoutQueryControls
+        transactionTypes={transactionTypes}
+        transactionTypeStatus={transactionTypeStatus}
+        selectedTransactionType={selectedTransactionType}
+      />
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
         <EuiFlexItem>

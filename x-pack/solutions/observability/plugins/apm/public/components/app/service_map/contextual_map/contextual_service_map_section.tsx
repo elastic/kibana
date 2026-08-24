@@ -15,6 +15,7 @@ import { useLicenseContext } from '../../../../context/license/use_license_conte
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
+import type { ServiceFlyoutOptions } from '../../../shared/service_flyout/types';
 import { LicensePrompt } from '../../../shared/license_prompt';
 import { APM_EBT_ACTIONS } from '../../ebt_constants';
 import { DisabledPrompt } from '../disabled_prompt';
@@ -56,6 +57,8 @@ export interface ContextualServiceMapSectionProps {
   sectionTestSubj?: string;
   exploreLinkTestSubj?: string;
   embeddableContainerTestSubj?: string;
+  /** Optional overrides for the service flyout opened from this map. */
+  flyoutOptions?: ServiceFlyoutOptions;
 }
 
 export function ContextualServiceMapSection({
@@ -65,6 +68,7 @@ export function ContextualServiceMapSection({
   environment,
   kuery,
   filterPills,
+  flyoutOptions,
   panelHeight = DEFAULT_CONTEXTUAL_SERVICE_MAP_PANEL_HEIGHT,
   sectionHeight,
   embeddableMinHeight,
@@ -238,6 +242,7 @@ export function ContextualServiceMapSection({
         showFocusMapInPopover
         clearKueryOnPopoverNavigation
         embeddableMinHeight={embeddableMinHeight}
+        flyoutOptions={flyoutOptions}
       />
     </EuiPanel>
   );

@@ -6,7 +6,19 @@
  */
 
 export const TIME_BUCKET_FIELD = 'timestamp';
-export const TIME_BUCKET_BY = `${TIME_BUCKET_FIELD} = TBUCKET(100)`;
+export const TARGET_BUCKET_COUNT = 100;
+
+/**
+ * `TBUCKET` derives the time range from the Kibana time filter. An explicit span keeps the interval
+ * identical to the `fixed_interval` the APM chart APIs use, so the same data lands in the same
+ * bucket; without it Elasticsearch picks its own span and the two charts dilute spikes differently.
+ */
+export const timeBucketBy = (bucketSizeInSeconds?: number) =>
+  `${TIME_BUCKET_FIELD} = TBUCKET(${
+    bucketSizeInSeconds ? `${bucketSizeInSeconds} seconds` : TARGET_BUCKET_COUNT
+  })`;
+
+export const TIME_BUCKET_BY = timeBucketBy();
 export const ESQL_NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields="nullify";';
 
 /**
