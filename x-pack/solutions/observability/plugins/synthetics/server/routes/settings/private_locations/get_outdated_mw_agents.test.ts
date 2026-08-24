@@ -62,6 +62,7 @@ describe('getOutdatedMwAgentLocations route', () => {
 
     expect(result.outdatedLocationIds).toEqual([]);
     expect(mockGetLocations).toHaveBeenCalledWith(expect.anything(), expect.anything(), true);
+    expect(listAgents).toHaveBeenCalledWith(expect.objectContaining({ showInactive: false }));
   });
 
   it('includes a location with at least one agent older than the MW threshold', async () => {
