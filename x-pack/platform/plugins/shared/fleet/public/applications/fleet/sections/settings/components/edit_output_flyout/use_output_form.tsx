@@ -181,10 +181,14 @@ export function extractDefaultDynamicKafkaTopics(
   if (!o?.topics || o.topics?.length === 0 || (o.topics && !o.topics[0]?.topic?.includes('%{['))) {
     return [];
   }
+  const topic = o.topics[0].topic;
+  // A simple %{[field]} token maps back to the bare field label to match the preset dropdown options.
+  // Multi-token or fallback expressions are kept verbatim as both label and value.
+  const simpleToken = topic.match(/^%\{\[([^\]]+)\]\}$/);
   return [
     {
-      label: o.topics[0].topic,
-      value: o.topics[0].topic,
+      label: simpleToken ? simpleToken[1] : topic,
+      value: topic,
     },
   ];
 }

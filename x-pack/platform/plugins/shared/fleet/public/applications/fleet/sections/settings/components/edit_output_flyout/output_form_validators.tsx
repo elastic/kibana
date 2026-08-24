@@ -333,7 +333,7 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
     } else {
       const topic = val.value;
       const stripped = topic.replace(validKafkaTopicToken, '');
-      if (stripped.includes('%{[')) {
+      if (stripped.includes('%{[') || (!stripped.includes('{[') && stripped.includes(']}'))  ) {
         res.push(
           i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicBracketsError', {
             defaultMessage:

@@ -325,5 +325,17 @@ describe('Output form validation', () => {
         'The topic should have a matching number of opening and closing brackets',
       ]);
     });
+    it('should return error when orphan closing delimiter precedes a valid token', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: ']}%{[field]}' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it('should return error when orphan closing delimiter follows a valid token', () => {
+      const res = validateDynamicKafkaTopics([{ label: 'field', value: '%{[field]}]}' }]);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
   });
 });
