@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getConnectorSpec } from '@kbn/connector-specs';
 import type {
   BaseConnectorContract,
   ConnectorContractUnion,
@@ -26,6 +25,7 @@ import {
   SystemConnectorsMap,
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
 // Import the singleton instance of StepSchemas
 import { stepSchemas } from './step_schemas';
@@ -45,7 +45,11 @@ function getConnectorSchemas(): typeof import('./connector_action_schema') {
 /**
  * Get parameter schema for a specific sub-action
  */
-function getSubActionParamsSchema(actionTypeId: string, subActionName: string): z.ZodSchema {
+function getSubActionParamsSchema(
+  actionTypeId: string,
+  subActionName: string,
+  runtimeInputSchema?: Record<string, unknown>
+): z.ZodSchema {
   const { ConnectorInputSchemas, ConnectorActionInputSchemas, ConnectorSpecsInputSchemas } =
     getConnectorSchemas();
 
@@ -70,9 +74,11 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
     }
   }
 
-  const runtimeInputSchema = getConnectorSpec(actionTypeId)?.actions[subActionName]?.input;
   if (runtimeInputSchema) {
-    return runtimeInputSchema;
+    const inputSchema = fromJSONSchema(runtimeInputSchema);
+    if (inputSchema) {
+      return inputSchema;
+    }
   }
 
   // Generic fallback for unknown sub-actions
@@ -212,7 +218,22 @@ function convertDynamicConnectorsToContractsInternal(
           // Create type name: actionTypeId.subActionName (e.g., "inference.completion")
           const subActionType = `${connectorTypeName}.${subAction.name}`;
 
-          const paramsSchema = getSubActionParamsSchema(connectorType.actionTypeId, subAction.name);
+          const paramsSchemasByConnectorId = Object.fromEntries(
+            connectorType.instances.flatMap((instance) => {
+              const inputSchema = instance.actionInputSchemas?.[subAction.name];
+              if (!inputSchema) return [];
+              const parsedSchema = fromJSONSchema(inputSchema);
+              return parsedSchema ? [[instance.id, parsedSchema]] : [];
+            })
+          );
+          if (!subAction.inputSchema && Object.keys(paramsSchemasByConnectorId).length === 0) {
+            return;
+          }
+          const paramsSchema = getSubActionParamsSchema(
+            connectorType.actionTypeId,
+            subAction.name,
+            subAction.inputSchema
+          );
           const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, subAction.name);
           const metadata = getSubActionMetadata(connectorType.actionTypeId, subAction.name);
 
@@ -222,6 +243,9 @@ function convertDynamicConnectorsToContractsInternal(
             type: subActionType,
             summary: subAction.displayName,
             paramsSchema,
+            ...(Object.keys(paramsSchemasByConnectorId).length > 0
+              ? { paramsSchemasByConnectorId }
+              : {}),
             hasConnectorId,
             outputSchema,
             description: `${connectorType.displayName} - ${subAction.displayName}`,

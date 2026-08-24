@@ -139,9 +139,7 @@ export async function create({
       : validatedActionTypeConfig;
   const connectorSpec = actionType.getConnectorSpec?.();
   const specPin =
-    connectorSpec?.version !== undefined
-      ? { specId: connectorSpec.metadata.id, specVersion: connectorSpec.version }
-      : {};
+    connectorSpec?.version !== undefined ? { specVersion: connectorSpec.version } : {};
 
   const result = await tryCatch(
     async () =>

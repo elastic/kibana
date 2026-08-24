@@ -37,6 +37,8 @@ export interface ActionType {
   isExperimental?: boolean;
   isTestable?: boolean;
   specActionNames?: string[];
+  specActionSchemas?: Record<string, Record<string, unknown>>;
+  specActionSchemasByVersion?: Record<string, Record<string, Record<string, unknown>>>;
   icon?: string;
 }
 

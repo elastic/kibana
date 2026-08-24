@@ -111,12 +111,12 @@ const buildAuthHeaders = (
   context: ActionContext
 ): Record<string, string> => {
   const { auth } = connector;
-  if (auth.type !== 'api_key_header' || !auth.header || !auth.prefix) return {};
+  if (auth.type !== 'api_key_header' || !auth.header) return {};
   const rawValue = context.secrets?.[auth.header];
   if (typeof rawValue !== 'string' || !rawValue.trim()) {
     throw new Error(`Connector secret "${auth.header}" is required.`);
   }
-  return { [auth.header]: `${auth.prefix}${rawValue.trim()}` };
+  return { [auth.header]: `${auth.prefix ?? ''}${rawValue.trim()}` };
 };
 
 const toFormBody = (value: unknown): URLSearchParams => {

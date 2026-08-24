@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "2026-08-23.1",
+  "activeVersions": {
+    ".declarative-abuseipdb": "1.0.0",
+    ".declarative-okta": "1.0.0"
+  },
+  "connectors": [
+    {
+      "id": ".declarative-abuseipdb",
+      "version": "1.0.0",
+      "definitionUrl": "connectors/abuseipdb/1.0.0.yaml",
+      "contentHash": "sha256:e2906e5c1ce6922f59619974446df01fbf99221a571bfd3107eac621b5937fc6"
+    },
+    {
+      "id": ".declarative-okta",
+      "version": "1.0.0",
+      "definitionUrl": "connectors/okta/1.0.0.yaml",
+      "contentHash": "sha256:4651ef38c693e03e7fd60fc8ab0ff6c7ce021c5d528f7cd35c2cd06419ce70b7"
+    }
+  ]
+}

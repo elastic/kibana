@@ -10,26 +10,10 @@
 import * as connectorsSpecs from './all_specs';
 import type { ConnectorSpec } from './connector_spec';
 
-const runtimeConnectorSpecs = new Map<string, ConnectorSpec>();
-
-/**
- * Replaces the process-local runtime connector specifications. This is used by
- * the development catalog PoC so consumers such as Workflows can resolve the
- * same action input schemas as the Actions runtime.
- */
-export function setRuntimeConnectorSpecs(specs: ConnectorSpec[]): void {
-  runtimeConnectorSpecs.clear();
-  for (const spec of specs) {
-    runtimeConnectorSpecs.set(spec.metadata.id, spec);
-  }
-}
-
 /**
  * Returns the ConnectorSpec for a given connector type ID, or undefined if not found.
  */
 export function getConnectorSpec(connectorTypeId: string): ConnectorSpec | undefined {
-  const runtimeSpec = runtimeConnectorSpecs.get(connectorTypeId);
-  if (runtimeSpec) return runtimeSpec;
   const specEntries = Object.values(connectorsSpecs);
   return specEntries.find((s) => s.metadata.id === connectorTypeId);
 }

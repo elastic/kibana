@@ -84,6 +84,26 @@ describe('executeDeclarativeRequest', () => {
     );
   });
 
+  it('sends an API key header without requiring a prefix', async () => {
+    const requestMock = jest.fn().mockResolvedValue(response({ ok: true }));
+    const context = createContext(requestMock);
+    context.secrets = { Key: 'raw-token' };
+
+    await executeDeclarativeRequest({
+      context,
+      connector: {
+        ...connector,
+        auth: { type: 'api_key_header', header: 'Key' },
+      },
+      request: { method: 'GET', url: 'https://example.test/check' },
+      input: {},
+    });
+
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({ headers: { Key: 'raw-token' } })
+    );
+  });
+
   it('follows same-origin Link headers up to the configured page bound', async () => {
     const requestMock = jest
       .fn()

@@ -109,6 +109,7 @@ export interface DeclarativeCatalogEntry {
 export interface DeclarativeCatalogManifest {
   schemaVersion: 1;
   catalogVersion: string;
+  activeVersions: Record<string, string>;
   connectors: DeclarativeCatalogEntry[];
 }
 

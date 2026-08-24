@@ -1,0 +1,12 @@
+xpack.stack_connectors:
+  enableExperimental:
+    - connectorsFromSpecs
+  declarativeCatalog:
+    enabled: true
+    registryUrl: http://127.0.0.1:8089
+    refreshIntervalMs: 10000
+
+xpack.actions.allowedHosts:
+  - 127.0.0.1
+
+xpack.encryptedSavedObjects.encryptionKey: declarative-connectors-poc-key-123456

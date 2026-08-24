@@ -101,7 +101,6 @@ export interface ActionTypeExecutorOptions<
   authMode?: AuthMode;
   profileUid?: string;
   connectorVersion?: string;
-  specId?: string;
   specVersion?: string;
 }
 
@@ -224,6 +223,17 @@ export type ActionType<
   | ClassicActionType<Config, Secrets, Params, ExecutorResultData>
   | WorkflowActionType<Config, Secrets, Params, ExecutorResultData>;
 
+export interface ActionTypeValidation<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams
+> {
+  params?: ValidatorType<Params>;
+  config: ValidatorType<Config>;
+  secrets: ValidatorType<Secrets>;
+  connector?: (config: Config, secrets: Secrets) => string | null;
+}
+
 export interface ActionTypeCoreFields<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
@@ -263,6 +273,13 @@ export interface ActionTypeCoreFields<
    * catalog is still loading.
    */
   getConnectorSpec?: () => ConnectorSpec | undefined;
+  getConnectorSpecs?: () => ConnectorSpec[];
+  getConnectorValidation?: (version: string) => Promise<
+    | (ActionTypeValidation<Config, Secrets, Params> & {
+        params: ValidatorType<Params>;
+      })
+    | undefined
+  >;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
@@ -294,12 +311,7 @@ export type WorkflowActionType<
   ExecutorResultData = void
 > = ActionTypeCoreFields<Config, Secrets, Params> & {
   executor?: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
-  validate: {
-    params?: ValidatorType<Params>;
-    config: ValidatorType<Config>;
-    secrets: ValidatorType<Secrets>;
-    connector?: (config: Config, secrets: Secrets) => string | null;
-  };
+  validate: ActionTypeValidation<Config, Secrets, Params>;
 };
 
 export type ClassicActionType<
@@ -309,11 +321,8 @@ export type ClassicActionType<
   ExecutorResultData = void
 > = ActionTypeCoreFields<Config, Secrets, Params> & {
   executor: ExecutorType<Config, Secrets, Params, ExecutorResultData>;
-  validate: {
+  validate: ActionTypeValidation<Config, Secrets, Params> & {
     params: ValidatorType<Params>;
-    config: ValidatorType<Config>;
-    secrets: ValidatorType<Secrets>;
-    connector?: (config: Config, secrets: Secrets) => string | null;
   };
 };
 
@@ -324,7 +333,6 @@ export interface RawAction extends Record<string, unknown> {
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   authMode?: AuthMode;
-  specId?: string;
   specVersion?: string;
 }
 

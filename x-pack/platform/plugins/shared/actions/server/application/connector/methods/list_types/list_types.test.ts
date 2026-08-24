@@ -24,6 +24,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { z } from '@kbn/zod/v4';
 import { ActionsClient } from '../../../../actions_client/actions_client';
 import { ConnectorRateLimiter } from '../../../../lib/connector_rate_limiter';
 import { getConnectorType } from '../../../../fixtures';
@@ -112,37 +113,66 @@ describe('listTypes()', () => {
 
   it('exposes action names from runtime connector specifications', async () => {
     mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+    const getConnectorSpec = () => ({
+      version: '1.0.0',
+      metadata: {
+        id: '.declarative-okta',
+        displayName: 'Declarative Okta',
+        description: 'Test',
+        icon: 'data:image/svg+xml;base64,dGVzdA==',
+        minimumLicense: 'basic' as const,
+        supportedFeatureIds: ['workflows'],
+      },
+      actions: {
+        listUsers: {
+          input: z.object({ limit: z.number().int().positive() }).strict(),
+          handler: async () => ({}),
+        },
+        getLogs: {
+          input: z
+            .object({ since: z.string() })
+            .strict()
+            .transform((value) => value),
+          handler: async () => ({}),
+        },
+      },
+      test: { enabled: false as const, handler: async () => ({}) },
+    });
+    const historicalSpec = {
+      ...getConnectorSpec(),
+      version: '0.9.0',
+      actions: {
+        legacyAction: {
+          input: z.object({ message: z.string() }).strict(),
+          handler: async () => ({}),
+        },
+      },
+    };
     actionTypeRegistry.register(
       getConnectorType({
         id: '.declarative-okta',
-        getConnectorSpec: () => ({
-          metadata: {
-            id: '.declarative-okta',
-            displayName: 'Declarative Okta',
-            description: 'Test',
-            icon: 'data:image/svg+xml;base64,dGVzdA==',
-            minimumLicense: 'basic',
-            supportedFeatureIds: ['workflows'],
-          },
-          actions: {
-            listUsers: {
-              input: { parse: (value: unknown) => value } as never,
-              handler: async () => ({}),
-            },
-            getLogs: {
-              input: { parse: (value: unknown) => value } as never,
-              handler: async () => ({}),
-            },
-          },
-          test: { enabled: false, handler: async () => ({}) },
-        }),
+        getConnectorSpec,
+        getConnectorSpecs: () => [getConnectorSpec(), historicalSpec],
       })
     );
 
     await expect(actionsClient.listTypes({ featureId: 'alerting' })).resolves.toEqual([
       expect.objectContaining({
         id: '.declarative-okta',
-        specActionNames: ['listUsers', 'getLogs'],
+        specActionNames: ['listUsers', 'getLogs', 'legacyAction'],
+        specActionSchemas: {
+          listUsers: expect.objectContaining({ type: 'object' }),
+          getLogs: expect.objectContaining({ type: 'object' }),
+        },
+        specActionSchemasByVersion: {
+          '1.0.0': {
+            listUsers: expect.objectContaining({ type: 'object' }),
+            getLogs: expect.objectContaining({ type: 'object' }),
+          },
+          '0.9.0': {
+            legacyAction: expect.objectContaining({ type: 'object' }),
+          },
+        },
         icon: 'data:image/svg+xml;base64,dGVzdA==',
       }),
     ]);

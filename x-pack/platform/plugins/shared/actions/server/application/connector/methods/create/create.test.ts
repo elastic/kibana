@@ -435,7 +435,6 @@ describe('create()', () => {
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         'action',
         expect.objectContaining({
-          specId: '.declarative-okta',
           specVersion: '1.0.0',
         }),
         { id: 'mock-saved-object-id' }

@@ -27,7 +27,7 @@ function makeSavedObject(id: string, overrides: Partial<RawAction> = {}): SavedO
 
 describe('connectorFromSavedObject', () => {
   it('maps saved object fields and resolved auth mode', () => {
-    const so = makeSavedObject('conn-1', { authMode: 'per-user' });
+    const so = makeSavedObject('conn-1', { authMode: 'per-user', specVersion: '1.0.0' });
     const result = connectorFromSavedObject(so, false, false);
     expect(result).toMatchObject({
       id: 'conn-1',
@@ -38,6 +38,7 @@ describe('connectorFromSavedObject', () => {
       isSystemAction: false,
       isConnectorTypeDeprecated: false,
       authMode: 'per-user',
+      specVersion: '1.0.0',
     });
     expect('userAuthStatus' in result).toBe(false);
   });

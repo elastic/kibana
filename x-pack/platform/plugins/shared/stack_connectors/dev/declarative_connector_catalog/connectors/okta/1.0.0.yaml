@@ -1,0 +1,136 @@
+schemaVersion: 1
+id: .declarative-okta
+version: 1.0.0
+metadata:
+  displayName: Okta (Declarative PoC)
+  description: Read-only Okta users and System Log actions from a catalog-loaded YAML definition
+  icon:
+    path: 1.0.0.svg
+    contentHash: sha256:9c57063aeab83ed23b95db29bf7d2aea2373897858598d6bf812d830b5409e83
+  minimumLicense: enterprise
+  isTechnicalPreview: true
+  supportedFeatureIds:
+    - workflows
+    - agentBuilder
+config:
+  type: object
+  additionalProperties: false
+  required:
+    - orgUrl
+  properties:
+    orgUrl:
+      type: string
+      format: uri
+      default: http://127.0.0.1:8090
+      description: Okta organization base URL
+      xUi:
+        label: Org URL
+        placeholder: https://your-okta-domain.okta.com
+        helpText: Use the local mock URL for the PoC or your Okta organization URL for live testing.
+        validate:
+          allowedHosts: true
+auth:
+  type: api_key_header
+  header: Authorization
+  prefix: "SSWS "
+  label: API token (SSWS)
+  placeholder: local-poc-token
+actions:
+  listUsers:
+    description: List users with bounded Link-header pagination.
+    isTool: true
+    scope: read
+    input:
+      type: object
+      additionalProperties: false
+      properties:
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 2
+        after:
+          type: string
+    request:
+      method: GET
+      baseUrl: "{{ config.orgUrl }}"
+      path: /api/v1/users
+      query:
+        limit: "{{ input.limit }}"
+        after: "{{ input.after }}"
+      retry:
+        statusCodes:
+          - 429
+          - 503
+        maxAttempts: 3
+        initialDelayMs: 200
+        maxDelayMs: 5000
+      pagination:
+        strategy: link_header
+        header: link
+        maxPages: 3
+        outputKey: users
+      response:
+        rateLimitHeaders:
+          remaining: x-rate-limit-remaining
+          reset: x-rate-limit-reset
+  getLogs:
+    description: Read recent Okta System Log events with bounded Link-header pagination.
+    isTool: true
+    scope: read
+    input:
+      type: object
+      additionalProperties: false
+      properties:
+        since:
+          type: string
+          format: date-time
+        until:
+          type: string
+          format: date-time
+        filter:
+          type: string
+        q:
+          type: string
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 2
+        after:
+          type: string
+    request:
+      method: GET
+      baseUrl: "{{ config.orgUrl }}"
+      path: /api/v1/logs
+      query:
+        since: "{{ input.since }}"
+        until: "{{ input.until }}"
+        filter: "{{ input.filter }}"
+        q: "{{ input.q }}"
+        limit: "{{ input.limit }}"
+        after: "{{ input.after }}"
+      retry:
+        statusCodes:
+          - 429
+          - 503
+        maxAttempts: 3
+        initialDelayMs: 200
+        maxDelayMs: 5000
+      pagination:
+        strategy: link_header
+        header: link
+        maxPages: 3
+        outputKey: events
+      response:
+        rateLimitHeaders:
+          remaining: x-rate-limit-remaining
+          reset: x-rate-limit-reset
+test:
+  description: Verify connectivity by listing one user.
+  request:
+    method: GET
+    baseUrl: "{{ config.orgUrl }}"
+    path: /api/v1/users
+    query:
+      limit: 1

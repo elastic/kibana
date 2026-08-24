@@ -13,6 +13,7 @@ import type {
   ActionTypeConfig,
   ActionTypeParams,
   ActionTypeSecrets,
+  ActionTypeValidation,
   ValidatorServices,
   ValidatorType,
 } from '../../types';
@@ -27,52 +28,33 @@ import { buildExecutableActions } from './create_connector_from_spec';
 export interface ConnectorSpecProvider {
   metadata: ConnectorMetadata;
   getCurrentSpec: () => ConnectorSpec | undefined;
-  getValidationSpecs: () => ConnectorSpec[];
+  getSpecs: () => ConnectorSpec[];
   getSpec: (version?: string) => Promise<ConnectorSpec | undefined>;
 }
 
-const getSpecsOrThrow = (provider: ConnectorSpecProvider): ConnectorSpec[] => {
-  const specs = provider.getValidationSpecs();
-  if (specs.length === 0) {
+const getCurrentSpecOrThrow = (provider: ConnectorSpecProvider): ConnectorSpec => {
+  const spec = provider.getCurrentSpec();
+  if (!spec) {
     throw new Error(`Connector catalog is not ready for "${provider.metadata.id}".`);
   }
-  return specs;
+  return spec;
 };
 
-const parseWithSpecs = <T>(
+const parseWithCurrentSpec = <T>(
   provider: ConnectorSpecProvider,
   value: unknown,
   buildValidator: (spec: ConnectorSpec) => ValidatorType<T>
-): T => {
-  let lastError: unknown;
-  for (const spec of getSpecsOrThrow(provider)) {
-    try {
-      return buildValidator(spec).schema.parse(value) as T;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-  throw lastError;
-};
+): T => buildValidator(getCurrentSpecOrThrow(provider)).schema.parse(value) as T;
 
-const validateWithMatchingSpec = <T>(
+const validateWithCurrentSpec = <T>(
   provider: ConnectorSpecProvider,
   value: T,
   services: ValidatorServices,
   buildValidator: (spec: ConnectorSpec) => ValidatorType<T>
 ): void => {
-  let lastError: unknown;
-  for (const spec of getSpecsOrThrow(provider)) {
-    const validator = buildValidator(spec);
-    try {
-      validator.schema.parse(value);
-      validator.customValidator?.(value, services);
-      return;
-    } catch (error) {
-      lastError = error;
-    }
-  }
-  throw lastError;
+  const validator = buildValidator(getCurrentSpecOrThrow(provider));
+  validator.schema.parse(value);
+  validator.customValidator?.(value, services);
 };
 
 export const createConnectorTypeFromSpecProvider = (
@@ -86,6 +68,15 @@ export const createConnectorTypeFromSpecProvider = (
     generateSecretsSchema(spec.auth, configUtils);
   const buildParamsValidator = (spec: ConnectorSpec) =>
     generateParamsSchema(buildExecutableActions(spec));
+  const buildValidation = (
+    spec: ConnectorSpec
+  ): ActionTypeValidation<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams> & {
+    params: ValidatorType<ActionTypeParams>;
+  } => ({
+    config: buildConfigValidator(spec),
+    secrets: buildSecretsValidator(spec),
+    params: buildParamsValidator(spec),
+  });
 
   return {
     id: provider.metadata.id,
@@ -95,23 +86,27 @@ export const createConnectorTypeFromSpecProvider = (
     validate: {
       config: {
         schema: {
-          parse: (value) => parseWithSpecs(provider, value, buildConfigValidator),
+          parse: (value) => parseWithCurrentSpec(provider, value, buildConfigValidator),
         },
         customValidator: (value, services) =>
-          validateWithMatchingSpec(provider, value, services, buildConfigValidator),
+          validateWithCurrentSpec(provider, value, services, buildConfigValidator),
       },
       secrets: {
         schema: {
-          parse: (value) => parseWithSpecs(provider, value, buildSecretsValidator),
+          parse: (value) => parseWithCurrentSpec(provider, value, buildSecretsValidator),
         },
         customValidator: (value, services) =>
-          validateWithMatchingSpec(provider, value, services, buildSecretsValidator),
+          validateWithCurrentSpec(provider, value, services, buildSecretsValidator),
       },
       params: {
         schema: {
-          parse: (value) => parseWithSpecs(provider, value, buildParamsValidator),
+          parse: (value) => parseWithCurrentSpec(provider, value, buildParamsValidator),
         },
       },
+    },
+    getConnectorValidation: async (version) => {
+      const spec = await provider.getSpec(version);
+      return spec ? buildValidation(spec) : undefined;
     },
     executor: async (execOptions) => {
       const spec = await provider.getSpec(execOptions.specVersion);
@@ -156,5 +151,6 @@ export const createConnectorTypeFromSpecProvider = (
     isExperimental: true,
     isTestable: true,
     getConnectorSpec: provider.getCurrentSpec,
+    getConnectorSpecs: provider.getSpecs,
   };
 };

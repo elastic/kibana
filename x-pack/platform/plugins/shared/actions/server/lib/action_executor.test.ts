@@ -312,18 +312,24 @@ beforeEach(() => {
 
 describe('Action Executor', () => {
   test('passes saved-object version only to spec connector executors', async () => {
+    const getConnectorValidation = jest.fn().mockResolvedValue(connectorType.validate);
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...connectorSavedObject,
       version: 'WzEsMV0=',
       attributes: {
         ...connectorSavedObject.attributes,
-        specId: '.declarative-okta',
         specVersion: '1.0.0',
       },
     });
     connectorTypeRegistry.get.mockReturnValueOnce({
       ...connectorType,
       source: ACTION_TYPE_SOURCES.spec,
+      validate: {
+        config: { schema: z.never() },
+        secrets: { schema: z.never() },
+        params: { schema: z.never() },
+      },
+      getConnectorValidation,
     });
 
     await actionExecutor.execute(executeParams);
@@ -331,13 +337,13 @@ describe('Action Executor', () => {
     expect(connectorType.executor).toHaveBeenCalledWith(
       expect.objectContaining({
         connectorVersion: 'WzEsMV0=',
-        specId: '.declarative-okta',
         specVersion: '1.0.0',
       })
     );
     expect(connectorType.executor).not.toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: expect.anything() })
     );
+    expect(getConnectorValidation).toHaveBeenCalledWith('1.0.0');
   });
 
   test('passes the in-memory revision sentinel for preconfigured spec connectors', async () => {

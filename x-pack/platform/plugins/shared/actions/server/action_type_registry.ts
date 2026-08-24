@@ -12,6 +12,8 @@ import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plu
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { TaskTypeGroup } from '@kbn/task-manager-plugin/server/task';
+import type { ConnectorSpec } from '@kbn/connector-specs';
+import { z } from '@kbn/zod/v4';
 import type { ActionType as CommonActionType } from '../common';
 import { areValidFeatures, MAX_FEATURE_ID_LENGTH } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
@@ -39,6 +41,16 @@ interface ListOpts {
   exposeValidation?: boolean;
   exposeSpecActions?: boolean;
 }
+
+const serializeActionSchemas = (
+  connectorSpec: ConnectorSpec
+): Record<string, Record<string, unknown>> =>
+  Object.fromEntries(
+    Object.entries(connectorSpec.actions).map(([name, action]) => [
+      name,
+      z.toJSONSchema(action.input, { io: 'input', unrepresentable: 'any' }),
+    ])
+  );
 
 export class ActionTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
@@ -285,6 +297,10 @@ export class ActionTypeRegistry {
           exposeValidation === true || exposeSpecActions === true
             ? actionType.getConnectorSpec?.()
             : undefined;
+        const connectorSpecs =
+          exposeValidation === true || exposeSpecActions === true
+            ? actionType.getConnectorSpecs?.() ?? []
+            : [];
         return {
           id: actionTypeId,
           name: actionType.name,
@@ -310,7 +326,22 @@ export class ActionTypeRegistry {
           isTestable: Boolean(actionType.isTestable),
           ...((exposeValidation === true || exposeSpecActions === true) && connectorSpec
             ? {
-                specActionNames: Object.keys(connectorSpec.actions),
+                specActionNames: [
+                  ...new Set([
+                    ...Object.keys(connectorSpec.actions),
+                    ...connectorSpecs.flatMap((spec) => Object.keys(spec.actions)),
+                  ]),
+                ],
+                specActionSchemas: serializeActionSchemas(connectorSpec),
+                ...(connectorSpecs.length > 0
+                  ? {
+                      specActionSchemasByVersion: Object.fromEntries(
+                        connectorSpecs.flatMap((spec) =>
+                          spec.version ? [[spec.version, serializeActionSchemas(spec)]] : []
+                        )
+                      ),
+                    }
+                  : {}),
                 ...(connectorSpec.metadata.icon ? { icon: connectorSpec.metadata.icon } : {}),
               }
             : {}),

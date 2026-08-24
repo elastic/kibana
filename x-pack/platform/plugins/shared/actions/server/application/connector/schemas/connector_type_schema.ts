@@ -31,5 +31,9 @@ export const connectorTypeSchema = schema.object({
   isExperimental: schema.maybe(schema.boolean()),
   isTestable: schema.boolean({ defaultValue: false }),
   specActionNames: schema.maybe(schema.arrayOf(schema.string())),
+  specActionSchemas: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  specActionSchemasByVersion: schema.maybe(
+    schema.recordOf(schema.string(), schema.recordOf(schema.string(), schema.any()))
+  ),
   icon: schema.maybe(schema.string()),
 });

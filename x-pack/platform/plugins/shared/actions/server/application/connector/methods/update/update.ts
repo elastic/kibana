@@ -102,15 +102,27 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   }
 
   const actionType = context.actionTypeRegistry.get(actionTypeId);
+  const connectorValidation =
+    attributes.specVersion && actionType.getConnectorValidation
+      ? await actionType.getConnectorValidation(attributes.specVersion)
+      : undefined;
+  if (attributes.specVersion && actionType.getConnectorValidation && !connectorValidation) {
+    throw Boom.badRequest(
+      `Connector specification "${actionTypeId}" version "${attributes.specVersion}" is unavailable.`
+    );
+  }
+  const actionTypeForValidation = connectorValidation
+    ? { ...actionType, validate: connectorValidation }
+    : actionType;
   const configurationUtilities = context.actionTypeRegistry.getUtils();
-  const validatedActionTypeConfig = validateConfig(actionType, config, {
+  const validatedActionTypeConfig = validateConfig(actionTypeForValidation, config, {
     configurationUtilities,
   });
-  const validatedActionTypeSecrets = validateSecrets(actionType, secrets, {
+  const validatedActionTypeSecrets = validateSecrets(actionTypeForValidation, secrets, {
     configurationUtilities,
   });
-  if (actionType.validate?.connector) {
-    validateConnector(actionType, { config, secrets });
+  if (actionTypeForValidation.validate?.connector) {
+    validateConnector(actionTypeForValidation, { config, secrets });
   }
 
   context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);

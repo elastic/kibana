@@ -189,6 +189,12 @@ const catalogManifestSchema = z
   .object({
     schemaVersion: z.literal(1),
     catalogVersion: z.string().min(1),
+    activeVersions: z
+      .record(z.string().regex(/^\.[a-z0-9_-]+$/), z.string().regex(/^\d+\.\d+\.\d+$/))
+      .refine(
+        (versions) => Object.keys(versions).length > 0,
+        'At least one active version is required.'
+      ),
     connectors: z
       .array(
         z

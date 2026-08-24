@@ -28,31 +28,42 @@ import { StepCategory } from '../step_definition_types';
  * without infinite references.
  */
 export function buildConnectorStepSchema(connector: ConnectorContractUnion): z.ZodType {
-  const props: Record<string, z.ZodType> = {
-    name: z.string().describe('Unique step name within the workflow'),
-    type: connector.description
-      ? z.literal(connector.type).describe(connector.description)
-      : z.literal(connector.type),
-    with: connector.paramsSchema,
-    ...StepWithIfConditionSchema.shape,
-    ...TimeoutPropSchema.shape,
+  const configShape = connector.configSchema ? getShape(connector.configSchema) : undefined;
+  const buildSchema = (paramsSchema: z.ZodType, connectorIdSchema?: z.ZodType): z.ZodType => {
+    const props: Record<string, z.ZodType> = {
+      name: z.string().describe('Unique step name within the workflow'),
+      type: connector.description
+        ? z.literal(connector.type).describe(connector.description)
+        : z.literal(connector.type),
+      with: paramsSchema,
+      ...StepWithIfConditionSchema.shape,
+      ...TimeoutPropSchema.shape,
+    };
+    if (connectorIdSchema) props['connector-id'] = connectorIdSchema;
+    if (configShape && Object.keys(configShape).length > 0) {
+      Object.assign(props, configShape);
+    }
+    return z.object(props);
   };
 
-  if (connector.hasConnectorId === 'required') {
-    props['connector-id'] = z.string().describe('ID of the connector instance to use');
-  } else if (connector.hasConnectorId === 'optional') {
-    props['connector-id'] = z
-      .string()
-      .optional()
-      .describe('Optional connector instance ID (omit to use the system connector)');
+  const versionedSchemas = Object.entries(connector.paramsSchemasByConnectorId ?? {}).map(
+    ([connectorId, paramsSchema]) => buildSchema(paramsSchema, z.literal(connectorId))
+  );
+  if (versionedSchemas.length === 1) return versionedSchemas[0];
+  if (versionedSchemas.length > 1) {
+    return z.union(versionedSchemas as [z.ZodType, z.ZodType, ...z.ZodType[]]);
   }
 
-  const configShape = connector.configSchema ? getShape(connector.configSchema) : undefined;
-  if (configShape && Object.keys(configShape).length > 0) {
-    Object.assign(props, configShape);
-  }
-
-  return z.object(props);
+  const connectorIdSchema =
+    connector.hasConnectorId === 'required'
+      ? z.string().describe('ID of the connector instance to use')
+      : connector.hasConnectorId === 'optional'
+      ? z
+          .string()
+          .optional()
+          .describe('Optional connector instance ID (omit to use the system connector)')
+      : undefined;
+  return buildSchema(connector.paramsSchema, connectorIdSchema);
 }
 
 /**

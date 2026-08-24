@@ -144,6 +144,39 @@ describe('update()', () => {
     );
   });
 
+  test('validates updates against the pinned connector specification', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      ...existingRawAction,
+      attributes: {
+        ...existingRawAction.attributes,
+        specVersion: '1.0.0',
+      },
+    } as never);
+    const getConnectorValidation = jest.fn().mockResolvedValue({
+      config: { schema: z.object({ pinned: z.string() }).strict() },
+      secrets: { schema: z.object({}).strict() },
+      params: { schema: z.object({}) },
+    });
+    (actionTypeRegistry.get as jest.Mock).mockReturnValueOnce(
+      getConnectorType({
+        validate: {
+          config: { schema: z.never() },
+          secrets: { schema: z.never() },
+          params: { schema: z.object({}) },
+        },
+        getConnectorValidation,
+      })
+    );
+
+    await update({
+      context: mockContext,
+      id: 'connector-id',
+      action: { name: 'Updated', config: { pinned: 'value' }, secrets: {} },
+    });
+
+    expect(getConnectorValidation).toHaveBeenCalledWith('1.0.0');
+  });
+
   describe('authMode in returned connector', () => {
     test('returns authMode "shared" when saved object has authMode "shared"', async () => {
       const soResult = makeSavedObjectResult({ authMode: 'shared' });

@@ -546,10 +546,25 @@ export class ActionExecutor {
         let validatedConfig;
         let validatedSecrets;
         try {
+          let actionTypeForValidation = actionType;
+          if (rawAction.specVersion && actionType.getConnectorValidation) {
+            const validation = await actionType.getConnectorValidation(rawAction.specVersion);
+            if (!validation) {
+              const message = `Connector specification "${actionTypeId}" version "${rawAction.specVersion}" is unavailable.`;
+              throw new ActionExecutionError(message, ActionExecutionErrorReason.Validation, {
+                actionId,
+                status: 'error',
+                message,
+                retry: !!taskInfo,
+                errorSource: TaskErrorSource.FRAMEWORK,
+              });
+            }
+            actionTypeForValidation = { ...actionType, validate: validation };
+          }
           const validationResult = validateAction(
             {
               actionId,
-              actionType,
+              actionType: actionTypeForValidation,
               params,
               config,
               secrets,
@@ -605,7 +620,6 @@ export class ActionExecutor {
             ...(actionType.source === ACTION_TYPE_SOURCES.spec
               ? {
                   connectorVersion: isInMemory ? IN_MEMORY_CONNECTOR_REVISION : connectorVersion,
-                  ...(rawAction.specId ? { specId: rawAction.specId } : {}),
                   ...(rawAction.specVersion ? { specVersion: rawAction.specVersion } : {}),
                 }
               : {}),

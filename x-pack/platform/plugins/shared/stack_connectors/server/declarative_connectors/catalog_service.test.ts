@@ -26,6 +26,10 @@ const contentHash = (raw: string): string =>
 const manifest = {
   schemaVersion: 1,
   catalogVersion: 'test-catalog',
+  activeVersions: {
+    '.declarative-abuseipdb': '1.0.0',
+    '.declarative-okta': '1.0.0',
+  },
   connectors: [
     {
       id: '.declarative-abuseipdb',
@@ -46,7 +50,22 @@ const createService = () =>
   new DeclarativeConnectorCatalogService({
     registryUrl: 'http://catalog.test',
     refreshIntervalMs: 0,
-    supportedConnectorIds: ['.declarative-abuseipdb', '.declarative-okta'],
+    connectorMetadata: [
+      {
+        id: '.declarative-abuseipdb',
+        displayName: 'AbuseIPDB',
+        description: 'Test AbuseIPDB connector',
+        minimumLicense: 'gold',
+        supportedFeatureIds: ['workflows'],
+      },
+      {
+        id: '.declarative-okta',
+        displayName: 'Okta',
+        description: 'Test Okta connector',
+        minimumLicense: 'enterprise',
+        supportedFeatureIds: ['workflows'],
+      },
+    ],
     logger: loggerMock.create(),
   });
 
@@ -162,7 +181,12 @@ describe('DeclarativeConnectorCatalogService', () => {
     const updatedManifest = {
       ...manifest,
       catalogVersion: 'updated-catalog',
+      activeVersions: {
+        ...manifest.activeVersions,
+        '.declarative-abuseipdb': '1.1.0',
+      },
       connectors: [
+        manifest.connectors[0],
         {
           ...manifest.connectors[0],
           version: '1.1.0',
@@ -183,6 +207,10 @@ describe('DeclarativeConnectorCatalogService', () => {
       .reply(200, oktaRaw)
       .get('/catalog.json')
       .reply(200, updatedManifest)
+      .get('/connectors/abuseipdb/1.0.0.yaml')
+      .reply(200, abuseIpDbRaw)
+      .get('/connectors/abuseipdb/1.0.0.svg')
+      .reply(200, CONNECTOR_ICON_FIXTURE)
       .get('/connectors/abuseipdb/1.1.0.yaml')
       .reply(200, updatedRaw)
       .get('/connectors/abuseipdb/1.1.0.svg')
@@ -233,6 +261,38 @@ describe('DeclarativeConnectorCatalogService', () => {
     expect(spec).toBeUndefined();
     expect(storage.index).not.toHaveBeenCalled();
     expect(service.getHealth().lastError?.message).toContain('Integrity check failed');
+    service.stop();
+  });
+
+  it('rejects catalog metadata that differs from registration metadata', async () => {
+    const storage = createStorage();
+    const mismatchedRaw = abuseIpDbRaw.replace(
+      'displayName: AbuseIPDB',
+      'displayName: Unexpected AbuseIPDB'
+    );
+    nock('http://catalog.test')
+      .get('/catalog.json')
+      .reply(200, {
+        ...manifest,
+        connectors: [
+          {
+            ...manifest.connectors[0],
+            contentHash: contentHash(mismatchedRaw),
+          },
+        ],
+      })
+      .get('/connectors/abuseipdb/1.0.0.yaml')
+      .reply(200, mismatchedRaw);
+
+    const service = createService();
+    service.start(storage);
+    const spec = await service.getSpec('.declarative-abuseipdb', '1.0.0');
+
+    expect(spec).toBeUndefined();
+    expect(storage.index).not.toHaveBeenCalled();
+    expect(service.getHealth().lastError?.message).toContain(
+      'does not match its registered metadata'
+    );
     service.stop();
   });
 });

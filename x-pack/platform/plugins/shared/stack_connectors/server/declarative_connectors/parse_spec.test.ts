@@ -31,6 +31,10 @@ describe('declarative connector parsing', () => {
     const manifest = parseDeclarativeCatalogManifest({
       schemaVersion: 1,
       catalogVersion: '2026-08-23.1',
+      activeVersions: {
+        '.declarative-abuseipdb': '1.0.0',
+        '.declarative-okta': '1.0.0',
+      },
       connectors: [
         {
           id: '.declarative-abuseipdb',

@@ -9,6 +9,5 @@ import { schema } from '@kbn/config-schema';
 import { rawConnectorSchema as rawConnectorSchemaV2 } from './v2';
 
 export const rawConnectorSchema = rawConnectorSchemaV2.extends({
-  specId: schema.maybe(schema.string()),
   specVersion: schema.maybe(schema.string()),
 });

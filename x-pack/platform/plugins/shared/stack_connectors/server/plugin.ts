@@ -71,7 +71,7 @@ export class StackConnectorsPlugin
       this.declarativeCatalog = new DeclarativeConnectorCatalogService({
         registryUrl: this.config.declarativeCatalog.registryUrl,
         refreshIntervalMs: this.config.declarativeCatalog.refreshIntervalMs,
-        supportedConnectorIds: DECLARATIVE_CONNECTOR_METADATA.map(({ id }) => id),
+        connectorMetadata: DECLARATIVE_CONNECTOR_METADATA,
         logger: context.logger.get('declarativeCatalog'),
       });
     }
