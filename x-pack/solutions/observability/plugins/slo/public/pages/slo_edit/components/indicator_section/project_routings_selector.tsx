@@ -83,7 +83,7 @@ export function ProjectRoutingsSelector() {
     return null;
   }
 
-  if (!isLoading && !error && linkedProjects.length === 0) {
+  if (!isLoading && !error && (!originProject || linkedProjects.length === 0)) {
     return null;
   }
 
