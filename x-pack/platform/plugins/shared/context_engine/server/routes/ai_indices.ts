@@ -44,6 +44,7 @@ import {
   InvalidConnectorSourceError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { ImprovementsServiceApi } from '../improvements/service';
 import { getKiSummary } from '../ai_indices/ki_summary';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
@@ -158,10 +159,12 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
 export const registerAiIndexRoutes = ({
   router,
   getAiIndexService,
+  getImprovementsService,
   getActions,
 }: {
   router: IRouter;
   getAiIndexService: () => AiIndexService;
+  getImprovementsService: () => ImprovementsServiceApi;
   getActions: () => Promise<ActionsPluginStart>;
 }) => {
   // Create an AI index
@@ -396,6 +399,9 @@ export const registerAiIndexRoutes = ({
         const { aiIndexId } = request.params;
         try {
           await getAiIndexService().delete(aiIndexId);
+          // The improvements store is keyed by AI index id, so revisions left behind would
+          // resurface if an AI index were later recreated under the same id.
+          await getImprovementsService().deleteByAiIndex(aiIndexId);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
           const body: DeleteAiIndexResponse = { acknowledged: true };
           return response.ok({ body });

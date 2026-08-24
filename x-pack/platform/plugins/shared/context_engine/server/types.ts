@@ -16,6 +16,7 @@ import type {
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
 import type { AiIndexService } from './ai_indices/service';
+import type { ImprovementsServiceApi } from './improvements/service';
 import type { SignalsServiceApi } from './signals/service';
 
 export interface ContextEnginePluginSetup {
@@ -26,6 +27,8 @@ export interface ContextEnginePluginStart {
   getAiIndexService: () => AiIndexService;
   /** The signals store. */
   getSignalsService: () => SignalsServiceApi;
+  /** The improvements store. */
+  getImprovementsService: () => ImprovementsServiceApi;
 }
 
 export interface ContextEngineSetupDependencies {

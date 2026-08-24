@@ -29,6 +29,7 @@ import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
+import { ImprovementsService } from './improvements/service';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
@@ -47,6 +48,7 @@ export class ContextEnginePlugin
   private logger: Logger;
   private aiIndexService?: AiIndexService;
   private signalsService?: SignalsService;
+  private improvementsService?: ImprovementsService;
   private esClient?: ElasticsearchClient;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
@@ -108,6 +110,12 @@ export class ContextEnginePlugin
           throw new Error('AI index service not available — plugin has not started');
         }
         return this.aiIndexService;
+      },
+      getImprovementsService: () => {
+        if (!this.improvementsService) {
+          throw new Error('Improvements service not available — plugin has not started');
+        }
+        return this.improvementsService;
       },
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
@@ -177,6 +185,12 @@ export class ContextEnginePlugin
     });
     const signalsService = this.signalsService;
 
+    this.improvementsService = new ImprovementsService({
+      esClient: this.esClient,
+      logger: this.logger.get('improvements'),
+    });
+    const improvementsService = this.improvementsService;
+
     const aiIndexService = this.aiIndexService;
     const registry = this.aiIndexRegistry;
 
@@ -219,6 +233,7 @@ export class ContextEnginePlugin
         return this.aiIndexService;
       },
       getSignalsService: () => signalsService,
+      getImprovementsService: () => improvementsService,
     };
   }
 

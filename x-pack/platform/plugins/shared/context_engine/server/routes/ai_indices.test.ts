@@ -28,6 +28,7 @@ import {
   AiIndexAlreadyExistsError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import type { ImprovementsServiceApi } from '../improvements/service';
 
 interface RegisteredRoute {
   config: {
@@ -87,6 +88,7 @@ describe('ai indices routes', () => {
   let aiIndexService: jest.Mocked<
     Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete'>
   >;
+  let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -134,6 +136,7 @@ describe('ai indices routes', () => {
       list: jest.fn(),
       delete: jest.fn(),
     };
+    improvementsService = { deleteByAiIndex: jest.fn() };
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
       addVersion: (
@@ -160,6 +163,7 @@ describe('ai indices routes', () => {
     registerAiIndexRoutes({
       router,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+      getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
       getActions: async () => actions,
     });
   });
@@ -520,6 +524,24 @@ describe('ai indices routes', () => {
 
       expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support');
       expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
+    });
+
+    it('clears the improvements for the AI index, so they cannot resurface under a reused id', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(improvementsService.deleteByAiIndex).toHaveBeenCalledWith('customer_support');
+    });
+
+    it('leaves the improvements alone when the AI index cannot be deleted', async () => {
+      aiIndexService.delete.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+      await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'missing' } });
+
+      expect(improvementsService.deleteByAiIndex).not.toHaveBeenCalled();
     });
 
     it('returns 404 when the AI index does not exist', async () => {

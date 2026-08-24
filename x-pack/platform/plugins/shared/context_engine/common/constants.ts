@@ -26,6 +26,17 @@ export const MAX_SIGNAL_GROUPS = 100;
 export const DEFAULT_SIGNALS_PAGE_SIZE = 25;
 export const MAX_SIGNALS_PAGE_SIZE = 100;
 
+/** Default and maximum page size when listing improvements (one entry per improvement lineage). */
+export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
+export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
+
+/**
+ * Cap on the improvement history handed to an analysis run's briefing. The runner needs to see
+ * what was already rejected so it does not re-propose it, but the briefing shares the run's
+ * context window.
+ */
+export const MAX_IMPROVEMENTS_HISTORY_SIZE = 200;
+
 /**
  * Version of the public AI index API, shared between the server route
  * registration and browser clients.

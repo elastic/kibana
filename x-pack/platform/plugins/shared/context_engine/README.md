@@ -80,3 +80,45 @@ user against the current space's signals index):
 Both routes are gated by the same `contextEngine:enabled` advanced setting as
 the AI index API (they return 404 while it is off).
 
+## Improvements
+
+An **improvement** is a proposed change to one AI index's KI pipeline, derived
+from that index's signals. They live in the single global
+`context-engine-improvements` index, exposed to the server as
+`ContextEnginePluginStart.getImprovementsService()`. There is no HTTP surface
+yet: the analysis runner that produces improvements and the review UI that
+applies them come later.
+
+Unlike signals, the store is **global rather than per-space**: an improvement
+targets an AI index's KI pipeline, and the AI index registry has no space
+dimension. Two consequences are accepted deliberately — the analysis reads
+signals across all spaces, so an improvement's rationale can cite evidence from
+a space the reviewer cannot open; and a single index means one
+`deleteByAiIndex` cleans up completely when an AI index is deleted.
+
+The lifecycle is an **append log** rather than a mutable status field, so the
+record of what the loop did to a user's index survives every transition:
+
+- `improvement_id` is the stable lineage key, derived idempotently from
+  `hash(ai_index_id + change_fingerprint)`. The fingerprint describes the
+  proposed fix (e.g. `remove_workflow:<workflow_id>`) and contains no free text,
+  so a re-run over the same latent problem appends a revision instead of
+  creating a near-duplicate row.
+- `revision_id` is the ES `_id`; every write, including APPLY / REJECT, appends
+  a revision carrying `previous_revision_id`.
+- `latest: true` marks the head of each lineage, and `list`/`get` filter on it.
+  A boolean flag rather than `collapse`, because `collapse` makes
+  `track_total_hits` count hits instead of groups and the review UI needs an
+  exact total to paginate.
+- Transitions are serialized by retiring the current head under
+  `if_seq_no`/`if_primary_term` before appending. A reviewer who loses that race
+  appends nothing and gets a conflict, so the log can never hold both an
+  `applied` and a `rejected` head for the same improvement.
+- `failed` is a status, not an error return: an approval whose apply step errors
+  stays visible and retryable, with the reason on `resolution.error`.
+
+**Prerequisite:** `context-engine-improvements*` must be granted to the built-in
+`kibana_system` role in Elasticsearch, the same way `context-engine-signals-*`
+is. Without it, Kibana's internal user cannot create the index and every write
+fails with a 403 `security_exception`.
+
