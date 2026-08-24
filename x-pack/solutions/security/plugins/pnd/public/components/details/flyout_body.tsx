@@ -6,17 +6,11 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody, EuiText, EuiTitle } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
-import { TemplateBadge } from '../conversation_card';
+import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS as i18n } from './translations';
+import { CriticalityBadge } from './criticality_badge';
 import { TimelineEventList } from '../timeline';
 
 export interface ConversationDetailsFlyoutBodyProps {
@@ -24,7 +18,7 @@ export interface ConversationDetailsFlyoutBodyProps {
 }
 
 export const ConversationDetailsFlyoutBody = memo<ConversationDetailsFlyoutBodyProps>(
-  ({ investigation: { title, template_id, summary, events } }) => {
+  ({ investigation: { title, summary, events, priorityScore } }) => {
     return (
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m">
@@ -38,25 +32,20 @@ export const ConversationDetailsFlyoutBody = memo<ConversationDetailsFlyoutBodyP
                 </EuiFlexItem>
               )}
 
-              {template_id && (
+              {priorityScore && (
                 <EuiFlexItem>
-                  <TemplateBadge template={template_id} />
+                  <CriticalityBadge priorityScore={priorityScore} />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
           </EuiFlexItem>
 
           {summary && (
-            <EuiFlexItem>
-              <EuiSpacer size="m" />
-              <EuiTitle size="xxs">
-                <h3>{i18n.sections.situation}</h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
+            <DetailsBlock title={i18n.sections.overview}>
               <EuiText size="s" color="subdued">
                 <p>{summary}</p>
               </EuiText>
-            </EuiFlexItem>
+            </DetailsBlock>
           )}
 
           {events.length > 0 && (
@@ -69,7 +58,7 @@ export const ConversationDetailsFlyoutBody = memo<ConversationDetailsFlyoutBodyP
                   justifyContent="flexStart"
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
+                    <EuiTitle size="xs">
                       <h3>{i18n.sections.timeline}</h3>
                     </EuiTitle>
                   </EuiFlexItem>

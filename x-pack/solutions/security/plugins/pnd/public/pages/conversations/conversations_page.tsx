@@ -128,10 +128,7 @@ export const ConversationsPage: React.FC = () => {
         css: css`
           padding-block: ${euiTheme.size.xxl};
           align-self: center;
-          @media (min-width: 1920px) {
-            max-width: 1300px;
-          }
-          max-width: 960px;
+          max-width: 1000px;
         `,
       }}
     >

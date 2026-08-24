@@ -13,8 +13,20 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     defaultMessage: 'Conversation details',
   }),
   sections: {
-    situation: i18n.translate('xpack.pnd.detailsFlyout.sections.situation', {
-      defaultMessage: 'Situation',
+    overview: i18n.translate('xpack.pnd.detailsFlyout.sections.situation', {
+      defaultMessage: 'What’s happened',
+    }),
+    impact: i18n.translate('xpack.pnd.detailsFlyout.sections.impact', {
+      defaultMessage: 'Impact',
+    }),
+    conclusion: i18n.translate('xpack.pnd.detailsFlyout.sections.conclusion', {
+      defaultMessage: 'Conclusion',
+    }),
+    parentInvestigation: i18n.translate('xpack.pnd.detailsFlyout.sections.parentInvestigation', {
+      defaultMessage: 'Parent investigation',
+    }),
+    attachments: i18n.translate('xpack.pnd.detailsFlyout.sections.attachments', {
+      defaultMessage: 'Attachments',
     }),
     timeline: i18n.translate('xpack.pnd.detailsFlyout.sections.timeline', {
       defaultMessage: 'Timeline',

@@ -112,7 +112,7 @@ export const PndPageHeader: React.FC<PndPageHeaderProps> = ({
         <EuiFlexGroup
           alignItems="center"
           justifyContent="flexStart"
-          gutterSize="s"
+          gutterSize="m"
           responsive={false}
           wrap
         >
@@ -154,10 +154,10 @@ export const PndPageHeader: React.FC<PndPageHeaderProps> = ({
             </div>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiTitle size="m" css={{ fontWeight: 400 }}>
+            <EuiTitle size="m" css={{ fontWeight: 500 }}>
               <h1>
-                <span style={{ color: euiTheme.colors.textSubdued }}>{getPndGreeting()}</span>{' '}
-                <span style={{ fontWeight: 600 }}>{title}</span>
+                <span style={{ color: euiTheme.colors.mediumShade }}>{getPndGreeting()}</span>{' '}
+                <span>{title}</span>
               </h1>
             </EuiTitle>
           </EuiFlexItem>

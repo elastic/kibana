@@ -53,14 +53,8 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
     const { euiTheme } = useEuiTheme();
 
     return (
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="s"
-        responsive
-        direction="row"
-        justifyContent="flexEnd"
-      >
-        <EuiFlexItem grow={false} alignItems="flexStart" justifyContent="center">
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive direction="row">
+        <EuiFlexItem grow={false} alignItems="center" justifyContent="flexStart">
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} direction="row">
             <EuiFlexItem grow={false}>
               <EuiIcon

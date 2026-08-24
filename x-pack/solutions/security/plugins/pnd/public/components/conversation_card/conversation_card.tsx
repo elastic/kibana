@@ -19,7 +19,6 @@ import { type Investigation } from '@kbn/pnd-common';
 import { useHistory } from 'react-router-dom';
 import type { BaseActionsProps } from '../actions';
 import { ConversationsActionsGroup, type ConversationsActionsGroupProps } from './actions_group';
-import { ConversationMetaInfo } from './conversation_meta_info';
 
 const CONVERSATION_CARD_RISK_SCORE_SIZE = 40;
 
@@ -60,10 +59,11 @@ export const ConversationCard = memo<{
       onClick={() => onClickCard(investigation.recordId)}
     >
       <EuiFlexGroup
-        alignItems="center"
-        justifyContent="flexStart"
+        alignItems="flexStart"
         gutterSize="l"
-        responsive={false}
+        responsive
+        justifyContent="spaceBetween"
+        direction="row"
       >
         {investigation.priorityScore != null ? (
           <EuiFlexItem grow={false} alignSelf="center" justifyContent="center">
@@ -80,48 +80,37 @@ export const ConversationCard = memo<{
                 width: `${CONVERSATION_CARD_RISK_SCORE_SIZE}px`,
                 height: `${CONVERSATION_CARD_RISK_SCORE_SIZE}px`,
                 fontWeight: euiTheme.font.weight.semiBold,
-                borderRadius: '50%',
+                fontVariantNumeric: 'tabular-nums',
+                borderRadius: euiTheme.size.s,
               }}
             >
               {investigation.priorityScore}
             </EuiText>
           </EuiFlexItem>
         ) : null}
-        <EuiFlexItem>
+        <EuiFlexItem grow={true}>
           <EuiFlexGroup gutterSize="xs" responsive direction="column">
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="m"
-                responsive={false}
-                direction="row"
-                justifyContent="spaceBetween"
-              >
-                <ConversationMetaInfo
-                  templateId={investigation.template_id}
-                  updatedAt={investigation.updatedAt}
-                />
-                <ConversationsActionsGroup
-                  investigation={investigation}
-                  onClickRecommendedAction={onClickRecommendedAction}
-                  onOpenChat={onOpenChat}
-                  onClickAction={onClickAction}
-                />
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">
-                <p>{investigation.title}</p>
+                <EuiTextTruncate text={investigation.title} />
               </EuiTitle>
             </EuiFlexItem>
             {investigation.summary ? (
               <EuiFlexItem grow={false}>
                 <EuiText size="s" color="subdued">
-                  <p>{investigation.summary}</p>
+                  <EuiTextTruncate text={investigation.summary} />
                 </EuiText>
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ConversationsActionsGroup
+            investigation={investigation}
+            onClickRecommendedAction={onClickRecommendedAction}
+            onOpenChat={onOpenChat}
+            onClickAction={onClickAction}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

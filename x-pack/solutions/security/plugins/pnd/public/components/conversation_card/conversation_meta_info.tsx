@@ -8,17 +8,12 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { type Investigation } from '@kbn/pnd-common';
-import { TemplateBadge } from './template_badge';
 
 export const ConversationMetaInfo = memo<{
-  templateId: Investigation['template_id'];
   updatedAt: Investigation['updatedAt'];
-}>(({ templateId, updatedAt }) => {
+}>(({ updatedAt }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive direction="row">
-      <EuiFlexItem grow={false}>
-        <TemplateBadge template={templateId} />
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="xs" color="subdued" component="span">
           <FormattedRelative value={updatedAt} />
