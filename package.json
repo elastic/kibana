@@ -2112,7 +2112,6 @@
     "@typescript-eslint/typescript-estree": "8.60.0",
     "@wojtekmaj/enzyme-adapter-react-17": "0.6.7",
     "@yarnpkg/lockfile": "1.1.0",
-    "aggregate-error": "3.1.0",
     "ajv": "8.20.0",
     "ajv-draft-04": "1.0.0",
     "autoprefixer": "10.4.7",
