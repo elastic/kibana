@@ -98,24 +98,38 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('`marketing`');
   });
 
-  it('renders a filter that also matches indices without a spaces field', () => {
+  it('renders a query template with a filter that also matches indices without a spaces field', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'marketing',
     });
-    const filter = JSON.parse(instructions.match(/```json\n(.+)\n```/)![1]);
+    const params = JSON.parse(instructions.match(/```json\n(.+)\n```/)![1]);
 
-    expect(filter).toEqual({
-      bool: {
-        should: [
-          { term: { spaces: 'marketing' } },
-          { term: { spaces: '*' } },
-          { bool: { must_not: { exists: { field: 'spaces' } } } },
-        ],
-        minimum_should_match: 1,
+    expect(params).toEqual({
+      query: 'FROM ai-index-* | LIMIT 100',
+      filter: {
+        bool: {
+          should: [
+            { term: { spaces: 'marketing' } },
+            { term: { spaces: '*' } },
+            { bool: { must_not: { exists: { field: 'spaces' } } } },
+          ],
+          minimum_should_match: 1,
+        },
       },
     });
+  });
+
+  it('tells the agent to adapt the query but copy the filter verbatim', () => {
+    const instructions = getAiIndicesInstructions({
+      enabled: true,
+      aiIndices: [agentBuilderDefaultAiIndexId],
+      spaceId: 'marketing',
+    });
+
+    expect(instructions).toContain('Adapt the query to the task');
+    expect(instructions).toContain('copy the filter verbatim');
   });
 
   it('does not leak the Context Engine ids of the declared indices', () => {

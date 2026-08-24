@@ -63,7 +63,7 @@ export const getAiIndicesInstructions = ({
     );
   }
 
-  const spaceFilter = JSON.stringify({
+  const spaceFilter = {
     bool: {
       should: [
         { term: { spaces: spaceId } },
@@ -72,7 +72,7 @@ export const getAiIndicesInstructions = ({
       ],
       minimum_should_match: 1,
     },
-  });
+  };
 
   return cleanPrompt(`
 ## AI INDICES
@@ -93,10 +93,10 @@ Documents in an AI index may be restricted to a single Kibana space. This conver
 
 The \`spaces\` field is optional: some AI indices define it, others do not, and an index without it holds documents visible from every space. A document whose \`spaces\` contains \`*\` is likewise visible everywhere.
 
-When you query AI indices with \`execute_esql\`, pass this \`filter\` to limit results to the current space:
+When you query AI indices with \`execute_esql\`, pass the query and space \`filter\` together. Adapt the query to the task, but copy the filter verbatim:
 
 \`\`\`json
-${spaceFilter}
+${JSON.stringify({ query: 'FROM ai-index-* | LIMIT 100', filter: spaceFilter })}
 \`\`\`
 
 Two caveats:
