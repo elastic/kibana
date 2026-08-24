@@ -1853,6 +1853,133 @@ describe('UnifiedDataTable', () => {
     });
   });
 
+  // Covers `useScrollToExpandedDoc` through the real grid rather than in isolation, since it
+  // depends on the grid's pagination and imperative API. These assert the paging half only:
+  // jsdom exposes grid pagination but not EUI's imperative virtualized scrolling API,
+  // so scrolling and retry behavior are covered by the focused hook tests instead.
+  describe('scrolling to the expanded document', () => {
+    const rows = esHitsMock.map((hit) => buildDataTableRecord(hit, dataViewMock));
+    const onChangePageMock = jest.fn();
+
+    beforeEach(() => {
+      onChangePageMock.mockClear();
+    });
+
+    const getPagedProps = (): UnifiedDataTableProps => ({
+      ...getProps(),
+      rows,
+      rowsPerPageOptions: [1, 5],
+      rowsPerPageState: 1,
+      onUpdatePageIndex: onChangePageMock,
+      setExpandedDoc: jest.fn(),
+      renderDocumentView: jest.fn(),
+    });
+
+    it('should page to the expanded document when it is not on the current page', async () => {
+      const props = getPagedProps();
+      const { rerender } = await renderComponent(props);
+
+      onChangePageMock.mockClear();
+
+      rerender(<DataTableWithI18n {...props} expandedDoc={rows[2]} />);
+
+      await waitFor(() => {
+        expect(onChangePageMock).toHaveBeenCalledWith(2);
+      });
+
+      // Scrolling retries must not repeat the page change.
+      expect(onChangePageMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should page to the expanded document once it arrives in the results', async () => {
+      const props = { ...getPagedProps(), rows: rows.slice(0, 1), expandedDoc: rows[2] };
+      const { rerender } = await renderComponent(props);
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+
+      rerender(<DataTableWithI18n {...props} rows={rows} />);
+
+      await waitFor(() => {
+        expect(onChangePageMock).toHaveBeenCalledWith(2);
+      });
+    });
+
+    it('should not page when the expanded document is already on the current page', async () => {
+      const props = getPagedProps();
+      const { rerender } = await renderComponent(props);
+
+      onChangePageMock.mockClear();
+
+      rerender(<DataTableWithI18n {...props} expandedDoc={rows[0]} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+
+    it('should not page again while the same document stays expanded', async () => {
+      const props = { ...getPagedProps(), expandedDoc: rows[2] };
+      const { rerender } = await renderComponent(props);
+
+      await waitFor(() => {
+        expect(onChangePageMock).toHaveBeenCalledWith(2);
+      });
+
+      onChangePageMock.mockClear();
+
+      // A background refetch must not pull the grid from the user's scroll position.
+      rerender(<DataTableWithI18n {...props} rows={[...rows]} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+
+    it('should not page to an expanded document again after restoring the table state', async () => {
+      const expandedDoc = rows[2];
+      const props = {
+        ...getPagedProps(),
+        expandedDoc,
+        initialState: {
+          pageIndex: 1,
+          scrolledToExpandedDocId: expandedDoc.id,
+        },
+      };
+
+      await renderComponent(props);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+
+    it('should not page when the expanded document is not part of the results', async () => {
+      const props = getPagedProps();
+      const { rerender } = await renderComponent(props);
+
+      onChangePageMock.mockClear();
+
+      rerender(
+        <DataTableWithI18n
+          {...props}
+          expandedDoc={buildDataTableRecord({ _index: 'i', _id: 'not-in-results' }, dataViewMock)}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('docTable')).toBeVisible();
+      });
+
+      expect(onChangePageMock).not.toHaveBeenCalled();
+    });
+  });
+
   describe('enableInTableSearch', () => {
     it(
       'should render find-button if enableInTableSearch is true and no custom toolbar specified',
