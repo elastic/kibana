@@ -15,6 +15,7 @@ import type {
   TodosStep,
   AskUserQuestionStep,
   RelevantSkillsStep,
+  SubagentRosterUpdatedStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
@@ -28,26 +29,49 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 
 export type ConversationCreateRequest = Omit<
   Conversation,
   'id' | 'created_at' | 'updated_at' | 'user' | 'access_control'
 > & {
   id?: string;
-  access_control?: Pick<ConversationAccessControl, 'access_mode'>;
+  /**
+   * Optional user override. Used to set the parent conversation's user when creating a child conversation for a subagent
+   */
+  user?: UserIdAndName;
+  access_control?: ConversationAccessControl;
 };
 
 export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
   Partial<
     Pick<
       Conversation,
-      'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'pinned' | 'workspace_id'
+      | 'title'
+      | 'rounds'
+      | 'attachments'
+      | 'state'
+      | 'status'
+      | 'read'
+      | 'pinned'
+      | 'workspace_id'
+      | 'access_control'
+      | 'metadata'
+      | 'template_id'
+      | 'template_version'
     >
   >;
 
 export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
-  'id' | 'title' | 'attachments' | 'read' | 'pinned'
+  | 'id'
+  | 'title'
+  | 'attachments'
+  | 'read'
+  | 'pinned'
+  | 'metadata'
+  | 'template_id'
+  | 'template_version'
 >;
 
 export interface GetEventsOptions {
@@ -116,7 +140,8 @@ export type PersistentConversationRoundStep =
   | BackgroundAgentCompleteStep
   | TodosStep
   | AskUserQuestionStep
-  | RelevantSkillsStep;
+  | RelevantSkillsStep
+  | SubagentRosterUpdatedStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.

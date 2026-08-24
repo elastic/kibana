@@ -401,7 +401,8 @@ export const EditPackagePolicyForm = memo<{
           ilmPolicyRef.current,
           packageInfo,
           notifications,
-          packageInfo.title ?? packageInfo.name
+          packageInfo.title ?? packageInfo.name,
+          namespaceCustomizationEnabledRef.current
         );
       }
       setIsEdited(false);
