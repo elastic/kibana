@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import React, { useState, useCallback, useEffect } from 'react';
-import { EuiConfirmModal, EuiSpacer, EuiText, EuiCallOut, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
 import { JsonEditor, XJson } from '../../../../../shared_imports';
@@ -133,15 +134,12 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
 
             {error && (
               <>
-                <EuiCallOut
+                <KbnDangerCallout
                   announceOnMount
                   data-test-subj="errorCallOut"
                   title={i18nTexts.error.title}
-                  color="danger"
-                  iconType="warning"
-                >
-                  {i18nTexts.error.body}
-                </EuiCallOut>
+                  text={i18nTexts.error.body}
+                />
                 <EuiSpacer size="m" />
               </>
             )}
