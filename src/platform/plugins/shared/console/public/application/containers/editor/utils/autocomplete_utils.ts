@@ -472,6 +472,14 @@ const getSuggestions = (
     endColumn,
   };
 
+  // Primitive terms insert bare JSON literals (`true`, `0`), so when the cursor is inside a
+  // quoted string the replacement range must also cover the opening quote, otherwise accepting
+  // leaves it behind (`"refresh": "false`). String terms don't need this: they re-insert the
+  // closing quote themselves without the opening one.
+  const startsInsideQuotedString =
+    isInsideQuotedString && lineContentBeforePosition.charAt(startColumn - 2) === '"';
+  const primitiveTermRange = { ...range, startColumn: startColumn - 1 };
+
   return (
     filterTermsWithoutName(autocompleteSet)
       // Filter suggestions to only show nested fields when there's a field being typed with a dot
@@ -499,7 +507,8 @@ const getSuggestions = (
           detail: i18nTexts.api,
           // the kind is only used to configure the icon
           kind: monaco.languages.CompletionItemKind.Constant,
-          range,
+          range:
+            typeof item.name !== 'string' && startsInsideQuotedString ? primitiveTermRange : range,
           insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           ...(endsInsideEmptyContainer
             ? { command: { id: 'editor.action.triggerSuggest', title: '' } }

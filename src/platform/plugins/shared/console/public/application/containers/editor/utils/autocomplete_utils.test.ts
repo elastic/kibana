@@ -579,6 +579,145 @@ describe('autocomplete_utils', () => {
       });
     });
 
+    describe('WHEN completing a primitive value inside an auto-closed string', () => {
+      const buildModel = (
+        editorLines: string[],
+        wordUntilPosition: { startColumn: number; word: string }
+      ) =>
+        ({
+          getLineContent: (lineNumber: number) => editorLines[lineNumber - 1],
+          getValueInRange: jest.fn(
+            ({ startLineNumber, startColumn, endLineNumber, endColumn }: monaco.IRange) => {
+              if (startLineNumber === endLineNumber) {
+                return editorLines[startLineNumber - 1].slice(startColumn - 1, endColumn - 1);
+              }
+              const selectedLines = editorLines.slice(startLineNumber - 1, endLineNumber);
+              selectedLines[0] = selectedLines[0].slice(startColumn - 1);
+              selectedLines[selectedLines.length - 1] = selectedLines[
+                selectedLines.length - 1
+              ].slice(0, endColumn - 1);
+              return selectedLines.join('\n');
+            }
+          ),
+          getWordUntilPosition: () => wordUntilPosition,
+          getLineMaxColumn: (lineNumber: number) => editorLines[lineNumber - 1].length + 1,
+        } as unknown as monaco.editor.ITextModel);
+
+      // Simulates Monaco applying a completion item over its single-range form.
+      const acceptSuggestion = (editorLines: string[], item: monaco.languages.CompletionItem) => {
+        if (!item.range || !('startLineNumber' in item.range)) {
+          throw new Error('completion item must use the single-range form');
+        }
+        const { range } = item;
+        const line = editorLines[range.startLineNumber - 1];
+        return (
+          line.slice(0, range.startColumn - 1) + item.insertText + line.slice(range.endColumn - 1)
+        );
+      };
+
+      beforeEach(() => {
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [
+            { name: false },
+            { name: 'false' },
+            { name: 'some_string_value' },
+          ] as unknown as AutoCompleteContext['autoCompleteSet'];
+        });
+      });
+
+      it('SHOULD cover the opening quote for primitive terms when completing mid-word', async () => {
+        const editorLines = ['GET _search', '{', '  "refresh": "f"'];
+        // Cursor after `f`, before the auto-closed closing quote.
+        const position = { lineNumber: 3, column: 16 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 15, word: 'f' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find(
+          (item) => item.label === 'false' && item.insertText === 'false'
+        );
+        const stringTerm = items.find((item) => item.label === 'some_string_value');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 14, // includes the opening quote
+          endLineNumber: 3,
+          endColumn: 17, // includes the auto-closed closing quote
+        });
+        expect(stringTerm?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 15, // string terms re-insert the quotes themselves
+          endLineNumber: 3,
+          endColumn: 17,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ refresh: false });
+        expect(acc).toBe('  "refresh": false');
+        expect(acceptSuggestion(editorLines, stringTerm!)).toBe('  "refresh": "some_string_value"');
+      });
+
+      it('SHOULD cover both quotes when accepted straight from the trigger quote', async () => {
+        const editorLines = ['GET _search', '{', '  "refresh": ""'];
+        // Cursor between the auto-closed quotes, before typing anything.
+        const position = { lineNumber: 3, column: 15 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 15, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find(
+          (item) => item.label === 'false' && item.insertText === 'false'
+        );
+        const stringTerm = items.find((item) => item.label === 'some_string_value');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 14, // includes the opening quote
+          endLineNumber: 3,
+          endColumn: 16, // includes the auto-closed closing quote
+        });
+        expect(stringTerm?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 15,
+          endLineNumber: 3,
+          endColumn: 16,
+        });
+        expect(JSON.parse(`{${acceptSuggestion(editorLines, primitive!)}}`)).toEqual({
+          refresh: false,
+        });
+        expect(acceptSuggestion(editorLines, stringTerm!)).toBe('  "refresh": "some_string_value"');
+      });
+
+      it('SHOULD NOT shift the range when typing an unquoted value', async () => {
+        const editorLines = ['GET _search', '{', '  "refresh": f'];
+        const position = { lineNumber: 3, column: 15 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 14, word: 'f' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find(
+          (item) => item.label === 'false' && item.insertText === 'false'
+        );
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 14, // starts at the word: there is no quote to replace
+          endLineNumber: 3,
+          endColumn: 15,
+        });
+        expect(acceptSuggestion(editorLines, primitive!)).toBe('  "refresh": false');
+      });
+    });
+
     it('ignores quotes inside comments when completing in the middle of a quoted field', async () => {
       mockPopulateContext.mockImplementation((...args) => {
         const context = args[0][1];
