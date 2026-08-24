@@ -115,3 +115,19 @@ export const resolveQueryGenerationDatasetName = (
   const hash = createHash('sha256').update(resolution.selectedScenarioIds.join('|')).digest('hex');
   return `${canonicalName} [focused:${hash.slice(0, 12)}]`;
 };
+
+/**
+ * Prevents focused runs from reading or replacing a canonical upstream dataset.
+ */
+export const assertQueryGenerationDatasetSafety = (
+  resolution: QueryGenerationDatasetResolution,
+  trustUpstreamDataset: boolean
+): void => {
+  if (resolution.isFocused && trustUpstreamDataset) {
+    throw new Error(
+      'KI_QUERY_GENERATION_SCENARIOS cannot be combined with SIGEVENTS_TRUST_UPSTREAM=true: ' +
+        'focused runs use a namespaced dataset and must never resolve or overwrite the canonical ' +
+        'upstream dataset. Unset KI_QUERY_GENERATION_SCENARIOS for trust-upstream runs.'
+    );
+  }
+};

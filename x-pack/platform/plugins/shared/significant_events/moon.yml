@@ -17,7 +17,6 @@ project:
   owner: '@elastic/obs-sig-events-team'
   sourceRoot: x-pack/platform/plugins/shared/significant_events
 dependsOn:
-  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/streams-plugin'
   - '@kbn/core'
   - '@kbn/core-pricing-common'
@@ -80,6 +79,7 @@ dependsOn:
   - '@kbn/core-http-server-utils'
   - '@kbn/cps-server-utils'
   - '@kbn/inference-prompt-utils'
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
 tags:
   - plugin
   - prod

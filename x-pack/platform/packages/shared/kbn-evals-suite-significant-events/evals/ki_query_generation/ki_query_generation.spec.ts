@@ -46,7 +46,6 @@ import {
 import { evaluate } from '../../src/evaluate';
 import { createEvalSignificantEventSearchTool } from '../../src/tools/significant_event_search_tool';
 import { createKIQueryGenerationEvaluators } from '../../src/evaluators/ki_query_generation';
-import { expectedGenerationOutcomeEvaluator } from '../../src/evaluators/ki_query_generation/expected_generation_outcome';
 import {
   getActiveDatasets,
   MANAGED_STREAM_NAME,
@@ -59,10 +58,11 @@ import { buildAvailableSnapshotsBySource } from '../shared';
 import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
 import { resolveMaxSteps } from './resolve_max_steps';
 import {
+  assertQueryGenerationDatasetSafety,
   resolveQueryGenerationDatasets,
   resolveQueryGenerationDatasetName,
 } from './resolve_scenarios';
-import { selectQueryGenerationEvaluators } from './select_evaluators';
+import { getEmptyDatastreamEvaluators, selectQueryGenerationEvaluators } from './select_evaluators';
 import { extractLogTextFromSourceDoc } from './extract_log_text';
 import { getComputedKIFeaturesFromDocs } from './get_computed_ki_features_from_docs';
 import { collectSampleDocuments } from './collect_sample_documents';
@@ -81,13 +81,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
   const activeDatasets = scenarioResolution.datasets;
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-  if (scenarioResolution.isFocused && TRUST_UPSTREAM) {
-    throw new Error(
-      'KI_QUERY_GENERATION_SCENARIOS cannot be combined with SIGEVENTS_TRUST_UPSTREAM=true: ' +
-        'focused runs use a namespaced dataset and must never resolve or overwrite the canonical ' +
-        'upstream dataset. Unset KI_QUERY_GENERATION_SCENARIOS for trust-upstream runs.'
-    );
-  }
+  assertQueryGenerationDatasetSafety(scenarioResolution, TRUST_UPSTREAM);
 
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
     // The significant_event_search tool is only registered when significant
@@ -606,7 +600,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
           // The empty-stream safety canary always runs its mandatory deterministic
           // evaluator. SELECTED_EVALUATORS only narrows the configurable main
           // query-generation experiment; it must never disable this canary.
-          [expectedGenerationOutcomeEvaluator]
+          getEmptyDatastreamEvaluators()
         );
       }
     );

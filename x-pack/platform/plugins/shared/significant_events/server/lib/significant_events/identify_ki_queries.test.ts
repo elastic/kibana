@@ -91,6 +91,25 @@ describe('generateSignificantEventDefinitions (semantic code search wiring)', ()
     expect(args.systemPrompt).toBe('SYSTEM');
   });
 
+  it('forwards reasoning diagnostics from the shared agent', async () => {
+    generateSignificantEventsMock.mockResolvedValueOnce({
+      queries: [],
+      tokensUsed: { prompt: 0, completion: 0, total: 0 },
+      toolUsage: {
+        get_stream_features: { calls: 0, failures: 0, latency_ms: 0 },
+        add_queries: { calls: 0, failures: 0, latency_ms: 0 },
+      },
+      reasoningDiagnostics: { externalContentToolContinuations: 4 },
+    });
+
+    const result = await identifyKIQueries(
+      { definition, connectorId: 'c1', systemPrompt: 'SYSTEM' },
+      buildDeps()
+    );
+
+    expect(result.reasoningDiagnostics).toEqual({ externalContentToolContinuations: 4 });
+  });
+
   it('forwards the SCS tools, appends the prompt snippet, and raises the step budget', async () => {
     const semanticCodeSearchTools = makeCodeTools();
 

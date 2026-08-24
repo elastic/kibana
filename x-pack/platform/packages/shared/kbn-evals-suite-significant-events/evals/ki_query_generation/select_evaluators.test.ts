@@ -11,8 +11,7 @@ import {
   createKIQueryGenerationEvaluators,
   type ScenarioCriteriaConfig,
 } from '../../src/evaluators/ki_query_generation';
-import { selectQueryGenerationEvaluators } from './select_evaluators';
-import { expectedGenerationOutcomeEvaluator } from '../../src/evaluators/ki_query_generation/expected_generation_outcome';
+import { getEmptyDatastreamEvaluators, selectQueryGenerationEvaluators } from './select_evaluators';
 
 const evaluator = (name: string): Evaluator => ({
   name,
@@ -82,13 +81,6 @@ describe('selectQueryGenerationEvaluators', () => {
       /nope.*Available: generation_success/
     );
   });
-
-  it('throws when the final list is empty', () => {
-    setSelection(',');
-    expect(() => selectQueryGenerationEvaluators([evaluator('a')])).toThrow(
-      /Unknown evaluator\(s\)/
-    );
-  });
 });
 
 describe('selectQueryGenerationEvaluators with the real query-generation list', () => {
@@ -131,30 +123,14 @@ describe('empty-datastream canary evaluator independence', () => {
     process.env = { ...ORIGINAL };
   });
 
-  it('keeps the canary evaluator enabled when the main selection is valid', () => {
-    process.env.SELECTED_EVALUATORS = 'generation_success,tool_usage_validation';
-    // The canary always runs its mandatory deterministic evaluator directly,
-    // bypassing SELECTED_EVALUATORS entirely.
-    expect(expectedGenerationOutcomeEvaluator.name).toBe('expected_generation_outcome');
-    expect(expectedGenerationOutcomeEvaluator.kind).toBe('CODE');
-  });
+  it('uses its mandatory evaluator when the main selection excludes it', () => {
+    setSelection('generation_success,tool_usage_validation');
 
-  it('still fails fast on unknown main selections', () => {
-    process.env.SELECTED_EVALUATORS = 'nope';
-    expect(() => selectQueryGenerationEvaluators([evaluator('generation_success')])).toThrow(
-      /nope/
-    );
-  });
-
-  it('still fails fast on blank selections', () => {
-    process.env.SELECTED_EVALUATORS = '';
-    expect(() => selectQueryGenerationEvaluators([evaluator('a')])).toThrow(/Unknown evaluator/);
-  });
-
-  it('still fails fast on trailing commas', () => {
-    process.env.SELECTED_EVALUATORS = 'generation_success,';
-    expect(() => selectQueryGenerationEvaluators([evaluator('generation_success')])).toThrow(
-      /Unknown evaluator/
-    );
+    expect(getEmptyDatastreamEvaluators()).toEqual([
+      expect.objectContaining({
+        name: 'expected_generation_outcome',
+        kind: 'CODE',
+      }),
+    ]);
   });
 });

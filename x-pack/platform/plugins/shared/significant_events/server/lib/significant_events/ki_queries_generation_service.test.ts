@@ -76,16 +76,15 @@ describe('generateKIQueries', () => {
           title: 'Detects failures',
           description: 'A query',
           esql: { query: 'FROM logs | WHERE message == "fail"' },
-          severity_score: 70,
           evidence: ['evidence'],
-          replaces: [],
           features: [],
+          severity_score: 70,
         },
       ],
       tokensUsed: { prompt: 10, completion: 20, total: 30, cached: 0 },
       toolUsage,
       reasoningDiagnostics: { externalContentToolContinuations: 4 },
-    } as never);
+    });
   });
 
   it('reports the external_content_tool_continuations counter to telemetry', async () => {
@@ -124,10 +123,9 @@ describe('generateKIQueries', () => {
           title: 'Detects failures',
           description: 'A query',
           esql: { query: 'FROM logs | WHERE message == "fail"' },
-          severity_score: 70,
           evidence: ['evidence'],
-          replaces: [],
           features: [],
+          severity_score: 70,
         },
       ],
       tokensUsed: { prompt: 10, completion: 20, total: 30, cached: 0 },
@@ -135,18 +133,5 @@ describe('generateKIQueries', () => {
     });
     expect(result).not.toHaveProperty('reasoningDiagnostics');
     expect(result).not.toHaveProperty('toolUsage');
-  });
-
-  it('does not leak reasoning diagnostics into the wire contract', async () => {
-    const telemetry = {
-      trackSignificantEventsQueriesGenerated: jest.fn(),
-    } as unknown as EbtTelemetryClient;
-
-    const result = await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector' },
-      makeDeps({ telemetry, logger })
-    );
-
-    expect(Object.keys(result).sort()).toEqual(['connectorId', 'queries', 'tokensUsed']);
   });
 });

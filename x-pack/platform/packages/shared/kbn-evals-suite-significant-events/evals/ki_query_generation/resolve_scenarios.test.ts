@@ -7,6 +7,7 @@
 
 import type { DatasetConfig, KIQueryGenerationScenario } from '../../src/datasets';
 import {
+  assertQueryGenerationDatasetSafety,
   resolveQueryGenerationDatasets,
   resolveQueryGenerationDatasetName,
   type QueryGenerationDatasetResolution,
@@ -127,6 +128,30 @@ describe('resolveQueryGenerationDatasets', () => {
   });
 });
 
+describe('assertQueryGenerationDatasetSafety', () => {
+  it.each([
+    { selection: undefined, trustUpstreamDataset: true },
+    { selection: 'healthy-baseline', trustUpstreamDataset: false },
+  ])(
+    'allows selection=$selection with trustUpstreamDataset=$trustUpstreamDataset',
+    ({ selection, trustUpstreamDataset }) => {
+      const resolution = resolveQueryGenerationDatasets(DATASETS, selection);
+
+      expect(() =>
+        assertQueryGenerationDatasetSafety(resolution, trustUpstreamDataset)
+      ).not.toThrow();
+    }
+  );
+
+  it('rejects focused runs that trust an upstream dataset', () => {
+    const resolution = resolveQueryGenerationDatasets(DATASETS, 'healthy-baseline');
+
+    expect(() => assertQueryGenerationDatasetSafety(resolution, true)).toThrow(
+      /KI_QUERY_GENERATION_SCENARIOS cannot be combined with SIGEVENTS_TRUST_UPSTREAM=true/
+    );
+  });
+});
+
 describe('resolveQueryGenerationDatasetName', () => {
   const CANONICAL = 'sigevents: KI query generation (toggle) (canonical) [baseline]';
 
@@ -172,26 +197,18 @@ describe('resolveQueryGenerationDatasetName', () => {
     );
   });
 
-  it('never collides with the canonical name', () => {
-    const res = resolveQueryGenerationDatasets(DATASETS, 'healthy-baseline');
+  it('adds a fixed-length suffix regardless of selection size', () => {
+    const res: QueryGenerationDatasetResolution = {
+      datasets: DATASETS,
+      isFocused: true,
+      selectedScenarioIds: Array.from(
+        { length: 1_000 },
+        (_, index) => `scenario-${index}-${'x'.repeat(100)}`
+      ),
+    };
     const name = resolveQueryGenerationDatasetName(res, CANONICAL);
-    expect(name).not.toBe(CANONICAL);
-    expect(name).toMatch(
-      /^sigevents: KI query generation \(toggle\) \(canonical\) \[baseline\] \[focused:[0-9a-f]{12}\]$/
-    );
-  });
 
-  it('stays below 256 characters even with long scenario ids', () => {
-    // Use scenario ids that exist in the fixture; the canonical name is long
-    // and the style of the dataset name is dominant, so the compact hash keeps
-    // the total within the dataset-name limit regardless of how many scenarios
-    // are selected.
-    const res = resolveQueryGenerationDatasets(
-      DATASETS,
-      'healthy-baseline,healthy-baseline,ledger-db-disconnect,ledger-db-disconnect,payment-unreachable'
-    );
-    const name = resolveQueryGenerationDatasetName(res, CANONICAL);
-    expect(name.length).toBeLessThan(256);
+    expect(name).toHaveLength(CANONICAL.length + ' [focused:000000000000]'.length);
     expect(name).toMatch(/\[focused:[0-9a-f]{12}\]$/);
   });
 });

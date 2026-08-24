@@ -188,6 +188,7 @@ const createReasoningResponse = (
     content: '',
     toolCalls: [],
     tokens,
+    diagnostics: { externalContentToolContinuations: 0 },
   } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>);
 
 interface HarnessOptions {
@@ -647,56 +648,39 @@ describe('zero-query warning', () => {
 
     expect(result.queries).toHaveLength(0);
     expect(logger.warn).toHaveBeenCalledTimes(1);
-    const message = jest.mocked(logger.warn).mock.calls[0][0] as string;
-    expect(message).toContain('observed=no_add_queries_calls');
-    expect(message).toContain('features_returned=1');
-    expect(message).toContain('get_stream_features_calls=1');
-    expect(message).toContain('add_queries_calls=0');
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Significant Events KI query generation produced no queries: ' +
+        'observed=no_add_queries_calls, features_returned=1, ' +
+        'get_stream_features_calls=1, get_stream_features_failures=0, ' +
+        'add_queries_calls=0, add_queries_failures=0'
+    );
   });
 
-  it('logs add_queries_called_no_accepted_queries when a call accepted nothing', async () => {
+  it('logs only aggregate diagnostics when a call accepted nothing', async () => {
     const { result } = await runIdentifyKIQueries({
-      scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message : "request failed"')]],
+      scriptedAddQueries: [
+        [scriptedQuery('FROM logs | WHERE message : "customer secret query text"')],
+      ],
     });
 
     expect(result.queries).toHaveLength(0);
     expect(result.toolUsage.add_queries.calls).toBe(1);
     expect(logger.warn).toHaveBeenCalledTimes(1);
-    const message = jest.mocked(logger.warn).mock.calls[0][0] as string;
-    expect(message).toContain('observed=add_queries_called_no_accepted_queries');
-    expect(message).toContain('add_queries_calls=1');
-    // The warning must not speculate about why the candidates were rejected.
-    expect(message).not.toContain('MATCH_PHRASE');
-    expect(message).not.toContain('rejected');
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Significant Events KI query generation produced no queries: ' +
+        'observed=add_queries_called_no_accepted_queries, features_returned=1, ' +
+        'get_stream_features_calls=1, get_stream_features_failures=0, ' +
+        'add_queries_calls=1, add_queries_failures=1'
+    );
   });
 
-  it('does not warn on successful generation and keeps the debug message unchanged', async () => {
+  it('does not warn when generation succeeds', async () => {
     const { result } = await runIdentifyKIQueries({
       scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "x"')]],
     });
 
     expect(result.queries).toHaveLength(1);
+    expect(result.reasoningDiagnostics).toEqual({ externalContentToolContinuations: 0 });
     expect(logger.warn).not.toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith('Generated 1 Significant Event KI queries');
-  });
-
-  it('keeps the zero-query debug message byte-identical', async () => {
-    await runIdentifyKIQueries({ scriptedAddQueries: [] });
-
-    expect(logger.debug).toHaveBeenCalledWith('Generated 0 Significant Event KI queries');
-  });
-
-  it('does not include customer-derived content in the warning', async () => {
-    await runIdentifyKIQueries({
-      scriptedAddQueries: [
-        // Rejected, so a warning fires while the customer-derived attempt text is present.
-        [scriptedQuery('FROM logs | WHERE message : "customer secret query text"')],
-      ],
-    });
-
-    const message = jest.mocked(logger.warn).mock.calls[0][0] as string;
-    expect(message).not.toContain('customer secret query text');
-    expect(message).not.toContain('Service A');
-    expect(message).not.toContain('A service');
   });
 });

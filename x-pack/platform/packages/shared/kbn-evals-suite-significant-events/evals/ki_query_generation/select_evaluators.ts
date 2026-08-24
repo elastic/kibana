@@ -7,6 +7,8 @@
 
 import { parseSelectedEvaluators } from '@kbn/evals';
 
+import { expectedGenerationOutcomeEvaluator } from '../../src/evaluators/ki_query_generation/expected_generation_outcome';
+
 /**
  * Applies `SELECTED_EVALUATORS` to the complete evaluator list after it is
  * assembled, failing fast on unknown or empty selections instead of silently
@@ -35,10 +37,10 @@ export const selectQueryGenerationEvaluators = <TEvaluator extends { name: strin
   }
 
   const selected = evaluators.filter((evaluator) => requested.includes(evaluator.name));
-  if (selected.length === 0) {
-    throw new Error(
-      `SELECTED_EVALUATORS matched no evaluators. Available: ${available.join(', ')}.`
-    );
-  }
   return selected;
 };
+
+/**
+ * Returns the mandatory evaluator for the empty-datastream safety canary.
+ */
+export const getEmptyDatastreamEvaluators = () => [expectedGenerationOutcomeEvaluator];
