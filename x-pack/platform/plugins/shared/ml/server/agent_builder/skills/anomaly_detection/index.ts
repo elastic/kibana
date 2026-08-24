@@ -16,6 +16,7 @@ import { createAdCreateJobTool } from '../../tools/ad_create_job';
 import { createAdManageJobStateTool } from '../../tools/ad_manage_job_state';
 import { createAdUpdateJobConfigTool } from '../../tools/ad_update_job_config';
 import { createQueryAnomaliesTool } from '../../tools/query_anomalies';
+import { createMlChartsTool } from '../../tools/create_ml_charts';
 import skillContent from './skill.md.text';
 import description from './description.text';
 import esqlReadQueries from './references/esql_read_queries.md.text';
@@ -75,5 +76,6 @@ export const createAnomalyDetectionSkill = (
         buildMlClient
       ),
       createQueryAnomaliesTool(resolveMlCapabilities, authorization, mlLicense, enabledFeatures),
+      createMlChartsTool(resolveMlCapabilities, authorization, mlLicense, enabledFeatures),
     ],
   });
