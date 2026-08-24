@@ -1,5 +1,5 @@
 {
-  "sha1": "def50ee59963c3cf6ade45bb121cd392095006d5",
+  "sha1": "e9d7dce997f11fe638369a414c4bcca25e0174fd",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -76,8 +76,8 @@
       }
     },
     {
-      "id": "ec3adfe4a124ece-0869127fb7e361d",
-      "title": "Notification Center - GET notifications accepts severity as a single query value",
+      "id": "ec3adfe4a124ece-121697461254593",
+      "title": "Notification Center - GET notifications returns severity on each item for consumers to facet on",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -90,34 +90,6 @@
       }
     },
     {
-      "id": "ec3adfe4a124ece-ae2f97bf5efa31b",
-      "title": "Notification Center - GET notifications accepts severity as repeated query values",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
-        "line": 85,
-        "column": 14
-      }
-    },
-    {
-      "id": "ec3adfe4a124ece-5d61b64e6e80d23",
-      "title": "Notification Center - GET notifications rejects an unknown severity value",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
-        "line": 98,
-        "column": 59
-      }
-    },
-    {
       "id": "ec3adfe4a124ece-08ebf48b0094f3e",
       "title": "Notification Center - GET notifications rejects an unknown query parameter",
       "expectedStatus": "passed",
@@ -127,8 +99,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/notification_center/test/scout_notification_center/api/tests/get_notifications.spec.ts",
-        "line": 101,
-        "column": 7
+        "line": 84,
+        "column": 26
       }
     },
     {
