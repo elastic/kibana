@@ -120,16 +120,27 @@ export default function (providerContext: FtrProviderContextWithServices) {
         return res.count;
       });
 
-      // Wait for a second task tick without any status change
-      await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL_MS));
-
-      const countAfterSecond = await es
-        .count({
-          index: AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
-          ignore_unavailable: true,
-          query: { term: { 'agent.id': 'agent-status-2' } },
-        })
-        .then((r) => r.count);
+      // Wait for the doc count to stabilise across two consecutive polls separated by
+      // TASK_INTERVAL_MS. This confirms the second task run has had a chance to complete and
+      // avoids the flakiness of a fixed-duration sleep on slow CI nodes.
+      let prevCount = -1;
+      const countAfterSecond = await retry.tryForTime(
+        TASK_INTERVAL_MS * 4,
+        async () => {
+          const res = await es.count({
+            index: AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
+            ignore_unavailable: true,
+            query: { term: { 'agent.id': 'agent-status-2' } },
+          });
+          if (res.count !== prevCount) {
+            prevCount = res.count;
+            throw new Error(`Count not yet stable: ${res.count}`);
+          }
+          return res.count;
+        },
+        undefined,
+        TASK_INTERVAL_MS
+      );
 
       // No additional docs should be written since status didn't change
       expect(countAfterSecond).to.be(countAfterFirst);

@@ -37,7 +37,7 @@ const AGENTS_BATCHSIZE = 10000;
 
 // Graceful stop so a mass status-change event doesn't run past the 1m task timeout.
 // Remaining agents still match `hasChanged:true` and are picked up on the next run.
-// Enforced on page boundaries, so up to AGENTS_BATCHSIZE-1 agents over the cap.
+// Enforced after each page is fully processed, so up to AGENTS_BATCHSIZE agents over the cap.
 const MAX_AGENTS_PER_RUN = 50000;
 
 export const HAS_CHANGED_RUNTIME_FIELD: estypes.SearchRequest['runtime_mappings'] = {
@@ -227,7 +227,7 @@ export class AgentStatusChangeTask {
 
       await this.bulkCreateAgentStatusChangeDocs(esClient, agentsWithStatus, agentlessPolicies);
 
-      const updateErrors = {};
+      const updateErrors: Record<string, unknown> = {};
       await bulkUpdateAgents(
         esClient,
         agentsWithStatus.map((agent: Agent) => ({
@@ -240,7 +240,7 @@ export class AgentStatusChangeTask {
       );
       const errorKeys = Object.keys(updateErrors);
       if (errorKeys.length > 0) {
-        const sample = errorKeys.slice(0, 5).map((k) => ({ [k]: (updateErrors as any)[k] }));
+        const sample = errorKeys.slice(0, 5).map((k) => ({ [k]: updateErrors[k] }));
         this.logger.warn(
           `[AgentStatusChangeTask] ${errorKeys.length} bulk update error(s): ${JSON.stringify(
             sample
