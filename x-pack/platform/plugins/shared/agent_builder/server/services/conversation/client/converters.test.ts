@@ -14,6 +14,7 @@ import {
   ConversationRoundStatus,
   ConversationOriginType,
   EventActorType,
+  MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   TimelineEventType,
   ToolOrigin,
 } from '@kbn/agent-builder-common';
@@ -1240,11 +1241,11 @@ describe('conversation model converters', () => {
   // ---------------------------------------------------------------------------
 
   describe('isEventsNativeVersion', () => {
-    it('accepts any numeric version >= 1 (monotonic, future-proof)', () => {
-      expect(isEventsNativeVersion(1)).toBe(true);
+    it('accepts any numeric version at or above the frozen floor (monotonic, future-proof)', () => {
+      expect(isEventsNativeVersion(MIN_EVENTS_NATIVE_SCHEMA_VERSION)).toBe(true);
       // A hypothetical future v2 doc is still events-native — the gate is
       // "has a stored projection", not "is exactly the current format".
-      expect(isEventsNativeVersion(2)).toBe(true);
+      expect(isEventsNativeVersion(MIN_EVENTS_NATIVE_SCHEMA_VERSION + 1)).toBe(true);
       expect(isEventsNativeVersion(99)).toBe(true);
     });
 
@@ -1255,6 +1256,18 @@ describe('conversation model converters', () => {
       expect(isEventsNativeVersion('1')).toBe(false);
       // @ts-expect-error runtime guard.
       expect(isEventsNativeVersion(null)).toBe(false);
+    });
+
+    it('stays below the current format so older-but-native docs keep reading as native', () => {
+      expect(MIN_EVENTS_NATIVE_SCHEMA_VERSION).toBeLessThanOrEqual(CONVERSATION_SCHEMA_VERSION);
+
+      for (
+        let version = MIN_EVENTS_NATIVE_SCHEMA_VERSION;
+        version <= CONVERSATION_SCHEMA_VERSION;
+        version++
+      ) {
+        expect(isEventsNativeVersion(version)).toBe(true);
+      }
     });
   });
 

@@ -21,6 +21,7 @@ import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   CONVERSATION_SCHEMA_VERSION,
+  MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   ConversationRoundStatus,
   ConversationRoundStepType,
   ToolOrigin,
@@ -70,7 +71,7 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
 };
 
 export const isEventsNativeVersion = (v: number | undefined): v is number =>
-  typeof v === 'number' && v >= CONVERSATION_SCHEMA_VERSION;
+  typeof v === 'number' && v >= MIN_EVENTS_NATIVE_SCHEMA_VERSION;
 
 /**
  * Rebuilds the stored timeline on write: round events keep their order, and additive events
