@@ -84,6 +84,13 @@ const storageSettings = {
       pinned: types.boolean({}),
       read_only: types.boolean({}),
       workspace_id: types.keyword({}),
+      parent_conversation: types.object({
+        dynamic: false,
+        properties: {
+          id: types.keyword({}),
+          relation: types.keyword({}),
+        },
+      }),
       access_control: types.object({
         properties: {
           access_mode: types.keyword({}),
@@ -111,6 +118,14 @@ const storageSettings = {
   },
 } satisfies IndexStorageSettings;
 
+/**
+ * Persistent shape of the parent-conversation link.
+ */
+export interface PersistentConversationParentLink {
+  id: string;
+  relation: string;
+}
+
 export interface ConversationProperties {
   user_id?: string;
   user_name: string;
@@ -131,6 +146,7 @@ export interface ConversationProperties {
   read_only?: boolean;
   workspace_id?: string;
   access_control?: Optional<ConversationAccessControl, 'entries'>;
+  parent_conversation?: PersistentConversationParentLink;
   origin?: ConversationOrigin;
   metadata?: Record<string, SerializedMetadataValue>;
   template_id?: string;
