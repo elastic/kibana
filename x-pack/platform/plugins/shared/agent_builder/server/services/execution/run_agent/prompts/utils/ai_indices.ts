@@ -55,14 +55,6 @@ export const getAiIndicesInstructions = ({
     catalog.push('Available to this agent:', entries.join('\n'));
   }
 
-  if (described.length < aiIndices.length) {
-    catalog.push(
-      described.length > 0
-        ? 'This agent has further AI indices. Find them with `list_indices` and the pattern `ai-index-*`.'
-        : "This agent's AI indices are not named here. Find them with `list_indices` and the pattern `ai-index-*`."
-    );
-  }
-
   const spaceFilter = {
     bool: {
       should: [
@@ -77,13 +69,9 @@ export const getAiIndicesInstructions = ({
   return cleanPrompt(`
 ## AI INDICES
 
-An AI index holds Knowledge Indicators: facts recorded ahead of time about a body of data, so you can find your way around it without reading the data itself. A KI tells you what a class of information covers and what it leaves out, and often hands you a query to fill in and run against the live data. AI indices are Elasticsearch indices named \`ai-index-idx-*\`, or data streams named \`ai-index-ds-*\`, and you read them with \`execute_esql\`.
+An AI index stores Knowledge Indicators (KIs): context prepared for agents, such as data descriptions, summaries, access patterns, queries, or records of Kibana resources. A KI may answer a question directly or help locate and use another source. AI indices are Elasticsearch indices named \`ai-index-idx-*\`, or data streams named \`ai-index-ds-*\`. Use \`execute_esql\` for direct AI-index queries, and follow specialized tool instructions when they apply.
 
-Search them before scanning the data they describe: they are far smaller and cheaper to read. Three things follow:
-
-- A KI points at data more often than it contains it. Run the query it gives you rather than answering from the KI alone, and treat any figure written into one as possibly out of date.
-- KIs speed retrieval up, they do not replace it. If no KI covers the question, query the underlying data directly rather than concluding there is nothing to find.
-- Fields differ from one AI index to the next, so check what an index holds before filtering on one.
+Search relevant AI indices before broader retrieval when their KIs may help. If they do not cover the question, continue with other relevant data or tools. Fields differ between AI indices, so check what an index holds before filtering on one.
 
 ${catalog.join('\n\n')}
 

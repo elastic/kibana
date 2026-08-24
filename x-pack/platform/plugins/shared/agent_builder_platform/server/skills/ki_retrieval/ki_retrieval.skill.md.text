@@ -31,8 +31,9 @@ Others omit the field entirely, and their KIs are visible from every space.
 
 Because of that split, the space condition belongs in the `filter` parameter of `execute_esql`,
 never in a `WHERE` clause: a `WHERE` on `spaces` would discard every KI from the indices that do
-not define the field. If your instructions carry an AI INDICES section, it gives the exact filter
-to pass, already resolved to the current space — use it verbatim on every query below.
+not define the field. When your instructions include an AI INDICES section, pass its exact `filter`
+verbatim as an `execute_esql` argument on every AI-index query below. It is already resolved to the
+current space.
 
 ---
 

@@ -36,24 +36,26 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('`ai-index-ds-*`');
   });
 
-  it('sends the agent to the underlying data when no KI covers the question', () => {
+  it('describes KIs as context that may answer directly or lead to another source', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'default',
     });
 
-    expect(instructions).toContain('query the underlying data directly');
+    expect(instructions).toContain('may answer a question directly');
+    expect(instructions).toContain('help locate and use another source');
   });
 
-  it('warns that a value written into a KI may be out of date', () => {
+  it('continues with other relevant sources when KIs do not cover the question', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'default',
     });
 
-    expect(instructions).toContain('possibly out of date');
+    expect(instructions).toContain('Search relevant AI indices before broader retrieval');
+    expect(instructions).toContain('continue with other relevant data or tools');
   });
 
   it('names the backing index of the default AI index and what it holds', () => {
@@ -85,6 +87,8 @@ describe('getAiIndicesInstructions', () => {
       spaceId: 'default',
     });
 
+    expect(instructions).toContain('Use `execute_esql` for direct AI-index queries');
+    expect(instructions).toContain('follow specialized tool instructions when they apply');
     expect(instructions).not.toContain('sml_');
   });
 
@@ -142,14 +146,14 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).not.toContain('some-private-id');
   });
 
-  it('points at index discovery for declared indices it cannot name', () => {
+  it('does not infer destinations for declared indices it cannot name', () => {
     const instructions = getAiIndicesInstructions({
       enabled: true,
       aiIndices: [agentBuilderDefaultAiIndexId, 'some-private-id'],
       spaceId: 'default',
     });
 
-    expect(instructions).toContain('`list_indices`');
+    expect(instructions).not.toContain('`list_indices`');
   });
 
   it('omits the catalog heading when no declared index can be named', () => {
@@ -160,6 +164,6 @@ describe('getAiIndicesInstructions', () => {
     });
 
     expect(instructions).not.toContain('Available to this agent');
-    expect(instructions).toContain('`list_indices`');
+    expect(instructions).not.toContain('`list_indices`');
   });
 });
