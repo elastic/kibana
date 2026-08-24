@@ -138,7 +138,7 @@ describe('EditCustomContentFlyout', () => {
       render(
         <EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" template="<p>hi</p>" />
       );
-      expect(screen.getByRole('button', { name: 'Run Preview' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Run preview' })).toBeDisabled();
     });
 
     it('is enabled when the query differs from the saved value', () => {
@@ -148,7 +148,7 @@ describe('EditCustomContentFlyout', () => {
         draftTemplate: '<p>hi</p>',
       });
       render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
-      expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Run preview' })).not.toBeDisabled();
     });
 
     it('is enabled when the template differs from the saved value', () => {
@@ -157,7 +157,7 @@ describe('EditCustomContentFlyout', () => {
         draftTemplate: '<p>edited</p>',
       });
       render(<EditCustomContentFlyout {...defaultProps} template="<p>hi</p>" />);
-      expect(screen.getByRole('button', { name: 'Run Preview' })).not.toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Run preview' })).not.toBeDisabled();
     });
 
     it('is disabled after preview has been applied to the current draft', () => {
@@ -167,7 +167,7 @@ describe('EditCustomContentFlyout', () => {
         hasPreviewedCurrentDraft: true,
       });
       render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM logs" />);
-      expect(screen.getByRole('button', { name: 'Run Preview' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Run preview' })).toBeDisabled();
     });
 
     it('calls handleRender when clicked', async () => {
