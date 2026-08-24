@@ -12,6 +12,21 @@ import {
 } from '../lib/inspect/inspectable_es_queries_map';
 import { createUxServerRoute } from './create_ux_server_route';
 
+interface InspectTestResources {
+  request: KibanaRequest;
+  context: { core: Promise<unknown> };
+}
+
+const invokeRoute = (
+  route: ReturnType<typeof createUxServerRoute>,
+  resources: InspectTestResources
+): Promise<unknown> => {
+  const def = Object.values(route)[0] as unknown as {
+    handler: (resources: InspectTestResources) => Promise<unknown>;
+  };
+  return def.handler(resources);
+};
+
 describe('createUxServerRoute inspect', () => {
   const request = {
     query: {},
@@ -37,14 +52,8 @@ describe('createUxServerRoute inspect', () => {
         return { ok: true };
       },
     });
-    const def = Object.values(route)[0] as {
-      handler: (resources: {
-        request: KibanaRequest;
-        context: { core: Promise<unknown> };
-      }) => Promise<unknown>;
-    };
 
-    const result = await def.handler({
+    const result = await invokeRoute(route, {
       request,
       context: { core: Promise.resolve({}) },
     });
@@ -64,14 +73,8 @@ describe('createUxServerRoute inspect', () => {
         return { sessions: [] };
       },
     });
-    const def = Object.values(route)[0] as {
-      handler: (resources: {
-        request: KibanaRequest;
-        context: { core: Promise<unknown> };
-      }) => Promise<unknown>;
-    };
 
-    const result = await def.handler({
+    const result = await invokeRoute(route, {
       request,
       context: { core: Promise.resolve({}) },
     });
