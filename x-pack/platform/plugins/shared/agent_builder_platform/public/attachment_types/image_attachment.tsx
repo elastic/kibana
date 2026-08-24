@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { HttpStart } from '@kbn/core/public';
 import type { ImageAttachmentData, UnknownAttachment } from '@kbn/agent-builder-common/attachments';
-import { AGENT_BUILDER_IMAGE_FILE_KIND } from '@kbn/agent-builder-common/attachments';
+import { CHAT_ATTACHMENT_IMAGES_FILE_KIND } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
 
 type ImageAttachment = UnknownAttachment & { data: ImageAttachmentData };
@@ -18,7 +18,9 @@ type ImageAttachment = UnknownAttachment & { data: ImageAttachmentData };
 const getImageSrc = (attachment: ImageAttachment, http: HttpStart): string | undefined => {
   const { file_id: fileId } = attachment.data;
   if (!fileId) return undefined;
-  return http.basePath.prepend(`/api/files/files/${AGENT_BUILDER_IMAGE_FILE_KIND}/${fileId}/blob`);
+  return http.basePath.prepend(
+    `/api/files/files/${CHAT_ATTACHMENT_IMAGES_FILE_KIND}/${fileId}/blob`
+  );
 };
 
 const ImageInlineContent: React.FC<{ attachment: ImageAttachment; http: HttpStart }> = ({
