@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configSchema, getMaxAlertsPerRun } from './config';
+import { configSchema, getQueryRowLimit, NON_STREAMING_MAX_ROWS } from './config';
 
 describe('alerting_v2 config schema', () => {
   describe('enabled', () => {
@@ -74,9 +74,9 @@ describe('alerting_v2 config schema', () => {
   });
 
   describe('rules.run.alerts.max', () => {
-    it('is unset by default so it can be resolved by response format', () => {
+    it('defaults to 10000', () => {
       const config = configSchema.validate({});
-      expect(config.rules.run.alerts.max).toBeUndefined();
+      expect(config.rules.run.alerts.max).toBe(10000);
     });
 
     it('accepts a smaller configured value', () => {
@@ -94,31 +94,31 @@ describe('alerting_v2 config schema', () => {
     });
   });
 
-  describe('getMaxAlertsPerRun', () => {
-    it('defaults to 1000 for the json response format', () => {
+  describe('getQueryRowLimit', () => {
+    it('uses min(alerts.max, NON_STREAMING_MAX_ROWS) for the json response format', () => {
       const config = configSchema.validate({ esql: { responseFormat: 'json' } });
-      expect(getMaxAlertsPerRun(config)).toBe(1000);
+      expect(getQueryRowLimit(config)).toBe(NON_STREAMING_MAX_ROWS);
     });
 
-    it('defaults to 10000 for the arrow response format', () => {
+    it('uses alerts.max for the arrow response format', () => {
       const config = configSchema.validate({ esql: { responseFormat: 'arrow' } });
-      expect(getMaxAlertsPerRun(config)).toBe(10000);
+      expect(getQueryRowLimit(config)).toBe(10000);
     });
 
-    it('honors the set value on the json response format', () => {
+    it('honors a lower alerts.max on the json response format', () => {
       const config = configSchema.validate({
         esql: { responseFormat: 'json' },
         rules: { run: { alerts: { max: 500 } } },
       });
-      expect(getMaxAlertsPerRun(config)).toBe(500);
+      expect(getQueryRowLimit(config)).toBe(500);
     });
 
-    it('honors the set value on the arrow response format', () => {
+    it('honors a lower alerts.max on the arrow response format', () => {
       const config = configSchema.validate({
         esql: { responseFormat: 'arrow' },
         rules: { run: { alerts: { max: 500 } } },
       });
-      expect(getMaxAlertsPerRun(config)).toBe(500);
+      expect(getQueryRowLimit(config)).toBe(500);
     });
   });
 

@@ -23,21 +23,18 @@ const MINIMUM_SCHEDULE_INTERVAL_FLOOR = MIN_SCHEDULE_INTERVAL;
 /** Highest value `xpack.alerting_v2.rules.minimumScheduleInterval` may be set to. */
 const MAX_MINIMUM_SCHEDULE_INTERVAL = '30d';
 
-/** Defaults and highest value of `xpack.alerting_v2.rules.run.alerts.max`. */
+/** Default and highest value of `xpack.alerting_v2.rules.run.alerts.max`. */
 const MAX_ALERTS_PER_RUN = 10000;
-const STREAMING_DEFAULT_MAX_ALERTS_PER_RUN = MAX_ALERTS_PER_RUN;
-const NON_STREAMING_DEFAULT_MAX_ALERTS_PER_RUN = 1000;
 /** Default cap on the ES response body size for non-streaming rule queries (50 MB). */
 const DEFAULT_MAX_QUERY_RESPONSE_SIZE_BYTES = 50 * 1024 * 1024;
+/**
+ * Max for the non-streaming (JSON) ES|QL path.
+ */
+export const NON_STREAMING_MAX_ROWS = 1000;
 
 const rulesRunSchema = schema.object({
   alerts: schema.object({
-    max: schema.maybe(
-      schema.number({
-        min: 1,
-        max: MAX_ALERTS_PER_RUN,
-      })
-    ),
+    max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
   }),
   timeout: schema.maybe(schema.string({ validate: validateDuration })),
   query: schema.object({
@@ -108,11 +105,10 @@ export type PluginConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type EsqlConfig = TypeOf<typeof esqlSchema>;
 
-export const getMaxAlertsPerRun = (config: PluginConfig): number => {
-  return (
-    config.rules.run.alerts.max ??
-    (config.esql.responseFormat === 'arrow'
-      ? STREAMING_DEFAULT_MAX_ALERTS_PER_RUN
-      : NON_STREAMING_DEFAULT_MAX_ALERTS_PER_RUN)
-  );
+export const getQueryRowLimit = (config: PluginConfig): number => {
+  const maxAlerts = config.rules.run.alerts.max;
+  if (config.esql.responseFormat === 'json') {
+    return Math.min(maxAlerts, NON_STREAMING_MAX_ROWS);
+  }
+  return maxAlerts;
 };

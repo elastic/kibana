@@ -19,7 +19,7 @@ import type { QueryServiceContract } from '../../services/query_service/query_se
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
 import { guardedExpandStep, withAtLeastOne } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../metrics/counters';
-import { type PluginConfig, getMaxAlertsPerRun } from '../../../config';
+import { type PluginConfig, getQueryRowLimit } from '../../../config';
 
 type EsqlRowBatch = Record<string, unknown>[];
 
@@ -27,7 +27,7 @@ type EsqlRowBatch = Record<string, unknown>[];
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public readonly name = 'execute_rule_query';
 
-  private readonly maxAlertsPerRun: number;
+  private readonly queryRowLimit: number;
   private readonly maxQueryResponseSize: number;
 
   constructor(
@@ -37,7 +37,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
     const config = pluginConfigAccessor.get<PluginConfig>();
-    this.maxAlertsPerRun = getMaxAlertsPerRun(config);
+    this.queryRowLimit = getQueryRowLimit(config);
     this.maxQueryResponseSize = config.rules.run.query.maxResponseSize;
   }
 
@@ -58,7 +58,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         lookbackWindow,
       });
 
-      const boundedQuery = appendLimitToQuery(effectiveQuery, step.maxAlertsPerRun);
+      const boundedQuery = appendLimitToQuery(effectiveQuery, step.queryRowLimit);
 
       logger.debug({
         message: 'Executing ES|QL query',
@@ -84,11 +84,11 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
             [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
           };
 
-          if (!loggedRowsDropped && totalRows >= step.maxAlertsPerRun) {
+          if (!loggedRowsDropped && totalRows >= step.queryRowLimit) {
             loggedRowsDropped = true;
             counters[RULE_EXECUTION_COUNTERS.rowsDroppedByLimit] = 1;
             logger.debug({
-              message: `ES|QL query results truncated at the ${step.maxAlertsPerRun}-row limit; some rows may have been dropped`,
+              message: `ES|QL query results truncated at the ${step.queryRowLimit}-row limit; some rows may have been dropped`,
               labels: { rule_id: input.ruleId, step: step.name },
             });
           }
