@@ -611,5 +611,76 @@ describe('QueryService', () => {
       expect(mockLogger.debug).toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
+
+    it('coerces date columns from ISO-8601 strings to epoch millis', async () => {
+      const iso = '2026-08-24T14:01:32.000Z';
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'bucket', type: 'date' },
+          { name: 'metric_value', type: 'long' },
+        ],
+        values: [[iso, 42]],
+      });
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toEqual([[{ bucket: Date.parse(iso), metric_value: 42 }]]);
+      expect(typeof batches[0][0].bucket).toBe('number');
+    });
+
+    it('coerces date_nanos columns to epoch millis', async () => {
+      const iso = '2026-08-24T14:01:32.123456789Z';
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [{ name: 'bucket', type: 'date_nanos' }],
+        values: [[iso]],
+      });
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toEqual([[{ bucket: Date.parse(iso) }]]);
+    });
+
+    it('maps multivalue date columns element-wise to epoch millis', async () => {
+      const first = '2026-08-24T14:01:32.000Z';
+      const second = '2026-08-24T15:01:32.000Z';
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [{ name: 'bucket', type: 'date' }],
+        values: [[[first, second]]],
+      } as unknown as EsqlQueryResponse);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toEqual([[{ bucket: [Date.parse(first), Date.parse(second)] }]]);
+    });
+
+    it('leaves non-date columns untouched when normalizing dates', async () => {
+      const iso = '2026-08-24T14:01:32.000Z';
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'bucket', type: 'date' },
+          { name: 'label', type: 'keyword' },
+          { name: 'count', type: 'integer' },
+        ],
+        values: [[iso, '2026-08-24T14:01:32.000Z', 7]],
+      });
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toEqual([
+        [{ bucket: Date.parse(iso), label: '2026-08-24T14:01:32.000Z', count: 7 }],
+      ]);
+    });
   });
 });

@@ -131,7 +131,7 @@ export class QueryService implements QueryServiceContract {
 
       context.throwIfAborted();
 
-      const rows = this.toRows<T>(response);
+      const rows = this.toRows<T>(response, { normalizeDates: true });
 
       this.logger.debug({
         message: `QueryService: Streaming query completed successfully (json)`,
@@ -273,11 +273,29 @@ export class QueryService implements QueryServiceContract {
     return new Error(`Failed to parse ES|QL response. Error: ${message}`);
   }
 
-  private toRows<T>(response: EsqlQueryResponse): T[] {
+  /**
+   * Builds row objects from an ES|QL response.
+   *
+   * `normalizeDates` (default `false`) coerces `date` / `date_nanos` columns to
+   * epoch millis. Use this flag to keep the JSON and Arrow response formats consistent
+   */
+  private toRows<T>(
+    response: EsqlQueryResponse,
+    { normalizeDates = false }: { normalizeDates?: boolean } = {}
+  ): T[] {
     const columnNames = response.columns.map((column) => column.name);
+    const dateColumnNames = normalizeDates
+      ? new Set(
+          response.columns
+            .filter((column) => column.type === 'date' || column.type === 'date_nanos')
+            .map((column) => column.name)
+        )
+      : undefined;
+
     return response.values.map((valueRow) => {
       const row = columnNames.reduce<Record<string, unknown>>((acc, columnName, index) => {
-        acc[columnName] = valueRow[index];
+        const value = valueRow[index];
+        acc[columnName] = dateColumnNames?.has(columnName) ? toEpochMillis(value) : value;
         return acc;
       }, {});
 
@@ -300,4 +318,18 @@ const coerceBigInts = (row: Record<string, unknown>): Record<string, unknown> =>
   }
 
   return coerced;
+};
+
+/**
+ * Coerces an ES|QL `date` / `date_nanos` value to epoch millis
+ */
+const toEpochMillis = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(toEpochMillis);
+  } else if (typeof value === 'string') {
+    const millis = Date.parse(value);
+    return Number.isNaN(millis) ? value : millis;
+  }
+
+  return value;
 };
