@@ -11,11 +11,12 @@ import { useEffect, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getAnySourceCommandFromESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { fetchExpandedDoc } from '../../data_fetching/fetch_expanded_doc';
 import {
   getExpandedDocRef,
+  isEsqlSourceCommandLinkable,
   matchesExpandedDocRef,
   type ExpandedDocRef,
 } from '../../utils/expanded_doc';
@@ -95,12 +96,11 @@ export const useExpandedDocSync = ({
     !expandedDoc ||
     (expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER && Boolean(getExpandedDocRef(expandedDoc)));
 
-  // Gate unresolved fetches by query because only non-transformational FROM rows can be refetched.
+  // Gate unresolved fetches by query because only supported, non-transformational rows can be refetched.
   const isEsqlUnrestorable = useMemo(() => {
     return (
       isEsqlQuery &&
-      (getAnySourceCommandFromESQLQuery(query.esql) !== 'FROM' ||
-        hasTransformationalCommand(query.esql))
+      (!isEsqlSourceCommandLinkable(query.esql) || hasTransformationalCommand(query.esql))
     );
   }, [isEsqlQuery, query]);
 

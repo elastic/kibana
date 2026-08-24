@@ -103,6 +103,22 @@ describe('fetchExpandedDoc', () => {
       );
     });
 
+    it('filters a TS query when fetching the document', async () => {
+      const { data, getSearchParams } = setup(esqlResponse);
+
+      await fetchExpandedDoc({
+        ref,
+        dataView: dataViewMock,
+        esqlQueryText: 'TS metrics-* METADATA _id, _index',
+        data,
+        abortSignal: new AbortController().signal,
+      });
+
+      expect(getSearchParams().params.query).toBe(
+        `TS metrics-* METADATA _id, _index\n| WHERE _index == "${ref.index}" AND _id == "${ref.id}"\n| LIMIT 1`
+      );
+    });
+
     it('builds a record shaped like the ones the main ES|QL search produces', async () => {
       const { data } = setup(esqlResponse);
 

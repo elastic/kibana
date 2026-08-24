@@ -64,13 +64,16 @@ describe('getExpandedDocLinkability', () => {
     ).toBe(ExpandedDocLinkability.Linkable);
   });
 
-  it('reports an ES|QL document carrying _id/_index as linkable', () => {
-    expect(
-      getExpandedDocLinkability({ esql: 'FROM logs METADATA _id, _index' }, docWithMetadata)
-    ).toBe(ExpandedDocLinkability.Linkable);
-  });
+  it.each(['FROM logs METADATA _id, _index', 'TS metrics-* METADATA _id, _index'])(
+    'reports a document from %s carrying _id/_index as linkable',
+    (esql) => {
+      expect(getExpandedDocLinkability({ esql }, docWithMetadata)).toBe(
+        ExpandedDocLinkability.Linkable
+      );
+    }
+  );
 
-  it.each(['ROW message = "hello"', 'PROMQL index=metrics query="up"', 'TS metrics-*'])(
+  it.each(['ROW message = "hello"', 'PROMQL index=metrics query="up"'])(
     'reports the %s source command as unsupported',
     (esql) => {
       expect(getExpandedDocLinkability({ esql }, docWithMetadata)).toBe(
@@ -103,9 +106,9 @@ describe('getExpandedDocLinkability', () => {
 });
 
 describe('getExpandedDocLinkDisabledReason', () => {
-  it('explains that only FROM queries support links to individual results', () => {
+  it('explains which source commands support links to individual results', () => {
     expect(getExpandedDocLinkDisabledReason(ExpandedDocLinkability.EsqlUnsupportedSource)).toBe(
-      'Links to individual results are only available for FROM queries.'
+      'Links to individual results are only available for FROM and TS queries.'
     );
   });
 

@@ -41,13 +41,19 @@ export const matchesExpandedDocRef = (doc: DataTableRecord, ref: ExpandedDocRef)
  */
 export enum ExpandedDocLinkability {
   Linkable = 'Linkable',
-  /** Only FROM queries support refetching individual documents */
+  /** Only FROM and TS queries support refetching individual documents */
   EsqlUnsupportedSource = 'EsqlUnsupportedSource',
   /** The ES|QL query does not request `_id` and `_index`, so its rows have no stable identity */
   EsqlMissingMetadata = 'EsqlMissingMetadata',
   /** The ES|QL query derives its rows, so they do not correspond to documents that can be refetched */
   EsqlTransformational = 'EsqlTransformational',
 }
+
+/** Whether the ES|QL source command supports linking to individual documents. */
+export const isEsqlSourceCommandLinkable = (esql: string): boolean => {
+  const sourceCommand = getAnySourceCommandFromESQLQuery(esql);
+  return sourceCommand === 'FROM' || sourceCommand === 'TS';
+};
 
 /**
  * Determines whether a document is deep linkable. Transformational ES|QL rows cannot be reliably refetched,
@@ -61,7 +67,7 @@ export const getExpandedDocLinkability = (
     return ExpandedDocLinkability.Linkable;
   }
 
-  if (getAnySourceCommandFromESQLQuery(query.esql) !== 'FROM') {
+  if (!isEsqlSourceCommandLinkable(query.esql)) {
     return ExpandedDocLinkability.EsqlUnsupportedSource;
   }
 
@@ -81,7 +87,7 @@ export const getExpandedDocLinkDisabledReason = (
   switch (linkability) {
     case ExpandedDocLinkability.EsqlUnsupportedSource:
       return i18n.translate('discover.expandedDoc.esqlUnsupportedSourceDescription', {
-        defaultMessage: 'Links to individual results are only available for FROM queries.',
+        defaultMessage: 'Links to individual results are only available for FROM and TS queries.',
       });
     case ExpandedDocLinkability.EsqlMissingMetadata:
       return i18n.translate('discover.expandedDoc.esqlMissingMetadataDescription', {
