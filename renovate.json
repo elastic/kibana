@@ -1024,6 +1024,7 @@
         "commander",
         "dedent",
         "getopts",
+        "meow",
         "listr2",
         "ora",
         "@parcel/watcher",
