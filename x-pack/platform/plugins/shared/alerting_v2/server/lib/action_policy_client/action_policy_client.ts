@@ -15,6 +15,7 @@ import type {
   MatcherContext,
 } from '@kbn/alerting-v2-schemas';
 import {
+  ALERT_EPISODE_STATUS,
   createActionPolicyDataSchema,
   updateActionPolicyDataSchema,
 } from '@kbn/alerting-v2-schemas';
@@ -408,7 +409,7 @@ export class ActionPolicyClient {
       last_event_timestamp: '',
       group_hash: '',
       episode_id: '',
-      episode_status: 'active',
+      episode_status: ALERT_EPISODE_STATUS.ACTIVE,
       rule: {
         id: ruleId ?? '',
         name: resolvedName,
@@ -671,8 +672,8 @@ export class ActionPolicyClient {
     return sortFieldMap[sortField];
   }
 
-  public async getAllTags(params?: { search?: string }): Promise<string[]> {
-    return this.actionPolicySavedObjectService.getDistinctTags({
+  public async getTags(params?: { search?: string }): Promise<string[]> {
+    return this.actionPolicySavedObjectService.findTags({
       search: params?.search,
     });
   }

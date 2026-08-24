@@ -15,7 +15,6 @@ import {
   createRulePipelineState,
   createRuleSoAttributes,
 } from '../test_utils';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createRulesClient } from '../../rules_client/rules_client.mock';
 
 // Note: RulesClient converts SavedObjectsError to Boom errors internally,
@@ -26,10 +25,9 @@ describe('FetchRuleStep', () => {
   let mockSavedObjectsClient: ReturnType<typeof createRulesClient>['mockSavedObjectsClient'];
 
   beforeEach(() => {
-    const { loggerService } = createLoggerService();
     const { rulesClient, mockSavedObjectsClient: soClient } = createRulesClient();
     mockSavedObjectsClient = soClient;
-    step = new FetchRuleStep(loggerService, rulesClient);
+    step = new FetchRuleStep(rulesClient);
   });
 
   it('returns rule when rule exists', async () => {

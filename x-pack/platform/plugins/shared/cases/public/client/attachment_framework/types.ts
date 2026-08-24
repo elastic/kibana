@@ -6,13 +6,14 @@
  */
 
 import type React from 'react';
-import type { EuiCommentProps, IconType, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
+import type { EuiCommentProps, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
 import type { z } from '@kbn/zod/v4';
 import type {
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
 } from '../../../common/types/domain';
 import type { CaseUI, CaseUser } from '../../containers/types';
+import type { CasesPermissions } from '../../../common/ui/types';
 import { AttachmentActionType } from '../../../common/utils/attachment_actions';
 
 export { AttachmentActionType };
@@ -34,34 +35,38 @@ interface ButtonAttachmentAction extends BaseAttachmentAction {
 
 interface CustomAttachmentAction extends BaseAttachmentAction {
   type: AttachmentActionType.CUSTOM;
-  render: () => JSX.Element;
+  render: () => JSX.Element | null;
 }
 
 export type AttachmentAction = ButtonAttachmentAction | CustomAttachmentAction;
 
-export interface AttachmentViewObject<Props = {}> {
-  timelineAvatar?: EuiCommentProps['timelineAvatar'];
+export interface AttachmentCreationActivity<Props = {}> {
   getActions?: (props: Props) => AttachmentAction[];
   event?: EuiCommentProps['event'];
   eventColor?: EuiCommentProps['eventColor'];
   children?: React.LazyExoticComponent<React.FC<Props>>;
   hideDefaultActions?: boolean;
-  deleteSuccessTitle?: string;
+  deleteSuccessToast?: string;
   className?: string;
   css?: EuiCommentProps['css'];
 }
 
-export interface AttachmentTabViewObject<Props = {}> {
+export interface AttachmentRemovalActivity<Props = {}> {
+  event?: EuiCommentProps['event'];
+}
+
+export interface AttachmentList<Props = {}> {
   children?: React.ComponentType<Props>;
 }
 
 export interface CommonAttachmentViewProps {
   savedObjectId: string;
   caseData: Pick<CaseUI, 'id' | 'title'>;
+  permissions: CasesPermissions;
 }
 
-/** Props for case-level attachment tabs (Alerts/Events/… table hosts). */
-export interface CommonAttachmentTabViewProps {
+/** Props for case-level attachment lists (Alerts/Events/… table hosts). */
+export interface CommonAttachmentListViewProps {
   caseData: CaseUI;
   searchTerm?: string;
 }
@@ -116,13 +121,13 @@ export interface UnifiedHybridAttachmentViewProps<
 
 export interface AttachmentType<Props> {
   id: string;
-  icon: IconType;
-  displayName: string;
-  getAttachmentViewObject: (props: Props) => AttachmentViewObject<Props>;
-  getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
-  getAttachmentTabViewObject?: (
-    props?: CommonAttachmentTabViewProps
-  ) => AttachmentTabViewObject<CommonAttachmentTabViewProps>;
+  getIcon: (props: Props) => EuiCommentProps['timelineAvatar'];
+  getLabel: () => string;
+  getCreationActivity: (props: Props) => AttachmentCreationActivity<Props>;
+  getRemovalActivity?: (props: Props) => AttachmentRemovalActivity<Props>;
+  getAttachmentList?: (
+    props?: CommonAttachmentListViewProps
+  ) => AttachmentList<CommonAttachmentListViewProps>;
 }
 
 interface UnifiedAttachmentSchema {
@@ -158,5 +163,5 @@ export type RegisteredUnifiedAttachmentType =
   | UnifiedHybridAttachmentType;
 
 export interface AttachmentFramework {
-  registerUnified: (unifiedAttachmentType: RegisteredUnifiedAttachmentType) => void;
+  registerAttachment: (attachmentType: RegisteredUnifiedAttachmentType) => void;
 }
