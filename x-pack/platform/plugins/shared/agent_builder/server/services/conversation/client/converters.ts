@@ -15,10 +15,13 @@ import type {
   ToolResult,
   UserIdAndName,
   SerializedMetadataValue,
+  ConversationParentRelation,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
+  CONVERSATION_SCHEMA_VERSION,
+  MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   ConversationRoundStatus,
   ConversationRoundStepType,
   ToolOrigin,
@@ -47,6 +50,7 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
+import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
 
 export type Document = Omit<
   Required<
@@ -64,6 +68,30 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
     hit._seq_no !== undefined &&
     hit._primary_term !== undefined
   );
+};
+
+export const isEventsNativeVersion = (v: number | undefined): v is number =>
+  typeof v === 'number' && v >= MIN_EVENTS_NATIVE_SCHEMA_VERSION;
+
+/**
+ * Rebuilds the stored timeline on write: round events keep their order, and additive events
+ * (like errors) get slotted in by timestamp. That keeps a future error where it actually
+ * happened instead of dumped at the end.
+ */
+const reconcileEvents = (merged: Conversation) => {
+  const roundDerived = roundsToEvents(merged);
+  const additive = (merged.events ?? []).filter((event) => !isRoundDerivedEventId(event.id));
+
+  const events = [...roundDerived];
+  for (const event of additive) {
+    const insertAt = events.findIndex((existing) => existing.created_at > event.created_at);
+    if (insertAt === -1) {
+      events.push(event);
+    } else {
+      events.splice(insertAt, 0, event);
+    }
+  }
+  return events;
 };
 
 const convertBaseFromEs = (document: Document) => {
@@ -88,6 +116,14 @@ const convertBaseFromEs = (document: Document) => {
     access_control: normalizeConversationAccessControl(document._source.access_control),
     ...(document._source.origin ? { origin: document._source.origin } : {}),
     ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
+    ...(document._source.parent_conversation
+      ? {
+          parent_conversation: {
+            id: document._source.parent_conversation.id,
+            relation: document._source.parent_conversation.relation as ConversationParentRelation,
+          },
+        }
+      : {}),
     ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
     ...(document._source.template_id ? { template_id: document._source.template_id } : {}),
     ...(document._source.template_version !== undefined
@@ -222,29 +258,24 @@ export const fromEs = (document: Document): Conversation => {
 
   const roundsWithRefs = applyAttachmentRefsToRounds(deserializedRounds, refsByRound);
 
-  if (existingAttachments && existingAttachments.length > 0) {
-    return {
-      ...base,
-      rounds: roundsWithRefs,
-      attachments: existingAttachments,
-      ...(document._source!.state && { state: document._source!.state }),
-    };
-  }
+  const storedSchemaVersion = document._source!.schema_version;
+  const storedEvents = document._source!.events;
+  const isEventsNative = isEventsNativeVersion(storedSchemaVersion);
 
-  if (hasLegacyRoundAttachments) {
-    return {
-      ...base,
-      rounds: roundsWithRefs,
-      ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
-      ...(document._source!.state && { state: document._source!.state }),
-    };
-  }
-
-  return {
+  const conversation: Conversation = {
     ...base,
     rounds: roundsWithRefs,
-    ...(document._source!.state && { state: document._source!.state }),
+    ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
+    ...(document._source!.state ? { state: document._source!.state } : {}),
+    ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
   };
+
+  const events =
+    isEventsNative && storedEvents && storedEvents.length > 0
+      ? storedEvents
+      : roundsToEvents(conversation);
+
+  return { ...conversation, events };
 };
 
 export const fromEsWithoutRounds = (document: Document): ConversationWithoutRounds => {
@@ -272,6 +303,7 @@ export const withPermissions = <T extends ConversationWithoutRounds>({
 };
 
 export const toEs = (conversation: Conversation, space: string): ConversationProperties => {
+  const isEventsNative = isEventsNativeVersion(conversation.schema_version);
   return {
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
@@ -292,6 +324,17 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    ...(conversation.parent_conversation
+      ? { parent_conversation: conversation.parent_conversation }
+      : {}),
+    // Only events-native conversations persist their timeline; legacy ones keep deriving it
+    // from rounds on read (see fromEs).
+    ...(isEventsNative
+      ? {
+          events: conversation.events ?? [],
+          schema_version: conversation.schema_version,
+        }
+      : {}),
     // Cast metadata to storage type — the flattened mapping requires string | string[].
     // Deserialized domain values (boolean, number) only exist on read; writes always
     // go through serializeMetadataValue before reaching this converter.
@@ -316,14 +359,32 @@ export const updateConversation = ({
   space: string;
   updateDate: Date;
 }) => {
-  const updated = {
-    ...conversation,
-    ...update,
-    space,
-    updated_at: updateDate.toISOString(),
+  const {
+    events: _ignoredEvents,
+    schema_version: _ignoredSchemaVersion,
+    ...safeUpdate
+  } = update as ConversationUpdatableFields & {
+    events?: Conversation['events'];
+    schema_version?: Conversation['schema_version'];
   };
 
-  return updated;
+  const merged: Conversation = {
+    ...conversation,
+    ...safeUpdate,
+    space,
+    updated_at: updateDate.toISOString(),
+    schema_version: conversation.schema_version,
+  } as Conversation;
+
+  if (!isEventsNativeVersion(merged.schema_version)) {
+    return merged;
+  }
+
+  return {
+    ...merged,
+    schema_version: CONVERSATION_SCHEMA_VERSION,
+    events: reconcileEvents(merged),
+  };
 };
 
 export const createRequestToEs = ({
@@ -337,15 +398,36 @@ export const createRequestToEs = ({
   creationDate: Date;
   space: string;
 }): ConversationProperties => {
+  // Honor conversation.user override if provided (used for persistent sub-agent
+  // creations where ownership is snapshotted from the parent conversation).
+  const effectiveUser = conversation.user ?? currentUser;
+  const createdAt = creationDate.toISOString();
+
+  // The initial timeline is derived from the rounds being created, using the same user that
+  // gets persisted so `user_message` actors match the stored ownership.
+  const forEvents: Conversation = {
+    id: '',
+    agent_id: conversation.agent_id,
+    user: { id: effectiveUser.id, username: effectiveUser.username },
+    title: conversation.title,
+    created_at: createdAt,
+    updated_at: createdAt,
+    rounds: conversation.rounds,
+    ...(conversation.origin ? { origin: conversation.origin } : {}),
+  };
+  const events = roundsToEvents(forEvents);
+
   return {
     agent_id: conversation.agent_id,
-    user_id: currentUser.id,
-    user_name: currentUser.username,
+    user_id: effectiveUser.id,
+    user_name: effectiveUser.username,
     space,
     title: conversation.title,
-    created_at: creationDate.toISOString(),
-    updated_at: creationDate.toISOString(),
+    created_at: createdAt,
+    updated_at: createdAt,
     conversation_rounds: serializeStepResults(conversation.rounds),
+    events,
+    schema_version: CONVERSATION_SCHEMA_VERSION,
     attachments: conversation.attachments ?? [],
     state: conversation.state,
     status: conversation.status,
@@ -362,6 +444,9 @@ export const createRequestToEs = ({
     ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
     ...(conversation.template_version !== undefined
       ? { template_version: conversation.template_version }
+      : {}),
+    ...(conversation.parent_conversation
+      ? { parent_conversation: conversation.parent_conversation }
       : {}),
   };
 };

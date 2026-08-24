@@ -181,10 +181,10 @@ describe('createCommentUserActionBuilder', () => {
       unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
       unifiedAttachmentTypeRegistry.register({
         id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-        displayName: 'Endpoint',
-        icon: 'logoSecurity',
-        getAttachmentViewObject: () => ({ event: 'added an endpoint' }),
-        getAttachmentRemovalObject: () => ({ event: 'removed endpoint attachment' }),
+        getLabel: () => 'Endpoint',
+        getIcon: () => 'logoSecurity',
+        getCreationActivity: () => ({ event: 'added an endpoint' }),
+        getRemovalActivity: () => ({ event: 'removed endpoint attachment' }),
         schema: z.object({}),
       });
 
@@ -218,9 +218,9 @@ describe('createCommentUserActionBuilder', () => {
       unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
       unifiedAttachmentTypeRegistry.register({
         id: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
-        displayName: 'Endpoint',
-        icon: 'logoSecurity',
-        getAttachmentViewObject: () => ({ event: 'added an endpoint' }),
+        getLabel: () => 'Endpoint',
+        getIcon: () => 'logoSecurity',
+        getCreationActivity: () => ({ event: 'added an endpoint' }),
         schema: z.object({}),
       });
 
@@ -276,10 +276,10 @@ describe('createCommentUserActionBuilder', () => {
       unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
       unifiedAttachmentTypeRegistry.register({
         id: 'security.event',
-        displayName: 'Event',
-        icon: 'bell',
-        getAttachmentViewObject: () => ({ event: 'added an event' }),
-        getAttachmentRemovalObject: () => ({ event: 'removed event' }),
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an event' }),
+        getRemovalActivity: () => ({ event: 'removed event' }),
         schema: z.object({}),
       });
 
@@ -312,10 +312,10 @@ describe('createCommentUserActionBuilder', () => {
       unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
       unifiedAttachmentTypeRegistry.register({
         id: 'security.event',
-        displayName: 'Event',
-        icon: 'bell',
-        getAttachmentViewObject: () => ({ event: 'added an event' }),
-        getAttachmentRemovalObject: () => ({ event: 'removed event' }),
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({ event: 'added an event' }),
+        getRemovalActivity: () => ({ event: 'removed event' }),
         schema: z.object({}),
       });
 
@@ -640,11 +640,10 @@ describe('createCommentUserActionBuilder', () => {
       unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
       unifiedAttachmentTypeRegistry.register({
         id: 'security.event',
-        displayName: 'Event',
-        icon: 'bell',
-        getAttachmentViewObject: () => ({
+        getLabel: () => 'Event',
+        getIcon: () => 'bell',
+        getCreationActivity: () => ({
           event: 'added an event',
-          timelineAvatar: <span data-test-subj="event-timeline-avatar" />,
         }),
         schema: z.object({}),
       });
@@ -683,11 +682,10 @@ describe('createCommentUserActionBuilder', () => {
       const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
       unifiedAttachmentTypeRegistry.register({
         id: 'lens',
-        displayName: 'Lens',
-        icon: 'lensApp',
-        getAttachmentViewObject: () => ({
+        getLabel: () => 'Lens',
+        getIcon: () => 'lensApp',
+        getCreationActivity: () => ({
           event: 'added an embeddable',
-          timelineAvatar: 'lensApp',
           ...viewObject,
         }),
         schema: z.object({}),
@@ -729,11 +727,10 @@ describe('createCommentUserActionBuilder', () => {
         unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
         unifiedAttachmentTypeRegistry.register({
           id: 'lens',
-          displayName: 'Lens',
-          icon: 'lensApp',
-          getAttachmentViewObject: () => ({
+          getLabel: () => 'Lens',
+          getIcon: () => 'lensApp',
+          getCreationActivity: () => ({
             event: 'added an embeddable',
-            timelineAvatar: 'lensApp',
             children: React.lazy(SpyLazyFactory),
           }),
           schema: z.object({}),
@@ -823,11 +820,10 @@ describe('createCommentUserActionBuilder', () => {
         unifiedAttachmentTypeRegistry.register(getCommentAttachmentType());
         unifiedAttachmentTypeRegistry.register({
           id: 'lens',
-          displayName: 'Lens',
-          icon: 'lensApp',
-          getAttachmentViewObject: () => ({
+          getLabel: () => 'Lens',
+          getIcon: () => 'lensApp',
+          getCreationActivity: () => ({
             event: 'added an embeddable',
-            timelineAvatar: 'lensApp',
           }),
           schema: z.object({}),
         });
