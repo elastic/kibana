@@ -208,7 +208,6 @@ export function getDashboardApi({
     hasOverlays$: trackOverlayApi.hasOverlays$,
     setState,
     getState,
-    initialState,
     dataLoading$: combineLatest([
       layoutManager.internalApi.childrenStateLoading$,
       layoutManager.internalApi.childrenLoading$,

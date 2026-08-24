@@ -43,7 +43,7 @@ describe('startTrackingHistory', () => {
 
   describe('history tracking', () => {
     it('enables undo after a state change is recorded', async () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
       state$.next({ value: 1 });
       expect(await firstValueFrom(api.disabledActions$.pipe(skip(1)))).toMatchObject({
         undo: false,
@@ -74,10 +74,10 @@ describe('startTrackingHistory', () => {
 
   describe('undo', () => {
     it('emits the previous state on currentState$', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
       state$.next({ value: 1 });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       api.undo();
       expect(emitted).toHaveLength(1);
@@ -87,12 +87,12 @@ describe('startTrackingHistory', () => {
     });
 
     it('records multiple distinct state changes', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
       state$.next({ value: 1 });
       state$.next({ value: 2 });
       state$.next({ value: 3 });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       api.undo();
       api.undo();
@@ -105,7 +105,7 @@ describe('startTrackingHistory', () => {
     it('is a no-op when at the bottom of the history stack', () => {
       const { api, cleanup } = setupHistory({});
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       api.undo();
       expect(emitted).toHaveLength(0);
@@ -114,9 +114,9 @@ describe('startTrackingHistory', () => {
     });
 
     it('is a no-op when disableUndoRedo$ is true', () => {
-      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({});
+      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       disableUndoRedo$.next(true);
@@ -127,7 +127,7 @@ describe('startTrackingHistory', () => {
     });
 
     it('enables redo after an undo', async () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
       state$.next({ value: 1 });
       api.undo();
@@ -138,7 +138,7 @@ describe('startTrackingHistory', () => {
     });
 
     it('disables undo once the bottom of the stack is reached', async () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
       state$.next({ value: 1 });
       api.undo();
@@ -149,13 +149,13 @@ describe('startTrackingHistory', () => {
     });
 
     it('does not add the undone state change back into history', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
       state$.next({ value: 1 });
       api.undo();
 
       // simulate the consumer echoing the undone state back into state$
       state$.next({ value: 0 });
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       api.redo();
       expect(emitted).toHaveLength(1);
@@ -167,9 +167,9 @@ describe('startTrackingHistory', () => {
 
   describe('redo', () => {
     it('re-applies the next change after an undo', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       api.undo(); // emitted[0] = { value: 0 }
@@ -181,9 +181,9 @@ describe('startTrackingHistory', () => {
     });
 
     it('is a no-op when already at the top of the history stack', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       api.redo();
@@ -193,9 +193,9 @@ describe('startTrackingHistory', () => {
     });
 
     it('is a no-op when disableUndoRedo$ is true', () => {
-      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({});
+      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       api.undo(); // emitted[0]
@@ -207,7 +207,7 @@ describe('startTrackingHistory', () => {
     });
 
     it('disables redo once the top of the stack is reached', async () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
       state$.next({ value: 1 });
       api.undo();
@@ -221,7 +221,7 @@ describe('startTrackingHistory', () => {
 
   describe('history branch pruning', () => {
     it('drops future history when a new change is made while not at the top of the stack', async () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
       state$.next({ value: 1 });
       state$.next({ value: 2 });
@@ -237,7 +237,7 @@ describe('startTrackingHistory', () => {
     });
 
     it('drops the oldest entry when the history stack exceeds maxSize', async () => {
-      const { state$, api, cleanup } = setupHistory({ maxSize: 1 });
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 }, maxSize: 1 });
 
       state$.next({ value: 1 }); // diff 0→1 recorded
       state$.next({ value: 2 }); // diff 1→2 recorded (at capacity)
@@ -254,7 +254,7 @@ describe('startTrackingHistory', () => {
 
   describe('disableUndoRedo$', () => {
     it('disables both actions when disableUndoRedo$ becomes true', async () => {
-      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({});
+      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
       // First, wait for undo to be enabled so we can verify the override.
       state$.next({ value: 1 });
@@ -272,7 +272,7 @@ describe('startTrackingHistory', () => {
     });
 
     it('re-enables actions when disableUndoRedo$ returns to false', async () => {
-      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({});
+      const { state$, disableUndoRedo$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
       state$.next({ value: 1 });
       disableUndoRedo$.next(true);
@@ -298,9 +298,9 @@ describe('startTrackingHistory', () => {
     };
 
     it('triggers undo on Ctrl+Z', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       fireKey('z', 'ctrlKey');
@@ -311,9 +311,9 @@ describe('startTrackingHistory', () => {
     });
 
     it('triggers undo on Meta+Z', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       fireKey('z', 'metaKey');
@@ -324,9 +324,9 @@ describe('startTrackingHistory', () => {
     });
 
     it('triggers redo on Ctrl+Y', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       api.undo(); // emitted[0]
@@ -338,9 +338,9 @@ describe('startTrackingHistory', () => {
     });
 
     it('does not trigger undo without a modifier key', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'z' }));
@@ -350,9 +350,9 @@ describe('startTrackingHistory', () => {
     });
 
     it('does not trigger redo without a modifier key', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       api.undo();
@@ -365,16 +365,16 @@ describe('startTrackingHistory', () => {
 
   describe('cleanup', () => {
     it('stops tracking new state changes after cleanup', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
       cleanup();
       state$.next({ value: 1 });
       expect(api.disabledActions$.value.undo).toBe(true);
     });
 
     it('removes the keyboard event listener after cleanup', () => {
-      const { state$, api, cleanup } = setupHistory({});
+      const { state$, api, cleanup } = setupHistory({ initial: { value: 0 } });
 
-      const emitted: object[] = [];
+      const emitted: Array<object | undefined> = [];
       api.currentState$.subscribe((s) => emitted.push(s));
       state$.next({ value: 1 });
       cleanup();

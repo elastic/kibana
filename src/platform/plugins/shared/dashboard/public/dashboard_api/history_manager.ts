@@ -29,12 +29,10 @@ export function initializeHistoryManager({
   hasOverlays$,
   setState,
   getState,
-  initialState,
   dataLoading$,
 }: {
   anyStateChange$: ReturnType<typeof initializeLayoutManager>['internalApi']['anyStateChange$'];
   hasOverlays$: ReturnType<typeof initializeTrackOverlay>['hasOverlays$'];
-  initialState: DashboardState;
   getState: () => DashboardState;
   setState: (state: DashboardState) => Promise<void>;
   dataLoading$: Observable<boolean>;

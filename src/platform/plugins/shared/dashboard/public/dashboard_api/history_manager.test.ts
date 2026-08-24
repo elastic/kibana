@@ -13,7 +13,7 @@ import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
 import { waitFor } from '@testing-library/react';
 
-const makeSetup = () => {
+const makeSetup = async () => {
   const initialState = getSampleDashboardState();
   // Mutable ref so getState's implementation is never replaced (mockReturnValue would drop the
   // getStateCalled$.next() side-effect; updating stateRef keeps the implementation intact).
@@ -27,20 +27,21 @@ const makeSetup = () => {
     stateRef.current = state;
   });
 
-  const unsavedChanges$ = new BehaviorSubject<Partial<DashboardState>>({});
+  const anyStateChange$ = new BehaviorSubject<undefined>(undefined);
   const hasOverlays$ = new BehaviorSubject<boolean>(false);
-  const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
+  const dataLoading$ = new BehaviorSubject<boolean>(false);
 
   const { api, cleanup } = initializeHistoryManager({
-    unsavedChanges$,
+    anyStateChange$,
     hasOverlays$,
     setState,
     getState,
-    initialState,
-    dataLoadingManager: { api: { dataLoading$ } } as ReturnType<
-      typeof import('./data_loading_manager').initializeDataLoadingManager
-    >,
+    dataLoading$,
   });
+
+  anyStateChange$.next(undefined); // initial state update
+  await waitFor(() => expect(getState).toBeCalled());
+  getState.mockClear();
 
   return {
     api,
@@ -49,7 +50,7 @@ const makeSetup = () => {
       getState.mockClear();
       setState.mockClear();
     },
-    unsavedChanges$,
+    anyStateChange$,
     hasOverlays$,
     dataLoading$,
     getState,
@@ -59,26 +60,29 @@ const makeSetup = () => {
   };
 };
 
-// Trigger a state change and resolve once getState has been called (after the 60 ms debounce).
-const pushStateChange = async (setup: ReturnType<typeof makeSetup>, title = 'Updated Title') => {
+// trigger a state change and resolve once getState has been called (after the 60 ms debounce).
+const pushStateChange = async (
+  setup: Awaited<ReturnType<typeof makeSetup>>,
+  title = 'Updated Title'
+) => {
   setup.stateRef.current = { ...setup.initialState, title };
+  setup.anyStateChange$.next(undefined);
   await waitFor(() => expect(setup.getState).toBeCalled());
-  setup.unsavedChanges$.next({ title });
 };
 
 describe('initializeHistoryManager', () => {
   describe('state management', () => {
     it('calls getState when unsavedChanges$ emits with no overlays or loading', async () => {
-      const setup = makeSetup();
+      const setup = await makeSetup();
       await pushStateChange(setup);
       expect(setup.getState).toHaveBeenCalled();
       setup.cleanup();
     });
 
     it('skips getState when hasOverlays$ is true', async () => {
-      const setup = makeSetup();
+      const setup = await makeSetup();
       setup.hasOverlays$.next(true);
-      setup.unsavedChanges$.next({ title: 'Should not push' });
+      setup.anyStateChange$.next(undefined);
       // once disabledActions$ fires, we know that stateSubscription has run
       await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)));
       expect(setup.getState).not.toHaveBeenCalled();
@@ -86,18 +90,18 @@ describe('initializeHistoryManager', () => {
     });
 
     it('skips getState when dataLoading$ is true', async () => {
-      const setup = makeSetup();
+      const setup = await makeSetup();
       setup.dataLoading$.next(true);
-      setup.unsavedChanges$.next({ title: 'Should not push' });
+      setup.anyStateChange$.next(undefined);
       await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)));
       expect(setup.getState).not.toHaveBeenCalled();
       setup.cleanup();
     });
 
     it('resumes after overlays are dismissed', async () => {
-      const setup = makeSetup();
+      const setup = await makeSetup();
       setup.hasOverlays$.next(true);
-      setup.unsavedChanges$.next({ title: 'While Overlay' });
+      setup.anyStateChange$.next(undefined);
       await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)));
       expect(setup.getState).not.toHaveBeenCalled();
 
@@ -110,12 +114,14 @@ describe('initializeHistoryManager', () => {
 
   describe('disabledActions$', () => {
     it('disables undo and redo when hasOverlays$ becomes true', async () => {
-      const setup = makeSetup();
+      const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
-      expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
-        undo: false,
-        redo: true,
-      });
+      await waitFor(async () =>
+        expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
+          undo: false,
+          redo: true,
+        })
+      );
 
       setup.hasOverlays$.next(true);
       expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
@@ -126,7 +132,7 @@ describe('initializeHistoryManager', () => {
     });
 
     it('disables undo and redo when dataLoading$ becomes true', async () => {
-      const setup = makeSetup();
+      const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
       expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
         undo: false,
@@ -142,7 +148,7 @@ describe('initializeHistoryManager', () => {
     });
 
     it('re-enables undo once overlays are dismissed', async () => {
-      const setup = makeSetup();
+      const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
       expect((await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).undo).toEqual(false);
       setup.hasOverlays$.next(true);
@@ -155,7 +161,7 @@ describe('initializeHistoryManager', () => {
 
   describe('undo', () => {
     it('calls setState with the previous state', async () => {
-      const setup = makeSetup();
+      const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
       expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
         undo: false,
@@ -167,7 +173,7 @@ describe('initializeHistoryManager', () => {
     });
 
     it('does not call setState when overlays are open', async () => {
-      const setup = makeSetup();
+      const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
       expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
         undo: false,
@@ -180,8 +186,8 @@ describe('initializeHistoryManager', () => {
       setup.cleanup();
     });
 
-    it('does not call setState when there is no history', () => {
-      const setup = makeSetup();
+    it('does not call setState when there is no history', async () => {
+      const setup = await makeSetup();
       setup.api.undo(); // pointer <= -1, returns early
       expect(setup.setState).not.toHaveBeenCalled();
       setup.cleanup();
@@ -190,7 +196,7 @@ describe('initializeHistoryManager', () => {
 
   describe('redo', () => {
     it('calls setState with the re-applied state after an undo', async () => {
-      const setup = makeSetup();
+      const setup = await makeSetup();
       await pushStateChange(setup, 'Change 1');
       setup.api.undo();
       expect(setup.setState).toBeCalledWith(setup.initialState); // undo called
@@ -201,43 +207,43 @@ describe('initializeHistoryManager', () => {
   });
 
   describe('cleanup', () => {
-    it('stops pushing state to history after cleanup', () => {
-      const setup = makeSetup();
+    it('stops pushing state to history after cleanup', async () => {
+      const setup = await makeSetup();
       setup.cleanup();
       // Subscription gone — no debounce timer starts, getState is never called.
-      setup.unsavedChanges$.next({ title: 'After Cleanup' });
+      setup.anyStateChange$.next(undefined);
       expect(setup.getState).not.toHaveBeenCalled();
     });
   });
 
   describe('panel sorting', () => {
     it('treats panels in different order as identical, producing no spurious diff', async () => {
-      const setup = makeSetup();
+      const setup = await makeSetup();
       const panelA = { id: 'a', type: 'test', grid: { x: 0, y: 0, w: 6, h: 6 }, config: {} };
       const panelB = { id: 'b', type: 'test', grid: { x: 6, y: 0, w: 6, h: 6 }, config: {} };
-      // Push [b, a] — sorted to [a, b] before diffing; creates one history entry.
+      // push [b, a] — sorted to [a, b] before diffing; creates one history entry.
       setup.stateRef.current = {
         ...setup.initialState,
         panels: [panelB, panelA],
       } as unknown as DashboardState;
+      setup.anyStateChange$.next(undefined);
       await waitFor(() => expect(setup.getState).toBeCalledTimes(1));
-      setup.unsavedChanges$.next({});
 
-      // Wait for undo to be enabled — confirms exactly one history entry was recorded.
+      // aait for undo to be enabled — confirms exactly one history entry was recorded.
       expect(await firstValueFrom(setup.api.disabledActions$.pipe(skip(1)))).toEqual({
         undo: false,
         redo: true,
       });
 
-      // Push [a, b] — still [a, b] after sorting; no diff, no new history entry.
+      // push [a, b] — still [a, b] after sorting; no diff, no new history entry.
       setup.stateRef.current = {
         ...setup.initialState,
         panels: [panelA, panelB],
       } as unknown as DashboardState;
+      setup.anyStateChange$.next(undefined);
       await waitFor(() => expect(setup.getState).toBeCalledTimes(2));
-      setup.unsavedChanges$.next({});
 
-      // One undo must exhaust the stack (pointer → -1).
+      // one undo must exhaust the stack (pointer → -1).
       const afterUndo = firstValueFrom(setup.api.disabledActions$.pipe(skip(1)));
       setup.api.undo();
       expect(await afterUndo).toMatchObject({ undo: true });
