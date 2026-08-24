@@ -150,6 +150,7 @@ describe('detectDataPresence', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [[HOST]])
     );
 
+    const input = createRuleExecutionInput();
     const result = await detectDataPresence({
       queryService,
       rule: createRuleResponse({
@@ -162,13 +163,13 @@ describe('detectDataPresence', () => {
           breach: { segment: 'WHERE AVG(cpu) > 0.9' },
         },
       }),
-      input: createRuleExecutionInput(),
+      input,
       logger: loggerService,
     });
 
     expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: baseQuery }),
-      expect.any(Object)
+      expect.objectContaining({ signal: input.executionContext.signal })
     );
     expect(result).toEqual(new Set([hostHash]));
   });
