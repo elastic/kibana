@@ -17,15 +17,7 @@ export const ALL_PROJECT_ROUTING = '_alias:*';
 export const normalizeDefinedRouting = (r: string | null): string =>
   r === null || r.trim().length === 0 || r === LOCAL_PROJECT_ROUTING ? LOCAL_PROJECT_ROUTING : r;
 
-export function toEsProjectRouting(
-  projectRoutings: string | null | undefined,
-  preventCrossProjectSearch: boolean | undefined
-): string | undefined {
-  if (projectRoutings !== undefined) return normalizeDefinedRouting(projectRoutings);
-  if (preventCrossProjectSearch === false) return undefined;
-  return LOCAL_PROJECT_ROUTING;
-}
-
+// `undefined` only when neither field was ever configured, so the picker can seed a value.
 export function toPickerProjectRouting(
   projectRoutings: string | null | undefined,
   preventCrossProjectSearch: boolean | undefined
@@ -34,4 +26,14 @@ export function toPickerProjectRouting(
   if (preventCrossProjectSearch === true) return LOCAL_PROJECT_ROUTING;
   if (preventCrossProjectSearch === false) return ALL_PROJECT_ROUTING;
   return undefined;
+}
+
+// Same mapping as the picker, but never-configured falls back to origin-only (fail-safe).
+export function toEsProjectRouting(
+  projectRoutings: string | null | undefined,
+  preventCrossProjectSearch: boolean | undefined
+): string {
+  return (
+    toPickerProjectRouting(projectRoutings, preventCrossProjectSearch) ?? LOCAL_PROJECT_ROUTING
+  );
 }

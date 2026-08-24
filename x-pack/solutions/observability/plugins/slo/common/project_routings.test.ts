@@ -31,8 +31,8 @@ describe('toEsProjectRouting', () => {
     expect(toEsProjectRouting(undefined, true)).toBe(LOCAL_PROJECT_ROUTING);
   });
 
-  it('maps undefined + false to undefined (omit = all)', () => {
-    expect(toEsProjectRouting(undefined, false)).toBeUndefined();
+  it('maps undefined + false to ALL', () => {
+    expect(toEsProjectRouting(undefined, false)).toBe(ALL_PROJECT_ROUTING);
   });
 
   it('maps both unset to LOCAL', () => {

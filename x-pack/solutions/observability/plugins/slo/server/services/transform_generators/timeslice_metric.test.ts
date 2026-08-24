@@ -6,7 +6,7 @@
  */
 
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
-import { LOCAL_PROJECT_ROUTING } from '../../../common/project_routings';
+import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../../common/project_routings';
 import { twoMinute } from '../fixtures/duration';
 import {
   createSLO,
@@ -230,11 +230,11 @@ describe('Timeslice Metric Transform Generator', () => {
       expect(transform.source.project_routing).toBe(LOCAL_PROJECT_ROUTING);
     });
 
-    it('omits project_routing when preventCrossProjectSearch is false', async () => {
+    it('uses all-projects routing when preventCrossProjectSearch is false', async () => {
       const transform = await cpsGenerator.getTransformParams(
         sloWithSettings({ preventCrossProjectSearch: false })
       );
-      expect(transform.source).not.toHaveProperty('project_routing');
+      expect(transform.source.project_routing).toBe(ALL_PROJECT_ROUTING);
     });
 
     it('lets stored projectRoutings win', async () => {

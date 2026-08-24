@@ -55,7 +55,7 @@ const PRECEDENCE_CASES: Array<{
   {
     name: 'undefined + preventCrossProjectSearch false',
     settings: { preventCrossProjectSearch: false },
-    expected: undefined,
+    expected: ALL_PROJECT_ROUTING,
   },
   {
     name: 'both unset',
