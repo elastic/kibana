@@ -122,8 +122,8 @@ export class CasesUiPlugin
 
     return {
       attachmentFramework: {
-        registerUnified: (unifiedAttachmentType) => {
-          this.unifiedAttachmentTypeRegistry.register(unifiedAttachmentType);
+        registerAttachment: (attachmentType) => {
+          this.unifiedAttachmentTypeRegistry.register(attachmentType);
         },
       },
     };
@@ -182,6 +182,7 @@ export class CasesUiPlugin
         templatesEnabled: config?.templates?.enabled ?? false,
         attachmentsEnabled: config?.attachments?.enabled ?? false,
         chatEnabled: config?.chat?.enabled ?? false,
+        runWorkflowsEnabled: config?.runWorkflows?.enabled ?? false,
         casesRedesign: {
           list: config?.casesRedesign?.list ?? false,
           details: config?.casesRedesign?.details ?? false,
