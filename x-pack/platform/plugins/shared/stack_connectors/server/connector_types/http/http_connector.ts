@@ -166,9 +166,17 @@ function renderParameterTemplates(
   }
 
   if (params.query) {
-    const renderedQuery: Record<string, string> = {};
+    const renderedQuery: Record<string, QueryParamValue> = {};
     for (const [key, value] of Object.entries(params.query)) {
-      renderedQuery[key] = renderMustacheString(logger, value, variables, 'json');
+      if (Array.isArray(value)) {
+        renderedQuery[key] = value.map((v) =>
+          typeof v === 'string' ? renderMustacheString(logger, v, variables, 'json') : v
+        );
+      } else if (typeof value === 'string') {
+        renderedQuery[key] = renderMustacheString(logger, value, variables, 'json');
+      } else {
+        renderedQuery[key] = value;
+      }
     }
     renderedParams.query = renderedQuery;
   }
@@ -213,7 +221,9 @@ function combineUrl(basePath: string, path?: string): string {
   return url.toString();
 }
 
-function appendQueryString(baseUrl: string, query?: Record<string, string>): string {
+type QueryParamValue = string | number | boolean | Array<string | number | boolean>;
+
+function appendQueryString(baseUrl: string, query?: Record<string, QueryParamValue>): string {
   if (!query || Object.keys(query).length === 0) {
     return baseUrl;
   }
@@ -221,9 +231,12 @@ function appendQueryString(baseUrl: string, query?: Record<string, string>): str
   const existingQueryKeys = new Set(url.searchParams.keys());
   const appendedQuery = new URLSearchParams();
 
-  for (const [key, value] of Object.entries(query)) {
+  for (const [key, val] of Object.entries(query)) {
     if (!existingQueryKeys.has(key)) {
-      appendedQuery.set(key, value);
+      const values = Array.isArray(val) ? val : [val];
+      for (const v of values) {
+        appendedQuery.append(key, String(v));
+      }
     }
   }
 
