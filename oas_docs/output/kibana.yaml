@@ -2100,7 +2100,7 @@ paths:
                 listConversationsPinnedExample:
                   description: Example response filtered to pinned conversations only
                   value:
-                    _meta:
+                    pagination:
                       page: 1
                       per_page: 50
                       total: 3
@@ -2119,7 +2119,7 @@ paths:
                 listConversationsResponseExample:
                   description: Example response returning the first page of conversations for all agents
                   value:
-                    _meta:
+                    pagination:
                       page: 1
                       per_page: 50
                       total: 128
