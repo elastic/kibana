@@ -34,7 +34,7 @@ import type {
   StandardDeviationIndexPatternColumn,
   SumIndexPatternColumn,
 } from '@kbn/lens-common';
-import { esql } from '@elastic/esql';
+import { buildMetricToESQL } from '@kbn/lens-common';
 import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -56,15 +56,6 @@ const typeToFn: Record<string, string> = {
   sum: 'aggSum',
   median: 'aggMedian',
   standard_deviation: 'aggStdDeviation',
-};
-
-const typeToESQLFn: Record<string, string> = {
-  min: 'MIN',
-  max: 'MAX',
-  average: 'AVG',
-  sum: 'SUM',
-  median: 'MEDIAN',
-  standard_deviation: 'MEDIAN_ABSOLUTE_DEVIATION',
 };
 
 const supportedTypes = ['number', 'histogram'];
@@ -215,13 +206,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         },
       ];
     },
-    toESQL: (column) => {
-      if (column.timeShift) return;
-      if (!typeToESQLFn[type]) return;
-      return {
-        template: `${typeToESQLFn[type]}(${esql.col(column.sourceField)})`,
-      };
-    },
+    toESQL: buildMetricToESQL(type),
     toEsAggsFn: (column, columnId, _indexPattern) => {
       return buildExpressionFunction(typeToFn[type], {
         id: columnId,

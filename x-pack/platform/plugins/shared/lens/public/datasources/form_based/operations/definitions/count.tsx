@@ -13,7 +13,7 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
 import type { CountIndexPatternColumn, TimeScaleUnit, IndexPatternField } from '@kbn/lens-common';
-import { esql } from '@elastic/esql';
+import { countToESQL } from '@kbn/lens-common';
 import type { OperationDefinition, ParamEditorProps } from '.';
 import {
   getInvalidFieldMessage,
@@ -180,17 +180,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     const field = indexPattern?.getFieldByName(column.sourceField);
     return field?.format ?? { id: 'number' };
   },
-  toESQL: (column, _columnId, indexPattern) => {
-    if (column.params?.emptyAsNull === false || column.timeShift) return;
-
-    const field = indexPattern.getFieldByName(column.sourceField);
-    if (!field || field?.type === 'document') {
-      return { template: 'COUNT(*)' };
-    }
-    return {
-      template: `COUNT(${esql.col(field.name)})`,
-    };
-  },
+  toESQL: countToESQL,
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
     if (field?.type === 'document') {

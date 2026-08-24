@@ -14,10 +14,10 @@ import type {
   ValueFormatConfig,
   GenericIndexPatternColumn,
 } from '@kbn/lens-common';
+import { getTimeZoneAndInterval } from '@kbn/lens-common';
 import type { OriginalColumn } from '../../../common/types';
 import { isColumnOfType } from './operations/definitions/helpers';
 import { operationDefinitionMap } from './operations';
-import { getTimeZoneAndInterval } from './date_histogram_esql';
 
 export interface CreateEsAggsIdMapEntryParams {
   col: GenericIndexPatternColumn;

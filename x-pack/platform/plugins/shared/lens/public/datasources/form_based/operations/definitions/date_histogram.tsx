@@ -27,26 +27,20 @@ import {
   extendedBoundsToAst,
   intervalOptions,
   getCalculateAutoTimeExpression,
-  splitStringInterval,
 } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
 import type { DateHistogramIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
-import { esql } from '@elastic/esql';
-import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
-
-import { AUTO_TARGET_NUMBER_OF_BUCKETS } from '@kbn/lens-common';
+import {
+  dateHistogramToESQL,
+  AUTO_INTERVAL,
+  getTimeZoneAndInterval,
+  restrictedInterval,
+} from '@kbn/lens-common';
 import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
-import {
-  AUTO_INTERVAL,
-  DEFAULT_DATE_HISTOGRAM_INTERVAL,
-  getTimeZoneAndInterval,
-  hasDateRange,
-  restrictedInterval,
-} from '../../date_histogram_esql';
 
 const { isValidInterval } = search.aggs;
 
@@ -80,30 +74,6 @@ function getMultipleDateHistogramsErrorMessage(
       }),
     },
   ];
-}
-
-const ESQL_UNIT_MAP: Record<string, [string, string]> = {
-  ms: ['millisecond', 'milliseconds'],
-  s: ['second', 'seconds'],
-  m: ['minute', 'minutes'],
-  h: ['hour', 'hours'],
-  d: ['day', 'days'],
-  w: ['week', 'weeks'],
-  M: ['month', 'months'],
-  y: ['year', 'years'],
-};
-
-function mapToEsqlInterval(interval: string) {
-  const parsed = splitStringInterval(interval);
-  if (!parsed) return '1 hour';
-  const { value, unit } = parsed;
-  const n = value;
-  const pair = ESQL_UNIT_MAP[unit];
-  if (pair) {
-    const word = n === 1 ? pair[0] : pair[1];
-    return `${n} ${word}`;
-  }
-  return interval;
 }
 
 const getIntervalParamValue = (intervalValue: ReturnType<typeof parseInterval>) => {
@@ -220,30 +190,7 @@ export const dateHistogramOperation: OperationDefinition<
     }
     return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
   },
-  toESQL: (column, _columnId, indexPattern, _layer, _uiSettings, dateRange) => {
-    if (column.params?.includeEmptyRows) return;
-    const { interval } = getTimeZoneAndInterval(column, indexPattern);
-    const esqlColumnNode = esql.col(column.sourceField);
-
-    if (interval === AUTO_INTERVAL) {
-      if (hasDateRange(dateRange)) {
-        const [ESQL_TIME_RANGE_START, ESQL_TIME_RANGE_END] = TIME_SYSTEM_PARAMS;
-        return {
-          template: `BUCKET(${esqlColumnNode}, ${AUTO_TARGET_NUMBER_OF_BUCKETS}, ${ESQL_TIME_RANGE_START}, ${ESQL_TIME_RANGE_END})`,
-        };
-      }
-      // Fall back to default 1h when date range is missing
-      return {
-        template: `BUCKET(${esqlColumnNode}, ${mapToEsqlInterval(
-          DEFAULT_DATE_HISTOGRAM_INTERVAL
-        )})`,
-      };
-    }
-
-    return {
-      template: `BUCKET(${esqlColumnNode}, ${mapToEsqlInterval(interval)})`,
-    };
-  },
+  toESQL: dateHistogramToESQL,
   toEsAggsFn: (column, columnId, indexPattern) => {
     const sourceField = column.sourceField ? column.sourceField : indexPattern.timeFieldName ?? '';
     const { usedField, timeZone, interval } = getTimeZoneAndInterval(

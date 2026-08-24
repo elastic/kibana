@@ -437,3 +437,18 @@ export {
   buildTrendlineQueryWithMetricFieldMap,
   queryHasStatsCommand,
 } from './esql/trendline_query';
+export type { ESQLExpressionWithParams, ToEsqlFn, UiSettingsReader } from './esql/operations';
+export {
+  countToESQL,
+  cardinalityToESQL,
+  percentileToESQL,
+  buildMetricToESQL,
+  dateHistogramToESQL,
+  rangesToESQL,
+  AUTO_INTERVAL,
+  DEFAULT_DATE_HISTOGRAM_INTERVAL,
+  hasDateRange,
+  restrictedInterval,
+  getTimeZoneAndInterval,
+  mapToEsqlInterval,
+} from './esql/operations';
