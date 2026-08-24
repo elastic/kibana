@@ -62,7 +62,6 @@ const COMMON_STATE_IGNORE_PATHS = [
   // TODO: check missing ES|QL column properties stripped out in transforms
   'state.datasourceStates.textBased.layers.*.columns.*.inMetricDimension', // dropped at state -> API and only applied from API -> State if explicitly set
   'state.datasourceStates.textBased.layers.*.columns.*.meta', // meta is inferred by the transform -> originals may have it, miss it, or have different values
-  'state.datasourceStates.textBased.layers.*.timeField', // inferred at runtime from the data view -> original may have undefined while transform sets @timestamp from query.esql
   // TODO: check missing/different properties on colorMapping
   'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
   'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
@@ -1257,8 +1256,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
             layer.columns.sort((a, b) => a.columnId.localeCompare(b.columnId));
           }
 
+          // 'timeField' is dropped and re-inferred at runtime from the data view unless the ESQL query refers to a specific time field
           if (layer.timeField) {
-            layer.timeField = undefined; // not saved in API re-derived at runtime
+            layer.timeField = layer.query?.esql
+              ? parseTimeFieldFromESQLQuery(layer.query.esql)
+              : undefined;
           }
 
           // 'allColumns' is a runtime-only property, not persisted or produced by transform
