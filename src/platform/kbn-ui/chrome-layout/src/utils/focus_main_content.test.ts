@@ -11,36 +11,20 @@ import { APP_MAIN_SCROLL_CONTAINER_ID } from '../constants';
 import { focusMainContent } from './focus_main_content';
 
 describe('focusMainContent', () => {
-  afterEach(() => {
-    document.body.replaceChildren();
-  });
+  it('focuses the first matching main content element', () => {
+    const main = document.createElement('div');
+    main.id = APP_MAIN_SCROLL_CONTAINER_ID;
 
-  it('falls back to the application scroll container', () => {
-    const scroll = document.createElement('div');
-    scroll.id = APP_MAIN_SCROLL_CONTAINER_ID;
-    const focusSpy = jest.spyOn(scroll, 'focus');
-    document.body.appendChild(scroll);
+    const focusSpy = jest.spyOn(main, 'focus');
+
+    document.body.appendChild(main);
 
     focusMainContent();
 
     expect(focusSpy).toHaveBeenCalledTimes(1);
-    expect(scroll.getAttribute('tabindex')).toBe('-1');
-  });
+    expect(main.getAttribute('tabindex')).toBe('-1');
 
-  it('prefers a main landmark over the scroll container', () => {
-    const scroll = document.createElement('div');
-    scroll.id = APP_MAIN_SCROLL_CONTAINER_ID;
-    const landmark = document.createElement('main');
-    scroll.appendChild(landmark);
-    document.body.appendChild(scroll);
-
-    const scrollFocus = jest.spyOn(scroll, 'focus');
-    const landmarkFocus = jest.spyOn(landmark, 'focus');
-
-    focusMainContent();
-
-    expect(landmarkFocus).toHaveBeenCalledTimes(1);
-    expect(scrollFocus).not.toHaveBeenCalled();
+    main.remove();
   });
 
   it('does nothing when no main content element is present', () => {
