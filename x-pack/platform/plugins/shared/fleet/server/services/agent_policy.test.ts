@@ -1003,6 +1003,34 @@ describe('Agent policy', () => {
       expect(deleteByQueryIdx).toBeLessThan(soDeleteIdx);
     });
 
+    it('should not delete the saved object when the .fleet-policies deleteByQuery fails', async () => {
+      // Fix 1: if ES is unavailable when we try to delete .fleet-policies docs, the SO must be
+      // preserved so the caller can retry the full delete later.
+      esClient.deleteByQuery.mockRejectedValueOnce(new Error('ES unavailable'));
+
+      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrow(
+        'ES unavailable'
+      );
+
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('should attempt to redeploy .fleet-policies documents when saved object delete fails', async () => {
+      // Fix 6: if the SO delete fails after .fleet-policies docs were already removed, we must
+      // try to redeploy them so fleet-server can continue delivering the policy.
+      esClient.deleteByQuery.mockResolvedValueOnce({ deleted: 2 });
+      soClient.delete.mockRejectedValueOnce(new Error('SO delete failed'));
+      const deploySpy = jest
+        .spyOn(agentPolicyService, 'deployPolicy')
+        .mockResolvedValue(undefined as any);
+
+      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrow(
+        'SO delete failed'
+      );
+
+      expect(deploySpy).toHaveBeenCalledWith(soClient, 'mocked');
+    });
+
     it('should only delete package polices that are not shared with other agent policies', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         {

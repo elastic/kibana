@@ -81,6 +81,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     // Setup app context service mocks
     mockAppContextService.getExperimentalFeatures.mockReturnValue({
       enableFleetPolicyRevisionsCleanupTask: true,
+      enableFleetOrphanedPolicySweep: true,
     } as any);
 
     // Default: orphan sweep finds nothing to delete
@@ -560,6 +561,21 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('Orphan sweep removed 5 documents')
       );
+    });
+
+    it('should skip the orphan sweep when enableFleetOrphanedPolicySweep is disabled', async () => {
+      mockAppContextService.getExperimentalFeatures.mockReturnValue({
+        enableFleetPolicyRevisionsCleanupTask: true,
+        enableFleetOrphanedPolicySweep: false,
+      } as any);
+
+      mockEsClient.search.mockResolvedValue({
+        aggregations: { latest_revisions_by_policy_id: { buckets: [] } },
+      } as any);
+
+      await mockTask.runTask(taskInstance, mockCore, signal);
+
+      expect(mockedSweepOrphanedFleetPolicies).not.toHaveBeenCalled();
     });
   });
 

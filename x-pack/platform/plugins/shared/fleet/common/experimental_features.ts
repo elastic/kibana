@@ -20,6 +20,7 @@ const _allowedExperimentalValues = {
   enableAgentPrivilegeLevelChange: true,
   installIntegrationsKnowledge: true,
   enableFleetPolicyRevisionsCleanupTask: true,
+  enableFleetOrphanedPolicySweep: true, // When enabled, the policy-revisions cleanup task also sweeps .fleet-policies docs for deleted agent policies.
   enableAgentRollback: true, // When enabled, agent upgrade rollback will be available in the API and UI.
   disableAgentlessLegacyAPI: true, // When enabled, the legacy agent/package policy APIs reject agentless create, update, upgrade, and copy. Forces enableAgentlessPoliciesUI on (see below).
   enableAgentlessPoliciesUI: true, // When enabled, the UI reads/writes agentless integration policies through the managed integrations API. Disable as a kill switch to fall back to the legacy APIs — but disableAgentlessLegacyAPI overrides it (the fallback would 400).
