@@ -22,14 +22,15 @@ import {
 const SECURITY_INFERENCE_PARENT_FEATURE_ID = 'security_search_inference_parent';
 
 // Taxonomy, severity, and relevance run on every report on a 4h schedule, so
-// this is the high-volume, low-stakes tier: a small model keeps the bill and
-// the wall clock down. The second entry is a different provider on purpose, so
-// enrich still has a cheap option when Anthropic is unavailable in a region.
-// Literals rather than `defaultInferenceEndpoints`: neither id has a constant
-// there, and a constant would not prove the endpoint is provisioned anyway.
+// this is the high-volume, low-stakes tier: a small model (Haiku) keeps the
+// bill and the wall clock down. Sonnet 4.6 is the fallback so enrich degrades
+// to a still-current model instead of collapsing onto the cluster default when
+// Haiku is not provisioned; it stays below the Opus tier Diamond uses. The
+// primary is a literal because Haiku 4.5 has no `defaultInferenceEndpoints`
+// constant, and a constant would not prove the endpoint is provisioned anyway.
 const ENRICH_RECOMMENDED_MODELS = [
   '.anthropic-claude-4.5-haiku-chat_completion',
-  '.google-gemini-2.5-flash-chat_completion',
+  defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
 ];
 
 // Diamond extraction is the one deep-reasoning stage: it reads the whole report
