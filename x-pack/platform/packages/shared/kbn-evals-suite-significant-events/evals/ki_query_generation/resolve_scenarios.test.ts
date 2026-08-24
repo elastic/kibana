@@ -135,11 +135,13 @@ describe('resolveQueryGenerationDatasetName', () => {
     expect(resolveQueryGenerationDatasetName(res, CANONICAL)).toBe(CANONICAL);
   });
 
-  it('derives a deterministic namespaced name for focused runs', () => {
+  it('derives a deterministic compact hash name for focused runs', () => {
     const res = resolveQueryGenerationDatasets(DATASETS, 'ledger-db-disconnect');
     const name = resolveQueryGenerationDatasetName(res, CANONICAL);
-    expect(name).toContain('[focused:');
-    expect(name).toContain('ledger-db-disconnect');
+    expect(name).toMatch(
+      /^sigevents: KI query generation \(toggle\) \(canonical\) \[baseline\] \[focused:[0-9a-f]{12}\]$/
+    );
+    expect(name).not.toContain('ledger-db-disconnect');
     expect(name).not.toBe(CANONICAL);
   });
 
@@ -175,7 +177,21 @@ describe('resolveQueryGenerationDatasetName', () => {
     const name = resolveQueryGenerationDatasetName(res, CANONICAL);
     expect(name).not.toBe(CANONICAL);
     expect(name).toMatch(
-      /^sigevents: KI query generation \(toggle\) \(canonical\) \[baseline\] \[focused:/
+      /^sigevents: KI query generation \(toggle\) \(canonical\) \[baseline\] \[focused:[0-9a-f]{12}\]$/
     );
+  });
+
+  it('stays below 256 characters even with long scenario ids', () => {
+    // Use scenario ids that exist in the fixture; the canonical name is long
+    // and the style of the dataset name is dominant, so the compact hash keeps
+    // the total within the dataset-name limit regardless of how many scenarios
+    // are selected.
+    const res = resolveQueryGenerationDatasets(
+      DATASETS,
+      'healthy-baseline,healthy-baseline,ledger-db-disconnect,ledger-db-disconnect,payment-unreachable'
+    );
+    const name = resolveQueryGenerationDatasetName(res, CANONICAL);
+    expect(name.length).toBeLessThan(256);
+    expect(name).toMatch(/\[focused:[0-9a-f]{12}\]$/);
   });
 });

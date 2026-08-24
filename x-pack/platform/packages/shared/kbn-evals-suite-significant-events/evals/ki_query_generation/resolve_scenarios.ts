@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
+
 import type { DatasetConfig } from '../../src/datasets';
 
 export interface QueryGenerationDatasetResolution {
@@ -97,9 +99,11 @@ export const resolveQueryGenerationDatasets = (
  * Determines the dataset name used to store a query-generation run.
  *
  * Unfiltered (full) runs keep the canonical name verbatim so the Golden dataset
- * keeps its complete example set. Focused runs get a deterministic namespaced
- * suffix derived from the sorted scenario ids, so partial runs never overwrite
- * (or prune) the canonical upstream dataset.
+ * keeps its complete example set. Focused runs get a compact deterministic
+ * namespaced suffix: the SHA-256 of the sorted scenario ids truncated to 12 hex
+ * characters. Selection order and duplicates produce the same hash, different
+ * selections produce different names, and the result never collides with the
+ * canonical name. The readable scenario list belongs in the dataset description.
  */
 export const resolveQueryGenerationDatasetName = (
   resolution: QueryGenerationDatasetResolution,
@@ -108,10 +112,6 @@ export const resolveQueryGenerationDatasetName = (
   if (!resolution.isFocused) {
     return canonicalName;
   }
-  const suffix = resolution.selectedScenarioIds
-    .map((id) => encodeURIComponent(id))
-    .join('%2C')
-    .toLowerCase()
-    .replace(/[^a-z0-9%]/g, '-');
-  return `${canonicalName} [focused: ${suffix}]`;
+  const hash = createHash('sha256').update(resolution.selectedScenarioIds.join('|')).digest('hex');
+  return `${canonicalName} [focused:${hash.slice(0, 12)}]`;
 };
