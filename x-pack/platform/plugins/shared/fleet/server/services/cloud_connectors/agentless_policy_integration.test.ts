@@ -71,7 +71,11 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
     getByIdSpy.mockRestore();
   });
 
-  const reuseConnector = (requestingPackage: string, soClient: any) =>
+  const reuseConnector = (
+    requestingPackage: string,
+    soClient: any,
+    attachedCloudConnectorId?: string
+  ) =>
     createAndIntegrateCloudConnector({
       packagePolicy: buildPackagePolicy('connector-1'),
       agentPolicy: buildAgentPolicy(),
@@ -80,6 +84,7 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
       soClient,
       esClient,
       logger,
+      attachedCloudConnectorId,
     });
 
   it('allows reuse within the provider-default group', async () => {
@@ -130,6 +135,39 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
 
     expect(result.cloudConnectorId).toBe('connector-1');
     expect(result.wasCreated).toBe(false);
+  });
+
+  it('rejects when ANY usage is cross-group, regardless of order (mixed pre-enforcement data)', async () => {
+    const soClient = savedObjectsClientMock.create();
+    // Same-group usage listed first: a single-usage sample would wrongly allow this
+    mockConnectorUsage(soClient, ['aws', 'cloud_security_posture']);
+
+    await expect(reuseConnector('aws_securityhub', soClient)).rejects.toThrow(
+      /security_audit_policy_group.*cannot be reused/
+    );
+  });
+
+  it('grandfathers re-saving a policy with its already-attached connector (update path)', async () => {
+    const soClient = savedObjectsClientMock.create();
+    // Mixed pre-enforcement connector: the update must stay editable
+    mockConnectorUsage(soClient, ['cloud_security_posture', 'aws']);
+
+    const result = await reuseConnector('aws_securityhub', soClient, 'connector-1');
+
+    expect(result.cloudConnectorId).toBe('connector-1');
+    expect(result.wasCreated).toBe(false);
+    // Group check skipped entirely — no usage lookup
+    expect(soClient.find).not.toHaveBeenCalled();
+  });
+
+  it('still enforces groups when the update swaps to a DIFFERENT connector', async () => {
+    const soClient = savedObjectsClientMock.create();
+    mockConnectorUsage(soClient, ['cloud_security_posture']);
+
+    // Policy currently attached to another-connector; requesting connector-1 is a new attachment
+    await expect(reuseConnector('aws_securityhub', soClient, 'another-connector')).rejects.toThrow(
+      /security_audit_policy_group.*cannot be reused/
+    );
   });
 
   it('rejects reuse when the connector provider does not match the policy provider', async () => {

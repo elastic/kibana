@@ -528,6 +528,9 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         esClient: this.esClient,
         logger: this.logger,
         cloudConnectorName: data.cloud_connector?.name,
+        // Re-saving with the already-attached connector is not a new attachment; this keeps
+        // policies on pre-enforcement cross-group connectors editable.
+        attachedCloudConnectorId: existingPackagePolicy.cloud_connector_id ?? undefined,
       });
 
       newPackagePolicy = integratedPackagePolicy;

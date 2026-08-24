@@ -114,9 +114,12 @@ export const SUPPORTED_CLOUD_CONNECTOR_VARS = [
 // are provisioned with bespoke IaC templates and permission scopes (CSPM, Cloud Asset
 // Inventory) and therefore must not be shared with provider-default integrations.
 //
-// INVARIANT: because every requester resolves to exactly one group and group membership is
-// enforced on both create-flow UI filtering and backend reuse, all package policies attached
-// to a given connector always belong to a single group.
+// NOTE: group membership is enforced on every NEW attachment (create-flow UI filtering and
+// backend reuse), but data created before this enforcement was effective may contain
+// cross-group attachments — the pre-inversion allowlist lookup never matched var_groups
+// integrations, so their attachments were unfiltered. Enforcement therefore checks every
+// usage of a connector rather than assuming all usages share one group, and updates that
+// re-save a policy with its already-attached connector are exempt (grandfathered).
 
 export type DefaultPolicyGroup = `${CloudProvider}_default`;
 export type PolicyGroup = 'security_audit_policy_group' | DefaultPolicyGroup;
@@ -135,7 +138,11 @@ export const ISOLATED_CLOUD_CONNECTOR_PACKAGES: Readonly<Record<string, PolicyGr
  * Returns the policy group for an integration: its isolated group if the package is
  * registered in {@link ISOLATED_CLOUD_CONNECTOR_PACKAGES}, otherwise the provider-default
  * group shared by all other integrations targeting the same cloud provider.
+ * Own-property lookup so package names shadowing `Object.prototype` members
+ * (e.g. `constructor`) fall through to the provider-default group.
  */
 export function getPolicyGroupForIntegration(pkg: string, provider: CloudProvider): PolicyGroup {
-  return ISOLATED_CLOUD_CONNECTOR_PACKAGES[pkg] ?? `${provider}_default`;
+  return Object.hasOwn(ISOLATED_CLOUD_CONNECTOR_PACKAGES, pkg)
+    ? ISOLATED_CLOUD_CONNECTOR_PACKAGES[pkg]
+    : `${provider}_default`;
 }

@@ -40,6 +40,12 @@ describe('getPolicyGroupForIntegration', () => {
     expect(getPolicyGroupForIntegration('unregistered_package', 'gcp')).toBeDefined();
   });
 
+  it('does not resolve Object.prototype members as isolated groups', () => {
+    expect(getPolicyGroupForIntegration('constructor', 'aws')).toBe('aws_default');
+    expect(getPolicyGroupForIntegration('toString', 'aws')).toBe('aws_default');
+    expect(getPolicyGroupForIntegration('hasOwnProperty', 'gcp')).toBe('gcp_default');
+  });
+
   it('separates isolated packages from provider-default packages on the same provider', () => {
     const cspmGroup = getPolicyGroupForIntegration('cloud_security_posture', 'aws');
     const awsGroup = getPolicyGroupForIntegration('aws', 'aws');
