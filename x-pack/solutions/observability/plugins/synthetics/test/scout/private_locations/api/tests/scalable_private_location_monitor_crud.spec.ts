@@ -14,7 +14,7 @@ import {
   SYNTHETICS_MONITOR_SO_TYPES,
 } from '../../../common/fixtures';
 import { addMonitor, editMonitor, deleteMonitors } from '../../../common/fixtures/monitors';
-import { getPackagePolicyForMonitor } from '../../../common/fixtures/fleet';
+import { getPackagePolicyForMonitor, getAgentPolicyRevision } from '../../../common/fixtures/fleet';
 import { tryForTime } from '../../../common/fixtures/retry';
 import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 
@@ -80,7 +80,9 @@ apiTest.describe(
           // The package policy is written synchronously; its `condition` field
           // (and the coalesced agent-policy revision bump behind it) confirms
           // the create actually went through the batched path, not merely that
-          // the HTTP call happened to return 200.
+          // the HTTP call happened to return 200. `condition` is meaningful
+          // evidence only here: before the create there is no package policy
+          // at all, so any string value proves the batched path ran.
           await tryForTime(30_000, async () => {
             const policy = await getPackagePolicyForMonitor(
               apiClient,
@@ -90,6 +92,12 @@ apiTest.describe(
             );
             expect(typeof policy?.condition).toBe('string');
           });
+
+          const revisionBeforeEdit = await getAgentPolicyRevision(
+            apiClient,
+            adminHeaders,
+            privateLocation.agentPolicyId
+          );
 
           await editMonitor(apiClient, editorHeaders, monitorId, {
             ...httpMonitorFixture,
@@ -99,14 +107,20 @@ apiTest.describe(
             schedule: { number: '10', unit: 'm' },
           });
 
+          // Unlike the create phase, the package policy here already has a
+          // `condition` string from the create, so re-asserting that shape
+          // wouldn't observe anything the edit itself did -- it would pass
+          // even if the edit silently no-oped on the batched path. Assert the
+          // agent-policy revision strictly increased instead: that is the
+          // actual, directly-observable side effect of the batched bump this
+          // PR introduces.
           await tryForTime(30_000, async () => {
-            const policy = await getPackagePolicyForMonitor(
+            const revisionAfterEdit = await getAgentPolicyRevision(
               apiClient,
               adminHeaders,
-              monitorId,
-              privateLocation.id
+              privateLocation.agentPolicyId
             );
-            expect(typeof policy?.condition).toBe('string');
+            expect(revisionAfterEdit).toBeGreaterThan(revisionBeforeEdit);
           });
         } finally {
           await deleteMonitors(apiClient, editorHeaders, [monitorId], { spaceId: 'default' });
