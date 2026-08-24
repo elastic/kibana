@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod';
 import * as YAML from 'yaml';
 import {
   Action,
@@ -233,7 +233,7 @@ const v3ApiSchema = z
 
 // .catch() maps any parse failure to ParseFailureQuery so callers never deal
 // with Zod errors directly — the output type is always HealthDiagnosticQuery.
-const QueryDescriptor: z.ZodType<HealthDiagnosticQuery> = z
+const QueryDescriptor: z.ZodType<HealthDiagnosticQuery, z.ZodTypeDef, unknown> = z
   .preprocess((raw) => {
     if (!raw || typeof raw !== 'object') return raw;
     const obj = raw as Record<string, unknown>;
