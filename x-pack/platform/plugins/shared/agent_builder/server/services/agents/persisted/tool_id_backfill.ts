@@ -6,6 +6,7 @@
  */
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+import pRetry from 'p-retry';
 import type { Logger } from '@kbn/logging';
 import type { ToolSelection } from '@kbn/agent-builder-common';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -129,7 +130,7 @@ const paginatedUpdate = async <TDoc>({
     const searchRequest: StorageClientSearchRequest = {
       track_total_hits: false,
       size: PAGE_SIZE,
-      sort: [{ _id: 'asc' }],
+      sort: [{ id: 'asc' }],
       ...(searchAfter && { search_after: searchAfter }),
     };
     const response = await client.search(searchRequest);
@@ -140,17 +141,12 @@ const paginatedUpdate = async <TDoc>({
     const bulkOperations = processHits(hits, now);
 
     if (bulkOperations.length > 0) {
-      try {
-        await client.bulk({
-          operations: bulkOperations,
-          refresh: 'wait_for',
-          throwOnFail: true,
-        });
-        totalUpdated += bulkOperations.length;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        logger.error(`${label} tool ID backfill: bulk update failed. ${message}`);
-      }
+      await client.bulk({
+        operations: bulkOperations,
+        refresh: 'wait_for',
+        throwOnFail: true,
+      });
+      totalUpdated += bulkOperations.length;
     }
 
     searchAfter = hits[hits.length - 1].sort as SortResults | undefined;
@@ -253,19 +249,37 @@ export const backfillSkillToolIds = async ({
 /**
  * Applies all registered tool ID backfills
  * to persisted agent configs and skill definitions. Idempotent — safe to run
- * on every startup.
+ * on every startup. Retries transient ES failures with exponential backoff.
  */
 export const runToolIdBackfill = async (
   logger: Logger,
   esClient: ElasticsearchClient
 ): Promise<void> => {
-  await backfillAgentToolIds({
-    storage: createAgentStorage({ logger, esClient }),
-    logger,
-  });
+  if (TOOL_ID_BACKFILLS.length === 0) {
+    return;
+  }
 
-  await backfillSkillToolIds({
-    storage: createSkillStorage({ logger, esClient }),
-    logger,
-  });
+  await pRetry(
+    async () => {
+      await backfillAgentToolIds({
+        storage: createAgentStorage({ logger, esClient }),
+        logger,
+      });
+
+      await backfillSkillToolIds({
+        storage: createSkillStorage({ logger, esClient }),
+        logger,
+      });
+    },
+    {
+      retries: 5,
+      factor: 2,
+      minTimeout: 1000,
+      onFailedAttempt: (error) => {
+        logger.warn(
+          `Tool ID backfill attempt ${error.attemptNumber} failed (${error.retriesLeft} retries left): ${error.message}`
+        );
+      },
+    }
+  );
 };
