@@ -108,6 +108,9 @@ export async function autocomplete(
         callbacks,
         options: {
           getFunctionsToIgnore,
+          // STATS COUNT(*) WHERE field IN (<cursor> — IN is already a function node,
+          // so this returns before `after_where`.
+          allowSubquery: pos === 'after_where',
         },
       });
 
@@ -202,6 +205,7 @@ export async function autocomplete(
         callbacks,
         options: {
           preferredExpressionType: 'boolean',
+          allowSubquery: true,
         },
       });
 

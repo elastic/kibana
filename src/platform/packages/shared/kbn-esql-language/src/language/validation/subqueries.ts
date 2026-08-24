@@ -18,7 +18,7 @@ import type {
 import { inOperators } from '../../commands/definitions/all_operators';
 import { expandEvals } from '../shared/expand_evals';
 
-const COMMANDS_WITH_SUBQUERIES = new Set(['from', 'where']);
+const COMMANDS_WITH_SUBQUERIES = new Set(['from', 'where', 'eval', 'stats', 'inline stats']);
 
 /**
  * Returns a list of subqueries to validate
