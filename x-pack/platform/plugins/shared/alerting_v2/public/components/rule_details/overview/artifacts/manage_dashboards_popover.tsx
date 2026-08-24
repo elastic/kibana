@@ -98,6 +98,14 @@ export const ManageDashboardsPopover = ({
     [euiTheme.base]
   );
 
+  const listContainerStyles = useMemo(
+    () => css`
+      max-height: ${SELECTABLE_LIST_MAX_HEIGHT}px;
+      overflow-y: auto;
+    `,
+    []
+  );
+
   const popoverTitleStyles = useMemo(
     () => css`
       border-bottom: none;
@@ -312,6 +320,11 @@ export const ManageDashboardsPopover = ({
       isOpen={isOpen}
       closePopover={onClose}
       panelPaddingSize="none"
+      panelProps={{
+        css: css`
+          overflow: hidden;
+        `,
+      }}
       anchorPosition="upCenter"
       ownFocus
       initialFocus="[data-test-subj='ruleDashboardArtifactsSearch']"
@@ -373,14 +386,18 @@ export const ManageDashboardsPopover = ({
               paddingSize: 's',
               isVirtualized: false,
               rowHeight: 36,
-              style: { maxHeight: SELECTABLE_LIST_MAX_HEIGHT },
             }}
             data-test-subj="ruleDashboardArtifactsSelectable"
           >
             {(list, search) => (
               <>
                 <div css={searchPaddingStyles}>{search}</div>
-                {list}
+                <div
+                  css={listContainerStyles}
+                  data-test-subj="ruleDashboardArtifactsSelectableList"
+                >
+                  {list}
+                </div>
               </>
             )}
           </EuiSelectable>

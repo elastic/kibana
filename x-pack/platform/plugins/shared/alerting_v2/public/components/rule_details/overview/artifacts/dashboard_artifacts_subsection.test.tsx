@@ -233,6 +233,26 @@ describe('DashboardArtifactsSubsection', () => {
     expect(screen.getByTestId('ruleDashboardArtifactsManagePopover')).toBeInTheDocument();
   });
 
+  it('keeps a long dashboard list inside a scrollable container', async () => {
+    mockSearchRelatedDashboard.mockResolvedValue(
+      Array.from({ length: 40 }, (_, index) => {
+        const id = String(index + 1).padStart(2, '0');
+        return { id: `dash-${id}`, title: `Related Dashboard ${id}` };
+      })
+    );
+
+    renderSubsection(baseRule);
+    fireEvent.click(screen.getByTestId('ruleDashboardArtifactsAddButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleDashboardSelectableOption-dash-40')).toBeInTheDocument();
+    });
+
+    const list = screen.getByTestId('ruleDashboardArtifactsSelectableList');
+    expect(list).toContainElement(screen.getByTestId('ruleDashboardSelectableOption-dash-01'));
+    expect(list).toContainElement(screen.getByTestId('ruleDashboardSelectableOption-dash-40'));
+  });
+
   it('re-queries dashboards on the server when searching in the manage popover', async () => {
     mockSearchRelatedDashboard.mockImplementation(
       async (_dashboard: unknown, params: { search?: string } = {}) => {
