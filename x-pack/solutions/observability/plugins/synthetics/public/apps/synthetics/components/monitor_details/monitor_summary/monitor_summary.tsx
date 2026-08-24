@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { LoadWhenInView } from '@kbn/observability-shared-plugin/public';
+import { isHeartbeatSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { MonitorMWsCallout } from '../../common/mws_callout/monitor_mws_callout';
 import { MissingIntegrationCallout } from '../../monitor_add_edit/steps/missing_integration_callout';
 import { SummaryPanel } from './summary_panel';
@@ -25,6 +26,7 @@ import { SummaryPanel } from './summary_panel';
 import { useGetUrlParams } from '../../../hooks';
 import { useMonitorDetailsPage } from '../use_monitor_details_page';
 import { useMonitorRangeFrom } from '../hooks/use_monitor_range_from';
+import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { MonitorAlerts } from './monitor_alerts';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
 import { MonitorDurationTrend } from './duration_trend';
@@ -38,6 +40,7 @@ import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_conf
 export const MonitorSummary = () => {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
   const { remoteName } = useGetUrlParams();
+  const { monitor } = useSelectedMonitor();
   const { from, to } = useMonitorRangeFrom();
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
@@ -53,7 +56,7 @@ export const MonitorSummary = () => {
 
   return (
     <>
-      <MissingIntegrationCallout configId={configId} />
+      {!isHeartbeatSyntheticsMonitor(monitor) && <MissingIntegrationCallout configId={configId} />}
       <MonitorPendingWrapper>
         <MonitorMWsCallout />
         <SummaryPanel dateLabel={dateLabel} from={from} to={to} />

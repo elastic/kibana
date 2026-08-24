@@ -299,7 +299,7 @@ export const BrowserStepsList = ({
         <StepDetailsLinkIcon
           checkGroup={item.monitor.check_group}
           stepIndex={item.synthetics?.step?.index}
-          configId={item.config_id!}
+          configId={item.config_id ?? item.monitor.id}
           target={testNowMode ? '_blank' : undefined}
         />
       ),
@@ -455,7 +455,7 @@ const MobileRowDetails = ({
         css={{ marginLeft: 'auto' }}
         checkGroup={journeyStep.monitor.check_group}
         stepIndex={journeyStep.synthetics?.step?.index}
-        configId={journeyStep.config_id!}
+        configId={journeyStep.config_id ?? journeyStep.monitor.id}
         asButton={true}
       />
     </EuiFlexGroup>
