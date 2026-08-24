@@ -147,7 +147,7 @@ const ExperimentHeader: React.FC<{
   const timestamp = experimentData?.timestamp;
   const taskModel = experimentData?.task_model?.id;
   const evaluatorModels = experimentData?.evaluator_models ?? [];
-  const displayName = experimentData?.experiment_name || experimentId;
+  const displayName = experimentData?.suite_id ?? experimentData?.experiment_name ?? experimentId;
   const detailLocation = {
     pathname: `/experiments/${encodeURIComponent(experimentId)}`,
     search: executionId ? `?execution_id=${encodeURIComponent(executionId)}` : '',
