@@ -82,6 +82,7 @@ describe('Legacy hash-based dashboard links in a non-default space', { tags: ['@
   let importedSavedObjects: Array<{ type: string; id: string }> = [];
 
   before(() => {
+    activateSpace(SPACE_ID);
     importSavedObjects(OSQUERY_MANAGER_DASHBOARDS_FIXTURE, SPACE_ID).then((objects) => {
       importedSavedObjects = objects;
     });
