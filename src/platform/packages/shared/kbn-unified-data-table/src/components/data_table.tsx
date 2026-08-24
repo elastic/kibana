@@ -114,12 +114,7 @@ import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
 import { WithNewIndicator } from './custom_toolbar/with_new_indicator';
 import { useViewModeNewBadge } from '../hooks/use_view_mode_new_badge';
-import {
-  HEADER_ROW_HEIGHT_STORAGE_KEY,
-  ROW_HEIGHT_STORAGE_KEY,
-  RowHeightType,
-  useRowHeight,
-} from '../hooks/use_row_height';
+import { RowHeightType, useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import type { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
@@ -1127,7 +1122,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       type: RowHeightType.header,
       storage,
       consumer,
-      key: HEADER_ROW_HEIGHT_STORAGE_KEY,
+      key: 'dataGridHeaderRowHeight',
       defaultRowHeight: 1,
       configRowHeight: configHeaderRowHeight,
       rowHeightState: headerRowHeightState,
@@ -1144,7 +1139,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       type: RowHeightType.row,
       storage,
       consumer,
-      key: ROW_HEIGHT_STORAGE_KEY,
+      key: 'dataGridRowHeight',
       defaultRowHeight: ROWS_HEIGHT_OPTIONS.default,
       configRowHeight,
       rowHeightState,
