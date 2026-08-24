@@ -37,7 +37,9 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 - Provide \`prompt\` to describe what to create or change. The server generates the HTML template.
 - When \`esqlQuery\` is also changing, the server samples the new schema before generating so the template matches the data.
 - When only \`prompt\` is provided (style or layout change, no query change), the server refines the existing template directly — no query sampling, preserving layout and design.
-- Pass \`esqlQuery: null\` to remove the query entirely.`,
+- Pass \`esqlQuery: null\` to remove the query entirely.
+
+On success this returns \`attachment_id\` and \`version\`. You MUST render the updated panel inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\` — without it the user cannot preview or step back through earlier versions of the panel.`,
   schema: updateCustomContentSchema,
   handler: async ({ prompt, esqlQuery }, { attachments, logger, esClient, modelProvider }) => {
     const allAttachments = attachments.getAll();
@@ -100,14 +102,22 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
       embeddable_id: currentData?.embeddable_id ?? '',
     };
 
-    await attachments.update(contextAttachment.id, { data: newData }, ATTACHMENT_REF_ACTOR.agent);
+    const updated = await attachments.update(
+      contextAttachment.id,
+      { data: newData },
+      ATTACHMENT_REF_ACTOR.agent
+    );
 
     return {
       results: [
         {
           tool_result_id: getToolResultId(),
           type: ToolResultType.other,
-          data: { message: 'Panel updated successfully.' },
+          data: {
+            message: 'Panel updated successfully.',
+            attachment_id: contextAttachment.id,
+            version: updated?.current_version,
+          },
         },
       ],
     };

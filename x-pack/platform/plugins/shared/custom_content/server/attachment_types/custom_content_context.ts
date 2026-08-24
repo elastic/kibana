@@ -47,6 +47,6 @@ export const createCustomContentContextAttachmentType = (): AttachmentTypeDefini
     }),
   }),
   getAgentDescription: () =>
-    'A custom content panel context containing the current HTML template and optional ES|QL query. Use the custom_content_update_panel tool to propose refined templates or query changes.',
+    'A custom content panel context containing the current HTML template and optional ES|QL query. Use the custom_content_update_panel tool to propose refined templates or query changes. After every successful update, render the attachment inline as the last part of your response with `<render_attachment id="{attachment_id}" version="{version}" />`, using the ids returned by the tool — this is what gives the user the preview and version history for the panel.',
   getTools: () => ['custom_content_update_panel'],
 });

@@ -52,6 +52,7 @@ import {
   type CustomContentContextAttachmentData,
 } from '../common/panel_context_attachment';
 import { buildCustomContentContextAttachment } from './utils/chat_integration';
+import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
 import { CUSTOM_CONTENT_REFINE_SESSION_TAG } from '../common/constants';
 import type { CustomContentEmbeddableState } from '../server';
 import { CustomContentComponent } from './components/custom_content_component';
@@ -317,6 +318,15 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
+        useEffect(
+          () =>
+            registerPanelPreviewHandler(uuid, (data) => {
+              template$.next(data.panel_template);
+              esqlQuery$.next(data.esql_query);
+            }),
+          []
+        );
+
         useEffect(() => {
           const { agentBuilder } = getServices();
           if (!agentBuilder) return;
@@ -351,14 +361,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
               template$.next(data.panel_template);
               esqlQuery$.next(data.esql_query);
-              agentBuilder.addAttachment(
-                buildCustomContentContextAttachment(
-                  data.panel_template,
-                  data.esql_query,
-                  uuid,
-                  titleManager.api.title$.getValue() ?? undefined
-                )
-              );
             });
 
           return () => sub.unsubscribe();
