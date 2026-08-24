@@ -139,6 +139,31 @@ describe('AuthenticateAndDeployStep', () => {
     });
   });
 
+  describe('persisted failure survives remount', () => {
+    // This is the invariant review comment r3842293220 asked about:
+    // a user who deploys, gets an error, navigates Back/Next, and returns to Step 3 must still see
+    // the error callout and Next must stay disabled — the hook seeds failedInstances from session
+    // storage, so the local state does not reset on remount.
+
+    it('hasFailed=true when hook returns non-empty failedInstances on first render (no deploy attempted)', () => {
+      // Simulates the hook having been seeded from persisted deployAndDetectStep.failedInstances.
+      mockUseDeploy.mockReturnValue(
+        makeDeployReturn({ failedInstances: ['guardduty'], isDeploying: false })
+      );
+      renderStep();
+      // hasFailed must be true without a prior deploy click in this render cycle.
+      expect(screen.getByTestId('mock-failed')).toBeInTheDocument();
+    });
+
+    it('Next stays disabled when hook returns failures on first render (no deploy attempted)', () => {
+      mockUseDeploy.mockReturnValue(
+        makeDeployReturn({ failedInstances: ['guardduty'], isDeploying: false })
+      );
+      renderStep();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+    });
+  });
+
   describe('Next button gating — no MI services', () => {
     it('Next is enabled without deploying', () => {
       mockUseOnboardingFlow.mockReturnValue({

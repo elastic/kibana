@@ -540,6 +540,22 @@ describe('useDeploy', () => {
     expect(result.current.failedInstances).toEqual([]);
   });
 
+  it('initializes failedInstances from persisted deployAndDetectStep state (survives remount)', () => {
+    // Simulate the post-Back/Next remount: session storage still has a failure from a prior deploy,
+    // but deployAttempted and local failedInstances are both reset to their initial values.
+    // The hook must seed from the persisted store so the error callout remains visible.
+    setupMocks({
+      selectedServiceIds: ['ec2_metrics'],
+      deployAndDetectStep: {
+        serviceStatuses: { ec2_metrics: 'error' },
+        failedInstances: ['ec2_metrics'],
+      },
+    });
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    expect(result.current.failedInstances).toEqual(['ec2_metrics']);
+  });
+
   it('navigates immediately and completes API call on success', async () => {
     setupMocks({ selectedServiceIds: ['ec2_metrics'] });
     const onContinue = jest.fn();

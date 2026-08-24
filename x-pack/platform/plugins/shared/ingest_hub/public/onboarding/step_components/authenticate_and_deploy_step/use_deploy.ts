@@ -57,7 +57,12 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
   const [namespace, setNamespace] = useState('default');
   const [isDeploying, setIsDeploying] = useState(false);
-  const [failedInstances, setFailedInstances] = useState<string[]>([]);
+  // Seeded from session storage so a partial failure survives unmounting Step 3. Without this,
+  // navigating Back and forward again clears the failure locally while serviceStatuses still holds
+  // the 'error' chip, which opens the isDone gate on a deploy that never succeeded.
+  const [failedInstances, setFailedInstances] = useState<string[]>(
+    () => deployAndDetectStep.failedInstances ?? []
+  );
 
   const deployGroups: DeployGroup[] = useMemo(
     () =>

@@ -41,7 +41,10 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const [deployAttempted, setDeployAttempted] = useState(false);
   const isDone =
     isAlreadyDeployed || (deployAttempted && !isDeploying && failedInstances.length === 0);
-  const hasFailed = deployAttempted && !isDeploying && failedInstances.length > 0;
+  // hasFailed is NOT gated on deployAttempted: if the hook is seeded with persisted failures on
+  // remount (after navigating Back/Next), the callout and Retry must still appear even though no
+  // deploy was attempted in this component lifetime.
+  const hasFailed = !isDeploying && failedInstances.length > 0;
 
   const handleDeployClick = useCallback(() => {
     setDeployAttempted(true);
