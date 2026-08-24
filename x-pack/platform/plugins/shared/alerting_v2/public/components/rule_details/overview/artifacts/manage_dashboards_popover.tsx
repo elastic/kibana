@@ -38,7 +38,7 @@ import {
 } from '@kbn/alerting-v2-rule-form';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 
-const SELECTABLE_LIST_MAX_HEIGHT = 320;
+export const SELECTABLE_LIST_MAX_HEIGHT = 320;
 const SEARCH_DEBOUNCE_MS = 300;
 
 export interface ManageDashboardsPopoverProps {
@@ -96,14 +96,6 @@ export const ManageDashboardsPopover = ({
       width: ${euiTheme.base * 30}px;
     `,
     [euiTheme.base]
-  );
-
-  const listContainerStyles = useMemo(
-    () => css`
-      max-height: ${SELECTABLE_LIST_MAX_HEIGHT}px;
-      overflow-y: auto;
-    `,
-    []
   );
 
   const popoverTitleStyles = useMemo(
@@ -393,7 +385,7 @@ export const ManageDashboardsPopover = ({
               <>
                 <div css={searchPaddingStyles}>{search}</div>
                 <div
-                  css={listContainerStyles}
+                  style={{ maxHeight: SELECTABLE_LIST_MAX_HEIGHT, overflowY: 'auto' }}
                   data-test-subj="ruleDashboardArtifactsSelectableList"
                 >
                   {list}

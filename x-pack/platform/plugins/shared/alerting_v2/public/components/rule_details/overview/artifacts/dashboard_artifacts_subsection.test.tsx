@@ -10,6 +10,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { DashboardArtifactsSubsection } from './dashboard_artifacts_subsection';
+import { SELECTABLE_LIST_MAX_HEIGHT } from './manage_dashboards_popover';
 import { RuleProvider } from '../../rule_context';
 import type { RuleApiResponse } from '../../../../services/rules_api';
 
@@ -251,6 +252,10 @@ describe('DashboardArtifactsSubsection', () => {
     const list = screen.getByTestId('ruleDashboardArtifactsSelectableList');
     expect(list).toContainElement(screen.getByTestId('ruleDashboardSelectableOption-dash-01'));
     expect(list).toContainElement(screen.getByTestId('ruleDashboardSelectableOption-dash-40'));
+    expect(list).toHaveStyle({
+      maxHeight: `${SELECTABLE_LIST_MAX_HEIGHT}px`,
+      overflowY: 'auto',
+    });
   });
 
   it('re-queries dashboards on the server when searching in the manage popover', async () => {
