@@ -131,7 +131,7 @@ export const generateLeadsTool = (
       try {
         const [, { security }] = await core.getStartServices();
         const privileges = await getUserLeadPrivileges(request, security, spaceId);
-        if (!privileges.adhoc.has_write_permissions) {
+        if (!privileges.has_write_permissions) {
           const errorMessage = 'You do not have permission to generate leads in this space.';
           telemetryTracker.recordFailure(errorMessage);
           return {

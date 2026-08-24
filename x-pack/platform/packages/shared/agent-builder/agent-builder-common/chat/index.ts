@@ -26,6 +26,8 @@ export {
   ConversationRoundStatus,
   ConversationDisplayStatus,
   ConversationOriginType,
+  ConversationParentRelation,
+  type ConversationParentLink,
   type ConversationAction,
   type RoundInput,
   type ConverseInput,
@@ -75,6 +77,11 @@ export {
   type RelevantSkillsStepData,
   createRelevantSkillsStep,
   isRelevantSkillsStep,
+  type SubagentRosterEntry,
+  type SubagentRosterUpdatedStep,
+  type SubagentRosterUpdatedStepData,
+  createSubagentRosterUpdatedStep,
+  isSubagentRosterUpdatedStep,
 } from './conversation';
 export {
   ChatEventType,
@@ -132,6 +139,10 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  type SubagentRosterUpdatedEvent,
+  type SubagentRosterUpdatedEventData,
+  createSubagentRosterUpdatedEvent,
+  isSubagentRosterUpdatedEvent,
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
@@ -148,6 +159,7 @@ export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';
 export {
   CONVERSATION_SCHEMA_VERSION,
+  MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   EventActorType,
   TimelineTriggerType,
   TimelineEventType,
