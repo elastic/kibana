@@ -504,7 +504,11 @@ describe('UiamService', () => {
       );
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure', oauthErrorType: 'KIBANA.AUDIENCE_MISMATCH', oauthErrorCode: undefined }
+        {
+          outcome: 'failure',
+          oauthErrorType: 'KIBANA.AUDIENCE_MISMATCH',
+          oauthErrorCode: undefined,
+        }
       );
     });
 
