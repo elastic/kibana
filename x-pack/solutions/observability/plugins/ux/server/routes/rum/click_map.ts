@@ -113,8 +113,8 @@ export const getRumClickMapRoute = createUxServerRoute({
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({ query: rumListQueryCodec }),
-  handler: async ({ context, core, params }): Promise<RumClickMapResponse> => {
-    const client = await getRumSearchClient({ context, core });
+  handler: async ({ context, core, params, request }): Promise<RumClickMapResponse> => {
+    const client = await getRumSearchClient({ context, core, request });
     const requestedPage = params.query.pageUrl;
     const baseFilters = rumBaseFilters(params.query);
     const clickFilters = [...baseFilters, CLICK_FILTER, CLICK_COORD_FILTER];

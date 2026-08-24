@@ -226,7 +226,7 @@ export const getSessionFunnelRoute = createUxServerRoute({
       }),
     ]),
   }),
-  handler: async ({ context, core, params }): Promise<SessionFunnelResponse> => {
+  handler: async ({ context, core, params, request }): Promise<SessionFunnelResponse> => {
     const { rangeFrom, rangeTo, serviceName, kuery, analyticsMode } = params.body;
     const steps = params.body.steps
       .map((step) => ({
@@ -242,7 +242,7 @@ export const getSessionFunnelRoute = createUxServerRoute({
     }
 
     const { elasticsearch } = await context.core;
-    const client = await getRumSearchClient({ context, core });
+    const client = await getRumSearchClient({ context, core, request });
     const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {
       analyticsMode,
       rangeTo,

@@ -117,6 +117,7 @@ export function useAppMenu(enableInspector: boolean) {
           defaultMessage: 'Inspect',
         }),
         iconType: 'inspect',
+        testId: 'uxInspectHeaderLink',
         run: () => inspector.open(inspectorAdapters),
         overflow: true,
       });

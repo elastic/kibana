@@ -30,6 +30,7 @@ import type {
   RumReportTemplateId,
 } from '../../../common/rum_report';
 import { RUM_REMOTE_CLUSTERS_API, type RumRemoteCluster } from '../../../common/rum_ccs';
+import { inspectableGet } from './ux_inspect';
 
 export interface RumQueryParams {
   http: HttpStart;
@@ -94,7 +95,9 @@ export const fetchRumFilters = async ({
   http,
   ...params
 }: RumQueryParams): Promise<RumFiltersResponse> => {
-  return http.get<RumFiltersResponse>('/internal/ux/rum/filters', { query: rumQuery(params) });
+  return inspectableGet<RumFiltersResponse>(http, '/internal/ux/rum/filters', {
+    query: rumQuery(params),
+  });
 };
 
 export const fetchRumAppSettings = async ({
@@ -130,7 +133,7 @@ export const fetchRumApps = async ({
 }: Pick<RumQueryParams, 'http' | 'rangeFrom' | 'rangeTo' | 'includeBots' | 'botUa'> & {
   stage?: RumAppsQueryStage;
 }): Promise<RumAppsResponse> => {
-  return http.get<RumAppsResponse>('/internal/ux/rum/apps', {
+  return inspectableGet<RumAppsResponse>(http, '/internal/ux/rum/apps', {
     query: {
       rangeFrom,
       rangeTo,
@@ -151,7 +154,7 @@ export const fetchRumAppsSpan = async ({
   RumQueryParams,
   'http' | 'rangeFrom' | 'rangeTo' | 'includeBots' | 'botUa'
 >): Promise<RumAppsSpanResponse> => {
-  return http.get<RumAppsSpanResponse>('/internal/ux/rum/apps/span', {
+  return inspectableGet<RumAppsSpanResponse>(http, '/internal/ux/rum/apps/span', {
     query: {
       rangeFrom,
       rangeTo,
@@ -165,14 +168,16 @@ export const fetchRumOverview = async ({
   http,
   ...params
 }: RumQueryParams): Promise<RumOverviewResponse> => {
-  return http.get<RumOverviewResponse>('/internal/ux/rum/overview', { query: rumQuery(params) });
+  return inspectableGet<RumOverviewResponse>(http, '/internal/ux/rum/overview', {
+    query: rumQuery(params),
+  });
 };
 
 export const fetchRumTrends = async ({
   http,
   ...params
 }: RumQueryParams): Promise<{ trends: RumTrendPoint[] }> => {
-  return http.get<{ trends: RumTrendPoint[] }>('/internal/ux/rum/trends', {
+  return inspectableGet<{ trends: RumTrendPoint[] }>(http, '/internal/ux/rum/trends', {
     query: rumQuery(params),
   });
 };
@@ -181,14 +186,18 @@ export const fetchRumClickMap = async ({
   http,
   ...params
 }: RumQueryParams): Promise<RumClickMapResponse> => {
-  return http.get<RumClickMapResponse>('/internal/ux/rum/click_map', { query: rumQuery(params) });
+  return inspectableGet<RumClickMapResponse>(http, '/internal/ux/rum/click_map', {
+    query: rumQuery(params),
+  });
 };
 
 export const fetchRumPages = async ({
   http,
   ...params
 }: RumQueryParams): Promise<RumPagesResponse> => {
-  return http.get<RumPagesResponse>('/internal/ux/rum/pages', { query: rumQuery(params) });
+  return inspectableGet<RumPagesResponse>(http, '/internal/ux/rum/pages', {
+    query: rumQuery(params),
+  });
 };
 
 export const fetchRumPageDetail = async ({
@@ -200,7 +209,7 @@ export const fetchRumPageDetail = async ({
   resources: RumResourceRow[];
   backendCalls: RumBackendCall[];
 }> => {
-  return http.get('/internal/ux/rum/pages/detail', {
+  return inspectableGet(http, '/internal/ux/rum/pages/detail', {
     query: rumQuery({ ...params, pageUrl }),
   });
 };
@@ -209,7 +218,9 @@ export const fetchRumErrors = async ({
   http,
   ...params
 }: RumQueryParams): Promise<RumErrorsResponse> => {
-  return http.get<RumErrorsResponse>('/internal/ux/rum/errors', { query: rumQuery(params) });
+  return inspectableGet<RumErrorsResponse>(http, '/internal/ux/rum/errors', {
+    query: rumQuery(params),
+  });
 };
 
 export const fetchRumReport = async ({
@@ -225,14 +236,18 @@ export const fetchRumReport = async ({
   includePii?: boolean;
   funnelSteps?: string;
 }): Promise<RumReportResponse> => {
-  return http.get<RumReportResponse>(`/internal/ux/rum/reports/${encodeURIComponent(templateId)}`, {
-    query: {
-      ...rumQuery(params),
-      ...(compare ? { compare } : {}),
-      ...(includePii ? { includePii: 'true' } : {}),
-      ...(funnelSteps ? { funnelSteps } : {}),
-    },
-  });
+  return inspectableGet<RumReportResponse>(
+    http,
+    `/internal/ux/rum/reports/${encodeURIComponent(templateId)}`,
+    {
+      query: {
+        ...rumQuery(params),
+        ...(compare ? { compare } : {}),
+        ...(includePii ? { includePii: 'true' } : {}),
+        ...(funnelSteps ? { funnelSteps } : {}),
+      },
+    }
+  );
 };
 
 export const fetchRumRemoteClusters = async ({

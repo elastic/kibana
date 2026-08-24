@@ -35,9 +35,9 @@ export const getRumTrendsRoute = createUxServerRoute({
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({ query: rumListQueryCodec }),
-  handler: async ({ context, core, params }): Promise<{ trends: RumTrendPoint[] }> => {
+  handler: async ({ context, core, params, request }): Promise<{ trends: RumTrendPoint[] }> => {
     const { elasticsearch } = await context.core;
-    const client = await getRumSearchClient({ context, core });
+    const client = await getRumSearchClient({ context, core, request });
     const status = await getRumAnalyticsStatus(elasticsearch.client.asInternalUser);
     const query = params.query;
     const daily = resolveRumDaily({

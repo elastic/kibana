@@ -251,9 +251,9 @@ export const getRumPageDetailRoute = createUxServerRoute({
   params: t.type({
     query: t.intersection([rumListQueryCodec, t.type({ pageUrl: boundedString(512) })]),
   }),
-  handler: async ({ context, core, params }) => {
+  handler: async ({ context, core, params, request }) => {
     return queryRawPageDetail({
-      client: await getRumSearchClient({ context, core }),
+      client: await getRumSearchClient({ context, core, request }),
       query: params.query,
     });
   },
@@ -264,9 +264,9 @@ export const getRumPagesRoute = createUxServerRoute({
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({ query: rumListQueryCodec }),
-  handler: async ({ context, core, params }): Promise<RumPagesResponse> => {
+  handler: async ({ context, core, params, request }): Promise<RumPagesResponse> => {
     const { elasticsearch } = await context.core;
-    const client = await getRumSearchClient({ context, core });
+    const client = await getRumSearchClient({ context, core, request });
     const coreStart = await core.start();
     const settings = await readSessionReplaySettings(
       coreStart.savedObjects.createInternalRepository()

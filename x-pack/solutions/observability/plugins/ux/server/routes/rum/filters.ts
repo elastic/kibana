@@ -32,9 +32,9 @@ export const getRumFiltersRoute = createUxServerRoute({
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({ query: rumListQueryCodec }),
-  handler: async ({ context, core, params }): Promise<RumFiltersResponse> => {
+  handler: async ({ context, core, params, request }): Promise<RumFiltersResponse> => {
     const { elasticsearch } = await context.core;
-    const client = await getRumSearchClient({ context, core });
+    const client = await getRumSearchClient({ context, core, request });
     const status = await getRumAnalyticsStatus(elasticsearch.client.asInternalUser);
     if (
       canUseSessionIndex({

@@ -158,8 +158,8 @@ export const getRumErrorsRoute = createUxServerRoute({
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({ query: rumListQueryCodec }),
-  handler: async ({ context, core, params }): Promise<RumErrorsResponse> => {
-    const client = await getRumSearchClient({ context, core });
+  handler: async ({ context, core, params, request }): Promise<RumErrorsResponse> => {
+    const client = await getRumSearchClient({ context, core, request });
 
     const baseFilters = rumBaseFilters(params.query);
     const bounds = rangeBoundsMs(params.query.rangeFrom, params.query.rangeTo);

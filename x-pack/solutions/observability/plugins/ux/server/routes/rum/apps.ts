@@ -36,7 +36,7 @@ export const getRumAppsRoute = createUxServerRoute({
   }),
   handler: async ({ context, core, params, request }): Promise<RumAppsResponse> => {
     const { elasticsearch } = await context.core;
-    const client = await getRumSearchClient({ context, core });
+    const client = await getRumSearchClient({ context, core, request });
     const { rangeFrom, rangeTo, includeBots, botUa, analyticsMode, stage } = params.query;
     const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {
       analyticsMode,
@@ -78,9 +78,9 @@ export const getRumAppsSpanRoute = createUxServerRoute({
       analyticsMode: boundedString(16),
     }),
   }),
-  handler: async ({ context, core, params }): Promise<RumAppsSpanResponse> => {
+  handler: async ({ context, core, params, request }): Promise<RumAppsSpanResponse> => {
     const { elasticsearch } = await context.core;
-    const client = await getRumSearchClient({ context, core });
+    const client = await getRumSearchClient({ context, core, request });
     const { rangeFrom, rangeTo, includeBots, botUa, analyticsMode } = params.query;
     const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {
       analyticsMode,

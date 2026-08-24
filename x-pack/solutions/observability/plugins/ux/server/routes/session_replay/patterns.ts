@@ -58,12 +58,12 @@ export const getSessionPatternsRoute = createUxServerRoute({
       analyticsMode: boundedString(16),
     }),
   }),
-  handler: async ({ context, core, params }): Promise<SessionPatternsResponse> => {
+  handler: async ({ context, core, params, request }): Promise<SessionPatternsResponse> => {
     const rangeFrom = params.query.rangeFrom || 'now-24h';
     const rangeTo = params.query.rangeTo || 'now';
     const { serviceName, kuery, analyticsMode } = params.query;
     const { elasticsearch } = await context.core;
-    const client = await getRumSearchClient({ context, core });
+    const client = await getRumSearchClient({ context, core, request });
     const coreStart = await core.start();
     const soClient = coreStart.savedObjects.createInternalRepository();
     const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {

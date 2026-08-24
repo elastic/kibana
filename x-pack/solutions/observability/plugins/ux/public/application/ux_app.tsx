@@ -32,6 +32,7 @@ import { RumAppsPage } from '../components/app/rum_apps/rum_apps_page';
 import { RumGlobalErrorsPage } from '../components/app/rum_global_errors';
 import { DASHBOARD_LABEL, RumHome, type UxHomeTab } from '../components/app/rum_dashboard/rum_home';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
+import { UxInspectBridge } from '../components/app/rum_dashboard/action_menu/ux_inspect_bridge';
 
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { UxDefaultDateRange } from '../hooks/use_date_range_redirect';
@@ -366,6 +367,7 @@ export function UXAppRoot({
                   <UxDefaultDateRange>
                     <DatePickerContextProvider>
                       <InspectorContextProvider>
+                        <UxInspectBridge />
                         <UrlParamsProvider>
                           <CsmSharedContextProvider>
                             <RouteRenderer />

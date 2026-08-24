@@ -50,7 +50,7 @@ export const getSessionReplayEventsRoute = createUxServerRoute({
       }),
     }),
   ]),
-  handler: async ({ context, core, params }): Promise<SessionReplayEventsResponse> => {
+  handler: async ({ context, core, params, request }): Promise<SessionReplayEventsResponse> => {
     const { sessionId } = params.path;
     const afterEvent = parseOptionalInt(params.query?.afterEvent);
     const requestedSize = parseOptionalInt(params.query?.size);
@@ -58,7 +58,7 @@ export const getSessionReplayEventsRoute = createUxServerRoute({
     const cap = incremental ? LIVE_EVENT_PAGE_SIZE_MAX : FULL_REPLAY_EVENT_PAGE_SIZE;
     const fallback = incremental ? LIVE_EVENT_PAGE_SIZE : FULL_REPLAY_EVENT_PAGE_SIZE;
     const size = Math.min(requestedSize ?? fallback, cap);
-    const client = await getRumSearchClient({ context, core });
+    const client = await getRumSearchClient({ context, core, request });
 
     const filters: object[] = [
       {

@@ -20,6 +20,7 @@ import {
   SESSION_REPLAY_SETTINGS_API,
   type SessionReplaySettings,
 } from '../../../common/session_replay_settings';
+import { inspectableGet, inspectablePost } from './ux_inspect';
 
 export interface FetchSessionsParams {
   http: HttpStart;
@@ -92,7 +93,7 @@ export const fetchSessionReplaySessions = async ({
   includeRaw,
   analyticsMode,
 }: FetchSessionsParams): Promise<SessionListResponse> => {
-  return http.get<SessionListResponse>('/internal/ux/session_replay/sessions', {
+  return inspectableGet<SessionListResponse>(http, '/internal/ux/session_replay/sessions', {
     query: {
       rangeFrom,
       rangeTo,
@@ -137,7 +138,8 @@ export const fetchSessionDetail = async ({
   http: HttpStart;
   sessionId: string;
 }): Promise<RumSessionDetail> => {
-  return http.get<RumSessionDetail>(
+  return inspectableGet<RumSessionDetail>(
+    http,
     `/internal/ux/session_replay/sessions/${encodeURIComponent(sessionId)}`
   );
 };
@@ -153,7 +155,8 @@ export const fetchSessionReplayEvents = async ({
   afterEvent?: number;
   size?: number;
 }): Promise<SessionReplayEventsResponse> => {
-  return http.get<SessionReplayEventsResponse>(
+  return inspectableGet<SessionReplayEventsResponse>(
+    http,
     `/internal/ux/session_replay/sessions/${encodeURIComponent(sessionId)}/events`,
     {
       query: {
@@ -175,7 +178,7 @@ export const fetchLiveReplaySessions = async ({
   lookbackSeconds?: number;
   size?: number;
 }): Promise<LiveReplaySessionsResponse> => {
-  return http.get<LiveReplaySessionsResponse>('/internal/ux/session_replay/live', {
+  return inspectableGet<LiveReplaySessionsResponse>(http, '/internal/ux/session_replay/live', {
     query: {
       ...(serviceName ? { serviceName } : {}),
       ...(lookbackSeconds != null ? { lookbackSeconds: String(lookbackSeconds) } : {}),
@@ -203,7 +206,7 @@ export const fetchSessionFunnel = async ({
   includeRaw?: boolean;
   analyticsMode?: string;
 }): Promise<SessionFunnelResponse> => {
-  return http.post<SessionFunnelResponse>('/internal/ux/session_replay/funnel', {
+  return inspectablePost<SessionFunnelResponse>(http, '/internal/ux/session_replay/funnel', {
     body: JSON.stringify({
       rangeFrom,
       rangeTo,
@@ -233,7 +236,7 @@ export const fetchSessionPatterns = async ({
   includeRaw?: boolean;
   analyticsMode?: string;
 }): Promise<SessionPatternsResponse> => {
-  return http.get<SessionPatternsResponse>('/internal/ux/session_replay/patterns', {
+  return inspectableGet<SessionPatternsResponse>(http, '/internal/ux/session_replay/patterns', {
     query: {
       rangeFrom,
       rangeTo,

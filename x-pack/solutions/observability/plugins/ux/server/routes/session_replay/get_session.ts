@@ -52,9 +52,9 @@ export const getSessionRoute = createUxServerRoute({
   params: t.type({
     path: t.type({ sessionId: t.string }),
   }),
-  handler: async ({ context, core, params }): Promise<RumSessionDetail> => {
+  handler: async ({ context, core, params, request }): Promise<RumSessionDetail> => {
     const { sessionId } = params.path;
-    const client = await getRumSearchClient({ context, core });
+    const client = await getRumSearchClient({ context, core, request });
 
     const sessionMatch = {
       bool: {
