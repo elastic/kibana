@@ -58,7 +58,10 @@ import {
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { KI_FEATURE_SOURCES_TO_RUN } from './resolve_ki_sources';
 import { resolveMaxSteps } from './resolve_max_steps';
-import { resolveQueryGenerationDatasets } from './resolve_scenarios';
+import {
+  resolveQueryGenerationDatasets,
+  resolveQueryGenerationDatasetName,
+} from './resolve_scenarios';
 import { selectQueryGenerationEvaluators } from './select_evaluators';
 import { extractLogTextFromSourceDoc } from './extract_log_text';
 import { getComputedKIFeaturesFromDocs } from './get_computed_ki_features_from_docs';
@@ -74,8 +77,17 @@ import {
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
 evaluate.describe('KI query generation', { tag: tags.serverless.observability.complete }, () => {
-  const activeDatasets = resolveQueryGenerationDatasets(getActiveDatasets());
+  const scenarioResolution = resolveQueryGenerationDatasets(getActiveDatasets());
+  const activeDatasets = scenarioResolution.datasets;
   const availableSnapshotsBySource = new Map<string, Set<string>>();
+
+  if (scenarioResolution.isFocused && TRUST_UPSTREAM) {
+    throw new Error(
+      'KI_QUERY_GENERATION_SCENARIOS cannot be combined with SIGEVENTS_TRUST_UPSTREAM=true: ' +
+        'focused runs use a namespaced dataset and must never resolve or overwrite the canonical ' +
+        'upstream dataset. Unset KI_QUERY_GENERATION_SCENARIOS for trust-upstream runs.'
+    );
+  }
 
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
     // The significant_event_search tool is only registered when significant
@@ -467,12 +479,22 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 })}`
               );
 
+              const canonicalDatasetName = `sigevents: KI query generation (${dataset.id}) (${kiSource}) [${groundingMode}]`;
+              const datasetName = resolveQueryGenerationDatasetName(
+                scenarioResolution,
+                canonicalDatasetName
+              );
+              const description = scenarioResolution.isFocused
+                ? `[${dataset.id}] KI query generation across scenarios (${kiSource}) [${groundingMode}] ` +
+                  `focused=${scenarioResolution.selectedScenarioIds.join(',')}`
+                : `[${dataset.id}] KI query generation across scenarios (${kiSource}) [${groundingMode}]`;
+
               await executorClient.runExperiment(
                 {
                   datasets: [
                     {
-                      name: `sigevents: KI query generation (${dataset.id}) (${kiSource}) [${groundingMode}]`,
-                      description: `[${dataset.id}] KI query generation across scenarios (${kiSource}) [${groundingMode}]`,
+                      name: datasetName,
+                      description,
                       examples,
                     },
                   ],
@@ -581,7 +603,10 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               };
             },
           },
-          selectQueryGenerationEvaluators([expectedGenerationOutcomeEvaluator])
+          // The empty-stream safety canary always runs its mandatory deterministic
+          // evaluator. SELECTED_EVALUATORS only narrows the configurable main
+          // query-generation experiment; it must never disable this canary.
+          [expectedGenerationOutcomeEvaluator]
         );
       }
     );

@@ -146,6 +146,7 @@ node scripts/evals run \
 | `SIGEVENTS_DATASET`                     | Dataset(s) to run (comma-separated or `all`)                                | `all`                      |
 | `KI_QUERY_GENERATION_KI_FEATURE_SOURCE` | KI feature source for KI query generation (`canonical`, `snapshot`, `both`) | `canonical`                |
 | `KI_QUERY_GENERATION_SCENARIOS`         | Comma-separated KI query generation scenario ids to run (focused local runs); unset runs every scenario | `all`                      |
+| `SELECTED_EVALUATORS`                   | Comma-separated evaluator names for the **configurable main** query-generation experiment. The empty-stream safety canary always runs its mandatory deterministic `expected_generation_outcome` evaluator and ignores this variable. Unknown, empty, or trailing-comma selections fail fast. | all evaluators when unset       |
 | `KI_QUERY_GENERATION_MAX_STEPS`         | Optional max reasoning steps override for KI query generation (integer 1-20) | suite default               |
 | `GCS_CREDENTIALS`                       | GCS service account JSON for snapshot access                                | —                          |
 | `SIGEVENTS_TRUST_UPSTREAM`              | When `true`, use dataset examples from the golden cluster instead of upserting from code | `false`                    |

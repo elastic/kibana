@@ -7,6 +7,28 @@
 
 import type { DatasetConfig } from '../../src/datasets';
 
+export interface QueryGenerationDatasetResolution {
+  /** Active datasets with query-generation scenarios filtered to the selection. */
+  datasets: DatasetConfig[];
+  /** True when a scenario filter (KI_QUERY_GENERATION_SCENARIOS) was requested. */
+  isFocused: boolean;
+  /** Sorted, deduplicated scenario ids: the union for full runs, the selection for focused runs. */
+  selectedScenarioIds: string[];
+}
+
+const parseSelection = (rawSelection: string | undefined): string[] => {
+  if (rawSelection == null || rawSelection.trim() === '') {
+    return [];
+  }
+  const requested = rawSelection.split(',').map((item) => item.trim());
+  if (requested.some((item) => item.length === 0)) {
+    throw new Error(
+      'KI_QUERY_GENERATION_SCENARIOS contains an empty item; expected a comma-separated list of scenario ids.'
+    );
+  }
+  return [...new Set(requested)];
+};
+
 /**
  * Resolves which KI query-generation scenarios to run.
  *
@@ -14,20 +36,30 @@ import type { DatasetConfig } from '../../src/datasets';
  * When unset, every scenario of every active dataset runs. Requested ids are
  * validated against the union of scenarios across the active datasets, and
  * datasets that contain no selected scenario are dropped.
+ *
+ * Returns selection metadata so the spec can distinguish a full run from a
+ * focused run and give focused runs a namespaced dataset name instead of
+ * overwriting the canonical Golden dataset with a pruned example set.
  */
 export const resolveQueryGenerationDatasets = (
   datasets: DatasetConfig[],
   rawSelection = process.env.KI_QUERY_GENERATION_SCENARIOS
-): DatasetConfig[] => {
-  if (rawSelection == null || rawSelection.trim() === '') {
-    return datasets;
-  }
+): QueryGenerationDatasetResolution => {
+  const requested = parseSelection(rawSelection);
+  const isFocused = requested.length > 0;
 
-  const requested = [...new Set(rawSelection.split(',').map((item) => item.trim()))];
-  if (requested.some((item) => item.length === 0)) {
-    throw new Error(
-      'KI_QUERY_GENERATION_SCENARIOS contains an empty item; expected a comma-separated list of scenario ids.'
-    );
+  if (!isFocused) {
+    return {
+      datasets,
+      isFocused,
+      selectedScenarioIds: [
+        ...new Set(
+          datasets.flatMap((dataset) =>
+            dataset.kiQueryGeneration.map((scenario) => scenario.input.scenario_id)
+          )
+        ),
+      ].sort(),
+    };
   }
 
   const available = [
@@ -45,7 +77,7 @@ export const resolveQueryGenerationDatasets = (
     );
   }
 
-  return datasets
+  const resolvedDatasets = datasets
     .map((dataset) => ({
       ...dataset,
       kiQueryGeneration: dataset.kiQueryGeneration.filter((scenario) =>
@@ -53,4 +85,33 @@ export const resolveQueryGenerationDatasets = (
       ),
     }))
     .filter((dataset) => dataset.kiQueryGeneration.length > 0);
+
+  return {
+    datasets: resolvedDatasets,
+    isFocused,
+    selectedScenarioIds: [...requested].sort(),
+  };
+};
+
+/**
+ * Determines the dataset name used to store a query-generation run.
+ *
+ * Unfiltered (full) runs keep the canonical name verbatim so the Golden dataset
+ * keeps its complete example set. Focused runs get a deterministic namespaced
+ * suffix derived from the sorted scenario ids, so partial runs never overwrite
+ * (or prune) the canonical upstream dataset.
+ */
+export const resolveQueryGenerationDatasetName = (
+  resolution: QueryGenerationDatasetResolution,
+  canonicalName: string
+): string => {
+  if (!resolution.isFocused) {
+    return canonicalName;
+  }
+  const suffix = resolution.selectedScenarioIds
+    .map((id) => encodeURIComponent(id))
+    .join('%2C')
+    .toLowerCase()
+    .replace(/[^a-z0-9%]/g, '-');
+  return `${canonicalName} [focused: ${suffix}]`;
 };

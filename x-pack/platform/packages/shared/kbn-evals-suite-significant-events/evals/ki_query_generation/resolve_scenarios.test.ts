@@ -6,7 +6,11 @@
  */
 
 import type { DatasetConfig, KIQueryGenerationScenario } from '../../src/datasets';
-import { resolveQueryGenerationDatasets } from './resolve_scenarios';
+import {
+  resolveQueryGenerationDatasets,
+  resolveQueryGenerationDatasetName,
+  type QueryGenerationDatasetResolution,
+} from './resolve_scenarios';
 
 const scenario = (id: string): KIQueryGenerationScenario => ({
   input: {
@@ -41,17 +45,35 @@ const DATASETS = [
   dataset('bank-of-anthos', ['healthy-baseline', 'ledger-db-disconnect']),
 ];
 
+const names = (res: QueryGenerationDatasetResolution) => res.datasets;
+
 describe('resolveQueryGenerationDatasets', () => {
   it('returns every scenario when the selection is unset', () => {
-    expect(resolveQueryGenerationDatasets(DATASETS, undefined)).toEqual(DATASETS);
+    expect(names(resolveQueryGenerationDatasets(DATASETS, undefined))).toEqual(DATASETS);
   });
 
   it('returns every scenario for an empty selection', () => {
-    expect(resolveQueryGenerationDatasets(DATASETS, '')).toEqual(DATASETS);
+    expect(names(resolveQueryGenerationDatasets(DATASETS, ''))).toEqual(DATASETS);
+  });
+
+  it('reports a full run as unfocused with the union sorted', () => {
+    const res = resolveQueryGenerationDatasets(DATASETS, undefined);
+    expect(res.isFocused).toBe(false);
+    expect(res.selectedScenarioIds).toEqual([
+      'healthy-baseline',
+      'ledger-db-disconnect',
+      'payment-unreachable',
+    ]);
+  });
+
+  it('reports a focused run with sorted selected ids', () => {
+    const res = resolveQueryGenerationDatasets(DATASETS, 'ledger-db-disconnect,healthy-baseline');
+    expect(res.isFocused).toBe(true);
+    expect(res.selectedScenarioIds).toEqual(['healthy-baseline', 'ledger-db-disconnect']);
   });
 
   it('returns a single valid ID once', () => {
-    expect(resolveQueryGenerationDatasets(DATASETS, 'payment-unreachable')).toEqual([
+    expect(names(resolveQueryGenerationDatasets(DATASETS, 'payment-unreachable'))).toEqual([
       {
         ...DATASETS[0],
         kiQueryGeneration: [DATASETS[0].kiQueryGeneration[1]],
@@ -60,7 +82,9 @@ describe('resolveQueryGenerationDatasets', () => {
   });
 
   it('deduplicates duplicate IDs', () => {
-    expect(resolveQueryGenerationDatasets(DATASETS, 'healthy-baseline,healthy-baseline')).toEqual([
+    expect(
+      names(resolveQueryGenerationDatasets(DATASETS, 'healthy-baseline,healthy-baseline'))
+    ).toEqual([
       { ...DATASETS[0], kiQueryGeneration: [DATASETS[0].kiQueryGeneration[0]] },
       { ...DATASETS[1], kiQueryGeneration: [DATASETS[1].kiQueryGeneration[0]] },
     ]);
@@ -68,7 +92,7 @@ describe('resolveQueryGenerationDatasets', () => {
 
   it('preserves source order across multiple IDs', () => {
     expect(
-      resolveQueryGenerationDatasets(DATASETS, 'ledger-db-disconnect,payment-unreachable')
+      names(resolveQueryGenerationDatasets(DATASETS, 'ledger-db-disconnect,payment-unreachable'))
     ).toEqual([
       { ...DATASETS[0], kiQueryGeneration: [DATASETS[0].kiQueryGeneration[1]] },
       { ...DATASETS[1], kiQueryGeneration: [DATASETS[1].kiQueryGeneration[1]] },
@@ -76,7 +100,7 @@ describe('resolveQueryGenerationDatasets', () => {
   });
 
   it('skips other datasets when an ID is present in only one dataset', () => {
-    expect(resolveQueryGenerationDatasets(DATASETS, 'ledger-db-disconnect')).toEqual([
+    expect(names(resolveQueryGenerationDatasets(DATASETS, 'ledger-db-disconnect'))).toEqual([
       { ...DATASETS[1], kiQueryGeneration: [DATASETS[1].kiQueryGeneration[1]] },
     ]);
   });
@@ -100,5 +124,58 @@ describe('resolveQueryGenerationDatasets', () => {
     const before = JSON.stringify(DATASETS);
     resolveQueryGenerationDatasets(DATASETS, 'healthy-baseline');
     expect(JSON.stringify(DATASETS)).toBe(before);
+  });
+});
+
+describe('resolveQueryGenerationDatasetName', () => {
+  const CANONICAL = 'sigevents: KI query generation (toggle) (canonical) [baseline]';
+
+  it('keeps the canonical name for unfiltered runs', () => {
+    const res = resolveQueryGenerationDatasets(DATASETS, undefined);
+    expect(resolveQueryGenerationDatasetName(res, CANONICAL)).toBe(CANONICAL);
+  });
+
+  it('derives a deterministic namespaced name for focused runs', () => {
+    const res = resolveQueryGenerationDatasets(DATASETS, 'ledger-db-disconnect');
+    const name = resolveQueryGenerationDatasetName(res, CANONICAL);
+    expect(name).toContain('[focused:');
+    expect(name).toContain('ledger-db-disconnect');
+    expect(name).not.toBe(CANONICAL);
+  });
+
+  it('is insensitive to selection order', () => {
+    const a = resolveQueryGenerationDatasets(DATASETS, 'healthy-baseline,ledger-db-disconnect');
+    const b = resolveQueryGenerationDatasets(DATASETS, 'ledger-db-disconnect,healthy-baseline');
+    expect(resolveQueryGenerationDatasetName(a, CANONICAL)).toBe(
+      resolveQueryGenerationDatasetName(b, CANONICAL)
+    );
+  });
+
+  it('is insensitive to duplicate ids', () => {
+    const a = resolveQueryGenerationDatasets(DATASETS, 'healthy-baseline,ledger-db-disconnect');
+    const b = resolveQueryGenerationDatasets(
+      DATASETS,
+      'healthy-baseline,healthy-baseline,ledger-db-disconnect'
+    );
+    expect(resolveQueryGenerationDatasetName(a, CANONICAL)).toBe(
+      resolveQueryGenerationDatasetName(b, CANONICAL)
+    );
+  });
+
+  it('keeps different selections distinct', () => {
+    const a = resolveQueryGenerationDatasets(DATASETS, 'healthy-baseline');
+    const b = resolveQueryGenerationDatasets(DATASETS, 'ledger-db-disconnect');
+    expect(resolveQueryGenerationDatasetName(a, CANONICAL)).not.toBe(
+      resolveQueryGenerationDatasetName(b, CANONICAL)
+    );
+  });
+
+  it('never collides with the canonical name', () => {
+    const res = resolveQueryGenerationDatasets(DATASETS, 'healthy-baseline');
+    const name = resolveQueryGenerationDatasetName(res, CANONICAL);
+    expect(name).not.toBe(CANONICAL);
+    expect(name).toMatch(
+      /^sigevents: KI query generation \(toggle\) \(canonical\) \[baseline\] \[focused:/
+    );
   });
 });
