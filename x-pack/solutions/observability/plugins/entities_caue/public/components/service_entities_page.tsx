@@ -25,6 +25,8 @@ import {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ServiceEntity } from '../../common/service_entity';
+import { getHealthColors, getHealthColor } from '../utils/health_colors';
 import { getApmServiceOverviewUrl } from '../utils/apm_service_link';
 import { ServiceMetadataFlyout } from './service_metadata_flyout';
 import { useServiceEntities } from '../hooks/use_service_entities';
@@ -34,35 +36,9 @@ import { ServiceMap } from './service_map/service_map';
 
 type TabId = 'entities' | 'map';
 
-interface ServiceEntity {
-  'entity.id': string;
-  'entity.name': string;
-  'service.environment': string | string[] | null;
-  'service.version': string | null;
-  'service.type': string | null;
-  'entity.lifecycle.first_seen': string | null;
-  'entity.lifecycle.last_seen': string | null;
-  'entity.source': string | string[] | null;
-  'service.health.calculated_level': string | null;
-  'service.health.calculated_score_norm': number | null;
-}
-
 const toStringArray = (value: string | string[] | null): string[] => {
   if (!value) return [];
   return Array.isArray(value) ? value : [value];
-};
-
-interface HealthColors {
-  Healthy: string;
-  Degraded: string;
-  Unhealthy: string;
-  Critical: string;
-  Unknown: string;
-}
-
-const getHealthColor = (level: string | null, colors: HealthColors): string => {
-  if (!level || !(level in colors)) return colors.Unknown;
-  return colors[level as keyof HealthColors];
 };
 
 interface Props {
@@ -81,13 +57,7 @@ export const ServiceEntitiesPage = ({ data, http, share }: Props) => {
 
   const { data: dependenciesData, refetch: refetchDependencies } = useServiceDependencies(http);
 
-  const healthColors: HealthColors = {
-    Healthy: euiTheme.colors.severity.success,
-    Degraded: euiTheme.colors.severity.warning,
-    Unhealthy: euiTheme.colors.severity.risk,
-    Critical: euiTheme.colors.severity.danger,
-    Unknown: euiTheme.colors.severity.unknown,
-  };
+  const healthColors = useMemo(() => getHealthColors(euiTheme), [euiTheme]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<ServiceEntity>>>(
     () => [
@@ -228,8 +198,7 @@ export const ServiceEntitiesPage = ({ data, http, share }: Props) => {
         ],
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [euiTheme, share]
+    [share, healthColors]
   );
 
   const { statusQuery, startMutation, stopMutation } = useEntityStoreStatus(http);

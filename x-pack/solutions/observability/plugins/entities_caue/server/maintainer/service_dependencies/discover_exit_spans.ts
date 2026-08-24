@@ -81,8 +81,8 @@ export const discoverExitSpans = async ({
             after_key: Record<string, string | number | null>;
             buckets: Array<{
               key: { service_name: string; resource: string };
-              // _source filtering returns the original nested structure, not dot-notation keys.
-              span_ids: { hits: { hits: Array<{ _source: { span?: { id?: string } } }> } };
+              // fields API resolves dot-notation aliases (e.g. OTel passthrough); _source does not.
+              span_ids: { hits: { hits: Array<{ fields?: { 'span.id'?: string[] } }> } };
             }>;
           };
         }
@@ -128,7 +128,9 @@ export const discoverExitSpans = async ({
               span_ids: {
                 top_hits: {
                   size: SPAN_SAMPLE_SIZE,
-                  _source: { includes: [SPAN_ID] },
+                  // Use fields (not _source) so aliases like span.id resolve on OTel-native docs.
+                  _source: false,
+                  fields: [SPAN_ID],
                 },
               },
             },
@@ -146,7 +148,8 @@ export const discoverExitSpans = async ({
     for (const bucket of buckets) {
       const spanIds = bucket.span_ids.hits.hits
         .map((hit) => {
-          return hit._source.span?.id;
+          // fields always returns arrays; take the first value.
+          return hit.fields?.['span.id']?.[0];
         })
         .filter((id): id is string => typeof id === 'string');
       if (spanIds.length > 0) {

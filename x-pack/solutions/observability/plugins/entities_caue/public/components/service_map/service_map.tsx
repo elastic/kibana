@@ -8,56 +8,42 @@
 import React, { useMemo, useEffect } from 'react';
 import { ReactFlow, MarkerType, useNodesState, type Node, type Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme } from '@elastic/eui';
 import type { ServiceDependencyEdge } from '../../../common/service_dependencies';
+import type { ServiceEntity } from '../../../common/service_entity';
 import { applyDagreLayout } from './layout';
+import { ServiceNode, SERVICE_NODE_SIZE } from './service_node';
 
-interface ServiceEntity {
-  'entity.id': string;
-  'entity.name': string;
-}
+// Module-level const — a new object identity on every render makes ReactFlow re-mount all nodes.
+const nodeTypes = { service: ServiceNode };
+
+const BACKEND_NODE_WIDTH = 160;
+const BACKEND_NODE_HEIGHT = 56;
+
+/** Strips the "service:" EUID prefix to get a display label. */
+const toServiceLabel = (euid: string): string =>
+  euid.startsWith('service:') ? euid.slice('service:'.length) : euid;
 
 interface Props {
   items: ServiceEntity[];
   edges: ServiceDependencyEdge[];
 }
 
-/** Strips the "service:" EUID prefix to get a display label. */
-const toServiceLabel = (euid: string): string =>
-  euid.startsWith('service:') ? euid.slice('service:'.length) : euid;
-
-// Dimensions used for layout spacing and explicit node sizing.
-const SERVICE_NODE_SIZE = 140;
-const BACKEND_NODE_WIDTH = 160;
-const BACKEND_NODE_HEIGHT = 56;
-
 export const ServiceMap = ({ items, edges }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const { nodes: layoutNodes, edges: rfEdges } = useMemo(() => {
-    // Shared style helpers — defined inside useMemo so they close over euiTheme.
-    const serviceNodeStyle: React.CSSProperties = {
-      width: SERVICE_NODE_SIZE,
-      height: SERVICE_NODE_SIZE,
-      borderRadius: '50%',
-      border: `2px solid ${euiTheme.colors.primary}`,
-      backgroundColor: euiTheme.colors.emptyShade,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center',
-      padding: '12px',
-      boxSizing: 'border-box',
-      fontSize: '12px',
-      fontWeight: 500,
-      lineHeight: 1.3,
-      color: euiTheme.colors.title,
-      overflowWrap: 'break-word',
-      wordBreak: 'break-word',
-      boxShadow: `0 2px 8px ${euiTheme.colors.shadow ?? 'rgba(0,0,0,0.12)'}`,
-    };
+    // Quick lookup from entity.id → health fields for the nodes seeded from items.
+    const healthByEntityId = new Map(
+      items.map((item) => [
+        item['entity.id'],
+        {
+          level: item['service.health.calculated_level'],
+          scoreNorm: item['service.health.calculated_score_norm'],
+        },
+      ])
+    );
 
     const backendNodeStyle: React.CSSProperties = {
       width: BACKEND_NODE_WIDTH,
@@ -78,34 +64,42 @@ export const ServiceMap = ({ items, edges }: Props) => {
       wordBreak: 'break-word',
     };
 
-    // Start with a node per known service entity.
+    // Start with a node per known service entity, carrying health data.
     const nodeMap = new Map<string, Node>(
-      items.map((item) => [
-        item['entity.id'],
-        {
-          id: item['entity.id'],
-          position: { x: 0, y: 0 },
-          width: SERVICE_NODE_SIZE,
-          height: SERVICE_NODE_SIZE,
-          style: serviceNodeStyle,
-          data: { label: item['entity.name'] },
-        },
-      ])
+      items.map((item) => {
+        const health = healthByEntityId.get(item['entity.id']);
+        return [
+          item['entity.id'],
+          {
+            id: item['entity.id'],
+            type: 'service',
+            position: { x: 0, y: 0 },
+            width: SERVICE_NODE_SIZE,
+            height: SERVICE_NODE_SIZE,
+            data: {
+              label: item['entity.name'],
+              level: health?.level ?? null,
+              scoreNorm: health?.scoreNorm ?? null,
+            },
+          },
+        ];
+      })
     );
 
     // Ensure every edge endpoint has a node. Back-fill missing service endpoints with a
-    // basic node; render backend nodes with a visually distinct style.
+    // basic node (health unknown — they aren't in the entity store yet);
+    // render backend nodes with a visually distinct style.
     for (const edge of edges) {
       const { source, target, targetKind } = edge;
 
       if (!nodeMap.has(source)) {
         nodeMap.set(source, {
           id: source,
+          type: 'service',
           position: { x: 0, y: 0 },
           width: SERVICE_NODE_SIZE,
           height: SERVICE_NODE_SIZE,
-          style: serviceNodeStyle,
-          data: { label: toServiceLabel(source) },
+          data: { label: toServiceLabel(source), level: null, scoreNorm: null },
         });
       }
 
@@ -124,11 +118,11 @@ export const ServiceMap = ({ items, edges }: Props) => {
         } else {
           nodeMap.set(target, {
             id: target,
+            type: 'service',
             position: { x: 0, y: 0 },
             width: SERVICE_NODE_SIZE,
             height: SERVICE_NODE_SIZE,
-            style: serviceNodeStyle,
-            data: { label: toServiceLabel(target) },
+            data: { label: toServiceLabel(target), level: null, scoreNorm: null },
           });
         }
       }
@@ -179,6 +173,7 @@ export const ServiceMap = ({ items, edges }: Props) => {
       <ReactFlow
         nodes={nodes}
         edges={rfEdges}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         fitView
         nodesConnectable={false}

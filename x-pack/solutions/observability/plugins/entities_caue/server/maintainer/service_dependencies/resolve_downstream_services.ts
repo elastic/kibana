@@ -120,7 +120,8 @@ export const resolveDownstreamServices = async ({
               key: string;
               // _source filtering returns nested JSON, not dot-notation keys.
               downstream_service: {
-                hits: { hits: Array<{ _source: { service?: { name?: string } } }> };
+                // fields API resolves aliases (e.g. OTel passthrough); _source does not.
+                hits: { hits: Array<{ fields?: { 'service.name'?: string[] } }> };
               };
             }>;
           };
@@ -149,7 +150,9 @@ export const resolveDownstreamServices = async ({
               downstream_service: {
                 top_hits: {
                   size: 1,
-                  _source: { includes: [SERVICE_NAME] },
+                  // Use fields (not _source) so aliases like service.name resolve on OTel-native docs.
+                  _source: false,
+                  fields: [SERVICE_NAME],
                 },
               },
             },
@@ -167,7 +170,8 @@ export const resolveDownstreamServices = async ({
       const spanId = bucket.key;
       // Guard `service` as well — a doc whose _source lacks a `service` object
       // (e.g. OTel-native, or a partial _source return) would throw without `?.`.
-      const downstreamName = bucket.downstream_service.hits.hits[0]?._source?.service?.name;
+      // fields always returns arrays; take the first value.
+      const downstreamName = bucket.downstream_service.hits.hits[0]?.fields?.['service.name']?.[0];
       if (!downstreamName) continue;
 
       const source = spanToSource.get(spanId);
