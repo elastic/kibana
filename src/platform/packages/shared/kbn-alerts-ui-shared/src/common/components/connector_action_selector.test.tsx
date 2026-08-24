@@ -102,22 +102,22 @@ describe('ConnectorActionSelector — cross-page selection', () => {
 });
 
 describe('ConnectorActionSelector — mode switching', () => {
-  it('preserves a specific selection when toggling recommended → specific', async () => {
+  it('preserves a specific selection when toggling All → Custom', async () => {
     const user = userEvent.setup();
     const onValueChange = jest.fn();
 
     render(<Fixture initialSelected={['action01', 'action03']} onValueChange={onValueChange} />);
 
-    await user.click(screen.getByTestId('connectorActionSelectorModeRecommended'));
+    await user.click(screen.getByRole('button', { name: 'All' }));
     expect(onValueChange).toHaveBeenLastCalledWith(null);
 
-    await user.click(screen.getByTestId('connectorActionSelectorModeSpecific'));
+    await user.click(screen.getByRole('button', { name: 'Custom' }));
     expect(onValueChange).toHaveBeenLastCalledWith(['action01', 'action03']);
     expect(rowCheckbox('action01')).toBeChecked();
     expect(rowCheckbox('action03')).toBeChecked();
   });
 
-  it('shows an error when specific mode has zero actions selected', async () => {
+  it('shows an error when custom mode has zero actions selected', async () => {
     const user = userEvent.setup();
 
     render(<Fixture initialSelected={['action01']} />);
@@ -125,7 +125,7 @@ describe('ConnectorActionSelector — mode switching', () => {
     await user.click(screen.getByTestId('connectorActionSelectorClearSelection'));
 
     expect(
-      screen.getByText('Select at least one action, or switch to recommended actions.')
+      screen.getByText('Select at least one action, or enable All.')
     ).toBeInTheDocument();
   });
 });
