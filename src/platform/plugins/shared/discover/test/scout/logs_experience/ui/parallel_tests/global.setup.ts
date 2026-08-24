@@ -23,6 +23,11 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
     config,
   });
 
+  // Seeding is delete-then-create so a re-run against a long-lived stack produces the same
+  // state as a fresh one. Without this, indexing appends and doc counts drift on every run,
+  // which would silently break count-dependent assertions.
+  await logsEsClient.clean();
+
   await logsEsClient.index([
     timerange(from, to)
       .interval('1m')
@@ -47,22 +52,25 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
   // Metric-shaped data for the negative cases: a data source that must NOT match the logs
   // profile. Indexed directly rather than via `infraEsClient`, whose `metrics-*` data streams
   // are TSDB and reject timestamps outside a moving window around now.
-  await esClient.indices
-    .create({
-      index: LOGS.NON_LOGS_INDEX,
-      mappings: {
-        properties: {
-          '@timestamp': { type: 'date' },
-          'host.name': { type: 'keyword' },
-          'system.cpu.total.norm.pct': { type: 'float' },
-          'system.memory.actual.used.pct': { type: 'float' },
-        },
+  //
+  // Delete-then-create for the same reason as the logs data above: a leftover index from an
+  // interrupted run would otherwise accumulate duplicate documents on the bulk below.
+  await esClient.indices.delete({ index: LOGS.NON_LOGS_INDEX }).catch((err: Error) => {
+    // Absent on a clean run; anything else is a real failure.
+    if (!err.message.includes('index_not_found_exception')) throw err;
+  });
+
+  await esClient.indices.create({
+    index: LOGS.NON_LOGS_INDEX,
+    mappings: {
+      properties: {
+        '@timestamp': { type: 'date' },
+        'host.name': { type: 'keyword' },
+        'system.cpu.total.norm.pct': { type: 'float' },
+        'system.memory.actual.used.pct': { type: 'float' },
       },
-    })
-    .catch((err: Error) => {
-      // Idempotent: the index survives an interrupted run that skipped teardown.
-      if (!err.message.includes('resource_already_exists_exception')) throw err;
-    });
+    },
+  });
 
   const intervalMs = 10 * 60 * 1000;
   const documents = Array.from({ length: 1 + (to - from) / intervalMs }, (_, i) => ({

@@ -68,5 +68,36 @@ spaceTest.describe(
         await expect(summaryCell).toContainText(LOGS.SYNTH_LOGS_MESSAGE);
       }
     );
+
+    spaceTest(
+      'should format a computed ES|QL column in the summary the same as its own column',
+      async ({ pageObjects }) => {
+        const { discover, dataGrid, unifiedFieldList } = pageObjects;
+
+        // `drop message` forces the summary to fall back to the remaining fields, so the
+        // computed column is what it renders.
+        await discover.goto({ queryMode: 'esql' });
+        await discover.writeAndSubmitEsqlQuery(
+          `from logs-${LOGS.SYNTH_LOGS_DATASET}-* | sort @timestamp desc | limit 1 ` +
+            `| eval custom_bytes = network.bytes * 2 | drop message`
+        );
+
+        // `getCell` rather than `getCellValue`: without `message` the summary renders more than
+        // one value wrapper, so the inner `.unifiedDataTable__cellValue` locator is not unique.
+        const summaryText = await dataGrid.getCell(0, SUMMARY_COLUMN_ID).innerText();
+
+        await unifiedFieldList.clickFieldListItemAdd('custom_bytes');
+        await discover.waitUntilTabIsLoaded();
+        const columnText = await dataGrid.getCell(0, 'custom_bytes').innerText();
+
+        // `network.bytes` defaults to 500-10000, so doubling it always yields a thousands
+        // separator. Extract rather than anchor: cell text carries surrounding chrome.
+        const formattedValue = columnText.match(/\d{1,3},\d{3}/)?.[0];
+        expect(formattedValue).toBeDefined();
+
+        // The point is that both renderings of the same row agree, not the specific value.
+        expect(summaryText).toContain(formattedValue);
+      }
+    );
   }
 );
