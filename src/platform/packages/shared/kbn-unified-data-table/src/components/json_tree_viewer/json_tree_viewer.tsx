@@ -104,8 +104,16 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
 
   const nav = useRovingTreeNavigation(rows, expansion);
 
-  const { hasControls, isAllExpanded, expandAll, collapseAll, toggle, revealMore, showFewer } =
-    expansion;
+  const {
+    hasControls,
+    isAllExpanded,
+    expandAll,
+    collapseAll,
+    toggle,
+    expandIds,
+    revealMore,
+    showFewer,
+  } = expansion;
   const { activeRowId, setActive, registerRow, onRowKeyDown, onControlKeyDown, firstControlRef } =
     nav;
 
@@ -183,7 +191,15 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
                 row={row}
                 isActive={row.node.id === activeRowId}
                 rowRef={registerRow(row.node.id)}
-                onActivate={() => row.hasChildren && toggle(row.node.id)}
+                onActivate={(event) => {
+                  if (!row.hasChildren) return;
+                  // Cmd/Ctrl-click expands the whole subtree.
+                  if (event.metaKey || event.ctrlKey) {
+                    expandIds(collectExpandableIds([row.node]));
+                  } else {
+                    toggle(row.node.id);
+                  }
+                }}
                 onFocus={() => setActive(row.node.id)}
                 onKeyDown={(event) => onRowKeyDown(event, row)}
                 formatValue={formatValue}

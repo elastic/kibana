@@ -49,6 +49,7 @@ export interface TreeExpansion {
   isAllExpanded: boolean;
   toggle: (id: string) => void;
   setExpandedFor: (id: string, shouldExpand: boolean) => void;
+  expandIds: (ids: string[]) => void;
   revealMore: (id: string) => void;
   showFewer: (id: string) => void;
   expandAll: () => void;
@@ -99,6 +100,19 @@ export const useTreeExpansion = ({
     [effectiveExpanded, setExpandedFor]
   );
 
+  const expandIds = useCallback((ids: string[]) => {
+    setExpanded((prev) => {
+      let next: Set<string> | undefined;
+      for (const id of ids) {
+        if (!prev.has(id)) {
+          next = next ?? new Set(prev);
+          next.add(id);
+        }
+      }
+      return next ?? prev;
+    });
+  }, []);
+
   const revealMore = useCallback((id: string) => {
     setRevealed((prev) => {
       const next = new Map(prev);
@@ -129,6 +143,7 @@ export const useTreeExpansion = ({
     isAllExpanded,
     toggle,
     setExpandedFor,
+    expandIds,
     revealMore,
     showFewer,
     expandAll,

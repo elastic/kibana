@@ -56,7 +56,7 @@ interface FocusableRowProps {
 
 interface NodeRowViewProps extends FocusableRowProps {
   row: NodeRow;
-  onActivate: () => void;
+  onActivate: (event: React.MouseEvent) => void;
   formatValue?: FormatValue;
   getLeafActions?: GetLeafActions;
 }

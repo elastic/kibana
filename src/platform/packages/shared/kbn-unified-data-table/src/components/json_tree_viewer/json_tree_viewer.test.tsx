@@ -119,6 +119,38 @@ describe('JsonTreeViewer', () => {
     expect(screen.getByTestId(moreTestId())).toHaveTextContent('Show 2 more of 12 fields');
   });
 
+  describe('recursive expand', () => {
+    it('expands the whole subtree on Cmd/Ctrl-click', async () => {
+      const user = userEvent.setup();
+      render(<JsonTreeViewer json={{ user: { address: { city: 'Berlin' } } }} />);
+
+      // Collapsed: only the top-level `user` row is visible.
+      expect(screen.queryByTestId(rowTestId('user.address'))).not.toBeInTheDocument();
+
+      await user.keyboard('{Control>}');
+      await user.click(screen.getByTestId(rowTestId('user')));
+      await user.keyboard('{/Control}');
+
+      expect(screen.getByTestId(rowTestId('user.address'))).toBeVisible();
+      expect(screen.getByTestId(rowTestId('user.address.city'))).toHaveTextContent('"Berlin"');
+    });
+
+    it('keeps each expanded level capped at the pager limit', async () => {
+      const user = userEvent.setup();
+      // A nested collection of 12 must still page at 10 after a recursive expand (no DOM explosion).
+      const doc = { logs: Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`f${i}`, i])) };
+      render(<JsonTreeViewer json={doc} />);
+
+      await user.keyboard('{Control>}');
+      await user.click(screen.getByTestId(rowTestId('logs')));
+      await user.keyboard('{/Control}');
+
+      expect(screen.getByTestId(rowTestId('logs.f0'))).toBeVisible();
+      expect(screen.queryByTestId(rowTestId('logs.f11'))).not.toBeInTheDocument();
+      expect(screen.getByTestId(moreTestId(getNodeId(['logs'])))).toBeVisible();
+    });
+  });
+
   describe('keyboard navigation', () => {
     it('steps from a leaf row into its copy-value button with ArrowRight', async () => {
       render(<JsonTreeViewer json={{ message: 'hello' }} />);
