@@ -157,3 +157,44 @@ export const SYNCED_ALERTS_WITH_CLOSE_REASON = (count: number) =>
     values: { count },
     defaultMessage: 'and synced {count, plural, =1 {# alert} other {# alerts}} with close reason',
   });
+
+export const WORKFLOW_STARTED = i18n.translate(
+  'xpack.cases.caseView.userActions.workflowStarted',
+  { defaultMessage: 'started a workflow' }
+);
+
+export const STARTED_WORKFLOW_AGAINST_CASE_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.startedWorkflowAgainstCaseLabel',
+  { defaultMessage: 'started a workflow on this case' }
+);
+
+export const STARTED_WORKFLOW_AGAINST_OBSERVABLE_LABEL = (typeLabel: string, value: string) =>
+  i18n.translate('xpack.cases.caseView.userActions.startedWorkflowAgainstObservableDetailsLabel', {
+    values: { typeLabel, value },
+    defaultMessage: 'started a workflow on observable {typeLabel}: {value}',
+  });
+
+export const STARTED_WORKFLOW_AGAINST_OBSERVABLE_FALLBACK_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.startedWorkflowAgainstObservableLabel',
+  { defaultMessage: 'started a workflow on an observable' }
+);
+
+export const STARTED_WORKFLOW_AGAINST_ALERT_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.startedWorkflowAgainstAlertLabel',
+  { defaultMessage: 'started a workflow on an alert' }
+);
+
+export const STARTED_WORKFLOW_AGAINST_ALERTS_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.startedWorkflowAgainstAlertsLabel',
+  { defaultMessage: 'started a workflow on alerts' }
+);
+
+export const STARTED_WORKFLOW_AGAINST_COMMENT_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.startedWorkflowAgainstCommentLabel',
+  { defaultMessage: 'started a workflow on a comment' }
+);
+
+export const STARTED_WORKFLOW_AGAINST_ATTACHMENT_LABEL = i18n.translate(
+  'xpack.cases.caseView.userActions.startedWorkflowAgainstAttachmentLabel',
+  { defaultMessage: 'started a workflow on an attachment' }
+);

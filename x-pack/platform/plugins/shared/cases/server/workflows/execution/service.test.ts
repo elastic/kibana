@@ -22,7 +22,6 @@ describe('CasesWorkflowRunService', () => {
   const auditLogger = audit.asScoped(request);
   const auditLog = auditLogger.log as jest.MockedFunction<typeof auditLogger.log>;
   const casesClient = createCasesClientMock();
-  const onWorkflowStarted = jest.fn();
   let workflowsAvailable = true;
   let licenseValid = true;
   const management = {
@@ -37,7 +36,6 @@ describe('CasesWorkflowRunService', () => {
     logger,
     audit,
     isLicenseValid: () => licenseValid,
-    onWorkflowStarted,
   });
   const theCase = {
     id: 'case-1',
@@ -66,6 +64,8 @@ describe('CasesWorkflowRunService', () => {
     licenseValid = true;
     casesClient.cases.ensureAuthorizedToUpdate.mockResolvedValue();
     casesClient.cases.get.mockResolvedValue(theCase);
+    casesClient.userActions.preflightWorkflowExecution.mockResolvedValue(undefined);
+    casesClient.userActions.recordWorkflowExecution.mockResolvedValue(undefined);
     management.getWorkflow.mockResolvedValue({
       id: 'workflow-1',
       name: 'Investigate case',
@@ -73,11 +73,13 @@ describe('CasesWorkflowRunService', () => {
       enabled: true,
     } as Awaited<ReturnType<typeof management.getWorkflow>>);
     management.runWorkflow.mockResolvedValue('execution-1');
-    onWorkflowStarted.mockResolvedValue(undefined);
   });
 
   it('starts the workflow with server-owned metadata', async () => {
-    await expect(run()).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+    await expect(run()).resolves.toEqual({
+      workflowExecutionId: 'execution-1',
+      activityStatus: 'succeeded',
+    });
 
     expect(casesClient.cases.ensureAuthorizedToUpdate).toHaveBeenCalledWith({ id: 'case-1' });
     expect(casesClient.cases.ensureAuthorizedToUpdate.mock.invocationCallOrder[0]).toBeLessThan(
@@ -98,16 +100,22 @@ describe('CasesWorkflowRunService', () => {
         origin: defaultBody.origin,
       }
     );
-    expect(onWorkflowStarted).toHaveBeenCalledWith({
+    // preflightWorkflowExecution runs before the workflow to enforce the user-action limit.
+    expect(casesClient.userActions.preflightWorkflowExecution).toHaveBeenCalledWith({
       caseId: 'case-1',
-      inputs: defaultBody.inputs,
-      origin: defaultBody.origin,
-      workflow: {
-        id: 'workflow-1',
-        name: 'Investigate case',
-        executionId: 'execution-1',
-      },
     });
+    // recordWorkflowExecution persists the activity log entry after a successful run.
+    expect(casesClient.userActions.recordWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        caseId: 'case-1',
+        workflow: expect.objectContaining({
+          id: 'workflow-1',
+          name: 'Investigate case',
+          executionId: 'execution-1',
+        }),
+        origin: defaultBody.origin,
+      })
+    );
     expect(auditLog).toHaveBeenCalledWith(
       expect.objectContaining({
         event: expect.objectContaining({
@@ -129,6 +137,15 @@ describe('CasesWorkflowRunService', () => {
     licenseValid = false;
 
     await expect(run()).rejects.toThrow('Workflows require an active Enterprise license.');
+    expect(management.runWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('rejects execution when preflight fails (user-action limit reached)', async () => {
+    casesClient.userActions.preflightWorkflowExecution.mockRejectedValue(
+      new Error('User action limit reached')
+    );
+
+    await expect(run()).rejects.toThrow('User action limit reached');
     expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
@@ -164,7 +181,7 @@ describe('CasesWorkflowRunService', () => {
         inputs: { event: { observables: [{ id: 'observable-1' }] } },
         origin: { type: 'cases.observable', id: 'observable-1' },
       })
-    ).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+    ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
   });
 
   it('rejects alert inputs for a case origin when alerts are not attached', async () => {
@@ -271,7 +288,7 @@ describe('CasesWorkflowRunService', () => {
         },
         origin: { type: 'cases.alerts', id: 'case-1' },
       })
-    ).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+    ).resolves.toEqual({ workflowExecutionId: 'execution-1', activityStatus: 'succeeded' });
   });
 
   it('rejects a missing workflow', async () => {
@@ -305,13 +322,16 @@ describe('CasesWorkflowRunService', () => {
     expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
-  it('preserves the execution result when the post-execution callback fails', async () => {
-    onWorkflowStarted.mockRejectedValue(new Error('callback failed'));
-
-    await expect(run()).resolves.toEqual({ workflowExecutionId: 'execution-1' });
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('post-execution callback failed')
+  it('returns activityStatus: failed when recordWorkflowExecution throws, without rethrowing', async () => {
+    casesClient.userActions.recordWorkflowExecution.mockRejectedValue(
+      new Error('activity recording failed')
     );
+
+    await expect(run()).resolves.toEqual({
+      workflowExecutionId: 'execution-1',
+      activityStatus: 'failed',
+    });
+    expect(logger.error).toHaveBeenCalled();
   });
 
   it('audits execution failures', async () => {
@@ -334,7 +354,10 @@ describe('CasesWorkflowRunService', () => {
       throw new Error('audit failed');
     });
 
-    await expect(run()).resolves.toEqual({ workflowExecutionId: 'execution-1' });
+    await expect(run()).resolves.toEqual({
+      workflowExecutionId: 'execution-1',
+      activityStatus: 'succeeded',
+    });
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('Failed to write Cases workflow audit event')
     );

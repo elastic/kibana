@@ -43,6 +43,10 @@ export { AttachmentActionType, defineAttachment } from './client/attachment_fram
 export { useCasesContext } from './components/cases_context/use_cases_context';
 export { ShowTableButton } from './components/attachments/common/show_table_button';
 export type {
+  RenderWorkflowUserActionAction,
+  RenderWorkflowUserActionActionArgs,
+} from './components/cases_context';
+export type {
   CasesTimelineIntegration,
   SelectTimelineModalProps,
 } from './components/timeline_context';

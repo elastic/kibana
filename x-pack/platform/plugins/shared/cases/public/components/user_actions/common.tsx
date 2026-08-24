@@ -53,6 +53,8 @@ type BuilderArgs = Pick<
 > & {
   label: EuiCommentProps['event'];
   icon: EuiCommentProps['timelineAvatar'];
+  /** Optional solution-owned action rendered before the copy-link button. */
+  extraActions?: React.ReactNode;
 };
 
 export const createCommonUpdateUserActionBuilder = ({
@@ -61,6 +63,7 @@ export const createCommonUpdateUserActionBuilder = ({
   label,
   icon,
   handleOutlineComment,
+  extraActions,
 }: BuilderArgs): ReturnType<UserActionBuilder> => {
   return {
     build: () => [
@@ -78,6 +81,9 @@ export const createCommonUpdateUserActionBuilder = ({
         timelineAvatarAriaLabel: getUserActionAriaLabel(userAction.type),
         actions: (
           <EuiFlexGroup responsive={false}>
+            {extraActions != null && (
+              <EuiFlexItem grow={false}>{extraActions}</EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <UserActionCopyLink id={userAction.id} />
             </EuiFlexItem>

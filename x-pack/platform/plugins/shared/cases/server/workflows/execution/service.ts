@@ -18,13 +18,13 @@ import {
   CasesWorkflowExecutionMetadataSchema,
 } from '../../../common/types/api/workflow/v1';
 import type {
-  CaseWorkflowRunOrigin,
   RunCaseWorkflowRequest,
   RunCaseWorkflowResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../../client';
 import type { CasesRequestHandlerContext } from '../../types';
 import { validateOrigin } from './validate_origin';
+import { buildActivityOrigin } from './build_activity_origin';
 
 interface RunWorkflowParams {
   caseId: string;
@@ -46,18 +46,6 @@ interface CasesWorkflowRunServiceDeps {
    * request so that mid-session license changes are reflected immediately.
    */
   isLicenseValid: () => boolean;
-  onWorkflowStarted?: (event: CasesWorkflowStartedEvent) => Promise<void>;
-}
-
-export interface CasesWorkflowStartedEvent {
-  caseId: string;
-  workflow: {
-    id: string;
-    name: string;
-    executionId: string;
-  };
-  origin: CaseWorkflowRunOrigin;
-  inputs: Record<string, unknown>;
 }
 
 export class CasesWorkflowRunService {
@@ -65,20 +53,12 @@ export class CasesWorkflowRunService {
   private readonly logger: Logger;
   private readonly audit: SecurityPluginSetup['audit'];
   private readonly isLicenseValid: () => boolean;
-  private readonly onWorkflowStarted?: (event: CasesWorkflowStartedEvent) => Promise<void>;
 
-  constructor({
-    management,
-    logger,
-    audit,
-    isLicenseValid,
-    onWorkflowStarted,
-  }: CasesWorkflowRunServiceDeps) {
+  constructor({ management, logger, audit, isLicenseValid }: CasesWorkflowRunServiceDeps) {
     this.management = management;
     this.logger = logger;
     this.audit = audit;
     this.isLicenseValid = isLicenseValid;
-    this.onWorkflowStarted = onWorkflowStarted;
   }
 
   public async run({
@@ -144,6 +124,9 @@ export class CasesWorkflowRunService {
       theCase,
     });
 
+    // Fail fast before anything irreversible: check the per-case user-action limit.
+    await casesClient.userActions.preflightWorkflowExecution({ caseId });
+
     const workflow = await this.management.getWorkflow(workflowId, spaceId);
     if (!workflow) {
       throw Boom.notFound(`Workflow "${workflowId}" was not found.`);
@@ -183,28 +166,39 @@ export class CasesWorkflowRunService {
       outcome: 'success',
     });
 
-    if (this.onWorkflowStarted) {
-      try {
-        await this.onWorkflowStarted({
-          caseId,
-          inputs: processedInputs,
-          origin: body.origin,
-          workflow: {
-            id: workflow.id,
-            name: workflow.name,
-            executionId: workflowExecutionId,
-          },
-        });
-      } catch (error) {
-        this.logger.error(
-          `Workflow "${workflowId}" execution "${workflowExecutionId}" started but its post-execution callback failed: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
+    // Record the case activity immediately after the execution starts.
+    // A failure to record must NOT be reported as an execution failure — the run did succeed.
+    try {
+      await casesClient.userActions.recordWorkflowExecution({
+        caseId,
+        owner: theCase.owner,
+        workflow: {
+          id: workflow.id,
+          name: workflow.name,
+          executionId: workflowExecutionId,
+        },
+        origin: buildActivityOrigin({ origin: body.origin, theCase }),
+      });
+      return { workflowExecutionId, activityStatus: 'succeeded' };
+    } catch (error) {
+      this.logger.error(
+        `Workflow "${workflowId}" execution "${workflowExecutionId}" started but its case activity could not be recorded: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      this.logAuditEvent(auditLogger, {
+        message: `Failed to record workflow [${workflowId}] execution [${workflowExecutionId}] in case [${caseId}] activity`,
+        event: {
+          action: 'case_workflow_activity_create',
+          category: ['database'],
+          type: ['creation'],
+          outcome: 'failure',
+        },
+        error: { message: error instanceof Error ? error.message : String(error) },
+        kibana: { saved_object: { type: CASE_SAVED_OBJECT, id: caseId } },
+      });
+      return { workflowExecutionId, activityStatus: 'failed' };
     }
-
-    return { workflowExecutionId };
   }
 
   private logWorkflowRunAuditEvent({

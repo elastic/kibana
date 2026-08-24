@@ -21,6 +21,7 @@ import type {
   CasesPermissions,
 } from '../../containers/types';
 import type { ReleasePhase } from '../types';
+import type { WorkflowOrigin } from '../../../common/types/domain';
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 import { CasesGlobalComponents } from './cases_global_components';
@@ -33,6 +34,15 @@ import { CasesStateContext } from './state/cases_state_context';
 import { isRegisteredOwner } from '../../files';
 import { casesQueryClient } from './query_client';
 
+export interface RenderWorkflowUserActionActionArgs {
+  origin: WorkflowOrigin;
+  userActionId: string;
+}
+
+export type RenderWorkflowUserActionAction = (
+  args: RenderWorkflowUserActionActionArgs
+) => ReactNode;
+
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
@@ -43,6 +53,7 @@ export interface CasesContextValue {
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
+  renderWorkflowUserActionAction?: RenderWorkflowUserActionAction;
 }
 
 export interface CasesContextProps
@@ -51,6 +62,7 @@ export interface CasesContextProps
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
   getFilesClient: (scope: string) => ScopedFilesClient;
+  renderWorkflowUserActionAction?: RenderWorkflowUserActionAction;
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
@@ -70,6 +82,7 @@ export const CasesProvider: FC<
     features = {},
     releasePhase = 'ga',
     getFilesClient,
+    renderWorkflowUserActionAction,
   },
   queryClient = casesQueryClient,
 }) => {
@@ -105,6 +118,7 @@ export const CasesProvider: FC<
       ),
       releasePhase,
       dispatch,
+      renderWorkflowUserActionAction,
     }),
     /**
      * We want to trigger a rerender only when the permissions will change.
@@ -128,6 +142,7 @@ export const CasesProvider: FC<
       // Need to revisit the re-rendering strategy in general as disabling exhaustive-deps is an anti-pattern
       features.alerts?.all,
       features.alerts?.read,
+      renderWorkflowUserActionAction,
     ]
   );
 
