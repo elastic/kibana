@@ -534,6 +534,7 @@ export interface DocLinks {
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
     definingRoles: string;
+    elasticCloudApiKeys: string;
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
