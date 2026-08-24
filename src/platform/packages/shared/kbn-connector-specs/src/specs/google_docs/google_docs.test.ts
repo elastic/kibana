@@ -365,8 +365,10 @@ describe('GoogleDocsConnector', () => {
       expect(GoogleDocsConnector.test?.enabled).toBe(true);
     });
 
-    it('calls the Drive about endpoint and returns an empty object', async () => {
-      mockGet.mockResolvedValueOnce({ data: { user: { displayName: 'Test User' } } });
+    it('calls Drive about and Docs API endpoints and returns an empty object', async () => {
+      mockGet
+        .mockResolvedValueOnce({ data: { user: { displayName: 'Test User' } } }) // Drive about
+        .mockRejectedValueOnce({ response: { data: { error: { code: 404 } } } }); // Docs connectivity (404 = accessible)
 
       const result = await GoogleDocsConnector.test.handler(mockContext);
 
@@ -374,13 +376,31 @@ describe('GoogleDocsConnector', () => {
         'https://www.googleapis.com/drive/v3/about',
         expect.objectContaining({ params: { fields: 'user' } })
       );
+      expect(mockGet).toHaveBeenCalledWith(
+        expect.stringContaining('docs.googleapis.com/v1/documents/'),
+        expect.anything()
+      );
       expect(result).toEqual({});
     });
 
-    it('propagates errors from the about endpoint', async () => {
+    it('propagates errors from the Drive about endpoint', async () => {
       mockGet.mockRejectedValueOnce(new Error('Unauthorized'));
 
       await expect(GoogleDocsConnector.test.handler(mockContext)).rejects.toThrow('Unauthorized');
+    });
+
+    it('propagates non-404 errors from the Docs API connectivity check', async () => {
+      mockGet
+        .mockResolvedValueOnce({ data: { user: { displayName: 'Test User' } } })
+        .mockRejectedValueOnce({
+          response: {
+            data: { error: { code: 403, message: 'Insufficient Authentication Scopes' } },
+          },
+        });
+
+      await expect(GoogleDocsConnector.test.handler(mockContext)).rejects.toThrow(
+        'Google Docs API error (403)'
+      );
     });
   });
 });

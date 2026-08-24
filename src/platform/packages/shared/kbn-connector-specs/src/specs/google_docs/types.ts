@@ -66,17 +66,19 @@ export const UpdateDocInputSchema = lazySchema(() =>
       )
       .min(1)
       .max(100)
+      .refine((arr) => JSON.stringify(arr).length <= 102_400, {
+        message: 'Total size of requests must not exceed 100 KB',
+      })
       .describe(
         'Array of batch update request objects for the Google Docs batchUpdate API. Each object must contain exactly ' +
           'one key identifying the operation type, plus its parameters. ' +
           'Examples: ' +
           '{"replaceAllText": {"containsText": {"text": "old"}, "replaceText": "new"}} — find and replace; ' +
-          '{"insertText": {"location": {"index": 1}, "text": "Hello"}} — insert at index (requires exact index from documents.get); ' +
           '{"updateTextStyle": {"range": {"startIndex": 1, "endIndex": 10}, "textStyle": {"bold": true}, ' +
           '"fields": "bold"}} — apply formatting. ' +
-          'Supported operations include replaceAllText, insertText, deleteContentRange, updateTextStyle, ' +
-          'updateParagraphStyle, createParagraphBullets, deleteParagraphBullets, insertTable, insertTableRow, ' +
-          'deleteTableRow, insertInlineImage, and 30+ more. ' +
+          'Supported operations include replaceAllText, updateTextStyle, updateParagraphStyle, ' +
+          'createParagraphBullets, deleteParagraphBullets, insertTable, insertTableRow, deleteTableRow, ' +
+          'insertInlineImage, createNamedRange, deleteNamedRange, and more. ' +
           'See the Google Docs batchUpdate reference for the full list.'
       ),
   })

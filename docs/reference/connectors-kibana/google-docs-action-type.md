@@ -41,11 +41,11 @@ Read document
     - `offset` (optional): Character offset to start reading from (default 0). Pass `next_offset` from a previous response to page through a long document.
 
 Update document
-:   Apply one or more batch updates to a Google Doc. Supports replacing text, formatting runs, managing bullet lists, inserting tables, images, comments, accepting suggestions, and more.
+:   Apply one or more batch updates to a Google Doc. Supports replacing text, applying text and paragraph styles, managing bullet lists, inserting and deleting tables and table rows, inserting inline images, and managing named ranges.
     - `document_id` (required): The ID of the Google Doc to update.
     - `requests` (required): Array of batch update request objects (1 to 100). Each object must contain exactly one operation key. Multiple requests are applied atomically in order. See the [Google Docs batchUpdate reference](https://developers.google.com/workspace/docs/api/reference/rest/v1/documents/batchUpdate) for the full list of supported operations.
 
-    Use `replaceAllText` for most text replacement tasks — it requires no index arithmetic. Index-based operations such as `insertText` require exact character positions from the document's internal JSON structure, which differs from the Markdown text returned by the **Read document** action.
+    Use `replaceAllText` for text replacement — it requires no index arithmetic and is the safest approach.
 
 ## Connector networking configuration [google-docs-connector-networking-configuration]
 
@@ -64,8 +64,11 @@ Start in **[Google Cloud Console](https://console.cloud.google.com/)**.
    - The **Name** can be something like `Elastic` or `Kibana`
    - Under **Authorized JavaScript origins**, add the base origin of your {{kib}} deployment (scheme, host, and port only —
      for example, `https://my-kibana.example.com`).
-   - Under **Authorized redirect URIs**, add {{kib}}'s connector OAuth callback for your host. Copy the pattern below and
-     substitute your public {{kib}} hostname:
+   - Under **Authorized redirect URIs**, add {{kib}}'s connector OAuth callback. The easiest way
+     is to copy the exact URI shown in the {{kib}} connector creation form. If you need to
+     construct it manually, use the pattern below, substituting your public {{kib}} hostname and
+     any configured `server.basePath` (for example, if Kibana is served at `https://my-kibana.example.com/kibana`,
+     use `/kibana/api/...` instead of `/api/...`):
      ```text
      https://<your-kibana-host>/api/actions/connector/_oauth_callback
      ```

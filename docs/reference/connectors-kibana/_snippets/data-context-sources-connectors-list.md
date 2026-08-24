@@ -23,7 +23,6 @@
 - [Google Calendar](/reference/connectors-kibana/google-calendar-action-type.md): Search and access events and calendars in Google Calendar.
 - [Google Cloud Monitoring](/reference/connectors-kibana/google-cloud-monitoring-action-type.md): Find, silence, and snooze GCP alerting policies, and enrich alerts with metric, uptime, and SLO data.
 - [Google Cloud Storage](/reference/connectors-kibana/google-cloud-storage-action-type.md): Search and access objects in Google Cloud Storage buckets.
-- [Google Docs](/reference/connectors-kibana/google-docs-action-type.md): Read and update documents in Google Docs.
 - [Google Drive](/reference/connectors-kibana/google-drive-action-type.md): Search and access files and folders in Google Drive.
 - [Grafana](/reference/connectors-kibana/grafana-action-type.md): Read alerts and rules, manage silences, and post annotations.
 - [GraphQL](/reference/connectors-kibana/graphql-action-type.md): Run queries and mutations, and introspect schemas on any GraphQL endpoint.

@@ -104,6 +104,8 @@ export const GoogleDocsConnector: ConnectorSpec = {
         'Returns the document title, Markdown content, total character count, and a web link. ' +
         'For documents longer than max_characters, the response includes truncated: true and next_offset — ' +
         'call readDoc again with offset: next_offset to fetch the next page. ' +
+        'Note: the entire document export is fetched before slicing; if the Markdown export exceeds ' +
+        'the Actions response size limit the request will fail regardless of max_characters. ' +
         'Use document IDs from search results, shared links, or URLs in the form ' +
         'docs.google.com/document/d/{document_id}/edit.',
       input: ReadDocInputSchema,
@@ -148,7 +150,8 @@ export const GoogleDocsConnector: ConnectorSpec = {
           throwGoogleDocsError(error);
         }
 
-        const totalCharacters = content.length;
+        const codePoints = [...content];
+        const totalCharacters = codePoints.length;
 
         if (offset > 0 && offset >= totalCharacters) {
           throw new Error(
@@ -157,7 +160,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
           );
         }
 
-        const slice = content.slice(offset, offset + max_characters);
+        const slice = codePoints.slice(offset, offset + max_characters).join('');
         const truncated = offset + max_characters < totalCharacters;
 
         return {
@@ -178,13 +181,11 @@ export const GoogleDocsConnector: ConnectorSpec = {
       scope: 'destroy',
       description:
         'Apply one or more batch updates to a Google Doc using the Google Docs batchUpdate API. ' +
-        'Supports replacing text, formatting runs, managing bullet lists, inserting tables, images, ' +
-        'comments, accepting suggestions, and 30+ other operations. ' +
+        'Supports replacing text (replaceAllText), applying text and paragraph styles, managing bullet lists, ' +
+        'inserting and deleting tables and table rows, inserting inline images, and managing named ranges. ' +
         'Each request in the array must contain exactly one operation key. ' +
         'Multiple requests are applied atomically in order. ' +
-        'For text replacement, use replaceAllText — it requires no index arithmetic and is safe against stale indices. ' +
-        "Index-based operations (insertText, deleteContentRange) require exact character positions from the document's " +
-        'internal JSON structure (from documents.get), not from the Markdown text returned by readDoc.',
+        'Use replaceAllText for all text replacement — it requires no index arithmetic and is the safest approach.',
       input: UpdateDocInputSchema,
       handler: async (ctx, input: UpdateDocInput) => {
         const { document_id, requests } = input;
@@ -212,10 +213,23 @@ export const GoogleDocsConnector: ConnectorSpec = {
         await ctx.client.get(`${DRIVE_API_BASE}/about`, {
           params: { fields: 'user' },
         });
-        return {};
       } catch (error: unknown) {
         throwGoogleDocsError(error);
       }
+
+      // Verify the Docs API is enabled and the documents scope is present. A 404 (document
+      // not found) is the expected response for a nonexistent ID and confirms access; any
+      // other error (403 missing scope, 403 API not enabled, network error) is a real failure.
+      try {
+        await ctx.client.get(`${DOCS_API_BASE}/documents/__kibana_connectivity_check__`);
+      } catch (error: unknown) {
+        const axiosError = error as { response?: { data?: { error?: { code?: number } } } };
+        if (axiosError.response?.data?.error?.code !== 404) {
+          throwGoogleDocsError(error);
+        }
+      }
+
+      return {};
     },
     enabled: true,
   },
@@ -241,17 +255,9 @@ export const GoogleDocsConnector: ConnectorSpec = {
     'When the goal is to replace a known phrase throughout the document, use replaceAllText.',
     'It requires no index arithmetic and is immune to stale-index bugs from concurrent edits.',
     '',
-    '## Index-based operations require raw document structure',
-    "Operations like insertText and deleteContentRange use character indices from the document's",
-    'internal JSON structure (from the Google Docs API documents.get endpoint). These indices do',
-    'NOT correspond to positions in the Markdown text returned by readDoc. Only use index-based',
-    'operations when you have obtained the exact indices from a prior documents.get call.',
-    '',
     '## Anatomy of a batchUpdate request',
     'Each entry in the requests array is a single-key object. The key names the operation; its',
-    'value is the operation parameters. Example to replace text:',
+    'value is the operation parameters. Example:',
     '  {"replaceAllText": {"containsText": {"text": "old phrase"}, "replaceText": "new phrase"}}',
-    'Example to bold a range (requires exact indices from documents.get):',
-    '  {"updateTextStyle": {"range": {"startIndex": 5, "endIndex": 15}, "textStyle": {"bold": true}, "fields": "bold"}}',
   ].join('\n'),
 };
