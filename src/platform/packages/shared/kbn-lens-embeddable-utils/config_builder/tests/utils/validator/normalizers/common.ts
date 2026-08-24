@@ -60,7 +60,6 @@ const COMMON_STATE_IGNORE_PATHS = [
   // Will be unskipped after the fix for https://github.com/elastic/kibana/issues/283574
   'state.datasourceStates.formBased.layers.*.columns.*.params.orderAgg.params.sortField',
   // TODO: check missing ES|QL column properties stripped out in transforms
-  'state.datasourceStates.textBased.layers.*.columns.*.inMetricDimension', // dropped at state -> API and only applied from API -> State if explicitly set
   'state.datasourceStates.textBased.layers.*.columns.*.meta', // meta is inferred by the transform -> originals may have it, miss it, or have different values
   // TODO: check missing/different properties on colorMapping
   'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
@@ -1246,6 +1245,14 @@ export const getCommonNormalizer = <T extends LensAttributes>(
             normalizeColumnLabel(remapped, { isTextBased: true });
             return remapped;
           });
+
+          // For non-datatable charts, 'inMetricDimension' is runtime-only state set by the
+          // suggestion engine and is not used anywhere else. Strip it.
+          if (attributes.visualizationType !== 'lnsDatatable') {
+            for (const column of layer.columns) {
+              delete column.inMetricDimension;
+            }
+          }
 
           // Datatable's ESQL output order is driven by `layer.columns` array order
           // and uses its own canonical (rows → splits → metrics) sort in

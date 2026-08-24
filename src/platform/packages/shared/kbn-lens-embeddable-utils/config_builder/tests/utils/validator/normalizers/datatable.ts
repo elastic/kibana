@@ -485,6 +485,27 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     },
   };
 
+  // The transform always sets `inMetricDimension: true` on metric columns.
+  // there are integration panels that have `isMetric: true` on the viz column
+  // but were never tagged by the suggestion engine, so the layer column lacks
+  // the flag. Fill it in when the remapped column ID confirms it's a metric.
+  const alignEsqlInMetricDimension: NormalizerConfig<DatatableAttributes> = {
+    original: (attrs) => {
+      const textBasedLayer = Object.values(attrs.state.datasourceStates.textBased?.layers ?? {})[0];
+      if (!textBasedLayer) {
+        return attrs;
+      }
+
+      for (const column of textBasedLayer.columns) {
+        if (isMetricColumnId(column.columnId) && column.inMetricDimension === undefined) {
+          column.inMetricDimension = true;
+        }
+      }
+
+      return attrs;
+    },
+  };
+
   // ES|QL text-based layers keep columns in editor order (often metrics first).
   // fromAPIFormat emits split → rows → metrics for nesting; normalize originals only.
   const sortEsqlDatasourceColumns: NormalizerConfig<DatatableAttributes> = {
@@ -511,6 +532,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     filterOrphanColumns,
     alignColumnTypes,
     alignId,
+    alignEsqlInMetricDimension,
     deduplicateColumns,
     sortColumns,
     sortEsqlDatasourceColumns,
