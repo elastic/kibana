@@ -18,31 +18,31 @@ import type {
 } from '@kbn/elastic-assistant-common/impl/schemas';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
-interface BulkUpdateAlertSummaryProps {
-  alertSummary: PerformAlertSummaryBulkActionRequestBody;
+interface BulkUpdateDocumentSummaryProps {
+  documentSummary: PerformAlertSummaryBulkActionRequestBody;
 }
 
-interface UseBulkUpdateAlertSummary {
+interface UseBulkUpdateDocumentSummary {
   abortStream: () => void;
   isLoading: boolean;
   bulkUpdate: (
-    props: BulkUpdateAlertSummaryProps
+    props: BulkUpdateDocumentSummaryProps
   ) => Promise<PerformAlertSummaryBulkActionResponse | void>;
 }
 
-export const useBulkUpdateAlertSummary = (): UseBulkUpdateAlertSummary => {
+export const useBulkUpdateDocumentSummary = (): UseBulkUpdateDocumentSummary => {
   const { http, toasts } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
 
   const bulkUpdate = useCallback(
-    async ({ alertSummary }: BulkUpdateAlertSummaryProps) => {
+    async ({ documentSummary }: BulkUpdateDocumentSummaryProps) => {
       setIsLoading(true);
 
       try {
-        return await bulkUpdateAlertSummary({
+        return await bulkUpdateDocumentSummary({
           http,
-          alertSummary,
+          documentSummary,
           toasts,
           signal: abortController.current.signal,
         });
@@ -68,12 +68,12 @@ export const useBulkUpdateAlertSummary = (): UseBulkUpdateAlertSummary => {
   return { isLoading, bulkUpdate, abortStream: cancelRequest };
 };
 
-const bulkUpdateAlertSummary = async ({
-  alertSummary,
+const bulkUpdateDocumentSummary = async ({
+  documentSummary,
   http,
   signal,
 }: {
-  alertSummary: PerformAlertSummaryBulkActionRequestBody;
+  documentSummary: PerformAlertSummaryBulkActionRequestBody;
   http: HttpSetup;
   signal?: AbortSignal;
   toasts?: IToasts;
@@ -83,7 +83,7 @@ const bulkUpdateAlertSummary = async ({
     {
       method: 'POST',
       version: API_VERSIONS.internal.v1,
-      body: JSON.stringify(alertSummary),
+      body: JSON.stringify(documentSummary),
       signal,
     }
   );

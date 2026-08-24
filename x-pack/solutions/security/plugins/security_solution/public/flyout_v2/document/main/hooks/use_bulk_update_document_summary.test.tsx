@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { renderHook, act } from '@testing-library/react';
-import { useBulkUpdateAlertSummary } from './use_bulk_update_alert_summary';
+import { useBulkUpdateDocumentSummary } from './use_bulk_update_document_summary';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
 }));
 
-describe('useBulkUpdateAlertSummary', () => {
+describe('useBulkUpdateDocumentSummary', () => {
   const mockHttp = {
     fetch: jest.fn(),
   };
@@ -30,33 +30,33 @@ describe('useBulkUpdateAlertSummary', () => {
   });
 
   it('should call the API with the correct parameters', async () => {
-    const { result } = renderHook(() => useBulkUpdateAlertSummary());
+    const { result } = renderHook(() => useBulkUpdateDocumentSummary());
 
-    const alertSummary = { update: [], create: [] };
+    const documentSummary = { update: [], create: [] };
     mockHttp.fetch.mockResolvedValue({ success: true });
 
     await act(async () => {
-      await result.current.bulkUpdate({ alertSummary });
+      await result.current.bulkUpdate({ documentSummary });
     });
 
     expect(mockHttp.fetch).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify(alertSummary),
+        body: JSON.stringify(documentSummary),
       })
     );
   });
 
   it('should handle API errors and show a toast message', async () => {
-    const { result } = renderHook(() => useBulkUpdateAlertSummary());
+    const { result } = renderHook(() => useBulkUpdateDocumentSummary());
 
-    const alertSummary = { update: [], create: [] };
+    const documentSummary = { update: [], create: [] };
     const errorMessage = 'API error';
     mockHttp.fetch.mockRejectedValue(new Error(errorMessage));
 
     await act(async () => {
-      await result.current.bulkUpdate({ alertSummary });
+      await result.current.bulkUpdate({ documentSummary });
     });
 
     expect(mockToasts.addDanger).toHaveBeenCalledWith(
@@ -65,7 +65,7 @@ describe('useBulkUpdateAlertSummary', () => {
   });
 
   it('should abort the request when abortStream is called', () => {
-    const { result } = renderHook(() => useBulkUpdateAlertSummary());
+    const { result } = renderHook(() => useBulkUpdateDocumentSummary());
 
     act(() => {
       result.current.abortStream();
