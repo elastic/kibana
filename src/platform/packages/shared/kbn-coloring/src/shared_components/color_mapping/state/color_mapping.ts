@@ -50,11 +50,8 @@ export const colorMappingSlice = createSlice({
       state.specialAssignments = [...action.payload.specialAssignments];
       state.paletteId = action.payload.paletteId;
       state.colorMode = { ...action.payload.colorMode };
-      if (state.assignments.length === 0) {
-        const defaultOther = getOtherAssignment(state.specialAssignments);
-        if (!defaultOther) {
-          state.specialAssignments = [...state.specialAssignments, DEFAULT_OTHER_ASSIGNMENT];
-        }
+      if (state.assignments.length === 0 && !getOtherAssignment(state.specialAssignments)) {
+        state.specialAssignments = [...state.specialAssignments, DEFAULT_OTHER_ASSIGNMENT];
       }
     },
     updatePalette: (
@@ -71,13 +68,13 @@ export const colorMappingSlice = createSlice({
     },
 
     addNewAssignment: (state, action: PayloadAction<ColorMapping.Assignment>) => {
-      if (state.assignments.length === 0) {
+      if (state.assignments.length === 0 && !getOtherAssignment(state.specialAssignments)) {
         state.specialAssignments = [...state.specialAssignments, DEFAULT_OTHER_ASSIGNMENT];
       }
       state.assignments.push({ ...action.payload });
     },
     addNewAssignments: (state, action: PayloadAction<ColorMapping.Config['assignments']>) => {
-      if (state.assignments.length === 0) {
+      if (state.assignments.length === 0 && !getOtherAssignment(state.specialAssignments)) {
         state.specialAssignments = [...state.specialAssignments, DEFAULT_OTHER_ASSIGNMENT];
       }
       state.assignments.push(...action.payload);
