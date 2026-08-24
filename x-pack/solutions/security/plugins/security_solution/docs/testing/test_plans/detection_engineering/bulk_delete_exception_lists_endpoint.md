@@ -72,7 +72,7 @@ Functional requirements derived from [#276458](https://github.com/elastic/kibana
 - The request must include `action: "delete"`.
 - The `ids` array must contain at least 1 and at most 100 entries.
 - Deleting a list cascades to all its exception list items.
-- Lists referenced by detection rules are blocked (409) with rule details in the error response. Endpoint-type lists are exempt from this check.
+- Lists referenced by detection rules are blocked (409) with rule details in the error response. The reference check is provided by the Security Solution plugin as an extension point and applies to all list types; endpoint artifact lists are never attached to detection rules so the check is a no-op for them.
 - The response includes `success`, `results`, `errors`, and `summary` (total/succeeded/failed/skipped).
 - One list's failure does not abort other lists in the batch.
 - Duplicate identifiers in the request are deduplicated (tracked in `summary.skipped`).
@@ -114,7 +114,7 @@ And the "results" array contains 1 entry for "so-1"
 
 #### **Scenario: Response includes full exception list objects in results**
 
-**Automation**: 1 integration test.
+**Automation**: not yet automated.
 
 ```Gherkin
 Given a "detection" exception list exists with known properties (name, description, tags, os_types)
@@ -151,6 +151,8 @@ Then items are deleted before the list container
 
 ### Rule reference checking
 
+> **Implementation note:** The reference check is not built into the Lists plugin. It is provided by the Security Solution plugin via the `exceptionsListPreDeleteList` extension point. When no callback is registered (for example, in tests that run the Lists plugin in isolation), the pre-delete check is skipped and all lists are deleted unconditionally. The check fires only from the bulk delete endpoint; the single-delete endpoint (`DELETE /api/exception_lists`) does **not** invoke it.
+
 #### **Scenario: Block deletion of a shared exception list linked to rules**
 
 **Automation**: 1 integration test + unit tests.
@@ -171,7 +173,7 @@ And the exception list still exists (not deleted)
 
 #### **Scenario: Block deletion of a rule_default list when owning rule exists**
 
-**Automation**: 1 integration test.
+**Automation**: not yet automated.
 
 ```Gherkin
 Given a rule "my-rule" exists with a "rule_default" exception list "default-list"
@@ -185,16 +187,19 @@ And the rule_default list still exists
 
 #### **Scenario: Allow deletion of endpoint-type exception lists**
 
-**Automation**: 1 integration test.
+**Automation**: covered by the core functionality integration tests — the default `createList()` helper creates endpoint-type lists, so the multi-list and single-list deletion tests exercise this path.
 
 ```Gherkin
-Given an "endpoint" exception list exists (no rule reference check performed)
+Given an "endpoint" exception list exists
 When the user sends bulk action delete with ids: ["endpoint-list-so-id"]
 Then the response status is 200
 And "success" is true
 And "results" contains the endpoint list
 And the list is deleted
 ```
+
+**Notes**: The reference check is still performed for endpoint artifact lists. Artifact lists are never referenced by detection rules via the standard `exceptions_list` rule parameter, so the check always returns no blockers and the deletion proceeds.
+
 
 #### **Scenario: Mix of linked and unlinked lists produces partial failure**
 
@@ -211,6 +216,40 @@ And "errors" contains 1 entry for "linked-list-id" with status_code 409
 And "summary.succeeded" is 1
 And "summary.failed" is 1
 ```
+
+#### **Scenario: Block deletion of an agnostic detection list referenced by a rule in the same space**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given an agnostic detection exception list "agnostic-list" exists (namespace_type: agnostic)
+And a detection rule references it (exceptions_list entry with namespace_type: agnostic)
+When the user sends bulk action delete with ids: ["agnostic-list-so-id"] and namespace_type: "agnostic"
+Then the response status is 200
+And "success" is false
+And "errors" contains 1 entry with status_code 409
+And errors[0].rule_references contains the referencing rule
+And the agnostic list still exists
+```
+
+**Notes**: The `hasReference` check uses saved object type `exception-list-agnostic` for agnostic lists (not `exception-list`). This test guards against a regression where the wrong type is used and the reference check silently finds nothing.
+
+#### **Scenario: Caller without detection rule read access is refused for all detection lists**
+
+**Automation**: 1 integration test (`@skipInServerless`).
+
+```Gherkin
+Given a user with the "exceptions_all_no_rules_read" role (exceptions-all, no detection rule read access)
+And a detection-type exception list exists
+When the user sends bulk action delete with ids: [the list's id]
+Then the response status is 200
+And "success" is false
+And "errors" contains 1 entry for the list
+And errors[0].message indicates the caller is not authorized to read detection rules
+And the list still exists (not deleted)
+```
+
+**Notes**: Fail-closed behavior. Rule search results are silently filtered to types the caller may read. For a caller without detection rule read access, an empty result means "hidden from you", not "no rule is attached". The endpoint refuses rather than trusting an unverifiable empty result. This applies to every non-artifact list in the request, even when no rules reference those lists.
 
 #### **Scenario: Error response includes referencing rule details**
 
@@ -381,7 +420,7 @@ Given an exception list exists with saved object id "so-1"
 When the user calls POST /api/exception_lists/_bulk_action with body:
   { "action": "delete", "ids": ["so-1", "so-1"] }
 Then the response status is 200
-And "summary.total" is 1
+And "summary.total" is 2
 And "summary.skipped" is 1
 And the "results" array contains exactly 1 entry
 And the "errors" array is empty
@@ -389,7 +428,7 @@ And the "errors" array is empty
 
 #### **Scenario: Retrying a successful delete request returns 404 for already-deleted lists**
 
-**Automation**: 1 integration test.
+**Automation**: not yet automated.
 
 ```Gherkin
 Given an exception list exists with id "so-1"
@@ -422,7 +461,7 @@ And the "errors" array is empty
 
 #### **Scenario: Namespace type defaults to single when not provided**
 
-**Automation**: 1 integration test.
+**Automation**: covered implicitly — all single-namespace integration tests omit `namespace_type` and rely on this default; no dedicated test.
 
 ```Gherkin
 Given an exception list exists in the single (space-scoped) namespace
@@ -434,7 +473,7 @@ And the list is deleted from the current space
 
 #### **Scenario: Lists in a different namespace are not affected**
 
-**Automation**: 1 integration test.
+**Automation**: not yet automated.
 
 ```Gherkin
 Given an exception list "so-1" exists in the agnostic namespace
@@ -475,7 +514,7 @@ Then the response status is 403
 
 #### **Scenario: Unauthenticated request returns 401**
 
-**Automation**: 1 integration test.
+**Automation**: not yet automated.
 
 ```Gherkin
 Given no authentication credentials are provided
