@@ -18,6 +18,7 @@ import { getYaraEngineVersion } from '../../../endpoint/lib/libyara';
 import {
   validateCustomYaraRule,
   validateYaraRuleContentByteLength,
+  YARA_ENGINE_INTERNAL_ERROR_MESSAGE,
 } from '../../../endpoint/lib/custom_yara_signatures';
 import { CUSTOM_YARA_SIGNATURE_FIELD_TYPE } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
@@ -209,10 +210,7 @@ export class CustomYaraSignaturesValidator extends BaseValidator {
       ({ errors, errorCount } = await validateCustomYaraRule(ruleText, item.osTypes));
     } catch (error) {
       this.logger.error(error);
-      throw new EndpointArtifactExceptionValidationError(
-        'Unable to validate YARA rule due to an internal error. Please try again later.',
-        500
-      );
+      throw new EndpointArtifactExceptionValidationError(YARA_ENGINE_INTERNAL_ERROR_MESSAGE, 500);
     }
 
     if (errors.length > 0) {
