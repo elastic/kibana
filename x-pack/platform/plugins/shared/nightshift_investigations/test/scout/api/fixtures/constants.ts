@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRole } from '@kbn/scout-oblt';
+import type { KibanaRole } from '@kbn/scout';
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'true',

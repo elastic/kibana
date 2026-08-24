@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/plugins/nightshift_investigations'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/nightshift_investigations'],
 };

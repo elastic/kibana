@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-import { createPlaywrightConfig } from '@kbn/scout-oblt';
-
-export default createPlaywrightConfig({
-  testDir: './tests',
-});
+export { apiTest } from '@kbn/scout';
+export { COMMON_HEADERS, NO_AGENT_BUILDER_ROLE } from './constants';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt/api';
-import { tags } from '@kbn/scout-oblt';
-import type { KibanaRole } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
+import type { KibanaRole } from '@kbn/scout';
 import { apiTest, COMMON_HEADERS } from '../fixtures';
 
 const INVESTIGATIONS_WRITE_ROLE: KibanaRole = {

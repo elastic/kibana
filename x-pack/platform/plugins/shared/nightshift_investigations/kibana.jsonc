@@ -2,8 +2,8 @@
   "type": "plugin",
   "id": "@kbn/nightshift-investigations-plugin",
   "owner": ["@elastic/nightshift-context-and-research-team", "@elastic/nightshift-sre-agent-team"],
-  "group": "observability",
-  "visibility": "private",
+  "group": "platform",
+  "visibility": "shared",
   "description": "Nightshift Investigations — domain API for starting and reading investigations",
   "plugin": {
     "id": "nightshiftInvestigations",

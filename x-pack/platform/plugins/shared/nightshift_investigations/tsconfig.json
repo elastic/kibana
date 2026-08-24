@@ -21,6 +21,6 @@
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
     "@kbn/zod",
-    "@kbn/scout-oblt"
+    "@kbn/scout"
   ]
 }

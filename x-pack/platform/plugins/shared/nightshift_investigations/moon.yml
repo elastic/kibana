@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/nightshift-investigations-plugin
   channel: ''
   owner: '@elastic/nightshift-context-and-research-team'
-  sourceRoot: x-pack/solutions/observability/plugins/nightshift_investigations
+  sourceRoot: x-pack/platform/plugins/shared/nightshift_investigations
 dependsOn:
   - '@kbn/core'
   - '@kbn/core-http-server'
@@ -27,12 +27,12 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
-  - '@kbn/scout-oblt'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
-  - group-observability
-  - private
+  - group-platform
+  - shared
   - jest-unit-tests
 fileGroups:
   src:
