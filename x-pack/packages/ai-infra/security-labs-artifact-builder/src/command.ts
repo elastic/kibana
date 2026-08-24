@@ -6,7 +6,7 @@
  */
 
 import Path from 'path';
-import yargs from 'yargs';
+import yargs, { type Argv } from 'yargs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getSecurityLabsUtcTimestampVersion } from '@kbn/product-doc-common';
 import { DEFAULT_ELSER } from './tasks/create_index';
@@ -17,7 +17,7 @@ import { buildArtifact } from './build_artifact';
 const SECURITY_LABS_REPO = 'https://github.com/elastic/security-labs-elastic-co';
 const SECURITY_LABS_CONTENT_SUBPATH = '_content/articles';
 
-function options(y: yargs.Argv) {
+function options(y: Argv) {
   return y
     .version(false) // Disable built-in version flag to avoid conflict
     .option('artifactVersion', {

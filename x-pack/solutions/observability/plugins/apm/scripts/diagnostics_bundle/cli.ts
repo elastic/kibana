@@ -15,7 +15,7 @@ import yargs from 'yargs';
 import { initDiagnosticsBundle } from './diagnostics_bundle';
 
 async function init() {
-  const { argv } = yargs(process.argv.slice(2))
+  const argv = yargs(process.argv.slice(2))
     .option('esHost', {
       type: 'string',
       description: 'Elasticsearch host name',
@@ -57,7 +57,8 @@ async function init() {
       type: 'string',
       description: 'KQL query to filter documents by',
     })
-    .help();
+    .help()
+    .parseSync();
 
   const { kuery, apiKey, cloudId } = argv;
   let esHost = argv.esHost;

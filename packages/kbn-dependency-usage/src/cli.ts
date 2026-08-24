@@ -31,7 +31,8 @@ export const configureYargs = () => {
       '*',
       chalk.green('Identify the usage of a dependency in the given paths and output as JSON'),
       (y) => {
-        y.version(false)
+        return y
+          .version(false)
           .option('dependency-name', {
             alias: 'd',
             describe: chalk.yellow('The name of the dependency to search for'),
@@ -92,7 +93,7 @@ export const configureYargs = () => {
             )
           );
       },
-      async (argv: CLIArgs) => {
+      async (argv) => {
         const {
           dependencyName,
           paths,
@@ -159,11 +160,10 @@ export const configureYargs = () => {
     .help();
 };
 
-export const runCLI = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-  configureYargs().argv;
+export const runCLI = async (): Promise<void> => {
+  await configureYargs().parseAsync();
 };
 
 if (!process.env.JEST_WORKER_ID) {
-  runCLI();
+  void runCLI();
 }

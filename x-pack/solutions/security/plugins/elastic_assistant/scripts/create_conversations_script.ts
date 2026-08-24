@@ -40,7 +40,7 @@ export const create = async () => {
       description: 'Elasticsearch URL including auth',
       default: `http://elastic:changeme@localhost:9200`,
     })
-    .parse();
+    .parseSync();
 
   const kibanaUrl = removeTrailingSlash(argv.kibana);
   const esUrl = removeTrailingSlash(argv.esUrl);
