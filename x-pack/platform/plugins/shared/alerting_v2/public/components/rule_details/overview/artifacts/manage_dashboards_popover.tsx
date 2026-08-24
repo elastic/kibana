@@ -325,7 +325,7 @@ export const ManageDashboardsPopover = ({
           overflow: hidden;
         `,
       }}
-      anchorPosition="upCenter"
+      anchorPosition="rightCenter"
       ownFocus
       initialFocus="[data-test-subj='ruleDashboardArtifactsSearch']"
       aria-labelledby={popoverTitleId}
