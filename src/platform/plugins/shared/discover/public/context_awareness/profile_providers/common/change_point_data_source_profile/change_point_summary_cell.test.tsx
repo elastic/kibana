@@ -219,19 +219,22 @@ describe('ChangePointSummaryCell', () => {
     expect(document.querySelector('.euiLoadingChart')).toBeInTheDocument();
   });
 
-  it('renders nothing when the shared series is in error', () => {
+  it('renders a compact error icon when the shared series is in error', () => {
     const table = makeTable([CHANGE_POINT_ROW]);
     renderCell({
       flattened: CHANGE_POINT_ROW,
       table,
       seriesState: {
         status: 'error',
-        error: new Error('failed'),
+        error: new Error('esql failed'),
         entityColumnIds: [],
         cards: buildChangePointCards({ table, esql: ESQL_NO_BY }),
       },
     });
 
+    expect(screen.getByTestId('changePointSummarySeriesError')).toBeInTheDocument();
+    expect(screen.getByText('Unable to load change point sparkline')).toBeInTheDocument();
+    expect(screen.queryByText('esql failed')).not.toBeInTheDocument();
     expect(screen.queryByTestId('changePointSummaryChartMock')).not.toBeInTheDocument();
     expect(document.querySelector('.euiLoadingChart')).not.toBeInTheDocument();
   });

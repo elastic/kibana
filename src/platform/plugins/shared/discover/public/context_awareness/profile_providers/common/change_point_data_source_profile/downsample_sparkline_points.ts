@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChangePointSeriesPoint } from './change_point_summary_series';
+import type { ChangePointSeriesPoint } from './change_point_summary_series_helpers';
 
 export const SPARKLINE_MAX_POINTS = 100;
 
@@ -30,11 +30,8 @@ const averagePoint = (
 };
 
 /**
- * Downsamples a sparkline with Largest Triangle Three Buckets (LTTB).
- * Always keeps first and last points, then one point per bucket: the one that
- * forms the largest triangle with the previous pick and the next bucket average.
- * Best fit here: O(n), no extra dependency, and it keeps spikes and trend that
- * even-index sampling would drop — enough shape for a tiny chart.
+ * Largest Triangle Three Buckets (LTTB) downsample: O(n), keeps first/last points
+ * and spikes that even-index sampling would drop.
  */
 export const downsampleSparklinePoints = (
   points: ChangePointSeriesPoint[]

@@ -10,7 +10,14 @@
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiLoadingChart, mathWithUnits, useEuiTheme } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiLoadingChart,
+  EuiScreenReaderOnly,
+  mathWithUnits,
+  useEuiTheme,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   getCardForRow,
   getChangePointRowTimestamp,
@@ -54,6 +61,13 @@ interface ChangePointSummaryCellInnerProps {
   data: UnifiedChangePointGridProps['services']['data'];
 }
 
+const errorLabel = i18n.translate(
+  'discover.contextAwareness.changePointSummaryCell.seriesLoadErrorMessage',
+  {
+    defaultMessage: 'Unable to load change point sparkline',
+  }
+);
+
 /**
  * Subscribes to the shared series snapshot. Mounted only for change-point rows.
  */
@@ -90,8 +104,25 @@ const ChangePointSummaryCellInner: FC<ChangePointSummaryCellInnerProps> = ({
     return seriesState.seriesByEntity.get(entityKey);
   }, [card, row.flattened, seriesState]);
 
-  if (seriesState.status === 'error' || seriesState.status === 'idle') {
+  if (seriesState.status === 'idle') {
     return null;
+  }
+
+  if (seriesState.status === 'error') {
+    return (
+      <>
+        <EuiIcon
+          type="warning"
+          color="danger"
+          title={errorLabel}
+          aria-hidden
+          data-test-subj="changePointSummarySeriesError"
+        />
+        <EuiScreenReaderOnly>
+          <span>{errorLabel}</span>
+        </EuiScreenReaderOnly>
+      </>
+    );
   }
 
   if (seriesState.status === 'loading') {

@@ -11,19 +11,13 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getTime } from '@kbn/data-plugin/public';
 import type { UnifiedChangePointGridProps } from '@kbn/change-point-chart-viewer';
+import { ESQLVariableType } from '@kbn/esql-types';
 import {
-  appendDistinctEntityWhereToLineEsql,
   clearChangePointSummarySeriesCache,
-  ENTITY_WHERE_PREDICATE_CAP,
   getChangePointSummarySeries$,
-  getEarliestAnnotationTime,
-  getEntityColumnIds,
   getSeriesCacheKey,
-  getSummarySeriesTimeRange,
-  partitionLineRows,
   type ChangePointSummarySeriesState,
 } from './change_point_summary_series';
-import { SPARKLINE_MAX_POINTS } from './downsample_sparkline_points';
 
 jest.mock('@kbn/data-plugin/public', () => {
   const actual = jest.requireActual('@kbn/data-plugin/public');
@@ -62,156 +56,121 @@ const COLUMNS_WITH_HOST = [
   { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
 ];
 
-describe('change_point_summary_series pure helpers', () => {
-  describe('getEntityColumnIds', () => {
-    it('returns BY columns that exist on the table', () => {
-      expect(getEntityColumnIds(ESQL_NO_BY, makeTable(COLUMNS_NO_BY, []))).toEqual([]);
-      expect(getEntityColumnIds(ESQL_WITH_HOST_BY, makeTable(COLUMNS_WITH_HOST, []))).toEqual([
-        'host',
-      ]);
-      expect(getEntityColumnIds(ESQL_WITH_HOST_BY, makeTable(COLUMNS_NO_BY, []))).toEqual([]);
+const NO_BY_ROW = {
+  bucket: '2023-11-15T00:00:00.000Z',
+  avg_bytes: 14,
+  type: 'mean_shift',
+  pvalue: 0.001,
+};
+
+const HOST_ROW = { host: 'a', ...NO_BY_ROW };
+
+const fixtures = {
+  noBy: {
+    esqlQuery: ESQL_NO_BY,
+    columns: COLUMNS_NO_BY,
+    rows: [NO_BY_ROW],
+    lineColumns: ['bucket', 'avg_bytes'],
+    lineValues: [['2023-11-15T00:00:00.000Z', 14]],
+  },
+  byHost: {
+    esqlQuery: ESQL_WITH_HOST_BY,
+    columns: COLUMNS_WITH_HOST,
+    rows: [HOST_ROW],
+    lineColumns: ['host', 'bucket', 'avg_bytes'],
+    lineValues: [
+      ['a', '2023-11-14T00:00:00.000Z', 12],
+      ['a', '2023-11-15T00:00:00.000Z', 14],
+    ],
+  },
+} as const;
+
+type LineSearchFixture = keyof typeof fixtures;
+
+const waitForTerminalState = (
+  fetchParams: ChangePointFetchParams,
+  data: DataPublicPluginStart
+): Promise<ChangePointSummarySeriesState> =>
+  new Promise((resolve, reject) => {
+    getChangePointSummarySeries$(fetchParams, data).subscribe({
+      next: (s) => {
+        if (s.status === 'ready' || s.status === 'error' || s.status === 'idle') {
+          resolve(s);
+        }
+      },
+      error: reject,
     });
   });
 
-  describe('getEarliestAnnotationTime / getSummarySeriesTimeRange', () => {
-    const inRangeTable = makeTable(COLUMNS_NO_BY, [
-      { bucket: '2023-11-14T00:00:00.000Z', avg_bytes: 12, type: '', pvalue: null },
-      { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14, type: 'mean_shift', pvalue: 0.001 },
-    ]);
+const setupLineSearch = ({
+  fixture = 'noBy',
+  esqlQuery,
+  columns,
+  rows,
+  lineColumns,
+  lineValues,
+  lineSearch = 'resolve',
+  lineError,
+  ...fetch
+}: {
+  fixture?: LineSearchFixture;
+  esqlQuery?: string;
+  columns?: Datatable['columns'];
+  rows?: Datatable['rows'];
+  lineColumns?: readonly string[];
+  lineValues?: unknown[][];
+  lineSearch?: 'resolve' | 'reject' | 'hang';
+  lineError?: Error;
+} & Omit<Partial<ChangePointFetchParams>, 'query' | 'table'> = {}) => {
+  const base = fixtures[fixture];
+  const resolvedQuery = esqlQuery ?? base.esqlQuery;
+  const resolvedColumns = columns ?? [...base.columns];
+  const resolvedRows = rows ?? [...base.rows];
+  const resolvedLineColumns = lineColumns ?? [...base.lineColumns];
+  const resolvedLineValues = lineValues ?? [...base.lineValues];
 
-    it('finds the earliest typed change-point annotation', () => {
-      expect(getEarliestAnnotationTime(inRangeTable, 'bucket', ESQL_NO_BY)).toBe(
-        Date.parse('2023-11-15T00:00:00.000Z')
-      );
+  let abortSignal: AbortSignal | undefined;
+  const esql = jest.fn();
+  if (lineSearch === 'reject') {
+    esql.mockRejectedValue(lineError ?? new Error('esql failed'));
+  } else if (lineSearch === 'hang') {
+    esql.mockImplementation((_query, opts: { abortSignal: AbortSignal }) => {
+      abortSignal = opts.abortSignal;
+      return new Promise(() => undefined);
     });
-
-    it('extends from when the annotation is before Discover from', () => {
-      const range = getSummarySeriesTimeRange(
-        { from: '2023-11-14T00:00:00.000Z', to: '2023-11-20T00:00:00.000Z' },
-        Date.parse('2023-11-10T00:00:00.000Z')
-      );
-      expect(range).toEqual({
-        from: '2023-11-10T00:00:00.000Z',
-        to: '2023-11-20T00:00:00.000Z',
-      });
+  } else {
+    esql.mockResolvedValue({
+      rawResponse: {
+        columns: resolvedLineColumns.map((name) => ({ name })),
+        values: resolvedLineValues,
+      },
     });
+  }
 
-    it('does not extend from when the annotation is inside the range', () => {
-      const timeRange = { from: '2023-11-14T00:00:00.000Z', to: '2023-11-20T00:00:00.000Z' };
-      expect(getSummarySeriesTimeRange(timeRange, Date.parse('2023-11-15T00:00:00.000Z'))).toEqual(
-        timeRange
-      );
-    });
-  });
+  const fetchParams: ChangePointFetchParams = {
+    searchSessionId: 'session-1',
+    lastReloadRequestTime: 1,
+    dataView: { isTimeBased: () => false } as never,
+    filters: [],
+    timeRange: { from: '2023-11-14T00:00:00.000Z', to: '2023-11-20T00:00:00.000Z' },
+    table: makeTable(resolvedColumns, resolvedRows),
+    query: { esql: resolvedQuery },
+    ...fetch,
+  } as ChangePointFetchParams;
+  const data = { search: { esql } } as unknown as DataPublicPluginStart;
 
-  describe('partitionLineRows', () => {
-    it('builds a single series with empty entity key when there is no BY', () => {
-      const series = partitionLineRows(
-        [
-          { bucket: '2023-11-14T00:00:00.000Z', avg_bytes: 12 },
-          { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14 },
-        ],
-        'bucket',
-        'avg_bytes',
-        []
-      );
+  return {
+    esql,
+    get abortSignal() {
+      return abortSignal;
+    },
+    load: (fetchOverrides?: Partial<ChangePointFetchParams>) =>
+      waitForTerminalState({ ...fetchParams, ...fetchOverrides }, data),
+    subscribe: () => getChangePointSummarySeries$(fetchParams, data).subscribe(),
+  };
+};
 
-      expect([...series.keys()]).toEqual(['']);
-      expect(series.get('')).toEqual([
-        { x: Date.parse('2023-11-14T00:00:00.000Z'), y: 12 },
-        { x: Date.parse('2023-11-15T00:00:00.000Z'), y: 14 },
-      ]);
-    });
-
-    it('partitions and sorts points per entity key', () => {
-      const series = partitionLineRows(
-        [
-          { host: 'b', bucket: '2023-11-16T00:00:00.000Z', avg_bytes: 20 },
-          { host: 'a', bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14 },
-          { host: 'a', bucket: '2023-11-14T00:00:00.000Z', avg_bytes: 12 },
-          { host: 'b', bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 18 },
-        ],
-        'bucket',
-        'avg_bytes',
-        ['host']
-      );
-
-      expect(series.get('host=a')).toEqual([
-        { x: Date.parse('2023-11-14T00:00:00.000Z'), y: 12 },
-        { x: Date.parse('2023-11-15T00:00:00.000Z'), y: 14 },
-      ]);
-      expect(series.get('host=b')).toEqual([
-        { x: Date.parse('2023-11-15T00:00:00.000Z'), y: 18 },
-        { x: Date.parse('2023-11-16T00:00:00.000Z'), y: 20 },
-      ]);
-    });
-
-    it('skips rows with invalid time or non-numeric values', () => {
-      const series = partitionLineRows(
-        [
-          { bucket: 'not-a-date', avg_bytes: 12 },
-          { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 'nope' },
-          { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: null },
-          { bucket: '2023-11-15T00:00:00.000Z', avg_bytes: 14 },
-        ],
-        'bucket',
-        'avg_bytes',
-        []
-      );
-
-      expect(series.get('')).toEqual([{ x: Date.parse('2023-11-15T00:00:00.000Z'), y: 14 }]);
-    });
-
-    it('caps a long entity series at SPARKLINE_MAX_POINTS', () => {
-      const start = Date.parse('2023-01-01T00:00:00.000Z');
-      const rows = Array.from({ length: 500 }, (_, i) => ({
-        bucket: new Date(start + i * 60_000).toISOString(),
-        avg_bytes: i,
-      }));
-
-      const series = partitionLineRows(rows, 'bucket', 'avg_bytes', []);
-      const points = series.get('') ?? [];
-
-      expect(points).toHaveLength(SPARKLINE_MAX_POINTS);
-      expect(points[0]).toEqual({ x: start, y: 0 });
-      expect(points[points.length - 1]).toEqual({
-        x: start + 499 * 60_000,
-        y: 499,
-      });
-    });
-  });
-
-  describe('appendDistinctEntityWhereToLineEsql', () => {
-    const line = 'FROM idx | STATS avg_bytes = AVG(bytes) BY host, bucket';
-
-    it('appends OR predicates for distinct entity values', () => {
-      expect(
-        appendDistinctEntityWhereToLineEsql(
-          line,
-          [{ host: 'a' }, { host: 'a' }, { host: 'b' }],
-          ['host']
-        )
-      ).toBe(`${line} | WHERE host == "a" OR host == "b"`);
-    });
-
-    it('groups multi-column entities', () => {
-      expect(
-        appendDistinctEntityWhereToLineEsql(
-          line,
-          [{ host: 'a', service: 'orders' }],
-          ['host', 'service']
-        )
-      ).toBe(`${line} | WHERE (host == "a" AND service == "orders")`);
-    });
-
-    it('returns the original query when the distinct set exceeds the cap', () => {
-      const rows = Array.from({ length: ENTITY_WHERE_PREDICATE_CAP + 1 }, (_, i) => ({
-        host: `h${i}`,
-      }));
-      expect(appendDistinctEntityWhereToLineEsql(line, rows, ['host'])).toBe(line);
-    });
-  });
-
+describe('change_point_summary_series', () => {
   describe('getSeriesCacheKey', () => {
     it('changes when time range or filters change', () => {
       const table = makeTable(COLUMNS_NO_BY, []);
@@ -241,9 +200,20 @@ describe('change_point_summary_series pure helpers', () => {
       expect(
         getSeriesCacheKey({
           ...base,
-          esqlVariables: [{ key: 'env', value: 'prod', type: 'values' }],
+          esqlVariables: [{ key: 'env', value: 'prod', type: ESQLVariableType.VALUES }],
         })
       ).not.toBe(same);
+      expect(
+        getSeriesCacheKey({
+          ...base,
+          esqlVariables: [{ key: 'env', value: 'staging', type: ESQLVariableType.VALUES }],
+        })
+      ).not.toBe(
+        getSeriesCacheKey({
+          ...base,
+          esqlVariables: [{ key: 'env', value: 'prod', type: ESQLVariableType.VALUES }],
+        })
+      );
     });
   });
 
@@ -254,68 +224,20 @@ describe('change_point_summary_series pure helpers', () => {
       jest.mocked(getTime).mockReturnValue(undefined);
     });
 
-    const waitForTerminalState = (
-      fetchParams: ChangePointFetchParams,
-      data: DataPublicPluginStart
-    ): Promise<ChangePointSummarySeriesState> =>
-      new Promise((resolve, reject) => {
-        getChangePointSummarySeries$(fetchParams, data).subscribe({
-          next: (s) => {
-            if (s.status === 'ready' || s.status === 'error' || s.status === 'idle') {
-              resolve(s);
-            }
-          },
-          error: reject,
-        });
-      });
-
-    const makeFetchParams = (
-      overrides: Partial<ChangePointFetchParams> & {
-        table: Datatable;
-        query: { esql: string };
-      }
-    ): ChangePointFetchParams =>
-      ({
-        searchSessionId: 'session-1',
-        lastReloadRequestTime: 1,
-        dataView: { isTimeBased: () => false } as never,
-        filters: [],
-        timeRange: { from: '2023-11-14T00:00:00.000Z', to: '2023-11-20T00:00:00.000Z' },
-        ...overrides,
-      } as ChangePointFetchParams);
-
     it('stays idle when the table is missing', async () => {
-      const esql = jest.fn();
-      const data = { search: { esql } } as unknown as DataPublicPluginStart;
-      const idle = await waitForTerminalState(
-        makeFetchParams({
-          table: makeTable([], []),
-          query: { esql: ESQL_NO_BY },
-        }),
-        data
-      );
+      const { esql, load } = setupLineSearch({ columns: [], rows: [] });
+      const idle = await load();
 
       expect(idle.status).toBe('idle');
       expect(esql).not.toHaveBeenCalled();
     });
 
     it('emits error when the line search rejects', async () => {
-      const esql = jest.fn().mockRejectedValue(new Error('esql failed'));
-      const data = { search: { esql } } as unknown as DataPublicPluginStart;
-      const table = makeTable(COLUMNS_WITH_HOST, [
-        {
-          host: 'a',
-          bucket: '2023-11-15T00:00:00.000Z',
-          avg_bytes: 14,
-          type: 'mean_shift',
-          pvalue: 0.001,
-        },
-      ]);
-
-      const error = await waitForTerminalState(
-        makeFetchParams({ table, query: { esql: ESQL_WITH_HOST_BY } }),
-        data
-      );
+      const { load } = setupLineSearch({
+        fixture: 'byHost',
+        lineSearch: 'reject',
+      });
+      const error = await load();
 
       expect(error.status).toBe('error');
       if (error.status === 'error') {
@@ -324,29 +246,13 @@ describe('change_point_summary_series pure helpers', () => {
     });
 
     it('fetches a line series for in-range no-BY queries instead of using the Discover table', async () => {
-      const esql = jest.fn().mockResolvedValue({
-        rawResponse: {
-          columns: [{ name: 'bucket' }, { name: 'avg_bytes' }],
-          values: [
-            ['2023-11-14T00:00:00.000Z', 12],
-            ['2023-11-15T00:00:00.000Z', 14],
-          ],
-        },
+      const { esql, load } = setupLineSearch({
+        lineValues: [
+          ['2023-11-14T00:00:00.000Z', 12],
+          ['2023-11-15T00:00:00.000Z', 14],
+        ],
       });
-      const data = { search: { esql } } as unknown as DataPublicPluginStart;
-      const table = makeTable(COLUMNS_NO_BY, [
-        {
-          bucket: '2023-11-15T00:00:00.000Z',
-          avg_bytes: 14,
-          type: 'mean_shift',
-          pvalue: 0.001,
-        },
-      ]);
-
-      const ready = await waitForTerminalState(
-        makeFetchParams({ table, query: { esql: ESQL_NO_BY } }),
-        data
-      );
+      const ready = await load();
 
       expect(ready.status).toBe('ready');
       expect(esql).toHaveBeenCalledTimes(1);
@@ -359,63 +265,63 @@ describe('change_point_summary_series pure helpers', () => {
     });
 
     it('passes ?_tstart/?_tend named params so the line query can resolve Discover time parameters', async () => {
-      const esql = jest.fn().mockResolvedValue({
-        rawResponse: {
-          columns: [{ name: 'bucket' }, { name: 'avg_bytes' }],
-          values: [['2023-11-15T00:00:00.000Z', 14]],
-        },
+      const { esql, load } = setupLineSearch({
+        esqlQuery:
+          'FROM idx | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket',
       });
-      const data = { search: { esql } } as unknown as DataPublicPluginStart;
-      const table = makeTable(COLUMNS_NO_BY, [
-        {
-          bucket: '2023-11-15T00:00:00.000Z',
-          avg_bytes: 14,
-          type: 'mean_shift',
-          pvalue: 0.001,
-        },
-      ]);
-      const esqlWithTimeParams =
-        'FROM idx | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket';
-
-      const ready = await waitForTerminalState(
-        makeFetchParams({ table, query: { esql: esqlWithTimeParams } }),
-        data
-      );
+      const ready = await load();
 
       expect(ready.status).toBe('ready');
+      expect(getTime).toHaveBeenCalled();
       expect(esql).toHaveBeenCalledWith(
         expect.objectContaining({
           query: expect.stringContaining('?_tend'),
-          params: expect.arrayContaining([{ _tstart: expect.any(String) }, { _tend: expect.any(String) }]),
+          params: expect.arrayContaining([
+            { _tstart: expect.any(String) },
+            { _tend: expect.any(String) },
+          ]),
         }),
         expect.anything()
       );
     });
 
-    it('fetches a line series with extended from when a no-BY annotation is before the range', async () => {
-      const esql = jest.fn().mockResolvedValue({
-        rawResponse: {
-          columns: [{ name: 'bucket' }, { name: 'avg_bytes' }],
-          values: [
-            ['2023-11-10T00:00:00.000Z', 10],
-            ['2023-11-15T00:00:00.000Z', 14],
-          ],
-        },
+    it('rewrites a single-? field control to ?? and passes it as a named param', async () => {
+      const { esql, load } = setupLineSearch({
+        esqlQuery:
+          'FROM idx | STATS avg_bytes = AVG(?metric) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket',
+        esqlVariables: [{ key: 'metric', value: 'bytes', type: ESQLVariableType.FIELDS }],
       });
-      const data = { search: { esql } } as unknown as DataPublicPluginStart;
-      const table = makeTable(COLUMNS_NO_BY, [
-        {
-          bucket: '2023-11-10T00:00:00.000Z',
-          avg_bytes: 14,
-          type: 'mean_shift',
-          pvalue: 0.001,
-        },
-      ]);
+      const ready = await load();
 
-      const ready = await waitForTerminalState(
-        makeFetchParams({ table, query: { esql: ESQL_NO_BY } }),
-        data
-      );
+      expect(ready.status).toBe('ready');
+      expect(esql.mock.calls[0][0].query).toContain('AVG(??metric)');
+      expect(esql.mock.calls[0][0].query).not.toContain('AVG(?metric)');
+      expect(esql.mock.calls[0][0].params).toEqual(expect.arrayContaining([{ metric: 'bytes' }]));
+    });
+
+    it('passes value-control named params without rewriting ?value to ??value', async () => {
+      const { esql, load } = setupLineSearch({
+        esqlQuery:
+          'FROM idx | WHERE host == ?env | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket',
+        esqlVariables: [{ key: 'env', value: 'prod', type: ESQLVariableType.VALUES }],
+      });
+      const ready = await load();
+
+      expect(ready.status).toBe('ready');
+      expect(esql.mock.calls[0][0].query).toContain('host == ?env');
+      expect(esql.mock.calls[0][0].query).not.toContain('??env');
+      expect(esql.mock.calls[0][0].params).toEqual(expect.arrayContaining([{ env: 'prod' }]));
+    });
+
+    it('fetches a line series with extended from when a no-BY annotation is before the range', async () => {
+      const { esql, load } = setupLineSearch({
+        rows: [{ ...NO_BY_ROW, bucket: '2023-11-10T00:00:00.000Z' }],
+        lineValues: [
+          ['2023-11-10T00:00:00.000Z', 10],
+          ['2023-11-15T00:00:00.000Z', 14],
+        ],
+      });
+      const ready = await load();
 
       expect(ready.status).toBe('ready');
       expect(esql).toHaveBeenCalledTimes(1);
@@ -431,34 +337,8 @@ describe('change_point_summary_series pure helpers', () => {
     });
 
     it('issues a single shared ES|QL line search for BY queries across subscribers', async () => {
-      const esql = jest.fn().mockResolvedValue({
-        rawResponse: {
-          columns: [{ name: 'host' }, { name: 'bucket' }, { name: 'avg_bytes' }],
-          values: [
-            ['a', '2023-11-14T00:00:00.000Z', 12],
-            ['a', '2023-11-15T00:00:00.000Z', 14],
-          ],
-        },
-      });
-      const data = { search: { esql } } as unknown as DataPublicPluginStart;
-      const table = makeTable(COLUMNS_WITH_HOST, [
-        {
-          host: 'a',
-          bucket: '2023-11-15T00:00:00.000Z',
-          avg_bytes: 14,
-          type: 'mean_shift',
-          pvalue: 0.001,
-        },
-      ]);
-      const fetchParams = makeFetchParams({
-        table,
-        query: { esql: ESQL_WITH_HOST_BY },
-      });
-
-      const readyStates = await Promise.all([
-        waitForTerminalState(fetchParams, data),
-        waitForTerminalState(fetchParams, data),
-      ]);
+      const { esql, load } = setupLineSearch({ fixture: 'byHost' });
+      const readyStates = await Promise.all([load(), load()]);
 
       expect(esql).toHaveBeenCalledTimes(1);
       expect(esql.mock.calls[0][0].query).toContain('STATS avg_bytes');
@@ -478,74 +358,48 @@ describe('change_point_summary_series pure helpers', () => {
     });
 
     it('does not reuse a cached series when the time range changes', async () => {
-      const esql = jest.fn().mockResolvedValue({
-        rawResponse: { columns: [{ name: 'bucket' }, { name: 'avg_bytes' }], values: [] },
-      });
-      const data = { search: { esql } } as unknown as DataPublicPluginStart;
-      const table = makeTable(COLUMNS_WITH_HOST, [
-        {
-          host: 'a',
-          bucket: '2023-11-15T00:00:00.000Z',
-          avg_bytes: 14,
-          type: 'mean_shift',
-          pvalue: 0.001,
-        },
-      ]);
+      const { esql, load } = setupLineSearch({ fixture: 'byHost', lineValues: [] });
 
-      await waitForTerminalState(
-        makeFetchParams({
-          table,
-          query: { esql: ESQL_WITH_HOST_BY },
-          timeRange: { from: '2023-11-14T00:00:00.000Z', to: '2023-11-20T00:00:00.000Z' },
-        }),
-        data
-      );
-      await waitForTerminalState(
-        makeFetchParams({
-          table,
-          query: { esql: ESQL_WITH_HOST_BY },
-          timeRange: { from: '2023-11-01T00:00:00.000Z', to: '2023-11-20T00:00:00.000Z' },
-        }),
-        data
-      );
+      await load();
+      await load({
+        timeRange: { from: '2023-11-01T00:00:00.000Z', to: '2023-11-20T00:00:00.000Z' },
+      });
+
+      expect(esql).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not reuse a cached series when ES|QL variable values change', async () => {
+      const { esql, load } = setupLineSearch({
+        esqlQuery:
+          'FROM idx | WHERE host == ?env | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket',
+        lineValues: [],
+        esqlVariables: [{ key: 'env', value: 'prod', type: ESQLVariableType.VALUES }],
+      });
+
+      await load();
+      await load({
+        esqlVariables: [{ key: 'env', value: 'staging', type: ESQLVariableType.VALUES }],
+      });
 
       expect(esql).toHaveBeenCalledTimes(2);
     });
 
     it('aborts an in-flight line search when the last subscriber unsubscribes', async () => {
-      let abortSignal: AbortSignal | undefined;
-      const esql = jest.fn().mockImplementation((_query, opts: { abortSignal: AbortSignal }) => {
-        abortSignal = opts.abortSignal;
-        return new Promise(() => undefined);
-      });
-      const data = { search: { esql } } as unknown as DataPublicPluginStart;
-      const table = makeTable(COLUMNS_WITH_HOST, [
-        {
-          host: 'a',
-          bucket: '2023-11-15T00:00:00.000Z',
-          avg_bytes: 14,
-          type: 'mean_shift',
-          pvalue: 0.001,
-        },
-      ]);
-      const fetchParams = makeFetchParams({
-        table,
-        query: { esql: ESQL_WITH_HOST_BY },
-      });
+      const harness = setupLineSearch({ fixture: 'byHost', lineSearch: 'hang' });
 
-      const subscription = getChangePointSummarySeries$(fetchParams, data).subscribe();
+      const subscription = harness.subscribe();
       await Promise.resolve();
       await Promise.resolve();
-      expect(esql).toHaveBeenCalled();
-      expect(abortSignal?.aborted).toBe(false);
+      expect(harness.esql).toHaveBeenCalled();
+      expect(harness.abortSignal?.aborted).toBe(false);
 
       subscription.unsubscribe();
-      expect(abortSignal?.aborted).toBe(true);
+      expect(harness.abortSignal?.aborted).toBe(true);
 
-      getChangePointSummarySeries$(fetchParams, data).subscribe();
+      harness.subscribe();
       await Promise.resolve();
       await Promise.resolve();
-      expect(esql).toHaveBeenCalledTimes(2);
+      expect(harness.esql).toHaveBeenCalledTimes(2);
     });
   });
 });

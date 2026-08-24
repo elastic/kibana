@@ -23,7 +23,7 @@ import {
 import { useEuiTheme, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { ChangePointSeriesPoint } from './change_point_summary_series';
+import type { ChangePointSeriesPoint } from './change_point_summary_series_helpers';
 
 const miniChartTheme: PartialTheme = {
   chartMargins: {

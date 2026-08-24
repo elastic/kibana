@@ -8,42 +8,31 @@
  */
 
 import { useEffect, useState } from 'react';
-import {
-  buildChangePointCards,
-  formatAnnotationTimestamp,
-  getEntityKey,
-  isChangePointTableRow,
-  type ChangePointCardModel,
-} from '@kbn/change-point-chart-viewer';
+import { buildChangePointCards, type ChangePointCardModel } from '@kbn/change-point-chart-viewer';
 import type { UnifiedChangePointGridProps } from '@kbn/change-point-chart-viewer';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getTime } from '@kbn/data-plugin/public';
 import {
   buildChangePointLineDataQuery,
-  formatEsqlIdentifier,
-  formatEsqlLiteral,
-  getChangePointByColumns,
-  getChangePointOutputColumnNames,
+  fixESQLQueryWithVariables,
   getChangePointSeriesColumns,
   getNamedParams,
 } from '@kbn/esql-utils';
-import type { TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType, buildEsQuery } from '@kbn/es-query';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import { Observable, of } from 'rxjs';
 
 import { downsampleSparklinePoints } from './downsample_sparkline_points';
+import {
+  appendDistinctEntityWhereToLineEsql,
+  esqlResponseToRows,
+  getEarliestAnnotationTimeFromCards,
+  getEntityColumnIds,
+  getSummarySeriesTimeRange,
+  partitionLineRows,
+  type ChangePointSeriesByEntity,
+} from './change_point_summary_series_helpers';
 
 type ChangePointFetchParams = UnifiedChangePointGridProps['fetchParams'];
-
-export interface ChangePointSeriesPoint {
-  /** Epoch milliseconds. */
-  x: number;
-  y: number;
-}
-
-/** Entity key → series points. Empty-string key is the single no-BY series. */
-export type ChangePointSeriesByEntity = Map<string, ChangePointSeriesPoint[]>;
 
 export type ChangePointSummarySeriesState =
   | { status: 'idle' }
@@ -68,106 +57,10 @@ export type ChangePointSummarySeriesState =
 
 const LINE_SERIES_LIMIT = 10000;
 const MAX_DONE_SERIES_CACHE = 8;
-export const ENTITY_WHERE_PREDICATE_CAP = 200;
 
 type SeriesCacheEntry =
   | { kind: 'in-flight'; observable: Observable<ChangePointSummarySeriesState> }
   | { kind: 'done'; state: ChangePointSummarySeriesState };
-
-/** BY columns that actually appear on the result table (used as series split keys). */
-export const getEntityColumnIds = (
-  esql: string | undefined,
-  table: Pick<Datatable, 'columns'>
-): string[] => {
-  const byColumns = getChangePointByColumns(esql);
-  if (!byColumns?.length) return [];
-  const columnIds = new Set(table.columns.map((c) => c.id));
-  return byColumns.filter((id) => columnIds.has(id));
-};
-
-const toEpochMs = (value: unknown): number | undefined => {
-  const iso = formatAnnotationTimestamp(value);
-  if (!iso) return undefined;
-  const ms = Date.parse(iso);
-  return Number.isNaN(ms) ? undefined : ms;
-};
-
-const toFiniteNumber = (value: unknown): number | undefined => {
-  if (typeof value === 'number' && Number.isFinite(value)) return value;
-  if (typeof value === 'string' && value.length > 0) {
-    const n = Number(value);
-    if (Number.isFinite(n)) return n;
-  }
-  return undefined;
-};
-
-/** Earliest change-point time in the table (epoch ms). */
-export const getEarliestAnnotationTime = (
-  table: Datatable,
-  timeColumn: string,
-  esql: string
-): number | undefined => {
-  const outputNames = getChangePointOutputColumnNames(esql);
-  const typeColumnId = outputNames?.typeColumn ?? 'type';
-  const pvalueColumnId = outputNames?.pvalueColumn ?? 'pvalue';
-  const columnIds = new Set(table.columns.map((c) => c.id));
-  // No type/pvalue columns => every row is a change-point event (common BY shape).
-  const hasTypedColumns = columnIds.has(typeColumnId) && columnIds.has(pvalueColumnId);
-
-  let earliest: number | undefined;
-  for (const row of table.rows as Array<Record<string, unknown>>) {
-    const isAnnotation = hasTypedColumns
-      ? isChangePointTableRow(row, typeColumnId, pvalueColumnId)
-      : true;
-    if (!isAnnotation) continue;
-    const ms = toEpochMs(row[timeColumn]);
-    if (ms === undefined) continue;
-    earliest = earliest === undefined ? ms : Math.min(earliest, ms);
-  }
-  return earliest;
-};
-
-/** Pull Discover's time range back if a change point sits before `from` (same idea as Lens). */
-export const getSummarySeriesTimeRange = (
-  timeRange: TimeRange,
-  earliestAnnotationMs?: number
-): TimeRange => {
-  if (earliestAnnotationMs === undefined) return timeRange;
-  const fromMs = Date.parse(timeRange.from);
-  if (Number.isNaN(fromMs) || earliestAnnotationMs >= fromMs) return timeRange;
-  return { from: new Date(earliestAnnotationMs).toISOString(), to: timeRange.to };
-};
-
-/** Group rows into per-entity time series, sorted by time. */
-export const partitionLineRows = (
-  rows: ReadonlyArray<Readonly<Record<string, unknown>>>,
-  timeColumn: string,
-  valueColumn: string,
-  entityColumnIds: readonly string[]
-): ChangePointSeriesByEntity => {
-  const seriesByEntity: ChangePointSeriesByEntity = new Map();
-
-  for (const row of rows) {
-    const x = toEpochMs(row[timeColumn]);
-    const y = toFiniteNumber(row[valueColumn]);
-    if (x === undefined || y === undefined) continue;
-
-    const key = getEntityKey(row, entityColumnIds);
-    const existing = seriesByEntity.get(key);
-    if (existing) {
-      existing.push({ x, y });
-    } else {
-      seriesByEntity.set(key, [{ x, y }]);
-    }
-  }
-
-  for (const [key, points] of seriesByEntity) {
-    points.sort((a, b) => a.x - b.x);
-    seriesByEntity.set(key, downsampleSparklinePoints(points));
-  }
-
-  return seriesByEntity;
-};
 
 const getEsqlQuery = (query: ChangePointFetchParams['query']): string | undefined =>
   isOfAggregateQueryType(query) ? query.esql : undefined;
@@ -207,61 +100,13 @@ const evictOldestDoneEntries = (keepKey: string): void => {
   }
 };
 
-const esqlResponseToRows = (rawResponse: {
-  columns?: Array<{ name?: string }>;
-  values?: unknown[][];
-}): Array<Record<string, unknown>> => {
-  const columnNames = (rawResponse.columns ?? [])
-    .map((c) => c.name)
-    .filter((name): name is string => typeof name === 'string' && name.length > 0);
-  return (rawResponse.values ?? []).map((values) => {
-    const row: Record<string, unknown> = {};
-    for (let i = 0; i < columnNames.length; i++) {
-      row[columnNames[i]] = values[i];
-    }
-    return row;
-  });
-};
-
-/**
- * Narrows the line query to distinct entity tuples on the Discover table.
- * Returns the original query when the distinct set exceeds {@link ENTITY_WHERE_PREDICATE_CAP}.
- */
-export const appendDistinctEntityWhereToLineEsql = (
-  lineEsql: string,
-  rows: ReadonlyArray<Readonly<Record<string, unknown>>>,
-  entityColumnIds: readonly string[],
-  cap: number = ENTITY_WHERE_PREDICATE_CAP
-): string => {
-  if (!entityColumnIds.length) return lineEsql;
-
-  const seen = new Set<string>();
-  const groups: string[] = [];
-
-  for (const row of rows) {
-    const predicates: string[] = [];
-    let skip = false;
-    for (const col of entityColumnIds) {
-      const lit = formatEsqlLiteral(row[col]);
-      if (lit === undefined) {
-        skip = true;
-        break;
-      }
-      predicates.push(`${formatEsqlIdentifier(col)} == ${lit}`);
-    }
-    if (skip) continue;
-
-    const key = predicates.join(' AND ');
-    if (seen.has(key)) continue;
-    if (seen.size >= cap) {
-      return lineEsql;
-    }
-    seen.add(key);
-    groups.push(entityColumnIds.length > 1 ? `(${key})` : key);
+const downsampleSeriesByEntity = (
+  seriesByEntity: ChangePointSeriesByEntity
+): ChangePointSeriesByEntity => {
+  for (const [key, points] of seriesByEntity) {
+    seriesByEntity.set(key, downsampleSparklinePoints(points));
   }
-
-  if (!groups.length) return lineEsql;
-  return `${lineEsql} | WHERE ${groups.join(' OR ')}`;
+  return seriesByEntity;
 };
 
 /**
@@ -294,7 +139,7 @@ const loadLineSeries = async ({
   }
 
   const { timeColumn, valueColumn } = seriesColumns;
-  const earliestAnnotationMs = getEarliestAnnotationTime(table, timeColumn, esql);
+  const earliestAnnotationMs = getEarliestAnnotationTimeFromCards(cards);
 
   let lineEsql = buildChangePointLineDataQuery(esql);
   if (!lineEsql) {
@@ -349,7 +194,9 @@ const loadLineSeries = async ({
   const rows = esqlResponseToRows(rawResponse);
   return {
     status: 'ready',
-    seriesByEntity: partitionLineRows(rows, timeColumn, valueColumn, entityColumnIds),
+    seriesByEntity: downsampleSeriesByEntity(
+      partitionLineRows(rows, timeColumn, valueColumn, entityColumnIds)
+    ),
     entityColumnIds,
     timeColumn,
     valueColumn,
@@ -378,7 +225,10 @@ export const getChangePointSummarySeries$ = (
     return cached.observable;
   }
 
-  const esql = getEsqlQuery(fetchParams.query);
+  const rawEsql = getEsqlQuery(fetchParams.query);
+  const esql = rawEsql
+    ? fixESQLQueryWithVariables(rawEsql, fetchParams.esqlVariables ?? [])
+    : undefined;
   const table = fetchParams.table;
   const entityColumnIds = esql && table?.columns?.length ? getEntityColumnIds(esql, table) : [];
   const cards = esql && table?.columns?.length ? buildChangePointCards({ table, esql }) : undefined;
