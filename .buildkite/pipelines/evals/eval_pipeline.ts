@@ -128,25 +128,6 @@ const EVALS_SKIP_LABEL_PREFIX = 'evals:skip-';
  */
 const MODEL_GROUP_ALIASES: Record<string, string[]> = {};
 
-function isDeprecatedLitellmEvalLabel(label: string): boolean {
-  return label.startsWith('models:llm-gateway/') || label.startsWith('models:judge:llm-gateway/');
-}
-
-function warnDeprecatedLitellmLabels(labels: string[]): void {
-  const deprecated = labels.filter(isDeprecatedLitellmEvalLabel);
-  if (deprecated.length === 0) {
-    return;
-  }
-
-  console.error(
-    'LiteLLM eval labels are deprecated and ignored: ' +
-      `${deprecated.join(', ')}. ` +
-      'Replace `models:llm-gateway/<model>` with `models:openrouter/<provider>-<model>` ' +
-      '(e.g. `models:openrouter/openai-gpt-5.4`, `models:openrouter/anthropic-claude-sonnet-4.6`) ' +
-      'and `models:judge:llm-gateway/<model>` with `models:judge:openrouter/<provider>-<model>`.'
-  );
-}
-
 function normalizeEvaluationConnectorId(raw: string): string {
   // `models:judge:eis/<modelId>` — judge value is a model id, not a connector id.
   if (raw.startsWith('eis/')) {
@@ -280,9 +261,7 @@ interface EvalSelection {
  * `getEvalTriggerStep` so the label gate lives in one place.
  */
 function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
-  const allLabels = parseGithubPrLabels(githubPrLabels);
-  warnDeprecatedLitellmLabels(allLabels);
-  const parsedLabels = allLabels.filter((label) => !isDeprecatedLitellmEvalLabel(label));
+  const parsedLabels = parseGithubPrLabels(githubPrLabels);
 
   const skippedSuiteIds = new Set(
     parsedLabels

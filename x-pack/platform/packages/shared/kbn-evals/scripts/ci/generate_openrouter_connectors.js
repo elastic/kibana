@@ -173,16 +173,6 @@ async function generateOpenrouterConnectors({
   if (rawList.length > 0 && evalConnectorId.startsWith('openrouter-')) {
     rawList.push(evalConnectorId);
   }
-  const deprecated = rawList.filter(
-    (token) => token.startsWith('llm-gateway/') || token.startsWith('litellm-')
-  );
-  if (deprecated.length > 0) {
-    throw new Error(
-      'LiteLLM model ids are deprecated: ' +
-        deprecated.join(', ') +
-        '. Use `openrouter/<provider>-<model>` instead (e.g. openrouter/openai-gpt-5.4).'
-    );
-  }
 
   const requested = filterRequestedModels(rawList);
   const available = await fetchAvailableModels(baseUrl, apiKey, httpJsonFn);

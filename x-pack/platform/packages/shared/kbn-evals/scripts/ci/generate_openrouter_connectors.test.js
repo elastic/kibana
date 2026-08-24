@@ -117,17 +117,6 @@ describe('generateOpenrouterConnectors', () => {
 
     expect(connectors).toEqual({});
   });
-
-  it('rejects deprecated LiteLLM model ids', async () => {
-    await expect(
-      generateOpenrouterConnectors({
-        baseUrl: BASE_URL,
-        apiKey: API_KEY,
-        modelsRaw: 'llm-gateway/gpt-5.4',
-        httpJsonFn: httpJsonFor([{ id: 'openai/gpt-5.4', supported_parameters: TOOLS }]),
-      })
-    ).rejects.toThrow(/LiteLLM model ids are deprecated/);
-  });
 });
 
 describe('filterRequestedModels', () => {

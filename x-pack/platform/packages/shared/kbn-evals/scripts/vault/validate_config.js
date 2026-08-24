@@ -185,22 +185,6 @@ function validateTracingExporters(config) {
   }
 }
 
-function assertOptionalNonEmptyString(obj, path) {
-  const parts = path.split('.');
-  let cur = obj;
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
-    if (!cur || typeof cur !== 'object' || !(part in cur)) {
-      return; // missing is ok
-    }
-    cur = cur[part];
-  }
-  if (cur === undefined || cur === null) return;
-  if (!isNonEmptyString(cur)) {
-    die(`Invalid kbn-evals CI config: "${path}" must be a non-empty string when provided`);
-  }
-}
-
 function validateConfigShape(config) {
   if (!config || typeof config !== 'object' || Array.isArray(config)) {
     die('Invalid kbn-evals CI config: root must be a JSON object');
@@ -209,15 +193,9 @@ function validateConfigShape(config) {
   // Required
   assertNonEmptyString(config, 'openrouter.baseUrl');
   assertNonEmptyString(config, 'openrouter.apiKey');
-  assertNonEmptyString(config, 'litellm.baseUrl');
-  assertNonEmptyString(config, 'litellm.virtualKey');
   assertNonEmptyString(config, 'evaluationConnectorId');
   assertNonEmptyString(config, 'evaluationsEs.url');
   assertNonEmptyString(config, 'evaluationsEs.apiKey');
-
-  // Optional
-  assertOptionalNonEmptyString(config, 'litellm.teamId');
-  assertOptionalNonEmptyString(config, 'litellm.teamName');
 
   validateEvaluationsKbn(config);
   validateGcsCredentials(config);

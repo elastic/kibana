@@ -89,33 +89,6 @@ describe('eval_pipeline', () => {
       expect(shouldRunEvals('evals:agent-builder,models:eis/openai-gpt-5.4')).toBe(true);
     });
 
-    it('warns that LiteLLM labels are deprecated and does not treat them as a model selection', () => {
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      expect(shouldRunEvals('evals:agent-builder,models:llm-gateway/gpt-5.4')).toBe(false);
-      expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('LiteLLM eval labels are deprecated')
-      );
-      expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('models:llm-gateway/gpt-5.4'));
-
-      errorSpy.mockRestore();
-    });
-
-    it('still runs evals when a valid OpenRouter or EIS label is present alongside a deprecated LiteLLM label', () => {
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation();
-
-      expect(
-        shouldRunEvals(
-          'evals:agent-builder,models:llm-gateway/gpt-5.4,models:openrouter/openai-gpt-5.4'
-        )
-      ).toBe(true);
-      expect(errorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('LiteLLM eval labels are deprecated')
-      );
-
-      errorSpy.mockRestore();
-    });
-
     it('maps `models:judge:openrouter/<provider>-<model>` to an openrouter-* connector id', () => {
       const yaml = getEvalPipeline(
         'evals:agent-builder,models:openrouter/openai-gpt-5.4,models:judge:openrouter/anthropic-claude-sonnet-4.6'

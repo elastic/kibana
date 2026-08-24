@@ -20,9 +20,8 @@ const getVaultAddr = (): string => process.env.VAULT_ADDR || DEFAULT_VAULT_ADDR;
 /**
  * Vault-backed config used by @kbn/evals CI and local development.
  *
- * This is intentionally minimal: we store OpenRouter credentials and LiteLLM
- * credentials (both required), plus credentials for the centralized Elasticsearch
- * cluster where eval results are exported.
+ * This is intentionally minimal: we store OpenRouter credentials, plus credentials for
+ * the centralized Elasticsearch cluster where eval results are exported.
  */
 
 export const KBN_EVALS_VAULT_ENV_VAR = 'KIBANA_EVALS_CI_CONFIG';
@@ -63,30 +62,6 @@ const configSchema = schema.object(
          * OpenRouter API key used for non-EIS models.
          */
         apiKey: schema.string({ minLength: 1 }),
-      },
-      { unknowns: 'allow' }
-    ),
-
-    /**
-     * LiteLLM credentials used to call the proxy (and to query team metadata).
-     */
-    litellm: schema.object(
-      {
-        baseUrl: schema.string({ minLength: 1 }),
-        /**
-         * LiteLLM *virtual key* (sk-...) used to call the proxy (and to query team metadata).
-         * This should not be the proxy master key.
-         */
-        virtualKey: schema.string({ minLength: 1 }),
-        /**
-         * Optional team id used by CI to discover models for connector generation.
-         * If omitted, CI may use a baked-in default.
-         */
-        teamId: schema.maybe(schema.string({ minLength: 1 })),
-        /**
-         * Optional, human-readable team name (not used for auth).
-         */
-        teamName: schema.maybe(schema.string({ minLength: 1 })),
       },
       { unknowns: 'allow' }
     ),

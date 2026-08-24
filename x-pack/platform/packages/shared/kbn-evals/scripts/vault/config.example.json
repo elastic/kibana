@@ -8,11 +8,6 @@
     "baseUrl": "https://openrouter.ai/api/v1",
     "apiKey": "REPLACE_ME"
   },
-  "litellm": {
-    "baseUrl": "https://elastic.litellm-prod.ai",
-    "virtualKey": "sk-REPLACE_ME",
-    "teamId": "REPLACE_ME"
-  },
   "evaluationConnectorId": "eis-google-gemini-3-1-pro",
   "evaluationsEs": {
     "url": "https://kbn-evals-serverless-ed035a.es.us-central1.gcp.elastic.cloud",
