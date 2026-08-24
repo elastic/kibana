@@ -130,9 +130,15 @@ export interface UsePaginatedFlyoutReturn {
    */
   readonly slice: FlyoutPaginationValue;
   /**
-   * Stable callback that opens (or navigates) the paginated flyout to the
-   * given absolute document index. Exposed so consumers (e.g. `ActionsCell`)
-   * can trigger navigation without accessing the store directly.
+   * Stable callback that opens the paginated flyout at the given absolute document index
+   * *from the source* (e.g. a table row, via `ActionsCell`), without the consumer having to
+   * touch the store.
+   *
+   * This always starts a fresh session: if the user has stacked anything over the flyout —
+   * a tool flyout, or a document opened as its child — that stack is torn down first, so the
+   * requested document replaces it instead of being swapped into a flyout that is no longer
+   * on screen. When the flyout is already the only thing on screen the document is swapped in
+   * place, so no history (and therefore no Back button) accumulates.
    */
   readonly openDocumentFlyout: (documentIndex: number) => void;
   /**
@@ -141,11 +147,16 @@ export interface UsePaginatedFlyoutReturn {
    */
   readonly setState: (partial: Partial<ScopedPaginationSlice>) => void;
   /**
-   * Open (or navigate) the paginated flyout to `documentIndex`.
+   * Navigate the *already open* paginated flyout to `documentIndex`. This is the in-flyout
+   * entry point, used by the header `EuiPagination` (through `openDocumentFlyoutImpl`) and by
+   * the source's cross-page resolution effect once the requested page has loaded.
    *
    * - Always sets `flyoutDocumentIndex` in the slice.
    * Opens the V2 system flyout on the first call; subsequent calls just
    * update the slice so the body re-renders from the store.
+   *
+   * Source-driven opens must go through `openDocumentFlyout` instead, which restarts the
+   * session when the flyout is no longer the one on screen.
    */
   readonly openPaginatedFlyout: (
     documentIndex: number,
