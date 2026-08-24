@@ -992,6 +992,33 @@ describe('autocomplete_utils', () => {
         expect(JSON.parse(`{${acc}}`)).toEqual({ value: 1e21 });
         expect(acc).toBe('  "value": 1e+21');
       });
+
+      it.each(['1e-7', '1e+21'])(
+        'SHOULD complete sibling fields after an exponent primitive value %s',
+        async (exponentValue) => {
+          mockPopulateContext.mockImplementation((...args) => {
+            const [bodyTokens, context] = args[0];
+            context.autoCompleteSet =
+              bodyTokens.at(-1) === '{'
+                ? ([{ name: 'next_field' }] as unknown as AutoCompleteContext['autoCompleteSet'])
+                : [];
+          });
+          const editorLines = ['GET _search', '{', `  "value": ${exponentValue}, "`];
+          const position = {
+            lineNumber: 3,
+            column: editorLines[2].length + 1,
+          } as monaco.Position;
+
+          const items = await getBodyCompletionItems(
+            buildModel(editorLines, { startColumn: editorLines[2].length, word: '' }),
+            position,
+            1,
+            mockEditor
+          );
+
+          expect(items.map((item) => item.label)).toContain('next_field');
+        }
+      );
     });
 
     it('ignores quotes inside comments when completing in the middle of a quoted field', async () => {
