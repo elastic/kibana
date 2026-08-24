@@ -8,6 +8,7 @@
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AgentShardingField } from './agent_sharding_field';
 import { useLicense } from '../../../hooks/use_license';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
@@ -37,20 +38,48 @@ describe('AgentShardingField', () => {
   it('hides the switch without an Enterprise license on a classic location', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => false, getLicense: () => null });
     render(<Form isEditingShardedLocation={false} />);
-    expect(screen.queryByTestId('syntheticsLocationAgentShardingSwitch')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('syntheticsAgentShardingSwitch')).not.toBeInTheDocument();
   });
 
   it('shows the switch with an Enterprise license', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => true, getLicense: () => null });
     render(<Form isEditingShardedLocation={false} />);
-    expect(screen.getByTestId('syntheticsLocationAgentShardingSwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsAgentShardingSwitch')).toBeInTheDocument();
   });
 
   it('shows the switch on an already-sharded location without Enterprise so it can be turned off', () => {
     useLicenseMock.mockReturnValue({ hasAtLeast: () => false, getLicense: () => null });
     render(<Form isEditingShardedLocation={true} defaultChecked={true} />);
-    const toggle = screen.getByTestId('syntheticsLocationAgentShardingSwitch');
+    const toggle = screen.getByTestId('syntheticsAgentShardingSwitch');
     expect(toggle).toBeInTheDocument();
     expect(toggle).not.toBeDisabled();
+  });
+
+  it('renders the toggle and hides the explainer until sharding is enabled', () => {
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true, getLicense: () => null });
+    render(<Form isEditingShardedLocation={false} />);
+
+    expect(screen.getByTestId('syntheticsAgentShardingSwitch')).toBeInTheDocument();
+    expect(screen.getByText('Scale with multiple agents on this policy')).toBeInTheDocument();
+    expect(screen.queryByTestId('syntheticsAgentShardingCallout')).not.toBeInTheDocument();
+  });
+
+  it('shows the condition-based sharding explainer when the toggle is on', async () => {
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true, getLicense: () => null });
+    render(<Form isEditingShardedLocation={false} />);
+
+    await userEvent.click(screen.getByTestId('syntheticsAgentShardingSwitch'));
+
+    expect(screen.getByTestId('syntheticsAgentShardingCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsAgentShardingCallout')).toHaveTextContent(
+      'each monitor runs on exactly one agent'
+    );
+  });
+
+  it('starts with the explainer visible when editing a scalable location', () => {
+    useLicenseMock.mockReturnValue({ hasAtLeast: () => true, getLicense: () => null });
+    render(<Form isEditingShardedLocation={true} defaultChecked={true} />);
+
+    expect(screen.getByTestId('syntheticsAgentShardingCallout')).toBeInTheDocument();
   });
 });
