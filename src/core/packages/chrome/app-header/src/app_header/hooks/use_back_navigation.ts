@@ -7,18 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type React from 'react';
 import { useMemo } from 'react';
+import type { AppHeaderBackTarget } from '@kbn/ui-app-header';
 import type { AppHeaderBack } from '../../types';
 import { useBasePath } from './chrome';
-
-export interface BackNavigation {
-  backHref: string;
-  backOnClick?: React.MouseEventHandler;
-  backDestinationLabel?: string;
-}
-
-const EMPTY: BackNavigation[] = [];
 
 const hasBasePathPrefix = (href: string, basePath: string): boolean => {
   return href === basePath || href.startsWith(`${basePath}/`);
@@ -26,16 +18,16 @@ const hasBasePathPrefix = (href: string, basePath: string): boolean => {
 
 export function useBackNavTargets(
   back: AppHeaderBack | AppHeaderBack[] | undefined
-): BackNavigation[] {
+): AppHeaderBackTarget[] | undefined {
   const basePath = useBasePath();
 
   return useMemo(() => {
     if (!back) {
-      return EMPTY;
+      return undefined;
     }
     const backItems = Array.isArray(back) ? back : [back];
     const base = basePath.get();
-    const explicit: BackNavigation[] = [];
+    const explicit: AppHeaderBackTarget[] = [];
     const seenHrefs = new Set<string>();
     for (const b of backItems) {
       const target = typeof b === 'string' ? { href: b } : b;
@@ -50,11 +42,11 @@ export function useBackNavTargets(
       }
       seenHrefs.add(href);
       explicit.push({
-        backHref: href,
-        backOnClick: target.onClick,
-        backDestinationLabel: target.label,
+        href,
+        onClick: target.onClick,
+        label: target.label,
       });
     }
-    return explicit.length > 0 ? explicit : EMPTY;
+    return explicit.length > 0 ? explicit : undefined;
   }, [back, basePath]);
 }

@@ -97,7 +97,14 @@ describe('bundledPackages', () => {
     });
   });
   describe('getBundledPackageByPkgKey', () => {
-    it('should return package by name if no version is provided', async () => {
+    it('should return package by name when air-gapped with no registry URL', async () => {
+      jest.mocked(appContextService.getConfig).mockReturnValue({
+        developer: {
+          bundledPackageLocation: '/tmp/test',
+        },
+        isAirGapped: true,
+      } as any);
+
       const pkg = await getBundledPackageByPkgKey('apm');
 
       expect(pkg).toBeDefined();
@@ -110,6 +117,28 @@ describe('bundledPackages', () => {
 
       expect(await pkg?.getBuffer()).toEqual(Buffer.from('TEST'));
     });
+
+    it.each([
+      ['isAirGapped is false', { isAirGapped: false }],
+      [
+        'isAirGapped is true with registryUrl configured',
+        { isAirGapped: true, registryUrl: 'https://epr.example.com' },
+      ],
+    ])(
+      'should not return package by name when registry is reachable (%s)',
+      async (_label, airGapConfig) => {
+        jest.mocked(appContextService.getConfig).mockReturnValue({
+          developer: {
+            bundledPackageLocation: '/tmp/test',
+          },
+          ...airGapConfig,
+        } as any);
+
+        const pkg = await getBundledPackageByPkgKey('apm');
+
+        expect(pkg).toBeUndefined();
+      }
+    );
 
     it('should return package by name and version if version is provided', async () => {
       const pkg = await getBundledPackageByPkgKey('apm-8.8.0');

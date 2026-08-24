@@ -132,6 +132,17 @@ describe('AlertEpisodeTrendChartSection', () => {
     await waitFor(() => expect(screen.getByTestId('trend-chart-stub')).toBeInTheDocument());
   });
 
+  it('shows a chart-sized skeleton while the trend query loads', () => {
+    mockUseFetchEpisodeQuery.mockReturnValue(asQuery(episode));
+    mockUseFetchRule.mockReturnValue(asQuery(singleMetricRule));
+    mockUseFetchEpisodeTrendQuery.mockReturnValue(asQuery(undefined, { isLoading: true }));
+
+    render(<AlertEpisodeTrendChartSection episodeId="ep1" services={mockServices} />);
+    expect(screen.getByTestId('alertingV2EpisodeTrendChartSectionLoading')).toHaveClass(
+      'euiSkeletonRectangle'
+    );
+  });
+
   it('shows an error message when the trend query errors', () => {
     mockUseFetchEpisodeQuery.mockReturnValue(asQuery(episode));
     mockUseFetchRule.mockReturnValue(asQuery(singleMetricRule));

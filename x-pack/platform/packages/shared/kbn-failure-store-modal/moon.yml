@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/es-ui-shared-plugin'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

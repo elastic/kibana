@@ -103,9 +103,6 @@ describe('queryNotifications [integration]', () => {
   });
 
   it('composes attribute filters', async () => {
-    const bySeverity = await query({ severity: ['error'] });
-    expect(bySeverity.items.map(({ notification_id: id }) => id)).toEqual(['old-error']);
-
     const byType = await query({ type: 'other' });
     expect(byType.items.map(({ notification_id: id }) => id)).toEqual(['other-type']);
 

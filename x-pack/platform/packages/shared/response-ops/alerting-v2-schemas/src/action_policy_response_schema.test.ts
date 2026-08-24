@@ -18,16 +18,16 @@ const validResponse = {
   enabled: true,
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: 'host.name: "server-1"',
-  groupBy: ['host.name'],
+  group_by: ['host.name'],
   tags: ['production'],
-  groupingMode: 'per_episode' as const,
+  grouping_mode: 'per_episode' as const,
   throttle: { strategy: 'on_status_change' as const, interval: null },
-  snoozedUntil: null,
-  auth: { owner: 'user-1', createdByUser: true },
-  createdBy: 'user-1',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedBy: 'user-1',
-  updatedAt: '2026-01-01T00:00:00.000Z',
+  snoozed_until: null,
+  auth: { owner: 'user-1', created_by_user: true },
+  created_by: 'user-1',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_by: 'user-1',
+  updated_at: '2026-01-01T00:00:00.000Z',
 };
 
 describe('actionPolicyResponseSchema', () => {
@@ -41,18 +41,18 @@ describe('actionPolicyResponseSchema', () => {
       ...validResponse,
       version: undefined,
       matcher: null,
-      groupBy: null,
+      group_by: null,
       tags: null,
-      groupingMode: null,
+      grouping_mode: null,
       throttle: null,
-      snoozedUntil: null,
-      createdBy: null,
-      updatedBy: null,
+      snoozed_until: null,
+      created_by: null,
+      updated_by: null,
     });
     expect(result.matcher).toBeNull();
-    expect(result.groupBy).toBeNull();
+    expect(result.group_by).toBeNull();
     expect(result.tags).toBeNull();
-    expect(result.groupingMode).toBeNull();
+    expect(result.grouping_mode).toBeNull();
     expect(result.throttle).toBeNull();
   });
 
@@ -71,7 +71,7 @@ describe('findActionPoliciesResponseSchema', () => {
       items: [validResponse],
       total: 1,
       page: 1,
-      perPage: 10,
+      per_page: 10,
     });
     expect(result.items).toHaveLength(1);
     expect(result.total).toBe(1);
@@ -82,7 +82,7 @@ describe('findActionPoliciesResponseSchema', () => {
       items: [],
       total: 0,
       page: 1,
-      perPage: 10,
+      per_page: 10,
     });
     expect(result.items).toHaveLength(0);
   });
@@ -92,7 +92,7 @@ describe('findActionPoliciesResponseSchema', () => {
       findActionPoliciesResponseSchema.parse({
         items: [],
         page: 1,
-        perPage: 10,
+        per_page: 10,
       })
     ).toThrow();
   });

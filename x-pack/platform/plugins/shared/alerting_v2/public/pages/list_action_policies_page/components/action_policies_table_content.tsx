@@ -148,7 +148,7 @@ export const ActionPoliciesTableContent = ({
   );
   const updatedByUids = useMemo(
     () =>
-      items.map((item) => toPolicy(item).updatedBy).filter((uid): uid is string => Boolean(uid)),
+      items.map((item) => toPolicy(item).updated_by).filter((uid): uid is string => Boolean(uid)),
     [items]
   );
   const { data: updatedByProfileByUid, isLoading: isProfileLoading } = useBulkGetUserProfiles({
@@ -204,7 +204,7 @@ export const ActionPoliciesTableContent = ({
           id="updatedBy"
           name={UPDATED_BY_COLUMN_NAME}
           render={(item) => {
-            const { updatedBy } = toPolicy(item);
+            const { updated_by: updatedBy } = toPolicy(item);
             if (!updatedBy) return null;
             if (isProfileLoadingRef.current)
               return (
