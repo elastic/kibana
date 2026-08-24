@@ -13,6 +13,7 @@ import type { WorkflowListItemDto } from '@kbn/workflows';
 import { RunWorkflowPanel } from './run_workflow_panel';
 import type { RunWorkflowPanelProps } from './run_workflow_panel';
 import * as i18n from './translations';
+import type { WorkflowSelectorConfig } from '../workflow_selector/workflow_utils';
 
 const mockMutate = jest.fn();
 const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: mockWorkflowsData } }));
@@ -20,6 +21,23 @@ const mockUseWorkflowsCapabilities = jest.fn(() => ({ canReadManagedWorkflow: tr
 const mockNavigateToApp = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
+
+interface MockWorkflowSelectorProps {
+  config: WorkflowSelectorConfig;
+  onWorkflowChange: (id: string) => void;
+}
+
+const mockWorkflowSelector = jest.fn(({ onWorkflowChange }: MockWorkflowSelectorProps) => (
+  <div data-test-subj="workflow-selector-mock">
+    <button
+      data-test-subj="select-workflow-option"
+      type="button"
+      onClick={() => onWorkflowChange('test-workflow-id')}
+    >
+      {'Select workflow'}
+    </button>
+  </div>
+));
 
 const noInputsWorkflow: WorkflowListItemDto = {
   id: 'test-workflow-id',
@@ -69,17 +87,7 @@ jest.mock('../../hooks/use_workflows_capabilities', () => ({
 }));
 
 jest.mock('../workflow_selector/workflow_selector', () => ({
-  WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
-    <div data-test-subj="workflow-selector-mock">
-      <button
-        data-test-subj="select-workflow-option"
-        type="button"
-        onClick={() => onWorkflowChange('test-workflow-id')}
-      >
-        {'Select workflow'}
-      </button>
-    </div>
-  ),
+  WorkflowSelector: (props: MockWorkflowSelectorProps) => mockWorkflowSelector(props),
 }));
 
 jest.mock('./run_workflow_inputs_modal', () => ({
@@ -338,15 +346,14 @@ describe('RunWorkflowPanel', () => {
       };
       mockWorkflowsData = [noInputsWorkflow, managedWorkflow];
 
-      // WorkflowSelector is mocked, so we confirm the component renders without error when
-      // filterWorkflow is provided. The actual client-side filtering is exercised in the
-      // WorkflowSelector unit tests via processWorkflowsToOptions.
       renderComponent({
         visibility: { selectors: ['rule_action'] },
         filterWorkflow: (w) => !w.managed,
       });
 
-      expect(screen.getByTestId('workflow-selector-mock')).toBeInTheDocument();
+      const [{ config }] = mockWorkflowSelector.mock.calls[0];
+
+      expect(config.filterFunction?.(mockWorkflowsData)).toEqual([noInputsWorkflow]);
     });
   });
 
