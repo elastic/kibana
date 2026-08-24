@@ -268,6 +268,30 @@ const Comma = memo(function Comma() {
 });
 
 const COPIED_FEEDBACK_DURATION = 1200;
+
+const copiedLabel = () =>
+  i18n.translate('unifiedDataTable.jsonTreeViewer.copied', { defaultMessage: 'Copied' });
+
+const useCopyWithFeedback = (getText: () => string, label: string) => {
+  const [copied, setCopied] = useState(false);
+  const resetTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(resetTimer.current), []);
+
+  const copy = () => {
+    copyToClipboard(getText());
+    setCopied(true);
+    clearTimeout(resetTimer.current);
+    resetTimer.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_DURATION);
+  };
+
+  return {
+    copy,
+    iconType: copied ? 'check' : 'copy',
+    color: copied ? 'success' : 'text',
+    displayedLabel: copied ? copiedLabel() : label,
+  } as const;
+};
+
 const CopyButton = function CopyButton({
   getText,
   label,
@@ -278,32 +302,21 @@ const CopyButton = function CopyButton({
   nodeId: string;
 }) {
   const styles = useEuiMemoizedStyles(treeStyles);
-  const [copied, setCopied] = useState(false);
-  const resetTimer = useRef<ReturnType<typeof setTimeout>>();
-  useEffect(() => () => clearTimeout(resetTimer.current), []);
-
-  const copiedLabel = i18n.translate('unifiedDataTable.jsonTreeViewer.copied', {
-    defaultMessage: 'Copied',
-  });
-
-  const displayedLabel = copied ? copiedLabel : label;
+  const { copy, iconType, color, displayedLabel } = useCopyWithFeedback(getText, label);
 
   return (
     <EuiToolTip content={displayedLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={displayedLabel}
         className="jsonTreeViewerCopyButton jsonTreeViewerRowAction"
-        color={copied ? 'success' : 'text'}
+        color={color}
         css={styles.rowActionButton}
         data-test-subj={`jsonTreeViewerCopy-${nodeId}`}
         iconSize="s"
-        iconType={copied ? 'check' : 'copy'}
+        iconType={iconType}
         onClick={(event: React.MouseEvent) => {
           event.stopPropagation();
-          copyToClipboard(getText());
-          setCopied(true);
-          clearTimeout(resetTimer.current);
-          resetTimer.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_DURATION);
+          copy();
         }}
         onKeyDown={rowActionKeyDown}
         size="xs"
@@ -343,6 +356,39 @@ const SubtreeCopyButton = memo(function SubtreeCopyButton({ node }: { node: Coll
           defaultMessage: 'Copy object',
         });
   return <CopyButton getText={() => nodeToJsonString(node)} label={label} nodeId={node.id} />;
+});
+
+// Copies the whole document as pretty-printed JSON.
+export const CopyAllButton = memo(function CopyAllButton({
+  getText,
+  onKeyDown,
+  buttonRef,
+}: {
+  getText: () => string;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+  buttonRef?: React.Ref<HTMLButtonElement>;
+}) {
+  const { copy, iconType, color, displayedLabel } = useCopyWithFeedback(
+    getText,
+    i18n.translate('unifiedDataTable.jsonTreeViewer.copyAll', { defaultMessage: 'Copy all' })
+  );
+
+  return (
+    <EuiButtonEmpty
+      buttonRef={buttonRef}
+      className="jsonTreeViewerHeaderControl"
+      color={color}
+      data-test-subj="jsonTreeViewerCopyAll"
+      flush="left"
+      iconSize="s"
+      iconType={iconType}
+      onClick={() => copy()}
+      onKeyDown={onKeyDown}
+      size="xs"
+    >
+      {displayedLabel}
+    </EuiButtonEmpty>
+  );
 });
 
 // A host-defined trailing action on a leaf row.

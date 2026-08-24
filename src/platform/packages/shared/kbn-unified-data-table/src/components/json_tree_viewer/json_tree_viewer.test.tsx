@@ -180,6 +180,27 @@ describe('JsonTreeViewer', () => {
 
       expect(screen.getByTestId('jsonTreeViewerExpandAll')).toHaveFocus();
     });
+
+    it('moves between the header controls with the Right and Left arrows', async () => {
+      render(<JsonTreeViewer json={{ user: { city: 'Berlin' } }} />);
+
+      screen.getByTestId('jsonTreeViewerExpandAll').focus();
+      await userEvent.keyboard('{ArrowRight}');
+      expect(screen.getByTestId('jsonTreeViewerCopyAll')).toHaveFocus();
+
+      await userEvent.keyboard('{ArrowLeft}');
+      expect(screen.getByTestId('jsonTreeViewerExpandAll')).toHaveFocus();
+    });
+
+    it('steps from the first row up to Copy all when there is no Expand all control', async () => {
+      // A flat document has no expandable collections, so Copy all is the only header control.
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+
+      screen.getByTestId(rowTestId('message')).focus();
+      await userEvent.keyboard('{ArrowUp}');
+
+      expect(screen.getByTestId('jsonTreeViewerCopyAll')).toHaveFocus();
+    });
   });
 
   describe('Auto expand nodes that contain a search match', () => {
@@ -404,6 +425,37 @@ describe('JsonTreeViewer', () => {
       expect(screen.getByTestId(copyTestId('message'))).toHaveFocus();
       await userEvent.keyboard('{ArrowLeft}');
       expect(row).toHaveFocus();
+    });
+  });
+
+  describe('copy all', () => {
+    beforeEach(() => copyToClipboardMock.mockClear());
+
+    it('copies the whole document as pretty-printed JSON', async () => {
+      const doc = { user: { name: 'Alice' }, count: 5 };
+      render(<JsonTreeViewer json={doc} />);
+
+      await userEvent.click(screen.getByTestId('jsonTreeViewerCopyAll'));
+
+      expect(copyToClipboardMock).toHaveBeenCalledWith(JSON.stringify(doc, null, 2));
+    });
+
+    it('renders even when there are no expandable collections', () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+
+      expect(screen.getByTestId('jsonTreeViewerCopyAll')).toBeVisible();
+      expect(screen.queryByTestId('jsonTreeViewerExpandAll')).not.toBeInTheDocument();
+    });
+
+    it('confirms the copy by swapping the icon to a success check', async () => {
+      render(<JsonTreeViewer json={{ message: 'hello' }} />);
+      const button = screen.getByTestId('jsonTreeViewerCopyAll');
+      expect(button.querySelector('[data-euiicon-type="copy"]')).toBeInTheDocument();
+
+      await userEvent.click(button);
+
+      expect(button.querySelector('[data-euiicon-type="check"]')).toBeInTheDocument();
+      expect(button.querySelector('[data-euiicon-type="copy"]')).not.toBeInTheDocument();
     });
   });
 

@@ -332,3 +332,15 @@ export const nodeToJsonValue = (node: JsonNode): JsonValue => {
   }
   return object;
 };
+
+/** Serialize the whole document (the root node list) to JSON, matching how the tree renders it. */
+export const rootToJsonString = (nodes: JsonNode[], rootType: CollectionType): string => {
+  return nodeToJsonString({
+    id: ROOT_ID,
+    key: '',
+    isArrayItem: false,
+    kind: 'collection',
+    collectionType: rootType,
+    children: nodes,
+  });
+};

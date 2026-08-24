@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useMemo, type ReactNode } from 'react';
+import React, { memo, useCallback, useMemo, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiMemoizedStyles } from '@elastic/eui';
 import {
   buildNodes,
   buildRows,
   collectExpandableIds,
+  rootToJsonString,
   type FormatValue,
   type GetLeafActions,
   type JsonValue,
@@ -24,7 +25,13 @@ import {
   useTreeExpansion,
   type TreeExpansionState,
 } from './use_tree_interaction';
-import { ClosingBracketRow, NodeRowView, PagerRowView, treeStyles } from './tree_rows';
+import {
+  ClosingBracketRow,
+  CopyAllButton,
+  NodeRowView,
+  PagerRowView,
+  treeStyles,
+} from './tree_rows';
 
 export type { FormatValue, GetLeafActions, JsonTreeRowAction, JsonValue } from './tree_model';
 export type { TreeExpansionState } from './use_tree_interaction';
@@ -81,6 +88,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   });
 
   const rootType = useMemo(() => (Array.isArray(json) ? 'array' : 'object'), [json]);
+  const copyAllText = useCallback(() => rootToJsonString(nodes, rootType), [nodes, rootType]);
 
   const rows = useMemo(
     () =>
@@ -98,38 +106,50 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
 
   const { hasControls, isAllExpanded, expandAll, collapseAll, toggle, revealMore, showFewer } =
     expansion;
-  const { activeRowId, setActive, registerRow, onRowKeyDown, onControlKeyDown, expandAllRef } = nav;
+  const { activeRowId, setActive, registerRow, onRowKeyDown, onControlKeyDown, firstControlRef } =
+    nav;
 
   return (
     <>
-      {(hasControls || extraHeaderContent) && (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          {hasControls && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                buttonRef={expandAllRef}
-                flush="left"
-                iconType={isAllExpanded ? 'fold' : 'unfold'}
-                iconSize="s"
-                onClick={isAllExpanded ? collapseAll : expandAll}
-                onKeyDown={onControlKeyDown}
-                size="xs"
-                color="text"
-                data-test-subj="jsonTreeViewerExpandAll"
-              >
-                {isAllExpanded
-                  ? i18n.translate('unifiedDataTable.jsonTreeViewer.collapseAll', {
-                      defaultMessage: 'Collapse all',
-                    })
-                  : i18n.translate('unifiedDataTable.jsonTreeViewer.expandAll', {
-                      defaultMessage: 'Expand all',
-                    })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          {extraHeaderContent && <EuiFlexItem grow={false}>{extraHeaderContent}</EuiFlexItem>}
-        </EuiFlexGroup>
-      )}
+      <EuiFlexGroup
+        className="jsonTreeViewerHeader"
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+      >
+        {hasControls && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              buttonRef={firstControlRef}
+              className="jsonTreeViewerHeaderControl"
+              flush="left"
+              iconType={isAllExpanded ? 'fold' : 'unfold'}
+              iconSize="s"
+              onClick={isAllExpanded ? collapseAll : expandAll}
+              onKeyDown={onControlKeyDown}
+              size="xs"
+              color="text"
+              data-test-subj="jsonTreeViewerExpandAll"
+            >
+              {isAllExpanded
+                ? i18n.translate('unifiedDataTable.jsonTreeViewer.collapseAll', {
+                    defaultMessage: 'Collapse all',
+                  })
+                : i18n.translate('unifiedDataTable.jsonTreeViewer.expandAll', {
+                    defaultMessage: 'Expand all',
+                  })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <CopyAllButton
+            getText={copyAllText}
+            onKeyDown={onControlKeyDown}
+            buttonRef={hasControls ? undefined : firstControlRef}
+          />
+        </EuiFlexItem>
+        {extraHeaderContent && <EuiFlexItem grow={false}>{extraHeaderContent}</EuiFlexItem>}
+      </EuiFlexGroup>
 
       <div css={[styles.wrapper, !wrapLines && styles.noWrap]}>
         <div
