@@ -1,5 +1,5 @@
 {
-  "sha1": "5d8c138ef9ffcde97c6b2151b3a52ecc40f422fa",
+  "sha1": "2ffebe89f20aca46b2d8e024b7bdc35aa0bd0e75",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1425,7 +1425,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 100,
+        "line": 107,
         "column": 10
       }
     },
@@ -1441,13 +1441,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 126,
+        "line": 133,
         "column": 10
       }
     },
     {
-      "id": "15fad2037802d36-616e10db6ba79eb",
-      "title": "Entity Store - privilege checks install - Should fail when user lacks permissions for entity store saved object descriptor",
+      "id": "15fad2037802d36-21ad743ce495379",
+      "title": "Entity Store - privilege checks Should fail when user lacks write privilege on target index patterns",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1457,7 +1457,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 154,
+        "line": 161,
+        "column": 10
+      }
+    },
+    {
+      "id": "15fad2037802d36-afbe5bbea0d8046",
+      "title": "Entity Store - privilege checks Should fail when user lacks permissions for entity store saved object descriptor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
+        "line": 189,
         "column": 10
       }
     },
@@ -1473,7 +1489,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 176,
+        "line": 211,
         "column": 10
       }
     },
@@ -1489,7 +1505,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 202,
+        "line": 237,
         "column": 10
       }
     },
@@ -1505,7 +1521,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 230,
+        "line": 265,
         "column": 10
       }
     },
@@ -1521,7 +1537,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 254,
+        "line": 289,
         "column": 10
       }
     },
@@ -1537,7 +1553,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 276,
+        "line": 311,
         "column": 10
       }
     },
@@ -1553,7 +1569,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/entity_store_privileges.spec.ts",
-        "line": 298,
+        "line": 333,
         "column": 10
       }
     },
