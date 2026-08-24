@@ -21,11 +21,17 @@ jest.mock('../../../detections/components/attacks/table/attacks_group_take_actio
   AttacksGroupTakeActionItems: ({
     onActionSuccess,
     isRemoteDocument,
+    telemetrySource,
   }: {
     onActionSuccess?: () => void;
     isRemoteDocument: boolean;
+    telemetrySource: string;
   }) => (
-    <div data-test-subj="mockAttacksGroupTakeActionItems" data-is-remote={String(isRemoteDocument)}>
+    <div
+      data-test-subj="mockAttacksGroupTakeActionItems"
+      data-is-remote={String(isRemoteDocument)}
+      data-telemetry-source={telemetrySource}
+    >
       <button type="button" data-test-subj="mockActionButton" onClick={onActionSuccess}>
         {'Action'}
       </button>
@@ -145,6 +151,17 @@ describe('<Footer />', () => {
     expect(getByTestId('mockAttacksGroupTakeActionItems')).toHaveAttribute(
       'data-is-remote',
       'true'
+    );
+  });
+
+  it('identifies the flyout as the telemetry source for take action events', () => {
+    const { getByTestId } = renderFooter();
+
+    fireEvent.click(getByTestId(FOOTER_TAKE_ACTION_BUTTON_TEST_ID));
+
+    expect(getByTestId('mockAttacksGroupTakeActionItems')).toHaveAttribute(
+      'data-telemetry-source',
+      'attacks_page_flyout_take_action'
     );
   });
 });

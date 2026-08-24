@@ -369,6 +369,33 @@ describe('useBulkAttackCaseItems', () => {
       });
     });
 
+    describe.each([
+      ['the attacks page', 'attacks_page_group_take_action'],
+      ['the attack flyout', 'attacks_page_flyout_take_action'],
+    ] as const)('when attaching from %s', (_surface, telemetrySource) => {
+      it('should report the add to new case event', async () => {
+        useIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+        await clickItem(1, { telemetrySource });
+
+        expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.ActionAddedToCase, {
+          source: telemetrySource,
+          action: 'add_to_new_case',
+        });
+      });
+
+      it('should report the add to existing case event', async () => {
+        useIsExperimentalFeatureEnabled.mockReturnValue(true);
+
+        await clickItem(0, { telemetrySource });
+
+        expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.ActionAddedToCase, {
+          source: telemetrySource,
+          action: 'add_to_existing_case',
+        });
+      });
+    });
+
     it('should not create a markdown user comment when the flag is on', async () => {
       useIsExperimentalFeatureEnabled.mockReturnValue(true);
 
