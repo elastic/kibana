@@ -1365,15 +1365,6 @@
       "enabled": true
     },
     {
-      "groupName": "aggregate-error",
-      "matchDepNames": ["aggregate-error"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "borc",
       "matchDepNames": ["borc"],
       "reviewers": ["team:kibana-operations"],
