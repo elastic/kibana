@@ -71,8 +71,12 @@ test.describe(
       });
 
       await test.step('verify rule creation', async () => {
+        const ruleName = 'Synthetics monitor status rule';
         await pageObjects.syntheticsApp.goToRulesPage();
-        await expect(page.getByText('Synthetics monitor status rule')).toBeVisible();
+        // Search by name to force a fresh scoped query: the list fetches once on load, which with preset rules (serverless) can predate the new rule being queryable.
+        await page.testSubj.fill('ruleSearchField', ruleName);
+        await page.testSubj.locator('ruleSearchField').press('Enter');
+        await expect(page.getByText(ruleName)).toBeVisible();
       });
     });
   }
