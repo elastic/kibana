@@ -43,20 +43,26 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       logsDir: options.logsDir,
     });
 
+    const extraKbnOpts: string[] = [];
+
+    if (!options.installDir) {
+      extraKbnOpts.push(
+        '--dev',
+        '--no-dev-config',
+        '--no-dev-credentials',
+        `--server.versioned.versionResolution=${config.get('serverless') ? 'newest' : 'oldest'}`
+      );
+    }
+
+    if (process.env.KIBANA_TEST_IPV6_ONLY === 'true') {
+      extraKbnOpts.push('--server.host=::1');
+    }
+
     await runKibanaServer({
       procs,
       config,
       installDir: options.installDir,
-      extraKbnOpts: options.installDir
-        ? []
-        : [
-            '--dev',
-            '--no-dev-config',
-            '--no-dev-credentials',
-            config.get('serverless')
-              ? '--server.versioned.versionResolution=newest'
-              : '--server.versioned.versionResolution=oldest',
-          ],
+      extraKbnOpts,
     });
 
     const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
@@ -81,16 +87,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
           module: config.module,
         }),
         installDir: options.installDir,
-        extraKbnOpts: options.installDir
-          ? []
-          : [
-              '--dev',
-              '--no-dev-config',
-              '--no-dev-credentials',
-              config.get('serverless')
-                ? '--server.versioned.versionResolution=newest'
-                : '--server.versioned.versionResolution=oldest',
-            ],
+        extraKbnOpts,
         remote: true,
       });
     }

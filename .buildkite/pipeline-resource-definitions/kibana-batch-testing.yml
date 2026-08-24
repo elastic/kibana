@@ -55,6 +55,13 @@ spec:
           branch: main
           env:
             TEST_CHANNELS: 'ci-batch-daily'
+        'Daily (IPv6)':
+          cronline: 0 2 * * 0-5
+          message: 'Scheduled batch (daily, IPv6-only)'
+          branch: main
+          env:
+            TEST_CHANNELS: 'ci-on-commit,ci-batch-3h,ci-batch-daily'
+            KIBANA_TEST_IPV6_ONLY: 'true'
         Weekly:
           cronline: 0 6 * * 5
           message: 'Scheduled batch (weekly)'
