@@ -17,7 +17,7 @@ import {
 } from './esql_attribute';
 import type { KiVerifier } from '../types';
 
-export const ESQL_EXECUTES_VERIFIER_ID = 'esql-executes';
+export const ESQL_EXECUTES_VERIFIER_ID = 'esql-valid-runtime';
 
 /**
  * Row cap injected right after the source command, so a query is bounded before
