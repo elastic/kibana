@@ -9,7 +9,11 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { APIRoutes } from '../../common/types';
-import { REGION_POLICY_QUERY_KEY, ROUTE_VERSIONS } from '../../common/constants';
+import {
+  INFERENCE_ENDPOINTS_QUERY_KEY,
+  REGION_POLICY_QUERY_KEY,
+  ROUTE_VERSIONS,
+} from '../../common/constants';
 import { useKibana } from './use_kibana';
 
 export const useDeleteRegionPolicy = (onSuccess?: () => void) => {
@@ -24,6 +28,7 @@ export const useDeleteRegionPolicy = (onSuccess?: () => void) => {
     },
     onSuccess: () => {
       queryClient.setQueryData([REGION_POLICY_QUERY_KEY], null);
+      queryClient.invalidateQueries([INFERENCE_ENDPOINTS_QUERY_KEY]);
       services.notifications.toasts.addSuccess({
         title: i18n.translate('xpack.searchInferenceEndpoints.regionPolicy.deleteSuccess', {
           defaultMessage: 'Region preferences reset to default',

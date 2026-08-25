@@ -25,6 +25,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import { TASK_TYPE_DESCRIPTIONS } from '@kbn/inference-endpoint-ui-common';
@@ -46,6 +47,7 @@ import {
   getModelStatus,
   getRegionZoneCounts,
 } from '../../utils/eis_utils';
+import { isModelUnavailableUnderRegionPolicy } from '../../utils/is_model_unavailable_under_region_policy';
 import { REGION_DISPLAY_NAMES } from '../../../common/constants';
 import type { EisInferenceEndpoint } from '../../../common/types';
 import { EisModelStatus } from '../../types';
@@ -75,6 +77,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
   const flyoutTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingEndpoint, setEditingEndpoint] = useState<EisInferenceEndpoint | undefined>();
+  const [isCalloutDismissed, setIsCalloutDismissed] = useState(false);
   const usageTracker = useUsageTracker();
 
   useEffect(() => {
@@ -146,6 +149,13 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
     setIsModalOpen(false);
     setEditingEndpoint(undefined);
   }, [usageTracker, editingEndpoint]);
+
+  const handleDismissCallout = useCallback(() => {
+    setIsCalloutDismissed(true);
+  }, []);
+
+  const showUnavailableCallout =
+    !isCalloutDismissed && isModelUnavailableUnderRegionPolicy(allEndpoints, modelId);
 
   const initialReasoningEffort = useMemo(() => {
     const effort = editingEndpoint?.task_settings?.reasoning?.effort;
@@ -273,6 +283,28 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
+        {showUnavailableCallout && (
+          <KbnWarningCallout
+            title={i18n.translate(
+              'xpack.searchInferenceEndpoints.modelDetailFlyout.regionPreferencesUnavailableTitle',
+              { defaultMessage: 'Model not available based on region preferences' }
+            )}
+            announceOnMount={false}
+            onDismiss={handleDismissCallout}
+            dismissButtonProps={{
+              'data-test-subj': 'modelDetailFlyoutRegionUnavailableCalloutDismiss',
+            }}
+            data-test-subj="modelDetailFlyoutRegionUnavailableCallout"
+            text={i18n.translate(
+              'xpack.searchInferenceEndpoints.modelDetailFlyout.regionPreferencesUnavailableDescription',
+              {
+                defaultMessage:
+                  "This model isn't available in the locations allowed by your region preferences. To use it, update your region preferences to include a supported location.",
+              }
+            )}
+          />
+        )}
+        {showUnavailableCallout && <EuiSpacer size="m" />}
         <EuiDescriptionList
           type="column"
           compressed

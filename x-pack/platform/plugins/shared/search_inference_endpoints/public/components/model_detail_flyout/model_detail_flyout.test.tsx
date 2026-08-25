@@ -188,6 +188,59 @@ describe('ModelDetailFlyout', () => {
     });
   });
 
+  describe('region preferences unavailable callout', () => {
+    const deniedEndpoint = createEndpoint({ metadata: { denied_by_region_policy: true } });
+
+    it('shows the callout when any endpoint is denied by region policy', () => {
+      renderFlyout(MODEL_ID, [
+        deniedEndpoint,
+        createEndpoint({
+          inference_id: 'ep-custom',
+          metadata: { denied_by_region_policy: false },
+        }),
+      ]);
+
+      const callout = screen.getByTestId('modelDetailFlyoutRegionUnavailableCallout');
+      expect(callout).toHaveTextContent('Model not available based on region preferences');
+      expect(callout).toHaveTextContent(
+        "This model isn't available in the locations allowed by your region preferences. To use it, update your region preferences to include a supported location."
+      );
+    });
+
+    it('hides the callout when denied_by_region_policy is missing', () => {
+      renderFlyout();
+
+      expect(
+        screen.queryByTestId('modelDetailFlyoutRegionUnavailableCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the callout when only a different model is denied by region policy', () => {
+      renderFlyout(MODEL_ID, [
+        createEndpoint(),
+        createEndpoint({
+          inference_id: 'ep-other',
+          service_settings: { model_id: 'other-model' },
+          metadata: { denied_by_region_policy: true },
+        }),
+      ]);
+
+      expect(
+        screen.queryByTestId('modelDetailFlyoutRegionUnavailableCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the callout after it is dismissed', () => {
+      renderFlyout(MODEL_ID, [deniedEndpoint]);
+
+      fireEvent.click(screen.getByTestId('modelDetailFlyoutRegionUnavailableCalloutDismiss'));
+
+      expect(
+        screen.queryByTestId('modelDetailFlyoutRegionUnavailableCallout')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('release and end-of-life dates', () => {
     const releaseLabel = 'Release date';
     const eolLabel = 'End-of-life date';

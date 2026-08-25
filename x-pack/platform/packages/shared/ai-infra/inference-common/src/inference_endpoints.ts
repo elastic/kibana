@@ -67,4 +67,5 @@ export type EisInferenceEndpointMetadata = {
     model_creator?: string;
   } & Record<string, unknown>;
   regions?: EisRegion[];
+  denied_by_region_policy?: boolean;
 } & Record<string, unknown>;
