@@ -281,7 +281,10 @@ const PendingThresholdExpression = ({
         max={100}
         compressed
         value={value}
-        onChange={(evt) => onChange(Number(evt.target.value))}
+        onChange={(evt) => {
+          const next = Number(evt.target.value);
+          onChange(Number.isFinite(next) && next >= 1 ? next : 1);
+        }}
       />
     </PopoverExpression>
   );
