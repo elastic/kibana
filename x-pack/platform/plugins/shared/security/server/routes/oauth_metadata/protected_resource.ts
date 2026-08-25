@@ -5,14 +5,30 @@
  * 2.0.
  */
 
+import { getOAuthProtectedResource } from '../../get_oauth_protected_resource';
 import type { RouteDefinitionParams } from '..';
 
-export function defineOAuthProtectedResourceRoute({ router, config }: RouteDefinitionParams) {
+export function defineOAuthProtectedResourceRoute({
+  router,
+  config,
+  basePath,
+  serverBaseUrl,
+}: RouteDefinitionParams) {
   if (!config.mcp?.oauth2) {
     return;
   }
 
   const { metadata } = config.mcp.oauth2;
+
+  // Resolves to the configured resource when set, otherwise the Kibana public base URL.
+  // A base-URL resource covers every OAuth-accepting endpoint (MCP, A2A) in any space;
+  // MCP SDK clients accept a same-origin parent resource and adopt it as their RFC 8707
+  // resource value.
+  const resource = getOAuthProtectedResource({
+    configuredResource: metadata.resource,
+    publicBaseUrl: basePath.publicBaseUrl,
+    serverBaseUrl,
+  });
 
   const authcReason =
     'This endpoint must be publicly accessible for OAuth 2 Protected Resource Metadata discovery.';
@@ -25,7 +41,7 @@ export function defineOAuthProtectedResourceRoute({ router, config }: RouteDefin
   // Only resource is required by the specification and authorization_servers must be present for our UIAM OAuth implementation.
   const metadataBody: Record<string, unknown> = {
     authorization_servers: metadata.authorization_servers,
-    resource: metadata.resource,
+    resource,
     ...(metadata.bearer_methods_supported
       ? { bearer_methods_supported: metadata.bearer_methods_supported }
       : {}),
