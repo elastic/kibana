@@ -45,6 +45,22 @@ describe('update watch route', () => {
     expect(update).not.toHaveBeenCalled();
   });
 
+  it('still disables a leftover watch when PND watches are disabled in the space', async () => {
+    const { handler, update } = registerHandler();
+    update.mockResolvedValue({ outcome: 'updated', response: {} });
+    const request = httpServerMock.createKibanaRequest({
+      params: { watchId: 'system-security-watch-floor' },
+      body: { enabled: false },
+    });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(createContext(false), request, response);
+
+    expect(update).toHaveBeenCalled();
+    expect(response.ok).toHaveBeenCalled();
+    expect(response.forbidden).not.toHaveBeenCalled();
+  });
+
   it.each([
     [{ outcome: 'conflict' }, 'conflict'],
     [{ outcome: 'rejected', what: 'an unsupported setting' }, 'badRequest'],

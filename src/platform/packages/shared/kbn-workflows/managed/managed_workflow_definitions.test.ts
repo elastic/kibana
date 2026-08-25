@@ -150,7 +150,7 @@ it.each([
   [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '1:79b46054'],
   [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '1:c23724c4'],
 ] as const)(
-  'requires an explicit %s version decision when imported YAML changes',
+  'requires bumping %s definition.version together with the imported YAML fingerprint',
   (workflowId, importedYaml, expectedFingerprint) => {
     const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);
     if (!definition) throw new Error(`Managed watch "${workflowId}" is not registered`);

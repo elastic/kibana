@@ -11,5 +11,5 @@ import type { ManagedWorkflowTemplateValues } from '../../types';
 
 export interface PndWatchTemplateValues extends ManagedWorkflowTemplateValues {
   settingsVersion: number;
-  autonomyLevel: string;
+  autonomyLevel: 'manual' | 'assisted' | 'supervised';
 }

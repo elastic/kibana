@@ -55,7 +55,14 @@ export const registerUpdateWatchRoute = ({
           const spaceEnabled = await core.uiSettings.client.get<boolean>(
             PND_SPACE_ENABLED_SETTING_ID
           );
-          if (!spaceEnabled) {
+          // A disable-only patch must still land when the space is already off; otherwise a leftover
+          // enabled watch cannot be turned off without first turning the space back on.
+          const isDisableOnlyPatch =
+            request.body.enabled === false &&
+            Object.entries(request.body).every(
+              ([key, value]) => key === 'enabled' || value === undefined
+            );
+          if (!spaceEnabled && !isDisableOnlyPatch) {
             return response.forbidden({
               body: {
                 message: i18n.translate('xpack.pnd.watches.spaceDisabledErrorMessage', {

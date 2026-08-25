@@ -20,6 +20,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import { isWorkflowConflictError } from '@kbn/workflows-yaml';
 import {
   WATCH_TAG,
   compareWatchesForDisplay,
@@ -182,6 +183,12 @@ export class WatchesService {
           workflowId: status.workflowId,
         });
       } catch (error) {
+        if (error instanceof Error && isWorkflowConflictError(error)) {
+          this.logger.info(
+            `PND watch "${registration.id}" in space "${spaceId}" is still draining; retry next sync`
+          );
+          continue;
+        }
         const message = error instanceof Error ? error.message : String(error);
         failures.push(`${registration.id}: ${message}`);
         this.logger.warn(
@@ -358,11 +365,11 @@ export class WatchesService {
     let settings: WatchSettings | undefined;
     let settingsRevision: number | null = null;
     if (registration?.settings) {
-      const state = await (
-        await this.requireManagedWorkflows()
-      ).getInstalledWorkflowState(workflowDocumentId, spaceId);
-      settingsRevision = state?.documentVersion ?? null;
       try {
+        const state = await (
+          await this.requireManagedWorkflows()
+        ).getInstalledWorkflowState(workflowDocumentId, spaceId);
+        settingsRevision = state?.documentVersion ?? null;
         const values = state?.templateValues
           ? registration.settings.migrate(state.templateValues).values
           : registration.settings.createDefaultValues();

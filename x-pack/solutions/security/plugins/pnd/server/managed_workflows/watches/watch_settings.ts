@@ -45,7 +45,7 @@ export const createWatchSettingsRegistration = (
       values,
       migrated:
         raw.settingsVersion !== WATCH_SETTINGS_VERSION ||
-        Object.keys(raw).some((key) => !(key in values)),
+        Object.keys(raw).some((key) => !Object.hasOwn(values, key)),
     };
   },
   applyPatch: (raw, patch) => {

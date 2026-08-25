@@ -13,6 +13,9 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { PND_MANAGED_WORKFLOW_OWNER_ID } from '../../common/constants';
 import { installRegisteredWatch, watchRegistry } from './watch_registry';
 
+/** Matches `getManagedWorkflowDocumentsAllSpaces` (`size: 1000`) in workflow_crud_service. */
+const MANAGED_WORKFLOW_STATE_LIST_CAP = 1000;
+
 export const initializeManagedWorkflows = async ({
   workflowsExtensions,
   logger,
@@ -44,6 +47,12 @@ export const initializeManagedWorkflows = async ({
 
   try {
     const states = await client.listInstalledWorkflowStates();
+    if (states.length >= MANAGED_WORKFLOW_STATE_LIST_CAP) {
+      canReconcile = false;
+      logger.warn(
+        `PND managed workflow list hit the ${MANAGED_WORKFLOW_STATE_LIST_CAP}-document read cap; skipping reconciliation`
+      );
+    }
     for (const state of states) {
       if (!state.definitionId) continue;
 

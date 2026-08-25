@@ -102,6 +102,27 @@ describe('initializeManagedWorkflows', () => {
     );
   });
 
+  it('degrades without reconciliation when the installed-state list hits the read cap', async () => {
+    const { client, workflowsExtensions, logger } = createDependencies();
+    client.listInstalledWorkflowStates = jest.fn(async () =>
+      Array.from({ length: 1000 }, (_, index) => ({
+        workflowId: `wf-${index}`,
+        spaceId: 'space-a',
+        definitionId: PND_WATCH_FLOOR_WORKFLOW_ID,
+        templateValues: {
+          settingsVersion: 1,
+          autonomyLevel: 'manual',
+        },
+        documentVersion: 1,
+      }))
+    );
+
+    await initializeManagedWorkflows({ workflowsExtensions, logger });
+
+    expect(client.ready).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('1000-document read cap'));
+  });
+
   it('does not reconcile when a required rule workflow install fails', async () => {
     const { client, workflowsExtensions, logger } = createDependencies();
     client.install.mockRejectedValueOnce(new Error('rule workflow install failed'));
