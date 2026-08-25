@@ -28,7 +28,7 @@ const buildDef = (ids: string[]) => ({
   body: ids.map((id) => ({ id, title: id.toUpperCase(), href: `https://localhost/app/${id}` })),
 });
 
-/** Extract the render-ready IDs (home, definition-hidden, and no-leaf nodes pruned). */
+/** Extract the render-ready IDs after hidden and no-leaf nodes are pruned. */
 const renderableIds = (result: ParsedNavigation): string[] =>
   result.renderableNodes.map((n) => n.id);
 
@@ -82,27 +82,6 @@ describe('applyCustomization', () => {
   });
 
   describe('defaultItemIds', () => {
-    it('includes items with renderAs === "home"', () => {
-      const def = {
-        id: SOLUTION_ID,
-        body: [
-          { id: 'home_node', title: 'HOME', renderAs: 'home' as const },
-          { id: 'a', title: 'A' },
-          { id: 'b', title: 'B' },
-        ],
-      };
-
-      const result = applyCustomization(
-        SOLUTION_ID,
-        def,
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        undefined
-      );
-
-      expect(result.defaultItemIds).toEqual(['home_node', 'a', 'b']);
-    });
-
     it('captures ids from items that use the `link` field instead of `id`', () => {
       const def = {
         id: SOLUTION_ID,
@@ -225,32 +204,6 @@ describe('applyCustomization', () => {
   });
 
   describe('renderableNodes (pruning rules)', () => {
-    it('includes the home node in renderableNodes', () => {
-      const def = {
-        id: SOLUTION_ID,
-        body: [
-          {
-            id: 'home_node',
-            title: 'HOME',
-            renderAs: 'home' as const,
-            href: 'https://localhost/app/home',
-          },
-          { id: 'a', title: 'A', href: 'https://localhost/app/a' },
-          { id: 'b', title: 'B', href: 'https://localhost/app/b' },
-        ],
-      };
-
-      const result = applyCustomization(
-        SOLUTION_ID,
-        def,
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        undefined
-      );
-
-      expect(renderableIds(result)).toEqual(['home_node', 'a', 'b']);
-    });
-
     it('excludes nodes flagged with sideNavStatus "hidden" in the definition', () => {
       const def = {
         id: SOLUTION_ID,

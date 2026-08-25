@@ -41,11 +41,11 @@ export interface NavigationItems {
  *
  * Structural Assumptions and Mapping
  *
- * - 2nd level nodes are transformed into primary navigation items:
+ * - Top-level body nodes are transformed into primary navigation items:
  *   - Accordion nodes are flattened (not supported) - their children become primary items
  *   - Nodes without links that aren't panel openers are treated as section dividers and not supported in new nav - their children are flattened
  *   - panelOpener nodes create flyout secondary navigation panels, they can't have links directly, but can have sections with links
- * - 3rd level is used for secondary navigation (children of panelOpener):
+ * - Children of panel-opener nodes become secondary navigation:
  *   - If all 3rd level items have links, they're treated as menu items and wrapped in a single section
  *   - If some don't have links, they're treated as section headers with their children becoming menu items
  * - Footer is limited to 5 items maximum (extras are dropped with warning)
@@ -101,15 +101,10 @@ export const toNavigationItems = (
     );
   };
 
-  // Home stays in `primaryNodes` as a regular, customizable sidebar item.
-  // Its title/icon are normalized upstream in `applyCustomization`.
+  // Title/icon for `renderAs: 'home'` are normalized upstream in `applyCustomization`.
   // TODO: remove the `renderAs: 'home'` special-casing entirely in favor of
   // solution-owned nav tree config: https://github.com/elastic/kibana/issues/272291
-
-  const homeNodeIndex = primaryNodes.findIndex((node) => node.renderAs === 'home');
-  if (homeNodeIndex !== -1) {
-    maybeMarkActive(primaryNodes[homeNodeIndex], 0);
-  } else {
+  if (!primaryNodes.some((node) => node.renderAs === 'home')) {
     warnOnce(
       `No "home" node found in primary nodes. There should be a node with renderAs: "home".`
     );

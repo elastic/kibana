@@ -33,8 +33,7 @@ export interface ParsedNavigation {
   defaultItemIds: string[];
   /**
    * Top-level body nodes the sidebar will actually render: hidden nodes removed
-   * and panel-openers with no visible descendants pruned. The `renderAs: 'home'`
-   * node is kept as a regular customizable item.
+   * and panel-openers with no visible descendants pruned.
    */
   renderableNodes: ChromeProjectNavigationNode[];
 }
@@ -50,10 +49,8 @@ export interface ParsedNavigation {
  * `defaultItemIds` is captured from the *original* body (before any moves) so
  * callers can always determine which items ship with the solution by default.
  *
- * The `renderAs: 'home'` node is treated as a regular, customizable item: it is
- * kept in `defaultItemIds`/`renderableNodes` and normalized to the shared "Home"
- * title and icon so the customize modal and the rendered sidebar present it
- * identically.
+ * The `renderAs: 'home'` node is normalized to the shared "Home" title and icon
+ * so the customize modal and the rendered sidebar present it identically.
  */
 export const applyCustomization = (
   solutionId: SolutionId,
