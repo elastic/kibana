@@ -813,17 +813,6 @@ describe('useAvailablePackages', () => {
       mockExperimentalFeaturesServiceGet.mockReturnValue({
         enableIntegrationCollectionTiles: true,
       });
-      mockApplyGrouping.mockReturnValue({
-        collectionCards: [
-          {
-            id: 'collection:nginx',
-            name: 'nginx',
-            isCollectionCard: true,
-            groupMembers: [],
-          },
-        ],
-        ungroupedItems: [],
-      });
 
       const { result } = renderHook(() =>
         useAvailablePackages({
