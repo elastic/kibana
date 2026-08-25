@@ -176,7 +176,7 @@ export function transformSpecToActionTypeModel(
           <>
             {configFields}
             <EuiSpacer size="m" />
-            <UseField<string[] | null>
+            <UseField
               path="config.selectedActions"
               config={{ defaultValue: null }}
               component={ConnectorActionSelectorField}
