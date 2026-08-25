@@ -31,6 +31,8 @@
       "@kbn/actions-utils/*": ["./src/platform/packages/shared/kbn-actions-utils/*"],
       "@kbn/adaptive-ui": ["./src/platform/packages/shared/adaptive-ui"],
       "@kbn/adaptive-ui/*": ["./src/platform/packages/shared/adaptive-ui/*"],
+      "@kbn/adaptive-ui-adapters": ["./x-pack/platform/packages/shared/adaptive-ui-adapters"],
+      "@kbn/adaptive-ui-adapters/*": ["./x-pack/platform/packages/shared/adaptive-ui-adapters/*"],
       "@kbn/adaptive-ui-plugin": ["./x-pack/platform/plugins/shared/adaptive_ui"],
       "@kbn/adaptive-ui-plugin/*": ["./x-pack/platform/plugins/shared/adaptive_ui/*"],
       "@kbn/advanced-settings-plugin": ["./src/platform/plugins/private/advanced_settings"],

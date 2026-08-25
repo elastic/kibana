@@ -4219,6 +4219,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/adaptive-ui-adapters@link:x-pack/platform/packages/shared/adaptive-ui-adapters":
+  version "0.0.0"
+  uid ""
+
 "@kbn/adaptive-ui-plugin@link:x-pack/platform/plugins/shared/adaptive_ui":
   version "0.0.0"
   uid ""

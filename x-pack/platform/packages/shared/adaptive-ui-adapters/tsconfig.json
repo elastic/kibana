@@ -1,0 +1,13 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "kbn_references": [
+    "@kbn/adaptive-ui",
+    "@kbn/agent-builder-common"
+  ],
+  "exclude": ["target/**/*"]
+}
