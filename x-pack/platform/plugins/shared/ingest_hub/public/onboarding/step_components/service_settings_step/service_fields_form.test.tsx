@@ -46,7 +46,7 @@ describe('ServiceFieldsForm — multi-DS flat input-toggle rendering', () => {
   const MULTI_DS_SERVICE: AwsServiceMatrixEntry = {
     id: 'test_multi',
     name: 'Test Multi DS',
-    category: 'security',
+    category: 'security_identity_compliance',
     signalTypes: ['logs'],
     dataStreams: ['ds_a', 'ds_b'],
     packageName: 'aws',
@@ -61,12 +61,14 @@ describe('ServiceFieldsForm — multi-DS flat input-toggle rendering', () => {
         type: 'logs',
         inputs: ['aws-s3'],
         defaultEnabledInputs: ['aws-s3'],
+        varDefsByInput: {},
       },
       ds_b: {
         title: 'DS B Logs',
         type: 'logs',
         inputs: ['aws-s3', 'aws-cloudwatch'],
         defaultEnabledInputs: ['aws-s3'],
+        varDefsByInput: {},
       },
     },
   };
