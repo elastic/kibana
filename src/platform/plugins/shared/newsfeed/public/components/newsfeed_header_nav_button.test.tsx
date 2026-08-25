@@ -105,4 +105,32 @@ describe('NewsfeedNavButton', () => {
     });
     expect(screen.getByTestId('newsfeedAllRead')).toBeInTheDocument();
   });
+
+  test('does not render the button once a successful fetch confirms there are no feed items', () => {
+    renderComponent(createFetchResult({ feedItems: [] }));
+    expect(screen.queryByTestId('newsfeedHasUnread')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('newsfeedAllRead')).not.toBeInTheDocument();
+  });
+
+  test('keeps rendering the button while the initial fetch is still pending', () => {
+    renderComponent(null);
+    expect(screen.getByTestId('newsfeedAllRead')).toBeInTheDocument();
+  });
+
+  test('keeps rendering the button on a fetch error, even with no feed items', () => {
+    renderComponent(createFetchResult({ feedItems: [], error: new Error('fetch failed') }));
+    expect(screen.getByTestId('newsfeedAllRead')).toBeInTheDocument();
+  });
+
+  test('does not abruptly hide the button while its flyout is open when items are cleared', async () => {
+    const { fetchResults$ } = renderComponent(createFetchResult());
+    await user.click(screen.getByTestId('newsfeedHasUnread'));
+    expect(screen.getByTestId('NewsfeedFlyout')).toBeInTheDocument();
+
+    act(() => {
+      fetchResults$.next(createFetchResult({ feedItems: [] }));
+    });
+
+    expect(screen.getByTestId('NewsfeedFlyout')).toBeInTheDocument();
+  });
 });

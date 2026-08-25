@@ -54,6 +54,21 @@ export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$, isServerles
     setFlyoutVisible(!flyoutVisible);
   }, [newsfeedApi, newsFetchResult, flyoutVisible]);
 
+  // Once a fetch has actually completed successfully and confirmed there are no feed items,
+  // there's nothing for the icon to lead to - hide it instead of leaving a permanent, inert
+  // menu item that always requires an administrator to explain/disable. Keep showing it while
+  // the initial fetch is still pending (`newsFetchResult` is `null`/`void`), on fetch errors,
+  // and - even if items are later cleared - while the flyout the user opened is still open.
+  const hasFeedItems = useMemo(() => {
+    return !!(newsFetchResult && !newsFetchResult.error && newsFetchResult.feedItems.length > 0);
+  }, [newsFetchResult]);
+  const hasFetchedSuccessfully = !!newsFetchResult && !newsFetchResult.error;
+  const shouldHideButton = hasFetchedSuccessfully && !hasFeedItems && !flyoutVisible;
+
+  if (shouldHideButton) {
+    return null;
+  }
+
   return (
     <NewsfeedContext.Provider value={{ setFlyoutVisible, newsFetchResult }}>
       <>
