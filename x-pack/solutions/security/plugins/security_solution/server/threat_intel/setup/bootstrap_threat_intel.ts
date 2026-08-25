@@ -1,0 +1,191 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import {
+  THREAT_INTEL_SOURCES_INDEX,
+  DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
+} from '../../../common/threat_intel';
+import { installIndexTemplates } from './index_templates';
+import { seedDefaultSources, type SeedDefaultSourcesResult } from './seed_default_sources';
+
+export interface BootstrapThreatIntelResult {
+  seed: SeedDefaultSourcesResult;
+}
+
+const BOOTSTRAP_RETRY_ATTEMPTS = 8;
+const BOOTSTRAP_RETRY_DELAY_MS = 2_000;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const withElasticsearchRetry = async <T>(
+  operation: () => Promise<T>,
+  log: Logger,
+  label: string
+): Promise<T> => {
+  let lastError: Error | undefined;
+
+  for (let attempt = 1; attempt <= BOOTSTRAP_RETRY_ATTEMPTS; attempt += 1) {
+    try {
+      return await operation();
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (attempt === BOOTSTRAP_RETRY_ATTEMPTS) {
+        break;
+      }
+      log.warn(
+        `${label} failed (attempt ${attempt}/${BOOTSTRAP_RETRY_ATTEMPTS}): ${lastError.message}; retrying`
+      );
+      await sleep(BOOTSTRAP_RETRY_DELAY_MS);
+    }
+  }
+
+  throw lastError ?? new Error(`${label} failed`);
+};
+
+/**
+ * Checks that the text-embedding endpoint backing the `semantic_text` Diamond
+ * summary fields is present. Non-fatal: Elasticsearch validates `inference_id`
+ * when a document is indexed rather than at template PUT, so a missing endpoint
+ * only surfaces when `extract_diamond` first writes a `summary`.
+ *
+ * This is not the model that performs Diamond extraction — that one is resolved
+ * per request from the `threat_intel_diamond` inference feature.
+ */
+const checkDiamondSummaryEmbeddingEndpoint = async (
+  esClient: ElasticsearchClient,
+  log: Logger
+): Promise<void> => {
+  try {
+    await esClient.inference.get({ inference_id: DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID });
+    log.debug(
+      `Diamond summary embedding endpoint ${DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID} verified present`
+    );
+  } catch (err) {
+    const status = (err as { statusCode?: number }).statusCode;
+    if (status === 404) {
+      log.warn(
+        `The Diamond summary fields are mapped as semantic_text against ` +
+          `"${DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID}", which this cluster does not have. ` +
+          `Reports still index; only extracted.diamond.*.summary writes will fail. ` +
+          `Dot-prefixed inference ids are preconfigured by Elasticsearch and cannot be created ` +
+          `by hand, so a deployment without it needs those fields remapped to an endpoint ` +
+          `that exists.`
+      );
+    } else {
+      log.warn(
+        `Could not verify the Diamond summary embedding endpoint: ${(err as Error).message}. ` +
+          `This may be a transient error; re-check on next restart.`
+      );
+    }
+  }
+};
+
+/**
+ * Seeds the default feed catalog into `.kibana-threat-intel-sources`.
+ *
+ * Separated from template installation so seeding can be catalog-gated while
+ * templates run on every boot. Called only when the catalog is empty.
+ */
+const seedThreatIntelCatalog = async ({
+  esClient,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<BootstrapThreatIntelResult> => {
+  const log = logger.get('bootstrap');
+
+  const seed = await withElasticsearchRetry(
+    async () => {
+      const result = await seedDefaultSources({ esClient, logger });
+      // Partial failures have to retry. `seedDefaultSources` catches per-item
+      // and bulk errors and reports them as `failed`, so returning here would
+      // treat a partial seed as success: the next boot sees a non-empty catalog
+      // and skips seeding forever, permanently omitting the rest of the starter
+      // catalog. Retrying is safe because already-created entries come back as
+      // `skipped` (conflicts are idempotent).
+      if (result.failed > 0) {
+        throw new Error(
+          `${result.failed} of ${result.total} default sources failed to seed ` +
+            `(${result.created} created, ${result.skipped} already present)`
+        );
+      }
+      return result;
+    },
+    log,
+    'Threat intelligence default source seeding'
+  );
+
+  log.info(
+    `Threat intelligence source seeding finished: ${seed.created} sources created, ` +
+      `${seed.skipped} already present, ${seed.failed} failed (${seed.total} catalog entries)`
+  );
+
+  const catalogCount = await esClient.count(
+    { index: THREAT_INTEL_SOURCES_INDEX },
+    { ignore: [404] }
+  );
+  if (catalogCount.count === 0 && seed.created === 0) {
+    log.error(
+      'Threat intelligence source seeding completed but `.kibana-threat-intel-sources` is still empty'
+    );
+  }
+
+  return { seed };
+};
+
+/**
+ * Idempotent entry point called on every plugin boot.
+ *
+ * Index templates and schema migrations (installIndexTemplates) run on EVERY
+ * boot — they are unconditional PUT operations that are safe to re-run and
+ * must run on each restart so version bumps and migrateExisting* patches reach
+ * populated clusters. Skipping them when the catalog is non-empty was the bug
+ * that caused ALL schema migrations (v14–v19) to silently miss any cluster
+ * that had already been seeded.
+ *
+ * Source catalog seeding is still catalog-gated: it only runs when the sources
+ * index is missing or empty (fresh install, or ES data wiped while Kibana ran).
+ */
+export const ensureThreatIntelBootstrap = async ({
+  esClient,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<BootstrapThreatIntelResult | undefined> => {
+  const log = logger.get('bootstrap');
+
+  // Always install templates and run migration patches — idempotent and safe
+  // to re-run; skipping them on a populated cluster silently breaks schema
+  // upgrades (the bug that kept templates at v18 on every non-fresh boot).
+  await withElasticsearchRetry(
+    () => installIndexTemplates({ esClient, logger }),
+    log,
+    'Threat intelligence index template installation'
+  );
+
+  // Non-blocking check — see `checkDiamondSummaryEmbeddingEndpoint` doc comment.
+  await checkDiamondSummaryEmbeddingEndpoint(esClient, log);
+
+  const catalogCount = await esClient.count(
+    { index: THREAT_INTEL_SOURCES_INDEX },
+    { ignore: [404] }
+  );
+
+  if (catalogCount.count > 0) {
+    log.debug(
+      `Threat intelligence catalog already has ${catalogCount.count} sources; skipping source seeding`
+    );
+    return undefined;
+  }
+
+  log.info('Threat intelligence catalog is empty; running source seeding');
+
+  return seedThreatIntelCatalog({ esClient, logger });
+};
