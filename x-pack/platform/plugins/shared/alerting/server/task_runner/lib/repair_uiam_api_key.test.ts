@@ -243,7 +243,9 @@ describe('repairUiamApiKey()', () => {
     });
     unsafeClient.update = jest
       .fn()
-      .mockRejectedValue(SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-1'));
+      .mockRejectedValue(
+        SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-1')
+      );
 
     await callRepair(context);
 
