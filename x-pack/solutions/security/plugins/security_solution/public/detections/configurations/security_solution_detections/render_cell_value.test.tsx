@@ -11,7 +11,6 @@ import type { ComponentProps } from 'react';
 import React from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { Alert } from '@kbn/alerting-types';
-import { CPS_SCOPE_LINKED_PROJECTS } from '@kbn/rule-data-utils';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
@@ -106,27 +105,29 @@ describe('RenderCellValue', () => {
     expect(getByText('Nov 5, 2018 @ 19:03:25.937')).toBeInTheDocument();
   });
 
-  it('renders kibana.cps_scope.linked_projects as alias strings instead of [object Object]', () => {
+  it('renders flattened object fields as JSON strings instead of [object Object]', () => {
+    const FLATTENED_FIELD = 'kibana.cps_scope.linked_projects';
     const linkedProjects = [
       { id: 'p1', alias: '_alias:project-one', type: 'project', organization: 'org-1' },
       { id: 'p2', alias: '_alias:project-two', type: 'project', organization: 'org-1' },
     ];
     const alertWithCps: Alert = {
       ...(defaultProps.alert as Alert),
-      [CPS_SCOPE_LINKED_PROJECTS]: linkedProjects,
+      [FLATTENED_FIELD]: linkedProjects,
     } as unknown as Alert;
 
-    const cpsHeader = { ...cloneDeep(defaultHeaders[0]), id: CPS_SCOPE_LINKED_PROJECTS };
-    const { getByText, queryByText } = render(
+    const cpsHeader = { ...cloneDeep(defaultHeaders[0]), id: FLATTENED_FIELD };
+    const { queryByText, baseElement } = render(
       <RenderCellValueComponent
         {...defaultProps}
         alert={alertWithCps}
-        columnId={CPS_SCOPE_LINKED_PROJECTS}
+        columnId={FLATTENED_FIELD}
         header={cpsHeader as ColumnHeaderOptions}
       />
     );
 
     expect(queryByText(/\[object Object\]/)).not.toBeInTheDocument();
-    expect(getByText('_alias:project-one, _alias:project-two')).toBeInTheDocument();
+    expect(baseElement.textContent).toContain('"alias":"_alias:project-one"');
+    expect(baseElement.textContent).toContain('"alias":"_alias:project-two"');
   });
 });
