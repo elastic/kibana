@@ -307,13 +307,12 @@ describe('parser corpus: textToTimeRange (English)', () => {
       },
       {
         input: 'now/y+3M',
-        note: 'rounding then offset (chained date math)',
+        note: 'rounding then offset (chained date math); validity is calendar-dependent (Apr 1 vs now)',
         expected: {
           start: 'now/y+3M',
           end: 'now',
           type: [DATE_TYPE_RELATIVE, DATE_TYPE_NOW],
           startOffset: null,
-          isInvalid: false,
         },
       },
       {
@@ -511,7 +510,7 @@ describe('parser corpus: textToTimeRange (English)', () => {
         input: 'now/y+3M',
         options: { roundRelativeTime: true },
         note: 'chained date math is left unchanged (no extra inferred rounding)',
-        expected: { start: 'now/y+3M', end: 'now', startOffset: null, isInvalid: false },
+        expected: { start: 'now/y+3M', end: 'now', startOffset: null },
       },
     ]);
   });
