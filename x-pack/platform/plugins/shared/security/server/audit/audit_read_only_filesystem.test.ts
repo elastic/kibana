@@ -42,7 +42,7 @@ describe('createLoggingConfig', () => {
   const config = auditConfig(rollingFileAppender('/var/log/kibana/audit.log'));
 
   it('keeps the configured appender and `info` level while the log is writable', () => {
-    const loggingConfig = createLoggingConfig(config, false, {
+    const loggingConfig = createLoggingConfig(config, {
       granted: true,
       path: '/var/log/kibana/audit.log',
       checkedAt: '2026-08-03T10:00:00.000Z',
