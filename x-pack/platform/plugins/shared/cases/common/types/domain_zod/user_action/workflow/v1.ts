@@ -15,14 +15,13 @@ export const WorkflowPayloadSchema = z.object({
   executionId: z.string(),
 });
 
-export const WorkflowOriginSchema = z
-  .object({
-    type: z.enum(CASE_WORKFLOW_USER_ACTION_ORIGIN_TYPES),
-    id: z.string(),
-    index: z.string().optional(),
-    typeKey: z.string().optional(),
-    value: z.string().optional(),
-  });
+export const WorkflowOriginSchema = z.object({
+  type: z.enum(CASE_WORKFLOW_USER_ACTION_ORIGIN_TYPES),
+  id: z.string(),
+  index: z.string().optional(),
+  typeKey: z.string().optional(),
+  value: z.string().optional(),
+});
 
 export const WorkflowUserActionPayloadSchema = z.object({
   workflow: WorkflowPayloadSchema,

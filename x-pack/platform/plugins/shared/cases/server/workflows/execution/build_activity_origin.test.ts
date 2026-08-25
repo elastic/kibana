@@ -62,7 +62,14 @@ describe('buildActivityOrigin', () => {
       const origin = { type: OBSERVABLE_WORKFLOW_ORIGIN_TYPE, id: 'obs-1' };
       const theCase = makeCase({
         observables: [
-          { id: 'obs-1', typeKey: 'ip', value: '1.2.3.4', description: null, createdAt: '', updatedAt: '' },
+          {
+            id: 'obs-1',
+            typeKey: 'ip',
+            value: '1.2.3.4',
+            description: null,
+            createdAt: '',
+            updatedAt: '',
+          },
         ],
       });
       expect(buildActivityOrigin({ origin, theCase })).toEqual({

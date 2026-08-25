@@ -8,6 +8,8 @@
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WorkflowsManagementUiActions } from '@kbn/workflows';
+import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { WorkflowOrigin, WorkflowUserAction } from '../../../common/types/domain';
 import {
@@ -19,8 +21,6 @@ import {
   ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
-import { WorkflowsManagementUiActions } from '@kbn/workflows';
-import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { UserActionBuilder, UserActionBuilderArgs } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { useAppUrl, useKibana } from '../../common/lib/kibana';
@@ -49,7 +49,9 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
     Boolean(wfCapabilities?.[WorkflowsManagementUiActions.readExecution]);
 
   const executionHref = getAppUrl({
-    path: `/${encodeURIComponent(id)}?tab=executions&executionId=${encodeURIComponent(executionId)}`,
+    path: `/${encodeURIComponent(id)}?tab=executions&executionId=${encodeURIComponent(
+      executionId
+    )}`,
   });
 
   const workflowNameNode = canViewExecution ? (
@@ -136,6 +138,8 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
     </EuiText>
   );
 };
+
+WorkflowActivityLabel.displayName = 'WorkflowActivityLabel';
 
 export const createWorkflowUserActionBuilder: UserActionBuilder = ({
   userAction,

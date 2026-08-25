@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { validateMaxUserActions } from '../../common/validators';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import type { WorkflowOrigin, WorkflowPayload } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
+import { WORKFLOW_RUN_AUTHZ_OPERATION } from '../cases/ensure_authorized_to_update';
 
 export interface PreflightWorkflowExecutionArgs {
   caseId: string;
@@ -18,8 +18,6 @@ export interface PreflightWorkflowExecutionArgs {
 
 export interface RecordWorkflowExecutionArgs {
   caseId: string;
-  /** The owner of the case — taken from the already-fetched case to avoid a second SO read. */
-  owner: string;
   workflow: WorkflowPayload;
   origin: WorkflowOrigin;
 }
@@ -51,23 +49,31 @@ export const preflightWorkflowExecution = async (
 
 /**
  * Records a workflow execution user action in the case activity log.
+ *
+ * The case owner is fetched from the saved object so that authorization cannot be bypassed
+ * by passing a forged owner — this method is exposed on the public UserActionsSubClient.
  */
 export const recordWorkflowExecution = async (
-  { caseId, owner, workflow, origin }: RecordWorkflowExecutionArgs,
+  { caseId, workflow, origin }: RecordWorkflowExecutionArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
     logger,
     user,
     authorization,
-    services: { userActionService },
+    services: { caseService, userActionService },
   } = clientArgs;
 
   try {
-    // Defensive authorization — the execution API already authorized with ensureAuthorizedToUpdate
-    // but we re-check here because this function is exposed on the cases client.
+    // Fetch the case to obtain the authoritative owner — we never trust caller-supplied owner
+    // because this function is exposed on the public UserActionsSubClient.
+    const theCase = await caseService.getCase({ id: caseId });
+    const owner = theCase.attributes.owner;
+
+    // Use the workflow-specific access operation (not Operations.updateCase) so the audit log
+    // emits an 'access' event rather than a 'change' event for workflow runs.
     await authorization.ensureAuthorized({
-      operation: Operations.updateCase,
+      operation: WORKFLOW_RUN_AUTHZ_OPERATION,
       entities: [{ id: caseId, owner }],
     });
 

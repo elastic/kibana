@@ -81,9 +81,7 @@ export const createCommonUpdateUserActionBuilder = ({
         timelineAvatarAriaLabel: getUserActionAriaLabel(userAction.type),
         actions: (
           <EuiFlexGroup responsive={false}>
-            {extraActions != null && (
-              <EuiFlexItem grow={false}>{extraActions}</EuiFlexItem>
-            )}
+            {extraActions != null && <EuiFlexItem grow={false}>{extraActions}</EuiFlexItem>}
             <EuiFlexItem grow={false}>
               <UserActionCopyLink id={userAction.id} />
             </EuiFlexItem>

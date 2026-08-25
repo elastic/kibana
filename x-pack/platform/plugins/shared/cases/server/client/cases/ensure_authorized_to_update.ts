@@ -20,7 +20,7 @@ import type { CasesClientArgs } from '../types';
  * to emit `case_workflow_run_authz` (an access event) rather than the misleading `case_update`
  * (a change event) that `Operations.updateCase` produces.
  */
-const WORKFLOW_RUN_AUTHZ_OPERATION: OperationDetails = {
+export const WORKFLOW_RUN_AUTHZ_OPERATION: OperationDetails = {
   ecsType: 'access',
   name: WriteOperations.UpdateCase,
   action: 'case_workflow_run_authz',

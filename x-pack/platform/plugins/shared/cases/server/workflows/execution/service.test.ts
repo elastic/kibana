@@ -113,6 +113,8 @@ describe('CasesWorkflowRunService', () => {
           name: 'Investigate case',
           executionId: 'execution-1',
         }),
+        // Note: owner is no longer passed from the service — recordWorkflowExecution
+        // fetches it from the case SO to prevent privilege escalation.
         origin: defaultBody.origin,
       })
     );

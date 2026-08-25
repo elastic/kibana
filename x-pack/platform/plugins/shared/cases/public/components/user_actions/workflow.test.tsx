@@ -112,44 +112,62 @@ describe('createWorkflowUserActionBuilder', () => {
   });
 
   describe('origin labels', () => {
+    const WORKFLOW_NAME = 'My Workflow';
     const makePayload = (type: string, extra: Record<string, unknown> = {}) => ({
-      workflow: { id: 'wf-1', name: 'My Workflow', executionId: 'exec-1' },
+      workflow: { id: 'wf-1', name: WORKFLOW_NAME, executionId: 'exec-1' },
       origin: { type, id: 'x', ...extra },
     });
 
     it('renders the case origin label', () => {
       buildAndRender(makePayload(CASE_WORKFLOW_ORIGIN_TYPE));
-      expect(screen.getByTestId('workflow-user-action-label')).toBeInTheDocument();
+      expect(screen.getByTestId('workflow-user-action-label')).toHaveTextContent(
+        `ran ${WORKFLOW_NAME} on this case`
+      );
     });
 
     it('renders the observable origin label with type+value when enriched', () => {
-      buildAndRender(makePayload(OBSERVABLE_WORKFLOW_ORIGIN_TYPE, { typeKey: 'ip', value: '1.2.3.4' }));
-      expect(screen.getByTestId('workflow-user-action-label')).toBeInTheDocument();
+      buildAndRender(
+        makePayload(OBSERVABLE_WORKFLOW_ORIGIN_TYPE, { typeKey: 'ip', value: '1.2.3.4' })
+      );
+      // typeKey 'ip' has no builtin label, so the raw key is used as the type label.
+      expect(screen.getByTestId('workflow-user-action-label')).toHaveTextContent(
+        `ran ${WORKFLOW_NAME} on observable ip: 1.2.3.4`
+      );
     });
 
     it('renders the observable fallback label when not enriched', () => {
       buildAndRender(makePayload(OBSERVABLE_WORKFLOW_ORIGIN_TYPE));
-      expect(screen.getByTestId('workflow-user-action-label')).toBeInTheDocument();
+      expect(screen.getByTestId('workflow-user-action-label')).toHaveTextContent(
+        `ran ${WORKFLOW_NAME} on an observable`
+      );
     });
 
     it('renders the alert origin label', () => {
       buildAndRender(makePayload(ALERT_WORKFLOW_ORIGIN_TYPE));
-      expect(screen.getByTestId('workflow-user-action-label')).toBeInTheDocument();
+      expect(screen.getByTestId('workflow-user-action-label')).toHaveTextContent(
+        `ran ${WORKFLOW_NAME} on an alert`
+      );
     });
 
     it('renders the alerts origin label', () => {
       buildAndRender(makePayload(ALERTS_WORKFLOW_ORIGIN_TYPE));
-      expect(screen.getByTestId('workflow-user-action-label')).toBeInTheDocument();
+      expect(screen.getByTestId('workflow-user-action-label')).toHaveTextContent(
+        `ran ${WORKFLOW_NAME} on alerts`
+      );
     });
 
     it('renders the comment origin label', () => {
       buildAndRender(makePayload(COMMENT_WORKFLOW_ORIGIN_TYPE));
-      expect(screen.getByTestId('workflow-user-action-label')).toBeInTheDocument();
+      expect(screen.getByTestId('workflow-user-action-label')).toHaveTextContent(
+        `ran ${WORKFLOW_NAME} on a comment`
+      );
     });
 
     it('renders the attachment origin label', () => {
       buildAndRender(makePayload(ATTACHMENT_WORKFLOW_ORIGIN_TYPE));
-      expect(screen.getByTestId('workflow-user-action-label')).toBeInTheDocument();
+      expect(screen.getByTestId('workflow-user-action-label')).toHaveTextContent(
+        `ran ${WORKFLOW_NAME} on an attachment`
+      );
     });
   });
 
@@ -163,9 +181,11 @@ describe('createWorkflowUserActionBuilder', () => {
         },
       });
 
-      const renderWorkflowUserActionAction = jest
-        .fn()
-        .mockReturnValue(<button data-test-subj="custom-action">Show alert</button>);
+      const renderWorkflowUserActionAction = jest.fn().mockReturnValue(
+        <button type="button" data-test-subj="custom-action">
+          {'Show alert'}
+        </button>
+      );
 
       const builder = createWorkflowUserActionBuilder({
         ...builderArgs,

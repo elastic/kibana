@@ -6,16 +6,12 @@
  */
 
 import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
-import type { WorkflowOrigin } from '../../../common/types/domain';
-import type { Case } from '../../../common/types/domain';
+import type { WorkflowOrigin, Case } from '../../../common/types/domain';
 import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/api/workflow/v1';
-import { isAlertAttachmentType, toStringArray } from '../../../common/utils/attachments';
-
-const getRecord = (value: unknown): Record<string, unknown> | undefined =>
-  typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;
+import { findAlertIndex } from './alert_attachment_utils';
 
 /**
  * Enriches an activity origin with display data derived from the already-fetched case:
@@ -48,39 +44,4 @@ export const buildActivityOrigin = ({
   }
 
   return origin;
-};
-
-/**
- * Finds the ES index for an alert identified by `alertId` among the case's alert attachments.
- * Handles both the legacy v1 shape (`alertId` + `index` parallel arrays) and the unified-v2
- * shape (`attachmentId` + `metadata.index`).
- */
-const findAlertIndex = (
-  alertId: string,
-  comments: NonNullable<Case['comments']>
-): string | undefined => {
-  for (const comment of comments) {
-    if (!isAlertAttachmentType(comment.type)) continue;
-
-    if ('alertId' in comment) {
-      // Legacy v1: alertId and index are parallel arrays.
-      const ids = toStringArray(comment.alertId);
-      const indices = toStringArray((comment as Record<string, unknown>).index ?? []);
-      const pos = ids.indexOf(alertId);
-      if (pos !== -1) {
-        return indices[pos];
-      }
-    } else if ('attachmentId' in comment) {
-      // Unified v2: id is attachmentId, index lives in metadata.index.
-      const ids = toStringArray(comment.attachmentId);
-      if (ids.includes(alertId)) {
-        const meta = getRecord((comment as Record<string, unknown>).metadata);
-        const metaIndices = meta ? toStringArray(meta.index) : [];
-        const pos = ids.indexOf(alertId);
-        return metaIndices[pos];
-      }
-    }
-  }
-
-  return undefined;
 };

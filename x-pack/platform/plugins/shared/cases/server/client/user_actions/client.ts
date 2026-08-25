@@ -20,10 +20,7 @@ import { getUsers } from './users';
 import type { GetConnectorsRequest, UserActionFind, UserActionGet, GetUsersRequest } from './types';
 import { find } from './find';
 import type { CasesClient } from '../client';
-import {
-  preflightWorkflowExecution,
-  recordWorkflowExecution,
-} from './record_workflow_execution';
+import { preflightWorkflowExecution, recordWorkflowExecution } from './record_workflow_execution';
 import type {
   PreflightWorkflowExecutionArgs,
   RecordWorkflowExecutionArgs,

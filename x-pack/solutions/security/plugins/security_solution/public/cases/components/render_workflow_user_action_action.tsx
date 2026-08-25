@@ -7,13 +7,13 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { CASE_VIEW_PAGE_TABS } from '@kbn/cases-plugin/common';
-import type { RenderWorkflowUserActionAction } from '@kbn/cases-plugin/public';
-import { ShowTableButton } from '@kbn/cases-plugin/public';
 import {
+  CASE_VIEW_PAGE_TABS,
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
 } from '@kbn/cases-plugin/common';
+import type { RenderWorkflowUserActionAction } from '@kbn/cases-plugin/public';
+import { ShowTableButton } from '@kbn/cases-plugin/public';
 
 const ShowAlertButton = lazy(async () => {
   const { ShowAlertButton: Component } = await import(
@@ -44,10 +44,7 @@ export const renderWorkflowUserActionAction: RenderWorkflowUserActionAction = ({
     );
   }
 
-  if (
-    origin.type === ALERT_WORKFLOW_ORIGIN_TYPE ||
-    origin.type === ALERTS_WORKFLOW_ORIGIN_TYPE
-  ) {
+  if (origin.type === ALERT_WORKFLOW_ORIGIN_TYPE || origin.type === ALERTS_WORKFLOW_ORIGIN_TYPE) {
     return <ShowTableButton tabId={CASE_VIEW_PAGE_TABS.ALERTS} />;
   }
 

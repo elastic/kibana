@@ -15,9 +15,7 @@ import {
 } from '../../../common/types/api/workflow/v1';
 import type { Case } from '../../../common/types/domain';
 import { isAlertAttachmentType, toStringArray } from '../../../common/utils/attachments';
-
-const getRecord = (value: unknown): Record<string, unknown> | undefined =>
-  typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;
+import { getRecord } from './alert_attachment_utils';
 
 interface AlertPair {
   _id: string;

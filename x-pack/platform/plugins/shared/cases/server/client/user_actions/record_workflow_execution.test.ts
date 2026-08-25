@@ -26,6 +26,14 @@ const WORKFLOW_PAYLOAD = {
 
 const CASE_ORIGIN = { type: CASE_WORKFLOW_ORIGIN_TYPE, id: CASE_ID };
 
+/** Minimal saved-object shape returned by caseService.getCase. */
+const makeCaseSO = (owner = OWNER) => ({
+  id: CASE_ID,
+  type: 'cases' as const,
+  references: [],
+  attributes: { owner },
+});
+
 describe('preflightWorkflowExecution', () => {
   const clientArgs = createCasesClientMockArgs();
   const userActionService = createUserActionServiceMock();
@@ -40,7 +48,9 @@ describe('preflightWorkflowExecution', () => {
       [CASE_ID]: MAX_USER_ACTIONS_PER_CASE - 1,
     });
 
-    await expect(preflightWorkflowExecution({ caseId: CASE_ID }, clientArgs)).resolves.toBeUndefined();
+    await expect(
+      preflightWorkflowExecution({ caseId: CASE_ID }, clientArgs)
+    ).resolves.toBeUndefined();
 
     expect(userActionService.getMultipleCasesUserActionsTotal).toHaveBeenCalledWith({
       caseIds: [CASE_ID],
@@ -65,16 +75,18 @@ describe('recordWorkflowExecution', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    clientArgs.services.caseService.getCase.mockResolvedValue(makeCaseSO());
     clientArgs.authorization.ensureAuthorized.mockResolvedValue();
     userActionService.creator.createUserAction.mockResolvedValue(undefined as never);
   });
 
-  it('authorizes with the case owner before writing', async () => {
+  it('fetches the case owner from the SO and authorizes with it', async () => {
     await recordWorkflowExecution(
-      { caseId: CASE_ID, owner: OWNER, workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
+      { caseId: CASE_ID, workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
       clientArgs
     );
 
+    expect(clientArgs.services.caseService.getCase).toHaveBeenCalledWith({ id: CASE_ID });
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({
         entities: [{ id: CASE_ID, owner: OWNER }],
@@ -82,11 +94,22 @@ describe('recordWorkflowExecution', () => {
     );
   });
 
+  it('uses the workflow access operation, not the case-update operation', async () => {
+    await recordWorkflowExecution(
+      { caseId: CASE_ID, workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
+      clientArgs
+    );
+
+    const [call] = clientArgs.authorization.ensureAuthorized.mock.calls;
+    expect(call[0].operation.action).toBe('case_workflow_run_authz');
+    expect(call[0].operation.ecsType).toBe('access');
+  });
+
   it('calls createUserAction with the correct payload and refresh', async () => {
     const alertOrigin = { type: ALERT_WORKFLOW_ORIGIN_TYPE, id: 'alert-1', index: '.my-index' };
 
     await recordWorkflowExecution(
-      { caseId: CASE_ID, owner: OWNER, workflow: WORKFLOW_PAYLOAD, origin: alertOrigin },
+      { caseId: CASE_ID, workflow: WORKFLOW_PAYLOAD, origin: alertOrigin },
       clientArgs
     );
 
@@ -111,7 +134,7 @@ describe('recordWorkflowExecution', () => {
 
     await expect(
       recordWorkflowExecution(
-        { caseId: CASE_ID, owner: OWNER, workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
+        { caseId: CASE_ID, workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
         clientArgs
       )
     ).rejects.toThrow('Failed to record workflow execution');
@@ -122,7 +145,7 @@ describe('recordWorkflowExecution', () => {
 
     await expect(
       recordWorkflowExecution(
-        { caseId: CASE_ID, owner: OWNER, workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
+        { caseId: CASE_ID, workflow: WORKFLOW_PAYLOAD, origin: CASE_ORIGIN },
         clientArgs
       )
     ).rejects.toThrow('Failed to record workflow execution');

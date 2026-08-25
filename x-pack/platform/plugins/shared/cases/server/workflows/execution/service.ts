@@ -17,10 +17,7 @@ import {
   CASES_WORKFLOW_EXECUTION_SOURCE,
   CasesWorkflowExecutionMetadataSchema,
 } from '../../../common/types/api/workflow/v1';
-import type {
-  RunCaseWorkflowRequest,
-  RunCaseWorkflowResponse,
-} from '../../../common/types/api';
+import type { RunCaseWorkflowRequest, RunCaseWorkflowResponse } from '../../../common/types/api';
 import type { CasesClient } from '../../client';
 import type { CasesRequestHandlerContext } from '../../types';
 import { validateOrigin } from './validate_origin';
@@ -171,7 +168,6 @@ export class CasesWorkflowRunService {
     try {
       await casesClient.userActions.recordWorkflowExecution({
         caseId,
-        owner: theCase.owner,
         workflow: {
           id: workflow.id,
           name: workflow.name,
