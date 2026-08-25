@@ -136,9 +136,12 @@ export const buildExperimentFilterQuery = (
  */
 export const buildExampleScoresQuery = (
   exampleId: string,
-  options?: { spaceId?: string; executionId?: string; modelId?: string }
+  options?: { spaceId?: string; datasetId?: string; executionId?: string; modelId?: string }
 ): { bool: { must: Array<Record<string, unknown>> } } => {
   const must: Array<Record<string, unknown>> = [{ term: { 'example.id': exampleId } }];
+  if (options?.datasetId !== undefined) {
+    must.push({ term: { 'example.dataset.id': options.datasetId } });
+  }
   if (options?.executionId) {
     must.push({ term: { 'metadata.execution_id': options.executionId } });
   }

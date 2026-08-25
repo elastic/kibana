@@ -21,6 +21,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
+import { UNBOUNDED_SCORE_FIELDS } from '../utils/score_source_fields';
 
 const EXAMPLE_SCORES_SORT_ORDER = [
   { '@timestamp': { order: 'desc' as const } },
@@ -54,14 +55,24 @@ export const registerGetExampleScoresRoute = ({
       async (context, request, response) => {
         try {
           const { exampleId } = request.params;
-          const { execution_id: executionId, model_id: modelId } = request.query;
+          const {
+            dataset_id: datasetId,
+            execution_id: executionId,
+            model_id: modelId,
+          } = request.query;
           const evalsContext = await context.evals;
           const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
           const searchResponse = await evalsContext.evaluationScoreService.search({
-            query: buildExampleScoresQuery(exampleId, { spaceId, executionId, modelId }),
+            query: buildExampleScoresQuery(exampleId, {
+              spaceId,
+              datasetId,
+              executionId,
+              modelId,
+            }),
             sort: EXAMPLE_SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
+            _source_excludes: UNBOUNDED_SCORE_FIELDS,
           });
 
           const hits = searchResponse.hits?.hits ?? [];
