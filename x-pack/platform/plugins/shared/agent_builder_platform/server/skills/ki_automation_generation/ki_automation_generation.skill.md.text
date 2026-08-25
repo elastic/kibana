@@ -371,11 +371,10 @@ The AI Index schema has these base fields (all required unless noted):
 | `attributes.expires_at` | string (ISO date) | Expiry date (~30 days); used by the expiry-based freshness guard. **Omit entirely for durable (immutable-fact) KIs** — a KI with no `expires_at` never ages out (principle #2). Stored as an ISO-8601 string; compare with `TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at"))` in ES\|QL. |
 | `attributes.excluded` | boolean | Soft-exclude: KI exists but is skipped by agents |
 | `attributes.esql` | string or string[] | **The canonical location for the KI's ES\|QL** — the field the ES\|QL verifiers read (see "Writing and verifying KIs"). Populate it wherever the KI carries any ES\|QL: a detection's materialized query, an index profile's runnable `esql_example` queries. Keep the prose access-pattern presentation (templates + params + returns) in `content` for the agent to read; only KI kinds with no ES\|QL at all omit `attributes.esql`. |
-| `attributes.slug` | string | Stable dedup key built from the KI's own data — `context-engine.createKi` generates the document id, so idempotency comes from looking this key up (see the KI upsert). |
 
 Strategy-specific structured output (e.g. a detection's materialized query and `query_type`/`severity_score`, a feature's `subtype`/`slug`) also goes in `content` + `attributes` — never in bespoke declared mappings.
 
-**Required fields note**: `@timestamp` and the document id are set by `context-engine.createKi` — there is no top-level field to hand-write. Everything else — `confidence`, `coverage` (if you emit it), and the lifecycle fields — is written *inside* `attributes` and needs no mapping declaration, since `attributes` is `flattened`.
+**Required fields note**: `@timestamp` is set by `context-engine.createKi` and the document id comes from `ki_id`, so there is no top-level field to hand-write. Everything else — `confidence`, `coverage` (if you emit it), and the lifecycle fields — is written *inside* `attributes` and needs no mapping declaration, since `attributes` is `flattened`.
 
 **Rule**: structured facts belong in both `content` and `attributes`, to facilitate exact-match and filter queries, as well as semantic searches.
 
@@ -385,16 +384,14 @@ Strategy-specific structured output (e.g. a detection's materialized query and `
 `attributes` is a `flattened` mapping — any string, number, or boolean nested inside it becomes keyword-queryable without explicit mappings.
 Use it for strategy-specific structured output: status, severity, themes, product mentions, version strings, entity names, etc.
 
-The `ki` object passed to `context-engine.createKi` (the step sets `@timestamp` and the
-document id itself):
+The `ki` object passed to `context-engine.createKi` (the step sets `@timestamp` itself; the
+document id comes from `ki_id`):
 
 ```yaml
 type:        <KI kind, e.g. "index_metadata" | "document" | "detection" | "feature">
 title:       <display_name>
 tags:        [...]
 attributes:
-  # Stable dedup key for cross-run upserts (see the KI upsert):
-  slug:            <stable key built from the KI's subject, e.g. "raw-cases-all">
   # Quality & lifecycle metadata (all under attributes — no declared mappings needed):
   confidence:      <0.0–1.0 calibrated correctness score (see grounding contract)>
   coverage:        <0.0–1.0 completeness score from profile_index (optional)>
@@ -444,7 +441,7 @@ setting (`contextEngine:enabled`); confirm availability and exact params with
 
 | Step | Input | Output |
 |---|---|---|
-| `context-engine.createKi` | `ai_index_id`, `ki` | `id` of the created KI |
+| `context-engine.createKi` | `ai_index_id`, `ki_id` (optional), `ki` | `id` of the created KI |
 | `context-engine.updateKi` | `ai_index_id`, `ki_id`, `ki` (partial — only the provided fields change) | `id`, `result` (`updated` or `noop`) |
 | `context-engine.deleteKi` | `ai_index_id`, `ki_id` | `id` of the deleted KI |
 | `context-engine.verifyKi` | `ki` (a partial KI is accepted) | `passed`, `results[]` — one `{ verifier, passed, reason }` per applicable verifier |
@@ -453,9 +450,10 @@ setting (`contextEngine:enabled`); confirm availability and exact params with
   auto-creates the AI index when it does not exist yet, always backed by a regular index
   (`ai-index-idx-<id>`); an AI index backed by a datastream (`ai-index-ds-*`, for timeseries
   KIs) must be created in the Context Engine beforehand.
-- `createKi` sets `@timestamp` and generates the document id itself — include neither in
-  `ki`. Idempotency therefore comes from a lookup, not a caller-supplied id (see the
-  KI upsert below).
+- `createKi` sets `@timestamp` itself. Pass `ki_id` for a stable, caller-chosen document id —
+  re-runs with the same `ki_id` replace the KI, making writes idempotent (see the KI upsert
+  below). Index-backed AI indices accept `ki_id`; data-stream-backed AI indices always
+  generate the id.
 - The `ki` object is the "KI document shape" above: `type` and `title` required;
   `description`, `content`, `tags`, `attributes` optional.
 
@@ -482,28 +480,25 @@ writes:
 
 ### KI upsert (dedup across runs)
 
-1. Create the backing index up front (`elasticsearch.indices.create` with
-   `on-failure: continue`, as in the reference workflow) so the lookup below succeeds on the
-   very first run, before any KI exists.
-2. Store a stable dedup key in `attributes.slug`, built from the KI's own data so the same
-   subject always produces the same value (e.g. `<index>/<doc_id>`, an entity id, or the
-   source index name).
-3. Before writing, look the key up in the AI index's backing store:
-   `FROM <backing index> METADATA _id | WHERE FIELD_EXTRACT(attributes, "slug") == "<slug>" | SORT @timestamp DESC | LIMIT 1 | KEEP _id`
-4. Hit → `context-engine.updateKi` with the hit's `_id`. `updateKi` replaces each field you
-   send, so a KI that is fully re-derived each run (e.g. a re-profiled index KI) can send the
-   fresh fields as-is. To apply the merge rules from the grounding contract (union
-   `evidence`/`tags`, average `confidence`, keep the richer `description`), have the lookup
-   also return the stored values and compute the merged fields in the workflow before calling
-   `updateKi`. No hit → `context-engine.createKi`.
+Set `ki_id` on `context-engine.createKi` to a stable value built from the KI's own data, so
+the same subject always produces the same id (e.g. `<index>/<doc_id>`, an entity id, or the
+source index name). Re-runs with the same `ki_id` replace the KI in place instead of
+appending a duplicate — this is the default for every re-runnable workflow.
 
-Note: `updateKi` does not refresh `@timestamp`, so on the merge path a KI keeps its creation
-timestamp. A scheduled workflow that needs a reliable last-profiled date should write one into
-`attributes` (e.g. `attributes.last_profiled_at`) on every write and compare that instead.
+When a re-run must **merge** with the stored KI instead of replacing it (union
+`evidence`/`tags`, average `confidence` — see the dedup rules in the grounding contract):
+read the stored KI first
+(`FROM <backing index> METADATA _id, _source | WHERE _id == "<ki_id>" | LIMIT 1`), compute
+the merged fields in the workflow, and write them with `context-engine.updateKi`. Create the
+backing index up front (`elasticsearch.indices.create` with `on-failure: continue`, as in
+the reference workflow) so this read works on the very first run, before any KI exists.
 
-One-shot pilots can skip the lookup (verify → gate → `createKi`); scheduled or re-runnable
-workflows need it so re-runs enrich rather than duplicate. The full pattern — verify → gate →
-look up → update-or-create — is shown in the `index-selection-reference-workflow` resource.
+Note: `createKi` refreshes `@timestamp` on each replace; `updateKi` keeps the stored one. A
+merge flow that needs a reliable last-profiled date should write it into `attributes` (e.g.
+`attributes.last_profiled_at`) and compare that instead.
+
+The verify → gate → `createKi`-with-`ki_id` pattern is shown in the
+`index-selection-reference-workflow` resource.
 
 ## Quality & grounding contract
 
@@ -529,15 +524,15 @@ values in `field.path=value` notation (e.g. `service.name=checkout`, `error.type
 When a KI is derived from specific documents, record the **minimal covering set** of source `_id`s
 (one per distinct source doc, not one per evidence string) — enough to trace every claim, no more.
 
-**Dedup & merge (not blind overwrite).** The KI upsert's lookup on `attributes.slug`
-catches only *exact* key collisions. Also treat two KIs as duplicates when they share a
-**fingerprint** — same `type` + `subtype` + same structured `attributes` — even if titles or slugs
-differ slightly. Derive the slug from the KI's identifying data, normalized (trim + lowercase), so cosmetic
-variation collapses to one key. On a collision, **merge** rather than overwrite: compute the merged
-fields in the workflow (union `evidence`/`tags`, average `confidence`, keep the richer
-`description`) from the stored values the lookup returned, then write them with
-`context-engine.updateKi`. This matters most for Cumulative / Wiki-style KIs (which enrich the
-same entity across runs) and for any scheduled re-run.
+**Dedup & merge (not blind overwrite).** A stable `ki_id` catches only *exact* id collisions.
+Also treat two KIs as duplicates when they share a **fingerprint** — same `type` + `subtype` +
+same structured `attributes` — even if titles or ids differ slightly. Derive the `ki_id` from
+the KI's identifying data, normalized (trim + lowercase), so cosmetic variation collapses to
+one id. When a run must enrich rather than replace, **merge**: read the stored KI, compute the
+merged fields in the workflow (union `evidence`/`tags`, average `confidence`, keep the richer
+`description`), then write them with `context-engine.updateKi`. This matters most for
+Cumulative / Wiki-style KIs (which enrich the same entity across runs) and for any scheduled
+re-run.
 
 ## Workflow quality checklist
 
@@ -551,10 +546,10 @@ Before presenting any workflow to the user:
 - [ ] KIs are written via the `context-engine` steps (`createKi` / `updateKi`) — never raw `elasticsearch.index`
 - [ ] Every write is gated on `context-engine.verifyKi`: the workflow writes only when `passed` is true and surfaces the failing `results` (verifier + reason) otherwise
 - [ ] Every ES|QL query the KI carries lives in `attributes.esql` (string or array of strings) so verifiers check it; only KI kinds with no ES|QL at all omit it
-- [ ] `attributes.slug` holds a stable, normalized key built from the KI's own data; collisions **merge** (merged values computed in the workflow, written via `updateKi`) rather than blind-overwrite
+- [ ] `ki_id` on `context-engine.createKi` is a stable, normalized value built from the KI's own data, so re-runs replace instead of duplicate; enrichment flows **merge** (merged values computed in the workflow, written via `updateKi`) rather than blind-overwrite
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
-- [ ] `@timestamp` and the document id are left to `context-engine.createKi`; `confidence`, `coverage` (if emitted), `evidence`, and `expires_at` are written *inside* `attributes` — never as top-level fields
+- [ ] `@timestamp` is left to `context-engine.createKi` and the document id to `ki_id`; `confidence`, `coverage` (if emitted), `evidence`, and `expires_at` are written *inside* `attributes` — never as top-level fields
 - [ ] Detection KIs carry the complete runnable query (not a template) in `attributes.esql` and repeated in `content`; `query_type` is derived from the ES|QL, not LLM-supplied; every threshold + `evidence[]` string quotes an observed distribution; sample-floor + precision-first guardrails applied
 - [ ] `attributes.expires_at` (~30 days) is written to expiring KIs and **omitted** for durable (immutable-fact) KIs
 - [ ] Expiry-based freshness guard is implemented when the workflow runs on a schedule
@@ -575,7 +570,7 @@ A `foreach` loop over a hardcoded list of index names. Per iteration: `GET /<ind
 each run samples different records rather than always returning the first-ingested documents), `ai.prompt` producing display_name, purpose,
 answers_questions, does_not_contain, key_fields, joins, when_to_use, and access_patterns (each
 with question_type, esql_template, esql_example, params, returns). Then the verified KI sink
-(`verifyKi` gate → `context-engine.createKi`) with `attributes.slug` set to the index name and
+(`verifyKi` gate → `context-engine.createKi`) with `ki_id` set to the index name and
 `attributes.esql` set to the runnable `esql_example` queries (array of strings) so the ES|QL
 verifiers check them.
 Put key_fields, when_to_use, and joins into `attributes`; put purpose, answers_questions, and
@@ -585,8 +580,8 @@ access patterns into `content`. A complete reference YAML is in the `index-selec
 An `elasticsearch.esql.query` pulling docs with id, title, and body fields;
 truncate body to 12,000 chars with `EVAL body = SUBSTRING(body_field, 1, 12000)`. A `foreach`
 over the results. Per iteration: `ai.prompt` producing title, summary, answers_questions,
-key_entities, topics, and access_patterns. Then the KI upsert with
-`attributes.slug` set to `<index>/<doc_id>` (stable, so re-runs merge instead of duplicating).
+key_entities, topics, and access_patterns. Then the verified KI sink with
+`ki_id` set to `<index>/<doc_id>` (stable, so re-runs replace instead of duplicating).
 Put structured fields (key_entities, topics, any domain-specific categorical
 values like status, severity, product_mentions) into `attributes`; put summary, answers_questions,
 and access_patterns into `content`.
@@ -603,7 +598,7 @@ Put filterable fields (severity, error_type, affected_component) into `attribute
 **Atomic Facts:**
 An `elasticsearch.esql.query` pulling docs, full text truncated to 24,000 chars. An
 `ai.prompt` extracting a list of discrete atomic claims: `{ facts: [{ claim, entities, topics }] }`.
-A `foreach` over the facts. Per iteration: the KI upsert with `attributes.slug` set to
+A `foreach` over the facts. Per iteration: the verified KI sink with `ki_id` set to
 `<index>/<doc_id>-fact-<n>`.
 Put entities and topics into `attributes` on each fact KI.
 
@@ -612,14 +607,15 @@ A top-level `foreach` over a hardcoded list of 1–2 entity IDs (pilot). Per ent
 `elasticsearch.esql.query` finding all documents referencing that entity (`LIMIT 10` for pilot).
 An `ai.prompt` synthesizing them into an entity profile: entity_name, summary, key_facts,
 open_questions, related_indices, and access_patterns. The KI upsert with
-`attributes.slug` set to the entity ID — re-runs resolve to the same KI via
+`ki_id` set to the entity ID — re-runs read the stored KI and merge via
 `context-engine.updateKi`, enriching it over time. Put entity_name, entity_type, and related_indices into `attributes`.
 
 **Connector:**
 Call `platform.workflows.get_step_definitions` with the connector type to get correct step params.
 A connector step to list/query documents. A `foreach` over the results. Per
 iteration: a second connector step to fetch the full document body. An `ai.prompt` extracting a
-KI including access_patterns using `execute_connector_sub_action` syntax. Then the KI upsert.
+KI including access_patterns using `execute_connector_sub_action` syntax. Then the verified KI
+sink with a stable `ki_id` from the source record id.
 Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
 into `attributes` so they remain filterable after ingestion. Note that any of the above strategies
 can be used with connectors.
@@ -644,18 +640,18 @@ Detection guardrails (bake into the prompt):
 > **`feature` vs. `entity` (Cumulative / Wiki-style):** these are deliberately different granularities and can coexist. A `feature` KI is a lightweight **inventory / orientation** signal from a single profiling pass — "this index *contains* a service called `checkout`", "it *depends on* Postgres" — answering "what exists in this data?". A Cumulative `entity` KI is a deep **per-instance dossier** enriched over many runs — everything known about one specific entity — answering "tell me everything about X". Reach for `feature` to map the shape of an index; reach for Cumulative when an entity deserves its own evolving profile. If a `feature/entity` grows into a full dossier, promote it to a Cumulative `entity` KI.
 
 *Sinking:*
-- `sink_detection_ki` — the KI upsert with `type = "detection"`, `content` (with the materialized query repeated as prose), and `attributes` (esql, query_type, severity_score, confidence, evidence, expires_at, slug = `<index>/<slug-of-title>`).
-- `sink_feature_ki` — the KI upsert with `type = "feature"`, `content`, and `attributes` (subtype, slug = `<index>/<slug>`, evidence_doc_ids, confidence, evidence, expires_at).
+- `sink_detection_ki` — the verified KI sink with `ki_id = <index>/<slug-of-title>`, `type = "detection"`, `content` (with the materialized query repeated as prose), and `attributes` (esql, query_type, severity_score, confidence, evidence, expires_at).
+- `sink_feature_ki` — the verified KI sink with `ki_id = <index>/<slug>`, `type = "feature"`, `content`, and `attributes` (subtype, slug, evidence_doc_ids, confidence, evidence, expires_at).
 - Detections carry `attributes.esql`, so the ES|QL verifiers actually run on `verifyKi` here: a detection whose query fails verification is reported (verifier + reason) and not written.
 
 *Lifecycle and dedup:*
 - Set `attributes.expires_at` ~30 days from now; agents and the freshness guard treat an expired KI as stale, so a detection whose condition no longer appears in the data simply ages out.
 - **Expiry-based freshness guard** (not the simple `@timestamp` recency check Strategy 1 uses): before the grounding steps, query the target for the newest non-expired KI for this source index — `attributes.expires_at` is a `flattened` (keyword) string, so compare it as `WHERE TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at")) > NOW()`; if one exists, skip the profiling run entirely.
-- Cross-run dedup: set `attributes.slug = <index>/<normalized-slug>` so a re-run's lookup resolves to the same KI (merged via `context-engine.updateKi`), and apply the fingerprint + merge rules from the grounding contract so near-duplicate detections/features (same condition, slightly different title) collapse into one rather than accumulating.
+- Cross-run dedup: set `ki_id = <index>/<normalized-slug>` so a re-run replaces the same KI, and apply the fingerprint + merge rules from the grounding contract so near-duplicate detections/features (same condition, slightly different title) collapse into one rather than accumulating.
 
 ## Adapting the recipe
 
-- **Scheduling:** When the workflow runs on a schedule, query `FROM <backing index> | WHERE FIELD_EXTRACT(attributes, "slug") == "<index_name>" | SORT @timestamp DESC | LIMIT 1 | KEEP @timestamp` to retrieve the KI's last-profiled date (`@timestamp` only reflects creation — on merge-heavy flows compare `attributes.last_profiled_at` instead; see the KI upsert note). Ensure the backing index exists first (KI upsert step 1) so this query works on the first run. Skip re-profiling if the source index has not been updated since that timestamp (e.g. check with `elasticsearch.search` using a `range` query on the source index's `@timestamp`). This avoids burning LLM tokens on unchanged data.
+- **Scheduling:** When the workflow runs on a schedule, query `FROM <backing index> METADATA _id | WHERE _id == "<ki_id>" | KEEP @timestamp | LIMIT 1` to retrieve the KI's last-profiled date (`createKi` refreshes `@timestamp` on each replace; merge flows using `updateKi` should compare `attributes.last_profiled_at` instead — see the KI upsert note). Ensure the backing index exists first (see the KI upsert) so this query works on the first run. Skip re-profiling if the source index has not been updated since that timestamp (e.g. check with `elasticsearch.search` using a `range` query on the source index's `@timestamp`). This avoids burning LLM tokens on unchanged data.
 
 - **Large or noisy indices (multi-iteration with exclusion):** For indices whose content cannot be captured in a single 20-document random sample, use a while-loop convergence pattern: `sample_docs` → `profile_index` → merge into the accumulated result → repeat. Crucially, **exclude what you've already covered on each re-sample** rather than re-rolling blindly: add a `must_not` filter for the entities/patterns already profiled (e.g. `must_not` on known `service.name` values) so each pass sees *new* data instead of re-profiling the same dominant records. Combine with `random_score` for variety within the not-yet-covered slice. Stop when a pass surfaces nothing new, `coverage` meets threshold, or max iterations is reached — whichever comes first. Merge per the dedup rules in the grounding contract.
 
