@@ -35,13 +35,13 @@ interface PutTemplateArg {
 /** Runs the real installer against a mocked cluster and returns what it sent. */
 const runInstall = async () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  (esClient.indices.exists as jest.Mock).mockResolvedValue(false);
-  (esClient.indices.get as jest.Mock).mockResolvedValue({});
-  (esClient.indices.getSettings as jest.Mock).mockResolvedValue({});
+  esClient.indices.exists.mockResolvedValue(false);
+  esClient.indices.get.mockResolvedValue({});
+  esClient.indices.getSettings.mockResolvedValue({});
 
   await installIndexTemplates({ esClient, logger: loggingSystemMock.createLogger() });
 
-  const templates = (esClient.indices.putIndexTemplate as jest.Mock).mock.calls.map(
+  const templates = esClient.indices.putIndexTemplate.mock.calls.map(
     ([arg]) => arg as PutTemplateArg
   );
   const byIndex = (index: string) => templates.find((t) => t.name === `${index}-template`);
@@ -90,13 +90,13 @@ describe('installIndexTemplates', () => {
 
   it('marks pre-existing indices hidden, since templates only apply at creation', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    (esClient.indices.exists as jest.Mock).mockResolvedValue(false);
-    (esClient.indices.get as jest.Mock).mockResolvedValue({ '.kibana-threat-reports': {} });
-    (esClient.indices.getSettings as jest.Mock).mockResolvedValue({});
+    esClient.indices.exists.mockResolvedValue(false);
+    esClient.indices.get.mockResolvedValue({ '.kibana-threat-reports': {} });
+    esClient.indices.getSettings.mockResolvedValue({});
 
     await installIndexTemplates({ esClient, logger: loggingSystemMock.createLogger() });
 
-    const hidden = (esClient.indices.putSettings as jest.Mock).mock.calls.map(([arg]) => arg.index);
+    const hidden = esClient.indices.putSettings.mock.calls.map(([arg]) => arg.index);
     expect(hidden).toEqual(
       expect.arrayContaining([
         '.kibana-threat-reports',
@@ -108,15 +108,15 @@ describe('installIndexTemplates', () => {
 
   it('leaves an already-hidden index alone', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    (esClient.indices.exists as jest.Mock).mockResolvedValue(false);
-    (esClient.indices.get as jest.Mock).mockResolvedValue({});
-    (esClient.indices.getSettings as jest.Mock).mockResolvedValue({
+    esClient.indices.exists.mockResolvedValue(false);
+    esClient.indices.get.mockResolvedValue({});
+    esClient.indices.getSettings.mockResolvedValue({
       [THREAT_INTEL_SOURCES_INDEX]: { settings: { index: { hidden: 'true' } } },
     });
 
     await installIndexTemplates({ esClient, logger: loggingSystemMock.createLogger() });
 
-    const hidden = (esClient.indices.putSettings as jest.Mock).mock.calls.map(([arg]) => arg.index);
+    const hidden = esClient.indices.putSettings.mock.calls.map(([arg]) => arg.index);
     expect(hidden).not.toContain(THREAT_INTEL_SOURCES_INDEX);
   });
 });

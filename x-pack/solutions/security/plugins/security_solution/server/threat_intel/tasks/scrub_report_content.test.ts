@@ -35,14 +35,13 @@ interface UpdateByQueryArg {
 }
 
 const setupRunner = (updateByQueryResult: unknown) => {
-  const esClient = coreMock.createStart().elasticsearch.client.asInternalUser;
+  const coreStart = coreMock.createStart();
+  const esClient = coreStart.elasticsearch.client.asInternalUser;
   (esClient.updateByQuery as jest.Mock).mockImplementation(async () => {
     if (updateByQueryResult instanceof Error) throw updateByQueryResult;
     return updateByQueryResult;
   });
 
-  const coreStart = coreMock.createStart();
-  coreStart.elasticsearch.client.asInternalUser = esClient;
   const coreSetup = coreMock.createSetup();
   (coreSetup.getStartServices as jest.Mock).mockResolvedValue([coreStart, {}, {}]);
 

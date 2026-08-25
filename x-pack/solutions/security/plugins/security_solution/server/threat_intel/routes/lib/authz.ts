@@ -13,7 +13,7 @@ import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
  */
 export const THREAT_INTEL_READ_AUTHZ = {
   requiredPrivileges: ['securitySolution'],
-} as const;
+};
 
 /**
  * Endpoints that mutate the corpus or spend model budget.
@@ -30,4 +30,4 @@ export const THREAT_INTEL_READ_AUTHZ = {
  */
 export const THREAT_INTEL_WRITE_AUTHZ = {
   requiredPrivileges: [{ allRequired: ['securitySolution', RULES_API_ALL] }],
-} as const;
+};

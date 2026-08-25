@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ExpandWildcards } from '@elastic/elasticsearch/lib/api/types';
 import {
   THREAT_REPORTS_INDEX,
   THREAT_REPORTS_INDEX_PATTERN,
@@ -27,7 +28,7 @@ const HIDDEN_INDEX_SETTINGS = { 'index.hidden': true } as const;
 
 /** Wildcard reads must ask for hidden indices explicitly. */
 export const HIDDEN_INDEX_SEARCH_OPTIONS = {
-  expand_wildcards: ['open', 'hidden'] as const,
+  expand_wildcards: ['open', 'hidden'] as ExpandWildcards,
   ignore_unavailable: true,
   allow_no_indices: true,
 };

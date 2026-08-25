@@ -251,7 +251,8 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
  */
 describe('promote task runner', () => {
   const setupRunner = (searchResponses: Array<Record<string, unknown>>) => {
-    const esClient = coreMock.createStart().elasticsearch.client.asInternalUser;
+    const coreStart = coreMock.createStart();
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
     let call = 0;
     (esClient.search as jest.Mock).mockImplementation(async () => {
       const response = searchResponses[call] ?? { hits: { hits: [] } };
@@ -259,9 +260,6 @@ describe('promote task runner', () => {
       return response;
     });
     (esClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
-
-    const coreStart = coreMock.createStart();
-    coreStart.elasticsearch.client.asInternalUser = esClient;
 
     const coreSetup = coreMock.createSetup();
     (coreSetup.getStartServices as jest.Mock).mockResolvedValue([coreStart, {}, {}]);
