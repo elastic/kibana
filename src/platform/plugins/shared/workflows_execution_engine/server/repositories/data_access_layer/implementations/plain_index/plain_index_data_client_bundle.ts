@@ -44,6 +44,9 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
+    if (!this.esClient) {
+      throw new Error('initStart must be called before creating data clients');
+    }
     return new PlainIndexDataClient<EsWorkflowExecution>({
       esClient: this.esClient,
       logger: this.deps.logger,
@@ -52,6 +55,9 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
   }
 
   createStepDataClient(): StepExecutionsDataClient {
+    if (!this.esClient) {
+      throw new Error('initStart must be called before creating data clients');
+    }
     return new PlainIndexDataClient<EsWorkflowStepExecution>({
       esClient: this.esClient,
       logger: this.deps.logger,
