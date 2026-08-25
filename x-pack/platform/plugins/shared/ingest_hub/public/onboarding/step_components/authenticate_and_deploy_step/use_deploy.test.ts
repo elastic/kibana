@@ -392,7 +392,8 @@ describe('buildPackageInputs', () => {
     expect(inputs['ec2-aws-cloudwatch']).toBeDefined();
   });
 
-  it('uses the first service input as default when no stored enabledInputs is set', () => {
+  it('activates all inputs by default for a single-DS service with no stored enabledInputs', () => {
+    // Single-DS: display defaults all inputs ON, so deploy must match.
     const service = makeService({
       id: 'cloudtrail',
       dataStreams: ['cloudtrail'],
@@ -400,7 +401,7 @@ describe('buildPackageInputs', () => {
     });
     const inputs = buildPackageInputs([service], {}, '');
     expect(inputs['cloudtrail-aws-s3']).toBeDefined();
-    expect(inputs['cloudtrail-aws-cloudwatch']).toBeUndefined();
+    expect(inputs['cloudtrail-aws-cloudwatch']).toBeDefined();
   });
 
   it('builds both inputs when two are enabled', () => {

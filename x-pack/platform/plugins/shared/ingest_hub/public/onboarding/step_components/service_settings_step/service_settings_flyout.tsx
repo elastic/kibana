@@ -45,12 +45,14 @@ export function ServiceSettingsFlyout({
 }: ServiceSettingsFlyoutProps) {
   const flyoutTitleId = useGeneratedHtmlId();
 
+  const isSingleDs = service.dataStreams.length === 1;
+
   const [draftByDs, setDraftByDs] = useState<Record<string, ServiceDataStreamVars>>(() => ({
     ...config.varsByDataStream,
   }));
 
   const handleApply = () => {
-    const singleDs = service.dataStreams.length === 1;
+    const singleDs = isSingleDs;
     const enabledDataStreams = service.dataStreams.filter((dsId) => {
       const dsVars = draftByDs[dsId];
       if (dsVars) return dsVars.enabledInputs.length > 0;
@@ -87,10 +89,11 @@ export function ServiceSettingsFlyout({
           globalRegion={globalRegion}
           onFieldChange={(dsId, input, fieldName, value) =>
             setDraftByDs((prev) => {
-              const existing = prev[dsId] ?? {
-                enabledInputs: service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs ?? [],
-                varsByInput: {},
-              };
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const defaultInputs = isSingleDs
+                ? (dsInfo?.inputs ?? [])
+                : (dsInfo?.defaultEnabledInputs ?? []);
+              const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
               return {
                 ...prev,
                 [dsId]: {
@@ -105,10 +108,11 @@ export function ServiceSettingsFlyout({
           }
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
-              const existing = prev[dsId] ?? {
-                enabledInputs: service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs ?? [],
-                varsByInput: {},
-              };
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const defaultInputs = isSingleDs
+                ? (dsInfo?.inputs ?? [])
+                : (dsInfo?.defaultEnabledInputs ?? []);
+              const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
               return {
                 ...prev,
                 [dsId]: {

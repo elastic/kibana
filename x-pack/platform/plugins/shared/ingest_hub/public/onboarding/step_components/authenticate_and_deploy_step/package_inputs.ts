@@ -97,8 +97,12 @@ export function buildPackageInputs(
       const dsVars = serviceVars.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
 
       // Determine which inputs are active for this data stream.
+      // Single-DS: default all inputs ON (matches the "all ON" display in the flyout).
+      const isSingleDs = service.dataStreams.length === 1;
       const activeInputs = dsVars.enabledInputs.length
         ? dsVars.enabledInputs
+        : isSingleDs
+        ? (dsInfo?.inputs ?? service.inputs ?? [])
         : dsInfo?.defaultEnabledInputs?.length
         ? dsInfo.defaultEnabledInputs
         : dsInfo?.inputs?.length

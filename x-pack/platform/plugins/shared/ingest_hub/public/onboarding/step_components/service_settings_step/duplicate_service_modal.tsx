@@ -83,6 +83,8 @@ export function DuplicateServiceModal({
     const dsVars = draftByDs[dsId] ?? { enabledInputs: [], varsByInput: {} };
     const activeInputs = dsVars.enabledInputs.length
       ? dsVars.enabledInputs
+      : singleDs
+      ? (dsInfo?.inputs ?? [])
       : dsInfo?.defaultEnabledInputs?.length
       ? dsInfo.defaultEnabledInputs
       : dsInfo?.inputs?.slice(0, 1) ?? [];
@@ -180,10 +182,11 @@ export function DuplicateServiceModal({
           globalRegion={globalRegion}
           onFieldChange={(dsId, input, fieldName, value) =>
             setDraftByDs((prev) => {
-              const existing = prev[dsId] ?? {
-                enabledInputs: service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs ?? [],
-                varsByInput: {},
-              };
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const defaultInputs = singleDs
+                ? (dsInfo?.inputs ?? [])
+                : (dsInfo?.defaultEnabledInputs ?? []);
+              const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
               return {
                 ...prev,
                 [dsId]: {
@@ -198,10 +201,11 @@ export function DuplicateServiceModal({
           }
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
-              const existing = prev[dsId] ?? {
-                enabledInputs: service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs ?? [],
-                varsByInput: {},
-              };
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const defaultInputs = singleDs
+                ? (dsInfo?.inputs ?? [])
+                : (dsInfo?.defaultEnabledInputs ?? []);
+              const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
               return {
                 ...prev,
                 [dsId]: {
