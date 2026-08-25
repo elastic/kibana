@@ -25,6 +25,10 @@
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
-    "@kbn/core-spaces-common"
+    "@kbn/core-spaces-common",
+    "@kbn/core-http-server",
+    "@kbn/significant-events-plugin",
+    "@kbn/nightshift-investigations-plugin",
+    "@kbn/significant-events-schema"
   ]
 }

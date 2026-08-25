@@ -10,6 +10,8 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
+import type { SignificantEventsPluginStart } from '@kbn/significant-events-plugin/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -19,6 +21,8 @@ export interface PluginSetupDependencies {
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   actions: ActionsPluginStart;
+  significantEvents?: SignificantEventsPluginStart;
+  nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

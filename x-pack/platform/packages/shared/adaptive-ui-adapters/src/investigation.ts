@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { actions, badge, codeBlock, itemList, panel, table, view } from '@kbn/adaptive-ui/builders';
-import type { PrimitiveNode, Tone, ViewSpec } from '@kbn/adaptive-ui';
+import { actions, badge, callout, codeBlock, itemList, view } from '@kbn/adaptive-ui/builders';
+import type { BodyNode, Tone, ViewSpec } from '@kbn/adaptive-ui';
+import { normalizeInvestigationInput } from './investigation_markdown';
 import { buildNightshiftEventHref, titleCase } from './shared';
 
 /**
- * Structured investigation payload as merged to main (`recommendations` /
- * `blind_spots` / prose `conclusion`) rather than this worktree's markdown-shaped
- * `InvestigationState`. Mirrors `@kbn/significant-events-schema` plus the event
- * and investigation ids needed for CTAs.
+ * Investigation payload for a ViewSpec. Accepts structured `recommendations` /
+ * `blind_spots` or markdown `conclusion` plus `gaps_found`. Mirrors
+ * `@kbn/significant-events-schema` plus event ids for CTAs.
  */
 export type InvestigationHypothesisStatus = 'investigating' | 'dismissed' | 'confirmed';
 
@@ -56,6 +56,8 @@ export interface InvestigationInput {
   conclusion?: string;
   recommendations?: InvestigationRecommendation[];
   blind_spots?: InvestigationBlindSpot[];
+  /** Legacy investigate-step gaps; used when `blind_spots` is absent. */
+  gaps_found?: string[];
   hypotheses?: InvestigationHypothesis[];
   status?: string;
   event_id?: string;
@@ -89,8 +91,6 @@ const codeReferenceHref = ({
 
 const fileName = (path: string): string => path.split('/').pop() || path;
 
-const firstLine = (value: string): string => value.split('\n')[0] ?? value;
-
 const HYPOTHESIS_TONE: Record<InvestigationHypothesisStatus, Tone> = {
   investigating: 'primary',
   confirmed: 'danger',
@@ -121,7 +121,8 @@ const confidencePercent = (confidence: number): string => `${Math.round(confiden
  * Alternate rendering for a Nightshift investigation: conclusion, ranked
  * remediations (optional raw `code` as `codeBlock`), blind spots, and evidence.
  */
-export const toInvestigationViewSpec = (input: InvestigationInput): ViewSpec => {
+export const toInvestigationViewSpec = (raw: InvestigationInput): ViewSpec => {
+  const input = normalizeInvestigationInput(raw);
   const hypotheses = input.hypotheses ?? [];
   const primary = primaryHypothesis(hypotheses);
   const title =
@@ -133,7 +134,7 @@ export const toInvestigationViewSpec = (input: InvestigationInput): ViewSpec => 
     eventUuid: input.event_uuid,
   });
 
-  const body: PrimitiveNode[] = [];
+  const body: BodyNode[] = [];
   const badges: Array<{ label: string; tone: Tone; variant: 'fill' | 'hollow' }> = [];
   if (input.status) {
     badges.push({
@@ -159,7 +160,7 @@ export const toInvestigationViewSpec = (input: InvestigationInput): ViewSpec => 
   }
 
   if (input.conclusion) {
-    body.push(panel({ title: 'Root cause', body: input.conclusion, variant: 'subdued' }));
+    body.push(callout({ title: 'Root cause', body: input.conclusion, tone: 'primary' }));
   }
 
   const recommendations = input.recommendations ?? [];
@@ -203,53 +204,18 @@ export const toInvestigationViewSpec = (input: InvestigationInput): ViewSpec => 
   const evidence = flattenEvidence(hypotheses);
   if (evidence.length > 0) {
     body.push(
-      table({
+      itemList({
         label: 'Evidence',
-        columns: [
-          { id: 'detail', label: 'Evidence' },
-          { id: 'query', label: 'ES|QL', font: 'monospace' },
-          { id: 'source', label: 'Source' },
-        ],
-        rows: evidence.map((item) => ({
-          detail: item.description,
-          query: item.esql_query ? firstLine(item.esql_query) : '—',
-          source: item.code ? fileName(item.code.path) : '—',
-        })),
+        items: evidence.map((item) => {
+          const href = item.code ? codeReferenceHref(item.code) : undefined;
+          return {
+            title: item.description,
+            meta: item.code ? fileName(item.code.path) : undefined,
+            ...(href ? { external: true, action: { label: 'Open', href } } : {}),
+          };
+        }),
       })
     );
-
-    for (const item of evidence) {
-      if (item.esql_query) {
-        body.push(
-          codeBlock({
-            language: 'esql',
-            code: item.esql_query,
-            title: item.description,
-            collapsible: true,
-          })
-        );
-      }
-    }
-
-    const sourceLinks = evidence.flatMap((item) => {
-      if (!item.code) {
-        return [];
-      }
-      const href = codeReferenceHref(item.code);
-      return href ? [{ title: fileName(item.code.path), href }] : [];
-    });
-    if (sourceLinks.length > 0) {
-      body.push(
-        itemList({
-          label: 'Evidence links',
-          items: sourceLinks.map((link) => ({
-            title: link.title,
-            external: true,
-            action: { label: 'Open', href: link.href },
-          })),
-        })
-      );
-    }
   }
 
   const actionItems: Array<{ label: string; href: string; tone?: Tone }> = [];

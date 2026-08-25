@@ -19,6 +19,9 @@
       "agentBuilder"
     ],
     "requiredBundles": [],
-    "optionalPlugins": []
+    "optionalPlugins": [
+      "significantEvents",
+      "nightshiftInvestigations"
+    ]
   }
 }
