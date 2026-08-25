@@ -95,9 +95,7 @@ export class AuditService {
     // Configure logging during setup and when the license changes
     logging.configure(
       probed$.pipe(
-        map(({ features, writeAccess }) =>
-          createLoggingConfig(config, writeAccess)(features)
-        )
+        map(({ features, writeAccess }) => createLoggingConfig(config, writeAccess)(features))
       )
     );
 
