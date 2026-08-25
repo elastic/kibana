@@ -95,16 +95,6 @@ function describeAlert(alert: AlertSnapshot): string {
     lines.push(`Rule parameters: ${JSON.stringify(alert.rule_parameters)}`);
   }
 
-  // The query the rule actually ran is the strongest starting point there is, so state it last
-  // where it reads as the handover into the agent's own querying.
-  alert.queries?.forEach(({ index, request, response, label }) => {
-    const name = label ? `Rule query "${label}"` : 'Rule query';
-    lines.push(`${name} against ${index}: ${JSON.stringify(request)}`);
-    if (response) {
-      lines.push(`That query returned: ${JSON.stringify(response)}`);
-    }
-  });
-
   return lines.join('\n');
 }
 

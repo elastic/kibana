@@ -39,19 +39,6 @@ const alertSnapshotSchema = z.object({
     .optional(),
   rule_parameters: z.record(z.string().max(128), z.unknown()).optional(),
   index_pattern: z.string().max(1000).optional(),
-  // Shaped to match the alerting query inspector's response so callers can forward it directly.
-  // Optional because only `observability.rules.custom_threshold` registers a `queryInspector`.
-  queries: z
-    .array(
-      z.object({
-        index: z.string().max(1000),
-        request: z.record(z.string().max(128), z.unknown()),
-        response: z.record(z.string().max(128), z.unknown()).optional(),
-        label: z.string().max(500).optional(),
-      })
-    )
-    .max(10)
-    .optional(),
 });
 
 const freeFormContextSchema = z
