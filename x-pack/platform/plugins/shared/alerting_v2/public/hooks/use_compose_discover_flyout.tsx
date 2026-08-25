@@ -212,35 +212,35 @@ export const useComposeDiscoverFlyout = ({
     [openRuleFlyout]
   );
 
-  const openCreateFromTemplateFlyout = useCallback(
-    (template: RuleTemplateResponse) => {
-      const syntheticRule = templateToSyntheticRule(template);
-      setTargetRule(syntheticRule);
-      setFlyoutMode('create');
+  const openCreateFromTemplateFlyout = useCallback((template: RuleTemplateResponse) => {
+    const syntheticRule = templateToSyntheticRule(template);
+    setTargetRule(syntheticRule);
+    setFlyoutMode('create');
 
-      if (syntheticRule.metadata.builder_type) {
-        const query = syntheticRule.query ? getBreachEsqlQuery(syntheticRule.query) : '';
-        const recoveryQuery = syntheticRule.query
-          ? getRecoverEsqlQuery(syntheticRule.query, syntheticRule.recovery_strategy)
-          : undefined;
-        const state = query
-          ? tryParseBuilderState(syntheticRule.metadata.builder_type, query, recoveryQuery)
-          : null;
-        if (state && typeof state === 'object') {
-          const stateWithTimeField = { ...state, timeField: syntheticRule.time_field ?? '@timestamp' };
-          setBuilderType(syntheticRule.metadata.builder_type);
-          setInitialBuilderState(stateWithTimeField);
-          setFlyoutOpen(true);
-          return;
-        }
+    if (syntheticRule.metadata.builder_type) {
+      const query = syntheticRule.query ? getBreachEsqlQuery(syntheticRule.query) : '';
+      const recoveryQuery = syntheticRule.query
+        ? getRecoverEsqlQuery(syntheticRule.query, syntheticRule.recovery_strategy)
+        : undefined;
+      const state = query
+        ? tryParseBuilderState(syntheticRule.metadata.builder_type, query, recoveryQuery)
+        : null;
+      if (state && typeof state === 'object') {
+        const stateWithTimeField = {
+          ...state,
+          timeField: syntheticRule.time_field ?? '@timestamp',
+        };
+        setBuilderType(syntheticRule.metadata.builder_type);
+        setInitialBuilderState(stateWithTimeField);
+        setFlyoutOpen(true);
+        return;
       }
+    }
 
-      setBuilderType(null);
-      setInitialBuilderState(undefined);
-      setFlyoutOpen(true);
-    },
-    []
-  );
+    setBuilderType(null);
+    setInitialBuilderState(undefined);
+    setFlyoutOpen(true);
+  }, []);
 
   const flyout = flyoutOpen ? (
     <ComposeDiscoverFlyout
