@@ -142,6 +142,63 @@ function resolveFallbackStates(walkStates: WalkingState[]): WalkingState[] {
   );
 }
 
+function orderStatesForFallbackEvaluation(walkStates: WalkingState[]): WalkingState[] {
+  const preferredStatesByFallbackGroup = new Map<string, WalkingState[]>();
+  _.each(walkStates, (state) => {
+    _.each(state.preferredFallbackGroups, (fallbackGroup) => {
+      const preferredStates = preferredStatesByFallbackGroup.get(fallbackGroup) ?? [];
+      preferredStates.push(state);
+      preferredStatesByFallbackGroup.set(fallbackGroup, preferredStates);
+    });
+  });
+  if (!preferredStatesByFallbackGroup.size) {
+    return walkStates;
+  }
+
+  const orderedStates: WalkingState[] = [];
+  const visitedStates = new Set<WalkingState>();
+  const visitedFallbackGroups = new Set<string>();
+  const visitState = (state: WalkingState) => {
+    if (visitedStates.has(state)) {
+      return;
+    }
+    visitedStates.add(state);
+
+    _.each(state.fallbackGroups, (fallbackGroup) => {
+      if (visitedFallbackGroups.has(fallbackGroup)) {
+        return;
+      }
+      visitedFallbackGroups.add(fallbackGroup);
+      _.each(preferredStatesByFallbackGroup.get(fallbackGroup), visitState);
+    });
+    orderedStates.push(state);
+  };
+
+  _.each(walkStates, visitState);
+  return orderedStates;
+}
+
+function resolveAutocompleteFallbackStates(
+  walkStates: WalkingState[],
+  preferredFallbackGroupsWithTerms: Set<string>,
+  fallbackGroupsWithTerms: Set<string>
+): WalkingState[] {
+  const preferredFallbackGroups = new Set(_.flatMap(walkStates, 'preferredFallbackGroups'));
+  const prefersExplicitBranch = (fallbackGroup: string) =>
+    preferredFallbackGroupsWithTerms.has(fallbackGroup) ||
+    (!fallbackGroupsWithTerms.has(fallbackGroup) && preferredFallbackGroups.has(fallbackGroup));
+
+  return _.filter(
+    walkStates,
+    (state) =>
+      !_.some(state.fallbackGroups, prefersExplicitBranch) &&
+      !_.some(
+        state.preferredFallbackGroups,
+        (fallbackGroup) => !prefersExplicitBranch(fallbackGroup)
+      )
+  );
+}
+
 export function walkTokenPath(
   tokenPath: Array<string | string[]>,
   walkingStates: WalkingState[],
@@ -246,10 +303,9 @@ export function populateContext(
     const autoCompleteSet = new Map<ResultTerm['name'], ResultTerm>();
     const stateTerms = new Map<WalkingState, AutocompleteTermDefinition[]>();
     const preferredFallbackGroupsWithTerms = new Set<string>();
-    // An outer preferred branch must be able to shadow its entire fallback
-    // subtree before any nested fallback component is evaluated.
-    const statesByFallbackDepth = _.sortBy(walkStates, (ws) => ws.fallbackGroups.length);
-    _.each(statesByFallbackDepth, function (ws) {
+    const fallbackGroupsWithTerms = new Set<string>();
+    const statesByFallbackPreference = orderStatesForFallbackEvaluation(walkStates);
+    _.each(statesByFallbackPreference, function (ws) {
       if (
         _.some(ws.fallbackGroups, (fallbackGroup) =>
           preferredFallbackGroupsWithTerms.has(fallbackGroup)
@@ -273,8 +329,16 @@ export function populateContext(
         _.each(ws.preferredFallbackGroups, (fallbackGroup) => {
           preferredFallbackGroupsWithTerms.add(fallbackGroup);
         });
+        _.each(ws.fallbackGroups, (fallbackGroup) => {
+          fallbackGroupsWithTerms.add(fallbackGroup);
+        });
       }
     });
+    walkStates = resolveAutocompleteFallbackStates(
+      walkStates,
+      preferredFallbackGroupsWithTerms,
+      fallbackGroupsWithTerms
+    );
     _.each(walkStates, (ws) => {
       const terms = stateTerms.get(ws);
       if (!terms) {
@@ -292,7 +356,9 @@ export function populateContext(
     context.autoCompleteSet = Array.from(autoCompleteSet.values());
   }
 
-  walkStates = resolveFallbackStates(walkStates);
+  if (!includeAutoComplete) {
+    walkStates = resolveFallbackStates(walkStates);
+  }
 
   // Apply accumulated context from the best matching state.
   if (walkStates.length !== 0) {

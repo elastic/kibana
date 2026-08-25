@@ -175,6 +175,65 @@ describe('WHEN matching object child rules', () => {
     expect(context.globalBranch).toBeUndefined();
   });
 
+  it('SHOULD hide an outer global rule when explicit terms require two nested fallbacks', () => {
+    const outerKey = new ConstantComponent('outer');
+    const innerOneKey = new ConstantComponent('inner_one');
+    innerOneKey.addComponent(new ConstantComponent('not_inner_two'));
+    outerKey.addComponent(new ObjectComponent('inner_one_object', [innerOneKey], []));
+
+    const innerTwoKey = new ConstantComponent('inner_two');
+    innerTwoKey.addComponent(new SharedComponent('no_terms'));
+    const innerTwoObject = new ObjectComponent('inner_two_object', [innerTwoKey], []);
+    const explicitTerm = new ConstantComponent('explicit_term');
+
+    const outerFallbackStepOne = new SharedComponent('outer_fallback_step_one');
+    const outerFallbackStepTwo = new SharedComponent(
+      'outer_fallback_step_two',
+      outerFallbackStepOne
+    );
+    const outerFallbackTerm = new ConstantComponent('outer_fallback_term', outerFallbackStepTwo);
+    const outerFallbackGetTerms = jest.spyOn(outerFallbackTerm, 'getTerms');
+
+    const component = new ObjectComponent('outer_object', [outerKey], []);
+    const globalComponentResolver = jest.fn((token: unknown) => {
+      if (token === 'outer') {
+        return [outerFallbackStepOne];
+      }
+      if (token === 'inner_one') {
+        return [innerTwoObject];
+      }
+      if (token === 'inner_two') {
+        return [explicitTerm];
+      }
+      return null;
+    });
+    const context: TestContext = { globalComponentResolver };
+
+    populateContext(['outer', 'inner_one', 'inner_two'], context, null, true, [component]);
+
+    expect(context.autoCompleteSet).toEqual([{ name: 'explicit_term' }]);
+    expect(outerFallbackGetTerms).not.toHaveBeenCalled();
+  });
+
+  it('SHOULD apply context from the global fallback when only it produces suggestions', () => {
+    const queryConstant = new ConstantComponent('query');
+    new SimpleParamComponent('explicitBranch', queryConstant);
+    const globalObjectOpen = new SimpleParamComponent('globalBranch');
+    globalObjectOpen.addComponent(new ConstantComponent('global_query_child'));
+    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const component = new ObjectComponent('object', [queryConstant], []);
+    const context: TestContext & {
+      explicitBranch?: unknown;
+      globalBranch?: unknown;
+    } = { globalComponentResolver };
+
+    populateContext(['query', '{'], context, null, true, [component]);
+
+    expect(context.autoCompleteSet).toEqual([{ name: 'global_query_child' }]);
+    expect(context.explicitBranch).toBeUndefined();
+    expect(context.globalBranch).toBe('{');
+  });
+
   it('SHOULD keep global rules when constant children match but have no suggestions', () => {
     // Regression test for the console FTR suite: at runtime the `search` endpoint
     // declares `query: {}` (an empty subtree) while Query DSL suggestions come from
