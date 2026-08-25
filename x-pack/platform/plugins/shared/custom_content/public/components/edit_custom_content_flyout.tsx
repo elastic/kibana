@@ -255,9 +255,9 @@ export const EditCustomContentFlyout = ({
                     defaultMessage: 'Copy template',
                   })}
                   disableScreenReaderOutput
+                  anchorProps={{ css: copyButtonCss }}
                 >
                   <EuiButtonIcon
-                    css={copyButtonCss}
                     iconType="copy"
                     aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
                       defaultMessage: 'Copy template',
