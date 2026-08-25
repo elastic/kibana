@@ -576,7 +576,6 @@ describe('#createLoggingConfig', () => {
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });
-
 });
 
 describe('#getForwardedFor', () => {

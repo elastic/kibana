@@ -7,7 +7,7 @@
 
 // `@kbn/fs` is not usable here: its helpers resolve names against the Kibana data directory via
 // `getSafePath`, whereas the audit log lives outside it at an operator-configured absolute path.
-/* eslint-disable-next-line @kbn/eslint/require_kbn_fs */
+
 import { appendFileSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
 import type { Observable } from 'rxjs';
