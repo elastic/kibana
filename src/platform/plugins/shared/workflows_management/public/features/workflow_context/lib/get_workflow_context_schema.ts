@@ -44,7 +44,12 @@ function buildEventSchemaFromTriggers(
 
   for (const trigger of triggers) {
     if (typeof trigger?.type === 'string' && isZodObject(eventSchema)) {
-      if (isTriggerType(trigger.type) && isManualTrigger(trigger)) {
+      if (
+        isTriggerType(trigger.type) &&
+        isManualTrigger(trigger) &&
+        isZodObject(inputsZodSchema) &&
+        Object.keys(inputsZodSchema.shape).length > 0
+      ) {
         eventSchema = z.object({
           ...eventSchema.shape,
           inputs: inputsZodSchema,
