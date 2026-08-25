@@ -56,7 +56,6 @@ const assertUpCheckShape = (
   target: AgentStack['target']
 ) => {
   expect(check.monitor?.type).toBe(type);
-  expect(check.synthetics?.type).toBe('heartbeat/summary');
 
   switch (type) {
     case 'http':
@@ -74,6 +73,7 @@ const assertUpCheckShape = (
       ).toMatch(/host\.docker\.internal|\d+\.\d+\.\d+\.\d+/);
       break;
     case 'browser':
+      expect(check.synthetics?.type).toBe('heartbeat/summary');
       expect(check.url?.full).toContain(target.url);
       break;
   }

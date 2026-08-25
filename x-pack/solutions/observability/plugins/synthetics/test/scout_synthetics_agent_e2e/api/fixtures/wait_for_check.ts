@@ -88,16 +88,18 @@ export async function waitForSyntheticsCheck(
   return tryForTime(
     timeoutMs,
     async () => {
-      const source = await searchLatest(
-        esClient,
-        index,
-        [{ term: { config_id: configId } }, { term: { 'synthetics.type': 'heartbeat/summary' } }],
-        testRunId
-      );
+      // Lightweight http/tcp/icmp docs do not set synthetics.type. Browser
+      // journeys do — restrict to heartbeat/summary so we skip journey/start.
+      const filters: Array<Record<string, unknown>> = [{ term: { config_id: configId } }];
+      if (type === 'browser') {
+        filters.push({ term: { 'synthetics.type': 'heartbeat/summary' } });
+      }
+
+      const source = await searchLatest(esClient, index, filters, testRunId);
 
       if (!source) {
         throw new Error(
-          `No ${type} heartbeat/summary yet in ${index} for config_id=${configId}` +
+          `No ${type} check document yet in ${index} for config_id=${configId}` +
             (testRunId ? ` test_run_id=${testRunId}` : '')
         );
       }
