@@ -372,5 +372,5 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
   ],
 
-  ['.misp', lazy(() => import(/* webpackChunkName: "connectorIconmisp" */ './specs/misp/icon'))],
+  ['.misp', lazy(() => import(/* webpackChunkName: "connectorIconMisp" */ './specs/misp/icon'))],
 ]);

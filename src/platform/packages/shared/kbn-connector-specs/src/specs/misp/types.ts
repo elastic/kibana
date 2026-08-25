@@ -67,22 +67,26 @@ export const CheckIndicatorInputSchema = lazySchema(() =>
 export type CheckIndicatorInput = z.infer<typeof CheckIndicatorInputSchema>;
 
 export const AddSightingInputSchema = lazySchema(() =>
-  z.object({
-    attributeId: z
-      .string()
-      .min(1)
-      .optional()
-      .describe('Attribute id or UUID to attach the sighting to.'),
-    value: z.string().min(1).optional().describe('Attribute value when id/UUID is unknown.'),
-    type: z.coerce
-      .number()
-      .int()
-      .min(0)
-      .max(2)
-      .default(0)
-      .describe('Sighting type: 0=sighting, 1=false-positive, 2=expiration.'),
-    source: z.string().max(255).optional().describe('Optional sighting source label.'),
-  })
+  z
+    .object({
+      attributeId: z
+        .string()
+        .min(1)
+        .optional()
+        .describe('Attribute id or UUID to attach the sighting to.'),
+      value: z.string().min(1).optional().describe('Attribute value when id/UUID is unknown.'),
+      type: z.coerce
+        .number()
+        .int()
+        .min(0)
+        .max(2)
+        .default(0)
+        .describe('Sighting type: 0=sighting, 1=false-positive, 2=expiration.'),
+      source: z.string().max(255).optional().describe('Optional sighting source label.'),
+    })
+    .refine((input) => Boolean(input.attributeId) || Boolean(input.value), {
+      message: 'Provide attributeId or value.',
+    })
 );
 export type AddSightingInput = z.infer<typeof AddSightingInputSchema>;
 

@@ -63,10 +63,21 @@ const formatMispError = (action: string, error: unknown): Error => {
     err.response?.data?.message ??
     err.response?.data?.name ??
     (typeof err.response?.data === 'string' ? err.response.data : undefined) ??
-    err.message;
+    err.message ??
+    (error instanceof Error ? error.message : String(error));
   return new Error(
     `MISP ${action} failed (status ${err.response?.status ?? 'unknown'}): ${detail}`
   );
+};
+
+const ATTRIBUTE_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const setSightingAttributeRef = (body: Record<string, unknown>, attributeId: string): void => {
+  if (ATTRIBUTE_UUID_RE.test(attributeId)) {
+    body.uuid = attributeId;
+  } else {
+    body.id = attributeId;
+  }
 };
 
 const jsonHeaders = {
@@ -301,16 +312,12 @@ export const Misp: ConnectorSpec = {
         'Record a sighting on a MISP attribute by id/UUID or value so Elastic detections feed observed-in-the-wild signal back into MISP.',
       input: AddSightingInputSchema,
       handler: async (ctx, input: AddSightingInput) => {
-        if (!input.attributeId && !input.value) {
-          throw new Error('addSighting requires attributeId or value.');
-        }
         const baseUrl = getBaseUrl(ctx);
         const body: Record<string, unknown> = {
           type: input.type ?? 0,
         };
         if (input.attributeId) {
-          body.id = input.attributeId;
-          body.uuid = input.attributeId;
+          setSightingAttributeRef(body, input.attributeId);
         }
         if (input.value) body.value = input.value;
         if (input.source) body.source = input.source;

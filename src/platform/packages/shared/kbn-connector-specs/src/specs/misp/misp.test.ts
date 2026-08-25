@@ -73,12 +73,8 @@ describe('Misp', () => {
       expect(CheckIndicatorInputSchema.safeParse({}).success).toBe(false);
     });
 
-    it('rejects addSighting without attributeId or value at the handler', async () => {
-      const parsed = AddSightingInputSchema.parse({});
-      await expect(Misp.actions.addSighting.handler(mockContext, parsed)).rejects.toThrow(
-        'addSighting requires attributeId or value'
-      );
-      expect(mockClient.post).not.toHaveBeenCalled();
+    it('rejects addSighting without attributeId or value at the schema', () => {
+      expect(AddSightingInputSchema.safeParse({}).success).toBe(false);
     });
 
     it('defaults createEvent published to false', () => {
@@ -174,6 +170,37 @@ describe('Misp', () => {
   });
 
   describe('write actions', () => {
+    it('addSighting sends id for numeric attribute ids and uuid for UUIDs', async () => {
+      mockClient.post.mockResolvedValue({ data: { Sighting: { id: '1' } } });
+
+      await Misp.actions.addSighting.handler(mockContext, {
+        attributeId: '42',
+        type: 0,
+      });
+      await Misp.actions.addSighting.handler(mockContext, {
+        attributeId: '6116c23d-d035-4e94-a110-bc940b73b9df',
+        type: 0,
+        source: 'kibana',
+      });
+
+      expect(mockClient.post).toHaveBeenNthCalledWith(
+        1,
+        `${BASE_URL}/sightings/add`,
+        { type: 0, id: '42' },
+        { headers: jsonHeaders }
+      );
+      expect(mockClient.post).toHaveBeenNthCalledWith(
+        2,
+        `${BASE_URL}/sightings/add`,
+        {
+          type: 0,
+          uuid: '6116c23d-d035-4e94-a110-bc940b73b9df',
+          source: 'kibana',
+        },
+        { headers: jsonHeaders }
+      );
+    });
+
     it('createEvent posts Event payload', async () => {
       mockClient.post.mockResolvedValue({ data: { Event: { id: '9', info: 'Alert' } } });
 
