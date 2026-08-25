@@ -30,6 +30,7 @@
       "agentBuilder",
       "agentBuilderSml",
       "cloud",
+      "contextEngine",
       "esql",
       "serverless",
       "globalSearch",

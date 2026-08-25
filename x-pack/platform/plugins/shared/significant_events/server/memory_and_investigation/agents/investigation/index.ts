@@ -39,6 +39,10 @@ export const investigationAgentType = {
         tool_ids: [
           platformSignificantEventsTools.reportInvestigationProgress,
           platformSignificantEventsTools.searchKnowledgeIndicators,
+          platformCoreTools.searchAiIndex,
+          platformCoreTools.createKi,
+          platformCoreTools.updateKi,
+          platformCoreTools.deleteKi,
           platformCoreTools.executeEsql,
           platformCoreTools.generateEsql,
           platformCoreTools.executeWorkflow,

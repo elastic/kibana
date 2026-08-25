@@ -15,6 +15,7 @@ import {
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
+  NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -43,6 +44,11 @@ const WORKFLOWS_TO_INSTALL: Array<{
   // are stored alongside the onboarding executions it triggers.
   {
     workflowId: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+    spaceId: DEFAULT_SPACE_ID,
+  },
+  // Per-space indexer: installed in default space; per-space enablement handled via ensureWorkflow.
+  {
+    workflowId: NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW_ID,
     spaceId: DEFAULT_SPACE_ID,
   },
 ];

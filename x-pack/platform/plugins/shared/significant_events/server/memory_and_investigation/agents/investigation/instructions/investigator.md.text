@@ -285,3 +285,13 @@ been reporting via `investigation_progress_report`:
   available for the cart service"), not incident-specific facts (e.g. "the pod crashed").
 
 </output_format>
+
+## Knowledge lookup
+
+Use `search_ai_index` with `ai_index_id: "nightshift"` to find:
+- **Behavioral signals** (`type: feature`): anomaly patterns, service behavior per stream
+- **Detection queries** (`type: query`): named ES|QL queries with severity scoring
+- **Memory** (`type: memory`): synthesized knowledge from past investigations
+- **Significant events** (`type: significant_event`): recent event summaries with status/severity
+
+Use `execute_esql` for structured queries, aggregations, or cross-index joins.

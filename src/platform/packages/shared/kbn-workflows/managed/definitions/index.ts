@@ -39,6 +39,7 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW,
 } from './significant_events/memory';
 import { EXAMPLE_MANAGED_WORKFLOW } from './workflows_extensions_example';
+import { NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW } from './significant_events/nightshift_significant_event_indexer';
 
 export {
   ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW_ID,
@@ -75,6 +76,7 @@ export {
   SIGNIFICANT_EVENTS_TRIAGE_WORKFLOW_ID,
 } from './significant_events';
 export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './significant_events/investigation';
+export { NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW_ID } from './significant_events/nightshift_significant_event_indexer';
 
 // Registering the AD workflow definitions in the managed-workflows registry is
 // FF-off safe: membership only makes a definition *discoverable by id* (which the
@@ -110,4 +112,5 @@ export const managedWorkflowDefinitions = [
   SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,
+  NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW,
 ] as const;

@@ -17,6 +17,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/streams-plugin",
+    "@kbn/context-engine-plugin",
     "@kbn/core",
     "@kbn/core-pricing-common",
     "@kbn/significant-events-schema",

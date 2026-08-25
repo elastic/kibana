@@ -6,6 +6,7 @@
  */
 
 import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/server';
+import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -58,6 +59,7 @@ export interface SignificantEventsPluginSetupDependencies {
   fieldsMetadata: FieldsMetadataServerSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
+  contextEngine?: ContextEnginePluginSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;

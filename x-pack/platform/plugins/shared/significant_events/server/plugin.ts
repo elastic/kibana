@@ -72,6 +72,16 @@ import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_flags';
 import { isSignificantEventsAvailable } from './lib/feature_flags/is_significant_events_available';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
+import {
+  SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significant_events';
 
@@ -304,6 +314,26 @@ export class SignificantEventsPlugin
           },
         }
       );
+    }
+
+    if (plugins.contextEngine) {
+      plugins.contextEngine.registerAiIndex('nightshift', {
+        description:
+          'Knowledge distilled from significant events: behavioral signals, named detection queries, ' +
+          'investigation memory, and significant event summaries.',
+        dest: { type: 'data_stream', value: 'ai-index-ds-nightshift' },
+        automations: [
+          { type: 'workflow', value: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID },
+          { type: 'workflow', value: SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID },
+          { type: 'workflow', value: SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW_ID },
+          { type: 'workflow', value: SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID },
+          { type: 'workflow', value: SIGNIFICANT_EVENTS_MEMORY_CONSOLIDATION_WORKFLOW_ID },
+          { type: 'workflow', value: SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID },
+          { type: 'workflow', value: SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID },
+          { type: 'workflow', value: NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW_ID },
+        ],
+        sources: [{ type: 'esql', value: 'FROM .significant_events-events' }],
+      });
     }
 
     core.pricing.registerProductFeatures(SIGNIFICANT_EVENT_TIERED_FEATURES);

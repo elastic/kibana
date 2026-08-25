@@ -21,6 +21,10 @@ import { indexExplorerTool } from './index_explorer';
 import { generateEsqlTool } from './generate_esql';
 import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
+import { searchAiIndexTool } from './search_ai_index';
+import { createKiTool } from './create_ki';
+import { updateKiTool } from './update_ki';
+import { deleteKiTool } from './delete_ki';
 
 export const registerTools = ({
   coreSetup,
@@ -41,6 +45,10 @@ export const registerTools = ({
     indexExplorerTool(),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
+    searchAiIndexTool(),
+    createKiTool(),
+    updateKiTool(),
+    deleteKiTool(),
   ];
 
   tools.forEach((tool) => {
