@@ -180,14 +180,14 @@ apiTest.describe(
       const res = await apiClient.post(CHAT_CONVERSE_ASYNC, {
         headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
         body: { input: 'stream please', connector_id: connectorId, _execution_mode: 'local' },
-        responseType: 'text',
+        responseType: 'buffer',
       });
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       expect(res).toHaveStatusCode(200);
       expect(String(res.headers['content-type'])).toContain('text/event-stream');
 
-      const streamText = String(res.body);
+      const streamText = (res.body as Buffer).toString('utf8');
       expect(streamText).toContain(MOCKED_LLM_RESPONSE);
 
       // Track the conversation for cleanup, and fail loudly (not silently leak) if the SSE format
