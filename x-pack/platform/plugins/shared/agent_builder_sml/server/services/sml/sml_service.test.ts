@@ -969,7 +969,7 @@ describe('SmlService', () => {
         expect(call.query!.bool!.must).toEqual([
           {
             bool: {
-              filter: [{ prefix: { type: 'connector' } }],
+              filter: [{ terms: { type: ['connector'] } }],
               must: [titlePrefixQuery('s3')],
             },
           },
@@ -991,11 +991,11 @@ describe('SmlService', () => {
 
         const call = esClient.search.mock.calls[0]![0]!;
         expect(call.query!.bool!.must).toEqual([
-          { bool: { filter: [{ prefix: { type: 'connector' } }] } },
+          { bool: { filter: [{ terms: { type: ['connector'] } }] } },
         ]);
       });
 
-      it('lowercases the type half, which the keyword prefix query needs', async () => {
+      it('resolves the type half case-insensitively', async () => {
         const smlService = startServiceWithTypes(['connector']);
 
         esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
@@ -1012,8 +1012,35 @@ describe('SmlService', () => {
         expect(call.query!.bool!.must).toEqual([
           {
             bool: {
-              filter: [{ prefix: { type: 'connector' } }],
+              filter: [{ terms: { type: ['connector'] } }],
               must: [titlePrefixQuery('s3')],
+            },
+          },
+        ]);
+      });
+
+      it('filters on every type an ambiguous abbreviation could mean', async () => {
+        const smlService = startServiceWithTypes([
+          'alerting_v2_rule',
+          'alerting_v2_action_policy',
+          'connector',
+        ]);
+
+        esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
+
+        await smlService.autocomplete({
+          query: 'alerting_v2/',
+          size: 10,
+          spaceId: 'default',
+          esClient: scopedClient,
+          request,
+        });
+
+        const call = esClient.search.mock.calls[0]![0]!;
+        expect(call.query!.bool!.must).toEqual([
+          {
+            bool: {
+              filter: [{ terms: { type: ['alerting_v2_rule', 'alerting_v2_action_policy'] } }],
             },
           },
         ]);
@@ -1039,7 +1066,7 @@ describe('SmlService', () => {
         expect(call.query!.bool!.must).toEqual([titlePrefixQuery('sales/marketing')]);
       });
 
-      it('recognises a partially typed type id', async () => {
+      it('resolves an abbreviated type id to the full id', async () => {
         const smlService = startServiceWithTypes(['connector']);
 
         esClient.search.mockResolvedValue({ hits: { total: 0, hits: [] } } as any);
@@ -1056,7 +1083,7 @@ describe('SmlService', () => {
         expect(call.query!.bool!.must).toEqual([
           {
             bool: {
-              filter: [{ prefix: { type: 'conn' } }],
+              filter: [{ terms: { type: ['connector'] } }],
               must: [titlePrefixQuery('s3')],
             },
           },
@@ -1181,7 +1208,7 @@ describe('SmlService', () => {
       expect(result.results.map(({ id }) => id)).toEqual(['entry-1', 'entry-2']);
     });
 
-    it('projects a hit down to the autocomplete result shape', async () => {
+    it('projects a hit as an autocomplete result', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });

@@ -70,12 +70,13 @@ describe('ensureSmlMappingsComponentTemplate', () => {
       'permissions',
       'spaces',
       'tags',
+      'type',
       'updated_at',
       'user_id',
     ]);
   });
 
-  it('overrides tags with the lowercase normalizer the base component lacks', async () => {
+  it('overrides tags and type with the lowercase normalizer the base component lacks', async () => {
     await ensureSmlMappingsComponentTemplate({ esClient, logger });
 
     const { template } = esClient.cluster.putComponentTemplate.mock.calls[0][0];
@@ -83,17 +84,21 @@ describe('ensureSmlMappingsComponentTemplate', () => {
       type: 'keyword',
       normalizer: 'lowercase',
     });
+    expect(template.mappings.properties.type).toMatchObject({
+      type: 'keyword',
+      normalizer: 'lowercase',
+    });
   });
 
-  it('does not redeclare fields the base component already provides', async () => {
+  it('does not redeclare base fields it has nothing to override', async () => {
     await ensureSmlMappingsComponentTemplate({ esClient, logger });
 
     const { template } = esClient.cluster.putComponentTemplate.mock.calls[0][0];
     const keys = Object.keys(template.mappings.properties);
 
-    // `type` included: the @ menu prefix-matches it, but adding a normalizer here
-    // would be an unshippable mapping change, so the base definition stands.
-    for (const baseField of ['type', 'title', 'description', 'content', 'references']) {
+    // `type` is redeclared to add the lowercase normalizer, so it is intentionally
+    // absent from this list; these fields are taken verbatim from the base.
+    for (const baseField of ['title', 'description', 'content', 'references']) {
       expect(keys).not.toContain(baseField);
     }
   });

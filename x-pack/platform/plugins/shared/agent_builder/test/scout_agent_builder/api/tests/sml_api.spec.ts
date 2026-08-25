@@ -50,6 +50,8 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   const slashTitleEntryId = `sml-slash-title-${searchRunId}`;
   const slashTitle = `sales/marketing overview ${searchRunId}`;
 
+  const capitalizedTypeEntryId = `sml-capitalized-type-${searchRunId}`;
+
   apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminInteractiveCookieHeader = cookieHeader;
@@ -116,7 +118,6 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     await sysEsClient.index({
       index: smlIndexName,
       id: shortTitleEntryId,
-      refresh: 'wait_for',
       document: {
         ...baseDocument,
         id: shortTitleEntryId,
@@ -126,10 +127,31 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
         content: 'yellowfin short title for sml scout ranking',
       },
     });
+
+    await sysEsClient.index({
+      index: smlIndexName,
+      id: capitalizedTypeEntryId,
+      document: {
+        ...baseDocument,
+        id: capitalizedTypeEntryId,
+        type: 'Workflow',
+        title: `capitalized type entry ${searchRunId}`,
+        origin: { uri: `workflow://${capitalizedTypeEntryId}` },
+        content: 'capitalized type for sml scout',
+      },
+    });
+
+    await sysEsClient.indices.refresh({ index: smlIndexName });
   });
 
   apiTest.afterAll(async () => {
-    for (const id of [searchEntryId, longTitleEntryId, shortTitleEntryId, slashTitleEntryId]) {
+    for (const id of [
+      searchEntryId,
+      longTitleEntryId,
+      shortTitleEntryId,
+      slashTitleEntryId,
+      capitalizedTypeEntryId,
+    ]) {
       try {
         await sysEsClient.delete({ index: smlIndexName, id, refresh: true });
       } catch {
@@ -229,6 +251,14 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       // other than connector, so the visualization entry must drop out.
       const wrongType = await autocomplete(apiClient, 'connector/pacif');
       expect(wrongType.some((r) => r.id === searchEntryId)).toBe(false);
+    }
+  );
+
+  apiTest(
+    'POST /internal/agent_builder_sml/sml/_autocomplete matches a type stored as "Workflow"',
+    async ({ apiClient }) => {
+      const results = await autocomplete(apiClient, 'workflo');
+      expect(results.some((r) => r.id === capitalizedTypeEntryId)).toBe(true);
     }
   );
 

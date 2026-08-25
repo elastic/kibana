@@ -969,50 +969,34 @@ const searchSml = async ({
   };
 };
 
-/**
- * Every typed token must match, with the trailing one matched as a prefix.
- *
- * A `search_as_you_type` multi-field would buy nothing here: the trailing
- * partial token is a constant-score prefix query either way, so single-token
- * queries tie regardless, and plain `title` already orders multi-token queries
- * by adjacency.
- */
+// Every typed token must match, with the last one matched as a prefix.
 const buildTitlePrefixClause = (text: string): Record<string, unknown> => ({
   match_bool_prefix: { title: { query: text, operator: 'and' } },
 });
 
-/**
- * `type` is a low-cardinality keyword, so a `prefix` query is cheap.
- *
- * Lowercasing the typed text is all that's needed for case-insensitive matching:
- * `type` carries no normalizer, but the type registry rejects any id that isn't
- * lowercase (`SML_TYPE_ID_PATTERN`), so the indexed values are already canonical.
- */
+// `type` is a low-cardinality keyword, so a `prefix` query is cheap.
 const buildTypePrefixClause = (text: string): Record<string, unknown> => ({
   prefix: { type: text.toLowerCase() },
 });
 
-/** Whether the typed text could still grow into one of the registered type ids. */
-const looksLikeType = (text: string, registeredTypeIds: string[]): boolean => {
+const buildTypeTermsClause = (typeIds: string[]): Record<string, unknown> => ({
+  terms: { type: typeIds },
+});
+
+/**
+ * The abbreviation "conn" resolves to `['connector']`.
+ * Empty when no type is resolved.
+ */
+const resolveTypeIds = (text: string, registeredTypeIds: string[]): string[] => {
   const lowered = text.toLowerCase();
-  return registeredTypeIds.some((id) => id.toLowerCase().startsWith(lowered));
+  return registeredTypeIds.filter((id) => id.toLowerCase().startsWith(lowered));
 };
 
 /**
- * Build the autocomplete query: `match_bool_prefix` against `title`, requiring
- * every typed token to match (including the trailing partial, as a prefix),
- * plus a prefix clause on `type`.
- *
- * Results render as "type/title", so a "type/name" query (e.g. "connector/s3")
- * matches each half against its own field. The type half goes in filter context
- * so it doesn't skew ranking. A bare trailing slash ("connector/") matches on
- * type alone.
- *
- * A slash only means "type/name" when the text before it names a registered
- * type. Otherwise it is punctuation inside a title (e.g. "sales/marketing"), so
- * the whole string is matched against `title` — the analyzer splits on the slash.
- *
- * After trim: empty string or `*` → `match_all`.
+ * Build the autocomplete query. Results render as "type/title", so a slash splits
+ * the input: the left side must name a registered type, the right prefix-matches
+ * the title. A slash that names no type is part of the title, e.g.
+ * "sales/marketing".
  */
 const buildSmlAutocompleteQuery = (
   query: string,
@@ -1038,8 +1022,7 @@ const buildSmlAutocompleteQuery = (
   const typePart = trimmed.slice(0, slashIdx).trim();
   const namePart = trimmed.slice(slashIdx + 1).trim();
 
-  // A lone "/" carries no signal. Match everything rather than leaning on
-  // Elasticsearch's empty-prefix behaviour, which does the same thing implicitly.
+  // A lone "/" carries no signal, thus, match everything
   if (typePart === '' && namePart === '') {
     return { match_all: {} };
   }
@@ -1048,17 +1031,18 @@ const buildSmlAutocompleteQuery = (
     return buildTitlePrefixClause(namePart);
   }
 
-  if (!looksLikeType(typePart, registeredTypeIds)) {
+  const typeIds = resolveTypeIds(typePart, registeredTypeIds);
+  if (typeIds.length === 0) {
     return buildTitlePrefixClause(trimmed);
   }
 
   if (namePart === '') {
-    return { bool: { filter: [buildTypePrefixClause(typePart)] } };
+    return { bool: { filter: [buildTypeTermsClause(typeIds)] } };
   }
 
   return {
     bool: {
-      filter: [buildTypePrefixClause(typePart)],
+      filter: [buildTypeTermsClause(typeIds)],
       must: [buildTitlePrefixClause(namePart)],
     },
   };
@@ -1123,13 +1107,7 @@ const autocompleteSml = async ({
           filter: filterClauses,
         },
       },
-      /**
-       * Relevance first, then a stable tiebreak. Several query shapes score every
-       * hit identically — a type-only query ("connector/") runs in filter context,
-       * `match_all` scores 1.0 for everything, and `match_bool_prefix` scores the
-       * trailing partial token as a constant — which would otherwise leave the
-       * menu ordered by internal doc id.
-       */
+      // Order will be arbitrary as every result scores the same.
       sort: [{ _score: { order: 'desc' } }, { updated_at: 'desc' }, { id: 'asc' }],
       _source: ['id', 'type', 'title', 'origin', 'permissions'],
     });

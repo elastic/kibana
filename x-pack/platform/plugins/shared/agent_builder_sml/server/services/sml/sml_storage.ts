@@ -39,18 +39,6 @@ const SEMANTIC_MULTI_FIELD = {
  * them independently without a separate top-level field or `copy_to`.
  */
 const baseProvidedSchemaProperties = {
-  /**
-   * Left exactly as the base component defines it, even though the @ menu
-   * prefix-matches this field. The type registry already rejects any id that
-   * isn't lowercase (`SML_TYPE_ID_PATTERN`), so stored values are canonical and
-   * the query only has to lowercase the typed text.
-   *
-   * Do not override it here with a `normalizer`: that is not an updateable
-   * mapping parameter, and the storage adapter reconciles schema drift with an
-   * in-place `putMapping`, which Elasticsearch rejects with `Cannot update
-   * parameter [normalizer]` on any index created beforehand.
-   */
-  type: types.keyword({}),
   title: types.text({ fields: SEMANTIC_MULTI_FIELD }),
   content: types.text({ fields: SEMANTIC_MULTI_FIELD }),
   description: types.text({ fields: SEMANTIC_MULTI_FIELD }),
@@ -65,11 +53,13 @@ const baseProvidedSchemaProperties = {
  * Fields the base component does not provide, installed as
  * {@link smlMappingsComponentTemplateName}.
  *
- * `tags` is listed here even though the base maps it too: SML needs the lowercase
- * normalizer, and this component is composed last so it wins.
+ * `tags` and `type` are listed here even though the base maps them too: SML needs
+ * the lowercase normalizer on both, and this component is composed last so it wins.
  */
 export const smlMappingsComponentProperties = {
   id: types.keyword({}),
+  /** Normalized to lowercase so the @ menu's `type` prefix query is case-insensitive. */
+  type: types.keyword({ normalizer: 'lowercase' }),
   origin: types.object({
     properties: {
       uri: types.keyword({}),

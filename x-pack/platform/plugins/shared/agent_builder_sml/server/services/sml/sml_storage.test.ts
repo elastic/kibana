@@ -48,14 +48,17 @@ describe('storageSettings', () => {
     );
   });
 
-  it('leaves `type` without a normalizer so mapping updates stay additive', () => {
-    // `normalizer` is not an updateable mapping parameter, and the storage adapter
-    // reconciles schema drift with an in-place `putMapping`. Adding one would break
-    // indexing into any index created beforehand. Case-insensitive matching comes
-    // from the registry rejecting non-lowercase type ids plus the query lowercasing
-    // the typed text.
-    expect(storageSettings.schema.properties.type).not.toHaveProperty('normalizer');
-    // Also guard the component, which is composed last and would win if it set one.
-    expect(smlMappingsComponentProperties).not.toHaveProperty('type');
+  it('normalizes `type` to lowercase from SML\'s own component, not the base', () => {
+    // The base maps `type` as a plain keyword; SML needs it lowercased so the @ menu
+    // prefix query is case-insensitive. Like `tags`, it lives in SML's component,
+    // which is composed last and therefore wins over the base mapping.
+    expect(storageSettings.schema.properties.type).toMatchObject({
+      type: 'keyword',
+      normalizer: 'lowercase',
+    });
+    expect(smlMappingsComponentProperties.type).toMatchObject({
+      type: 'keyword',
+      normalizer: 'lowercase',
+    });
   });
 });
