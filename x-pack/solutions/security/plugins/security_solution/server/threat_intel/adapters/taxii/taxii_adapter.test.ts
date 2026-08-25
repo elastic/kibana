@@ -161,4 +161,83 @@ describe('taxiiAdapter', () => {
       ).rejects.toThrow(/no ActionsClient could be resolved/);
     });
   });
+
+  // Only the first envelope used to be read, so every collection larger than
+  // the server page size silently lost all its later pages on every run.
+  describe('TAXII 2.1 pagination', () => {
+    const envelope = (id: string, paging: { more?: boolean; next?: string } = {}) => ({
+      objects: [{ type: 'indicator', id, name: id, modified: '2026-05-15T00:00:00Z' }],
+      ...paging,
+    });
+
+    const jsonResponse = (body: unknown) =>
+      new Response(JSON.stringify(body), {
+        status: 200,
+        headers: { 'Content-Type': 'application/taxii+json;version=2.1' },
+      });
+
+    it('follows next until more is false and returns every page', async () => {
+      const fetchMock = jest
+        .fn()
+        .mockResolvedValueOnce(jsonResponse(envelope('indicator--1', { more: true, next: 'p2' })))
+        .mockResolvedValueOnce(jsonResponse(envelope('indicator--2', { more: true, next: 'p3' })))
+        .mockResolvedValueOnce(jsonResponse(envelope('indicator--3', { more: false })));
+
+      const reports = await taxiiAdapter.run(buildSource(), buildContext({ fetchImpl: fetchMock }));
+
+      expect(reports.map((r) => r.lineage.source_doc_ref?.id)).toEqual([
+        'indicator--1',
+        'indicator--2',
+        'indicator--3',
+      ]);
+      // The continuation token travels as the `next` query parameter.
+      expect(fetchMock.mock.calls[1][0]).toContain('next=p2');
+      expect(fetchMock.mock.calls[2][0]).toContain('next=p3');
+    });
+
+    it('stops when more is true but the server sends no next token', async () => {
+      const fetchMock = jest
+        .fn()
+        .mockResolvedValue(jsonResponse(envelope('indicator--1', { more: true })));
+
+      const reports = await taxiiAdapter.run(buildSource(), buildContext({ fetchImpl: fetchMock }));
+
+      expect(reports).toHaveLength(1);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('bounds the number of pages when a server always reports more', async () => {
+      const fetchMock = jest
+        .fn()
+        .mockImplementation(async () =>
+          jsonResponse(envelope('indicator--loop', { more: true, next: 'always' }))
+        );
+
+      await taxiiAdapter.run(buildSource(), buildContext({ fetchImpl: fetchMock }));
+
+      expect(fetchMock).toHaveBeenCalledTimes(50);
+    });
+
+    it('paginates the connector path through subActionParams.next', async () => {
+      const execute = jest
+        .fn()
+        .mockResolvedValueOnce({
+          status: 'ok',
+          data: envelope('indicator--c1', { more: true, next: 'c2' }),
+        })
+        .mockResolvedValueOnce({ status: 'ok', data: envelope('indicator--c2', { more: false }) });
+      const fakeActionsClient = { execute } as unknown as ScopedActionsClient;
+
+      const reports = await taxiiAdapter.run(
+        buildSource({ connector_id: 'connector-1' }),
+        buildContext({ getActionsClient: async () => fakeActionsClient })
+      );
+
+      expect(reports).toHaveLength(2);
+      expect(execute.mock.calls[1][0].params.subActionParams).toEqual({
+        collectionUrl: COLLECTION_URL,
+        next: 'c2',
+      });
+    });
+  });
 });

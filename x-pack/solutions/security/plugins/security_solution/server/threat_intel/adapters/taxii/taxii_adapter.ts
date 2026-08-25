@@ -18,6 +18,26 @@ const BODY_TEXT_MAX_LENGTH = 32_000;
 const TAXII_ACCEPT = 'application/taxii+json;version=2.1, application/json';
 const TAXII_CONNECTOR_POLL_SUB_ACTION = 'pollCollection';
 
+/**
+ * Bound on TAXII 2.1 continuation pages per run. A server that always answers
+ * `more: true` would otherwise spin forever; the next scheduled run resumes.
+ */
+const MAX_TAXII_PAGES = 50;
+
+/** TAXII 2.1 envelope paging fields. */
+const readEnvelopePaging = (envelope: unknown): { more: boolean; next?: string } => {
+  const env = envelope as { more?: unknown; next?: unknown } | null | undefined;
+  const next = typeof env?.next === 'string' && env.next.length > 0 ? env.next : undefined;
+  return { more: env?.more === true, next };
+};
+
+/** TAXII 2.1 passes the continuation token as the `next` query parameter. */
+const withNextParam = (url: string, next: string): string => {
+  const parsed = new URL(url);
+  parsed.searchParams.set('next', next);
+  return parsed.toString();
+};
+
 const deriveCollectionId = (url: string): string => {
   const match = /\/collections\/([^/]+)/.exec(url);
   return match ? match[1] : 'unknown';
@@ -44,7 +64,8 @@ const safeParseJson = (body: string): unknown => {
 const fetchViaConnector = async (
   connectorId: string,
   collectionUrl: string,
-  context: AdapterRunContext
+  context: AdapterRunContext,
+  next?: string
 ): Promise<unknown> => {
   if (!context.getActionsClient) {
     throw new Error(
@@ -61,7 +82,7 @@ const fetchViaConnector = async (
     actionId: connectorId,
     params: {
       subAction: TAXII_CONNECTOR_POLL_SUB_ACTION,
-      subActionParams: { collectionUrl },
+      subActionParams: { collectionUrl, ...(next ? { next } : {}) },
     },
   });
   if (result.status !== 'ok') {
@@ -83,14 +104,18 @@ export const taxiiAdapter: FetchAdapter = {
     }
 
     const connectorId = readConnectorId(source);
-    let envelope: unknown;
     if (connectorId) {
       log.debug(
         `Polling TAXII collection ${url} via connector ${connectorId} for source ${source._id}`
       );
-      envelope = await fetchViaConnector(connectorId, url, context);
-    } else {
-      const response = await fetchUrl(url, {
+    }
+
+    const fetchEnvelope = async (next?: string): Promise<unknown> => {
+      if (connectorId) {
+        return fetchViaConnector(connectorId, url, context, next);
+      }
+      const pageUrl = next ? withNextParam(url, next) : url;
+      const response = await fetchUrl(pageUrl, {
         abortSignal: context.abortSignal,
         headers: { Accept: TAXII_ACCEPT },
         fetchFn: context.fetchFn,
@@ -98,16 +123,45 @@ export const taxiiAdapter: FetchAdapter = {
       });
       if (response.status >= 400) {
         throw new Error(
-          `TAXII poll ${redactUrl(url)} failed: HTTP ${response.status} ${response.statusText}`
+          `TAXII poll ${redactUrl(pageUrl)} failed: HTTP ${response.status} ${response.statusText}`
         );
       }
-      envelope = safeParseJson(response.body);
-      if (envelope == null) {
-        throw new Error(`TAXII response at ${redactUrl(url)} was not valid JSON`);
+      const parsed = safeParseJson(response.body);
+      if (parsed == null) {
+        throw new Error(`TAXII response at ${redactUrl(pageUrl)} was not valid JSON`);
       }
+      return parsed;
+    };
+
+    // TAXII 2.1 pages collections with `more` + `next`. Reading only the first
+    // envelope silently dropped every later page on every run, so a collection
+    // larger than the server page size was never fully ingested.
+    const sdos: ReturnType<typeof splitStixBundle> = [];
+    let nextToken: string | undefined;
+    let pages = 0;
+    do {
+      const envelope = await fetchEnvelope(nextToken);
+      sdos.push(...splitStixBundle(envelope));
+      pages += 1;
+
+      const paging = readEnvelopePaging(envelope);
+      nextToken = paging.more ? paging.next : undefined;
+
+      if (nextToken && pages >= MAX_TAXII_PAGES) {
+        log.warn(
+          `TAXII collection at ${url} still reported more pages after ${MAX_TAXII_PAGES} for ` +
+            `source ${source._id}; stopping and resuming on the next run`
+        );
+        break;
+      }
+    } while (nextToken && !context.abortSignal.aborted);
+
+    if (pages > 1) {
+      log.debug(
+        `TAXII collection at ${url} returned ${sdos.length} objects across ${pages} pages for source ${source._id}`
+      );
     }
 
-    const sdos = splitStixBundle(envelope);
     if (sdos.length === 0) {
       log.debug(
         `TAXII collection at ${url} returned 0 reportable objects for source ${source._id}`
