@@ -26185,7 +26185,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.deleteSearchableSnapshotFieldLabel": "删除可搜索快照",
     "xpack.indexLifecycleMgmt.editPolicy.dependenciesMessage": "您所做的任何更改都会影响附加到此策略的 {dependenciesLinks}{count, plural, one {} other {}}。",
     "xpack.indexLifecycleMgmt.editPolicy.differentPolicyNameRequiredError": "策略名称必须不同。",
-    "xpack.indexLifecycleMgmt.editPolicy.documentationLinkText": "文档",
     "xpack.indexLifecycleMgmt.editPolicy.downsampleDescription": "将固定时间间隔内的文档汇总/打包到单个摘要文档。通过以减小的粒度存储时序数据来减少索引占用。",
     "xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalColdPhaseHotError": "必须大于热阶段值 ({value}) 并且是它的倍数",
     "xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalColdPhaseWarmError": "必须大于温阶段值 ({value}) 并且是它的倍数",
