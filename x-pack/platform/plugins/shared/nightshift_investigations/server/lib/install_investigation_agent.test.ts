@@ -10,7 +10,7 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
-} from '../../agents/investigation';
+} from '../agents/investigation';
 import { installInvestigationAgent } from './install_investigation_agent';
 
 describe('installInvestigationAgent', () => {

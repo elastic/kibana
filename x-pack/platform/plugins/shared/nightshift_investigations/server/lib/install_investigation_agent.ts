@@ -11,7 +11,7 @@ import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
   SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
-} from '../../agents/investigation';
+} from '../agents/investigation';
 
 export const installInvestigationAgent = async ({
   agentBuilder,

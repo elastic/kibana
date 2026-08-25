@@ -11,6 +11,8 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import type {
   GetInvestigationResponse,
   InvestigationStatus,
@@ -116,7 +118,8 @@ export class NightshiftInvestigationsClient {
     private readonly logger: Logger,
     // Explicit override for contexts where the request cannot carry space info (e.g. workflow step
     // definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
-    private readonly spaceIdOverride?: string
+    private readonly spaceIdOverride?: string,
+    private readonly agentBuilder?: AgentBuilderPluginStart
   ) {}
 
   private getSpaceId(): string {
@@ -129,6 +132,8 @@ export class NightshiftInvestigationsClient {
 
   async start({
     subject,
+    message,
+    stream_names,
     concurrency_key,
     context = {},
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
@@ -136,7 +141,14 @@ export class NightshiftInvestigationsClient {
       throw new Error('workflowsManagement is not available');
     }
 
+    if (!this.agentBuilder) {
+      throw new Error('agentBuilder is not available');
+    }
+
     const spaceId = this.getSpaceId();
+
+    await installInvestigationAgent({ agentBuilder: this.agentBuilder, spaceId });
+
     const workflow = await this.workflowsManagement.management.getWorkflow(
       SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
       spaceId
@@ -150,7 +162,8 @@ export class NightshiftInvestigationsClient {
     }
 
     const inputs = {
-      message: `Investigation requested for ${subject.type} ${subject.id}`,
+      message: message ?? `Investigation requested for ${subject.type} ${subject.id}`,
+      stream_names: stream_names ?? [],
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
         ...context,

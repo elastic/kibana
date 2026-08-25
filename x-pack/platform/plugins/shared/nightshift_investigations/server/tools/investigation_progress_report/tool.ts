@@ -14,16 +14,14 @@ import {
   INVESTIGATION_PROGRESS_UI_EVENT,
   investigationStateSchema,
 } from '@kbn/significant-events-schema';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import dedent from 'dedent';
-import { createSignificantEventsAvailability } from '../../../agent_builder/tools/significant_events_availability';
 
 export const SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID =
   platformSignificantEventsTools.reportInvestigationProgress;
 
 const toolDescription = dedent`
   ${i18n.translate(
-    'xpack.significantEvents.agentBuilder.tools.investigationProgressReport.description',
+    'xpack.nightshiftInvestigations.agentBuilder.tools.investigationProgressReport.description',
     {
       defaultMessage:
         'Report the full current state of the investigation, so the user can see live progress before the investigation finishes. This is a snapshot, not a diff: every call must include every hypothesis considered so far, each with its own confidence and status — not just what changed since the last call.',
@@ -31,7 +29,7 @@ const toolDescription = dedent`
   )}
 
   ${i18n.translate(
-    'xpack.significantEvents.agentBuilder.tools.investigationProgressReport.description.rules',
+    'xpack.nightshiftInvestigations.agentBuilder.tools.investigationProgressReport.description.rules',
     {
       defaultMessage:
         'Call this whenever a hypothesis is added, its confidence changes, or its status changes (investigating, dismissed, confirmed). Keep "summary" short (one or two sentences) describing what is happening right now. This tool does not end the investigation — keep working after calling it.',
@@ -40,10 +38,8 @@ const toolDescription = dedent`
 `;
 
 export const createInvestigationProgressReportTool = ({
-  server,
   logger,
 }: {
-  server: StreamsServer;
   logger: Logger;
 }): BuiltinToolDefinition<typeof investigationStateSchema> => ({
   id: SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
@@ -58,9 +54,9 @@ export const createInvestigationProgressReportTool = ({
   },
   schema: investigationStateSchema,
   tags: ['streams', 'investigation'],
-  availability: createSignificantEventsAvailability({ server, logger }),
   handler: async (state, context) => {
     context.events.sendUiEvent(INVESTIGATION_PROGRESS_UI_EVENT, state);
+    logger.debug('Reported investigation progress');
 
     return {
       results: [

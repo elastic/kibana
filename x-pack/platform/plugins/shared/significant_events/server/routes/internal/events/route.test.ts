@@ -34,7 +34,7 @@ describe('POST /internal/significant_events/events/{id}/investigate', () => {
         licensing: {},
         getEventClient: () => ({ findByEventUuid }),
       }),
-      server: { workflowsManagement: {}, agentBuilder: {}, spaces: {} },
+      server: { nightshiftInvestigations: {} },
       logger: { warn: jest.fn(), get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
       maintenanceService: makeMaintenanceService('paused'),
     } as unknown as HandlerParams;

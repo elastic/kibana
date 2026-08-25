@@ -6,6 +6,8 @@
  */
 
 import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/server';
+import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting-v2-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
@@ -72,4 +74,16 @@ export interface SignificantEventsPluginStartDependencies {
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
   streams: StreamsPluginStart;
+  nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
+
+/**
+ * The shared `StreamsServer` bag, extended with the nightshift investigations start
+ * contract. Significant events reuses `StreamsServer` as its own route-handler `server`
+ * type (see other significant-events-only fields like `kibanaVersion`/`relayClient`
+ * already carried on that interface); nightshift is added here instead of on the shared
+ * type because streams itself has no use for it.
+ */
+export type SignificantEventsServer = StreamsServer & {
+  nightshiftInvestigations?: NightshiftInvestigationsServerStart;
+};

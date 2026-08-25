@@ -20,6 +20,8 @@ import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
+import { registerInvestigationAgentType } from './agents/investigation';
+import { createInvestigationProgressReportTool } from './tools/investigation_progress_report/tool';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -39,6 +41,7 @@ export class NightshiftInvestigationsPlugin
   private readonly logger: Logger;
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
+  private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
@@ -56,12 +59,22 @@ export class NightshiftInvestigationsPlugin
         this.workflowsManagement,
         this.spaces,
         this.logger,
-        spaceId
+        spaceId,
+        this.agentBuilder
       );
 
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
+
+    if (plugins.agentBuilder) {
+      registerInvestigationAgentType(plugins.agentBuilder);
+      plugins.agentBuilder.tools.register(
+        createInvestigationProgressReportTool({
+          logger: this.logger.get('investigation_progress_report_tool'),
+        })
+      );
+    }
 
     if (plugins.workflowsManagement) {
       if (plugins.workflowsExtensions) {
@@ -89,6 +102,7 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsStartDeps
   ): NightshiftInvestigationsServerStart {
     this.spaces = plugins.spaces;
+    this.agentBuilder = plugins.agentBuilder;
 
     if (plugins.workflowsExtensions) {
       this.installManagedWorkflows(plugins.workflowsExtensions).catch((err) => {
@@ -104,7 +118,9 @@ export class NightshiftInvestigationsPlugin
           request,
           this.workflowsManagement,
           this.spaces,
-          this.logger
+          this.logger,
+          undefined,
+          this.agentBuilder
         ),
     };
   }
