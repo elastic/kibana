@@ -8,9 +8,8 @@
 import { set } from '@kbn/safer-lodash-set';
 import { get, isEqual, unset } from 'lodash';
 import { produce } from 'immer-v9';
-import type { CoreStart, Logger, SavedObjectsFindResult } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
 import { packSavedObjectType } from '../../common/types';
 import type { PackSavedObject } from '../common/types';
@@ -22,16 +21,31 @@ import {
 import {
   convertSOQueriesToPackConfig,
   fetchAllPackagePolicies,
-  hasQueries,
-  policyHasPack,
   makePackKey,
   removePackFromPolicy,
 } from '../routes/pack/utils';
+import { escapeFilterValue } from '../routes/utils/generate_copy_name';
+
+/** Pack-block keys are `${spaceId}--${packName}`, or a legacy bare `${packName}` (default space). */
+const parsePackKey = (key: string): { spaceId: string; packName: string } => {
+  const separatorIndex = key.indexOf('--');
+  if (separatorIndex === -1) {
+    return { spaceId: 'default', packName: key };
+  }
+
+  return {
+    spaceId: key.slice(0, separatorIndex),
+    packName: key.slice(separatorIndex + 2),
+  };
+};
 
 /**
- * Idempotent, one-shot pass that pushes each enabled pack's `schedule_id`
+ * Idempotent, one-shot pass that pushes each pack's `schedule_id` / `start_date`
  * values onto its Fleet package-policy wire so agents emit them in results.
- * Writes only the osquery pack block; never mints.
+ *
+ * Wire-first so blocks stay reachable when the pack SO has no agent-policy
+ * references (attached pre-#275000, prebuilt/asset packs, 9.4→9.5 drift).
+ * Writes pack block metadata only; never attaches or detaches.
  */
 export const reconcileScheduleIdsToWire = async ({
   coreStart,
@@ -51,35 +65,6 @@ export const reconcileScheduleIdsToWire = async ({
   // Setup I/O throwing out of run() → FailedRunResult → the one-shot task is
   // removed after maxAttempts. Convert to hadFailures so the backoff re-arms.
   try {
-    const internalClient = await getInternalSavedObjectsClient(coreStart);
-
-    // Page all packs across spaces (no 1000-pack ceiling, no offset drift).
-    const packFinder = internalClient.createPointInTimeFinder<PackSavedObject>({
-      type: packSavedObjectType,
-      perPage: 1000,
-      namespaces: ['*'],
-    });
-    const allPackSavedObjects: Array<SavedObjectsFindResult<PackSavedObject>> = [];
-    for await (const { saved_objects: packBatch } of packFinder.find()) {
-      allPackSavedObjects.push(...packBatch);
-    }
-
-    await packFinder.close();
-
-    const packsToReconcile = allPackSavedObjects.filter(
-      (pack) => pack.attributes.enabled && hasQueries(pack.attributes.queries)
-    );
-
-    if (!packsToReconcile.length) {
-      logger.debug('reconcileScheduleIdsToWire: no enabled packs to reconcile');
-
-      return { hadFailures: false };
-    }
-
-    logger.info(
-      `reconcileScheduleIdsToWire: ${packsToReconcile.length} enabled pack(s) to reconcile onto the Fleet wire`
-    );
-
     const packagePolicyService = osqueryContext.getPackagePolicyService();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
@@ -89,15 +74,54 @@ export const reconcileScheduleIdsToWire = async ({
       return { hadFailures: true };
     }
 
-    const packsBySpaceId = new Map<string, Array<SavedObjectsFindResult<PackSavedObject>>>();
-    for (const packSO of packsToReconcile) {
-      const spaceId = packSO.namespaces?.[0] ?? 'default';
-      const spacePacks = packsBySpaceId.get(spaceId) ?? [];
-      spacePacks.push(packSO);
-      packsBySpaceId.set(spaceId, spacePacks);
+    const internalClient = await getInternalSavedObjectsClient(coreStart);
+
+    const packagePolicies: PackagePolicy[] = await fetchAllPackagePolicies(
+      packagePolicyService,
+      internalClient
+    );
+
+    if (!packagePolicies.length) {
+      logger.debug('reconcileScheduleIdsToWire: no osquery package policies found');
+
+      return { hadFailures: false };
     }
 
-    for (const [spaceId, spacePacks] of packsBySpaceId) {
+    // Indexed so writes can splice back updated versions (409 prevention when
+    // several packs live on the same policy).
+    const policiesByIndex = packagePolicies;
+
+    const spaceWorkItems = new Map<
+      string,
+      Array<{ ppIndex: number; packKey: string; packName: string }>
+    >();
+
+    for (let i = 0; i < policiesByIndex.length; i++) {
+      const pp = policiesByIndex[i];
+      const packsBlock = get(pp, 'inputs[0].config.osquery.value.packs') as
+        | Record<string, unknown>
+        | undefined;
+      if (!packsBlock) continue;
+
+      for (const packKey of Object.keys(packsBlock)) {
+        const { spaceId, packName } = parsePackKey(packKey);
+        const items = spaceWorkItems.get(spaceId) ?? [];
+        items.push({ ppIndex: i, packKey, packName });
+        spaceWorkItems.set(spaceId, items);
+      }
+    }
+
+    if (!spaceWorkItems.size) {
+      logger.debug('reconcileScheduleIdsToWire: no pack blocks found in any package policy');
+
+      return { hadFailures: false };
+    }
+
+    logger.info(
+      `reconcileScheduleIdsToWire: scanning ${packagePolicies.length} package policy(ies) across ${spaceWorkItems.size} space(s)`
+    );
+
+    for (const [spaceId, workItems] of spaceWorkItems) {
       if (signal?.aborted) {
         logger.info(
           'reconcileScheduleIdsToWire: aborted by task manager, will retry remaining packs'
@@ -108,15 +132,35 @@ export const reconcileScheduleIdsToWire = async ({
 
       const spaceClient = getInternalSavedObjectsClientForSpaceId(coreStart, spaceId);
 
-      // Fetch each space's package policies once — O(policies-per-space), not O(packs × policies).
-      const packagePolicies: PackagePolicy[] = await fetchAllPackagePolicies(
-        packagePolicyService,
-        spaceClient
-      );
+      const packSOsByName = new Map<string, { id: string; attributes: PackSavedObject }>();
+      const uniquePackNames = [...new Set(workItems.map((w) => w.packName))];
 
-      for (const packSO of spacePacks) {
-        // Abort per-pack, not just per-space: the default single-space deployment
-        // has one space iteration, so a space-only check would never re-fire.
+      for (const packName of uniquePackNames) {
+        try {
+          const findResult = await spaceClient.find<PackSavedObject>({
+            type: packSavedObjectType,
+            filter: `${packSavedObjectType}.attributes.name: "${escapeFilterValue(packName)}"`,
+            perPage: 100,
+          });
+          // `name` is analyzed `text`, so this filter matches fuzzily ("windows"
+          // hits "windows discovery"). Re-check exactly or we project the wrong
+          // pack's queries onto this block.
+          const so = findResult.saved_objects.find(
+            (candidate) => candidate.attributes?.name === packName
+          );
+          if (so) {
+            packSOsByName.set(packName, { id: so.id, attributes: so.attributes });
+          }
+        } catch (err) {
+          logger.warn(
+            `reconcileScheduleIdsToWire: failed to look up pack SO "${packName}" in space ${spaceId}: ${
+              (err as Error).message
+            }`
+          );
+        }
+      }
+
+      for (const { ppIndex, packKey, packName } of workItems) {
         if (signal?.aborted) {
           logger.info(
             'reconcileScheduleIdsToWire: aborted by task manager, will retry remaining packs'
@@ -125,108 +169,89 @@ export const reconcileScheduleIdsToWire = async ({
           return { hadFailures: true };
         }
 
+        const packEntry = packSOsByName.get(packName);
+        if (!packEntry) {
+          logger.warn(
+            `reconcileScheduleIdsToWire: no pack SO found for key "${packKey}" in space ${spaceId}, skipping`
+          );
+          continue;
+        }
+
+        const { id: packId, attributes: packAttrs } = packEntry;
+        const pp = policiesByIndex[ppIndex];
+        const canonicalPackKey = makePackKey(packName, spaceId);
+        const packPath = `inputs[0].config.osquery.value.packs.${canonicalPackKey}`;
+
+        const legacyPackBlock = get(pp, `inputs[0].config.osquery.value.packs.${packName}`) as
+          | Record<string, unknown>
+          | undefined;
+        const existingPackBlock =
+          (get(pp, packPath) as Record<string, unknown> | undefined) ?? legacyPackBlock;
+        const existingShard = existingPackBlock?.shard ?? legacyPackBlock?.shard;
+
         try {
-          const policyRefs =
-            packSO.references
-              ?.filter((r) => r.type === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE)
-              .map((r) => r.id) ?? [];
-
-          if (!policyRefs.length) {
-            continue;
-          }
-
           const { queries: builtQueries, ...packDefaults } = convertSOQueriesToPackConfig(
-            packSO.attributes.queries ?? [],
+            packAttrs.queries ?? [],
             {
               spaceId,
               packSchedule: {
-                schedule_type: packSO.attributes.schedule_type,
-                interval: packSO.attributes.interval,
-                rrule_schedule: packSO.attributes.rrule_schedule,
+                schedule_type: packAttrs.schedule_type,
+                interval: packAttrs.interval,
+                rrule_schedule: packAttrs.rrule_schedule,
               },
               isRruleFeatureEnabled,
+              fallbackStartDate: packAttrs.created_at,
             }
           );
 
-          // Index-based so a written policy can be spliced back in (below), so
-          // later packs on the same policy diff against post-write state.
-          for (let ppIndex = 0; ppIndex < packagePolicies.length; ppIndex++) {
-            // Abort down to the individual write: one pack on many policies can run long.
-            if (signal?.aborted) {
-              logger.info(
-                'reconcileScheduleIdsToWire: aborted by task manager, will retry remaining packs'
-              );
+          const intendedPackBlock = {
+            ...(existingShard !== undefined ? { shard: existingShard } : {}),
+            pack_id: packId,
+            pack_name: packName,
+            ...packDefaults,
+            queries: builtQueries,
+          };
 
-              return { hadFailures: true };
-            }
-
-            const pp = packagePolicies[ppIndex];
-            if (policyHasPack(pp, packSO.attributes.name, spaceId)) {
-              const packPath = `inputs[0].config.osquery.value.packs.${makePackKey(
-                packSO.attributes.name,
-                spaceId
-              )}`;
-
-              const legacyPackBlock = get(
-                pp,
-                `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`
-              ) as Record<string, unknown> | undefined;
-              const existingPackBlock =
-                (get(pp, packPath) as Record<string, unknown> | undefined) ?? legacyPackBlock;
-              const existingShard = existingPackBlock?.shard ?? legacyPackBlock?.shard;
-
-              // Matches the block the write sets below; used as the diff gate.
-              const intendedPackBlock = {
-                ...(existingShard !== undefined ? { shard: existingShard } : {}),
-                pack_id: packSO.id,
-                pack_name: packSO.attributes.name,
-                ...packDefaults,
-                queries: builtQueries,
-              };
-
-              if (isEqual(existingPackBlock, intendedPackBlock)) {
-                logger.debug(
-                  `reconcileScheduleIdsToWire: pack ${packSO.id} already in sync on policy ${pp.id}, skipping write`
-                );
-                continue;
-              }
-
-              const updatedPolicy = await packagePolicyService.update(
-                spaceClient,
-                esClient,
-                pp.id,
-                produce<PackagePolicy>(pp, (draft) => {
-                  unset(draft, 'id');
-                  removePackFromPolicy(draft, packSO.attributes.name, spaceId);
-                  set(draft, packPath, intendedPackBlock);
-
-                  return draft;
-                })
-              );
-
-              // Splice back so later packs see the version bump (no stale-version 409).
-              packagePolicies[ppIndex] = { ...updatedPolicy, id: updatedPolicy.id ?? pp.id };
-            }
+          if (isEqual(existingPackBlock, intendedPackBlock)) {
+            logger.debug(
+              `reconcileScheduleIdsToWire: pack "${packKey}" already in sync on policy ${pp.id}, skipping write`
+            );
+            continue;
           }
 
+          const updatedPolicy = await packagePolicyService.update(
+            spaceClient,
+            esClient,
+            pp.id,
+            produce<PackagePolicy>(pp, (draft) => {
+              unset(draft, 'id');
+              removePackFromPolicy(draft, packName, spaceId);
+              set(draft, packPath, intendedPackBlock);
+
+              return draft;
+            })
+          );
+
+          // Splice back so later packs on this policy see the version bump (409).
+          policiesByIndex[ppIndex] = { ...updatedPolicy, id: updatedPolicy.id ?? pp.id };
+
           logger.debug(
-            `reconcileScheduleIdsToWire: reconciled pack ${packSO.id} in space ${spaceId}`
+            `reconcileScheduleIdsToWire: repaired pack "${packKey}" on policy ${pp.id} in space ${spaceId}`
           );
         } catch (err) {
           const error = err as Error & {
             statusCode?: number;
             output?: { statusCode?: number };
           };
-          // Boom conflicts carry the status under output.statusCode; read both.
           const statusCode = error.output?.statusCode ?? error.statusCode;
           if (statusCode === 409) {
             logger.debug(
-              `reconcileScheduleIdsToWire: version conflict for pack ${packSO.id}, will retry`
+              `reconcileScheduleIdsToWire: version conflict for pack "${packKey}" on policy ${pp.id}, will retry`
             );
             hadFailures = true;
           } else {
             logger.warn(
-              `reconcileScheduleIdsToWire: failed to reconcile pack ${packSO.id}: ${error.message}`
+              `reconcileScheduleIdsToWire: failed to repair pack "${packKey}" on policy ${pp.id}: ${error.message}`
             );
             hadFailures = true;
           }

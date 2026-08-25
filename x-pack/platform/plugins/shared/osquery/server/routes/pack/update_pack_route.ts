@@ -105,11 +105,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
+        const logger = osqueryContext.logFactory.get('pack');
         const [, startPlugins] = await osqueryContext.getStartServices();
         const currentUser = await getUserInfo({
           request,
           security: (startPlugins as StartPlugins).security,
-          logger: osqueryContext.logFactory.get('pack'),
+          logger,
         });
         const username = currentUser?.username ?? undefined;
         const profileUid = currentUser?.profile_uid ?? undefined;
@@ -403,6 +404,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 rrule_schedule: updatedPackSO.attributes.rrule_schedule,
               },
               isRruleFeatureEnabled,
+              fallbackStartDate: updatedPackSO.attributes.created_at,
             }
           );
 
@@ -515,17 +517,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                 )
               );
             }
-          } else {
-            // Diff current vs. target. Resolve the still-targeted package
-            // policies (write targets) first, then remove the pack from every
-            // package policy that currently carries it on the wire but is no
-            // longer targeted. Scanning the wire (`currentPackagePolicies`)
-            // rather than resolving the SO's agent-policy references keeps
-            // detach correct even when references and wire attachments have
-            // diverged (e.g. after a 9.4.3 → 9.5.0 upgrade); see #279224.
-            // Gated on an actual retarget request: in the same drift state an
-            // edit-only PUT resolves to zero write targets, and detaching on
-            // that would silently unschedule an enabled pack everywhere.
+          } else if (targetingChangeRequested) {
+            // Retarget. Detach is driven off the wire, not SO references, so it
+            // stays correct when the two have diverged (#279224).
             const packagePolicyWriteTargets = groupAgentPolicyIdsByPackagePolicy(
               policiesList,
               packagePolicies
@@ -536,25 +530,23 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               )
             );
 
-            if (targetingChangeRequested) {
-              await Promise.all(
-                currentPackagePolicies
-                  .filter((packagePolicy) => !writeTargetIds.has(packagePolicy.id))
-                  .map((packagePolicy) =>
-                    packagePolicyService?.update(
-                      spaceScopedClient,
-                      esClient,
-                      packagePolicy.id,
-                      produce<PackagePolicy>(packagePolicy, (draft) => {
-                        unset(draft, 'id');
-                        removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+            await Promise.all(
+              currentPackagePolicies
+                .filter((packagePolicy) => !writeTargetIds.has(packagePolicy.id))
+                .map((packagePolicy) =>
+                  packagePolicyService?.update(
+                    spaceScopedClient,
+                    esClient,
+                    packagePolicy.id,
+                    produce<PackagePolicy>(packagePolicy, (draft) => {
+                      unset(draft, 'id');
+                      removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
 
-                        return draft;
-                      })
-                    )
+                      return draft;
+                    })
                   )
-              );
-            }
+                )
+            );
 
             await Promise.all(
               Array.from(packagePolicyWriteTargets.values()).map(
@@ -588,6 +580,83 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   )
               )
             );
+          } else {
+            // Edit-only. Write targets come from the wire scan, not SO references,
+            // so metadata repairs reach packs whose references drifted. Only
+            // rewrites blocks that already exist; never attaches.
+            await Promise.all(
+              currentPackagePolicies.map((packagePolicy) =>
+                packagePolicyService?.update(
+                  spaceScopedClient,
+                  esClient,
+                  packagePolicy.id,
+                  produce<PackagePolicy>(packagePolicy, (draft) => {
+                    unset(draft, 'id');
+                    if (!has(draft, 'inputs[0].streams')) {
+                      set(draft, 'inputs[0].streams', []);
+                    }
+
+                    if (updatedPackSO.attributes.name !== currentPackSO.attributes.name) {
+                      removePackFromPolicy(draft, currentPackSO.attributes.name, spaceId);
+                    }
+
+                    const pk = makePackKey(updatedPackSO.attributes.name, spaceId);
+                    removePackFromPolicy(draft, updatedPackSO.attributes.name, spaceId);
+                    set(
+                      draft,
+                      `inputs[0].config.osquery.value.packs.${pk}`,
+                      buildFleetPackBlock(packagePolicy.policy_ids ?? [])
+                    );
+
+                    return draft;
+                  })
+                )
+              )
+            );
+
+            // Heal references to match the wire. Best-effort: the save already
+            // committed, so a heal failure must not fail the response.
+            const wiredPolicyIds = new Set(
+              currentPackagePolicies.flatMap((pp) => pp.policy_ids ?? [])
+            );
+            const soRefPolicyIds = new Set(currentAgentPolicyIds);
+            const missingFromRefs = [...wiredPolicyIds].filter((id) => !soRefPolicyIds.has(id));
+            if (missingFromRefs.length) {
+              // Union, not replacement — a reference legitimately absent from the
+              // wire must survive healing.
+              const healedPolicyIds = [...new Set([...currentAgentPolicyIds, ...wiredPolicyIds])];
+
+              // `agentPoliciesIdMap` is keyed off `policiesList`, empty in the very
+              // drift state we're healing — resolve names for the healed ids.
+              const healedAgentPolicies = await agentPolicyService?.getByIds(
+                spaceScopedClient,
+                healedPolicyIds
+              );
+              const healedNameById = mapKeys(healedAgentPolicies, 'id');
+
+              const healedRefs = [
+                ...nonAgentPolicyReferences,
+                ...healedPolicyIds.map((id) => ({
+                  id,
+                  name: healedNameById[id]?.name ?? agentPoliciesIdMap[id]?.name,
+                  type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+                })),
+              ];
+              try {
+                await spaceScopedClient.update<PackSavedObject>(
+                  packSavedObjectType,
+                  request.params.id,
+                  {},
+                  { references: healedRefs }
+                );
+              } catch (healErr) {
+                logger.warn(
+                  `update_pack_route: reference healing failed for pack ${request.params.id}: ${
+                    (healErr as Error).message
+                  }`
+                );
+              }
+            }
           }
         } catch (err) {
           const conflictStatus =

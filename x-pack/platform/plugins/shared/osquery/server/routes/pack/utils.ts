@@ -358,6 +358,9 @@ export interface ConvertSOQueriesToPackConfigOptions {
   // Required — callers must resolve this explicitly so a missing wiring
   // never silently ships RRULE state to Fleet.
   isRruleFeatureEnabled: boolean;
+  // Anchor used when the stored start_date is absent or the epoch sentinel.
+  // Pass the pack's created_at; defaults to now() when omitted.
+  fallbackStartDate?: string;
 }
 
 export interface PackConfigOutput {
@@ -373,7 +376,8 @@ export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
   options: ConvertSOQueriesToPackConfigOptions
 ): PackConfigOutput => {
-  const { spaceId, packSchedule, isRruleFeatureEnabled } = options;
+  const { spaceId, packSchedule, isRruleFeatureEnabled, fallbackStartDate } = options;
+  const resolvedFallback = fallbackStartDate ?? new Date().toISOString();
 
   const packMode: ScheduleType | undefined = isRruleFeatureEnabled
     ? packSchedule?.schedule_type ?? undefined
@@ -427,14 +431,19 @@ export const convertSOQueriesToPackConfig = (
       }
 
       // Suppress start_date for rrule-mode (osquerybeat would honour the stale
-      // value over the override) and the V4 epoch-fallback (avoid a bogus 1970
-      // on interval packs that never had one).
-      const startDateField =
-        isRruleFeatureEnabled && (packMode === 'rrule' || querySchedType === 'rrule')
-          ? {}
-          : legacyStartDate !== undefined && legacyStartDate !== START_DATE_EPOCH_FALLBACK
-          ? { start_date: legacyStartDate }
-          : {};
+      // value over the rrule_schedule.start_date anchor).
+      // Interval mode must always carry an anchor or osquerybeat's
+      // nativeScheduleExecutionCount returns 0 for every run.
+      const isRruleMode =
+        isRruleFeatureEnabled && (packMode === 'rrule' || querySchedType === 'rrule');
+      const startDateField = isRruleMode
+        ? {}
+        : {
+            start_date:
+              legacyStartDate !== undefined && legacyStartDate !== START_DATE_EPOCH_FALLBACK
+                ? legacyStartDate
+                : resolvedFallback,
+          };
 
       queriesOut[index] = omitBy(
         {
