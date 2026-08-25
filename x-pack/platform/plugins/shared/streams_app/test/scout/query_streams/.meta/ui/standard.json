@@ -1,0 +1,199 @@
+{
+  "sha1": "eefd7dab2ada2a6d8adf76add8233892518643d9",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "6c84c4cc07435c8-744ce32675c025c",
+      "title": "Setup environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "7a35c691b0ec9e7-cd54fa739417889",
+      "title": "Query streams - Create query stream should properly handle errors for invalid query streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/create_query_stream.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    },
+    {
+      "id": "7a35c691b0ec9e7-aed3b1699c34c31",
+      "title": "Query streams - Create query stream should properly create a root query stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/create_query_stream.spec.ts",
+        "line": 51,
+        "column": 7
+      }
+    },
+    {
+      "id": "7a35c691b0ec9e7-0f0cfefb9e93b08",
+      "title": "Query streams - Create query stream should create a query stream as a child of an ingest stream",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/create_query_stream.spec.ts",
+        "line": 81,
+        "column": 8
+      }
+    },
+    {
+      "id": "539a1d3bf3be63a-6fe4c6137b25361",
+      "title": "Query streams - Delete query stream should support deleting an existing query stream",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/delete_query_stream.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "6589141fab3424f-1cd2ae1f95337e5",
+      "title": "Query streams - Inline edit and delete on classic stream partitioning view should edit a query stream inline from the classic stream partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/edit_query_stream_classic_partitioning.spec.ts",
+        "line": 64,
+        "column": 9
+      }
+    },
+    {
+      "id": "6589141fab3424f-62d132f57e94ce4",
+      "title": "Query streams - Inline edit and delete on classic stream partitioning view should delete a query stream from the inline edit form on classic stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/edit_query_stream_classic_partitioning.spec.ts",
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "70d99d8d6dd521c-6d1781c1e9bac72",
+      "title": "Query streams - Inline edit and delete from partitioning view should edit a query stream inline from the partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/edit_query_stream_partitioning.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "70d99d8d6dd521c-37017f1fb2cbbbd",
+      "title": "Query streams - Inline edit and delete from partitioning view should delete a query stream from the inline edit form in partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/edit_query_stream_partitioning.spec.ts",
+        "line": 93,
+        "column": 9
+      }
+    },
+    {
+      "id": "656452058f1cc30-7490fc470cd2b93",
+      "title": "Query streams - Edit query stream should support editing an existing query stream's ES|QL query from the partitioning tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/edit_query_stream.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "9c09d8f53b5c1fd-b2cfca62ca2b6bb",
+      "title": "Query streams - feature flag gating should properly hide query streams UI when feature flag is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/query_streams_feature_flag.spec.ts",
+        "line": 23,
+        "column": 7
+      }
+    },
+    {
+      "id": "9c09d8f53b5c1fd-a29364a7e6effc4",
+      "title": "Query streams - feature flag gating should properly show query streams UI when feature flag is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/query_streams_feature_flag.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "2ed9862cb2bcb8b-59c33f79265c2ca",
+      "title": "Query streams - View query stream should show query stream in navigation with detail view accessible",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/view_query_stream.spec.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "id": "8988fae19c44a10-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
+      }
+    }
+  ]
+}
