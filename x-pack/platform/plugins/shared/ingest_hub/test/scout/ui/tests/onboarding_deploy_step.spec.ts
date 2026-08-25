@@ -129,10 +129,10 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
 
     // Wait for the static-keys form (lazy-loaded Fleet component) to appear before filling.
-    const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId').locator('input');
-    const secretKeyField = page.testSubj
-      .locator('awsStaticKeysForm-secretAccessKey')
-      .locator('input');
+    // EuiFieldText/EuiFieldPassword put data-test-subj on the <input> itself, so no child
+    // .locator('input') is needed — the test-subj locator already IS the input element.
+    const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId');
+    const secretKeyField = page.testSubj.locator('awsStaticKeysForm-secretAccessKey');
     await expect(accessKeyField).toBeVisible();
     await accessKeyField.fill('AKIATEST');
     await secretKeyField.fill('secrettest');
