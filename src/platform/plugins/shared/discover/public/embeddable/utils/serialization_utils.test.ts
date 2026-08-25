@@ -291,6 +291,29 @@ describe('Serialization utils', () => {
       expect(deserializedState.columns).toEqual(['custom-col']);
       expect(deserializedState.sort).toEqual([['timestamp', 'asc']]);
     });
+
+    test('by reference - partial nested override deep-merges instead of replacing', async () => {
+      const sessionTabs = [
+        mockTab('tab-1', 'Tab 1', { jsonModeSettings: { hideNulls: true, wrapLines: true } }),
+      ];
+      discoverServiceMock.savedSearch.getDiscoverSession = jest
+        .fn()
+        .mockResolvedValue(mockDiscoverSession(sessionTabs));
+
+      const serializedState: DiscoverSessionEmbeddableByReferenceState = {
+        title: 'test panel title',
+        ref_id: 'savedSearch',
+        selected_tab_id: undefined,
+        overrides: { json_mode_settings: { wrap_lines: false } },
+      };
+
+      const deserializedState = await deserializeState({
+        serializedState,
+        discoverServices: discoverServiceMock,
+      });
+
+      expect(deserializedState.jsonModeSettings).toEqual({ hideNulls: true, wrapLines: false });
+    });
   });
 
   describe('serialize state', () => {

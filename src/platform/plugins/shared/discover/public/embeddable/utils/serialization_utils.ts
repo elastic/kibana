@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit, pick } from 'lodash';
+import { mergeWith, omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import { type SerializedTimeRange, type SerializedTitles } from '@kbn/presentation-publishing';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
@@ -62,7 +62,13 @@ export const deserializeState = async ({
     // ignore the time range from the tab - only global time range + panel time range matter
     const runtimeSavedSearchState = isSelectedTabDeleted
       ? {}
-      : { ...omit(resolvedTab, 'timeRange'), ...savedObjectOverride };
+      : mergeWith(
+          {},
+          omit(resolvedTab, 'timeRange'),
+          savedObjectOverride,
+          (_savedObjectValue, overrideValue) =>
+            Array.isArray(overrideValue) ? overrideValue : undefined
+        );
 
     return {
       ...runtimeSavedSearchState,
