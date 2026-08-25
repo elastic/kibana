@@ -350,7 +350,7 @@ describe('connectorSmlType', () => {
 
       expect(result!.content).toContain('searchMessages: Search Slack messages');
       expect(result!.content).toContain('sendMessage: Send a message to a channel');
-      expect(result!.content).toContain('internalAction: Internal only');
+      expect(result!.content).toContain('internalAction [DESTROY]: Internal only');
     });
 
     it('handles missing optional fields gracefully', async () => {

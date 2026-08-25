@@ -192,7 +192,7 @@ describe('connector attachment type', () => {
         expect(representation.value).toContain('execute_connector_sub_action');
         expect(representation.value).toContain('searchMessages: Search Slack messages');
         expect(representation.value).toContain('sendMessage: Send a message to a channel');
-        expect(representation.value).toContain('internalAction: Internal only');
+        expect(representation.value).toContain('internalAction [DESTROY]: Internal only');
         expect(representation.value).toContain('Connector ID: connector-123');
         expect(representation.value).toContain('Required JSON shape for tool');
         expect(representation.value).toContain(
@@ -246,9 +246,7 @@ describe('connector attachment type', () => {
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain('sendMessage: Send a message to a channel');
-        expect(representation.value).toContain(
-          'internalAction: Internal only (requires user confirmation before calling)'
-        );
+        expect(representation.value).toContain('internalAction [DESTROY]: Internal only');
         expect(representation.value).not.toContain('searchMessages');
       });
 
