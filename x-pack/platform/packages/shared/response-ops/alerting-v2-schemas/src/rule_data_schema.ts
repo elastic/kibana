@@ -805,6 +805,18 @@ export const findRulesRequestSchema = z.object({
     .max(MAX_SEARCH_LENGTH)
     .optional()
     .describe('A text string to search across rule fields.'),
+  has_reference_type: z
+    .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .optional()
+    .describe('Filter to rules referencing a saved object of this type.'),
+  has_reference_id: z
+    .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .optional()
+    .describe('Filter to rules referencing a saved object with this id (requires has_reference_type).'),
 });
 
 export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;

@@ -107,7 +107,13 @@ describe('useInstallRuleTemplate', () => {
     result.current.mutate(mockTemplate);
 
     await waitFor(() => {
-      expect(mockCreateRule).toHaveBeenCalledWith(mockCreatePayload);
+      expect(mockCreateRule).toHaveBeenCalledWith({
+        ...mockCreatePayload,
+        metadata: {
+          ...mockCreatePayload.metadata,
+          source: { type: 'rule_template', data: { template_id: 'template-1' } },
+        },
+      });
       expect(mockDisableRule).toHaveBeenCalledWith('rule-1');
       expect(mockAddSuccess).toHaveBeenCalledWith(
         expect.objectContaining({

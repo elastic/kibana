@@ -39,6 +39,8 @@ export const toFindRulesRequest = ({
     search,
     sort_field: sortField,
     sort_order: sortOrder,
+    has_reference_type: undefined,
+    has_reference_id: undefined,
   };
 };
 

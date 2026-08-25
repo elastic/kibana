@@ -311,6 +311,7 @@ describe('RulesClient', () => {
           schedule: expect.objectContaining({ every: '5m' }),
         }),
         version: 'WzEsMV0=',
+        references: [],
       });
     });
 
@@ -336,6 +337,7 @@ describe('RulesClient', () => {
         id: 'rule-id-disabled',
         attrs: expect.objectContaining({ enabled: false }),
         version: 'WzEsMV0=',
+        references: [],
       });
     });
 
@@ -360,6 +362,7 @@ describe('RulesClient', () => {
           metadata: expect.objectContaining({ description: 'New description' }),
         }),
         version: 'WzEsMV0=',
+        references: [],
       });
 
       expect(res.metadata.description).toBe('New description');
@@ -746,6 +749,7 @@ describe('RulesClient', () => {
         id: 'rule-id-clear-artifacts',
         attrs: expect.objectContaining({ artifacts: [] }),
         version: 'WzEsMV0=',
+        references: [],
       });
     });
 

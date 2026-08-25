@@ -33,6 +33,8 @@ export const toFindRulesArgs = ({
   search,
   sort_field: sortField,
   sort_order: sortOrder,
+  has_reference_type: hasReferenceType,
+  has_reference_id: hasReferenceId,
   ...rest
 }: FindRulesRequest): Complete<FindRulesArgs> => {
   assertAllFieldsMapped(rest);
@@ -43,6 +45,10 @@ export const toFindRulesArgs = ({
     search,
     sortField,
     sortOrder,
+    hasReference:
+      hasReferenceType && hasReferenceId
+        ? { type: hasReferenceType, id: hasReferenceId }
+        : undefined,
   };
 };
 

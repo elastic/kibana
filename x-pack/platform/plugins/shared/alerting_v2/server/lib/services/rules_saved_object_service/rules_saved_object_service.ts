@@ -8,7 +8,7 @@
 import { PluginStart } from '@kbn/core-di';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
@@ -95,18 +95,30 @@ export interface CountByQueryParams {
   searchFields?: string[];
 }
 
+export interface RuleSoGetResult {
+  id: string;
+  attributes: RuleSavedObjectAttributes;
+  version?: string;
+  references?: SavedObjectReference[];
+}
+
 export interface RulesSavedObjectServiceContract {
-  create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<RuleWriteResult>;
+  create(params: {
+    attrs: RuleSavedObjectAttributes;
+    id?: string;
+    references?: SavedObjectReference[];
+  }): Promise<RuleWriteResult>;
   get(
     id: string,
     spaceId?: string
-  ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
+  ): Promise<RuleSoGetResult>;
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
   findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]>;
   update(params: {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
+    references?: SavedObjectReference[];
   }): Promise<RuleWriteResult>;
   bulkUpdate(
     items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
@@ -121,8 +133,9 @@ export interface RulesSavedObjectServiceContract {
     searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
+    hasReference?: { type: string; id: string };
   }): Promise<{
-    saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
+    saved_objects: Array<RuleSoGetResult>;
     total: number;
   }>;
   getRuleIdsByQuery(params: GetRuleIdsByQueryParams): Promise<string[]>;
@@ -149,9 +162,11 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   public async create({
     attrs,
     id,
+    references,
   }: {
     attrs: RuleSavedObjectAttributes;
     id?: string;
+    references?: SavedObjectReference[];
   }): Promise<RuleWriteResult> {
     const ruleId = id ?? SavedObjectsUtils.generateId();
     const result = await this.client.create<RuleSavedObjectAttributes>(
@@ -160,6 +175,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       {
         id: ruleId,
         overwrite: false,
+        ...(references?.length ? { references } : {}),
       }
     );
     return { id: result.id, version: result.version };
@@ -167,14 +183,14 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   public async get(
     id: string,
     spaceId?: string
-  ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }> {
+  ): Promise<RuleSoGetResult> {
     const namespace = spaceIdToNamespace(this.spaces, spaceId);
     const doc = await this.client.get<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
       id,
       namespace ? { namespace } : undefined
     );
-    return { id: doc.id, attributes: doc.attributes, version: doc.version };
+    return { id: doc.id, attributes: doc.attributes, version: doc.version, references: doc.references };
   }
 
   public async bulkGetByIds(
@@ -230,10 +246,12 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     id,
     attrs,
     version,
+    references,
   }: {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
+    references?: SavedObjectReference[];
   }): Promise<RuleWriteResult> {
     const result = await this.client.update<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
@@ -241,6 +259,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       attrs,
       {
         ...(version ? { version } : {}),
+        ...(references ? { references } : {}),
         mergeAttributes: false,
       }
     );
@@ -304,6 +323,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     searchFields,
     sortField = 'updated_at',
     sortOrder = 'desc',
+    hasReference,
   }: {
     page: number;
     perPage: number;
@@ -312,8 +332,9 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
+    hasReference?: { type: string; id: string };
   }) {
-    return this.client.find<RuleSavedObjectAttributes>({
+    const res = await this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       page,
       perPage,
@@ -321,7 +342,18 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       sortOrder,
       ...(filter ? { filter } : {}),
       ...(search ? { search, searchFields, defaultSearchOperator: 'AND' as const } : {}),
+      ...(hasReference ? { hasReference } : {}),
     });
+
+    return {
+      saved_objects: res.saved_objects.map((so) => ({
+        id: so.id,
+        attributes: so.attributes,
+        version: so.version,
+        references: so.references,
+      })),
+      total: res.total,
+    };
   }
 
   /**
