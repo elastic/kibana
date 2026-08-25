@@ -7,23 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  makeHighContrastColor,
-  tint,
-  useEuiScrollBar,
-  useEuiTheme,
-  useIsDarkMode,
-} from '@elastic/eui';
+import { useEuiScrollBar, useEuiTheme, useIsDarkMode } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { layoutVar } from '@kbn/core-chrome-layout-constants';
 
 export const useEmbeddableConsoleStyleVariables = () => {
   const { euiTheme } = useEuiTheme();
   const isDark = useIsDarkMode();
-  const background = isDark ? euiTheme.colors.plainDark : euiTheme.colors.darkestShade;
-  const baseTextColor = makeHighContrastColor(euiTheme.colors.lightestShade)(background);
-  const text = tint(baseTextColor, 0.2);
-
+  const background = isDark ? euiTheme.colors.plainDark : euiTheme.colors.backgroundBasePlain;
+  const text = euiTheme.colors.textParagraph;
   const initialHeight = euiTheme.size.xxl;
   const maxHeight = `calc(${layoutVar('application.content.height', '100vh')} - ${
     euiTheme.size.base
@@ -45,12 +37,11 @@ export const useEmbeddableConsoleContentStyles = () => {
     overflow-y: auto;
     width: 100%;
     height: calc(100% - ${initialHeight});
-    background-color: ${euiTheme.colors.body};
     animation-name: embeddableConsoleShowContent;
     animation-duration: ${euiTheme.animation.slow};
     animation-iteration-count: 1;
     animation-timing-function: ${euiTheme.animation.resistance};
-    color: ${euiTheme.colors.darkestShade};
+    color: ${euiTheme.colors.textParagraph};
 
     #consoleRoot {
       height: 100%;
