@@ -82,7 +82,13 @@ export function createMlClientFactory(deps: MlClientFactoryDeps): BuildMlClientF
     }
     const auditLogger = new MlAuditLogger(auditService, request);
 
-    return getMlClient(esClient, mlSavedObjectService, auditLogger, deps.mlLicense, deps.serverless);
+    return getMlClient(
+      esClient,
+      mlSavedObjectService,
+      auditLogger,
+      deps.mlLicense,
+      deps.serverless
+    );
   };
 }
 

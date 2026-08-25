@@ -33,7 +33,8 @@ export const createAnomalySwimLaneAttachmentType = (): AttachmentTypeDefinition<
         `Type: ${data.swimlane_type}`,
       ];
       if ('view_by' in data && data.view_by) lines.push(`View by: ${data.view_by}`);
-      if (data.severity_threshold != null) lines.push(`Severity threshold: ${data.severity_threshold}`);
+      if (data.severity_threshold != null)
+        lines.push(`Severity threshold: ${data.severity_threshold}`);
       return { type: 'text' as const, value: lines.join('\n') };
     },
   }),

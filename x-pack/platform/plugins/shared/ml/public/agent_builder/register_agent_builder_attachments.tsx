@@ -39,18 +39,15 @@ const getLabel = (attachment: UnknownAttachment, fallback: string): string => {
 };
 
 export function registerAgentBuilderAttachments(agentBuilder: AgentBuilderPluginStart) {
-  agentBuilder.attachments.addAttachmentType<SwimLaneAttachment>(
-    ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
-    {
-      getLabel: (attachment) => getLabel(attachment, 'Anomaly Swim Lane'),
-      getIcon: () => 'machineLearningApp',
-      renderInlineContent: (props) => (
-        <React.Suspense fallback={null}>
-          <LazyInlineSwimLane {...props} />
-        </React.Suspense>
-      ),
-    }
-  );
+  agentBuilder.attachments.addAttachmentType<SwimLaneAttachment>(ANOMALY_SWIMLANE_ATTACHMENT_TYPE, {
+    getLabel: (attachment) => getLabel(attachment, 'Anomaly Swim Lane'),
+    getIcon: () => 'machineLearningApp',
+    renderInlineContent: (props) => (
+      <React.Suspense fallback={null}>
+        <LazyInlineSwimLane {...props} />
+      </React.Suspense>
+    ),
+  });
 
   agentBuilder.attachments.addAttachmentType<AnomalyChartsAttachment>(
     ANOMALY_CHARTS_ATTACHMENT_TYPE,

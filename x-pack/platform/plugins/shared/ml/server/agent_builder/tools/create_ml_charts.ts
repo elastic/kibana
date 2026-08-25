@@ -99,9 +99,7 @@ const schema = z.object({
       from: z
         .string()
         .describe('Start of the time range (ISO 8601 or Kibana date math, e.g. "now-7d").'),
-      to: z
-        .string()
-        .describe('End of the time range (ISO 8601 or Kibana date math, e.g. "now").'),
+      to: z.string().describe('End of the time range (ISO 8601 or Kibana date math, e.g. "now").'),
     })
     .optional()
     .describe(
@@ -166,9 +164,7 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
     } catch (error) {
       return {
         results: [
-          createErrorResult(
-            `Cannot create ML chart due to missing capabilities: ${error.message}`
-          ),
+          createErrorResult(`Cannot create ML chart due to missing capabilities: ${error.message}`),
         ],
       };
     }
@@ -198,9 +194,7 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
         }
         if (params.swimlane_type === 'viewBy' && !params.view_by) {
           return {
-            results: [
-              createErrorResult('view_by is required when swimlane_type is "viewBy".'),
-            ],
+            results: [createErrorResult('view_by is required when swimlane_type is "viewBy".')],
           };
         }
         attachmentType = ANOMALY_SWIMLANE_ATTACHMENT_TYPE;
@@ -266,7 +260,9 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
               return {
                 results: [
                   createErrorResult(
-                    `single_metric_viewer cannot render: the selected detector requires values for the following entity field${missing.length > 1 ? 's' : ''}: ${missing.map((f) => `"${f}"`).join(', ')}. ` +
+                    `single_metric_viewer cannot render: the selected detector requires values for the following entity field${
+                      missing.length > 1 ? 's' : ''
+                    }: ${missing.map((f) => `"${f}"`).join(', ')}. ` +
                       `Provide them via selected_entities (e.g. from a prior anomaly record's partition_field_value / by_field_value / over_field_value).`
                   ),
                 ],
@@ -275,7 +271,9 @@ The returned \`config\` in the result can also be forwarded to \`platform.dashbo
           }
         } catch (fetchError) {
           logger.warn(
-            `Could not validate detector entity fields for job ${params.job_ids[0]}: ${fetchError instanceof Error ? fetchError.message : String(fetchError)}`
+            `Could not validate detector entity fields for job ${params.job_ids[0]}: ${
+              fetchError instanceof Error ? fetchError.message : String(fetchError)
+            }`
           );
           // Non-fatal: proceed and let the embeddable show its own validation state.
         }
