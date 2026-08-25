@@ -7,6 +7,7 @@
 
 import net from 'node:net';
 import dns from 'node:dns/promises';
+import { isNonRoutableIPv4, isNonRoutableIPv6 } from '../lib/ip_ranges';
 
 const DEFAULT_USER_AGENT = 'Kibana-ThreatIntel/1.0 (+https://www.elastic.co/security)';
 const DEFAULT_TIMEOUT_MS = 30_000;
@@ -81,14 +82,14 @@ export const assertSafeUrl = (rawUrl: string): void => {
   const ipFamily = net.isIP(ip);
 
   if (ipFamily === 4) {
-    if (isRestrictedIPv4(ip)) {
+    if (isNonRoutableIPv4(ip)) {
       throw new Error(`URL host "${host}" is in a restricted IPv4 address range`);
     }
     return;
   }
 
   if (ipFamily === 6) {
-    if (isRestrictedIPv6(ip)) {
+    if (isNonRoutableIPv6(ip)) {
       throw new Error(`URL host "${host}" is in a restricted IPv6 address range`);
     }
     return;
@@ -144,84 +145,14 @@ export const assertSafeUrlResolved = async (
   for (const { address } of addresses) {
     const family = net.isIP(address);
     if (
-      (family === 4 && isRestrictedIPv4(address)) ||
-      (family === 6 && isRestrictedIPv6(address))
+      (family === 4 && isNonRoutableIPv4(address)) ||
+      (family === 6 && isNonRoutableIPv6(address))
     ) {
       throw new Error(
         `URL host "${host}" resolves to "${address}", which is in a restricted address range`
       );
     }
   }
-};
-
-/** Convert two 16-bit hex groups (as strings) to dotted-quad IPv4 notation. */
-const hexGroupsToDotted = (hiHex: string, loHex: string): string => {
-  const hi = parseInt(hiHex, 16);
-  const lo = parseInt(loHex, 16);
-  return [Math.floor(hi / 256), hi % 256, Math.floor(lo / 256), lo % 256].join('.');
-};
-
-const isRestrictedIPv4 = (ip: string): boolean => {
-  const [a, b, c] = ip.split('.').map(Number);
-  // loopback 127.0.0.0/8
-  if (a === 127) return true;
-  // link-local 169.254.0.0/16
-  if (a === 169 && b === 254) return true;
-  // private 10.0.0.0/8
-  if (a === 10) return true;
-  // private 172.16.0.0/12
-  if (a === 172 && b >= 16 && b <= 31) return true;
-  // private 192.168.0.0/16
-  if (a === 192 && b === 168) return true;
-  // "this network" 0.0.0.0/8 — 0.0.0.1 and friends also route to local on some stacks
-  if (a === 0) return true;
-  // carrier-grade NAT 100.64.0.0/10 — internal in most cloud networks
-  if (a === 100 && b >= 64 && b <= 127) return true;
-  // IETF protocol assignments 192.0.0.0/24
-  if (a === 192 && b === 0 && c === 0) return true;
-  // benchmarking 198.18.0.0/15
-  if (a === 198 && (b === 18 || b === 19)) return true;
-  // multicast 224.0.0.0/4 and reserved/broadcast 240.0.0.0/4
-  if (a >= 224) return true;
-  return false;
-};
-
-const isRestrictedIPv6 = (ip: string): boolean => {
-  const lower = ip.toLowerCase();
-
-  // loopback ::1 / unspecified ::
-  if (lower === '::1' || lower === '::') return true;
-
-  // link-local fe80::/10
-  if (/^fe[89ab][0-9a-f]:/i.test(lower)) return true;
-
-  // unique-local fc00::/7 (fc and fd prefixes)
-  if (/^f[cd][0-9a-f]{2}:/i.test(lower)) return true;
-
-  // IPv4-mapped  ::ffff:<ipv4>  and IPv4-compatible  ::<ipv4>
-  // Forms seen in the wild:
-  //   ::ffff:169.254.169.254   (dotted)
-  //   ::ffff:a9fe:a9fe         (two hex groups)
-  //   ::ffff:0:169.254.169.254 (alternative mapped prefix)
-  //   ::169.254.169.254        (IPv4-compatible, deprecated but still parsed)
-  const mappedDotted = lower.match(/^::(?:ffff:(?:0:)?)?(\d+\.\d+\.\d+\.\d+)$/);
-  if (mappedDotted) {
-    return isRestrictedIPv4(mappedDotted[1]);
-  }
-  // ::ffff:<hi>:<lo> — IPv4-mapped (canonical form from URL parser for e.g. ::ffff:169.254.169.254)
-  const mappedFfff = lower.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
-  if (mappedFfff) {
-    return isRestrictedIPv4(hexGroupsToDotted(mappedFfff[1], mappedFfff[2]));
-  }
-
-  // ::<hi>:<lo> — IPv4-compatible (deprecated; URL parser converts ::169.254.169.254 → ::a9fe:a9fe).
-  // Only match the exact two-group-after-:: form to avoid false-positives on normal short IPv6.
-  const compatHex = lower.match(/^::([0-9a-f]{1,4}):([0-9a-f]{1,4})$/);
-  if (compatHex) {
-    return isRestrictedIPv4(hexGroupsToDotted(compatHex[1], compatHex[2]));
-  }
-
-  return false;
 };
 
 export interface FetchUrlOptions {

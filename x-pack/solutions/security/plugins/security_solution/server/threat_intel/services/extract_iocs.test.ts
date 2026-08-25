@@ -645,6 +645,29 @@ describe('extract_iocs — KEEP side (real IOCs retained)', () => {
       expect(ioc?.tier_basis).toBe('private_ip');
     });
 
+    // These ranges were missing from the old prefix list, so a lateral-movement
+    // hop inside a cloud VPC was tiered `uncertain` and became false
+    // correlation signal. CGNAT in particular cannot be expressed as a string
+    // prefix, which is why the range check is now shared with the SSRF guard.
+    test.each([
+      ['CGNAT (AWS/GCP/Kubernetes inter-node)', '100.64.1.1'],
+      ['unspecified 0.0.0.0/8', '0.0.0.1'],
+      ['IETF protocol assignments 192.0.0.0/24', '192.0.0.8'],
+      ['benchmarking 198.18.0.0/15', '198.18.0.5'],
+      ['multicast 224.0.0.0/4', '239.255.255.250'],
+    ])('%s gets tier=reference, basis=private_ip', (_label, ip) => {
+      const r = extractIocs({ text: `observed traffic to ${ip}` });
+      const ioc = r.iocs.find((i) => i.type === 'ip' && i.value === ip);
+      expect(ioc?.tier).toBe('reference');
+      expect(ioc?.tier_basis).toBe('private_ip');
+    });
+
+    test('public space adjacent to CGNAT stays uncertain', () => {
+      const r = extractIocs({ text: 'C2 at 100.63.0.1' });
+      const ioc = r.iocs.find((i) => i.type === 'ip' && i.value === '100.63.0.1');
+      expect(ioc?.tier).toBe('uncertain');
+    });
+
     test('noise denylist domain gets tier=reference, basis=denylist', () => {
       const r = extractIocs({ text: 'scan via virustotal.com' });
       const ioc = r.iocs.find((i) => i.value === 'virustotal.com');

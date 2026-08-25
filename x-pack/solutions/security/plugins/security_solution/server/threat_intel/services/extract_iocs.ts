@@ -15,6 +15,7 @@ import {
   TERMINATOR_HEADER_TERMS,
   TERMINATOR_PREFIXES,
 } from '../adapters/section_headers';
+import { isNonRoutableIPv4 } from '../lib/ip_ranges';
 
 /** IOC tier for correlation anchoring. */
 export type IocTier = 'discriminating' | 'contextual' | 'reference' | 'denied' | 'uncertain';
@@ -76,16 +77,6 @@ const DOMAIN_HOST = `(?:${DOMAIN_LABEL}\\.)+[a-z]{2,24}`;
 const SOCKET_PATTERN = new RegExp(`\\b(${IPV4}|${DOMAIN_HOST}):(\\d{1,5})\\b`, 'gi');
 
 // ── Keep existing filter infrastructure ─────────────────────────────────────
-
-const PRIVATE_IP_PREFIXES = [
-  '10.',
-  '127.',
-  '169.254.',
-  '192.168.',
-  // RFC1918 172.16.0.0/12 — enumerated because prefix matching cannot express
-  // the second-octet range, and `172.` alone would drop public 172.x space.
-  ...Array.from({ length: 16 }, (_, i) => `172.${16 + i}.`),
-];
 
 /**
  * File / executable / script extensions (alpha-only) that look like TLD tokens in
@@ -269,7 +260,12 @@ const PUBLIC_SUFFIX_DROPLIST = new Set([
   'org.za',
 ]);
 
-const isPrivateIp = (ip: string) => PRIVATE_IP_PREFIXES.some((p) => ip.startsWith(p));
+/**
+ * Non-routable addresses are observability entries, not C2 anchors, so they are
+ * tiered `reference`. Shares its range set with the SSRF guard in
+ * `adapters/http_client` so the two definitions cannot drift.
+ */
+const isPrivateIp = (ip: string) => isNonRoutableIPv4(ip);
 
 /**
  * Pure security-vendor and research domains — exact-match OR suffix-match
