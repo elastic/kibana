@@ -8,12 +8,11 @@
 import type { KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, makeEsQueryRule } from '../fixtures';
+import { test, makeEsQueryRule, openRulesListAndSearch } from '../fixtures';
 
 const RULES_APP = 'rules';
 const APP_TITLE_SUBJ = 'appHeaderTitle';
 const RULES_LIST_SUBJ = 'rulesList';
-const RULES_TAB_SUBJ = 'rulesTab';
 
 const ALERTS_AND_ACTIONS_ROLE: KibanaRole = {
   elasticsearch: {
@@ -85,8 +84,7 @@ test.describe('Rules home page', { tag: tags.stateful.classic }, () => {
     createdRuleIds.push(ruleId);
 
     await browserAuth.loginAsAdmin();
-    await page.gotoApp(RULES_APP);
-    await page.testSubj.click(RULES_TAB_SUBJ);
+    await openRulesListAndSearch(page, ruleName);
 
     const ruleRow = page.testSubj
       .locator(RULES_LIST_SUBJ)

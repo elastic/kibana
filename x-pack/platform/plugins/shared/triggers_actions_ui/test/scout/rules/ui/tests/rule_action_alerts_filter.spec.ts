@@ -14,6 +14,7 @@ import {
   THRESHOLD_TEST_INDEX,
   findRuleIdByName,
   deleteRuleById,
+  openRulesListAndSearch,
 } from '../fixtures';
 
 const STATEFUL_ALERTS_INDEX_PATTERN = '.internal.alerts-stack.alerts-*';
@@ -223,7 +224,7 @@ test.describe('Rule action alerts filter', { tag: tags.stateful.classic }, () =>
     const savedFilter = saved.data.actions[0].alerts_filter.query.filters[0];
     expect(savedFilter.meta.value).toBeUndefined();
 
-    await page.gotoApp('rules');
+    await openRulesListAndSearch(page, ruleName);
     await page.testSubj.locator(`checkboxSelectRow-${ruleId}`).hover();
     await page.testSubj.click('editActionHoverButton');
     await expect(page.testSubj.locator('ruleForm')).toBeVisible();
