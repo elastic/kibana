@@ -318,44 +318,35 @@ describe('project watch', () => {
       });
 
       it('tags the harvested alerts once a decision is recorded', () => {
-        expect(tagSteps).toHaveLength(5);
+        expect(tagSteps).toHaveLength(1);
 
-        const reviewedOnly = tagSteps.filter(({ name }) =>
-          name.startsWith('mark_alerts_reviewed_') &&
-          name !== 'mark_alerts_reviewed_dismissed' &&
-          name !== 'mark_alerts_reviewed_applied'
+        const [tagStep] = tagSteps;
+        expect(tagStep.name).toBe('mark_alerts_reviewed');
+        expect(tagStep.if).toContain('steps.review_tuning.output.response.approved != null');
+        expect(String(tagStep.with?.tags_to_add)).toContain('consts.dismissed_tags');
+        expect(String(tagStep.with?.tags_to_add)).toContain('consts.applied_tags');
+        expect(String(tagStep.with?.tags_to_add)).toContain('consts.reviewed_only_tags');
+      });
+
+      it('declares tag sets for each decision path', () => {
+        expect(tuning.consts).toEqual(
+          expect.objectContaining({
+            reviewed_only_tags: ['detection-watch:tuning-reviewed'],
+            dismissed_tags: [
+              'detection-watch:tuning-reviewed',
+              'detection-watch:tuning-dismissed',
+            ],
+            applied_tags: [
+              'detection-watch:tuning-reviewed',
+              'detection-watch:tuning-applied',
+            ],
+          })
         );
-        expect(reviewedOnly).toHaveLength(3);
-        for (const step of reviewedOnly) {
-          expect(step.with?.tags_to_add).toEqual(['{{ consts.reviewed_tag }}']);
-        }
-
-        const dismissed = tagSteps.find(({ name }) => name === 'mark_alerts_reviewed_dismissed')!;
-        expect(dismissed.with?.tags_to_add).toEqual([
-          '{{ consts.reviewed_tag }}',
-          '{{ consts.dismissed_tag }}',
-        ]);
-
-        const applied = tagSteps.find(({ name }) => name === 'mark_alerts_reviewed_applied')!;
-        expect(applied.if).toContain('steps.preview_proposed_query.output.succeeded == true');
-        expect(applied.with?.tags_to_add).toEqual([
-          '{{ consts.reviewed_tag }}',
-          '{{ consts.applied_tag }}',
-        ]);
       });
 
       it('does not use classify_proposal or can_apply', () => {
         expect(tuningSteps.some(({ name }) => name === 'classify_proposal')).toBe(false);
         expect(JSON.stringify(tuningSteps)).not.toContain('can_apply');
-      });
-
-      it('declares dismissed and applied outcome tag constants', () => {
-        expect(tuning.consts).toEqual(
-          expect.objectContaining({
-            dismissed_tag: 'detection-watch:tuning-dismissed',
-            applied_tag: 'detection-watch:tuning-applied',
-          })
-        );
       });
 
       // The harvest projects its columns positionally, so reordering KEEP would make the

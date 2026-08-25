@@ -43,6 +43,14 @@ consts:
   reviewed_tag: detection-watch:tuning-reviewed
   dismissed_tag: detection-watch:tuning-dismissed
   applied_tag: detection-watch:tuning-applied
+  reviewed_only_tags:
+    - detection-watch:tuning-reviewed
+  dismissed_tags:
+    - detection-watch:tuning-reviewed
+    - detection-watch:tuning-dismissed
+  applied_tags:
+    - detection-watch:tuning-reviewed
+    - detection-watch:tuning-applied
 steps:
   # Scoped to one space because the tag API writes to the space's own alerts index, so
   # a cross-space harvest would keep rediagnosing alerts it can never mark.
@@ -241,70 +249,31 @@ steps:
             id: "{{ foreach.item.0 }}"
             query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
 
-      - name: mark_alerts_reviewed_non_query
+      # Marking runs last so a failed PATCH aborts before tagging and the next sweep can
+      # retry the rule. A tagging failure is tolerated (`continue: true`) so it doesn't
+      # kill the rest of the sweep.
+      #
+      # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
+      # harvest's KEEP projects: the alert_ids multivalue. `${{ }}` rather than `{{ }}`
+      # passes that list through as an array instead of stringifying it.
+      - name: mark_alerts_reviewed
         type: security.setAlertTags
-        if: >-
-          ${{ steps.review_tuning.output.response.approved == true
-            and steps.diagnose_rule.output.structured_output.change_type != 'query' }}
+        if: "${{ steps.review_tuning.output.response.approved != null }}"
         with:
           alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add:
-            - "{{ consts.reviewed_tag }}"
-        on-failure:
-          continue: true
-
-      - name: mark_alerts_reviewed_manual
-        type: security.setAlertTags
-        if: >-
-          ${{ steps.review_tuning.output.response.approved == true
-            and steps.diagnose_rule.output.structured_output.change_type == 'query'
-            and steps.fetch_rule.output.type != 'query' }}
-        with:
-          alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add:
-            - "{{ consts.reviewed_tag }}"
-        on-failure:
-          continue: true
-
-      - name: mark_alerts_reviewed_preview_failed
-        type: security.setAlertTags
-        if: >-
-          ${{ steps.review_tuning.output.response.approved == true
-            and steps.diagnose_rule.output.structured_output.change_type == 'query'
-            and steps.fetch_rule.output.type == 'query'
-            and steps.preview_proposed_query.output.succeeded == false }}
-        with:
-          alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add:
-            - "{{ consts.reviewed_tag }}"
-        on-failure:
-          continue: true
-
-      - name: mark_alerts_reviewed_dismissed
-        type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved == false }}"
-        with:
-          alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add:
-            - "{{ consts.reviewed_tag }}"
-            - "{{ consts.dismissed_tag }}"
-        on-failure:
-          continue: true
-
-      - name: mark_alerts_reviewed_applied
-        type: security.setAlertTags
-        if: >-
-          ${{ steps.review_tuning.output.response.approved == true
-            and steps.diagnose_rule.output.structured_output.change_type == 'query'
-            and steps.diagnose_rule.output.structured_output.proposed_query != ''
-            and steps.fetch_rule.output.type == 'query'
-            and steps.preview_proposed_query.output.succeeded == true
-            and steps.preview_proposed_query.output.is_aborted == false }}
-        with:
-          alert_ids: "${{ foreach.item.5 }}"
-          tags_to_add:
-            - "{{ consts.reviewed_tag }}"
-            - "{{ consts.applied_tag }}"
+          tags_to_add: >-
+            {% if steps.review_tuning.output.response.approved == false -%}
+            ${{ consts.dismissed_tags }}
+            {%- elsif steps.review_tuning.output.response.approved == true
+                 and steps.diagnose_rule.output.structured_output.change_type == 'query'
+                 and steps.diagnose_rule.output.structured_output.proposed_query != ''
+                 and steps.fetch_rule.output.type == 'query'
+                 and steps.preview_proposed_query.output.succeeded == true
+                 and steps.preview_proposed_query.output.is_aborted == false -%}
+            ${{ consts.applied_tags }}
+            {%- else -%}
+            ${{ consts.reviewed_only_tags }}
+            {%- endif %}
         on-failure:
           continue: true
 
