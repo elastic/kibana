@@ -6,19 +6,20 @@
  */
 
 import { tags } from '@kbn/scout';
-import type { BrowserAuthFixture, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import type { ServiceVars } from '../../../../public/onboarding/step_components/service_settings_step/use_service_settings';
+import {
+  mockAwsPackage,
+  navigateToOnboardingStep,
+  useOnboardingFeatureFlag,
+} from '../helpers/onboarding';
 
 // elb (DS: elb_logs): dual-transport (S3 + CloudWatch); required fields bucket_arn (S3) / log_group_arn (CW)
 //   — used for flyout tests with MOCK_AWS_PACKAGE_RESPONSE intercepting the Fleet EPR endpoint
 // cloudtrail: ECF-only (no flyout); static name 'AWS CloudTrail' — used for non-flyout assertions
 // waf: ECF-only; always showInUI:true regardless of manifest version
 // s3access: managed_integration, no required text vars → used for no-attention-callout test
-
-const SERVICES_STEP_SESSION_KEY = 'onboarding.aws.servicesStep';
-const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 
 // Synthetic aws package manifest injected via page.route() to make all tests hermetic.
 // Covers every service used in this spec so assertions never depend on whatever
@@ -157,20 +158,6 @@ const MOCK_AWS_PACKAGE_RESPONSE = {
   },
 };
 
-async function mockAWSPackage(page: ScoutPage): Promise<void> {
-  // Match exactly `/api/fleet/epm/packages/aws` (with optional base-path prefix) but not
-  // `/api/fleet/epm/packages/aws_bedrock` or other packages that share the `aws` prefix.
-  await page.route(
-    (url) => /\/api\/fleet\/epm\/packages\/aws$/.test(url.pathname),
-    (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(MOCK_AWS_PACKAGE_RESPONSE),
-      })
-  );
-}
-
 async function fillFlyoutField(
   page: ScoutPage,
   input: string,
@@ -184,87 +171,21 @@ async function fillFlyoutField(
 }
 
 async function navigateToServiceSettings(
-  browserAuth: BrowserAuthFixture,
+  browserAuth: Parameters<typeof navigateToOnboardingStep>[0],
   page: ScoutPage,
-  opts: {
-    selectedServiceIds: string[];
-    globalRegion?: string;
-    serviceVars?: Record<string, ServiceVars>;
-    instances?: unknown[];
-  }
+  opts: Parameters<typeof navigateToOnboardingStep>[3]
 ): Promise<void> {
-  const { selectedServiceIds, globalRegion = 'us-east-1', serviceVars = {}, instances } = opts;
-  await browserAuth.loginAsAdmin();
-  await page.gotoApp('onboarding/aws#service-settings');
-  await page.evaluate(
-    ({
-      ids,
-      region,
-      vars,
-      insts,
-      servicesKey,
-      settingsKey,
-    }: {
-      ids: string[];
-      region: string;
-      vars: Record<string, ServiceVars>;
-      insts: unknown[] | undefined;
-      servicesKey: string;
-      settingsKey: string;
-    }) => {
-      sessionStorage.setItem(servicesKey, JSON.stringify({ selectedServiceIds: ids }));
-      const settingsPayload: Record<string, unknown> = { globalRegion: region, serviceVars: vars };
-      if (insts !== undefined) settingsPayload.instances = insts;
-      sessionStorage.setItem(settingsKey, JSON.stringify(settingsPayload));
-    },
-    {
-      ids: selectedServiceIds,
-      region: globalRegion,
-      vars: serviceVars,
-      insts: instances,
-      servicesKey: SERVICES_STEP_SESSION_KEY,
-      settingsKey: SERVICE_SETTINGS_SESSION_KEY,
-    }
-  );
-  await page.reload();
-  await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
+  return navigateToOnboardingStep(browserAuth, page, 'service-settings', opts);
 }
 
 test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ apiServices, config }) => {
-    // The /internal/core/_settings route is only registered when
-    // coreApp.allowDynamicConfigOverrides=true (Scout's local stateful base config).
-    // ECH deployments don't carry that override, so the PUT 404s. Skip on Cloud.
-    // eslint-disable-next-line playwright/no-skipped-test
-    test.skip(
-      config.isCloud === true,
-      `Core API returns 404 for 'ingestHub.onboardingEnabled' on ECH`
-    );
-    // skip() in beforeAll only skips the tests, not the hook body itself.
-    if (config.isCloud) {
-      return;
-    }
-
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': 'true',
-      },
-    });
-  });
+  // The /internal/core/_settings route is only registered when
+  // coreApp.allowDynamicConfigOverrides=true (Scout's local stateful base config).
+  // ECH deployments don't carry that override, so the PUT 404s. Skip on Cloud.
+  useOnboardingFeatureFlag();
 
   test.beforeEach(async ({ page }) => {
-    await mockAWSPackage(page);
-  });
-
-  test.afterAll(async ({ apiServices, config }) => {
-    if (config.isCloud) {
-      return;
-    }
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': 'false',
-      },
-    });
+    await mockAwsPackage(page, MOCK_AWS_PACKAGE_RESPONSE);
   });
 
   test('renders table with Service Name, Collects, Category, Region columns', async ({

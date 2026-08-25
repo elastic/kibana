@@ -440,6 +440,69 @@ describe('buildPackageInputs', () => {
     );
     expect(Object.keys(inputs)).toHaveLength(0);
   });
+
+  it('keys stream as packageName.dataStreamPath and passes through stored var values', () => {
+    // Verifies the exact key shapes the Fleet API expects:
+    //   input key = <serviceId>-<inputType>   (e.g. elb-aws-s3)
+    //   stream key = <packageName>.<dsPath>   (e.g. aws.elb_logs)
+    // Also verifies that a stored var value (bucket_arn) is emitted in the stream vars.
+    const service = makeService({
+      id: 'elb',
+      packageName: 'aws',
+      dataStreams: ['elb_logs'],
+      inputs: ['aws-s3', 'aws-cloudwatch'],
+      requiredConfig: [],
+      optionalConfig: [],
+    });
+    const inputs = buildPackageInputs(
+      [service],
+      {
+        elb: {
+          enabledDataStreams: ['elb_logs'],
+          varsByDataStream: {
+            elb_logs: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::test-bucket' } },
+            },
+          },
+        },
+      },
+      'us-east-1'
+    );
+
+    expect(inputs['elb-aws-s3']).toBeDefined();
+    expect(inputs['elb-aws-s3'].enabled).toBe(true);
+    expect(inputs['elb-aws-s3'].streams['aws.elb_logs']).toBeDefined();
+    expect(inputs['elb-aws-s3'].streams['aws.elb_logs'].enabled).toBe(true);
+    expect(inputs['elb-aws-s3'].streams['aws.elb_logs'].vars.bucket_arn).toBe(
+      'arn:aws:s3:::test-bucket'
+    );
+    // aws-cloudwatch was not in enabledInputs — not included by buildPackageInputs.
+    // (deployGroup adds it as enabled:false via the pkgTemplates explicit-disable loop.)
+    expect(inputs['elb-aws-cloudwatch']).toBeUndefined();
+  });
+
+  it('omits explicitly-disabled data streams (enabledDataStreams: [] stored)', () => {
+    // Verifies the "explicitly emptied vs never configured" fix: a stored empty array
+    // means the user turned everything off — buildPackageInputs should emit nothing.
+    const service = makeService({
+      id: 'cloudtrail',
+      packageName: 'aws',
+      dataStreams: ['cloudtrail'],
+      inputs: ['aws-s3', 'aws-cloudwatch'],
+    });
+    const inputs = buildPackageInputs(
+      [service],
+      {
+        cloudtrail: {
+          enabledDataStreams: [],
+          varsByDataStream: { cloudtrail: { enabledInputs: [], varsByInput: {} } },
+        },
+      },
+      ''
+    );
+    expect(Object.keys(inputs)).toHaveLength(0);
+  });
 });
 
 // ─── collectDeployResults ────────────────────────────────────────────────────
