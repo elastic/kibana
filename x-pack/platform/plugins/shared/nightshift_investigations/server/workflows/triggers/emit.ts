@@ -12,11 +12,6 @@ import type {
   InvestigationsTriggerPayloadMap,
 } from '../../../common/workflows/triggers';
 
-/**
- * Fire-and-forget emitter for nightshift-investigations workflow triggers. Emission must never
- * block or break the underlying investigation operation, so failures are logged and swallowed.
- * Passing the attribution `request` keeps the workflows event-chain depth / loop guardrails working.
- */
 export type TriggerEmitter = <T extends InvestigationsTriggerId>(
   triggerId: T,
   payload: InvestigationsTriggerPayloadMap[T]

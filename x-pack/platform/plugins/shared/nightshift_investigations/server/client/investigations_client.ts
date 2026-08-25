@@ -21,10 +21,7 @@ import type {
   StartInvestigationRequest,
   StartInvestigationResponse,
 } from '../../common';
-import { INVESTIGATION_STARTED_TRIGGER_ID } from '../../common/workflows/triggers';
-
 import { InvestigationNotFoundError } from './errors';
-import type { TriggerEmitter } from '../workflows/triggers/emit';
 export { InvestigationNotFoundError };
 
 const SORT_FIELD_MAP: Record<
@@ -102,7 +99,10 @@ function recoverSubjectFromInput(
   const ctx = input?.context;
   if (!isPlainObject(ctx)) return undefined;
   if (ctx.source === 'significant_event') {
-    return { type: 'significant_event', id: String(ctx.significant_event_id ?? '') };
+    return {
+      type: 'significant_event',
+      id: String(ctx.significant_event_id ?? ctx.event_id ?? ''),
+    };
   }
   if (ctx.source === 'alert') {
     return { type: 'alert', id: String(ctx.alert_id ?? '') };
@@ -118,10 +118,7 @@ export class NightshiftInvestigationsClient {
     private readonly logger: Logger,
     // Explicit override for contexts where the request cannot carry space info (e.g. workflow step
     // definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
-    private readonly spaceIdOverride?: string,
-    // Best-effort emitter for the nightshift-investigations.started workflow trigger; absent when
-    // the workflowsExtensions plugin is unavailable.
-    private readonly triggerEmitter?: TriggerEmitter
+    private readonly spaceIdOverride?: string
   ) {}
 
   private getSpaceId(): string {
@@ -175,18 +172,6 @@ export class NightshiftInvestigationsClient {
     this.logger.info(
       `Started investigation for ${subject.type}/${subject.id}, execution_id=${executionId}`
     );
-
-    try {
-      this.triggerEmitter?.(INVESTIGATION_STARTED_TRIGGER_ID, {
-        investigation_id: executionId,
-        status: 'running',
-        subject,
-        started_at: new Date().toISOString(),
-      });
-    } catch (error) {
-      // Emission must not affect the start result; async failures are logged inside the emitter.
-      this.logger.warn(`Failed to build ${INVESTIGATION_STARTED_TRIGGER_ID} payload: ${error}`);
-    }
 
     return { investigation_id: executionId };
   }

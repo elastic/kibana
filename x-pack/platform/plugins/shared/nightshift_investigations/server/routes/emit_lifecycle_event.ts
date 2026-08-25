@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import {
   INVESTIGATION_COMPLETED_TRIGGER_ID,
   INVESTIGATION_FAILED_TRIGGER_ID,
+  INVESTIGATION_STARTED_TRIGGER_ID,
 } from '../../common/workflows/triggers';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
@@ -18,11 +19,9 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
     access: 'internal',
     summary: 'Emit an investigation lifecycle trigger event',
     description:
-      'Called by the final steps of the managed investigation workflow to emit the nightshift-investigations.completed / nightshift-investigations.failed workflow triggers.',
+      'Called by the managed investigation workflow to emit investigation lifecycle triggers.',
   },
   security: {
-    // The workflow runs as the user who triggered the investigation, so the same agentBuilder:write
-    // requirement as the start route applies (see start_investigation.ts for the reasoning).
     authz: {
       requiredPrivileges: ['agentBuilder:write'],
     },
@@ -32,11 +31,10 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       id: z.string().min(1).max(500),
     }),
     body: z.object({
-      status: z.enum(['completed', 'failed']),
+      status: z.enum(['running', 'completed', 'failed']),
       started_at: z.string().min(1).max(64),
       subject: z.object({
         type: z.enum(['significant_event', 'alert']),
-        // Empty for runs initiated without a subject (e.g. a bare manual run of the workflow).
         id: z.string().max(500),
       }),
     }),
@@ -54,7 +52,12 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       started_at: params.body.started_at,
     };
 
-    if (params.body.status === 'completed') {
+    if (params.body.status === 'running') {
+      emitter(INVESTIGATION_STARTED_TRIGGER_ID, {
+        ...base,
+        status: 'running',
+      });
+    } else if (params.body.status === 'completed') {
       emitter(INVESTIGATION_COMPLETED_TRIGGER_ID, {
         ...base,
         status: 'completed',

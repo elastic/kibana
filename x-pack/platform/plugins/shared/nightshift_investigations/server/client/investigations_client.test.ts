@@ -9,7 +9,6 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { TriggerEmitter } from '../workflows/triggers/emit';
 import type { InvestigationStatus } from '../../common';
 import {
   InvestigationNotFoundError,
@@ -49,14 +48,13 @@ const makeExecution = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const makeClient = (triggerEmitter?: jest.Mock) =>
+const makeClient = () =>
   new NightshiftInvestigationsClient(
     mockRequest,
     mockWorkflowsManagement,
     undefined,
     mockLogger,
-    SPACE_ID,
-    triggerEmitter as unknown as TriggerEmitter
+    SPACE_ID
   );
 
 beforeEach(() => {
@@ -123,6 +121,16 @@ describe('NightshiftInvestigationsClient.get()', () => {
       );
       const result = await makeClient().get('inv-1');
       expect(result.subject).toEqual({ type: 'significant_event', id: 'se-42' });
+    });
+
+    it('recovers significant_event subject from direct workflow input', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          context: { inputs: { context: { source: 'significant_event', event_id: 'event-42' } } },
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({ type: 'significant_event', id: 'event-42' });
     });
 
     it('recovers alert subject from context.inputs', async () => {
@@ -258,54 +266,6 @@ describe('NightshiftInvestigationsClient.get()', () => {
       const result = await makeClient().get('inv-1');
       expect(result.error).toBeUndefined();
     });
-  });
-});
-
-describe('NightshiftInvestigationsClient.start() trigger emission', () => {
-  const startRequest = { subject: { type: 'alert' as const, id: 'alert-7' } };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  const arrangeSuccessfulStart = () => {
-    mockManagement.getWorkflow.mockResolvedValue({ id: 'workflow-1', definition: {} });
-    mockManagement.runWorkflow.mockResolvedValue('exec-42');
-  };
-
-  it('emits nightshift-investigations.started after a successful start', async () => {
-    arrangeSuccessfulStart();
-    const emitter = jest.fn();
-    await makeClient(emitter).start(startRequest);
-
-    expect(emitter).toHaveBeenCalledTimes(1);
-    const [triggerId, payload] = emitter.mock.calls[0];
-    expect(triggerId).toBe('nightshift-investigations.started');
-    expect(payload).toMatchObject({
-      investigation_id: 'exec-42',
-      status: 'running',
-      subject: { type: 'alert', id: 'alert-7' },
-    });
-    expect(typeof payload.started_at).toBe('string');
-  });
-
-  it('does not emit when the workflow run fails', async () => {
-    mockManagement.getWorkflow.mockResolvedValue({ id: 'workflow-1', definition: {} });
-    mockManagement.runWorkflow.mockRejectedValue(new Error('boom'));
-    const emitter = jest.fn();
-
-    await expect(makeClient(emitter).start(startRequest)).rejects.toThrow('boom');
-    expect(emitter).not.toHaveBeenCalled();
-  });
-
-  it('still returns the investigation_id when the emitter throws synchronously', async () => {
-    arrangeSuccessfulStart();
-    const emitter = jest.fn(() => {
-      throw new Error('emit exploded');
-    });
-
-    const result = await makeClient(emitter).start(startRequest);
-    expect(result).toEqual({ investigation_id: 'exec-42' });
   });
 });
 

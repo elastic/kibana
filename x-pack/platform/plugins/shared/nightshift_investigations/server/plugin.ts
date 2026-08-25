@@ -37,7 +37,6 @@ export class NightshiftInvestigationsPlugin
 {
   private readonly logger: Logger;
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
-  // Only set in start(); emitters are built lazily from request handlers, which always run after start.
   private workflowsExtensionsStart?: NightshiftInvestigationsStartDeps['workflowsExtensions'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
 
@@ -65,8 +64,7 @@ export class NightshiftInvestigationsPlugin
         this.workflowsManagement,
         this.spaces,
         this.logger,
-        spaceId,
-        getTriggerEmitter(request)
+        spaceId
       );
 
     if (plugins.workflowsManagement) {
@@ -103,13 +101,7 @@ export class NightshiftInvestigationsPlugin
           request,
           this.workflowsManagement,
           this.spaces,
-          this.logger,
-          undefined,
-          createTriggerEmitter({
-            workflowsExtensions: this.workflowsExtensionsStart,
-            request,
-            logger: this.logger,
-          })
+          this.logger
         ),
     };
   }

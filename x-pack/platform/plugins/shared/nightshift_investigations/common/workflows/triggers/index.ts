@@ -9,15 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
-/**
- * Custom workflow triggers owned by the nightshift_investigations plugin. Users subscribe to these
- * in their workflow YAML (e.g. `triggers: [{ type: nightshift-investigations.completed }]`) to run
- * a workflow when an investigation changes lifecycle, regardless of what initiated it (significant
- * event, alert, manual). Payloads are intentionally lean; consumers needing the full result can
- * fetch it via GET /internal/nightshift/investigations/{id} using `investigation_id`.
- */
-
-// Trigger ids: kebab-case namespace, camelCase event.
 export const INVESTIGATION_STARTED_TRIGGER_ID = 'nightshift-investigations.started' as const;
 export const INVESTIGATION_COMPLETED_TRIGGER_ID = 'nightshift-investigations.completed' as const;
 export const INVESTIGATION_FAILED_TRIGGER_ID = 'nightshift-investigations.failed' as const;
@@ -51,17 +42,12 @@ const failedSchema = baseInvestigationSchema.extend({
 export type InvestigationCompletedTriggerPayload = z.infer<typeof completedSchema>;
 export type InvestigationFailedTriggerPayload = z.infer<typeof failedSchema>;
 
-/**
- * Maps each nightshift-investigations workflow trigger id to the exact payload shape emitted for
- * it, so a call site cannot pass the wrong payload for a given trigger id.
- */
 export interface InvestigationsTriggerPayloadMap {
   [INVESTIGATION_STARTED_TRIGGER_ID]: InvestigationsTriggerBasePayload;
   [INVESTIGATION_COMPLETED_TRIGGER_ID]: InvestigationCompletedTriggerPayload;
   [INVESTIGATION_FAILED_TRIGGER_ID]: InvestigationFailedTriggerPayload;
 }
 
-/** Union of every nightshift-investigations workflow trigger id. */
 export type InvestigationsTriggerId = keyof InvestigationsTriggerPayloadMap;
 
 const notifyExample = (messageLine: string): string => `## Notify on a lifecycle change

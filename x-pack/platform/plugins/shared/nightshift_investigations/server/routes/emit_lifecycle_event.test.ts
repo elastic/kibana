@@ -19,6 +19,28 @@ const makeResources = (emitter: jest.Mock | undefined, params: Record<string, un
   getTriggerEmitter: jest.fn().mockReturnValue(emitter),
 });
 
+it('emits the started trigger with the expected payload', async () => {
+  const emitter = jest.fn();
+  const resources = makeResources(emitter, {
+    path: { id: 'exec-1' },
+    body: {
+      status: 'running',
+      started_at: '2024-01-01T00:00:00Z',
+      subject: { type: 'significant_event', id: 'event-1' },
+    },
+  });
+
+  const result = await handler(resources as never);
+
+  expect(result).toEqual({ emitted: true });
+  expect(emitter).toHaveBeenCalledWith('nightshift-investigations.started', {
+    investigation_id: 'exec-1',
+    status: 'running',
+    subject: { type: 'significant_event', id: 'event-1' },
+    started_at: '2024-01-01T00:00:00Z',
+  });
+});
+
 it('emits the completed trigger with the expected payload', async () => {
   const emitter = jest.fn();
   const resources = makeResources(emitter, {

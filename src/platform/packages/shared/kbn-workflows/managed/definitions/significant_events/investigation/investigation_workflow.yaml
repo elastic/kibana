@@ -41,6 +41,22 @@ triggers:
       additionalProperties: false
 
 steps:
+  - name: emit_investigation_started
+    type: kibana.request
+    with:
+      method: POST
+      path: '/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body:
+        status: 'running'
+        started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+        subject:
+          type: "{{ inputs.context.source | default: 'significant_event' }}"
+          id: "{{ inputs.context.significant_event_id | default: inputs.context.event_id | default: inputs.context.alert_id | default: '' }}"
+    on-failure:
+      continue: true
+
   # Records a pending investigation on the Significant Event as soon as the workflow starts,
   # so the UI can show an in-progress indicator before the agent step finishes.
   # Only runs when a sig-event context was supplied (discovery or chat-agent paths).
@@ -53,7 +69,7 @@ steps:
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_id: '{{ execution.id }}'
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
     on-failure:
       continue: true
@@ -76,7 +92,7 @@ steps:
       # up the agent execution's (auto-generated) id via findExecutions and follow its live
       # progress before this step returns.
       metadata:
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_id: '{{ execution.id }}'
       message: |
         Investigate the root cause of the following issue:
 
@@ -583,7 +599,7 @@ steps:
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
-        workflow_execution_id: "{{ execution.id }}"
+        workflow_execution_id: '{{ execution.id }}'
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         completed_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         severity: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'severity' | map: 'to' | first }}"
@@ -617,11 +633,6 @@ steps:
     on-failure:
       continue: true
 
-  # Emits the nightshift-investigations.completed / nightshift-investigations.failed workflow
-  # triggers so subscribers are notified of the investigation outcome regardless of how the
-  # investigation was initiated (significant event, alert, manual). Exactly one of the two steps
-  # runs, keyed on whether the investigate step recorded an error (its own on-failure continues
-  # the run). on-failure: continue so a failed emission never fails the overall workflow run.
   - name: emit_investigation_completed
     type: kibana.request
     if: '${{ steps.investigate.error == null }}'
@@ -635,7 +646,7 @@ steps:
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         subject:
           type: "{{ inputs.context.source | default: 'significant_event' }}"
-          id: "{{ inputs.context.significant_event_id | default: inputs.context.alert_id | default: '' }}"
+          id: "{{ inputs.context.significant_event_id | default: inputs.context.event_id | default: inputs.context.alert_id | default: '' }}"
     on-failure:
       continue: true
 
@@ -652,6 +663,10 @@ steps:
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         subject:
           type: "{{ inputs.context.source | default: 'significant_event' }}"
-          id: "{{ inputs.context.significant_event_id | default: inputs.context.alert_id | default: '' }}"
+          id: "{{ inputs.context.significant_event_id | default: inputs.context.event_id | default: inputs.context.alert_id | default: '' }}"
     on-failure:
       continue: true
+
+  - name: fail_investigation
+    type: workflow.fail
+    if: '${{ steps.investigate.error != null }}'
