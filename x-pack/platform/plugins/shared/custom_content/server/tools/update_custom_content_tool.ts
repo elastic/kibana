@@ -10,14 +10,14 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
-import { customContentUpdateSchema } from '@kbn/custom-content-common';
+import { customContentPanelUpdateSchema } from '@kbn/custom-content-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
 
-const updateCustomContentSchema = customContentUpdateSchema;
+const updateCustomContentSchema = customContentPanelUpdateSchema;
 
 export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
   typeof updateCustomContentSchema
@@ -45,10 +45,11 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
     { embeddable_id, prompt, esqlQuery },
     { attachments, logger, esClient, modelProvider }
   ) => {
-    const allAttachments = attachments.getAll();
-    const contextAttachment = allAttachments.find(
+    const panelAttachments = attachments
+      .getAll()
+      .filter((a) => a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE);
+    const contextAttachment = panelAttachments.find(
       (a) =>
-        a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE &&
         (getLatestVersion(a)?.data as CustomContentContextAttachmentData | undefined)
           ?.embeddable_id === embeddable_id
     );
@@ -57,12 +58,26 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       logger.warn(
         `custom_content_update_panel: no custom_content_context attachment found for embeddable_id "${embeddable_id}"`
       );
+      // List what is attached so a wrong id is recoverable in the same round rather than a dead end.
+      const availableIds = panelAttachments
+        .map(
+          (a) =>
+            (getLatestVersion(a)?.data as CustomContentContextAttachmentData | undefined)
+              ?.embeddable_id
+        )
+        .filter(Boolean);
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.error,
-            data: { message: 'No custom content panel context found in this conversation.' },
+            data: {
+              message: availableIds.length
+                ? `No custom content panel with embeddable_id "${embeddable_id}" in this conversation. Attached panels: ${availableIds.join(
+                    ', '
+                  )}.`
+                : 'No custom content panel context found in this conversation.',
+            },
           },
         ],
       };

@@ -27,34 +27,60 @@ export type CustomContentState = z.output<typeof customContentStateSchema>;
  * Generation input for the create-panel and update-panel tools. `prompt` instructs this operation
  * only and is never persisted; the server generates `template`.
  */
+const customContentUpdateFields = {
+  prompt: z
+    .string()
+    .min(1)
+    .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
+    .optional()
+    .describe(
+      'Natural language instruction for what to create or change. The server generates the HTML template from this prompt.'
+    ),
+  esqlQuery: z
+    .string()
+    .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
+    .nullable()
+    .optional()
+    .describe(
+      'ES|QL query. Omit to keep the existing query. Pass null to remove it entirely. Build it with the generate_esql tool rather than writing it yourself — the server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
+    ),
+} as const;
+
+const hasSomethingToChange = ({
+  prompt,
+  esqlQuery,
+}: {
+  prompt?: string;
+  esqlQuery?: string | null;
+}) => prompt !== undefined || esqlQuery !== undefined;
+
+const atLeastOneChange = { message: 'At least one of prompt or esqlQuery must be provided.' };
+
+/**
+ * Edit input for callers that already know which panel they are editing — the dashboard generation
+ * tool targets the panel by `panelId`, so no identifier belongs in the config itself.
+ */
 export const customContentUpdateSchema = z
+  .object(customContentUpdateFields)
+  .refine(hasSomethingToChange, atLeastOneChange);
+
+export type CustomContentUpdate = z.output<typeof customContentUpdateSchema>;
+
+/**
+ * Edit input for the chat tool. A conversation can hold one context attachment per panel, so the
+ * target has to be explicit — without it the tool would act on whichever panel was attached first.
+ */
+export const customContentPanelUpdateSchema = z
   .object({
     embeddable_id: z
       .string()
       .min(1)
       .max(100)
       .describe(
-        'The embeddable_id of the custom content panel to update. It is shown in the panel context header (e.g. "Custom content panel (embeddable_id: …)"). Required when multiple panels are present in the conversation so the tool can target the correct one.'
+        'The embeddable_id of the custom content panel to update, as shown in that panel\'s context header (e.g. "Custom content panel (embeddable_id: …)"). Always required — several panels can be attached to one conversation.'
       ),
-    prompt: z
-      .string()
-      .min(1)
-      .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-      .optional()
-      .describe(
-        'Natural language instruction for what to create or change. The server generates the HTML template from this prompt.'
-      ),
-    esqlQuery: z
-      .string()
-      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-      .nullable()
-      .optional()
-      .describe(
-        'ES|QL query. Omit to keep the existing query. Pass null to remove it entirely. Build it with the generate_esql tool rather than writing it yourself — the server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
-      ),
+    ...customContentUpdateFields,
   })
-  .refine(({ prompt, esqlQuery }) => prompt !== undefined || esqlQuery !== undefined, {
-    message: 'At least one of prompt or esqlQuery must be provided.',
-  });
+  .refine(hasSomethingToChange, atLeastOneChange);
 
-export type CustomContentUpdate = z.output<typeof customContentUpdateSchema>;
+export type CustomContentPanelUpdate = z.output<typeof customContentPanelUpdateSchema>;

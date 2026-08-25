@@ -14,7 +14,11 @@ export {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
 } from './constants';
 
-export { customContentStateSchema, customContentUpdateSchema } from './schema';
+export {
+  customContentStateSchema,
+  customContentUpdateSchema,
+  customContentPanelUpdateSchema,
+} from './schema';
 export type { CustomContentUpdate } from './schema';
 export type { CustomContentState } from './schema';
 

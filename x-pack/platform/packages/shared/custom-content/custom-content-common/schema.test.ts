@@ -10,7 +10,11 @@ import {
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
 } from './constants';
-import { customContentStateSchema, customContentUpdateSchema } from './schema';
+import {
+  customContentStateSchema,
+  customContentUpdateSchema,
+  customContentPanelUpdateSchema,
+} from './schema';
 
 describe('customContentStateSchema', () => {
   it('accepts an empty object (all fields optional)', () => {
@@ -54,29 +58,25 @@ describe('customContentStateSchema', () => {
 
 describe('customContentUpdateSchema', () => {
   it('accepts a prompt on its own', () => {
-    expect(
-      customContentUpdateSchema.safeParse({ embeddable_id: 'p1', prompt: 'Make it blue' }).success
-    ).toBe(true);
+    expect(customContentUpdateSchema.safeParse({ prompt: 'Make it blue' }).success).toBe(true);
   });
 
   it('accepts an esqlQuery on its own', () => {
-    expect(
-      customContentUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: 'FROM logs-*' }).success
-    ).toBe(true);
+    expect(customContentUpdateSchema.safeParse({ esqlQuery: 'FROM logs-*' }).success).toBe(true);
   });
 
-  it('requires embeddable_id', () => {
-    expect(customContentUpdateSchema.safeParse({ prompt: 'Make it blue' }).success).toBe(false);
+  // The dashboard tool targets the panel with its own `panelId`, so an identifier here would be
+  // a second, redundant way to say the same thing.
+  it('does not require a panel identifier', () => {
+    expect(customContentUpdateSchema.safeParse({ prompt: 'Make it blue' }).success).toBe(true);
   });
 
   it('requires at least one of prompt or esqlQuery', () => {
-    expect(customContentUpdateSchema.safeParse({ embeddable_id: 'p1' }).success).toBe(false);
+    expect(customContentUpdateSchema.safeParse({}).success).toBe(false);
   });
 
   it('accepts a null esqlQuery to clear the query', () => {
-    expect(
-      customContentUpdateSchema.safeParse({ embeddable_id: 'p1', esqlQuery: null }).success
-    ).toBe(true);
+    expect(customContentUpdateSchema.safeParse({ esqlQuery: null }).success).toBe(true);
   });
 
   it('rejects a prompt exceeding CUSTOM_CONTENT_MAX_PROMPT_LENGTH', () => {
@@ -92,5 +92,24 @@ describe('customContentUpdateSchema', () => {
     expect(customContentUpdateSchema.safeParse({ embeddable_id: 'p1', prompt: '' }).success).toBe(
       false
     );
+  });
+});
+
+describe('customContentPanelUpdateSchema', () => {
+  it('requires embeddable_id so the chat tool cannot act on the wrong panel', () => {
+    expect(customContentPanelUpdateSchema.safeParse({ prompt: 'Make it blue' }).success).toBe(
+      false
+    );
+  });
+
+  it('accepts an update targeted at a panel', () => {
+    expect(
+      customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1', prompt: 'Make it blue' })
+        .success
+    ).toBe(true);
+  });
+
+  it('still requires at least one of prompt or esqlQuery', () => {
+    expect(customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1' }).success).toBe(false);
   });
 });
