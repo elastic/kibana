@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { LocationAgentDetails } from './location_agent_details';
 import type { AgentStat, LocationAgentStats } from '../../../../../../common/types';
 
@@ -37,15 +38,21 @@ const agent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   lastCheckinMessage: 'Running',
   platform: 'linux',
   tags: [],
+  monitorsAssigned: null,
   ...overrides,
 });
 
-const stats = (agents: AgentStat[]): LocationAgentStats => ({
+const stats = (
+  agents: AgentStat[],
+  overrides: Partial<LocationAgentStats> = {}
+): LocationAgentStats => ({
   locationId: 'loc-1',
   locationLabel: 'Local Docker PL',
   agentPolicyId: 'policy-1',
   agentPolicyName: 'synthetics-private-pol',
+  isAgentSharding: false,
   agents,
+  ...overrides,
 });
 
 describe('LocationAgentDetails', () => {
@@ -122,5 +129,48 @@ describe('LocationAgentDetails', () => {
 
     // Memory and CPU both render the N/A fallback.
     expect(screen.getAllByText('N/A').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows the assigned share for a sharded location instead of 100%', () => {
+    render(
+      <LocationAgentDetails
+        stats={stats(
+          [
+            agent({ monitorsAssigned: 1 }),
+            agent({ host: 'agent-b', agentId: 'agent-b-id', monitorsAssigned: 2 }),
+          ],
+          { isAgentSharding: true }
+        )}
+        loading={false}
+        agentPolicyId="policy-1"
+        locationLabel="Local Docker PL"
+        locationMonitorCount={3}
+      />
+    );
+
+    expect(screen.getByText('33%')).toBeInTheDocument();
+    expect(screen.getByText('67%')).toBeInTheDocument();
+    expect(screen.queryByText('100%')).not.toBeInTheDocument();
+  });
+
+  it('opens the agent details flyout from a per-agent row', async () => {
+    const user = userEvent.setup();
+    render(
+      <LocationAgentDetails
+        stats={stats([agent()])}
+        loading={false}
+        agentPolicyId="policy-1"
+        locationLabel="Local Docker PL"
+        locationMonitorCount={3}
+      />
+    );
+
+    await user.click(screen.getByTestId('syntheticsAgentDetailsLink'));
+
+    expect(screen.getByTestId('syntheticsAgentDetailsFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsAgentFlyoutFleetLink')).toHaveAttribute(
+      'href',
+      '/app/fleet/agents/agent-a-id'
+    );
   });
 });

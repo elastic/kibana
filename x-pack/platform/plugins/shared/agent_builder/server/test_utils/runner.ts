@@ -50,6 +50,7 @@ import type { ToolsServiceStartMock } from './tools';
 import { createToolsServiceStartMock } from './tools';
 import type { AgentsServiceStartMock } from './agents';
 import { createAgentsServiceStartMock } from './agents';
+import { createConversationServiceMock } from './conversations';
 import type { SkillRegistry, SkillServiceStart } from '../services/skills';
 import type { PluginsServiceStart } from '../services/plugins/plugin_service';
 
@@ -349,6 +350,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
       skills: false,
+      aiIndices: false,
       relevantSkills: false,
       subagents: false,
       todos: false,
@@ -359,9 +361,16 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
+      createSubAgent: jest.fn(),
+      sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
+    conversationClient: {
+      exists: jest.fn().mockResolvedValue(false),
+    },
     executionMode: AgentExecutionMode.conversation,
+    interactivity: { enabled: true },
+    parentExecutionId: undefined,
   };
 };
 
@@ -408,6 +417,7 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     runContext: { runId: 'mock-run-id', stack: [] },
     experimentalFeatures: {
       skills: false,
+      aiIndices: false,
       relevantSkills: false,
       subagents: false,
       todos: false,
@@ -416,6 +426,9 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       bash: false,
       apiTools: false,
     },
+    executionMode: AgentExecutionMode.conversation,
+    interactivity: { enabled: true },
+    parentExecutionId: undefined,
   };
 };
 
@@ -445,6 +458,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     modelProvider: createModelProviderMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
+    conversationService: createConversationServiceMock(),
     logger: loggerMock.create(),
     request: httpServerMock.createKibanaRequest(),
     resultStore: createToolResultStoreMock(),
@@ -462,6 +476,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
       skills: false,
+      aiIndices: false,
       relevantSkills: false,
       subagents: false,
       todos: false,
@@ -472,9 +487,13 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
+      createSubAgent: jest.fn(),
+      sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
     executionMode: AgentExecutionMode.conversation,
+    interactivity: { enabled: true },
+    parentExecutionId: undefined,
   };
 };
 
@@ -490,6 +509,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     modelProviderFactory: createModelProviderFactoryMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
+    conversationService: createConversationServiceMock(),
     logger: loggerMock.create(),
     attachmentsService: createAttachmentsServiceStartMock(),
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },

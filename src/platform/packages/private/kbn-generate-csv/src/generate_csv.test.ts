@@ -654,6 +654,43 @@ describe('CsvGenerator', () => {
           })
         );
       });
+
+      it('uses PIT even when pagingStrategy is scroll', async () => {
+        const mockJobScrollStrategyInternalUser = createMockJob({
+          columns: ['date', 'ip', 'message'],
+          pagingStrategy: 'scroll',
+        });
+
+        const generateCsv = new CsvGenerator(
+          mockJobScrollStrategyInternalUser,
+          getMockConfig({ scroll: { size: 500, duration: '30s', strategy: 'scroll' } }),
+          mockTaskInstanceFields,
+          {
+            es: mockEsClient,
+            data: mockDataClient,
+            uiSettings: uiSettingsClient,
+          },
+          {
+            searchSourceStart: mockSearchSourceService,
+            fieldFormatsRegistry: mockFieldFormatsRegistry,
+          },
+          new CancellationToken(),
+          mockLogger,
+          stream,
+          false,
+          jobId,
+          true // useInternalUser
+        );
+
+        await generateCsv.generateData();
+
+        expect(mockEsClient.asInternalUser.openPointInTime).toHaveBeenCalled();
+        expect(mockEsClient.asCurrentUser.openPointInTime).not.toHaveBeenCalled();
+        expect(mockDataClient.search).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({ strategy: INTERNAL_ENHANCED_ES_SEARCH_STRATEGY })
+        );
+      });
     });
   });
 
