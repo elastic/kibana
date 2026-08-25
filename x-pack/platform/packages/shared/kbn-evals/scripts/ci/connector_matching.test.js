@@ -53,6 +53,24 @@ describe('connectorMatchesModelGroup', () => {
     ).toBe(true);
   });
 
+  it('matches an openrouter/<provider>-<model> group to the slugified connector id', () => {
+    const openrouter = { config: { defaultModel: 'openai/gpt-5.4' } };
+    expect(
+      connectorMatchesModelGroup(
+        'openrouter-openai-gpt-5-4',
+        openrouter,
+        'openrouter/openai-gpt-5.4'
+      )
+    ).toBe(true);
+  });
+
+  it('matches a native openrouter id against defaultModel', () => {
+    const openrouter = { config: { defaultModel: 'openai/gpt-5.4' } };
+    expect(
+      connectorMatchesModelGroup('openrouter-openai-gpt-5-4', openrouter, 'openai/gpt-5.4')
+    ).toBe(true);
+  });
+
   it('does not match an unrelated group', () => {
     expect(connectorMatchesModelGroup('eis-openai-gpt-5-4', eis, 'eis/openai-gpt-5.4-mini')).toBe(
       false

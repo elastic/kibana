@@ -10,12 +10,18 @@
 // `get_fanout_matrix.js` to build the connector/per-spec fanout, keeping the matching rule in one
 // place.
 
+const { slugifyId } = require('./slugify_id');
+
 // Whether a single connector satisfies a single requested model group.
 function connectorMatchesModelGroup(connectorId, connector, requestedValue) {
   if (requestedValue === connectorId) return true;
 
   const defaultModel = connector?.config?.defaultModel;
   if (typeof defaultModel === 'string' && requestedValue === defaultModel) return true;
+
+  if (requestedValue.startsWith('openrouter/') && slugifyId(requestedValue) === connectorId) {
+    return true;
+  }
 
   const eisModelId = connector?.config?.providerConfig?.model_id;
   if (typeof eisModelId === 'string') {
