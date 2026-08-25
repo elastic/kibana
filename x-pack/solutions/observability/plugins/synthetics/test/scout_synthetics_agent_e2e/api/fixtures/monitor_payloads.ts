@@ -16,10 +16,11 @@ export const FAIL_PATH = '/fail';
 
 export const buildMonitorPayload = (
   type: SyntheticsMonitorType,
-  { privateLocation, target }: AgentStack
+  stack: AgentStack
 ): Record<string, unknown> => {
+  const { privateLocation, target } = stack;
   const shared = {
-    name: `agent-e2e-${type}`,
+    name: `agent-e2e-${type}-${stack.runId}`,
     enabled: true,
     locations: [privateLocation],
     schedule,
@@ -46,6 +47,6 @@ export const buildMonitorPayload = (
 
 export const buildDownHttpMonitorPayload = (stack: AgentStack): Record<string, unknown> => ({
   ...buildMonitorPayload('http', stack),
-  name: 'agent-e2e-http-down',
+  name: `agent-e2e-http-down-${stack.runId}`,
   url: `${stack.target.url}${FAIL_PATH}`,
 });

@@ -18,8 +18,15 @@ export interface AgentE2eWorkerFixtures {
  */
 export const apiTest = baseApiTest.extend<{}, AgentE2eWorkerFixtures>({
   agentStack: [
-    async ({ apiServices, kbnClient, config, log }, use) => {
-      const { stack, stop } = await startAgentStack({ apiServices, kbnClient, config, log });
+    async ({ apiServices, kbnClient, config, log }, use, workerInfo) => {
+      const runId = `w${workerInfo.workerIndex}-${process.pid}`;
+      const { stack, stop } = await startAgentStack({
+        apiServices,
+        kbnClient,
+        config,
+        log,
+        runId,
+      });
       await use(stack);
       await stop();
     },

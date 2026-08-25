@@ -10,25 +10,23 @@ import { tryForTime } from '../../../scout/common/fixtures/retry';
 import type { ScoutPrivateLocation } from '../../../scout/common/services/synthetics_private_location_api_service';
 import type { SyntheticsApiServicesFixture } from '../../../scout/common/fixtures';
 import {
-  FLEET_SERVER_CONTAINER,
-  SYNTHETICS_AGENT_CONTAINER,
   containerLogs,
+  dockerContainerName,
   isDockerAvailable,
+  publishedHostPort,
   pullImage,
   removeContainer,
   startDetachedContainer,
 } from './docker';
 import { startTargetServer, stopTargetServer, type TargetServer } from './target_server';
 
-const FLEET_SERVER_PORT = 8220;
-const FLEET_SERVER_URL = `http://localhost:${FLEET_SERVER_PORT}`;
-const AGENT_FLEET_URL = `http://host.docker.internal:${FLEET_SERVER_PORT}`;
-
+const FLEET_SERVER_CONTAINER_PORT = 8220;
 const DOCKER_HOST_GATEWAY = ['--add-host', 'host.docker.internal:host-gateway'];
 
 export interface AgentStack {
   privateLocation: ScoutPrivateLocation;
   target: Omit<TargetServer, 'server'>;
+  runId: string;
 }
 
 interface EnrollmentApiKeyItem {
@@ -47,16 +45,16 @@ const esPortFromUrl = (elasticsearchUrl: string): string => {
   return parsed.port || (parsed.protocol === 'https:' ? '443' : '80');
 };
 
-async function waitForFleetServer(log: ScoutLogger): Promise<void> {
+async function waitForFleetServer(url: string, log: ScoutLogger): Promise<void> {
   await tryForTime(
     180_000,
     async () => {
       let response: Response;
       try {
-        response = await fetch(`${FLEET_SERVER_URL}/api/status`);
+        response = await fetch(`${url}/api/status`);
       } catch (error) {
         throw new Error(
-          `Fleet Server not reachable at ${FLEET_SERVER_URL}/api/status: ${
+          `Fleet Server not reachable at ${url}/api/status: ${
             error instanceof Error ? error.message : String(error)
           }`
         );
@@ -71,35 +69,12 @@ async function waitForFleetServer(log: ScoutLogger): Promise<void> {
   log.info('Fleet Server is healthy');
 }
 
-async function advertiseDockerFleetServerHost(kbnClient: KbnClient): Promise<void> {
-  const { data } = await kbnClient.request<{
-    items: Array<{ id: string; is_default?: boolean; host_urls?: string[] }>;
-  }>({
-    method: 'GET',
-    path: '/api/fleet/fleet_server_hosts',
-  });
-  const alreadyAdvertised = data.items.some((item) => item.host_urls?.includes(AGENT_FLEET_URL));
-  if (alreadyAdvertised) {
-    return;
-  }
-  // Preconfigured hosts cannot change `host_urls` via API — add a default
-  // host the Docker agent can reach.
-  await kbnClient.request({
-    method: 'POST',
-    path: '/api/fleet/fleet_server_hosts',
-    body: {
-      name: 'Docker Fleet Server',
-      host_urls: [AGENT_FLEET_URL],
-      is_default: true,
-    },
-  });
-}
-
 async function waitForAgentOnline(
   kbnClient: KbnClient,
   log: ScoutLogger,
   policyId: string
-): Promise<void> {
+): Promise<string> {
+  let agentId = '';
   await tryForTime(
     180_000,
     async () => {
@@ -114,10 +89,12 @@ async function waitForAgentOnline(
           `No online agent for policy ${policyId}. Seen: ${JSON.stringify(data.items)}`
         );
       }
+      agentId = agent.id;
     },
     { intervalMs: 5_000 }
   );
-  log.info(`Elastic Agent is online on policy ${policyId}`);
+  log.info(`Elastic Agent ${agentId} is online on policy ${policyId}`);
+  return agentId;
 }
 
 export async function startAgentStack({
@@ -125,11 +102,13 @@ export async function startAgentStack({
   kbnClient,
   config,
   log,
+  runId,
 }: {
   apiServices: SyntheticsApiServicesFixture;
   kbnClient: KbnClient;
   config: ScoutTestConfig;
   log: ScoutLogger;
+  runId: string;
 }): Promise<{ stack: AgentStack; stop: () => Promise<void> }> {
   if (!isDockerAvailable()) {
     throw new Error(
@@ -137,6 +116,8 @@ export async function startAgentStack({
     );
   }
 
+  const fleetServerContainer = dockerContainerName('fleet-server', runId);
+  const agentContainer = dockerContainerName('agent', runId);
   const target = await startTargetServer();
   log.info(`Target HTTP server listening on ${target.url}`);
 
@@ -148,19 +129,36 @@ export async function startAgentStack({
   const fleetServerImage = `docker.elastic.co/elastic-agent/elastic-agent:${imageTag}`;
   const agentImage = `docker.elastic.co/elastic-agent/elastic-agent-complete:${imageTag}`;
   const esPort = esPortFromUrl(config.hosts.elasticsearch);
+  const dockerEsHost = `http://host.docker.internal:${esPort}`;
 
   let fleetServerStarted = false;
   let agentStarted = false;
+  let dockerOutputId: string | undefined;
+  let dockerFleetHostId: string | undefined;
+  let fleetServerPolicyId: string | undefined;
+  let enrolledAgentId: string | undefined;
 
   const stop = async () => {
     if (agentStarted) {
-      removeContainer(SYNTHETICS_AGENT_CONTAINER);
+      removeContainer(agentContainer);
     }
     if (fleetServerStarted) {
-      removeContainer(FLEET_SERVER_CONTAINER);
+      removeContainer(fleetServerContainer);
     }
     await stopTargetServer(target.server);
+    if (enrolledAgentId) {
+      await apiServices.fleet.agent.delete(enrolledAgentId);
+    }
+    if (fleetServerPolicyId) {
+      await apiServices.fleet.agent_policies.delete(fleetServerPolicyId, true);
+    }
     await apiServices.syntheticsPrivateLocations.cleanUpPrivateLocationsAndPolicies();
+    if (dockerFleetHostId) {
+      await apiServices.fleet.server_hosts.delete(dockerFleetHostId);
+    }
+    if (dockerOutputId) {
+      await apiServices.fleet.outputs.delete(dockerOutputId);
+    }
   };
 
   try {
@@ -171,30 +169,39 @@ export async function startAgentStack({
 
     await apiServices.fleet.internal.setup();
     await apiServices.fleet.agent.setup();
-    await advertiseDockerFleetServerHost(kbnClient);
     await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
+
+    const { data: dockerOutput } = await apiServices.fleet.outputs.create(
+      `scout-synthetics-agent-e2e-es-${runId}`,
+      [dockerEsHost],
+      'elasticsearch',
+      { is_default: false, is_default_monitoring: false }
+    );
+    dockerOutputId = dockerOutput.item.id as string;
 
     const { data: serviceToken } = await kbnClient.request<{ value: string }>({
       method: 'POST',
       path: '/api/fleet/service_tokens',
     });
 
+    const fleetServerPolicyName = `scout-synthetics-agent-e2e-fleet-server-${runId}`;
     const { data: fleetServerPolicy } = await apiServices.fleet.agent_policies.create({
-      policyName: `scout-synthetics-agent-e2e-fleet-server-${Date.now()}`,
+      policyName: fleetServerPolicyName,
       policyNamespace: 'default',
       sysMonitoring: false,
       params: {
         description: 'Fleet Server policy for scout_synthetics_agent_e2e',
         monitoring_enabled: [],
         has_fleet_server: true,
+        data_output_id: dockerOutputId,
       },
     });
-    const fleetServerPolicyId = fleetServerPolicy.item.id as string;
+    fleetServerPolicyId = fleetServerPolicy.item.id as string;
 
     log.info(`Starting Fleet Server ${fleetServerImage}`);
-    startDetachedContainer(FLEET_SERVER_CONTAINER, [
+    startDetachedContainer(fleetServerContainer, [
       '-p',
-      `${FLEET_SERVER_PORT}:8220`,
+      String(FLEET_SERVER_CONTAINER_PORT),
       ...DOCKER_HOST_GATEWAY,
       '-e',
       'FLEET_SERVER_ENABLE=true',
@@ -205,7 +212,7 @@ export async function startAgentStack({
       '-e',
       'FLEET_INSECURE=true',
       '-e',
-      `FLEET_SERVER_ELASTICSEARCH_HOST=http://host.docker.internal:${esPort}`,
+      `FLEET_SERVER_ELASTICSEARCH_HOST=${dockerEsHost}`,
       '-e',
       `FLEET_SERVER_SERVICE_TOKEN=${serviceToken.value}`,
       '-e',
@@ -216,16 +223,48 @@ export async function startAgentStack({
     ]);
     fleetServerStarted = true;
 
+    const fleetHostPort = publishedHostPort(fleetServerContainer, FLEET_SERVER_CONTAINER_PORT);
+    const fleetServerUrl = `http://localhost:${fleetHostPort}`;
+    const agentFleetUrl = `http://host.docker.internal:${fleetHostPort}`;
+
     try {
-      await waitForFleetServer(log);
+      await waitForFleetServer(fleetServerUrl, log);
     } catch (error) {
-      log.error(`Fleet Server failed to become healthy:\n${containerLogs(FLEET_SERVER_CONTAINER)}`);
+      log.error(`Fleet Server failed to become healthy:\n${containerLogs(fleetServerContainer)}`);
       throw error;
     }
 
-    const { id: syntheticsPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
-      `scout-synthetics-agent-e2e-${Date.now()}`
+    const { data: dockerFleetHost } = await apiServices.fleet.server_hosts.create(
+      `scout-synthetics-agent-e2e-fleet-host-${runId}`,
+      [agentFleetUrl],
+      { is_default: false }
     );
+    dockerFleetHostId = dockerFleetHost.item.id as string;
+
+    await apiServices.fleet.agent_policies.update({
+      agentPolicyId: fleetServerPolicyId,
+      policyName: fleetServerPolicyName,
+      policyNamespace: 'default',
+      params: {
+        has_fleet_server: true,
+        data_output_id: dockerOutputId,
+        fleet_server_host_id: dockerFleetHostId,
+      },
+    });
+
+    const syntheticsPolicyName = `scout-synthetics-agent-e2e-${runId}`;
+    const { id: syntheticsPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
+      syntheticsPolicyName
+    );
+    await apiServices.fleet.agent_policies.update({
+      agentPolicyId: syntheticsPolicyId,
+      policyName: syntheticsPolicyName,
+      policyNamespace: 'default',
+      params: {
+        data_output_id: dockerOutputId,
+        fleet_server_host_id: dockerFleetHostId,
+      },
+    });
     const [privateLocation] = await apiServices.syntheticsPrivateLocations.setTestLocations([
       syntheticsPolicyId,
     ]);
@@ -243,7 +282,7 @@ export async function startAgentStack({
     log.info(`Starting synthetics agent ${agentImage}`);
     // CI runc rejects `--sysctl net.ipv4.ping_group_range=...` (invalid argument).
     // NET_RAW is enough for ICMP; Docker Desktop already allows unprivileged ping.
-    startDetachedContainer(SYNTHETICS_AGENT_CONTAINER, [
+    startDetachedContainer(agentContainer, [
       ...DOCKER_HOST_GATEWAY,
       '--cap-add=NET_RAW',
       '--cap-add=SYS_ADMIN',
@@ -251,7 +290,7 @@ export async function startAgentStack({
       '-e',
       'FLEET_ENROLL=1',
       '-e',
-      `FLEET_URL=${AGENT_FLEET_URL}`,
+      `FLEET_URL=${agentFleetUrl}`,
       '-e',
       `FLEET_ENROLLMENT_TOKEN=${enrollmentToken}`,
       '-e',
@@ -261,9 +300,9 @@ export async function startAgentStack({
     agentStarted = true;
 
     try {
-      await waitForAgentOnline(kbnClient, log, syntheticsPolicyId);
+      enrolledAgentId = await waitForAgentOnline(kbnClient, log, syntheticsPolicyId);
     } catch (error) {
-      log.error(`Agent failed to come online:\n${containerLogs(SYNTHETICS_AGENT_CONTAINER)}`);
+      log.error(`Agent failed to come online:\n${containerLogs(agentContainer)}`);
       throw error;
     }
 
@@ -271,6 +310,7 @@ export async function startAgentStack({
       stack: {
         privateLocation,
         target: { port: target.port, url: target.url, host: target.host },
+        runId,
       },
       stop,
     };

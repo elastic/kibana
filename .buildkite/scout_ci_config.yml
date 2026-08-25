@@ -132,8 +132,3 @@ excluded_configs:
   - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts
   - x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/playwright.config.ts
-
-# Run on PR pipelines only (skipped on on-merge / scheduled Scout). PR selective
-# testing still limits these to affected modules — e.g. synthetics source or this suite.
-pr_only_configs:
-  - x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/playwright.config.ts

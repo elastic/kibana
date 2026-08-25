@@ -7,10 +7,7 @@
 
 import type { ApiClientFixture, EsClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import {
-  mergeSyntheticsApiHeaders,
-  SYNTHETICS_MONITOR_SO_TYPES,
-} from '../../../scout/common/fixtures';
+import { mergeSyntheticsApiHeaders } from '../../../scout/common/fixtures';
 import {
   addMonitor,
   deleteMonitors,
@@ -109,20 +106,18 @@ apiTest.describe(
     let editorHeaders: Record<string, string>;
     const createdMonitorIds: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth, apiClient, kbnClient, agentStack }) => {
+    apiTest.beforeAll(async ({ requestAuth, apiClient, agentStack }) => {
       apiTest.setTimeout(TEST_TIMEOUT);
-      await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
       const { apiKeyHeader } = await requestAuth.getApiKey('editor');
       editorHeaders = mergeSyntheticsApiHeaders(apiKeyHeader, { Accept: 'application/json' });
       await enableSynthetics(apiClient, editorHeaders);
       expect(agentStack.privateLocation.id).not.toBe('');
     });
 
-    apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+    apiTest.afterAll(async ({ apiClient }) => {
       if (createdMonitorIds.length > 0) {
-        await deleteMonitors(apiClient, editorHeaders, createdMonitorIds).catch(() => undefined);
+        await deleteMonitors(apiClient, editorHeaders, createdMonitorIds, { ignoreErrors: true });
       }
-      await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
     });
 
     for (const type of MONITOR_TYPES) {

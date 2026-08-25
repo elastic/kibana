@@ -7,8 +7,8 @@
 
 import { spawnSync, type SpawnSyncReturns } from 'child_process';
 
-export const FLEET_SERVER_CONTAINER = 'scout-synthetics-agent-e2e-fleet-server';
-export const SYNTHETICS_AGENT_CONTAINER = 'scout-synthetics-agent-e2e-agent';
+export const dockerContainerName = (kind: 'fleet-server' | 'agent', runId: string): string =>
+  `scout-synthetics-agent-e2e-${kind}-${runId}`;
 
 const DOCKER_TIMEOUT_MS = 15 * 60 * 1000;
 const ERROR_TAIL_CHARS = 4000;
@@ -35,6 +35,15 @@ export const pullImage = (image: string): void => {
 
 export const removeContainer = (name: string): void => {
   spawnSync('docker', ['rm', '-f', name], { encoding: 'utf8' });
+};
+
+export const publishedHostPort = (name: string, containerPort: number): number => {
+  const mapping = runDocker(['port', name, String(containerPort)]);
+  const match = mapping.match(/:(\d+)\s*$/m);
+  if (!match) {
+    throw new Error(`No published host port for ${name}:${containerPort} (${mapping})`);
+  }
+  return Number(match[1]);
 };
 
 export const containerLogs = (name: string, tail = 80): string => {
