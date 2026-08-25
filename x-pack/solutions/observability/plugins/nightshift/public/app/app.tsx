@@ -99,7 +99,7 @@ const setElementInert = (element: HTMLDivElement | null): void => {
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const { agentBuilder, application } = useKibana().services;
+  const { agentBuilder, application, chrome } = useKibana().services;
   const history = useHistory();
   const { search } = useLocation();
   const needsActionSectionRef = useRef<HTMLElement>(null);
@@ -126,6 +126,23 @@ export function NightshiftApp(): React.ReactElement {
     });
     return () => subscription.unsubscribe();
   }, [agentBuilder]);
+
+  // Expand the sidebar to ~75% of the viewport while the Nightshift page is mounted,
+  // making the landing page a narrow side-picker. Restores the previous width on unmount.
+  useEffect(() => {
+    if (!chrome?.sidebar) return;
+    const nightshiftWidth = Math.floor(window.innerWidth * 0.75);
+    const previousWidth = chrome.sidebar.getWidth();
+    const sub = chrome.sidebar.isOpen$().subscribe((isOpen) => {
+      if (isOpen) {
+        chrome.sidebar.setWidth(nightshiftWidth);
+      }
+    });
+    return () => {
+      sub.unsubscribe();
+      chrome.sidebar.setWidth(previousWidth);
+    };
+  }, [chrome]);
 
   const { data, error: eventsError, isFetching, isLoading, refetch } = useFetchSignificantEvents();
   const { data: investigationsData } = useFetchInvestigations();
