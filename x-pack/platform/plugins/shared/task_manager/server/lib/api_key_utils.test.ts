@@ -78,6 +78,17 @@ describe('api_key_utils', () => {
       const result = getApiKeyFromRequest(request);
       expect(result).toBeNull();
     });
+
+    test('should return a raw user-created UIAM API key without an id', () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `ApiKey essu_user_created_key`,
+        },
+      });
+
+      const result = getApiKeyFromRequest(request);
+      expect(result).toEqual({ api_key: 'essu_user_created_key' });
+    });
   });
 
   describe('createApiKey', () => {
@@ -137,6 +148,29 @@ describe('api_key_utils', () => {
       expect(coreStart.security.authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalled();
       expect(coreStart.security.authc.getCurrentUser).toHaveBeenCalledWith(request);
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('should throw if the request was made by a raw user-created UIAM API key', async () => {
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          authorization: `ApiKey essu_user_created_key`,
+        },
+      });
+
+      const coreStart = coreMock.createStart();
+      const mockUser = {
+        authentication_type: 'api_key',
+        username: 'testUser',
+      };
+
+      coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
+      coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
+
+      await expect(
+        createApiKey([mockTask], request, coreStart.security)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot use a user-provided Cloud (UIAM) API key to schedule tasks in this environment; an Elasticsearch API key is required."`
+      );
     });
 
     test('should clone the API key if the request is a fake request', async () => {
