@@ -483,6 +483,30 @@ describe('bulkUpdateRules', () => {
     });
   });
 
+  describe('legacy actions migration', () => {
+    test('migrate throw: log and continue, earlier batch ids kept', async () => {
+      mockPit(
+        nSos(10),
+        nSos(10).map((_, i) => so(`id-${i + 10}`))
+      );
+      (bulkMigrateLegacyActions as jest.Mock)
+        .mockResolvedValueOnce([])
+        .mockRejectedValueOnce(new Error('es down'));
+
+      const result = await rulesClient.bulkUpdateRules({
+        rules: nItems(20),
+        batchSize: MIN_BULK_UPDATE_BATCH_SIZE,
+      });
+
+      expect(result.successfulIds).toHaveLength(20);
+      expect(result.errors).toEqual([]);
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2);
+      expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('legacy actions migration failed, continuing')
+      );
+    });
+  });
+
   describe('prepare', () => {
     test('per-rule schema failure is isolated; rest persist', async () => {
       mockPit([so('id-1'), so('id-2')]);

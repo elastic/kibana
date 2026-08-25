@@ -212,12 +212,20 @@ async function runBatch<Params extends RuleParams>({
     }
   }
 
-  await withSpan({ name: 'bulkUpdateRules.runBatch.bulkMigrateLegacyActions', type: 'rules' }, () =>
-    bulkMigrateLegacyActions({
-      context,
-      rules: toPrepare.map(({ original }) => original),
-    })
-  );
+  try {
+    await withSpan(
+      { name: 'bulkUpdateRules.runBatch.bulkMigrateLegacyActions', type: 'rules' },
+      () =>
+        bulkMigrateLegacyActions({
+          context,
+          rules: toPrepare.map(({ original }) => original),
+        })
+    );
+  } catch (error) {
+    context.logger.error(
+      `bulkUpdateRules: legacy actions migration failed, continuing: ${error.message}`
+    );
+  }
 
   const written = await writeWithRetry({
     context,
