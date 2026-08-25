@@ -34,7 +34,7 @@ describe('logWorkflowsRouteError', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('logs user errors at warn level', () => {
+  it('logs user errors at warn level without the full Error object', () => {
     const logger = loggingSystemMock.createLogger();
     const error = Object.assign(new Error('invalid input'), { isUserError: true as const });
 
@@ -42,12 +42,18 @@ describe('logWorkflowsRouteError', () => {
       route: 'POST /api/workflows/test',
     });
 
+    expect(logger.warn).toHaveBeenCalledWith('Workflows API request failed', {
+      route: 'POST /api/workflows/test',
+      workflowId: undefined,
+      spaceId: undefined,
+      workflowExecutionId: undefined,
+      errorMessage: 'invalid input',
+      errorName: 'Error',
+      isUserError: true,
+    });
     expect(logger.warn).toHaveBeenCalledWith(
       'Workflows API request failed',
-      expect.objectContaining({
-        isUserError: true,
-        errorMessage: 'invalid input',
-      })
+      expect.not.objectContaining({ error: expect.anything() })
     );
     expect(logger.error).not.toHaveBeenCalled();
   });

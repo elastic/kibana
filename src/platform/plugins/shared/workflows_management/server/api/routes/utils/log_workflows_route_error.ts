@@ -37,6 +37,7 @@ export function logWorkflowsRouteError(
   context: WorkflowsRouteErrorLogContext
 ): void {
   const normalizedError = toError(error);
+  const userError = isUserError(error);
   const meta = {
     route: context.route,
     workflowId: context.workflowId,
@@ -44,11 +45,12 @@ export function logWorkflowsRouteError(
     workflowExecutionId: context.workflowExecutionId,
     errorMessage: normalizedError.message,
     errorName: normalizedError.name,
-    isUserError: isUserError(error),
-    error: normalizedError,
+    isUserError: userError,
+    // Omit the full Error (stack / request-derived details) for expected user errors.
+    ...(userError ? {} : { error: normalizedError }),
   };
 
-  if (meta.isUserError) {
+  if (userError) {
     logger.warn(LOG_MESSAGE, meta);
     return;
   }
