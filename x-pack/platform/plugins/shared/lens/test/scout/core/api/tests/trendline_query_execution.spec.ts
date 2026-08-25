@@ -149,57 +149,55 @@ apiTest.describe(
       cookieHeader = (await samlAuth.asInteractiveUser('viewer')).cookieHeader;
     });
 
-    apiTest('executes trendline query cases', async ({ apiClient }) => {
-      for (const queryCase of QUERY_CASES) {
-        await apiTest.step(queryCase.description, async () => {
-          const generated = buildTrendlineQueryWithMetricFieldMap(
-            queryCase.sourceQuery,
-            '@timestamp',
-            queryCase.metricFields,
-            queryCase.groupByFields
-          );
-          const usesTimeParams = generated.query.includes('?_tstart');
+    for (const queryCase of QUERY_CASES) {
+      apiTest(`executes trendline query: ${queryCase.description}`, async ({ apiClient }) => {
+        const generated = buildTrendlineQueryWithMetricFieldMap(
+          queryCase.sourceQuery,
+          '@timestamp',
+          queryCase.metricFields,
+          queryCase.groupByFields
+        );
+        const usesTimeParams = generated.query.includes('?_tstart');
 
-          expect(generated.query).toBe(queryCase.expectedQuery);
-          expect(generated.timeField).toBe(queryCase.expectedTimeField);
+        expect(generated.query).toBe(queryCase.expectedQuery);
+        expect(generated.timeField).toBe(queryCase.expectedTimeField);
 
-          const response = await apiClient.post(`${SEARCH_API_BASE_URL}/${ESQL_SEARCH_STRATEGY}`, {
-            headers: { ...INTERNAL_HEADERS, ...cookieHeader },
-            body: {
-              params: {
-                query: generated.query,
-                dropNullColumns: true,
-                filter: {
-                  range: {
-                    '@timestamp': {
-                      gte: TSDB_ISO_TIME_RANGE.start,
-                      lte: TSDB_ISO_TIME_RANGE.end,
-                    },
+        const response = await apiClient.post(`${SEARCH_API_BASE_URL}/${ESQL_SEARCH_STRATEGY}`, {
+          headers: { ...INTERNAL_HEADERS, ...cookieHeader },
+          body: {
+            params: {
+              query: generated.query,
+              dropNullColumns: true,
+              filter: {
+                range: {
+                  '@timestamp': {
+                    gte: TSDB_ISO_TIME_RANGE.start,
+                    lte: TSDB_ISO_TIME_RANGE.end,
                   },
                 },
-                ...(usesTimeParams
-                  ? {
-                      params: [
-                        { _tstart: TSDB_ISO_TIME_RANGE.start },
-                        { _tend: TSDB_ISO_TIME_RANGE.end },
-                      ],
-                    }
-                  : {}),
               },
+              ...(usesTimeParams
+                ? {
+                    params: [
+                      { _tstart: TSDB_ISO_TIME_RANGE.start },
+                      { _tend: TSDB_ISO_TIME_RANGE.end },
+                    ],
+                  }
+                : {}),
             },
-          });
-
-          expect(response).toHaveStatusCode(200);
-          const columnNames = response.body.rawResponse.columns.map(
-            ({ name }: { name: string }) => name
-          );
-          expect(columnNames).toStrictEqual([
-            ...queryCase.expectedMetricFields,
-            queryCase.expectedTimeField,
-          ]);
-          expect(response.body.rawResponse.values.length).toBeGreaterThan(0);
+          },
         });
-      }
-    });
+
+        expect(response).toHaveStatusCode(200);
+        const columnNames = response.body.rawResponse.columns.map(
+          ({ name }: { name: string }) => name
+        );
+        expect(columnNames).toStrictEqual([
+          ...queryCase.expectedMetricFields,
+          queryCase.expectedTimeField,
+        ]);
+        expect(response.body.rawResponse.values.length).toBeGreaterThan(0);
+      });
+    }
   }
 );
