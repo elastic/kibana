@@ -379,6 +379,16 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               </EuiButton>
             </EuiToolTip>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AlertingDateRangePicker
+              from={dateRange.dateStart}
+              to={dateRange.dateEnd}
+              onChange={handleDateRangeChange}
+              services={services}
+              width="auto"
+              data-test-subj="querySandboxDatePicker"
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false} css={timeFieldSelectCss}>
             <EuiSelect
               options={timeFieldOptions}
@@ -399,17 +409,11 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               data-test-subj="querySandboxTimeField"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AlertingDateRangePicker
-              from={dateRange.dateStart}
-              to={dateRange.dateEnd}
-              onChange={handleDateRangeChange}
-              services={services}
-              width="auto"
-              data-test-subj="querySandboxDatePicker"
-            />
-          </EuiFlexItem>
-          {headerActions && <EuiFlexItem grow={false}>{headerActions}</EuiFlexItem>}
+          {headerActions && (
+            <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
+              {headerActions}
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div css={editorBodyCss} style={{ height: editorHeight }}>
