@@ -889,10 +889,10 @@ export interface WorkflowDiagnostic {
   path?: (string | number)[];
   /**
    * Stable identity of the check that produced this diagnostic. Prefer this over
-   * matching on `message`, which is translated and reworded freely. Optional while
-   * validators are converted; see WORKFLOW_VALIDATION_RULES.
+   * matching on `message`, which is translated and reworded freely.
+   * See WORKFLOW_VALIDATION_RULES.
    */
-  ruleId?: WorkflowValidationRuleId;
+  ruleId: WorkflowValidationRuleId;
 }
 export interface ValidateWorkflowResponseDto {
   valid: boolean;

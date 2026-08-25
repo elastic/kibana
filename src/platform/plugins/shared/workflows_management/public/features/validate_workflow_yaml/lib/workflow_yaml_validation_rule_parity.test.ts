@@ -107,7 +107,7 @@ const getServerRuleIds = (
     yaml,
     options?.triggerDefinitions ? workflowSchemaWithCustomTrigger : workflowSchema,
     options
-  ).diagnostics.flatMap(({ ruleId }) => (ruleId ? [ruleId] : []));
+  ).diagnostics.map(({ ruleId }) => ruleId);
 
 interface RuleParityCase {
   name: string;
