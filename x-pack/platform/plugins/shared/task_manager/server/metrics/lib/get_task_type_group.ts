@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-const ALERT_GROUP = 'alerting';
-const ACTIONS_GROUP = 'actions';
-const taskTypeGrouping = new Set<string>([`${ALERT_GROUP}:`, `${ACTIONS_GROUP}:`]);
+import { TaskTypeGroup } from '../../task';
 
-export function getTaskTypeGroup(taskType: string): string | undefined {
-  // we want to group ad hoc runs under alerting
-  if (taskType === 'ad_hoc_run-backfill') {
-    return ALERT_GROUP;
-  }
+const taskTypeGrouping = [TaskTypeGroup.Actions, TaskTypeGroup.Alerting];
 
-  for (const group of taskTypeGrouping) {
-    if (taskType.startsWith(group)) {
-      return group.replace(':', '');
-    }
+export function getTaskTypeGroup(taskTypeGroup?: string): TaskTypeGroup | undefined {
+  if (taskTypeGroup !== undefined && taskTypeGrouping.includes(taskTypeGroup as TaskTypeGroup)) {
+    return taskTypeGroup as TaskTypeGroup;
   }
 }

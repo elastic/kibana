@@ -246,7 +246,7 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
                       ? 'errorFill'
                       : error.severity === 'warning'
                       ? 'warningFill'
-                      : 'iInCircle'
+                      : 'info'
                   }
                   color={
                     error.severity === 'error'

@@ -1,24 +1,10 @@
 {
-  "sha1": "6acd23b0b0e5fd2ddcdde3b491a8868354044394",
+  "sha1": "072fac33b1efa162dc992789b648002f68f0f7de",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
-    {
-      "id": "5ce936b95a321a4-ee984c13261a09d",
-      "title": "Task Manager ensureScheduled API keys grants a single ES + UIAM pair when called repeatedly for the same task",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/ensure_scheduled_api_keys.spec.ts",
-        "line": 26,
-        "column": 15
-      }
-    },
     {
       "id": "208b6394ca1260b-100a2f007029fdb",
       "title": "Task Manager API Keys scheduled task has both apiKey and uiamApiKey",
@@ -73,6 +59,20 @@
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/uiam_api_key_provisioning_background.spec.ts",
         "line": 142,
         "column": 23
+      }
+    },
+    {
+      "id": "2b8622c17fc479a-4bec8a92839533d",
+      "title": "[NON-MKI] Task Manager task scheduled with a user-created (external) UIAM API key persists the raw key UIAM-only, executes the task, and never queues the key for invalidation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/user_created_uiam_api_key_task.spec.ts",
+        "line": 64,
+        "column": 5
       }
     }
   ]
