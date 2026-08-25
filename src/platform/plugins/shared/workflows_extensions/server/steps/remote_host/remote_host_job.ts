@@ -186,9 +186,15 @@ fi
 rm -rf "${workdir}"
 `;
 
+const createVariableAssignment = (variable: string, value: string): string =>
+  `${variable}=$(cat << EOF
+${value}
+EOF
+)`;
+
 const envRecordToScript = (env: Record<string, string>): string =>
   Object.entries(env)
-    .map(([key, value]) => `export ${key}=${JSON.stringify(value)}`)
+    .map(([key, value]) => createVariableAssignment(key, value))
     .join('\n');
 
 export async function startJob(
