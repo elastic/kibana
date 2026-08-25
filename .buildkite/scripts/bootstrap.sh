@@ -11,6 +11,8 @@ if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
   echo 'Removing /opt/buildkite-agent/.cache/yarn' && rm -rf /opt/buildkite-agent/.cache/yarn
   echo "Available disk space after clearing yarn cache:"
   df -h . || echo "Failed to get disk space"
+
+  rm -rf ~/.kibana/node_modules
 fi
 
 echo "--- yarn install and bootstrap"
