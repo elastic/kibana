@@ -242,6 +242,7 @@ export class DeployPrivateLocationMonitors {
     maintenanceWindows: MaintenanceWindow[];
   }) {
     const { privateLocationAPI } = this.syntheticsMonitorClient;
+    const failedCreatesBySpace: string[] = [];
 
     for (const spaceId of monitorSpaceIds) {
       const privateConfigs: Array<SyncConfig> = [];
@@ -271,13 +272,21 @@ export class DeployPrivateLocationMonitors {
         );
 
         if (result?.failedCreates && result.failedCreates.length > 0) {
-          const message = `[DeployPrivateLocationMonitors] Failed to create ${result.failedCreates.length} policies during sync`;
-          this.serverSetup.logger.error(message);
-          throw new Error(message);
+          failedCreatesBySpace.push(`${spaceId} (${result.failedCreates.length})`);
         }
       } else {
         this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
       }
+    }
+
+    // Throw only after every space was attempted, so one bad space doesn't
+    // block the rest. Callers need the failure to retry the recreate.
+    if (failedCreatesBySpace.length > 0) {
+      const message = `[DeployPrivateLocationMonitors] Failed to create policies during sync for spaces: [${failedCreatesBySpace.join(
+        ', '
+      )}]`;
+      this.serverSetup.logger.error(message);
+      throw new Error(message);
     }
   }
 

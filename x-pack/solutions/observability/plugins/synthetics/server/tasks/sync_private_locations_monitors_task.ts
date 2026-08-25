@@ -109,21 +109,37 @@ export class SyncPrivateLocationMonitorsTask {
       ]);
       const allPrivateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
 
-      if (taskInstance.state.privateLocationId) {
-        // if privateLocationId exists on state, we just perform sync and exit
-        await this.deployPackagePolicies.syncAllPackagePolicies({
-          allPrivateLocations,
-          encryptedSavedObjects,
-          privateLocationId: taskInstance.state.privateLocationId,
-          soClient: savedObjects.createInternalRepository(),
-        });
+      const { privateLocationId } = taskInstance.state;
+      if (privateLocationId) {
+        // This instance is one-shot, so never return a schedule: task manager
+        // would turn a failed run into a recurring task.
+        const state = {
+          ...taskInstance.state,
+          privateLocationId: undefined,
+        } as SyncTaskState;
 
-        return {
-          state: {
-            ...taskInstance.state,
-            privateLocationId: undefined,
-          } as SyncTaskState,
-        };
+        try {
+          // Recreating missing policies can race Fleet/ESO; retry in-process
+          // because this task is maxAttempts: 1 and the next schedule is minutes out.
+          await pRetry(
+            async () => {
+              await this.deployPackagePolicies.syncAllPackagePolicies({
+                allPrivateLocations,
+                encryptedSavedObjects,
+                privateLocationId,
+                soClient: savedObjects.createInternalRepository(),
+              });
+            },
+            { retries: 3, minTimeout: 1000, factor: 2, randomize: false }
+          );
+        } catch (error) {
+          logger.error(
+            `Sync of private location monitors failed for location ${privateLocationId}: ${error.message}`
+          );
+          return { error, state };
+        }
+
+        return { state };
       }
 
       const defaultState = {
@@ -147,35 +163,17 @@ export class SyncPrivateLocationMonitorsTask {
             `locations count: ${allPrivateLocations.length}`
         );
 
-        try {
-          if (allPrivateLocations.length > 1) {
-            for (const location of allPrivateLocations) {
-              await runTaskPerPrivateLocation({
-                server: this.serverSetup,
-                privateLocationId: location.id,
-              });
-            }
-          } else {
-            // Recreating missing policies can race Fleet/ESO; retry in-process
-            // because this task is maxAttempts: 1 and the next schedule is minutes out.
-            await pRetry(
-              async () => {
-                await this.deployPackagePolicies.syncAllPackagePolicies({
-                  allPrivateLocations,
-                  soClient,
-                  encryptedSavedObjects,
-                });
-              },
-              { retries: 3, minTimeout: 1000, factor: 2, randomize: false }
-            );
-          }
-          this.debugLog(`Completed post-cleanup sync`);
-        } finally {
-          // Always stop after this run's follow-up attempt so a permanent
-          // recreate failure cannot reschedule cleanup forever.
-          taskState.hasAlreadyDoneCleanup = true;
-          taskState.maxCleanUpRetries = 3;
+        // Mark done before scheduling so a failed recreate cannot reschedule
+        // cleanup forever. The per-location tasks retry in-process.
+        taskState.hasAlreadyDoneCleanup = true;
+        taskState.maxCleanUpRetries = 3;
+        for (const location of allPrivateLocations) {
+          await runTaskPerPrivateLocation({
+            server: this.serverSetup,
+            privateLocationId: location.id,
+          });
         }
+        this.debugLog(`Scheduled post-cleanup sync per private location`);
         return defaultState;
       }
 
