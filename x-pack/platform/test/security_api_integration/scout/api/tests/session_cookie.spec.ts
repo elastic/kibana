@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest as test, tags } from '@kbn/scout';
+import { tags, apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 const KBN_XSRF = 'xxx';

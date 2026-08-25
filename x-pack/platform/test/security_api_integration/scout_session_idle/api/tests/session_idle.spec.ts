@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { apiTest as test, tags } from '@kbn/scout';
+import { tags, apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { SESSION_ERROR_REASON_HEADER } from '@kbn/security-plugin/common/constants';
 import {
   getSAMLRequestId,
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
+import { SESSION_ERROR_REASON_HEADER } from '@kbn/security-plugin/common/constants';
 
 const KBN_XSRF = 'xxx';
 const KIBANA_PORT = 5620;
@@ -56,51 +56,60 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
         wait_for_status: 'green',
         ignore_unavailable: true,
       } as any);
-      await waitFor(async () => {
-        await clearAllSessions(apiClient, config);
-        expect(await getSessionCount(esClient)).toBe(0);
-      }, 10000, 500);
+      await waitFor(
+        async () => {
+          await clearAllSessions(apiClient, config);
+          expect(await getSessionCount(esClient)).toBe(0);
+        },
+        10000,
+        500
+      );
     });
 
-    test(
-      `should return ${SESSION_ERROR_REASON_HEADER} header if session is expired`,
-      async ({ apiClient, config, esClient }) => {
-        test.setTimeout(100000);
+    test(`should return ${SESSION_ERROR_REASON_HEADER} header if session is expired`, async ({
+      apiClient,
+      config,
+      esClient,
+    }) => {
+      test.setTimeout(100000);
 
-        const loginResponse = await apiClient.post('/internal/security/login', {
-          headers: { 'kbn-xsrf': KBN_XSRF },
-          body: {
-            providerType: 'basic',
-            providerName: 'basic1',
-            currentURL: '/',
-            params: { username: config.auth.username, password: config.auth.password },
-          },
-        });
-        expect(loginResponse).toHaveStatusCode(200);
+      const loginResponse = await apiClient.post('/internal/security/login', {
+        headers: { 'kbn-xsrf': KBN_XSRF },
+        body: {
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/',
+          params: { username: config.auth.username, password: config.auth.password },
+        },
+      });
+      expect(loginResponse).toHaveStatusCode(200);
 
-        const cookie = extractSessionCookie(loginResponse.headers['set-cookie'] as string[]);
+      const cookie = extractSessionCookie(loginResponse.headers['set-cookie'] as string[]);
 
-        await waitFor(async () => {
+      await waitFor(
+        async () => {
           expect(await getSessionCount(esClient)).toBe(1);
-        }, 5000, 200);
+        },
+        5000,
+        200
+      );
 
-        const meResponse = await apiClient.get('/internal/security/me', {
-          headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
-        });
-        expect(meResponse).toHaveStatusCode(200);
+      const meResponse = await apiClient.get('/internal/security/me', {
+        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
+      });
+      expect(meResponse).toHaveStatusCode(200);
 
-        await new Promise((r) => setTimeout(r, 11000));
+      await new Promise((r) => setTimeout(r, 11000));
 
-        expect(await getSessionCount(esClient)).toBe(1);
+      expect(await getSessionCount(esClient)).toBe(1);
 
-        const expiredResponse = await apiClient.get('/internal/security/me', {
-          headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
-        });
-        expect(expiredResponse).toHaveStatusCode(401);
-        const reasonHeader = expiredResponse.headers[SESSION_ERROR_REASON_HEADER];
-        expect(reasonHeader).toBe('SESSION_IDLE_TIMEOUT');
-      }
-    );
+      const expiredResponse = await apiClient.get('/internal/security/me', {
+        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
+      });
+      expect(expiredResponse).toHaveStatusCode(401);
+      const reasonHeader = expiredResponse.headers[SESSION_ERROR_REASON_HEADER];
+      expect(reasonHeader).toBe('SESSION_IDLE_TIMEOUT');
+    });
   });
 
   test.describe('Session extension', () => {
@@ -180,9 +189,7 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
         expect(getResponse).toHaveStatusCode(200);
         const getOverhead = Date.now() - afterExtend;
 
-        expect(getResponse.body.expiresInMs).toBeGreaterThan(
-          IDLE_TIMEOUT_MS - getOverhead - 100
-        );
+        expect(getResponse.body.expiresInMs).toBeGreaterThan(IDLE_TIMEOUT_MS - getOverhead - 100);
         expect(getResponse.body.expiresInMs).toBeLessThan(IDLE_TIMEOUT_MS + 100);
 
         const allCreatedAtAfter = await getSessionsCreatedAt(esClient);
@@ -201,160 +208,177 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
       await esClient.cluster.putSettings({
         body: { persistent: { 'logger.org.elasticsearch.xpack.security.authc': 'debug' } },
       } as any);
-      await waitFor(async () => {
-        await clearAllSessions(apiClient, config);
-        expect(await getSessionCount(esClient)).toBe(0);
-      }, 10000, 500);
+      await waitFor(
+        async () => {
+          await clearAllSessions(apiClient, config);
+          expect(await getSessionCount(esClient)).toBe(0);
+        },
+        10000,
+        500
+      );
     });
 
-    test(
-      'should properly clean up session expired because of idle timeout',
-      async ({ apiClient, config, esClient }) => {
-        test.setTimeout(100000);
+    test('should properly clean up session expired because of idle timeout', async ({
+      apiClient,
+      config,
+      esClient,
+    }) => {
+      test.setTimeout(100000);
 
-        const loginResponse = await apiClient.post('/internal/security/login', {
-          headers: { 'kbn-xsrf': KBN_XSRF },
-          body: {
-            providerType: 'basic',
-            providerName: 'basic1',
-            currentURL: '/',
-            params: { username: config.auth.username, password: config.auth.password },
-          },
-        });
-        expect(loginResponse).toHaveStatusCode(200);
-        const cookie = extractSessionCookie(loginResponse.headers['set-cookie'] as string[]);
+      const loginResponse = await apiClient.post('/internal/security/login', {
+        headers: { 'kbn-xsrf': KBN_XSRF },
+        body: {
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/',
+          params: { username: config.auth.username, password: config.auth.password },
+        },
+      });
+      expect(loginResponse).toHaveStatusCode(200);
+      const cookie = extractSessionCookie(loginResponse.headers['set-cookie'] as string[]);
 
+      const meResponse = await apiClient.get('/internal/security/me', {
+        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
+      });
+      expect(meResponse.body.username).toBe(config.auth.username);
+      await waitFor(
+        async () => {
+          expect(await getSessionCount(esClient)).toBe(1);
+        },
+        5000,
+        200
+      );
+
+      await runCleanupTask(apiClient, config.auth.username, config.auth.password);
+
+      await new Promise((r) => setTimeout(r, 40000));
+
+      await waitFor(async () => {
+        expect(await getSessionCount(esClient)).toBe(0);
+      }, 20000);
+
+      const expiredResponse = await apiClient.get('/internal/security/me', {
+        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
+      });
+      expect(expiredResponse).toHaveStatusCode(401);
+    });
+
+    test('should properly clean up session expired because of idle timeout when providers override global session config', async ({
+      apiClient,
+      config,
+      esClient,
+    }) => {
+      test.setTimeout(100000);
+
+      const samlDisableCookie = await loginWithSAML(apiClient, 'saml_disable');
+      const samlOverrideCookie = await loginWithSAML(apiClient, 'saml_override');
+      const samlFallbackCookie = await loginWithSAML(apiClient, 'saml_fallback');
+
+      const basicResponse = await apiClient.post('/internal/security/login', {
+        headers: { 'kbn-xsrf': KBN_XSRF },
+        body: {
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/',
+          params: { username: config.auth.username, password: config.auth.password },
+        },
+      });
+      expect(basicResponse).toHaveStatusCode(200);
+      const basicCookie = extractSessionCookie(basicResponse.headers['set-cookie'] as string[]);
+
+      const meBasic = await apiClient.get('/internal/security/me', {
+        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookie },
+      });
+      expect(meBasic.body.username).toBe(config.auth.username);
+      await waitFor(
+        async () => {
+          expect(await getSessionCount(esClient)).toBe(4);
+        },
+        5000,
+        200
+      );
+
+      await runCleanupTask(apiClient, config.auth.username, config.auth.password);
+
+      await new Promise((r) => setTimeout(r, 40000));
+
+      await waitFor(async () => {
+        expect(await getSessionCount(esClient)).toBe(2);
+      }, 20000);
+
+      const basicExpired = await apiClient.get('/internal/security/me', {
+        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookie },
+      });
+      expect(basicExpired).toHaveStatusCode(401);
+
+      const fallbackExpired = await apiClient.get('/internal/security/me', {
+        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlFallbackCookie },
+      });
+      expect(fallbackExpired).toHaveStatusCode(401);
+
+      const overrideMe = await apiClient.get('/internal/security/me', {
+        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlOverrideCookie },
+      });
+      expect(overrideMe).toHaveStatusCode(200);
+      expect(overrideMe.body.authentication_provider).toStrictEqual({
+        type: 'saml',
+        name: 'saml_override',
+      });
+
+      const disableMe = await apiClient.get('/internal/security/me', {
+        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlDisableCookie },
+      });
+      expect(disableMe).toHaveStatusCode(200);
+      expect(disableMe.body.authentication_provider).toStrictEqual({
+        type: 'saml',
+        name: 'saml_disable',
+      });
+    });
+
+    test('should not clean up session if user is active', async ({
+      apiClient,
+      config,
+      esClient,
+    }) => {
+      test.setTimeout(100000);
+
+      const loginResponse = await apiClient.post('/internal/security/login', {
+        headers: { 'kbn-xsrf': KBN_XSRF },
+        body: {
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/',
+          params: { username: config.auth.username, password: config.auth.password },
+        },
+      });
+      expect(loginResponse).toHaveStatusCode(200);
+      let cookie = extractSessionCookie(loginResponse.headers['set-cookie'] as string[]);
+
+      const me0 = await apiClient.get('/internal/security/me', {
+        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
+      });
+      expect(me0.body.username).toBe(config.auth.username);
+      await waitFor(
+        async () => {
+          expect(await getSessionCount(esClient)).toBe(1);
+        },
+        5000,
+        200
+      );
+
+      for (let i = 0; i < 20; i++) {
+        await new Promise((r) => setTimeout(r, 3000));
         const meResponse = await apiClient.get('/internal/security/me', {
           headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
         });
-        expect(meResponse.body.username).toBe(config.auth.username);
-        await waitFor(async () => {
-          expect(await getSessionCount(esClient)).toBe(1);
-        }, 5000, 200);
-
-        await runCleanupTask(apiClient, config.auth.username, config.auth.password);
-
-        await new Promise((r) => setTimeout(r, 40000));
-
-        await waitFor(async () => {
-          expect(await getSessionCount(esClient)).toBe(0);
-        }, 20000);
-
-        const expiredResponse = await apiClient.get('/internal/security/me', {
-          headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
-        });
-        expect(expiredResponse).toHaveStatusCode(401);
-      }
-    );
-
-    test(
-      'should properly clean up session expired because of idle timeout when providers override global session config',
-      async ({ apiClient, config, esClient }) => {
-        test.setTimeout(100000);
-
-        const samlDisableCookie = await loginWithSAML(apiClient, 'saml_disable');
-        const samlOverrideCookie = await loginWithSAML(apiClient, 'saml_override');
-        const samlFallbackCookie = await loginWithSAML(apiClient, 'saml_fallback');
-
-        const basicResponse = await apiClient.post('/internal/security/login', {
-          headers: { 'kbn-xsrf': KBN_XSRF },
-          body: {
-            providerType: 'basic',
-            providerName: 'basic1',
-            currentURL: '/',
-            params: { username: config.auth.username, password: config.auth.password },
-          },
-        });
-        expect(basicResponse).toHaveStatusCode(200);
-        const basicCookie = extractSessionCookie(basicResponse.headers['set-cookie'] as string[]);
-
-        const meBasic = await apiClient.get('/internal/security/me', {
-          headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookie },
-        });
-        expect(meBasic.body.username).toBe(config.auth.username);
-        await waitFor(async () => {
-          expect(await getSessionCount(esClient)).toBe(4);
-        }, 5000, 200);
-
-        await runCleanupTask(apiClient, config.auth.username, config.auth.password);
-
-        await new Promise((r) => setTimeout(r, 40000));
-
-        await waitFor(async () => {
-          expect(await getSessionCount(esClient)).toBe(2);
-        }, 20000);
-
-        const basicExpired = await apiClient.get('/internal/security/me', {
-          headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookie },
-        });
-        expect(basicExpired).toHaveStatusCode(401);
-
-        const fallbackExpired = await apiClient.get('/internal/security/me', {
-          headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlFallbackCookie },
-        });
-        expect(fallbackExpired).toHaveStatusCode(401);
-
-        const overrideMe = await apiClient.get('/internal/security/me', {
-          headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlOverrideCookie },
-        });
-        expect(overrideMe).toHaveStatusCode(200);
-        expect(overrideMe.body.authentication_provider).toStrictEqual({
-          type: 'saml',
-          name: 'saml_override',
-        });
-
-        const disableMe = await apiClient.get('/internal/security/me', {
-          headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlDisableCookie },
-        });
-        expect(disableMe).toHaveStatusCode(200);
-        expect(disableMe.body.authentication_provider).toStrictEqual({
-          type: 'saml',
-          name: 'saml_disable',
-        });
-      }
-    );
-
-    test(
-      'should not clean up session if user is active',
-      async ({ apiClient, config, esClient }) => {
-        test.setTimeout(100000);
-
-        const loginResponse = await apiClient.post('/internal/security/login', {
-          headers: { 'kbn-xsrf': KBN_XSRF },
-          body: {
-            providerType: 'basic',
-            providerName: 'basic1',
-            currentURL: '/',
-            params: { username: config.auth.username, password: config.auth.password },
-          },
-        });
-        expect(loginResponse).toHaveStatusCode(200);
-        let cookie = extractSessionCookie(loginResponse.headers['set-cookie'] as string[]);
-
-        const me0 = await apiClient.get('/internal/security/me', {
-          headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
-        });
-        expect(me0.body.username).toBe(config.auth.username);
-        await waitFor(async () => {
-          expect(await getSessionCount(esClient)).toBe(1);
-        }, 5000, 200);
-
-        for (let i = 0; i < 20; i++) {
-          await new Promise((r) => setTimeout(r, 3000));
-          const meResponse = await apiClient.get('/internal/security/me', {
-            headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
-          });
-          expect(meResponse).toHaveStatusCode(200);
-          if (meResponse.headers['set-cookie']) {
-            cookie = extractSessionCookie(
-              meResponse.headers['set-cookie'] as string | string[]
-            );
-          }
+        expect(meResponse).toHaveStatusCode(200);
+        if (meResponse.headers['set-cookie']) {
+          cookie = extractSessionCookie(meResponse.headers['set-cookie'] as string | string[]);
         }
-
-        expect(await getSessionCount(esClient)).toBe(1);
       }
-    );
+
+      expect(await getSessionCount(esClient)).toBe(1);
+    });
   });
 });
 
@@ -395,10 +419,7 @@ async function getSessionsCreatedAt(esClient: any): Promise<number[]> {
   return result.hits.hits.map((h: any) => h._source!.createdAt).sort();
 }
 
-async function loginWithSAML(
-  apiClient: any,
-  providerName: string
-): Promise<string> {
+async function loginWithSAML(apiClient: any, providerName: string): Promise<string> {
   const handshakeResponse = await apiClient.post('/internal/security/login', {
     headers: { 'kbn-xsrf': KBN_XSRF },
     body: { providerType: 'saml', providerName, currentURL: '' },

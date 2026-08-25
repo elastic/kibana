@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest as test, tags } from '@kbn/scout';
+import { tags, apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   getSAMLRequestId,
@@ -110,113 +110,127 @@ test.describe('Session Lifespan cleanup', { tag: [...tags.stateful.classic] }, (
     await esClient.cluster.putSettings({
       body: { persistent: { 'logger.org.elasticsearch.xpack.security.authc': 'debug' } },
     } as any);
-    await waitFor(async () => {
-      await clearAllSessions(apiClient, config);
-      expect(await getSessionCount(esClient)).toBe(0);
-    }, 10000, 500);
+    await waitFor(
+      async () => {
+        await clearAllSessions(apiClient, config);
+        expect(await getSessionCount(esClient)).toBe(0);
+      },
+      10000,
+      500
+    );
   });
 
-  test(
-    'should properly clean up session expired because of lifespan',
-    async ({ apiClient, config, esClient }) => {
-      test.setTimeout(100000);
+  test('should properly clean up session expired because of lifespan', async ({
+    apiClient,
+    config,
+    esClient,
+  }) => {
+    test.setTimeout(100000);
 
-      const loginResponse = await apiClient.post('/internal/security/login', {
-        headers: { 'kbn-xsrf': KBN_XSRF },
-        body: {
-          providerType: 'basic',
-          providerName: 'basic1',
-          currentURL: '/',
-          params: { username: config.auth.username, password: config.auth.password },
-        },
-      });
-      expect(loginResponse).toHaveStatusCode(200);
-      const cookie = extractSessionCookie(loginResponse.headers['set-cookie'] as string[]);
+    const loginResponse = await apiClient.post('/internal/security/login', {
+      headers: { 'kbn-xsrf': KBN_XSRF },
+      body: {
+        providerType: 'basic',
+        providerName: 'basic1',
+        currentURL: '/',
+        params: { username: config.auth.username, password: config.auth.password },
+      },
+    });
+    expect(loginResponse).toHaveStatusCode(200);
+    const cookie = extractSessionCookie(loginResponse.headers['set-cookie'] as string[]);
 
-      const meResponse = await apiClient.get('/internal/security/me', {
-        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
-      });
-      expect(meResponse.body.username).toBe(config.auth.username);
-      await waitFor(async () => {
+    const meResponse = await apiClient.get('/internal/security/me', {
+      headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
+    });
+    expect(meResponse.body.username).toBe(config.auth.username);
+    await waitFor(
+      async () => {
         expect(await getSessionCount(esClient)).toBe(1);
-      }, 5000, 200);
+      },
+      5000,
+      200
+    );
 
-      // Cleanup routine runs every 20s, wait 60s for lifespan (10s) to be exceeded and cleaned up
-      await new Promise((r) => setTimeout(r, 60000));
+    // Cleanup routine runs every 20s, wait 60s for lifespan (10s) to be exceeded and cleaned up
+    await new Promise((r) => setTimeout(r, 60000));
 
-      expect(await getSessionCount(esClient)).toBe(0);
-      const expiredResponse = await apiClient.get('/internal/security/me', {
-        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
-      });
-      expect(expiredResponse).toHaveStatusCode(401);
-    }
-  );
+    expect(await getSessionCount(esClient)).toBe(0);
+    const expiredResponse = await apiClient.get('/internal/security/me', {
+      headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
+    });
+    expect(expiredResponse).toHaveStatusCode(401);
+  });
 
-  test(
-    'should properly clean up session expired because of lifespan when providers override global session config',
-    async ({ apiClient, config, esClient }) => {
-      test.setTimeout(100000);
+  test('should properly clean up session expired because of lifespan when providers override global session config', async ({
+    apiClient,
+    config,
+    esClient,
+  }) => {
+    test.setTimeout(100000);
 
-      const samlDisableCookie = await loginWithSAML(apiClient, 'saml_disable');
-      const samlOverrideCookie = await loginWithSAML(apiClient, 'saml_override');
-      const samlFallbackCookie = await loginWithSAML(apiClient, 'saml_fallback');
+    const samlDisableCookie = await loginWithSAML(apiClient, 'saml_disable');
+    const samlOverrideCookie = await loginWithSAML(apiClient, 'saml_override');
+    const samlFallbackCookie = await loginWithSAML(apiClient, 'saml_fallback');
 
-      const basicResponse = await apiClient.post('/internal/security/login', {
-        headers: { 'kbn-xsrf': KBN_XSRF },
-        body: {
-          providerType: 'basic',
-          providerName: 'basic1',
-          currentURL: '/',
-          params: { username: config.auth.username, password: config.auth.password },
-        },
-      });
-      expect(basicResponse).toHaveStatusCode(200);
-      await esClient.indices.refresh({
-        index: '.kibana_security_session*',
-        ignore_unavailable: true,
-      } as any);
-      const basicCookie = extractSessionCookie(basicResponse.headers['set-cookie'] as string[]);
+    const basicResponse = await apiClient.post('/internal/security/login', {
+      headers: { 'kbn-xsrf': KBN_XSRF },
+      body: {
+        providerType: 'basic',
+        providerName: 'basic1',
+        currentURL: '/',
+        params: { username: config.auth.username, password: config.auth.password },
+      },
+    });
+    expect(basicResponse).toHaveStatusCode(200);
+    await esClient.indices.refresh({
+      index: '.kibana_security_session*',
+      ignore_unavailable: true,
+    } as any);
+    const basicCookie = extractSessionCookie(basicResponse.headers['set-cookie'] as string[]);
 
-      const meBasic = await apiClient.get('/internal/security/me', {
-        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookie },
-      });
-      expect(meBasic.body.username).toBe(config.auth.username);
-      await waitFor(async () => {
+    const meBasic = await apiClient.get('/internal/security/me', {
+      headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookie },
+    });
+    expect(meBasic.body.username).toBe(config.auth.username);
+    await waitFor(
+      async () => {
         expect(await getSessionCount(esClient)).toBe(4);
-      }, 10000, 500);
+      },
+      10000,
+      500
+    );
 
-      // Wait 60s for lifespan (10s) to expire and cleanup to run
-      await new Promise((r) => setTimeout(r, 60000));
+    // Wait 60s for lifespan (10s) to expire and cleanup to run
+    await new Promise((r) => setTimeout(r, 60000));
 
-      expect(await getSessionCount(esClient)).toBe(2);
+    expect(await getSessionCount(esClient)).toBe(2);
 
-      const basicExpired = await apiClient.get('/internal/security/me', {
-        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookie },
-      });
-      expect(basicExpired).toHaveStatusCode(401);
+    const basicExpired = await apiClient.get('/internal/security/me', {
+      headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookie },
+    });
+    expect(basicExpired).toHaveStatusCode(401);
 
-      const fallbackExpired = await apiClient.get('/internal/security/me', {
-        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlFallbackCookie },
-      });
-      expect(fallbackExpired).toHaveStatusCode(401);
+    const fallbackExpired = await apiClient.get('/internal/security/me', {
+      headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlFallbackCookie },
+    });
+    expect(fallbackExpired).toHaveStatusCode(401);
 
-      const overrideMe = await apiClient.get('/internal/security/me', {
-        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlOverrideCookie },
-      });
-      expect(overrideMe).toHaveStatusCode(200);
-      expect(overrideMe.body.authentication_provider).toStrictEqual({
-        type: 'saml',
-        name: 'saml_override',
-      });
+    const overrideMe = await apiClient.get('/internal/security/me', {
+      headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlOverrideCookie },
+    });
+    expect(overrideMe).toHaveStatusCode(200);
+    expect(overrideMe.body.authentication_provider).toStrictEqual({
+      type: 'saml',
+      name: 'saml_override',
+    });
 
-      const disableMe = await apiClient.get('/internal/security/me', {
-        headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlDisableCookie },
-      });
-      expect(disableMe).toHaveStatusCode(200);
-      expect(disableMe.body.authentication_provider).toStrictEqual({
-        type: 'saml',
-        name: 'saml_disable',
-      });
-    }
-  );
+    const disableMe = await apiClient.get('/internal/security/me', {
+      headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlDisableCookie },
+    });
+    expect(disableMe).toHaveStatusCode(200);
+    expect(disableMe.body.authentication_provider).toStrictEqual({
+      type: 'saml',
+      name: 'saml_disable',
+    });
+  });
 });

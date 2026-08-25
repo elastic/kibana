@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest as test, tags } from '@kbn/scout';
+import { tags, apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   getSAMLRequestId,
@@ -78,11 +78,7 @@ async function clearAllSessions(
     .catch(() => {});
 }
 
-async function loginWithBasic(
-  apiClient: any,
-  username: string,
-  password: string
-): Promise<string> {
+async function loginWithBasic(apiClient: any, username: string, password: string): Promise<string> {
   const response = await apiClient.post('/internal/security/login', {
     headers: { 'kbn-xsrf': KBN_XSRF },
     body: {

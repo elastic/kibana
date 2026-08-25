@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest as test, tags } from '@kbn/scout';
+import { tags, apiTest as test } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 const KBN_XSRF = 'xxx';
@@ -64,77 +64,75 @@ test.describe('Session index shard missing', { tag: [...tags.stateful.classic] }
     await simulatePointInTimeFailure(apiClient, config, false);
   });
 
-  test(
-    'quietly fails if shards are unavailable',
-    async ({ apiClient, config, esClient }) => {
-      test.setTimeout(100000);
+  test('quietly fails if shards are unavailable', async ({ apiClient, config, esClient }) => {
+    test.setTimeout(100000);
 
-      await resetCleanupTask(apiClient, config, esClient);
-      await simulatePointInTimeFailure(apiClient, config, true);
+    await resetCleanupTask(apiClient, config, esClient);
+    await simulatePointInTimeFailure(apiClient, config, true);
 
-      const loginResponse = await apiClient.post('/internal/security/login', {
-        headers: { 'kbn-xsrf': KBN_XSRF },
-        body: {
-          providerType: 'basic',
-          providerName: 'basic1',
-          currentURL: '/',
-          params: { username: config.auth.username, password: config.auth.password },
-        },
-      });
-      expect(loginResponse).toHaveStatusCode(200);
+    const loginResponse = await apiClient.post('/internal/security/login', {
+      headers: { 'kbn-xsrf': KBN_XSRF },
+      body: {
+        providerType: 'basic',
+        providerName: 'basic1',
+        currentURL: '/',
+        params: { username: config.auth.username, password: config.auth.password },
+      },
+    });
+    expect(loginResponse).toHaveStatusCode(200);
 
+    await runCleanupTask(apiClient, config);
+
+    await new Promise((r) => setTimeout(r, 5000));
+
+    // Session should remain since cleanup couldn't run (shard missing)
+    const count = await getSessionCount(esClient);
+    expect(count).toBe(1);
+
+    await simulatePointInTimeFailure(apiClient, config, false);
+  });
+
+  test('fails if shards are unavailable more than 10 times', async ({
+    apiClient,
+    config,
+    esClient,
+  }) => {
+    test.setTimeout(600000);
+
+    await resetCleanupTask(apiClient, config, esClient);
+    await simulatePointInTimeFailure(apiClient, config, true);
+
+    await apiClient.post('/internal/security/login', {
+      headers: { 'kbn-xsrf': KBN_XSRF },
+      body: {
+        providerType: 'basic',
+        providerName: 'basic1',
+        currentURL: '/',
+        params: { username: config.auth.username, password: config.auth.password },
+      },
+    });
+
+    let shardMissingCounter = 0;
+    while (shardMissingCounter < 9) {
+      const currentCounter = shardMissingCounter;
       await runCleanupTask(apiClient, config);
 
-      await new Promise((r) => setTimeout(r, 5000));
-
-      // Session should remain since cleanup couldn't run (shard missing)
-      const count = await getSessionCount(esClient);
-      expect(count).toBe(1);
-
-      await simulatePointInTimeFailure(apiClient, config, false);
-    }
-  );
-
-  test(
-    'fails if shards are unavailable more than 10 times',
-    async ({ apiClient, config, esClient }) => {
-      test.setTimeout(600000);
-
-      await resetCleanupTask(apiClient, config, esClient);
-      await simulatePointInTimeFailure(apiClient, config, true);
-
-      await apiClient.post('/internal/security/login', {
-        headers: { 'kbn-xsrf': KBN_XSRF },
-        body: {
-          providerType: 'basic',
-          providerName: 'basic1',
-          currentURL: '/',
-          params: { username: config.auth.username, password: config.auth.password },
-        },
-      });
-
-      let shardMissingCounter = 0;
-      while (shardMissingCounter < 9) {
-        const currentCounter = shardMissingCounter;
-        await runCleanupTask(apiClient, config);
-
-        while (shardMissingCounter <= currentCounter) {
-          await new Promise((r) => setTimeout(r, 5000));
-          const state = await getCleanupTaskStatus(apiClient);
-          shardMissingCounter = state.shardMissingCounter ?? 0;
-        }
-      }
-
-      if (shardMissingCounter === 9) {
-        await runCleanupTask(apiClient, config);
+      while (shardMissingCounter <= currentCounter) {
         await new Promise((r) => setTimeout(r, 5000));
         const state = await getCleanupTaskStatus(apiClient);
-        expect(state.shardMissingCounter).toBe(0);
+        shardMissingCounter = state.shardMissingCounter ?? 0;
       }
-
-      await simulatePointInTimeFailure(apiClient, config, false);
     }
-  );
+
+    if (shardMissingCounter === 9) {
+      await runCleanupTask(apiClient, config);
+      await new Promise((r) => setTimeout(r, 5000));
+      const state = await getCleanupTaskStatus(apiClient);
+      expect(state.shardMissingCounter).toBe(0);
+    }
+
+    await simulatePointInTimeFailure(apiClient, config, false);
+  });
 });
 
 async function runCleanupTask(
