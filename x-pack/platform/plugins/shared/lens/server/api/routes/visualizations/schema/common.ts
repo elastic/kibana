@@ -6,10 +6,27 @@
  */
 
 import { z } from '@kbn/zod';
-import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import { lensApiConfigSchemaNoESQL, type LensApiConfigNoESQL } from '@kbn/lens-embeddable-utils';
+import { asCodeMetaSchema, getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 
 import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management/zod';
+
+/**
+ * Shared schema only for by-reference Lens API configs saved to library
+ */
+const lensApiConfigLibItemSharedSchema = z.object({
+  tags: getAsCodeTagsSchema('Tag IDs to associate with this visualization.'),
+});
+
+export type LensApiConfigLibItemNoESQL = LensApiConfigNoESQL &
+  z.output<typeof lensApiConfigLibItemSharedSchema>;
+
+/**
+ * Schema for Lens API configs by reference library item, only supports DSL configs
+ */
+export const lensApiConfigLibItemSchemaNoESQL = lensApiConfigSchemaNoESQL
+  .and(lensApiConfigLibItemSharedSchema)
+  .meta({ id: 'lensApiConfigLibItemNoESQL', title: 'Library Visualization Item' });
 
 /**
  * The Lens response item returned from the server
@@ -17,7 +34,7 @@ import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management/zo
 export const lensResponseItemSchema = z
   .object({
     id: lensCommonSavedObjectSchemaV2.shape.id,
-    data: lensApiConfigSchemaNoESQL,
+    data: lensApiConfigLibItemSchemaNoESQL,
     meta: asCodeMetaSchema,
   })
   .strict()

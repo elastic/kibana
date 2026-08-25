@@ -16,10 +16,6 @@ import { sharedPanelInfoSchema, layerSettingsSchema, collapseBySchema } from './
 type SharedPanelInfoInput = z.input<typeof sharedPanelInfoSchema>;
 type LayerSettingsInput = z.input<typeof layerSettingsSchema>;
 
-const defaultValues: SharedPanelInfoInput = {
-  tags: [],
-};
-
 describe('Shared Schemas', () => {
   describe('sharedPanelInfoSchema', () => {
     it('validates panel info with title and description', () => {
@@ -29,10 +25,7 @@ describe('Shared Schemas', () => {
       } satisfies SharedPanelInfoInput;
 
       const validated = sharedPanelInfoSchema.parse(input);
-      expect(validated).toEqual({
-        ...defaultValues,
-        ...input,
-      });
+      expect(validated).toEqual(input);
     });
 
     it('validates panel info with only title', () => {
@@ -41,10 +34,7 @@ describe('Shared Schemas', () => {
       } satisfies SharedPanelInfoInput;
 
       const validated = sharedPanelInfoSchema.parse(input);
-      expect(validated).toEqual({
-        ...defaultValues,
-        ...input,
-      });
+      expect(validated).toEqual(input);
     });
 
     it('validates panel info with only description', () => {
@@ -53,17 +43,14 @@ describe('Shared Schemas', () => {
       } satisfies SharedPanelInfoInput;
 
       const validated = sharedPanelInfoSchema.parse(input);
-      expect(validated).toEqual({
-        ...defaultValues,
-        ...input,
-      });
+      expect(validated).toEqual(input);
     });
 
     it('validates empty panel info', () => {
       const input = {} satisfies SharedPanelInfoInput;
 
       const validated = sharedPanelInfoSchema.parse(input);
-      expect(validated).toEqual(defaultValues);
+      expect(validated).toEqual(input);
     });
   });
 
@@ -168,11 +155,7 @@ describe('Shared Schemas', () => {
       };
 
       expect(validated).toEqual({
-        panelInfo: {
-          ...defaultValues,
-          title: 'Complex Chart',
-          description: 'A chart with all settings',
-        },
+        panelInfo: input.panelInfo,
         layerSettings: input.layerSettings,
         collapseBy: input.collapseBy,
       });
@@ -190,7 +173,7 @@ describe('Shared Schemas', () => {
       };
 
       expect(validated).toEqual({
-        panelInfo: defaultValues,
+        panelInfo: {},
         layerSettings: {
           sampling: 1,
           ignore_global_filters: false,

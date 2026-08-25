@@ -25,7 +25,6 @@ describe('Legacy Metric Schema', () => {
   const defaultValues = {
     sampling: 1,
     ignore_global_filters: false,
-    tags: [],
   } satisfies Partial<LegacyMetricConfig>;
 
   type LegacyMetricInput = Omit<LegacyMetricConfig, keyof typeof defaultValues>;

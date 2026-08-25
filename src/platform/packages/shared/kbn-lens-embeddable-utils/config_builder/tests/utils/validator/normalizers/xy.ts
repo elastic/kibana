@@ -546,6 +546,10 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       return ref;
     });
 
+    // Tag references are only for Lens library items handled at the route level — not preserved by the
+    // builder round-trip (toAPIFormat → schema.parse → fromAPIFormat), so strip them here.
+    attributes.references = attributes.references.filter((ref) => ref.type !== 'tag');
+
     // Re-sort so the order matches what normalizeReferences produces on the transformed side.
     attributes.references = orderBy(attributes.references, ['name', 'id', 'type']);
 

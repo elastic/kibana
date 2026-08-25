@@ -9,7 +9,7 @@
 
 import type { LensEmbeddableInput, LensPartitionVisualizationState } from '@kbn/lens-common';
 import { v4 as uuidv4 } from 'uuid';
-import { toAsCodeTags, toStoredTags } from '@kbn/as-code-shared-transforms';
+import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
 import {
   buildGauge,
@@ -317,7 +317,6 @@ export class LensConfigBuilder {
     const converter = this.apiConvertersByChart[type as keyof typeof this.apiConvertersByChart];
     const chartConfig = converter.fromLensStateToAPI(config);
     const panelFiltersAndQuery = filtersAndQueryToApiFormat(config);
-    const { tags } = toAsCodeTags(config.references);
 
     // Omit panel-level query on ES|QL charts, query is on data_source
     if ('data_source' in chartConfig && isEsqlTableTypeDataSource(chartConfig.data_source)) {
@@ -325,14 +324,12 @@ export class LensConfigBuilder {
       return {
         ...chartConfig,
         ...panelFiltersWithoutQuery,
-        ...(tags.length > 0 ? { tags } : {}),
       };
     }
 
     return {
       ...chartConfig,
       ...panelFiltersAndQuery,
-      ...(tags.length > 0 ? { tags } : {}),
     };
   }
 }
