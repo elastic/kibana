@@ -157,7 +157,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+        class="euiExpression emotion-euiExpression-isClickable-success"
       >
         <span
           class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
@@ -282,7 +282,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiExpression emotion-euiExpression-isClickable-success-ScopeExpression"
+        class="euiExpression emotion-euiExpression-isClickable-success"
       >
         <span
           class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
@@ -457,7 +457,8 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
               >
                 Filter Lists
               </button>
-               settings page to create the list of values you want to include or exclude in the job rule.
+               settings page
+            to create the list of values you want to include or exclude in the job rule.
             </p>
           </div>
         </div>

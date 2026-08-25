@@ -1959,10 +1959,11 @@
         "@jest/reporters",
         "@jest/transform",
         "@jest/types",
+        "@swc/jest",
+        "@swc/plugin-emotion-jest",
         "@types/jest",
         "babel-jest",
         "expect",
-        "jest",
         "jest-canvas-mock",
         "jest-config",
         "jest-diff",
@@ -1971,7 +1972,8 @@
         "jest-mock",
         "jest-runtime",
         "jest-snapshot",
-        "jest-styled-components"
+        "jest-styled-components",
+        "jest"
       ],
       "matchUpdateTypes": ["minor", "patch"],
       "reviewers": ["team:kibana-operations"],

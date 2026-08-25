@@ -35,6 +35,7 @@ dependsOn:
   - '@kbn/stdio-dev-helpers'
   - '@kbn/test-docker-servers'
   - '@kbn/swc-register'
+  - '@kbn/swc-config'
   - '@kbn/repo-packages'
   - '@kbn/test-saml-auth'
   - '@kbn/code-owners'
