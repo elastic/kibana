@@ -173,6 +173,15 @@ describe('autocomplete', () => {
     promqlPipedQueries.forEach((query) => {
       testSuggestions(query, commandsAfterNonTsSource);
     });
+
+    it.each([
+      'PROMQL index=metrics (sum(/',
+      'PROMQL index=metrics col0=(sum(/',
+    ])('does not treat parenthesized PromQL as an ES|QL subquery: %s', async (query) => {
+      const { suggest: suggestFn } = await setup();
+
+      await expect(suggestFn(query)).resolves.toEqual(expect.any(Array));
+    });
   });
 
   describe('command filtering by metadata (requiresTimeseriesSource, hiddenAfterCommands)', () => {
@@ -1256,6 +1265,12 @@ describe('autocomplete', () => {
         ['($0)', '(FROM $0)', '(ROW $0)', '(TS $0)'].sort()
       );
     });
+
+    testSuggestions('FROM index | WHERE (keywordField, textField) IN (/)', [
+      'FROM ',
+      'ROW ',
+      'TS ',
+    ]);
 
     testSuggestions('FROM index | WHERE doubleField IN (ROW /)', [
       'col0 = ',

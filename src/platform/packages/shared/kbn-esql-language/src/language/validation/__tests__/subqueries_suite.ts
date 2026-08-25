@@ -192,6 +192,15 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
         );
       });
 
+      it('does not report a type mismatch for query parameters', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'FROM index | WHERE (??field, textField) IN (ROW col0 = 1, col1 = "other")',
+          []
+        );
+      });
+
       it('does not make an extra column request without an IN subquery', async () => {
         const { callbacks, expectErrors } = await setup();
         const getColumnsFor = jest.fn(async () => []);

@@ -25,7 +25,7 @@ import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/time
 import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
 import type { ESQLMessage } from '../../commands';
 
-const UNRESOLVED_TYPES = new Set(['unknown', 'unsupported']);
+const UNRESOLVED_TYPES = new Set(['unknown', 'unsupported', 'param']);
 
 /**
  * ES|QL validation public API
