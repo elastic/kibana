@@ -109,8 +109,14 @@ export const isMissingUiamApiKeyLastRunError = (
  * UIAM one and persisting it on the rule, so the rule's next scheduled run authenticates with a
  * working credential instead of staying broken until someone re-saves it.
  *
- * Does nothing when there is no key to replace, when the key is the user's to rotate, or when the
- * rule has no Elasticsearch key to convert (UIAM-only rules).
+ * A rule whose Elasticsearch key the user supplied (`apiKeyCreatedByUser`) but which also holds a
+ * UIAM key is repaired differently: that combination is one the rules client refuses to create, so
+ * the UIAM key can only be the residue of the historical clone/update leak, and it is removed —
+ * letting the next run fall back to the user's own key — rather than re-granted over a credential
+ * that was never this rule's to hold.
+ *
+ * Does nothing when there is no key to replace, when a user-keyed rule holds nothing but its own
+ * key, or when the rule has no Elasticsearch key to convert (UIAM-only rules).
  */
 export const repairUiamApiKey = async ({
   context,
@@ -135,6 +141,9 @@ export const repairUiamApiKey = async ({
   // Set once the convert API has minted a key, so a failed write can tell whether there is a live
   // UIAM key left over to clean up.
   let freshUiamApiKey: string | undefined;
+  // What the catch below reports this attempt as: the leak-removal branch swaps it out so a failed
+  // write is not misreported as a failed re-grant.
+  let failedRepairDescription = 're-grant the UIAM API key for';
 
   try {
     // Re-read the rule rather than reuse what the run loaded: the write below needs the current
@@ -153,8 +162,37 @@ export const repairUiamApiKey = async ({
     }
 
     if (apiKeyCreatedByUser === true) {
-      logger.debug(
-        'Not re-granting the UIAM API key: it was created by the user, who manages its lifecycle.',
+      if (!apiKey) {
+        logger.debug(
+          'Not re-granting the UIAM API key: it was created by the user, who manages its lifecycle.',
+          { tags: logTags }
+        );
+        return;
+      }
+
+      // A user-keyed rule holding a UIAM key alongside its Elasticsearch key is a state the rules
+      // client refuses to create (`apiKeyAsAlertAttributes` throws on it): it is the residue of the
+      // historical clone/update leak, where the framework's UIAM key survived the user supplying
+      // their own key. The leaked key follows another lifecycle — for clones it is literally the
+      // source rule's key — so it can vanish from UIAM at any time, which is what stranded this
+      // run. There is nothing to re-grant (the user's key is not Kibana's to convert); removing the
+      // leak makes the next run fall back to the user's Elasticsearch key. The removed key is NOT
+      // queued for invalidation: a clone's source rule may still be running on it. The external
+      // verdict is cleared with the key it described.
+      failedRepairDescription = 'remove the leaked UIAM API key from';
+      await savedObjectsClient.update<RawRule>(
+        RULE_SAVED_OBJECT_TYPE,
+        ruleId,
+        { ...rawRule, uiamApiKey: null, uiamApiKeyExternal: null },
+        {
+          mergeAttributes: false,
+          version,
+          namespace: context.spaceIdToNamespace(spaceId),
+        }
+      );
+
+      logger.info(
+        'Removed the leaked UIAM API key from the rule after it failed to authenticate; the rule will run with its user-provided API key.',
         { tags: logTags }
       );
       return;
@@ -201,7 +239,7 @@ export const repairUiamApiKey = async ({
       { tags: logTags }
     );
   } catch (error) {
-    logger.warn(`Failed to re-grant the UIAM API key for the rule: ${error.message}`, {
+    logger.warn(`Failed to ${failedRepairDescription} the rule: ${error.message}`, {
       tags: logTags,
     });
 

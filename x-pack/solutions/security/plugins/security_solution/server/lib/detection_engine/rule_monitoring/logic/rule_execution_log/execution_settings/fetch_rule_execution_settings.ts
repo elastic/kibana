@@ -6,6 +6,7 @@
  */
 
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import type { ConfigType } from '../../../../../../config';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../../../plugin_contract';
@@ -14,11 +15,20 @@ import { EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING } from '../../../../.
 import type { RuleExecutionSettings } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { LogLevelSetting } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
+/**
+ * Elasticsearch's wording for UIAM's `APIKEY_MISSING` (`0x28D520`) — the rule run's API key is
+ * unknown to UIAM. Matched in full rather than by the bare code, mirroring
+ * `isMissingUiamApiKeyLastRunError` in the alerting plugin, which is the consumer this phrase
+ * exists for.
+ */
+const UIAM_API_KEY_MISSING_MESSAGE = 'failed to authenticate cloud API key: [0x28D520]';
+
 export const fetchRuleExecutionSettings = async (
   config: ConfigType,
   logger: Logger,
   core: SecuritySolutionPluginCoreSetupDependencies,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  ruleResultService?: PublicRuleResultService
 ): Promise<RuleExecutionSettings> => {
   try {
     const ruleExecutionSettings = await withSecuritySpan('fetchRuleExecutionSettings', async () => {
@@ -39,6 +49,17 @@ export const fetchRuleExecutionSettings = async (
     const logMessage = 'Error fetching rule execution settings';
     const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
     logger.error(`${logMessage}: ${logReason}`);
+
+    // This fetch authenticates with the rule's own API key, so a UIAM rejection here means the
+    // key is broken for the whole run — but a rule that does no further authenticated work (for
+    // example one that exits early on "no matching indices") would surface it nowhere else.
+    // Recording it as a run error makes the failure visible and lets the alerting task runner's
+    // UIAM API key repair see it (`isMissingUiamApiKeyLastRunError` matches this exact phrase).
+    // Every other failure keeps the long-standing behavior of silently falling back to defaults.
+    const reason = e instanceof Error ? e.message : String(e);
+    if (reason.includes(UIAM_API_KEY_MISSING_MESSAGE)) {
+      ruleResultService?.addLastRunError(`${logMessage}: ${reason}`);
+    }
 
     return getRuleExecutionSettingsDefault(config);
   }
