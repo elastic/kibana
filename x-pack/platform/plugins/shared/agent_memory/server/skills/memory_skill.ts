@@ -28,15 +28,22 @@ that is relevant across conversations.
 
 ## When to remember
 
-Remember information when:
-- The user explicitly states a preference ("I prefer…", "I like to…", "I work on…")
-- The user shares personal context that is likely to be relevant in future conversations
-- The user asks you to remember something
-- A fact is too important to lose at the end of this session
+Before each response, scan the categories for durable user context; do not wait for an explicit request.
+Use one coherent memory per subject or occurrence and preserve exact names, dates, quantities,
+percentages, and ordering.
+
+For profile and preferences, recall the same subject first. Skip equivalents. On clear replacement,
+save one consolidated memory, then forget outdated or redundant versions. If a conflict is unclear,
+ask the user when possible. If asking is unavailable, keep both and do not guess or delete.
+
+For events and trajectories, preserve material history, skip repeated paraphrases, and tombstone
+only duplicates or explicit corrections.
+
+Treat assistant-originated information as prior advice unless the user confirms it.
 
 Do NOT remember:
 - Ephemeral conversation context (e.g. intermediate search results)
-- Information the user has not consented to storing
+- Generic knowledge, intermediate reasoning, or repeated restatements
 - Sensitive credentials, secrets, or authentication tokens
 
 ## When to recall
@@ -66,10 +73,10 @@ would miss.
 ## Categories
 
 Use the \`category\` field to classify memories:
-- \`profile\` — who the user is (role, expertise, background)
-- \`preferences\` — stated preferences (tools, style, format)
-- \`events\` — things that happened (incidents, decisions)
-- \`trajectories\` — plans, goals, or ongoing work
+- \`profile\` — Current beliefs about the user, such as name, role, expertise, and background.
+- \`preferences\` — Current preferences for styles, formats, tools, and workflows.
+- \`events\` — Completed occurrences, decisions, and outcomes, including relevant dates.
+- \`trajectories\` — Goals, plans, deadlines, progress changes, and milestones.
 `.trim();
 
 // `defineSkillType` is a no-op identity helper not exported from the package.

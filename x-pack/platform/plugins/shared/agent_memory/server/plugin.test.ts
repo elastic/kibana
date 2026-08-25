@@ -89,6 +89,37 @@ describe('AgentMemoryPlugin', () => {
         getRegistryTools: expect.any(Function),
       })
     );
+    expect(registeredSkill?.content).toContain(
+      'Before each response, scan the categories for durable user context; do not wait for an explicit request.'
+    );
+    expect(registeredSkill?.content).toContain('Use one coherent memory per subject or occurrence');
+    expect(registeredSkill?.content).toContain(
+      'For profile and preferences, recall the same subject first.'
+    );
+    expect(registeredSkill?.content).toContain(
+      'If asking is unavailable, keep both and do not guess or delete.'
+    );
+    expect(registeredSkill?.content).toContain(
+      'For events and trajectories, preserve material history'
+    );
+    expect(registeredSkill?.content).not.toContain(
+      'Create one atomic memory for each independently useful fact'
+    );
+    expect(registeredSkill?.content).toContain(
+      '`profile` — Current beliefs about the user, such as name, role, expertise, and background.'
+    );
+    expect(registeredSkill?.content).toContain(
+      '`preferences` — Current preferences for styles, formats, tools, and workflows.'
+    );
+    expect(registeredSkill?.content).toContain(
+      '`events` — Completed occurrences, decisions, and outcomes, including relevant dates.'
+    );
+    expect(registeredSkill?.content).toContain(
+      '`trajectories` — Goals, plans, deadlines, progress changes, and milestones.'
+    );
+    expect(registeredSkill?.content).not.toContain(
+      'Information the user has not consented to storing'
+    );
     if (!registeredSkill?.getRegistryTools) {
       throw new Error('Expected Agent Memory skill to bind registry tools');
     }
