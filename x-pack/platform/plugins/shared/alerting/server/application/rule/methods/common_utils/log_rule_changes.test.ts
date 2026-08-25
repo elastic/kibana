@@ -316,9 +316,7 @@ describe('logBulkRuleChanges', () => {
     ).resolves.toBeUndefined();
 
     expect(context.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining(
-        `Unable to log bulk rule changes for action "${RuleChangeTrackingAction.ruleEnable}"`
-      )
+      expect.stringContaining('Failed to log change history')
     );
   });
 
@@ -464,6 +462,130 @@ describe('logBulkRuleChanges', () => {
       const [changes] = changeTrackingService.logBulk.mock.calls[0];
       const distinctTimestamps = new Set(changes.map((c) => c.timestamp));
       expect(distinctTimestamps).toEqual(new Set([REFERENCE_TIMESTAMP_ISO]));
+    });
+  });
+
+  describe('user activity', () => {
+    it('emits a user-activity entry per affected rule with the mapped action id', async () => {
+      const trackUserAction = jest.fn();
+      const context = buildContext({ changeTrackingService, trackUserAction });
+
+      await logRuleChanges({
+        rulesClientContext: context,
+        ruleSOs: [buildRuleSO('rule-1'), buildRuleSO('rule-2')],
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleCreate,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+        },
+      });
+
+      expect(trackUserAction).toHaveBeenCalledTimes(2);
+      expect(trackUserAction).toHaveBeenNthCalledWith(1, {
+        message: 'User created rule "rule rule-1" (id: rule-1).',
+        event: { action: 'alerting_rule_create', type: 'creation', outcome: 'success' },
+        object: { id: 'rule-1', name: 'rule rule-1', type: 'rule', tags: [] },
+      });
+      expect(trackUserAction).toHaveBeenNthCalledWith(2, {
+        message: 'User created rule "rule rule-2" (id: rule-2).',
+        event: { action: 'alerting_rule_create', type: 'creation', outcome: 'success' },
+        object: { id: 'rule-2', name: 'rule rule-2', type: 'rule', tags: [] },
+      });
+    });
+
+    it('uses the deletion event type for rule delete', async () => {
+      const trackUserAction = jest.fn();
+      const context = buildContext({ changeTrackingService, trackUserAction });
+
+      await logRuleChanges({
+        rulesClientContext: context,
+        ruleSOs: [buildRuleSO('rule-1')],
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleDelete,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+        },
+      });
+
+      expect(trackUserAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'alerting_rule_delete', type: 'deletion', outcome: 'success' },
+        })
+      );
+    });
+
+    it('skips user activity for custom change-tracking actions with no registered action id', async () => {
+      const trackUserAction = jest.fn();
+      const context = buildContext({ changeTrackingService, trackUserAction });
+
+      await logRuleChanges({
+        rulesClientContext: context,
+        ruleSOs: [buildRuleSO('rule-1')],
+        changesContext: {
+          action: 'rule_install',
+          timestamp: REFERENCE_TIMESTAMP_MS,
+        },
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      expect(trackUserAction).not.toHaveBeenCalled();
+      expect(context.logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('No user-activity action registered')
+      );
+    });
+
+    it('does not emit user activity when trackUserAction is not wired', async () => {
+      const context = buildContext({ changeTrackingService });
+
+      await expect(
+        logRuleChanges({
+          rulesClientContext: context,
+          ruleSOs: [buildRuleSO('rule-1')],
+          changesContext: {
+            action: RuleChangeTrackingAction.ruleUpdate,
+            timestamp: REFERENCE_TIMESTAMP_MS,
+          },
+        })
+      ).resolves.toBeUndefined();
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+    });
+
+    it('still emits user activity when the change-history write fails', async () => {
+      changeTrackingService.logBulk.mockRejectedValueOnce(new Error('boom'));
+      const trackUserAction = jest.fn();
+      const context = buildContext({ changeTrackingService, trackUserAction });
+
+      await logRuleChanges({
+        rulesClientContext: context,
+        ruleSOs: [buildRuleSO('rule-1')],
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleEnable,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+        },
+      });
+
+      expect(trackUserAction).toHaveBeenCalledTimes(1);
+    });
+
+    it('swallows trackUserAction errors and warns instead of bubbling them', async () => {
+      const trackUserAction = jest.fn().mockImplementation(() => {
+        throw new Error('activity boom');
+      });
+      const context = buildContext({ changeTrackingService, trackUserAction });
+
+      await expect(
+        logRuleChanges({
+          rulesClientContext: context,
+          ruleSOs: [buildRuleSO('rule-1')],
+          changesContext: {
+            action: RuleChangeTrackingAction.ruleSnooze,
+            timestamp: REFERENCE_TIMESTAMP_MS,
+          },
+        })
+      ).resolves.toBeUndefined();
+
+      expect(context.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to track user action "alerting_rule_snooze"')
+      );
     });
   });
 

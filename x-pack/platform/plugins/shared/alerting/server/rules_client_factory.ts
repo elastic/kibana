@@ -32,6 +32,7 @@ import {
 import type { InvalidateAPIKeyResult } from '@kbn/core-security-server';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { UserActivityServiceSetup } from '@kbn/core-user-activity-server';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -76,6 +77,7 @@ export interface RulesClientFactoryOpts {
   actions: ActionsPluginStartContract;
   eventLog: IEventLogClientService;
   changeTrackingService?: IChangeTrackingService;
+  trackUserAction?: UserActivityServiceSetup['trackUserAction'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   authorization: AlertingAuthorizationClientFactory;
   eventLogger?: IEventLogger;
@@ -107,6 +109,7 @@ export class RulesClientFactory {
   private actions!: ActionsPluginStartContract;
   private eventLog!: IEventLogClientService;
   private changeTrackingService?: IChangeTrackingService;
+  private trackUserAction?: UserActivityServiceSetup['trackUserAction'];
   private kibanaVersion!: PluginInitializerContext['env']['packageInfo']['version'];
   private authorization!: AlertingAuthorizationClientFactory;
   private eventLogger?: IEventLogger;
@@ -140,6 +143,7 @@ export class RulesClientFactory {
     this.actions = options.actions;
     this.eventLog = options.eventLog;
     this.changeTrackingService = options.changeTrackingService;
+    this.trackUserAction = options.trackUserAction;
     this.kibanaVersion = options.kibanaVersion;
     this.authorization = options.authorization;
     this.eventLogger = options.eventLogger;
@@ -412,6 +416,7 @@ export class RulesClientFactory {
       encryptedSavedObjectsClient: this.encryptedSavedObjectsClient,
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       changeTrackingService: this.changeTrackingService?.asScoped(request),
+      trackUserAction: this.trackUserAction,
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
       backfillClient: this.backfillClient,
