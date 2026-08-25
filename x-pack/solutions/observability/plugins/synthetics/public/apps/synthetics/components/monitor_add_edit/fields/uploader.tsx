@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiFilePicker } from '@elastic/eui';
 import type {
-  EuiFilePickerClass,
+  EuiFilePickerRef,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 
@@ -22,7 +22,7 @@ interface Props {
 export function Uploader({ onUpload }: Props) {
   const fileReader = useRef<null | FileReader>(null);
   const [error, setError] = useState<string | null>(null);
-  const filePickerRef = useRef<EuiFilePickerClass>(null);
+  const filePickerRef = useRef<EuiFilePickerRef>(null);
 
   const handleFileRead = (fileName: string) => {
     const content = fileReader?.current?.result as string;

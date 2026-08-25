@@ -7,7 +7,7 @@
 
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
 import type {
-  EuiFilePickerClass,
+  EuiFilePickerRef,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import React, { useCallback, useState, useRef } from 'react';
@@ -35,7 +35,7 @@ interface ConfigUploaderProps {
 }
 
 const ConfigUploaderComponent: React.FC<ConfigUploaderProps> = ({ onChange }) => {
-  const filePickerRef = useRef<EuiFilePickerClass>(null);
+  const filePickerRef = useRef<EuiFilePickerRef>(null);
   const [isInvalid, setIsInvalid] = useState<string | null>(null);
   // @ts-expect-error update types
   let fileReader;

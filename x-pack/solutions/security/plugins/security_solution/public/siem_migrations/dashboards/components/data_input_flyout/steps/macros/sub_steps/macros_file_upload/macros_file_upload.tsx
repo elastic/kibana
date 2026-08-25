@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState, useRef } from 'react';
 import { isPlainObject } from 'lodash';
 import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import type {
-  EuiFilePickerClass,
+  EuiFilePickerRef,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { UploadFileButton } from '../../../../../../../common/components/migration_steps';
@@ -33,7 +33,7 @@ export interface MacrosFileUploadProps {
 export const MacrosFileUpload = React.memo<MacrosFileUploadProps>(
   ({ createResources, apiError, isLoading }) => {
     const [macrosToUpload, setMacrosToUpload] = useState<SiemMigrationResourceData[]>([]);
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
 
     const createMacros = useCallback(() => {
       filePickerRef.current?.removeFiles();

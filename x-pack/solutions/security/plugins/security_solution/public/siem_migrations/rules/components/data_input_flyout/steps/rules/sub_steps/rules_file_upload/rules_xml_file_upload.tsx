@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import type {
-  EuiFilePickerClass,
+  EuiFilePickerRef,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { UploadFileButton } from '../../../../../../../common/components';
@@ -30,7 +30,7 @@ export interface RulesXMLFileUploadProps {
 export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
   ({ createMigration, migrationName, apiError, isLoading, isCreated, onRulesFileChanged }) => {
     const [rulesToUpload, setRulesToUpload] = useState<string>();
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
     const { rulesFileUpload } = useRuleMigrationVendorCopy(MigrationSource.QRADAR);
 
     const createRules = useCallback(() => {
