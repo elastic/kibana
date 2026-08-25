@@ -202,6 +202,7 @@
       "matchDepNames": [
         "@wojtekmaj/enzyme-adapter-react-17",
         "enzyme",
+        "enzyme-to-json",
         "@types/enzyme"
       ],
       "reviewers": ["team:appex-sharedux"],
