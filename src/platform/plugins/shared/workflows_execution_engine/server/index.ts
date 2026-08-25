@@ -25,6 +25,8 @@ export type {
   StepExecutionsDataClient,
   TriggerEventsContract,
   WorkflowExecutionsDataClient,
+  WorkflowServiceAccountExecution,
+  WorkflowServiceAccountOperation,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';
@@ -36,6 +38,11 @@ export {
   type HitlLifecycleAuditor,
   type HitlLifecycleEvent,
 } from './step/wait_for_input_step/hitl_lifecycle_auditor';
+export {
+  getWorkflowServiceAccountCoordinates,
+  WORKFLOW_SERVICE_ACCOUNT_OPERATION_TYPE,
+  WORKFLOW_SERVICE_ACCOUNT_WORKLOAD_TYPE,
+} from './service_account_execution';
 
 export type {
   LogsRepository,

@@ -75,17 +75,19 @@ describe('buildWorkflowContext', () => {
   });
 
   describe('execution context', () => {
-    it('should include executedBy and triggeredBy in execution context', () => {
+    it('should include initiator, effective identity, and trigger in execution context', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
         createdBy: 'user@example.com',
         executedBy: 'user@example.com',
+        effectiveIdentity: 'service-account-1',
         triggeredBy: 'manual',
       };
 
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.execution.executedBy).toBe('user@example.com');
+      expect(context.execution.effectiveIdentity).toBe('service-account-1');
       expect(context.execution.triggeredBy).toBe('manual');
     });
 
@@ -100,6 +102,7 @@ describe('buildWorkflowContext', () => {
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.execution.executedBy).toBe('unknown');
+      expect(context.execution.effectiveIdentity).toBe('unknown');
       expect(context.execution.triggeredBy).toBe('manual');
     });
 

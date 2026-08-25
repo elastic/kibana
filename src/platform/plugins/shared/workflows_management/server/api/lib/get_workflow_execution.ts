@@ -94,6 +94,10 @@ function transformToWorkflowExecutionDetailDto(
     stepId: workflowExecution.stepId,
     stepExecutions,
     executedBy: workflowExecution.executedBy ?? workflowExecution.createdBy,
+    effectiveIdentity:
+      workflowExecution.effectiveIdentity ??
+      workflowExecution.executedBy ??
+      workflowExecution.createdBy,
     triggeredBy: workflowExecution.triggeredBy,
     yaml,
     traceId: workflowExecution.traceId,

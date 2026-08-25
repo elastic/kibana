@@ -20,6 +20,7 @@ import type {
   IWorkflowEventLoggerService,
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
+  WorkflowServiceAccountExecution,
 } from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
@@ -43,6 +44,7 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   executionQueryService: WorkflowExecutionQueryService;
   validationService: WorkflowValidationService;
   getCoreStart: () => CoreStart;
+  getServiceAccountExecution: () => WorkflowServiceAccountExecution;
   changeHistoryService: IWorkflowChangeHistoryService;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;

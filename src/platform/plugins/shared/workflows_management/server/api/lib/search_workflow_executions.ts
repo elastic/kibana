@@ -132,6 +132,7 @@ function transformToWorkflowExecutionListModel(
           tags: source.workflowDefinition?.tags,
           triggeredBy: source.triggeredBy,
           executedBy: source.executedBy ?? source.createdBy,
+          effectiveIdentity: source.effectiveIdentity ?? source.executedBy ?? source.createdBy,
           concurrencyGroupKey: source.concurrencyGroupKey,
           ...pickWorkflowDocumentVersion(source),
         });

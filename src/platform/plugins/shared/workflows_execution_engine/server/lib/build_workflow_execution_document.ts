@@ -77,18 +77,26 @@ export const buildWorkflowExecutionDocument = (
   const dispatchEventId =
     typeof metadata?.eventId === 'string' ? metadata.eventId.trim() || undefined : undefined;
   const missingIdentity = authenticatedUser == null;
+  const effectiveIdentity =
+    !workflow.isTestRun &&
+    !workflow.isEphemeral &&
+    (triggeredBy === 'manual' || triggeredBy === 'scheduled')
+      ? workflow.definition?.settings?.run_as ?? authenticatedUser
+      : authenticatedUser;
   const workflowExecution: WorkflowExecutionForInputRendering = {
     id: generateUuid(),
     spaceId,
     workflowId: workflow.id,
     ...pickManagedWorkflowFields(workflow),
     isTestRun: workflow.isTestRun,
+    isEphemeral: workflow.isEphemeral,
     workflowDefinition: workflow.definition,
     yaml: workflow.yaml,
     context,
     status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
     executedBy: authenticatedUser ?? UNKNOWN_EXECUTION_IDENTITY,
+    effectiveIdentity,
     triggeredBy,
     ...(missingIdentity
       ? {
