@@ -82,7 +82,7 @@ export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0', '(MPL-2.0 OR Apache-2.0)'];
 // there are some licenses which should not be globally allowed
 // but can be brought in on a per-package basis
 export const PER_PACKAGE_ALLOWED_LICENSES = {
-  'openpgp@5.11.3': ['LGPL-3.0+'],
+  'openpgp@6.3.0': ['LGPL-3.0+'],
   '@img/sharp-libvips-darwin-arm64@1.3.1': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linuxmusl-x64@1.3.1': ['LGPL-3.0-or-later'],
   '@img/sharp-libvips-linux-x64@1.3.1': ['LGPL-3.0-or-later'],
