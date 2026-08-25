@@ -25,14 +25,10 @@ interface LegacyDashboardHashMatch {
 }
 
 /**
- * Real Kibana saved-object ids are always a UUID or a URL-safe slug (e.g.
- * `osquery_manager-69f5ae20-eb02-11e7-8f04-51231daa5b05`), so an allowlist is both safe and, in
- * particular, not bypassable by splitting a disallowed character across the dashboard id and
- * expanded panel id capture groups: e.g. `#/dashboard/<script>alert(1)</script>` decodes to two
- * individually "clean" halves (`<script>alert(1)<` and `script>`) that get rejoined with `/`
- * when building the target path. A denylist that only rejects `/`, `?`, `#` would let each half
- * through on its own; requiring the *whole* decoded value to match a known-safe charset rejects
- * it regardless of how it's split.
+ * Checks a decoded dashboard/panel id against the charset real Kibana saved-object ids use
+ * (letters, digits, `_`, `.`, `:`, `-`), e.g. `osquery_manager-69f5ae20-eb02-11e7-8f04-51231daa5b05`.
+ * An allowlist, rather than a denylist of `/`, `?`, `#`, so a disallowed character can't sneak
+ * through by landing in the dashboard id half vs. the expanded panel id half of the hash.
  */
 const isSafeHashSegmentId = (decoded: string): boolean => /^[\w.:-]+$/.test(decoded);
 
