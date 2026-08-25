@@ -11,6 +11,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import {
@@ -21,10 +22,11 @@ import {
   ContentListToolbar,
 } from '@kbn/content-list';
 import type { ContentListItem, ContentListItemConfig } from '@kbn/content-list';
-import { useService } from '@kbn/core-di-browser';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
+import { paths, RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
+import { useInstalledRuleCounts } from '../../hooks/use_installed_rule_counts';
 import { useInstallRuleTemplate } from '../../hooks/use_install_rule_template';
 import { UserCapabilities } from '../../services/user_capabilities';
 import {
@@ -50,6 +52,19 @@ const INSTALL_RESTRICTED_REASON = i18n.translate(
 );
 
 const toTemplate = (item: ContentListItem) => (item as RuleTemplateContentListItem).template;
+
+const InstalledCountColumn = ({ item }: { item: ContentListItem }) => {
+  const { basePath } = useService(CoreStart('http'));
+  const { counts } = useInstalledRuleCounts([item.id]);
+  const count = counts.get(item.id) ?? 0;
+
+  if (count === 0) {
+    return <>{'\u2014'}</>;
+  }
+
+  const href = basePath.prepend(paths.ruleListFilteredByTemplate(item.id));
+  return <EuiLink href={href}>{count}</EuiLink>;
+};
 
 export const RuleLibraryList = () => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
@@ -165,6 +180,14 @@ export const RuleLibraryList = () => {
                 </EuiFlexGroup>
               );
             }}
+          />
+          <Column
+            id="installed"
+            name={i18n.translate('xpack.alertingV2.ruleLibrary.column.installed', {
+              defaultMessage: 'Installed',
+            })}
+            width="8em"
+            render={(item: ContentListItem) => <InstalledCountColumn item={item} />}
           />
           <Column.Actions width="14em" sticky={false}>
             <Action

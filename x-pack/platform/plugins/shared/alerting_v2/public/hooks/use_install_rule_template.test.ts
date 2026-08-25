@@ -19,6 +19,11 @@ jest.mock('./invalidate_rules_content_list', () => ({
   invalidateRulesContentList: jest.fn(() => Promise.resolve()),
 }));
 
+const mockContentListInvalidate = jest.fn(() => Promise.resolve());
+jest.mock('@kbn/content-list-provider', () => ({
+  contentListQueryClient: { invalidateQueries: (...args: unknown[]) => mockContentListInvalidate(...args) },
+}));
+
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
 
@@ -102,7 +107,8 @@ describe('useInstallRuleTemplate', () => {
   it('creates a disabled rule from the template payload via useCreateRule', async () => {
     mockCreateRule.mockResolvedValue(mockRuleResponse);
     mockDisableRule.mockResolvedValue({ ...mockRuleResponse, enabled: false });
-    const { result } = renderHook(() => useInstallRuleTemplate(), { wrapper: createWrapper() });
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useInstallRuleTemplate(), { wrapper });
 
     result.current.mutate(mockTemplate);
 
@@ -133,6 +139,18 @@ describe('useInstallRuleTemplate', () => {
     expect(mockDisableRule.mock.invocationCallOrder[0]).toBeLessThan(
       mockAddSuccess.mock.invocationCallOrder[0]
     );
+  });
+
+  it('invalidates the installed count query for the template on success', async () => {
+    mockCreateRule.mockResolvedValue(mockRuleResponse);
+    mockDisableRule.mockResolvedValue({ ...mockRuleResponse, enabled: false });
+    const { result } = renderHook(() => useInstallRuleTemplate(), { wrapper: createWrapper() });
+
+    result.current.mutate(mockTemplate);
+
+    await waitFor(() => {
+      expect(mockContentListInvalidate).toHaveBeenCalledWith(['installedRuleCount', 'template-1']);
+    });
   });
 
   it('shows an error toast when install fails', async () => {
