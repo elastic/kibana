@@ -64,7 +64,13 @@ export class SignificantEventsAppPlugin
       appRoute: SIGNIFICANT_EVENTS_APP_ROUTE,
       category: DEFAULT_APP_CATEGORIES.management,
       visibleIn: [],
-      keywords: ['nightshift management', 'nightshift', 'significant events', 'sig events', 'discovery'],
+      keywords: [
+        'nightshift management',
+        'nightshift',
+        'significant events',
+        'sig events',
+        'discovery',
+      ],
       deepLinks: [
         {
           id: 'knowledge_indicators' satisfies SignificantEventsLinkId,
