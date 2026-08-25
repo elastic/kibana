@@ -13,16 +13,37 @@ Use `platform.core.list_indices` to discover which ones exist.
 
 ### Field reference
 
-| Field | ES|QL type | Purpose |
+| Field | ES\|QL type | Purpose |
 |---|---|---|
 | `type` | keyword | Categorization — e.g. `"index_metadata"`, `"document"`, `"entity_profile"` |
 | `title` | text | Short name of the KI or its backing entity; semantic via `title.semantic` |
 | `content` | text | Full text: purpose, questions answered, access patterns; semantic via `content.semantic` |
 | `description` | text | Short description of this KI; semantic via `description.semantic` |
 | `tags` | keyword | Filter facets |
-| `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.) |
+| `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.). `attributes.esql` is the canonical location for a KI's runnable ES\|QL — see below. |
 
 Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, `description.semantic`.
+
+### `attributes.esql` — a KI's runnable ES|QL
+
+When a KI carries a complete runnable ES|QL query (e.g. a `detection` KI with a materialized
+query), that query lives in `attributes.esql`, as a string or an array of strings. This is the
+canonical location — do not hunt for runnable queries elsewhere in `attributes`.
+(Parameterized `?param` access-pattern templates are different: those live as prose inside
+`content`.)
+
+The field is **optional**: only KI kinds that carry ES|QL set it, so queries must tolerate its
+absence rather than assume every KI has it. `attributes` is `flattened`, so extract the value
+with `FIELD_EXTRACT` before filtering or keeping it:
+
+```esql
+FROM ai-index-* METADATA _id, _index, _score
+| WHERE type == "detection"
+| EVAL esql = FIELD_EXTRACT(attributes, "esql")
+| WHERE esql IS NOT NULL
+| KEEP title, description, esql
+| LIMIT <n>
+```
 
 ---
 

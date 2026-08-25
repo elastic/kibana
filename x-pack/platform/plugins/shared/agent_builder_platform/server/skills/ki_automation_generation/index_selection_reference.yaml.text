@@ -2,13 +2,16 @@ version: "1"
 name: Index-selection KIs (with ES|QL access patterns)
 description: >
   Profile each source index (mapping + 20 samples) into a per-index Knowledge Indicator
-  that carries parameterized ES|QL access patterns, written into an AI Index.
+  that carries parameterized ES|QL access patterns, verified and written into an AI Index
+  via the context-engine steps.
 enabled: true
 tags:
   - index-selection
   - knowledge-indicators
 consts:
-  target_index: ai-index-idx-ki-example
+  # AI index id, not an Elasticsearch index name. context-engine.createKi creates the
+  # AI index (backing index ai-index-idx-ki-example) when it does not exist yet.
+  ai_index_id: ki-example
   indices:
     - raw-cases-all
     - raw-articles-all
@@ -16,34 +19,6 @@ consts:
 triggers:
   - type: manual
 steps:
-  - name: ensure_target_index
-    type: elasticsearch.indices.create
-    with:
-      index: "{{ consts.target_index }}"
-      mappings:
-        dynamic: strict
-        properties:
-          id: { type: keyword }
-          type: { type: keyword }
-          title:
-            type: text
-            fields:
-              semantic: { type: semantic_text }
-          content:
-            type: text
-            fields:
-              semantic: { type: semantic_text }
-          description:
-            type: text
-            fields:
-              semantic: { type: semantic_text }
-          tags:
-            type: keyword
-          attributes:
-            type: flattened
-          ingestion_method: { type: keyword }
-    on-failure:
-      continue: true
   - name: loop_indices
     type: foreach
     foreach: "{{ consts.indices | json }}"
@@ -161,19 +136,26 @@ steps:
               - when_to_use
               - access_patterns
         timeout: 120s
-      - name: sink_index_ki
-        type: elasticsearch.index
+      # Build the KI once so verify_ki and sink_index_ki see the same document.
+      # @timestamp and the document id are set by context-engine.createKi — never here.
+      # This index-metadata KI carries no attributes.esql (its ES|QL access patterns are
+      # ?param templates inside content), so verification passes with empty results;
+      # KIs that carry complete runnable ES|QL put it in attributes.esql, the field the
+      # ES|QL verifiers read.
+      - name: build_ki
+        type: data.set
         with:
-          index: "{{ consts.target_index }}"
-          id: "{{ foreach.item }}"
-          refresh: wait_for
-          document:
-            type: ki
+          ki:
+            type: index_metadata
             title: "{{ steps.profile_index.output.content.display_name | default: foreach.item }}"
-            ingestion_method: manual
             tags:
               - index-selection
             attributes:
+              # Stable natural key: on re-runs, look this up in the backing index and
+              # switch to context-engine.updateKi to merge instead of duplicating
+              # (see "Create-or-merge sink" in the skill).
+              slug: "{{ foreach.item }}"
+              ingestion_method: manual
               key_fields: "{{ steps.profile_index.output.content.key_fields | join: ', ' }}"
               when_to_use: "{{ steps.profile_index.output.content.when_to_use }}"
               joins: "{{ steps.profile_index.output.content.joins | join: ', ' }}"
@@ -192,5 +174,26 @@ steps:
               {% endfor %}
             description: |
               Index profile: {{ steps.profile_index.output.content.display_name }}. Does NOT contain: {{ steps.profile_index.output.content.does_not_contain | join: "; " }}. Key fields: {{ steps.profile_index.output.content.key_fields | join: "; " }}. Joins: {{ steps.profile_index.output.content.joins | join: "; " }}.
+      # Run the registered Context Engine verifiers before writing.
+      - name: verify_ki
+        type: context-engine.verifyKi
+        with:
+          ki: "${{ variables.ki }}"
+      # Write only when verification passes; otherwise surface the failing
+      # verifiers and reasons instead of silently persisting a broken KI.
+      - name: gate_on_verification
+        type: if
+        condition: "${{ steps.verify_ki.output.passed }}"
+        steps:
+          - name: sink_index_ki
+            type: context-engine.createKi
+            with:
+              ai_index_id: "{{ consts.ai_index_id }}"
+              ki: "${{ variables.ki }}"
+        else:
+          - name: report_verification_failure
+            type: console
+            with:
+              message: "KI for {{ foreach.item }} failed verification: {{ steps.verify_ki.output.results | json }}"
     iteration-on-failure:
       continue: true
