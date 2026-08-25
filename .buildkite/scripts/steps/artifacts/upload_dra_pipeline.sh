@@ -28,7 +28,7 @@ steps:
     plugins:
       - elastic/dra-prep#v0.1.6:
           product_id: kibana
-          stack_version: "${BASE_VERSION}"
+          stack_version: "${QUALIFIER_VERSION}"
           workflow: "${WORKFLOW}"
           dependencies:
             - "beats:${BEATS_MANIFEST_URL}"
@@ -40,7 +40,7 @@ steps:
     build:
       env:
         DRA_PRODUCT_ID: kibana
-        DRA_STACK_VERSION: "${BASE_VERSION}"
+        DRA_STACK_VERSION: "${QUALIFIER_VERSION}"
         DRA_WORKFLOW: "${WORKFLOW}"
 EOF
 else
