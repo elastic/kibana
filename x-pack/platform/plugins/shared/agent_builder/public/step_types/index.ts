@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import { conversationMetadataUpdatedTriggerCommonDefinition } from '../../common/workflows/triggers';
 
 export function registerWorkflowSteps(
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup,
@@ -18,5 +19,10 @@ export function registerWorkflowSteps(
   );
   workflowsExtensions.registerStepDefinition(() =>
     import('./rerank_step').then((m) => m.createRerankStepDefinition(core))
+  );
+
+  // Register triggers
+  workflowsExtensions.registerTriggerDefinition(
+    conversationMetadataUpdatedTriggerCommonDefinition
   );
 }
