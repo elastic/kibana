@@ -66,6 +66,7 @@ export const prepareWorkflowDocumentFromYaml = (params: {
   now: Date;
   spaceId: string;
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
+  nameOverride?: string;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
   const {
     id: providedId,
@@ -75,11 +76,16 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     now,
     spaceId,
     triggerDefinitions,
+    nameOverride,
   } = params;
 
   const looseTitle = extractLooseTitleFields(yaml);
   let workflowToCreate: EsWorkflowCreate = {
-    name: looseTitle.name ?? 'Untitled workflow',
+    // Prefer the YAML-embedded name so the stored name round-trips with the YAML.
+    // `nameOverride` is a fallback for YAML that cannot carry a `name` key (e.g. a
+    // schema-invalid workflow whose root is a scalar/sequence), so callers such as
+    // cloning can still name the document instead of collapsing to "Untitled workflow".
+    name: looseTitle.name ?? nameOverride ?? 'Untitled workflow',
     description: looseTitle.description,
     enabled: false,
     tags: [],

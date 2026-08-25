@@ -296,4 +296,37 @@ describe('prepareWorkflowDocumentFromYaml', () => {
     expect(result.workflowData.name).toBe('Untitled workflow');
     expect(result.workflowData.description).toBeUndefined();
   });
+
+  it('uses nameOverride when the YAML root cannot carry a name (e.g. cloning invalid YAML)', () => {
+    const zodSchema = getWorkflowZodSchema({});
+
+    // A scalar root has no `name` key to extract, so without the override this would
+    // collapse to "Untitled workflow".
+    const result = prepareWorkflowDocumentFromYaml({
+      yaml: 'not-a-workflow',
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      nameOverride: 'Original Copy',
+    });
+
+    expect(result.workflowData.name).toBe('Original Copy');
+    expect(result.workflowData.valid).toBe(false);
+  });
+
+  it('prefers the YAML-embedded name over nameOverride', () => {
+    const zodSchema = getWorkflowZodSchema({});
+
+    const result = prepareWorkflowDocumentFromYaml({
+      yaml: 'name: From YAML\ndescription: still broken',
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      nameOverride: 'Override Name',
+    });
+
+    expect(result.workflowData.name).toBe('From YAML');
+  });
 });
