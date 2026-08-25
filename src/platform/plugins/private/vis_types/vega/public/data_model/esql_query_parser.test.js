@@ -262,8 +262,8 @@ describe('EsqlQueryParser.populateData', () => {
     expect(second.params).toEqual([{ color: 'blue' }]);
   });
 
-  test('sends the rewritten identifier query without mutating the source query', async () => {
-    const storedQuery = 'FROM logs-* | STATS COUNT(?field)';
+  test('binds an identifier variable and sends the query without mutating the source', async () => {
+    const storedQuery = 'FROM logs-* | STATS COUNT(??field)';
     const { parser, searchAPI } = createParser(rangeStart, rangeEnd, {}, [
       { key: 'field', value: 'bytes', type: ESQLVariableType.FIELDS },
     ]);
@@ -273,9 +273,9 @@ describe('EsqlQueryParser.populateData', () => {
     const url = { query: storedQuery };
     await parser.populateData([{ url, dataObject: { name: 'field_query' } }]);
 
-    expect(searchAPI.searchEsql.mock.calls[0][0][0].query).toBe(
-      'FROM logs-* | STATS COUNT(??field)'
-    );
+    const [request] = searchAPI.searchEsql.mock.calls[0][0];
+    expect(request.query).toBe(storedQuery);
+    expect(request.params).toEqual([{ field: 'bytes' }]);
     expect(url.query).toBe(storedQuery);
   });
 
@@ -761,15 +761,15 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     expect(result.params).toEqual([{ fizzbuzz: 'ios' }]);
   });
 
-  test('rewrites identifier ?field to ??field on the request only', () => {
+  test('binds an identifier variable written with the ?? prefix', () => {
     const { parser } = createParser(rangeStart, rangeEnd, {}, [
       { key: 'field', value: 'host.name', type: ESQLVariableType.FIELDS },
     ]);
 
-    const query = 'FROM logs-* | STATS COUNT(?field)';
+    const query = 'FROM logs-* | STATS COUNT(??field)';
     const result = parser._injectNamedParams(query, { query });
 
-    expect(result.query).toBe('FROM logs-* | STATS COUNT(??field)');
+    expect(result.query).toBe(query);
     expect(result.params).toEqual([{ field: 'host.name' }]);
   });
 

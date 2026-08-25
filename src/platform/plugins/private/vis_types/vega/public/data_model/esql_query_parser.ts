@@ -12,7 +12,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { getTime } from '@kbn/data-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import { getESQLTimeField, getNamedParams, fixESQLQueryWithVariables } from '@kbn/esql-utils';
+import { getESQLTimeField, getNamedParams } from '@kbn/esql-utils';
 import { getHttp } from '../services';
 import type { TimeCache } from './time_cache';
 import type { SearchAPI } from './search_api';
@@ -235,9 +235,8 @@ export class EsqlQueryParser {
    * Bind dashboard ES|QL variables and time params, then leftover spec `url.params`.
    */
   private _injectNamedParams(query: string, url: InternalEsqlUrlObject): InjectedParams {
-    const fixedQuery = fixESQLQueryWithVariables(query, this._esqlVariables ?? []);
     const params: Record<string, unknown>[] = [
-      ...getNamedParams(fixedQuery, this._getTimeRange(), this._esqlVariables),
+      ...getNamedParams(query, this._getTimeRange(), this._esqlVariables),
     ];
     const boundKeys = new Set(params.flatMap((param) => Object.keys(param)));
 
@@ -253,7 +252,7 @@ export class EsqlQueryParser {
       }
     }
 
-    return { query: fixedQuery, params };
+    return { query, params };
   }
 
   /**
