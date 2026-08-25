@@ -483,6 +483,55 @@ describe('AgentlessPoliciesService', () => {
       expect(jest.mocked(agentPolicyService.update)).not.toHaveBeenCalled();
     });
 
+    it('should update a legacy policy whose agent policy ID differs from its package policy ID', async () => {
+      // Simulates policies created before the same-ID invariant was introduced: the package
+      // policy's policy_ids[0] references a *different* agent policy ID.
+      const legacyPackagePolicyId = 'f5ff1997-package-policy-id';
+      const legacyAgentPolicyId = '0be3a541-agent-policy-id';
+
+      packagePolicyService.get.mockReset();
+      packagePolicyService.get.mockResolvedValue(
+        buildAgentlessPackagePolicy({
+          id: legacyPackagePolicyId,
+          policy_ids: [legacyAgentPolicyId],
+        })
+      );
+      jest.mocked(agentPolicyService.get).mockReset();
+      jest.mocked(agentPolicyService.get).mockResolvedValue({
+        id: legacyAgentPolicyId,
+        name: 'Agentless policy for Test Agentless Policy',
+        namespace: 'default',
+        supports_agentless: true,
+        agentless: { cluster_id: 'cluster-456' },
+      } as any);
+
+      await createService().updateAgentlessPolicy(legacyPackagePolicyId, buildUpdateRequest());
+
+      // Package policy is updated using the package policy ID.
+      expect(packagePolicyService.update).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        legacyPackagePolicyId,
+        expect.objectContaining({ policy_ids: [legacyAgentPolicyId] }),
+        expect.anything()
+      );
+
+      // Agent policy operations use the *agent* policy ID, not the package policy ID.
+      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        legacyAgentPolicyId,
+        expect.anything(),
+        expect.anything()
+      );
+      expect(jest.mocked(agentPolicyService.deployPolicy)).toHaveBeenCalledWith(
+        expect.anything(),
+        legacyAgentPolicyId,
+        undefined,
+        expect.objectContaining({ throwOnAgentlessError: true })
+      );
+    });
+
     it('should allow a package version change and re-derive package info from the requested version', async () => {
       await createService().updateAgentlessPolicy(
         'agentless-policy-id',
@@ -523,6 +572,45 @@ describe('AgentlessPoliciesService', () => {
         expect.objectContaining({
           name: 'Agentless policy for Test Agentless Policy',
           agentless: expect.objectContaining({ cluster_id: 'cluster-123' }),
+        }),
+        expect.objectContaining({ force: true })
+      );
+    });
+
+    it('should roll back using the agent policy ID (not package policy ID) for legacy policies', async () => {
+      const legacyPackagePolicyId = 'f5ff1997-package-policy-id';
+      const legacyAgentPolicyId = '0be3a541-agent-policy-id';
+
+      packagePolicyService.get.mockReset();
+      packagePolicyService.get.mockResolvedValue(
+        buildAgentlessPackagePolicy({
+          id: legacyPackagePolicyId,
+          policy_ids: [legacyAgentPolicyId],
+        })
+      );
+      jest.mocked(agentPolicyService.get).mockReset();
+      jest.mocked(agentPolicyService.get).mockResolvedValue({
+        id: legacyAgentPolicyId,
+        name: 'Agentless policy for Test Agentless Policy',
+        namespace: 'default',
+        supports_agentless: true,
+        agentless: { cluster_id: 'cluster-456' },
+      } as any);
+      jest
+        .mocked(agentPolicyService.deployPolicy)
+        .mockRejectedValueOnce(new Error('deploy failure'));
+
+      await expect(() =>
+        createService().updateAgentlessPolicy(legacyPackagePolicyId, buildUpdateRequest())
+      ).rejects.toThrow('deploy failure');
+
+      // Rollback must target the agent policy ID, not the package policy ID.
+      expect(jest.mocked(agentPolicyService.update)).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.anything(),
+        legacyAgentPolicyId,
+        expect.objectContaining({
+          agentless: expect.objectContaining({ cluster_id: 'cluster-456' }),
         }),
         expect.objectContaining({ force: true })
       );
@@ -797,6 +885,44 @@ describe('AgentlessPoliciesService', () => {
         expect.anything(),
         'existing-agentless-policy-id',
         expect.objectContaining({})
+      );
+    });
+
+    it('should delete a legacy policy whose agent policy ID differs from its package policy ID', async () => {
+      const legacyPackagePolicyId = 'f5ff1997-package-policy-id';
+      const legacyAgentPolicyId = '0be3a541-agent-policy-id';
+
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({
+          id: legacyPackagePolicyId,
+          policy_ids: [legacyAgentPolicyId],
+        })
+      );
+      jest.mocked(agentPolicyService.get).mockResolvedValueOnce({
+        id: legacyAgentPolicyId,
+        supports_agentless: true,
+      } as any);
+      jest.mocked(agentPolicyService.delete).mockResolvedValueOnce({} as any);
+
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await agentlessPoliciesService.deleteAgentlessPolicy(legacyPackagePolicyId);
+
+      // Must delete the agent policy using the agent policy ID, not the package policy ID.
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        legacyAgentPolicyId,
+        expect.anything()
       );
     });
 
