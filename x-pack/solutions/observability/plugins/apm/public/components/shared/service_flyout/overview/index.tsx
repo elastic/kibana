@@ -17,10 +17,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
+import {
+  ServiceFlyoutTransactionsSection,
+  type TransactionGroup,
+} from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
@@ -29,6 +32,8 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
 import { useProjectRouting } from '../hooks/use_project_routing';
+import { TransactionDetailFlyout } from '../../transaction_detail_flyout';
+import type { TransactionDetailFlyoutFilters } from '../../transaction_detail_flyout/types';
 import { getChartDefinitions } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
@@ -167,6 +172,8 @@ function ServiceFlyoutChartsSection({
 
 export function ServiceFlyoutOverview() {
   const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
+  const [transactionDetailFilters, setTransactionDetailFilters] =
+    useState<TransactionDetailFlyoutFilters | null>(null);
   const {
     deps: { core, share },
     service,
@@ -185,6 +192,20 @@ export function ServiceFlyoutOverview() {
   // CPS: embed the active project routing in the generated ES|QL so the Lens charts query
   // the same projects as the surrounding APM APIs (which forward it via `x-project-routing`).
   const projectRouting = useProjectRouting();
+
+  const onTransactionClick = useCallback(
+    (item: TransactionGroup) => {
+      setTransactionDetailFilters({
+        serviceName: service.name,
+        transactionName: item.name,
+        transactionType: item.transactionType || transactionType || '',
+        environment,
+        rangeFrom,
+        rangeTo,
+      });
+    },
+    [service.name, transactionType, environment, rangeFrom, rangeTo]
+  );
 
   const { keyMetrics, infrastructureMetrics } = useMemo(
     () =>
@@ -281,10 +302,18 @@ export function ServiceFlyoutOverview() {
               transactionType={transactionType ?? ''}
               latencyAggregationType={latencyAggregationType}
               refreshToken={refreshToken}
+              onTransactionClick={onTransactionClick}
             />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {transactionDetailFilters && (
+        <TransactionDetailFlyout
+          deps={{ core }}
+          filters={transactionDetailFilters}
+          onClose={() => setTransactionDetailFilters(null)}
+        />
+      )}
     </div>
   );
 }

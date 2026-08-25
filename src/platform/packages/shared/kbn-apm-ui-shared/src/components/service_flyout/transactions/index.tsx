@@ -61,6 +61,8 @@ interface ServiceFlyoutTransactionsSectionProps {
   latencyAggregationType?: LatencyAggregationType;
   locators?: SharePluginStart['url']['locators'];
   refreshToken?: number;
+  /** When set, name clicks call this instead of the APM transaction details locator. */
+  onTransactionClick?: (item: TransactionGroup) => void;
 }
 
 export function ServiceFlyoutTransactionsSection({
@@ -74,6 +76,7 @@ export function ServiceFlyoutTransactionsSection({
   latencyAggregationType,
   locators,
   refreshToken,
+  onTransactionClick,
 }: ServiceFlyoutTransactionsSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -174,7 +177,9 @@ export function ServiceFlyoutTransactionsSection({
       remainingTransactionsCellTooltipContent={MAX_GROUPS_TOOLTIP}
       columnInteractions={{
         name: {
-          href: getTransactionDetailHref,
+          ...(onTransactionClick
+            ? { onClick: onTransactionClick }
+            : { href: getTransactionDetailHref }),
           ebt: { element: SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS.ROW_NAME },
         },
         alerts: {

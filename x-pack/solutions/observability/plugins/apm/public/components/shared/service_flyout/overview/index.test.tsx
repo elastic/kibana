@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import type { ServiceFlyoutService } from '..';
@@ -48,6 +48,23 @@ jest.mock('./query_controls', () => ({
 
 jest.mock('./lens_chart', () => ({
   ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
+}));
+
+jest.mock('../../transaction_detail_flyout', () => ({
+  TransactionDetailFlyout: ({
+    filters,
+    onClose,
+  }: {
+    filters: { transactionName: string };
+    onClose: () => void;
+  }) => (
+    <div data-test-subj="transactionDetailFlyoutMock">
+      <span>{filters.transactionName}</span>
+      <button type="button" onClick={onClose}>
+        close
+      </button>
+    </div>
+  ),
 }));
 
 const service: ServiceFlyoutService = {
@@ -239,6 +256,46 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     renderOverview({ refreshToken: 42 });
 
     expect(transactionsSectionProps?.refreshToken).toBe(42);
+  });
+
+  it('opens TransactionDetailFlyout when a transaction name is clicked', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+    expect(transactionsSectionProps?.onTransactionClick).toEqual(expect.any(Function));
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(screen.getByTestId('transactionDetailFlyoutMock')).toHaveTextContent('GET /api/orders');
+  });
+
+  it('closes TransactionDetailFlyout when onClose is called', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { getByRole, queryByTestId } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(queryByTestId('transactionDetailFlyoutMock')).toBeInTheDocument();
+    act(() => {
+      getByRole('button', { name: 'close' }).click();
+    });
+    expect(queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
   });
 });
 

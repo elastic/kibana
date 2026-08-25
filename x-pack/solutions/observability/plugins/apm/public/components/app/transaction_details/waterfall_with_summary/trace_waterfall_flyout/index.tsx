@@ -7,7 +7,10 @@
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
+import type {
+  FullTraceWaterfallOnErrorClick,
+  WaterfallGetErrorMarkerHref,
+} from '@kbn/apm-types';
 import { UnifiedDocViewerObservabilityTraceDocFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import type { UnifiedDocViewerObservabilityTracesDocumentType } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -18,7 +21,6 @@ import { TraceWaterfallFlyoutFooter } from './flyout_footer';
 import { useLogsIndexPattern } from '../../../../../hooks/use_logs_index_pattern';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { getApmInternalServices } from '../../../../../plugin';
-import { useGetErrorMarkerHrefFromRouter } from '../waterfall_container/use_get_error_marker_href_from_router';
 
 const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
 
@@ -29,6 +31,11 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   contextSpanIds?: string[];
+  /**
+   * Optional APM error-group deep link builder. Discover-style hosts omit this and
+   * rely on `onErrorClick` → document flyout instead of route-param-based hrefs.
+   */
+  getErrorMarkerHref?: WaterfallGetErrorMarkerHref;
 }
 
 export function TraceWaterfallFlyout({
@@ -38,11 +45,11 @@ export function TraceWaterfallFlyout({
   isOpen,
   onClose,
   contextSpanIds,
+  getErrorMarkerHref,
 }: Props) {
   const { callApmApi } = getApmInternalServices();
   const { core } = useApmPluginContext();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter();
   const { dataView, apmIndices } = useAdHocApmDataView();
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [selectedDocIndex, setSelectedDocIndex] = useState<string | undefined>(undefined);
@@ -96,7 +103,7 @@ export function TraceWaterfallFlyout({
 
   return (
     <EuiFlyout
-      session="start"
+      session="inherit"
       historyKey={TRACE_WATERFALL_FLYOUT_HISTORY_KEY}
       onClose={onClose}
       size="m"
