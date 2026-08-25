@@ -29,7 +29,7 @@ export class NewsfeedPageObject extends FtrService {
     this.log.debug('closeNewsfeedPanel');
     await this.retry.waitFor('newsfeed sidebar to close', async () => {
       if (await this.testSubjects.exists('newsfeedSidebar')) {
-        await this.testSubjects.click('sidebarHeader > [aria-label="Close side panel"]');
+        await this.testSubjects.click('sidebarHeaderCloseButton');
         return false;
       }
       return true;

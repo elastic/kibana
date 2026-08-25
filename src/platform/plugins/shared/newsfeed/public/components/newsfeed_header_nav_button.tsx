@@ -8,7 +8,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip, type EuiToolTipRef } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
 import type { NewsfeedApi } from '../lib/api';
@@ -29,6 +29,7 @@ export const NewsfeedNavButton = ({ newsfeedApi, sidebar }: Props) => {
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
 
   const hasNew = useMemo(() => {
     return newsFetchResult ? newsFetchResult.hasNew : false;
@@ -58,40 +59,35 @@ export const NewsfeedNavButton = ({ newsfeedApi, sidebar }: Props) => {
   }, [newsfeedApi]);
 
   const handleClick = useCallback(() => {
+    tooltipRef.current?.hideToolTip();
     toggleNewsfeedSidebar(sidebar, newsfeedApi, newsFetchResult);
   }, [sidebar, newsfeedApi, newsFetchResult]);
 
-  const button = (
-    <EuiHeaderSectionItemButton
-      ref={(node: HTMLButtonElement | null) => {
-        buttonRef.current = node;
-      }}
-      data-test-subj={hasNew ? 'newsfeedHasUnread' : 'newsfeedAllRead'}
-      aria-expanded={sidebarOpen}
-      aria-haspopup="true"
-      aria-label={
-        hasNew
-          ? i18n.translate('newsfeed.headerButton.unreadAriaLabel', {
-              defaultMessage: 'Newsfeed menu - unread items available',
-            })
-          : i18n.translate('newsfeed.headerButton.readAriaLabel', {
-              defaultMessage: 'Newsfeed menu - all items read',
-            })
-      }
-      notification={hasNew ? true : null}
-      onClick={handleClick}
-    >
-      <EuiIcon type="popper" size="m" aria-hidden={true} />
-    </EuiHeaderSectionItemButton>
-  );
-
-  if (sidebarOpen) {
-    return button;
-  }
-
+  // The tooltip stays mounted unconditionally: swapping it in and out would change the element
+  // type at this position, remounting the button and dropping focus when the sidebar closes.
   return (
-    <EuiToolTip content={whatsNewLabel} disableScreenReaderOutput>
-      {button}
+    <EuiToolTip ref={tooltipRef} content={whatsNewLabel} disableScreenReaderOutput>
+      <EuiHeaderSectionItemButton
+        ref={(node: HTMLButtonElement | null) => {
+          buttonRef.current = node;
+        }}
+        data-test-subj={hasNew ? 'newsfeedHasUnread' : 'newsfeedAllRead'}
+        aria-expanded={sidebarOpen}
+        aria-haspopup="true"
+        aria-label={
+          hasNew
+            ? i18n.translate('newsfeed.headerButton.unreadAriaLabel', {
+                defaultMessage: 'Newsfeed menu - unread items available',
+              })
+            : i18n.translate('newsfeed.headerButton.readAriaLabel', {
+                defaultMessage: 'Newsfeed menu - all items read',
+              })
+        }
+        notification={hasNew ? true : null}
+        onClick={handleClick}
+      >
+        <EuiIcon type="popper" size="m" aria-hidden={true} />
+      </EuiHeaderSectionItemButton>
     </EuiToolTip>
   );
 };
