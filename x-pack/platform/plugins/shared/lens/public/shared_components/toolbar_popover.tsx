@@ -13,7 +13,7 @@ import type { ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { EuiIconLegend } from '@kbn/chart-icons';
 
-const typeToIconMap: { [type: string]: string | IconType } = {
+const typeToIconMap: { [type: string]: IconType } = {
   legend: EuiIconLegend as IconType,
   values: 'number',
   list: 'listBullet',

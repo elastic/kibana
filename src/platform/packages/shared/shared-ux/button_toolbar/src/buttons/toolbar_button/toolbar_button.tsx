@@ -10,7 +10,6 @@
 import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiButton, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
-import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 
 import { ToolbarButtonStyles, fontWeightDefinitions } from './toolbar_button.styles';
 
@@ -22,18 +21,15 @@ type ButtonPositions = 'left' | 'right' | 'center' | 'none';
 
 type ButtonRenderStyle = 'standard' | 'iconButton';
 
-interface ToolbarButtonCommonProps
-  extends Pick<
-    EuiButtonPropsForButton,
-    | 'onClick'
-    | 'onBlur'
-    | 'iconType'
-    | 'size'
-    | 'data-test-subj'
-    | 'isDisabled'
-    | 'aria-label'
-    | 'id'
-  > {
+interface ToolbarButtonCommonProps {
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  onBlur?: React.FocusEventHandler<HTMLButtonElement>;
+  iconType?: IconType;
+  size?: 's' | 'm';
+  'data-test-subj'?: string;
+  isDisabled?: boolean;
+  'aria-label'?: string;
+  id?: string;
   /**
    * Render style of the toolbar button
    */
@@ -45,26 +41,37 @@ interface ToolbarButtonCommonProps
   groupPosition?: ButtonPositions;
 }
 
-type ToolbarStandardButton = Pick<EuiButtonPropsForButton, 'fullWidth' | 'isLoading' | 'iconSide'> &
-  Omit<ToolbarButtonCommonProps, 'label'> & {
-    as?: Extract<ButtonRenderStyle, 'standard'>;
-    /**
-     * Display text for toolbar button
-     */
-    label: React.ReactNode;
-    /**
-     * Determines if the button will have a down arrow or not
-     */
-    hasArrow?: boolean;
-    /**
-     * Determines prominence
-     */
-    fontWeight?: ToolbarButtonFontWeights;
-  };
+type ToolbarStandardButton = ToolbarButtonCommonProps & {
+  as?: Extract<ButtonRenderStyle, 'standard'>;
+  fullWidth?: boolean;
+  isLoading?: boolean;
+  iconSide?: 'left' | 'right';
+  /**
+   * Display text for toolbar button
+   */
+  label: React.ReactNode;
+  /**
+   * Determines if the button will have a down arrow or not
+   */
+  hasArrow?: boolean;
+  /**
+   * Determines prominence
+   */
+  fontWeight?: ToolbarButtonFontWeights;
+};
 
-type ToolbarIconButton = ToolbarButtonCommonProps & {
+type ToolbarIconButton = {
   as: Extract<ButtonRenderStyle, 'iconButton'>;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  onBlur?: React.FocusEventHandler<HTMLButtonElement>;
   iconType: IconType;
+  size?: 's' | 'm';
+  'data-test-subj'?: string;
+  isDisabled?: boolean;
+  'aria-label'?: string;
+  id?: string;
+  type?: ToolbarButtonTypes;
+  groupPosition?: ButtonPositions;
   label?: string;
 };
 
@@ -75,10 +82,8 @@ export type Props<T extends ButtonRenderStyle> = T extends Extract<ButtonRenderS
   ? ToolbarIconButton
   : ToolbarStandardButton;
 
-const isIconButton = (
-  props: ToolbarStandardButton | ToolbarIconButton
-): props is ToolbarIconButton => {
-  return (props as ToolbarIconButton).as === 'iconButton';
+const isIconButton = (props: { as?: ButtonRenderStyle }): props is ToolbarIconButton => {
+  return props.as === 'iconButton';
 };
 
 const computeToolbarButtonCommonCSSProps = (
@@ -87,7 +92,11 @@ const computeToolbarButtonCommonCSSProps = (
     type,
     isDisabled,
     groupPosition,
-  }: Pick<Props<ButtonRenderStyle>, 'type' | 'isDisabled' | 'groupPosition'>
+  }: {
+    type?: ToolbarButtonTypes;
+    isDisabled?: boolean;
+    groupPosition?: ButtonPositions;
+  }
 ) => {
   const toolButtonStyles = ToolbarButtonStyles(euiTheme);
 
@@ -119,7 +128,13 @@ const ToolbarStandardButton = ({
   fullWidth,
   isDisabled,
   groupPosition,
-  ...rest
+  size,
+  onClick,
+  onBlur,
+  isLoading,
+  id,
+  'data-test-subj': dataTestSubj,
+  'aria-label': ariaLabel,
 }: Omit<ToolbarStandardButton, 'as'>) => {
   const euiTheme = useEuiTheme();
   const cssProps = {
@@ -127,39 +142,56 @@ const ToolbarStandardButton = ({
     fontWeight: fontWeightDefinitions(euiTheme.euiTheme)[fontWeight],
   };
 
-  const toolbarButtonStyleProps: EuiButtonPropsForButton = isDisabled
-    ? {}
-    : type === 'primary'
-    ? { color: 'primary', fill: true }
-    : { color: 'text' };
-
-  const icon = iconType ?? (hasArrow ? 'chevronSingleDown' : '');
+  const icon = iconType ?? (hasArrow ? 'chevronSingleDown' : undefined);
 
   return (
     <EuiButton
-      size={rest.size}
+      size={size}
       isDisabled={isDisabled}
       css={cssProps}
       iconType={icon}
       iconSide={iconType ? iconSide : 'right'}
       fullWidth={fullWidth}
       contentProps={fullWidth ? { style: { justifyContent: 'space-between' } } : {}}
-      {...toolbarButtonStyleProps}
-      {...rest}
+      color={isDisabled ? undefined : type === 'primary' ? 'primary' : 'text'}
+      fill={!isDisabled && type === 'primary'}
+      onClick={onClick}
+      onBlur={onBlur}
+      isLoading={isLoading}
+      id={id}
+      data-test-subj={dataTestSubj}
+      aria-label={ariaLabel}
     >
       {label}
     </EuiButton>
   );
 };
 
-const ToolbarIconButton = ({
+const ToolbarIconButtonComponent = ({
   size,
   type,
   label,
   isDisabled,
   groupPosition,
-  ...rest
-}: Omit<ToolbarIconButton, 'as'>) => {
+  iconType,
+  onClick,
+  onBlur,
+  id,
+  'data-test-subj': dataTestSubj,
+  'aria-label': ariaLabel,
+}: {
+  size?: 's' | 'm';
+  type?: ToolbarButtonTypes;
+  label?: string;
+  isDisabled?: boolean;
+  groupPosition?: ButtonPositions;
+  iconType: IconType;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  onBlur?: React.FocusEventHandler<HTMLButtonElement>;
+  id?: string;
+  'data-test-subj'?: string;
+  'aria-label'?: string;
+}) => {
   const euiTheme = useEuiTheme();
   const cssProps = computeToolbarButtonCommonCSSProps(euiTheme, {
     type,
@@ -169,9 +201,13 @@ const ToolbarIconButton = ({
 
   return (
     <EuiButtonIcon
-      {...rest}
+      iconType={iconType}
+      onClick={onClick}
+      onBlur={onBlur}
+      id={id}
+      data-test-subj={dataTestSubj}
       disabled={isDisabled}
-      aria-label={label ?? rest['aria-label']}
+      aria-label={label ?? ariaLabel}
       size={size}
       iconSize={size}
       css={cssProps}
@@ -181,11 +217,13 @@ const ToolbarIconButton = ({
   );
 };
 
-export function ToolbarButton<T extends ButtonRenderStyle>(props: Props<T>) {
+export function ToolbarButton(props: ToolbarStandardButton): JSX.Element;
+export function ToolbarButton(props: ToolbarIconButton): JSX.Element;
+export function ToolbarButton(props: ToolbarStandardButton | ToolbarIconButton) {
   const { type = 'empty', size = 'm' } = props;
 
   if (isIconButton(props)) {
-    return <ToolbarIconButton {...props} size={size} type={type} />;
+    return <ToolbarIconButtonComponent {...props} size={size} type={type} />;
   }
 
   return <ToolbarStandardButton {...props} size={size} type={type} />;

@@ -9,6 +9,7 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
+import type { IconButton } from './icon_button_group';
 import { IconButtonGroup as Component } from './icon_button_group';
 import mdx from '../../../README.mdx';
 
@@ -22,7 +23,7 @@ export default {
   },
 };
 
-const iconButtons = [
+const iconButtons: IconButton[] = [
   {
     label: 'Text',
     onClick: action('onTextClick'),
