@@ -41,7 +41,8 @@ export function useActions(
     aiopsListState,
     timefilter,
     onAddFilter,
-    additionalFilter
+    additionalFilter,
+    onClose
   );
 
   const { getLabels: getOpenInDiscoverLabels, openFunction: openInDiscoverFunction } =
