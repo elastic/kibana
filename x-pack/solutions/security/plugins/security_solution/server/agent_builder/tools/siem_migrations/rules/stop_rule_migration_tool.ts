@@ -39,6 +39,13 @@ export const stopRuleMigrationTool = (
     id: SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
+    annotations: {
+      title: 'Stop Rule Migration',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     confirmation: { askUser: 'always' },
     description: `Stop a running Automatic Rule Migration.
 

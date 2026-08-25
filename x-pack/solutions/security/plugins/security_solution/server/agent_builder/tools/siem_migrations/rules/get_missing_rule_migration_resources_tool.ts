@@ -44,6 +44,13 @@ export const getMissingRuleMigrationResourcesTool = (
     id: SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID,
     type: ToolType.builtin,
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
+    annotations: {
+      title: 'Get Missing Rule Migration Resources',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `List the resources (macros, lookups, reference sets, watchlists) that a rule migration is still missing.
 
 Returns a flat array of { name, type } objects. An empty array means no resources are missing.

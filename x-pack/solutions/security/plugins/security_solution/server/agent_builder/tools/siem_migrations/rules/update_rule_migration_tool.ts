@@ -41,6 +41,13 @@ export const updateRuleMigrationTool = (
     id: SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
+    annotations: {
+      title: 'Update Rule Migration',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     confirmation: { askUser: 'always' },
     description: `Update a rule migration's name.
 

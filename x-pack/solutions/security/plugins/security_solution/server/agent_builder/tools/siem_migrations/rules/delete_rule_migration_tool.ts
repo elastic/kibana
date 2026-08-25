@@ -38,6 +38,13 @@ export const deleteRuleMigrationTool = (
     id: SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID,
     type: ToolType.builtin,
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
+    annotations: {
+      title: 'Delete Rule Migration',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     confirmation: { askUser: 'always' },
     description: `Delete a rule migration and all its associated rule items. This is destructive and irreversible.
 
