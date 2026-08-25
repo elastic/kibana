@@ -59,7 +59,7 @@ export const getAuditStatus$ = ({
   derivedStatus$: Observable<ServiceStatus>;
 }): Observable<ServiceStatus> => {
   if (!writeAccess$) {
-    return derivedStatus$;
+      if (!writeAccess || writeAccess.granted || derived.level >= ServiceStatusLevels.degraded) {
   }
 
   return combineLatest([derivedStatus$, writeAccess$]).pipe(
