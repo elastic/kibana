@@ -19,7 +19,6 @@ consts:
 triggers:
   - type: manual
 steps:
-  # Mappings come from the built-in AI index templates.
   - name: ensure_target_index
     type: elasticsearch.indices.create
     with:
