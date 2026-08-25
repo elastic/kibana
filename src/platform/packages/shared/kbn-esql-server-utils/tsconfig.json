@@ -15,6 +15,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/es-types",
     "@kbn/esql-types"
   ]
 }

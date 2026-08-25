@@ -54,6 +54,7 @@ export const createVerifyKiStepDefinition = (
             logger,
             abortSignal: context.abortSignal,
             verifiers,
+            options: context.input.options,
           }),
       });
 

@@ -12,3 +12,4 @@ export {
   ESQL_VALID_RUNTIME_VERIFIER_ID,
   ESQL_EXECUTION_ROW_LIMIT,
 } from './esql_valid_runtime';
+export { createEsqlValidSchemaVerifier, ESQL_VALID_SCHEMA_VERIFIER_ID } from './esql_valid_schema';

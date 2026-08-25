@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { VerifyKiOptions } from '../../common/step_types/verify_ki_step';
 
 /**
  * A Knowledge Indicator (KI) to verify. Fields mirror the base AI index
@@ -27,6 +28,8 @@ export interface KiVerifierContext {
   abortSignal?: AbortSignal;
   /** KI attribute names containing ES|QL; defaults to ['esql']. */
   esqlAttributes?: string[];
+  /** Per-verifier configuration options, keyed by verifier id. */
+  options?: VerifyKiOptions;
 }
 
 /**

@@ -8,7 +8,7 @@
 import { MAX_KI_ATTRIBUTES, MAX_KI_ATTRIBUTE_VALUE_LENGTH } from './ki';
 import { VerifyKiInputSchema } from './verify_ki_step';
 
-const BASE = { verifiers: ['esql-valid-runtime'] };
+const BASE = { verifiers: ['esql-valid-schema'] };
 
 describe('VerifyKiInputSchema', () => {
   it('accepts a KI with esql attributes', () => {
@@ -43,6 +43,33 @@ describe('VerifyKiInputSchema', () => {
 
   it('rejects an empty verifiers list', () => {
     const result = VerifyKiInputSchema.safeParse({ ki: { type: 'detection' }, verifiers: [] });
+
+    expect(result.success).toBe(false);
+  });
+
+  it.each(['enabled', 'disabled'] as const)(
+    'accepts field_verification mode %s',
+    (fieldVerification) => {
+      const result = VerifyKiInputSchema.safeParse({
+        ...BASE,
+        ki: { type: 'detection' },
+        options: {
+          'esql-valid-schema': { field_verification: fieldVerification },
+        },
+      });
+
+      expect(result.success).toBe(true);
+    }
+  );
+
+  it('rejects an unknown field_verification mode', () => {
+    const result = VerifyKiInputSchema.safeParse({
+      ...BASE,
+      ki: { type: 'detection' },
+      options: {
+        'esql-valid-schema': { field_verification: 'unknown' },
+      },
+    });
 
     expect(result.success).toBe(false);
   });

@@ -6,12 +6,17 @@
  */
 
 import { KiVerifierRegistry } from './registry';
-import { createEsqlValidRuntimeVerifier, createEsqlValidSyntaxVerifier } from './verifiers';
+import {
+  createEsqlValidRuntimeVerifier,
+  createEsqlValidSchemaVerifier,
+  createEsqlValidSyntaxVerifier,
+} from './verifiers';
 
 /** Creates a registry with all built-in KI verifiers registered. */
 export const createKiVerifierRegistry = (): KiVerifierRegistry => {
   const registry = new KiVerifierRegistry();
   registry.register(createEsqlValidSyntaxVerifier());
   registry.register(createEsqlValidRuntimeVerifier());
+  registry.register(createEsqlValidSchemaVerifier());
   return registry;
 };

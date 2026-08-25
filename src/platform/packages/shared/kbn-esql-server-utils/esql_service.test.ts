@@ -114,3 +114,67 @@ describe('EsqlService.getAllIndices', () => {
     });
   });
 });
+
+describe('EsqlService ES|QL validation resources', () => {
+  it('retrieves canonical columns with LIMIT 0 and forwards cancellation', async () => {
+    const query = jest.fn().mockResolvedValue({
+      columns: [
+        { name: 'count', type: 'integer' },
+        {
+          name: 'value',
+          type: 'unsupported',
+          original_types: ['keyword', 'long'],
+        },
+      ],
+      values: [],
+    });
+    const client = { esql: { query } } as unknown as ElasticsearchClient;
+    const service = new EsqlService({ client });
+    const signal = new AbortController().signal;
+
+    await expect(service.getColumns('FROM logs-*', signal)).resolves.toEqual([
+      { name: 'count', type: 'integer', hasConflict: false, userDefined: false },
+      {
+        name: 'value',
+        type: 'unsupported',
+        hasConflict: true,
+        originalTypes: ['keyword', 'long'],
+        userDefined: false,
+      },
+    ]);
+    expect(query).toHaveBeenCalledWith(
+      { query: 'FROM logs-* | LIMIT 0', format: 'json' },
+      { signal }
+    );
+  });
+
+  it('normalizes policy arrays and forwards cancellation', async () => {
+    const getPolicy = jest.fn().mockResolvedValue({
+      policies: [
+        {
+          config: {
+            match: {
+              name: 'geo_policy',
+              indices: 'geo-index',
+              match_field: 'client.ip',
+              enrich_fields: 'geo.city',
+            },
+          },
+        },
+      ],
+    });
+    const client = { enrich: { getPolicy } } as unknown as ElasticsearchClient;
+    const service = new EsqlService({ client });
+    const signal = new AbortController().signal;
+
+    await expect(service.getPolicies(signal)).resolves.toEqual([
+      {
+        name: 'geo_policy',
+        sourceIndices: ['geo-index'],
+        matchField: 'client.ip',
+        enrichFields: ['geo.city'],
+      },
+    ]);
+    expect(getPolicy).toHaveBeenCalledWith({}, { signal });
+  });
+});

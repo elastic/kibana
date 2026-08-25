@@ -8,6 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ESQLColumn } from '@kbn/es-types';
 import {
   type IndicesAutocompleteResult,
   type IndexAutocompleteItem,
@@ -272,9 +273,10 @@ export class EsqlService {
 
   /**
    * Get enrich policies formatted for ES|QL autocomplete.
+   * @param signal Optional signal used to abort the Elasticsearch request.
    * @returns A promise that resolves to an array of enrich policy objects.
    */
-  public async getPolicies(): Promise<
+  public async getPolicies(signal?: AbortSignal): Promise<
     Array<{
       name: string;
       sourceIndices: string[];
@@ -284,16 +286,18 @@ export class EsqlService {
   > {
     const { client } = this.options;
 
-    const response = await client.enrich.getPolicy();
+    const response = await client.enrich.getPolicy({}, { signal });
     return response.policies.flatMap((p) => {
       const config = p.config.match ?? p.config.range ?? p.config.geo_match;
       if (!config?.name) return [];
       return [
         {
           name: config.name,
-          sourceIndices: config.indices as string[],
+          sourceIndices: Array.isArray(config.indices) ? config.indices : [config.indices],
           matchField: config.match_field,
-          enrichFields: config.enrich_fields as string[],
+          enrichFields: Array.isArray(config.enrich_fields)
+            ? config.enrich_fields
+            : [config.enrich_fields],
         },
       ];
     });
@@ -302,23 +306,34 @@ export class EsqlService {
   /**
    * Get columns for an ES|QL query by executing it with LIMIT 0.
    * @param esqlQuery The ES|QL query to get columns for.
+   * @param signal Optional signal used to abort the Elasticsearch request.
    * @returns A promise that resolves to an array of ESQLFieldWithMetadata.
    */
-  public async getColumns(esqlQuery: string): Promise<ESQLFieldWithMetadata[]> {
+  public async getColumns(
+    esqlQuery: string,
+    signal?: AbortSignal
+  ): Promise<ESQLFieldWithMetadata[]> {
     const { client } = this.options;
 
-    const response = await client.esql.query({
-      query: `${esqlQuery} | LIMIT 0`,
-      format: 'json',
-    });
+    const response = await client.esql.query(
+      {
+        query: `${esqlQuery} | LIMIT 0`,
+        format: 'json',
+      },
+      { signal }
+    );
 
-    return (
-      (response.columns as Array<{ name: string; type: string }>)?.map((c) => ({
-        name: c.name,
-        type: c.type as EsqlFieldType,
-        hasConflict: false,
-        userDefined: false,
-      })) ?? []
+    return (response.columns as ESQLColumn[]).map(
+      ({ name, type, original_types: originalTypes }) => {
+        const hasConflict = type === 'unsupported' && (originalTypes?.length ?? 0) > 1;
+        return {
+          name,
+          type: type as EsqlFieldType,
+          hasConflict,
+          ...(hasConflict ? { originalTypes } : {}),
+          userDefined: false,
+        };
+      }
     );
   }
 }

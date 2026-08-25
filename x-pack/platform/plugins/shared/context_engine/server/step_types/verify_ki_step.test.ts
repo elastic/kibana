@@ -5,36 +5,49 @@
  * 2.0.
  */
 
+import { errors, type estypes } from '@elastic/elasticsearch';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { createVerifyKiStepDefinition } from './verify_ki_step';
-import { ESQL_VALID_RUNTIME_VERIFIER_ID, ESQL_VALID_SYNTAX_VERIFIER_ID } from '../ki_verification';
+import {
+  ESQL_VALID_RUNTIME_VERIFIER_ID,
+  ESQL_VALID_SCHEMA_VERIFIER_ID,
+  ESQL_VALID_SYNTAX_VERIFIER_ID,
+} from '../ki_verification';
 import { mockKiStepTelemetry } from './test_utils';
 
 type VerifyKiHandler = ReturnType<typeof createVerifyKiStepDefinition>['handler'];
 type VerifyKiHandlerContext = Parameters<VerifyKiHandler>[0];
 type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+interface HandlerOptions {
+  verifiers?: string[];
+  options?: VerifyKiHandlerContext['input']['options'];
+  abortSignal?: AbortSignal;
+  getScopedEsClient?: () => unknown;
+}
+
+const createPolicyResponse = (): estypes.EnrichGetPolicyResponse => ({ policies: [] });
+
+const esResponseError = (type: string, reason: string, statusCode: number) =>
+  new errors.ResponseError(
+    elasticsearchClientMock.createApiResponse({ statusCode, body: { error: { type, reason } } })
+  );
 
 const makeHandlerContext = (
   ki: VerifyKiHandlerContext['input']['ki'],
   esClient: EsClientMock,
-  {
-    verifiers,
-    getScopedEsClient,
-  }: {
-    verifiers?: string[];
-    getScopedEsClient?: () => unknown;
-  } = {}
+  { verifiers, options, abortSignal, getScopedEsClient }: HandlerOptions = {}
 ): VerifyKiHandlerContext =>
   ({
-    input: { ki, verifiers },
+    input: { ki, verifiers, options },
     config: {},
-    rawInput: { ki, verifiers },
+    rawInput: { ki, verifiers, options },
     contextManager: {
       getFakeRequest: jest.fn(),
       getScopedEsClient: getScopedEsClient ?? jest.fn().mockReturnValue(esClient),
     },
     logger: loggingSystemMock.createLogger(),
-    abortSignal: new AbortController().signal,
+    abortSignal: abortSignal ?? new AbortController().signal,
     stepId: 'verify_ki',
     stepType: 'context-engine.verifyKi',
   } as unknown as VerifyKiHandlerContext);
@@ -58,7 +71,14 @@ describe('verify_ki workflow step', () => {
     } as unknown as ReturnType<typeof startServices.uiSettings.asScopedToClient>);
     coreSetup.getStartServices.mockResolvedValue([startServices, {}, undefined]);
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+    esClient.fieldCaps.mockResolvedValue({ indices: ['logs-2026'], fields: {} });
+    esClient.esql.query.mockImplementation(async (request) => ({
+      columns: request?.query.includes('LIMIT 0')
+        ? [{ name: 'event.outcome', type: 'keyword' }]
+        : [],
+      values: [],
+    }));
+    esClient.enrich.getPolicy.mockResolvedValue(createPolicyResponse());
     telemetry = mockKiStepTelemetry();
   });
 
@@ -67,7 +87,7 @@ describe('verify_ki workflow step', () => {
 
   const runHandler = async (
     ki: VerifyKiHandlerContext['input']['ki'],
-    opts: { verifiers?: string[] } = {}
+    opts: HandlerOptions = {}
   ) => {
     const { output } = await makeDefinition().handler(makeHandlerContext(ki, esClient, opts));
     if (!output) {
@@ -76,7 +96,11 @@ describe('verify_ki workflow step', () => {
     return output;
   };
 
-  const ALL_ESQL_VERIFIERS = [ESQL_VALID_SYNTAX_VERIFIER_ID, ESQL_VALID_RUNTIME_VERIFIER_ID];
+  const ALL_ESQL_VERIFIERS = [
+    ESQL_VALID_SYNTAX_VERIFIER_ID,
+    ESQL_VALID_RUNTIME_VERIFIER_ID,
+    ESQL_VALID_SCHEMA_VERIFIER_ID,
+  ];
 
   it('throws when verifiers is not specified', async () => {
     setContextEngineEnabled(true);
@@ -101,6 +125,7 @@ describe('verify_ki workflow step', () => {
     expect(output.results).toEqual([
       { verifier: ESQL_VALID_SYNTAX_VERIFIER_ID, passed: true },
       { verifier: ESQL_VALID_RUNTIME_VERIFIER_ID, passed: true },
+      { verifier: ESQL_VALID_SCHEMA_VERIFIER_ID, passed: true },
     ]);
   });
 
@@ -113,6 +138,66 @@ describe('verify_ki workflow step', () => {
     );
 
     expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards schema options and still verifies index existence when fields are disabled', async () => {
+    setContextEngineEnabled(true);
+
+    const output = await runHandler(
+      { attributes: { esql: 'FROM logs-* | WHERE missing > 0' } },
+      {
+        verifiers: [ESQL_VALID_SCHEMA_VERIFIER_ID],
+        options: { 'esql-valid-schema': { field_verification: 'disabled' } },
+      }
+    );
+
+    expect(output).toEqual({
+      passed: true,
+      results: [{ verifier: ESQL_VALID_SCHEMA_VERIFIER_ID, passed: true }],
+    });
+    expect(esClient.esql.query).toHaveBeenCalled();
+    expect(esClient.fieldCaps).toHaveBeenCalled();
+  });
+
+  it('propagates infrastructure failures raised during semantic validation', async () => {
+    setContextEngineEnabled(true);
+    esClient.esql.query.mockImplementation(async (request) => {
+      if (request?.query.includes('lookup_index')) {
+        throw esResponseError('too_many_requests', 'metadata throttled', 429);
+      }
+      return { columns: [{ name: 'event.outcome', type: 'keyword' }], values: [] };
+    });
+
+    await expect(
+      runHandler(
+        {
+          attributes: {
+            esql: 'FROM logs-* | LOOKUP JOIN lookup_index ON event.outcome',
+          },
+        },
+        { verifiers: [ESQL_VALID_SCHEMA_VERIFIER_ID] }
+      )
+    ).rejects.toBeInstanceOf(errors.ResponseError);
+  });
+
+  it('propagates cancellation during schema metadata retrieval', async () => {
+    setContextEngineEnabled(true);
+    const abortController = new AbortController();
+    esClient.esql.query.mockImplementation(async (_request, options) => {
+      abortController.abort();
+      options?.signal?.throwIfAborted();
+      return { columns: [], values: [] };
+    });
+
+    await expect(
+      runHandler(
+        { attributes: { esql: 'FROM logs-*' } },
+        {
+          verifiers: [ESQL_VALID_SCHEMA_VERIFIER_ID],
+          abortSignal: abortController.signal,
+        }
+      )
+    ).rejects.toThrow(/abort/i);
   });
 
   it('fails a KI with invalid ES|QL and reports the reason', async () => {
@@ -131,6 +216,11 @@ describe('verify_ki workflow step', () => {
         reason: expect.stringContaining('NOT_A_FUNCTION'),
       },
       { verifier: ESQL_VALID_RUNTIME_VERIFIER_ID, passed: true },
+      {
+        verifier: ESQL_VALID_SCHEMA_VERIFIER_ID,
+        passed: false,
+        reason: expect.stringContaining('NOT_A_FUNCTION'),
+      },
     ]);
   });
 

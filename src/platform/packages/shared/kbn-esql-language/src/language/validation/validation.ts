@@ -17,6 +17,7 @@ import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { errors, getExpressionType, getMessageFromId } from '../../commands/definitions/utils';
 import { areCompatibleStringTypes } from '../../commands/definitions/utils/signatures';
 import { QueryColumns } from '../../query_columns_service';
+import { QueryColumnsCache } from '../../query_columns_service/query_columns_cache';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getInSubqueries, getSubqueriesToValidate, type InSubqueryReference } from './subqueries';
@@ -118,6 +119,7 @@ async function validateAst(
   }
 
   const unmappedFieldsStrategyFromHeader = getUnmappedFieldsStrategy(headerCommands);
+  const columnsCache = new QueryColumnsCache();
 
   /**
    * Even though we are validating single commands, we work with subqueries.
@@ -140,7 +142,13 @@ async function validateAst(
         : queryString;
 
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(subqueryForColumns, queryForColumns, callbacks, options).asMap()
+      ? await new QueryColumns(
+          subqueryForColumns,
+          queryForColumns,
+          callbacks,
+          options,
+          columnsCache
+        ).asMap()
       : new Map();
 
     const references: ReferenceMaps = {
@@ -187,7 +195,7 @@ async function validateAst(
       // Cheap anyway: its source columns were already cached earlier in this loop.
       const rightColumns = await Promise.all(
         inSubqueries.map(({ query }) =>
-          new QueryColumns(query, queryString, callbacks, options).asMap()
+          new QueryColumns(query, queryString, callbacks, options, columnsCache).asMap()
         )
       );
       messages.push(
