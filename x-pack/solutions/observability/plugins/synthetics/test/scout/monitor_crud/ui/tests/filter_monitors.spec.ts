@@ -12,8 +12,7 @@ import { test } from '../../../common/ui/fixtures';
 const FIRST_TAG = 'a';
 const SECOND_TAG = 'b';
 
-// Failing: See https://github.com/elastic/kibana/issues/257334
-test.describe.skip(
+test.describe(
   'FilterMonitors',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
