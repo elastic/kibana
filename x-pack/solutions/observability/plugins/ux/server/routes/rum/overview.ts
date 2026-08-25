@@ -23,15 +23,8 @@ import {
 } from '../../../common/rum_app';
 import { groupingFromSettings } from '../../../common/session_replay_settings';
 import { rangeSpanMs } from '../../../common/rum_daily';
-import { canUseSessionIndex } from '../../../common/rum_sessions';
+import { canUseSessionIndex, rangeIncludesOpenTail } from '../../../common/rum_sessions';
 import { readSessionReplaySettings } from '../session_replay/settings';
-import { SAMPLE_SOURCE } from '../session_replay/list_sessions';
-import { SESSION_ID_SCRIPT } from '../session_replay/session_id_script';
-import {
-  collectSessionSignals,
-  countDeadAndErrorClicks,
-  type OtelHit,
-} from '../session_replay/session_attributes';
 import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
 import { resolveRumDaily } from '../../transforms/rum_daily';
 import { queryDailyOverview } from '../../transforms/rum_daily_query';
@@ -41,6 +34,7 @@ import {
   querySessionIndexKpis,
   sessionIndexParamsFromQuery,
 } from '../../transforms/rum_sessions_query';
+import { resolveNewTailSessionIds } from '../../transforms/rum_sessions_tail';
 import { rumEsSearchOptions } from './es_retry';
 import { getRumSearchClient } from '../../lib/rum_search_client';
 import {
@@ -52,6 +46,7 @@ import {
   WEB_VITAL_FILTER,
   cardValue,
   facetFromScriptTerms,
+  frustrationEventFilter,
   pagePathTerms,
   percentileValue,
   rumBaseFilters,
@@ -96,7 +91,17 @@ const overlaySessionIndex = async (
     return result;
   }
   const sessionParams = sessionIndexParamsFromQuery(query, watermark);
-  const [slice, facets] = await Promise.all([
+  const tailPromise =
+    watermark && rangeIncludesOpenTail(query.rangeTo, watermark)
+      ? resolveNewTailSessionIds({
+          client,
+          rangeFrom: watermark,
+          rangeTo: query.rangeTo || 'now',
+          serviceName: query.serviceName,
+          kuery: query.kuery,
+        })
+      : Promise.resolve([]);
+  const [slice, facets, tailIds] = await Promise.all([
     querySessionIndexKpis({
       client,
       ...sessionParams,
@@ -105,22 +110,26 @@ const overlaySessionIndex = async (
       client,
       ...sessionParams,
     }),
+    tailPromise,
   ]);
+  const sessions = slice.sessions + tailIds.length;
   return {
     ...result,
     trends: applySessionIndexTrendSessions(result.trends, slice.trends),
     kpis: {
       ...result.kpis,
-      sessions: slice.sessions,
+      sessions,
       pageViews: slice.pageViews,
       errorSessions: slice.errorSessions,
-      errorRate: slice.sessions > 0 ? slice.errorSessions / slice.sessions : 0,
+      errorRate: sessions > 0 ? slice.errorSessions / sessions : 0,
     },
     frustration: {
       ...result.frustration,
       rageSessions: slice.rageSessions,
       errorSessions: slice.errorSessions,
       deadClickSessions: slice.deadSessions,
+      rageClicks: slice.rageClicks,
+      deadClicks: slice.deadClicks,
     },
     browsers: facets.browsers.length > 0 ? facets.browsers : result.browsers,
     os: facets.os.length > 0 ? facets.os : result.os,
@@ -230,200 +239,180 @@ export const getRumOverviewRoute = createUxServerRoute({
     }
     const filters = rumBaseFilters(params.query);
 
-    const [aggResult, sessionSample] = await Promise.all([
-      client.search(
-        {
-          index: RUM_SESSION_SOURCE_INDEX,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          size: 0,
-          query: { bool: { filter: filters } },
-          aggs: {
-            sessions: sessionCardinality,
-            page_views: { filter: PAGE_VIEW_FILTER },
-            error_sessions: {
-              filter: EXCEPTION_FILTER,
-              aggs: { sessions: sessionCardinality },
-            },
-            load_duration: {
-              filter: DOCUMENT_LOAD_FILTER,
-              aggs: {
-                p75_ns: { percentiles: { field: 'duration', percents: [75] } },
-                p75_us: {
-                  percentiles: { field: 'attributes.transaction.duration.us', percents: [75] },
-                },
+    const aggResult = await client.search(
+      {
+        index: RUM_SESSION_SOURCE_INDEX,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: 0,
+        query: { bool: { filter: filters } },
+        aggs: {
+          sessions: sessionCardinality,
+          page_views: { filter: PAGE_VIEW_FILTER },
+          error_sessions: {
+            filter: EXCEPTION_FILTER,
+            aggs: { sessions: sessionCardinality },
+          },
+          rage_clicks: { filter: frustrationEventFilter('rage_click') },
+          dead_clicks: { filter: frustrationEventFilter('dead_click') },
+          error_clicks: { filter: frustrationEventFilter('error_click') },
+          rage_sessions: {
+            filter: frustrationEventFilter('rage_click'),
+            aggs: { sessions: sessionCardinality },
+          },
+          dead_sessions: {
+            filter: frustrationEventFilter('dead_click'),
+            aggs: { sessions: sessionCardinality },
+          },
+          load_duration: {
+            filter: DOCUMENT_LOAD_FILTER,
+            aggs: {
+              p75_ns: { percentiles: { field: 'duration', percents: [75] } },
+              p75_us: {
+                percentiles: { field: 'attributes.transaction.duration.us', percents: [75] },
               },
             },
-            vitals: {
-              filter: WEB_VITAL_FILTER,
-              aggs: {
-                by_name: {
-                  terms: { field: 'attributes.browser.web_vital.name', size: 10 },
-                  aggs: {
-                    p75: {
-                      percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] },
-                    },
-                    ranks_lcp: {
-                      percentile_ranks: {
-                        field: 'attributes.browser.web_vital.value',
-                        values: [2500, 4000],
-                      },
-                    },
-                    ranks_inp: {
-                      percentile_ranks: {
-                        field: 'attributes.browser.web_vital.value',
-                        values: [200, 500],
-                      },
-                    },
-                    ranks_cls: {
-                      percentile_ranks: {
-                        field: 'attributes.browser.web_vital.value',
-                        values: [0.1, 0.25],
-                      },
-                    },
-                    ranks_fcp: {
-                      percentile_ranks: {
-                        field: 'attributes.browser.web_vital.value',
-                        values: [1800, 3000],
-                      },
+          },
+          vitals: {
+            filter: WEB_VITAL_FILTER,
+            aggs: {
+              by_name: {
+                terms: { field: 'attributes.browser.web_vital.name', size: 10 },
+                aggs: {
+                  p75: {
+                    percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] },
+                  },
+                  ranks_lcp: {
+                    percentile_ranks: {
+                      field: 'attributes.browser.web_vital.value',
+                      values: [2500, 4000],
                     },
                   },
-                },
-              },
-            },
-            trends: {
-              auto_date_histogram: { field: '@timestamp', buckets: 24 },
-              aggs: {
-                sessions: sessionCardinality,
-                page_views: { filter: PAGE_VIEW_FILTER },
-                errors: { filter: EXCEPTION_FILTER },
-              },
-            },
-            top_pages: {
-              ...pagePathTerms(8),
-              aggs: {
-                views: { filter: PAGE_VIEW_FILTER },
-                errors: { filter: EXCEPTION_FILTER },
-                lcp: {
-                  filter: {
-                    bool: {
-                      filter: [
-                        WEB_VITAL_FILTER,
-                        { term: { 'attributes.browser.web_vital.name': 'lcp' } },
-                      ],
+                  ranks_inp: {
+                    percentile_ranks: {
+                      field: 'attributes.browser.web_vital.value',
+                      values: [200, 500],
                     },
                   },
-                  aggs: {
-                    p75: {
-                      percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] },
+                  ranks_cls: {
+                    percentile_ranks: {
+                      field: 'attributes.browser.web_vital.value',
+                      values: [0.1, 0.25],
                     },
                   },
-                },
-                inp: {
-                  filter: {
-                    bool: {
-                      filter: [
-                        WEB_VITAL_FILTER,
-                        { term: { 'attributes.browser.web_vital.name': 'inp' } },
-                      ],
-                    },
-                  },
-                  aggs: {
-                    p75: {
-                      percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] },
-                    },
-                  },
-                },
-                cls: {
-                  filter: {
-                    bool: {
-                      filter: [
-                        WEB_VITAL_FILTER,
-                        { term: { 'attributes.browser.web_vital.name': 'cls' } },
-                      ],
-                    },
-                  },
-                  aggs: {
-                    p75: {
-                      percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] },
-                    },
-                  },
-                },
-                load: {
-                  filter: DOCUMENT_LOAD_FILTER,
-                  aggs: {
-                    avg_ns: { avg: { field: 'duration' } },
-                    avg_us: { avg: { field: 'attributes.transaction.duration.us' } },
-                  },
-                },
-              },
-            },
-            browsers: {
-              terms: { script: { source: BROWSER_SCRIPT, lang: 'painless' }, size: 8, exclude: '' },
-            },
-            os: {
-              terms: { script: { source: OS_SCRIPT, lang: 'painless' }, size: 8, exclude: '' },
-            },
-            countries: {
-              terms: { field: 'client.geo.country_iso_code', size: 12, missing: '' },
-              aggs: {
-                country_name: {
-                  terms: { field: 'client.geo.country_name', size: 1 },
-                },
-                views: { filter: PAGE_VIEW_FILTER },
-                errors: { filter: EXCEPTION_FILTER },
-                sessions: sessionCardinality,
-                lcp: {
-                  filter: {
-                    bool: {
-                      filter: [
-                        WEB_VITAL_FILTER,
-                        { term: { 'attributes.browser.web_vital.name': 'lcp' } },
-                      ],
-                    },
-                  },
-                  aggs: {
-                    p75: {
-                      percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] },
+                  ranks_fcp: {
+                    percentile_ranks: {
+                      field: 'attributes.browser.web_vital.value',
+                      values: [1800, 3000],
                     },
                   },
                 },
               },
             },
           },
-        },
-        rumEsSearchOptions
-      ),
-      client.search(
-        {
-          index: RUM_SESSION_SOURCE_INDEX,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          size: 0,
-          query: { bool: { filter: filters } },
-          aggs: {
-            sessions: {
-              terms: {
-                script: { source: SESSION_ID_SCRIPT, lang: 'painless' },
-                size: 200,
-                exclude: '',
+          trends: {
+            auto_date_histogram: { field: '@timestamp', buckets: 24 },
+            aggs: {
+              sessions: sessionCardinality,
+              page_views: { filter: PAGE_VIEW_FILTER },
+              errors: { filter: EXCEPTION_FILTER },
+            },
+          },
+          top_pages: {
+            ...pagePathTerms(8),
+            aggs: {
+              views: { filter: PAGE_VIEW_FILTER },
+              errors: { filter: EXCEPTION_FILTER },
+              lcp: {
+                filter: {
+                  bool: {
+                    filter: [
+                      WEB_VITAL_FILTER,
+                      { term: { 'attributes.browser.web_vital.name': 'lcp' } },
+                    ],
+                  },
+                },
+                aggs: {
+                  p75: {
+                    percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] },
+                  },
+                },
               },
-              aggs: {
-                error_count: { filter: EXCEPTION_FILTER },
-                sample: {
-                  top_hits: {
-                    size: 80,
-                    sort: [{ '@timestamp': 'asc' as const }],
-                    _source: SAMPLE_SOURCE,
+              inp: {
+                filter: {
+                  bool: {
+                    filter: [
+                      WEB_VITAL_FILTER,
+                      { term: { 'attributes.browser.web_vital.name': 'inp' } },
+                    ],
+                  },
+                },
+                aggs: {
+                  p75: {
+                    percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] },
+                  },
+                },
+              },
+              cls: {
+                filter: {
+                  bool: {
+                    filter: [
+                      WEB_VITAL_FILTER,
+                      { term: { 'attributes.browser.web_vital.name': 'cls' } },
+                    ],
+                  },
+                },
+                aggs: {
+                  p75: {
+                    percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] },
+                  },
+                },
+              },
+              load: {
+                filter: DOCUMENT_LOAD_FILTER,
+                aggs: {
+                  avg_ns: { avg: { field: 'duration' } },
+                  avg_us: { avg: { field: 'attributes.transaction.duration.us' } },
+                },
+              },
+            },
+          },
+          browsers: {
+            terms: { script: { source: BROWSER_SCRIPT, lang: 'painless' }, size: 8, exclude: '' },
+          },
+          os: {
+            terms: { script: { source: OS_SCRIPT, lang: 'painless' }, size: 8, exclude: '' },
+          },
+          countries: {
+            terms: { field: 'client.geo.country_iso_code', size: 12, missing: '' },
+            aggs: {
+              country_name: {
+                terms: { field: 'client.geo.country_name', size: 1 },
+              },
+              views: { filter: PAGE_VIEW_FILTER },
+              errors: { filter: EXCEPTION_FILTER },
+              sessions: sessionCardinality,
+              lcp: {
+                filter: {
+                  bool: {
+                    filter: [
+                      WEB_VITAL_FILTER,
+                      { term: { 'attributes.browser.web_vital.name': 'lcp' } },
+                    ],
+                  },
+                },
+                aggs: {
+                  p75: {
+                    percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] },
                   },
                 },
               },
             },
           },
         },
-        rumEsSearchOptions
-      ),
-    ]);
+      },
+      rumEsSearchOptions
+    );
 
     const aggs = (aggResult.aggregations ?? {}) as Record<string, unknown>;
     const sessions = cardValue(aggs.sessions);
@@ -501,41 +490,15 @@ export const getRumOverviewRoute = createUxServerRoute({
       errors: (bucket.errors as { doc_count?: number } | undefined)?.doc_count ?? 0,
     }));
 
-    const sampleBuckets =
-      (
-        sessionSample.aggregations as {
-          sessions?: {
-            buckets?: Array<{
-              key: string;
-              error_count?: { doc_count: number };
-              sample?: { hits?: { hits?: OtelHit[] } };
-            }>;
-          };
-        }
-      )?.sessions?.buckets ?? [];
-
-    let rageSessions = 0;
-    let deadClickSessions = 0;
-    let rageClicks = 0;
-    let deadClicks = 0;
-    let errorClicks = 0;
-    for (const bucket of sampleBuckets) {
-      if (!bucket.key) {
-        continue;
-      }
-      const hits = bucket.sample?.hits?.hits ?? [];
-      const { clicks } = collectSessionSignals(hits);
-      const { dead, errorClicks: errClicks, rage } = countDeadAndErrorClicks(hits, clicks);
-      if (rage > 0) {
-        rageSessions += 1;
-        rageClicks += rage;
-      }
-      if (dead > 0) {
-        deadClickSessions += 1;
-        deadClicks += dead;
-      }
-      errorClicks += errClicks;
-    }
+    const rageSessions = cardValue(
+      (aggs.rage_sessions as { sessions?: unknown } | undefined)?.sessions
+    );
+    const deadClickSessions = cardValue(
+      (aggs.dead_sessions as { sessions?: unknown } | undefined)?.sessions
+    );
+    const rageClicks = (aggs.rage_clicks as { doc_count?: number } | undefined)?.doc_count ?? 0;
+    const deadClicks = (aggs.dead_clicks as { doc_count?: number } | undefined)?.doc_count ?? 0;
+    const errorClicks = (aggs.error_clicks as { doc_count?: number } | undefined)?.doc_count ?? 0;
 
     const sessionParams = sessionIndexParamsFromQuery(params.query, status.watermark);
     const destCountries = status.installed

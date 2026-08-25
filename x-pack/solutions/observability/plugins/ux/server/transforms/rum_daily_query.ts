@@ -1072,7 +1072,7 @@ export const queryDailyPages = async ({
 }): Promise<RumPagesResponse> => {
   const fillTail = rangeIncludesOpenTail(rangeTo, watermark ?? '');
   const useServiceViews = Boolean(useService) && !pageUrl;
-  const [result, tail, serviceResult] = await Promise.all([
+  const [result, tail, serviceResult, uniqueResult] = await Promise.all([
     client.search(
       {
         index: RUM_PAGES_DAILY_INDEX,
@@ -1126,6 +1126,28 @@ export const queryDailyPages = async ({
           rumEsSearchOptions
         )
       : Promise.resolve(null),
+    client.search(
+      {
+        index: RUM_SESSION_SOURCE_INDEX,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: 0,
+        query: {
+          bool: {
+            filter: rumBaseFilters({
+              rangeFrom,
+              rangeTo,
+              serviceName,
+              pageUrl,
+              includeBots,
+              botUa,
+            }),
+          },
+        },
+        aggs: { sessions: sessionCardinality },
+      },
+      rumEsSearchOptions
+    ),
   ]);
 
   const pages = mergePageRowsByPath(
@@ -1136,7 +1158,7 @@ export const queryDailyPages = async ({
   );
   const kpis = summarizePagesKpis(
     pages,
-    pages.reduce((sum, page) => sum + page.sessionCount, 0)
+    cardValue((uniqueResult.aggregations as { sessions?: unknown } | undefined)?.sessions)
   );
   const servicePageViews = serviceResult
     ? sumValue((serviceResult.aggregations as { page_views?: unknown } | undefined)?.page_views)

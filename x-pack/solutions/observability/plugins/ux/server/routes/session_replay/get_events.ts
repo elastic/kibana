@@ -40,13 +40,16 @@ export const getSessionReplayEventsRoute = createUxServerRoute({
   params: t.intersection([
     t.type({
       path: t.type({
-        sessionId: t.string,
+        sessionId: boundedString(128),
       }),
     }),
     t.partial({
       query: t.partial({
         afterEvent: boundedString(16),
         size: boundedString(8),
+        rangeFrom: boundedString(64),
+        rangeTo: boundedString(64),
+        serviceName: boundedString(256),
       }),
     }),
   ]),

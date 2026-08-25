@@ -92,7 +92,7 @@ const WEB_VITAL_FILTER = {
 
 const vitalValue = 'attributes.browser.web_vital.value';
 
-const sessionVitalAgg = (name: 'lcp' | 'inp' | 'cls') => ({
+const sessionVitalAgg = (name: 'lcp' | 'inp' | 'cls' | 'fcp' | 'ttfb') => ({
   filter: {
     bool: {
       filter: [WEB_VITAL_FILTER, { term: { 'attributes.browser.web_vital.name': name } }],
@@ -215,6 +215,10 @@ export const rumSessionsIndexMappings = {
     inp_samples: { type: 'long' },
     cls_p75: { type: 'double' },
     cls_samples: { type: 'long' },
+    fcp_p75: { type: 'double' },
+    fcp_samples: { type: 'long' },
+    ttfb_p75: { type: 'double' },
+    ttfb_samples: { type: 'long' },
     entry_page: { type: 'keyword' },
     exit_page: { type: 'keyword' },
     path_key: { type: 'keyword' },
@@ -441,6 +445,7 @@ export const rumSessionsDestPipeline = {
           if (ctx.has_replay instanceof Map) {
             def n = ctx.has_replay.doc_count;
             replay = n != null && n > 0;
+            if (n instanceof Number) { ctx.replay_event_count = ((Number) n).longValue(); }
           } else if (ctx.has_replay instanceof Boolean) {
             replay = ctx.has_replay;
           } else if (ctx.has_replay instanceof Number) {
@@ -467,6 +472,14 @@ export const rumSessionsDestPipeline = {
           if (ctx.cls instanceof Map) {
             ctx.cls_p75 = p75Of(ctx.cls.p75);
             ctx.cls_samples = samplesOf(ctx.cls);
+          }
+          if (ctx.fcp instanceof Map) {
+            ctx.fcp_p75 = p75Of(ctx.fcp.p75);
+            ctx.fcp_samples = samplesOf(ctx.fcp);
+          }
+          if (ctx.ttfb instanceof Map) {
+            ctx.ttfb_p75 = p75Of(ctx.ttfb.p75);
+            ctx.ttfb_samples = samplesOf(ctx.ttfb);
           }
           def groups = ctx.error_groups;
           if (groups instanceof Map && groups.groups instanceof Map) {
@@ -550,6 +563,8 @@ export const rumSessionsDestPipeline = {
           ctx.remove('lcp');
           ctx.remove('inp');
           ctx.remove('cls');
+          ctx.remove('fcp');
+          ctx.remove('ttfb');
         `,
       },
     },
@@ -633,6 +648,8 @@ export const buildRumSessionsTransformBody = (
       lcp: sessionVitalAgg('lcp'),
       inp: sessionVitalAgg('inp'),
       cls: sessionVitalAgg('cls'),
+      fcp: sessionVitalAgg('fcp'),
+      ttfb: sessionVitalAgg('ttfb'),
       page_first: {
         filter: PAGE_VIEW_FILTER,
         aggs: { token: earliestSeen(RUM_CANONICAL_URL_PATH_GROUPED_FIELD) },

@@ -33,6 +33,8 @@ describe('rumSessionsTransformBody', () => {
     });
     expect(aggregations.error_groups.aggs.groups.terms.size).toBe(5);
     expect(aggregations.lcp.aggs.p75).toBeDefined();
+    expect(aggregations.fcp.aggs.p75).toBeDefined();
+    expect(aggregations.ttfb.aggs.p75).toBeDefined();
     expect(aggregations).not.toHaveProperty('sequences');
     expect(JSON.stringify(aggregations)).not.toContain('scripted_metric');
     expect(aggregations.page_first.aggs.token.top_metrics.size).toBe(1);
@@ -60,7 +62,7 @@ describe('rumSessionsTransformBody', () => {
         { field: 'resource.attributes.user.email' },
       ])
     );
-    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 6 }));
+    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 7 }));
   });
 
   it('defaults sync delay to 5m and accepts an override', () => {
@@ -123,6 +125,9 @@ describe('rumSessionsDestPipeline', () => {
     expect(source).toContain('ctx.user.key');
     expect(source).toContain('resource.attributes.client.geo.country_iso_code');
     expect(source).toContain('ctx.page_first');
+    expect(source).toContain('ctx.replay_event_count');
+    expect(source).toContain('ctx.fcp_p75');
+    expect(source).toContain('ctx.ttfb_p75');
     expect(source).not.toContain('ctx.sequences');
   });
 });

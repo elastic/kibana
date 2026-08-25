@@ -352,6 +352,22 @@ const isFollowUpName = (name: string | null): boolean => {
   );
 };
 
+export const exceptionMessageFromSource = (source: Record<string, unknown>): string => {
+  const direct =
+    attrString(source, 'exception.message') || attrString(source, 'error.message') || '';
+  if (direct.trim()) {
+    return direct;
+  }
+  const type = attrString(source, 'exception.type') || attrString(source, 'error.type') || '';
+  const stack =
+    attrString(source, 'exception.stacktrace') || attrString(source, 'error.stacktrace') || '';
+  const first = (stack.split('\n')[0] ?? '').trim();
+  if (type && first.startsWith(`${type}:`)) {
+    return first.slice(type.length + 1).trim();
+  }
+  return first;
+};
+
 export const errorGroupFromHit = (
   source: Record<string, unknown>
 ): {
@@ -364,8 +380,7 @@ export const errorGroupFromHit = (
     return null;
   }
   const type = attrString(source, 'exception.type') || attrString(source, 'error.type') || 'Error';
-  const message =
-    attrString(source, 'exception.message') || attrString(source, 'error.message') || '';
+  const message = exceptionMessageFromSource(source);
   const groupingKey =
     attrString(source, 'error.grouping_key') || attrString(source, 'grouping_key');
   return {

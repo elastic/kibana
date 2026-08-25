@@ -9,6 +9,7 @@ import {
   enrichRumAppInventory,
   mergeRumAppRows,
   mergeRumAppsResponses,
+  overlayAppInventoryVitals,
   parseRumSessionTraffic,
   rumAppFromBucket,
   rumAppOpportunity,
@@ -333,5 +334,39 @@ describe('mergeRumAppsResponses', () => {
       { timestamp: 0, sessions: 4 },
       { timestamp: 86_400_000, sessions: 9 },
     ]);
+  });
+});
+
+describe('overlayAppInventoryVitals', () => {
+  it('keeps dest session counts and fills FCP/TTFB from raw', () => {
+    const indexed = [
+      rumAppFromBucket({
+        name: 'shop',
+        sessions: 10,
+        pageViews: 20,
+        errorSessions: 1,
+        p75Lcp: 4000,
+        p75Fcp: null,
+        p75Ttfb: null,
+        platformKeys: ['web'],
+      }),
+    ];
+    const vitals = [
+      rumAppFromBucket({
+        name: 'shop',
+        sessions: 99,
+        pageViews: 99,
+        errorSessions: 9,
+        p75Lcp: 2100,
+        p75Fcp: 1400,
+        p75Ttfb: 200,
+        platformKeys: ['web'],
+      }),
+    ];
+    const next = overlayAppInventoryVitals(indexed, vitals);
+    expect(next[0]?.sessions).toBe(10);
+    expect(next[0]?.p75Lcp).toBe(2100);
+    expect(next[0]?.p75Fcp).toBe(1400);
+    expect(next[0]?.p75Ttfb).toBe(200);
   });
 });

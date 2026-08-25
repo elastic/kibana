@@ -115,7 +115,8 @@ export const shouldQueryDailyIndex = ({
     return false;
   }
   const span = rangeSpanMs(rangeFrom, rangeTo);
-  return span != null && span > RUM_DAILY_LONG_RANGE_MS;
+  // Inclusive `now` rounding can add a few ms; keep Last 7 days (`now-7d`) off daily.
+  return span != null && span - RUM_DAILY_LONG_RANGE_MS > 60_000;
 };
 
 /** Daily rollups: service + date + optional page, or browser-daily when only browser is set. */

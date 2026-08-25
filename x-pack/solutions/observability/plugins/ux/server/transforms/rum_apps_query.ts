@@ -22,6 +22,7 @@ import {
   enrichRumAppInventory,
   mergeRumAppRows,
   mergeRumAppsResponses,
+  overlayAppInventoryVitals,
   parseRumSessionTraffic,
   rumAppFromBucket,
   type RumAppInventoryRow,
@@ -32,7 +33,7 @@ import { ranksFromPercentileRanks, VITAL_RANK_THRESHOLDS } from '../../common/ru
 import { rumPerformanceScore, type RumPerformanceVitals } from '../../common/rum_performance_score';
 import { previousEqualPeriod } from '../../common/rum_report';
 import { RUM_CANONICAL_SESSION_ID_FIELD, RUM_SESSIONS_INDEX } from '../../common/rum_sessions';
-import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
+import { RUM_SESSION_SOURCE_INDEX, SESSION_ID_FIELDS } from '../../common/session_replay';
 import { rumEsSearchOptions } from '../routes/rum/es_retry';
 import {
   EXCEPTION_FILTER,
@@ -45,6 +46,7 @@ import {
   termsBuckets,
 } from '../routes/rum/query';
 import { sessionIndexTimeFilter } from './rum_sessions_query';
+import { resolveNewTailSessionIds } from './rum_sessions_tail';
 
 const platformSubAggs = {
   rumPlatform: { terms: { field: OTEL_RUM_PLATFORM, size: 5 } },
@@ -233,7 +235,7 @@ export const parseAppTerms = (agg: unknown): RumAppInventoryRow[] =>
     });
   });
 
-const sessionVitalP75 = (field: 'lcp_p75' | 'inp_p75' | 'cls_p75') => ({
+const sessionVitalP75 = (field: 'lcp_p75' | 'inp_p75' | 'cls_p75' | 'fcp_p75' | 'ttfb_p75') => ({
   percentiles: { field, percents: [75] },
 });
 
@@ -243,6 +245,8 @@ const sessionTrafficAggs = {
   lcp: sessionVitalP75('lcp_p75'),
   inp: sessionVitalP75('inp_p75'),
   cls: sessionVitalP75('cls_p75'),
+  fcp: sessionVitalP75('fcp_p75'),
+  ttfb: sessionVitalP75('ttfb_p75'),
   osName: { terms: { field: 'os.name', size: 5 } },
 };
 
@@ -255,6 +259,8 @@ const sessionCurrentAppAggs = {
       lcp: sessionVitalP75('lcp_p75'),
       inp: sessionVitalP75('inp_p75'),
       cls: sessionVitalP75('cls_p75'),
+      fcp: sessionVitalP75('fcp_p75'),
+      ttfb: sessionVitalP75('ttfb_p75'),
     },
   },
 };
@@ -348,6 +354,7 @@ const searchRawApps = async ({
   compare,
   request,
   operationName,
+  extraFilters,
 }: {
   client: ElasticsearchClient;
   rangeFrom: string;
@@ -357,6 +364,7 @@ const searchRawApps = async ({
   compare: boolean;
   request?: KibanaRequest;
   operationName: string;
+  extraFilters?: object[];
 }): Promise<RumAppsResponse & { _inspect?: InspectResponse }> => {
   const period = compare ? previousEqualPeriod(rangeFrom, rangeTo) : null;
   const wideFrom = period?.compareFrom ?? rangeFrom;
@@ -370,6 +378,7 @@ const searchRawApps = async ({
       bool: {
         filter: [
           ...rumBaseFilters({ rangeFrom: wideFrom, rangeTo: wideTo, includeBots, botUa }),
+          ...(extraFilters ?? []),
           {
             bool: {
               should: [PAGE_VIEW_FILTER, { exists: { field: RUM_CANONICAL_SESSION_ID_FIELD } }],
@@ -538,18 +547,43 @@ export const queryRumApps = async ({
   }
 
   if (wantIndex) {
-    const indexed = await searchSessionApps({
-      client,
-      rangeFrom: currentFrom,
-      rangeTo: currentTo,
-      watermark: watermark as string,
-      request,
-    });
+    const [indexed, vitals] = await Promise.all([
+      searchSessionApps({
+        client,
+        rangeFrom: currentFrom,
+        rangeTo: currentTo,
+        watermark: watermark as string,
+        request,
+      }),
+      searchRawApps({
+        client,
+        rangeFrom: currentFrom,
+        rangeTo: currentTo,
+        includeBots,
+        botUa,
+        compare: false,
+        request,
+        operationName: 'UxApplicationsVitals',
+      }),
+    ]);
+    const withVitals = {
+      ...indexed,
+      apps: overlayAppInventoryVitals(indexed.apps, vitals.apps),
+    };
     if (stage === 'index') {
-      return { ...indexed, remainder: Boolean(mergeRaw) };
+      return { ...withVitals, remainder: Boolean(mergeRaw) };
     }
     if (!wantRemainder) {
-      return indexed;
+      return withVitals;
+    }
+    const newIds = await resolveNewTailSessionIds({
+      client,
+      rangeFrom: watermark as string,
+      rangeTo: currentTo,
+    });
+    if (newIds.length === 0) {
+      const inspect = [...(withVitals._inspect ?? []), ...(vitals._inspect ?? [])];
+      return inspect.length > 0 ? { ...withVitals, _inspect: inspect } : withVitals;
     }
     const live = await searchRawApps({
       client,
@@ -560,9 +594,21 @@ export const queryRumApps = async ({
       compare: false,
       request,
       operationName: 'UxApplicationsRemainder',
+      extraFilters: [
+        {
+          bool: {
+            should: SESSION_ID_FIELDS.map((field) => ({ terms: { [field]: newIds } })),
+            minimum_should_match: 1,
+          },
+        },
+      ],
     });
-    const merged = mergeRumAppsResponses(indexed, live);
-    const inspect = [...(indexed._inspect ?? []), ...(live._inspect ?? [])];
+    const merged = mergeRumAppsResponses(withVitals, live);
+    const inspect = [
+      ...(withVitals._inspect ?? []),
+      ...(vitals._inspect ?? []),
+      ...(live._inspect ?? []),
+    ];
     return inspect.length > 0 ? { ...merged, _inspect: inspect } : merged;
   }
 

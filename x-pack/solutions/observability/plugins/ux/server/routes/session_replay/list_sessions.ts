@@ -34,6 +34,7 @@ import {
   userFromHits,
   type OtelHit,
 } from './session_attributes';
+import { boundedString, rumListQueryCodec } from '../rum/query';
 import { kueryFilters } from '../rum/kuery';
 import { botExclusionFilters } from '../rum/bots';
 import { rumEsSearchOptions } from '../rum/es_retry';
@@ -139,40 +140,25 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({
-    query: t.partial({
-      rangeFrom: t.string,
-      rangeTo: t.string,
-      serviceName: t.string,
-      query: t.string,
-      sortField: t.string,
-      sortDirection: t.string,
-      page: t.string,
-      perPage: t.string,
-      hasReplay: t.string,
-      hasErrors: t.string,
-      hasRage: t.string,
-      hasDead: t.string,
-      browser: t.string,
-      os: t.string,
-      location: t.string,
-      pageUrl: t.string,
-      errorGroup: t.string,
-      sessionIds: t.string,
-      frustration: t.string,
-      minDurationMs: t.string,
-      maxDurationMs: t.string,
-      user: t.string,
-      click: t.string,
-      account: t.string,
-      includeBots: t.string,
-      botUa: t.string,
-      kuery: t.string,
-      breakpoint: t.string,
-      connection: t.string,
-      device: t.string,
-      includeRaw: t.string,
-      analyticsMode: t.string,
-    }),
+    query: t.intersection([
+      rumListQueryCodec,
+      t.partial({
+        query: boundedString(512),
+        sortField: boundedString(32),
+        sortDirection: boundedString(8),
+        page: boundedString(8),
+        perPage: boundedString(8),
+        hasReplay: boundedString(8),
+        hasErrors: boundedString(8),
+        hasRage: boundedString(8),
+        hasDead: boundedString(8),
+        minDurationMs: boundedString(16),
+        maxDurationMs: boundedString(16),
+        click: boundedString(512),
+        account: boundedString(256),
+        includeRaw: boundedString(8),
+      }),
+    ]),
   }),
   handler: async ({ context, core, params, request }): Promise<SessionListResponse> => {
     const { elasticsearch } = await context.core;

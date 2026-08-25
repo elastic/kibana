@@ -65,6 +65,32 @@ describe('errorGroupFromHit', () => {
     expect(group?.key).toBe('TypeError|x is not defined');
     expect(group?.type).toBe('TypeError');
   });
+
+  it('uses the stacktrace first line when the message is empty', () => {
+    const group = errorGroupFromHit({
+      event_name: 'exception',
+      attributes: {
+        'exception.type': 'ChunkLoadError',
+        'exception.message': '',
+        'exception.stacktrace':
+          'ChunkLoadError: Loading chunk 74600 failed.\n    at o.f.j (https://example/kbn.js)',
+      },
+    });
+    expect(group?.key).toBe('ChunkLoadError|Loading chunk 74600 failed.');
+    expect(group?.message).toBe('Loading chunk 74600 failed.');
+  });
+
+  it('uses the stacktrace first line when it has no type prefix', () => {
+    const group = errorGroupFromHit({
+      event_name: 'exception',
+      attributes: {
+        'exception.type': 'Error',
+        'exception.stacktrace': 'Loading chunk 12 failed.\n    at foo',
+      },
+    });
+    expect(group?.message).toBe('Loading chunk 12 failed.');
+    expect(group?.key).toBe('Error|Loading chunk 12 failed.');
+  });
 });
 
 describe('countDeadAndErrorClicks', () => {

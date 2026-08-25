@@ -28,6 +28,7 @@ import { SAMPLE_SOURCE } from '../session_replay/list_sessions';
 import {
   attrString,
   errorGroupFromHit,
+  exceptionMessageFromSource,
   pageFromHit,
   traceIdFromHit,
   type OtelHit,
@@ -78,11 +79,14 @@ const rangeBoundsMs = (rangeFrom?: string, rangeTo?: string): { from: number; to
 
 const ERROR_GROUP_SCRIPT = `
   try {
+    def nl = '' + (char)10;
     def type = '';
     if (doc.containsKey('attributes.exception.type') && doc['attributes.exception.type'].size() > 0) {
       type = doc['attributes.exception.type'].value.toString();
     } else if (doc.containsKey('attributes.error.type') && doc['attributes.error.type'].size() > 0) {
       type = doc['attributes.error.type'].value.toString();
+    } else if (doc.containsKey('attributes.error.group') && doc['attributes.error.group'].size() > 0) {
+      type = doc['attributes.error.group'].value.toString();
     }
     if (type.length() == 0) { type = 'Error'; }
     if (type.length() > 80) { type = type.substring(0, 80); }
@@ -92,8 +96,19 @@ const ERROR_GROUP_SCRIPT = `
     } else if (doc.containsKey('attributes.error.message') && doc['attributes.error.message'].size() > 0) {
       msg = doc['attributes.error.message'].value.toString();
     }
-    int nl = msg.indexOf((char)10);
-    if (nl >= 0) { msg = msg.substring(0, nl); }
+    if (msg.length() == 0 && doc.containsKey('attributes.exception.stacktrace') && doc['attributes.exception.stacktrace'].size() > 0) {
+      def stack = doc['attributes.exception.stacktrace'].value.toString();
+      int br = stack.indexOf(nl);
+      def first = (br >= 0 ? stack.substring(0, br) : stack).trim();
+      def prefix = type + ':';
+      if (first.startsWith(prefix)) {
+        msg = first.substring(prefix.length()).trim();
+      } else if (first.length() > 0) {
+        msg = first;
+      }
+    }
+    int lineBreak = msg.indexOf(nl);
+    if (lineBreak >= 0) { msg = msg.substring(0, lineBreak); }
     msg = msg.trim();
     if (msg.length() > 120) { msg = msg.substring(0, 120); }
     return type + '|' + msg;
@@ -269,10 +284,11 @@ export const getRumErrorsRoute = createUxServerRoute({
         attrString(source, 'error.type') ??
         'Error';
       const message =
-        parsed?.message ??
-        attrString(source, 'exception.message') ??
-        attrString(source, 'error.message') ??
-        String(bucket.key);
+        (parsed?.message && parsed.message.length > 0 ? parsed.message : '') ||
+        exceptionMessageFromSource(source) ||
+        (String(bucket.key).includes('|')
+          ? String(bucket.key).slice(String(bucket.key).indexOf('|') + 1)
+          : String(bucket.key));
       const trendPoints = trendPointsFromAgg(
         (bucket.trend as { buckets?: unknown } | undefined) ?? bucket.trend
       );

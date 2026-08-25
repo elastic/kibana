@@ -263,6 +263,46 @@ export const parseRumSessionTraffic = (agg: unknown): RumSessionTrafficPoint[] =
 
 const pickVital = (indexed: number | null, live: number | null): number | null => indexed ?? live;
 
+/** Copy sample p75s from raw onto dest-backed rows. Dest stores per-session p75s, not FCP/TTFB. */
+export const overlayAppInventoryVitals = (
+  indexed: RumAppInventoryRow[],
+  vitals: RumAppInventoryRow[]
+): RumAppInventoryRow[] => {
+  if (vitals.length === 0) {
+    return indexed;
+  }
+  const byName = new Map(vitals.map((row) => [row.name, row]));
+  return indexed.map((app) => {
+    const raw = byName.get(app.name);
+    if (!raw) {
+      return app;
+    }
+    const next = rumAppFromBucket({
+      name: app.name,
+      sessions: app.sessions,
+      pageViews: app.pageViews,
+      errorSessions: app.errorSessions,
+      p75Lcp: raw.p75Lcp ?? app.p75Lcp,
+      p75Inp: raw.p75Inp ?? app.p75Inp,
+      p75Cls: raw.p75Cls ?? app.p75Cls,
+      p75Fcp: raw.p75Fcp ?? app.p75Fcp,
+      p75Ttfb: raw.p75Ttfb ?? app.p75Ttfb,
+      ranks: raw.ranks ?? app.ranks,
+      trend: app.trend,
+      scoreTrend: app.scoreTrend,
+      environments: app.environments,
+      platformKeys: [app.platform],
+    });
+    return {
+      ...next,
+      scoreDelta: app.scoreDelta,
+      sessionsDelta: app.sessionsDelta,
+      errorRateDelta: app.errorRateDelta,
+      opportunity: app.opportunity,
+    };
+  });
+};
+
 const mergeInventoryRow = (
   indexed: RumAppInventoryRow,
   live: RumAppInventoryRow

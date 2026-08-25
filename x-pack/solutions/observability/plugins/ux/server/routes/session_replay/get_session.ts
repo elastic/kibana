@@ -13,6 +13,7 @@ import {
   SESSION_REPLAY_INDEX,
   type RumSessionDetail,
 } from '../../../common/session_replay';
+import { boundedString, rumListQueryCodec } from '../rum/query';
 import { rumEsSearchOptions } from '../rum/es_retry';
 import { CLICK_FILTER, EXCEPTION_FILTER } from '../../transforms/rum_sessions_spec';
 import { getRumSearchClient } from '../../lib/rum_search_client';
@@ -48,9 +49,12 @@ export const getSessionRoute = createUxServerRoute({
   security: { authz: { requiredPrivileges: ['apm'] } },
   // A session id uniquely identifies the session, so the detail lookup is not
   // time-scoped (a session outside the caller's selected range must still load).
-  params: t.type({
-    path: t.type({ sessionId: t.string }),
-  }),
+  params: t.intersection([
+    t.type({
+      path: t.type({ sessionId: boundedString(128) }),
+    }),
+    t.partial({ query: rumListQueryCodec }),
+  ]),
   handler: async ({ context, core, params, request }): Promise<RumSessionDetail> => {
     const { sessionId } = params.path;
     const client = await getRumSearchClient({ context, core, request });

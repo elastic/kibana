@@ -638,6 +638,8 @@ export const querySessionIndexKpis = async ({
   errorSessions: number;
   rageSessions: number;
   deadSessions: number;
+  rageClicks: number;
+  deadClicks: number;
   trends: RumTrendPoint[];
 }> => {
   const result = await client.search({
@@ -652,6 +654,8 @@ export const querySessionIndexKpis = async ({
       error_sessions: { filter: { range: { error_count: { gt: 0 } } } },
       rage_sessions: { filter: { range: { rage_click_count: { gt: 0 } } } },
       dead_sessions: { filter: { range: { dead_click_count: { gt: 0 } } } },
+      rage_clicks: { sum: { field: 'rage_click_count' } },
+      dead_clicks: { sum: { field: 'dead_click_count' } },
       trends: sessionTrendsAggregation(),
     },
   });
@@ -664,6 +668,8 @@ export const querySessionIndexKpis = async ({
     errorSessions: (aggs.error_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0,
     rageSessions: (aggs.rage_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0,
     deadSessions: (aggs.dead_sessions as { doc_count?: number } | undefined)?.doc_count ?? 0,
+    rageClicks: asNumber((aggs.rage_clicks as { value?: number } | undefined)?.value),
+    deadClicks: asNumber((aggs.dead_clicks as { value?: number } | undefined)?.value),
     trends: trendsFromSessionHistogram(aggs.trends),
   };
 };
