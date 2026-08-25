@@ -40,6 +40,7 @@ import {
   OAuthClientsService,
   PluginsService,
   EventsService,
+  SpaceSettingsService,
   type AgentBuilderInternalService,
 } from './services';
 import { createPublicEmbeddableChatAccess } from './services/access';
@@ -175,6 +176,7 @@ export class AgentBuilderPlugin
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
     const oauthClientsService = new OAuthClientsService({ http });
+    const spaceSettingsService = new SpaceSettingsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -257,6 +259,7 @@ export class AgentBuilderPlugin
       smlService,
       pluginsService,
       oauthClientsService,
+      spaceSettingsService,
       startDependencies,
       usageCollection,
       accessChecker,

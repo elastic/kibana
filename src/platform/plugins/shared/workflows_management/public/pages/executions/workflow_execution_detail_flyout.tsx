@@ -75,6 +75,7 @@ const WorkflowExecutionDetailFlyoutContent = ({
               }}
               onReRunExecution={onReRunExecution}
               onViewAllExecutionsForWorkflow={onViewAllExecutionsForWorkflow}
+              origin="flyout_actions"
               variant="takeAction"
             />
           </EuiFlexItem>
