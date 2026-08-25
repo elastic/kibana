@@ -30,20 +30,13 @@ import type { ImpactedServiceChip } from './impacted_services_chips';
 export const MAX_VISIBLE_IMPACTED_SERVICES = 10;
 
 interface ImpactedServiceButtonProps {
-  chipKey: string;
   count: number;
   isSelected: boolean;
   name: string;
   onClick: () => void;
 }
 
-function ImpactedServiceButton({
-  chipKey,
-  count,
-  isSelected,
-  name,
-  onClick,
-}: ImpactedServiceButtonProps) {
+function ImpactedServiceButton({ count, isSelected, name, onClick }: ImpactedServiceButtonProps) {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -206,7 +199,6 @@ export function ImpactedServices({
           {visibleServices.map(({ count, key, name }) => (
             <EuiFlexItem grow={false} key={key}>
               <ImpactedServiceButton
-                chipKey={key}
                 count={count}
                 isSelected={selectedServiceKey === key}
                 name={name}

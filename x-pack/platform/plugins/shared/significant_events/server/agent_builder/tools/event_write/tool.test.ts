@@ -32,9 +32,12 @@ const input = {
   confidence: 0.8,
 };
 
+const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
+
 const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventClient: jest.fn().mockReturnValue({}),
+    getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     licensing: {},
   });
   return createEventsWriteTool({
@@ -48,6 +51,7 @@ const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
 describe('events_write tool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getFeatures.mockResolvedValue({ hits: [] });
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
   });
 
@@ -114,6 +118,70 @@ describe('events_write tool', () => {
     });
 
     expect(result.items[0].event_id).toBeUndefined();
+  });
+
+  it('enriches causal features from their Knowledge Indicators', async () => {
+    getFeatures.mockResolvedValue({
+      hits: [
+        {
+          id: 'checkout-api',
+          uuid: 'feature-uuid',
+          stream_name: 'logs.test',
+          type: 'entity',
+          subtype: 'service',
+        },
+      ],
+    });
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      {
+        index: 0,
+        event_uuid: 'uuid-1',
+        event_id: 'event-1',
+        status: 'open',
+        written: true,
+      },
+    ]);
+
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      {
+        items: [
+          {
+            ...input,
+            causal_features: [
+              {
+                feature_id: 'checkout-api',
+                name: 'Checkout API',
+                stream_name: 'logs.test',
+              },
+            ],
+          },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(getFeatures).toHaveBeenCalledWith(['logs.test'], {
+      featureIds: ['checkout-api'],
+      includeExcluded: true,
+      includeExpired: true,
+    });
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
+      eventClient: {},
+      inputs: [
+        expect.objectContaining({
+          causal_features: [
+            {
+              feature_id: 'checkout-api',
+              name: 'Checkout API',
+              stream_name: 'logs.test',
+              type: 'entity',
+              subtype: 'service',
+            },
+          ],
+        }),
+      ],
+    });
   });
 
   it('returns aligned results and tracks each item', async () => {

@@ -22,6 +22,7 @@ import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
@@ -135,6 +136,50 @@ export const eventsWriteSchema = z
 
 export type EventsWriteParams = z.infer<typeof eventsWriteSchema>;
 
+const enrichCausalFeatures = async (
+  items: EventsWriteParams['items'],
+  getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>
+): Promise<EventsWriteParams['items']> => {
+  const causalFeatures = items.flatMap(({ causal_features: features = [] }) => features);
+  if (causalFeatures.length === 0) {
+    return items;
+  }
+
+  const featureIds = [...new Set(causalFeatures.map(({ feature_id: featureId }) => featureId))];
+  const streamNames = [
+    ...new Set([
+      ...items.flatMap(({ stream_names: names }) => names),
+      ...causalFeatures.flatMap(({ stream_name: streamName }) => streamName ?? []),
+    ]),
+  ];
+  const kiClient = await getKnowledgeIndicatorClient();
+  const { hits } = await kiClient.getFeatures(streamNames, {
+    featureIds,
+    includeExcluded: true,
+    includeExpired: true,
+  });
+  const featuresByReference = new Map(
+    hits.flatMap((feature) => [
+      [`${feature.stream_name}:${feature.id}`, feature] as const,
+      [`${feature.stream_name}:${feature.uuid}`, feature] as const,
+    ])
+  );
+
+  return items.map((item) => ({
+    ...item,
+    causal_features: item.causal_features?.map((causalFeature) => {
+      const feature = causalFeature.stream_name
+        ? featuresByReference.get(`${causalFeature.stream_name}:${causalFeature.feature_id}`)
+        : hits.find(
+            ({ id, uuid }) => id === causalFeature.feature_id || uuid === causalFeature.feature_id
+          );
+      return feature
+        ? { ...causalFeature, type: feature.type, subtype: feature.subtype }
+        : causalFeature;
+    }),
+  }));
+};
+
 export function createEventsWriteTool({
   getScopedClients,
   server,
@@ -177,12 +222,15 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing } = await getScopedClients({ request });
+        const { getEventClient, getKnowledgeIndicatorClient, licensing } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
+        const items = await enrichCausalFeatures(toolParams.items, getKnowledgeIndicatorClient);
 
         const data = await eventsWriteBulkHandler({
           eventClient: getEventClient(),
-          inputs: toolParams.items,
+          inputs: items,
         });
 
         data.forEach((result) => {
