@@ -169,10 +169,11 @@ const v3IndexSchema = z
 const v3IntegrationsSchema = z.preprocess((val) => {
   if (val === undefined || val === null) return undefined;
   if (typeof val === 'string') {
-    return val
+    const parts = val
       .split(',')
       .map((p) => p.trim())
       .filter((p) => p.length > 0);
+    return parts.length > 0 ? parts : undefined;
   }
   if (Array.isArray(val)) return val.length > 0 ? val : undefined;
   return val; // invalid types pass through to schema validation

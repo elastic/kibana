@@ -604,6 +604,13 @@ filterlist: {}
         expect(q.integrations).toBeUndefined();
       });
 
+      it('treats empty integrations scalar string as no constraint (integrations undefined)', () => {
+        const yaml = `${baseYaml}integrations: ""\n`;
+        const [q] = parseHealthDiagnosticQueries(yaml) as ApiQuery[];
+        expect('_raw' in q).toBe(false);
+        expect(q.integrations).toBeUndefined();
+      });
+
       it('returns ParseFailureQuery when integrations is an invalid type', () => {
         const yaml = `${baseYaml}integrations:\n  nested: value\n`;
         const [q] = parseHealthDiagnosticQueries(yaml);
