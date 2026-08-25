@@ -841,6 +841,39 @@ class OutputService {
     };
   }
 
+  public async listPreconfigured() {
+    const outputs = await this.soClient.find<OutputSOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      perPage: SO_SEARCH_LIMIT,
+      filter: `${SAVED_OBJECT_TYPE}.attributes.is_preconfigured: true`,
+    });
+
+    for (const output of outputs.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        name: output.attributes.name,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    return {
+      items: outputs.saved_objects.map<Output>((so) =>
+        outputSavedObjectToOutput({
+          ...so,
+          attributes: omit(so.attributes, [
+            'ssl',
+            'password',
+            'kibana_api_key',
+          ]) as OutputSOAttributes,
+        })
+      ),
+      total: outputs.total,
+      page: outputs.page,
+      perPage: outputs.per_page,
+    };
+  }
+
   public async listAllForProxyId(proxyId: string) {
     const outputs = await this.soClient.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
