@@ -68,6 +68,16 @@ test.describe(
 
       await test.step('filter by tags with OR', async () => {
         await page.getByLabel('expands filter group for Tags filter').click();
+        // Reopening must still show both AND selections. If suggestions omit a
+        // selected tag, Apply would drop it and OR would keep a single monitor.
+        await expect(page.getByRole('option', { name: FIRST_TAG })).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
+        await expect(page.getByRole('option', { name: SECOND_TAG })).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
         await page.testSubj.click('tagsLogicalOperatorSwitch');
         await page.testSubj.click('o11yFieldValueSelectionApplyButton');
         await expect(page.getByLabel('expands filter group for Tags filter')).toBeVisible();

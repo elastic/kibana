@@ -47,6 +47,17 @@ const formatOptions = (
     uniqueValues[label] = { count, tooltip };
   });
 
+  // Apply reads `options`, not `selectedValue`. Keep applied selections in the
+  // list when suggestions omit them (search filter, or a refetch of the
+  // already-filtered set) so Apply cannot drop them.
+  const ensureLabel = (label: string) => {
+    if (uniqueValues[label] === undefined) {
+      uniqueValues[label] = { count: 0 };
+    }
+  };
+  selectedValue?.forEach(ensureLabel);
+  excludedValues?.forEach(ensureLabel);
+
   return Object.entries(uniqueValues).map(([label, { count, tooltip }]) => {
     const counter = (
       <Counter>
@@ -118,10 +129,22 @@ export function FieldValueSelection({
     setIsLogicalAND(useLogicalAND);
   }, [useLogicalAND]);
 
+  const valuesKey = JSON.stringify(values);
+  const selectedValueKey = JSON.stringify(selectedValue);
+
   useEffect(() => {
-    setOptions(formatOptions(values, selectedValue, excludedValue, showCount));
+    setOptions((current) => {
+      // A suggestions refetch while the popover is open would otherwise rebuild
+      // `options` from props and wipe in-progress checks (and, without the
+      // selectedValue union above, drop tags missing from the new list).
+      if ((isPopoverOpen || forceOpen) && current.length > 0) {
+        return current;
+      }
+      return formatOptions(values, selectedValue, excludedValue, showCount);
+    });
+    // values/selectedValue are represented by the serialized keys above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(values), JSON.stringify(selectedValue), showCount, excludedValue]);
+  }, [valuesKey, selectedValueKey, showCount, excludedValue, isPopoverOpen, forceOpen]);
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
@@ -130,6 +153,7 @@ export function FieldValueSelection({
   const closePopover = () => {
     setIsPopoverOpen(false);
     setForceOpen?.(false);
+    setQuery('');
   };
 
   const onChange = (optionsN: EuiSelectableOption[]) => {
@@ -324,6 +348,7 @@ export function FieldValueSelection({
 
                     setIsPopoverOpen(false);
                     setForceOpen?.(false);
+                    setQuery('');
                   }}
                 >
                   {i18n.translate('xpack.observabilityShared.fieldValueSelection.apply', {
