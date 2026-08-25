@@ -21,5 +21,5 @@ export function getOAuthProtectedResource({
   serverBaseUrl: string;
 }): string {
   const resource = configuredResource ?? publicBaseUrl ?? serverBaseUrl;
-  return resource.endsWith('/') ? resource.slice(0, -1) : resource;
+  return resource.replace(/\/+$/, '');
 }
