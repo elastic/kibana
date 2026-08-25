@@ -92,26 +92,14 @@ export const getMatchPrebuiltRuleAgentNode = ({
 
     const isSearchingAgain = Boolean(aiMessage.tool_calls?.length);
     if (isSearchingAgain) {
-      // No `matchResult` — the model asked for another search instead of answering, e.g.
-      // { aiMessage: AIMessage { content: '', tool_calls: [{ id: 'call_1',
-      //     name: 'searchPrebuiltRules', args: { query: 'windows office macro process creation' } }] } }
       return { aiMessage };
     }
 
     const matchResult = await parseFinalResponse(aiMessage.content);
     if (matchResult || attempt === MAX_FINAL_ANSWER_ATTEMPTS) {
-      // Valid JSON answer, e.g.
-      // { aiMessage: AIMessage { content: '```json\n{"match":"Suspicious MS Office Child Process",...}\n```' },
-      //   matchResult: { match: 'Suspicious MS Office Child Process',
-      //     summary: '## Prebuilt Rule Matching Summary\nBoth rules detect macro-spawned child processes.' } }
-      // Or, on the last attempt with still-malformed JSON:
-      // { aiMessage: AIMessage { content: 'The closest rule is Suspicious MS Office Child Process' },
-      //   matchResult: undefined }
       return { aiMessage, matchResult };
     }
 
-    // Malformed JSON with an attempt left: re-invokes with the bad answer plus the corrective nudge
-    // appended, and returns whichever of the two shapes above that second attempt produces.
     return invokeAndValidateFinalAnswer(
       [...messages, aiMessage, RETRY_ON_MALFORMED_JSON_MESSAGE],
       attempt + 1
@@ -126,9 +114,7 @@ export const getMatchPrebuiltRuleAgentNode = ({
       `Title: ${state.original_rule.title}\nDescription: ${state.original_rule.description}\nQuery: ${state.original_rule.query}`;
     const techniqueIds = state.original_rule.annotations?.mitre_attack?.join(',') ?? '';
     const previousSearchAttempts = getPreviousSearchAttempts(matchPrebuiltRulesMessages);
-    // Needed on the first turn, and again only when a search comes back empty — the two cases where
-    // the model has nothing to judge and must produce a query. Deferred rather than rendered up
-    // front so an evaluation turn with candidates doesn't build a message it won't send.
+    // Only needed on the first turn and when the last search returned no candidates.
     const formatCreateSemanticQueryMessages = () =>
       CREATE_PREBUILT_RULE_SEMANTIC_QUERY_PROMPT_V2.formatMessages({
         ruleContext,
@@ -143,20 +129,12 @@ export const getMatchPrebuiltRuleAgentNode = ({
           ? MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2
           : MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2;
 
-      // Router re-invoked this node after a no-match verdict: the last message in the conversation
-      // is the model's no-match AIMessage (not a ToolMessage from a fresh search). Inject the retry
-      // nudge so the model tries a different keyword angle. The router's `turnCount` cap prevents
-      // this path from repeating more than `MAX_TOOL_CALL_ATTEMPTS - 1` times total.
+      // Detects the router's retry path: last message is a no-match AIMessage with no tool calls.
       const lastMessage = matchPrebuiltRulesMessages.at(-1);
       const isRetryAfterNoMatch =
         AIMessage.isInstance(lastMessage) && !lastMessage.tool_calls?.length;
 
-      // With candidates in hand the model's only job is to judge them, so the match prompt goes in
-      // alone: the source rule and the query guidelines are already earlier in this conversation, so
-      // re-injecting the query prompt would re-send them and end the turn on a "call the tool"
-      // directive over candidates the model hasn't rejected yet. It still needs the queries already
-      // tried, which ride along compactly on the match prompt. An empty search is the inverse —
-      // nothing to judge — so the query prompt goes in instead.
+      // Match prompt with candidates, query prompt on empty search, retry prompt on retry.
       const injectedMessages = isRetryAfterNoMatch
         ? [new HumanMessage(formatRetrySearchNudgePrompt(previousSearchAttempts))]
         : hasCandidatesToEvaluate(matchPrebuiltRulesMessages)
@@ -169,21 +147,7 @@ export const getMatchPrebuiltRuleAgentNode = ({
         ...matchPrebuiltRulesMessages,
         ...injectedMessages,
       ]);
-      // Later turn (after a search or after a retry nudge). Only the injected prompt and the
-      // model's reply are appended — the prior history is already in state. Either the model
-      // finished:
-      // { match_prebuilt_rules_messages: [
-      //     HumanMessage { content: '<matching_guidelines>\nEvaluate the candidates returned...' },
-      //     AIMessage { content: '```json\n{"match":"Suspicious MS Office Child Process",...}\n```' },
-      //   ],
-      //   match_prebuilt_rules_result: { match: 'Suspicious MS Office Child Process',
-      //     summary: '## Prebuilt Rule...' } }
-      // ...or it wants another search (routes back to `tools` or to `agent` via retry):
-      // { match_prebuilt_rules_messages: [
-      //     HumanMessage { content: '<matching_guidelines>...\nQueries already tried: "office macro child process".' },
-      //     AIMessage { content: '', tool_calls: [{ name: 'searchPrebuiltRules',
-      //       args: { query: 'office document macro execution sysmon' } }] }],
-      //   match_prebuilt_rules_result: undefined }
+
       return {
         match_prebuilt_rules_messages: [...injectedMessages, aiMessage],
         match_prebuilt_rules_result: matchResult,
@@ -196,15 +160,7 @@ export const getMatchPrebuiltRuleAgentNode = ({
     ];
 
     const { aiMessage, matchResult } = await invokeAndValidateFinalAnswer(prompt);
-    // First turn — starts the conversation and issues the initial search, e.g. for the Splunk rule
-    // 'Office Document Executing Macro Code':
-    // { match_prebuilt_rules_messages: [
-    //     SystemMessage { content: 'You are an expert assistant in Cybersecurity...' },
-    //     HumanMessage { content: 'Source rule context:\nTitle: Office Document Executing Macro Code\n...' },
-    //     AIMessage { content: '', tool_calls: [{ name: 'searchPrebuiltRules',
-    //       args: { query: 'windows office macro child process creation sysmon event id 7' } }] },
-    //   ],
-    //   match_prebuilt_rules_result: undefined }
+    // First turn — starts the conversation and issues the initial search
     return {
       match_prebuilt_rules_messages: [...prompt, aiMessage],
       match_prebuilt_rules_result: matchResult,
@@ -218,10 +174,7 @@ interface GetFinalizeMatchNodeParams {
 
 export const getFinalizeMatchNode = ({ telemetryClient }: GetFinalizeMatchNodeParams) => {
   return async (state: MatchPrebuiltRuleState): Promise<Partial<MatchPrebuiltRuleState>> => {
-    // Already parsed and validated by `getMatchPrebuiltRuleAgentNode`'s
-    // `invokeAndValidateFinalAnswer` above — `undefined` here means either the turn cap was hit
-    // while the model kept calling the tool, or its final answer stayed malformed JSON even after
-    // retrying.
+    // `undefined` when the model never produced valid JSON or exhausted the search budget without a final answer.
     const matchResult = state.match_prebuilt_rules_result;
 
     const latestCandidates = getLatestCandidates(state.match_prebuilt_rules_messages);
@@ -237,17 +190,10 @@ export const getFinalizeMatchNode = ({ telemetryClient }: GetFinalizeMatchNodePa
     });
 
     if (matchedRule) {
-      // The model's match resolved to a real candidate — see `buildMatchResult` below for the
-      // shape, e.g. { comments: [...], elastic_rule: { prebuilt_rule_id: 'test-rule', ... },
-      //   translation_result: 'full' }
       return buildMatchResult(matchedRule, matchResult?.summary);
     }
 
     const summary = matchResult?.summary?.trim() || NO_MATCH_SUMMARY;
-    // No match: only a comment, no `elastic_rule`/`translation_result`, so the parent graph falls
-    // through to the translation subgraph. e.g.
-    // { comments: [{ message: '## Prebuilt Rule Matching Summary\nNo related prebuilt rule found.',
-    //     created_at: '2026-08-19T15:04:05.000Z', created_by: 'assistant' }] }
     return { comments: [generateAssistantComment(cleanMarkdown(summary))] };
   };
 };
@@ -256,11 +202,6 @@ const getLatestCandidates = (messages: BaseMessage[]): RuleSemanticSearchResult[
   for (let i = messages.length - 1; i >= 0; i--) {
     const message = messages[i];
     if (ToolMessage.isInstance(message) && Array.isArray(message.artifact)) {
-      // The full search results the model only saw a compact projection of, e.g.
-      // [{ rule_id: 'test-rule', name: 'Suspicious MS Office Child Process',
-      //    description: 'Identifies suspicious child processes of frequently targeted...',
-      //    target: { severity: 'high', risk_score: 73, related_integrations: [{ package: 'windows' }] },
-      //    current: { id: '9f1c2d3e-...' } }]
       return message.artifact as RuleSemanticSearchResult[];
     }
   }
@@ -269,12 +210,7 @@ const getLatestCandidates = (messages: BaseMessage[]): RuleSemanticSearchResult[
   return [];
 };
 
-/**
- * Whether the search that just ran returned anything for the model to judge, which is what decides
- * between injecting the match prompt and the query prompt. Deliberately looks at the last message
- * only, unlike `getLatestCandidates` above: an empty or errored search must read as "no candidates"
- * rather than falling back to an earlier search's hits.
- */
+/** True when the last search returned candidates; checks only the last message, not earlier searches. */
 const hasCandidatesToEvaluate = (messages: BaseMessage[]): boolean => {
   const lastMessage = messages.at(-1);
   return (
@@ -295,10 +231,6 @@ const getPreviousSearchAttempts = (messages: BaseMessage[]): PreviousSearchAttem
     }
   });
 
-  // One entry per query already issued, in call order, e.g. after two searches:
-  // [{ query: 'office macro child process', candidateNames: ['wrong-name'] },
-  //  { query: 'office document macro execution sysmon', candidateNames: [] }]
-  // `[]` on the first turn, when the conversation holds no tool calls yet.
   return messages.filter(AIMessage.isInstance).flatMap((message) =>
     (message.tool_calls ?? [])
       .filter(
@@ -320,15 +252,6 @@ const buildMatchResult = (
 ): Partial<MatchPrebuiltRuleState> => {
   const comments = summary?.trim() ? [generateAssistantComment(cleanMarkdown(summary))] : undefined;
 
-  // The final matched state, e.g.
-  // { comments: [{ message: '## Prebuilt Rule Matching Summary\nBoth rules detect...' }],
-  //   elastic_rule: { title: 'Suspicious MS Office Child Process',
-  //     description: 'Identifies suspicious child processes of frequently targeted...',
-  //     prebuilt_rule_id: 'test-rule', id: '9f1c2d3e-...', integration_ids: ['windows'],
-  //     severity: 'high', risk_score: 73 },
-  //   translation_result: 'full' }
-  // `comments` is omitted when the model returned a match with no summary; `severity`/`risk_score`
-  // fall back to DEFAULT_TRANSLATION_* when the target rule doesn't specify them.
   return {
     ...(comments ? { comments } : {}),
     elastic_rule: {

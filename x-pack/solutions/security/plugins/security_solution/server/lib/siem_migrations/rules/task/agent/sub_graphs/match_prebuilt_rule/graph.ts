@@ -29,8 +29,7 @@ export const getMatchPrebuiltRuleGraph = ({
 }: GetMatchPrebuiltRuleGraphParams) => {
   const agentNode = getMatchPrebuiltRuleAgentNode({ model, tool: searchPrebuiltRules });
   const toolNode = new ToolNode<BaseMessage[]>([searchPrebuiltRules]);
-  // `ToolNode` reads the conversation from a `messages` key (or a bare array) and cannot be handed
-  // this subgraph's state directly, so feed it the array and map its `ToolMessage`s back.
+  // ToolNode only accepts a messages array, so pass the inner array and map results back to state.
   const toolsNode = async (state: MatchPrebuiltRuleState, config: RunnableConfig) => ({
     match_prebuilt_rules_messages: await toolNode.invoke(
       state.match_prebuilt_rules_messages,
@@ -59,10 +58,8 @@ export const getMatchPrebuiltRuleGraph = ({
 
 const matchPrebuiltRuleRouter = (state: MatchPrebuiltRuleState) => {
   const messages = state.match_prebuilt_rules_messages;
-  // Count only tool-calling turns (actual searches), not verdict turns. Verdict turns used to count
-  // toward the old `turnCount` cap, which caused the retry path to exhaust the budget prematurely
-  // — e.g. 2 searches + 2 verdicts = 4 turns would hit MAX_TOOL_CALL_ATTEMPTS (4) even though only
-  // 2 of the allowed 3 searches had been issued.
+  // Only count turns where the model actually searched (has tool calls).
+  // Counting final-answer turns too would hit the cap before all searches are used.
   const searchCount = messages.filter(
     (message) => AIMessage.isInstance(message) && Boolean(message.tool_calls?.length)
   ).length;
