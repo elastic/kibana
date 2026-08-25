@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { WatchAutonomyLevel } from '@kbn/pnd-common';
+import {
+  SYSTEM_SECURITY_WATCH_DARK_ID,
+  SYSTEM_SECURITY_WATCH_DEEP_ID,
+  SYSTEM_SECURITY_WATCH_DETECTION_ID,
+  SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  WatchAutonomyLevel,
+} from '@kbn/pnd-common';
 import type { SYSTEM_SECURITY_WATCH_IDS } from '@kbn/pnd-common';
 import type { ManagedWorkflowTemplateValuesForId } from '@kbn/workflows/managed';
 import type { WatchSettingsRegistration } from './types';
@@ -13,11 +20,18 @@ import type { WatchSettingsRegistration } from './types';
 type RegisteredWatchId = (typeof SYSTEM_SECURITY_WATCH_IDS)[number];
 type WatchTemplateValues = ManagedWorkflowTemplateValuesForId<RegisteredWatchId>;
 
-const WATCH_SETTINGS_VERSION = 1;
+const WATCH_SETTINGS_VERSIONS: Record<RegisteredWatchId, number> = {
+  [SYSTEM_SECURITY_WATCH_FLOOR_ID]: 1,
+  [SYSTEM_SECURITY_WATCH_OFFICER_ID]: 1,
+  [SYSTEM_SECURITY_WATCH_DARK_ID]: 1,
+  [SYSTEM_SECURITY_WATCH_DEEP_ID]: 1,
+  [SYSTEM_SECURITY_WATCH_DETECTION_ID]: 1,
+};
 
 const parseWatchValues = (watchId: RegisteredWatchId, raw: Record<string, unknown>) => {
+  const currentVersion = WATCH_SETTINGS_VERSIONS[watchId];
   const { settingsVersion, autonomyLevel } = raw;
-  if (settingsVersion !== undefined && settingsVersion !== WATCH_SETTINGS_VERSION) {
+  if (settingsVersion !== undefined && settingsVersion !== currentVersion) {
     throw new Error(
       `Unsupported settings version for PND watch "${watchId}": ${String(settingsVersion)}`
     );
@@ -27,7 +41,7 @@ const parseWatchValues = (watchId: RegisteredWatchId, raw: Record<string, unknow
     throw new Error(`PND watch "${watchId}" settings contain an invalid autonomy level`);
   }
   return {
-    settingsVersion: WATCH_SETTINGS_VERSION,
+    settingsVersion: currentVersion,
     autonomyLevel: parsedAutonomyLevel.data,
   } satisfies WatchTemplateValues;
 };
@@ -36,7 +50,7 @@ export const createWatchSettingsRegistration = (
   watchId: RegisteredWatchId
 ): WatchSettingsRegistration => ({
   createDefaultValues: (): WatchTemplateValues => ({
-    settingsVersion: WATCH_SETTINGS_VERSION,
+    settingsVersion: WATCH_SETTINGS_VERSIONS[watchId],
     autonomyLevel: 'manual',
   }),
   migrate: (raw: Record<string, unknown>) => {
@@ -44,7 +58,7 @@ export const createWatchSettingsRegistration = (
     return {
       values,
       migrated:
-        raw.settingsVersion !== WATCH_SETTINGS_VERSION ||
+        raw.settingsVersion !== WATCH_SETTINGS_VERSIONS[watchId] ||
         Object.keys(raw).some((key) => !Object.hasOwn(values, key)),
     };
   },

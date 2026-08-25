@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SYSTEM_SECURITY_WATCH_FLOOR_ID, SYSTEM_SECURITY_WATCH_OFFICER_ID } from '@kbn/pnd-common';
+import {
+  SYSTEM_SECURITY_WATCH_IDS,
+  SYSTEM_SECURITY_WATCH_FLOOR_ID,
+  SYSTEM_SECURITY_WATCH_OFFICER_ID,
+} from '@kbn/pnd-common';
 import { createWatchSettingsRegistration } from './watch_settings';
 
 const watchSettings = createWatchSettingsRegistration(SYSTEM_SECURITY_WATCH_FLOOR_ID);
@@ -62,6 +66,15 @@ describe('createWatchSettingsRegistration', () => {
     if ('rejected' in result) throw new Error(`Unexpected rejection: ${result.rejected}`);
 
     expect(result.values).toEqual({ settingsVersion: 1, autonomyLevel: 'supervised' });
+  });
+
+  it('versions settings per watch so one bump does not rewrite the others', () => {
+    expect(
+      SYSTEM_SECURITY_WATCH_IDS.map((id) => ({
+        id,
+        version: createWatchSettingsRegistration(id).createDefaultValues().settingsVersion,
+      }))
+    ).toEqual(SYSTEM_SECURITY_WATCH_IDS.map((id) => ({ id, version: 1 })));
   });
 
   it('binds the projected settings to the registered watch', () => {
