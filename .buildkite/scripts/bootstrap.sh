@@ -8,10 +8,7 @@ source .buildkite/scripts/common/util.sh
 # Build steps that still run package installs afterwards can opt out with KEEP_INSTALL_CACHE=1.
 if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
   echo "--- Clearing yarn cache"
-  du -sh /opt/buildkite-agent/.cache/yarn
   echo 'Removing /opt/buildkite-agent/.cache/yarn' && rm -rf /opt/buildkite-agent/.cache/yarn
-  du -sh /opt/buildkite-agent/.yarn-local-mirror
-  echo 'Removing /opt/buildkite-agent/.yarn-local-mirror' && rm -rf /opt/buildkite-agent/.yarn-local-mirror
   echo "Available disk space after clearing yarn cache:"
   df -h . || echo "Failed to get disk space"
 fi
