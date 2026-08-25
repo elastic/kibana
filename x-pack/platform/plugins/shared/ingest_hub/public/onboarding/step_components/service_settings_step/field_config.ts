@@ -128,14 +128,24 @@ export function getFlyoutFields(
 
 export const REGION_FIELD_NAMES = new Set(['region', 'region_name', 'aws_region']);
 
+function hasConfigurableFlyoutFieldsForInput(
+  service: AwsServiceMatrixEntry,
+  activeInput: string | null
+): boolean {
+  if (getRequiredTextFields(service, activeInput).length > 0) return true;
+  if (getRequiredBooleanFields(service, activeInput).length > 0) return true;
+  const flyoutFields = getFlyoutFields(service, activeInput);
+  const requiredSet = new Set(getRequiredTextFields(service, activeInput));
+  return flyoutFields.some((f) => !REGION_FIELD_NAMES.has(f) && !requiredSet.has(f));
+}
+
 /** Returns true when the flyout has at least one visible field for the given service. */
 export function hasConfigurableFlyoutFields(service: AwsServiceMatrixEntry): boolean {
-  const defaultInput = getDefaultInput(service);
-  if (getRequiredTextFields(service, defaultInput).length > 0) return true;
-  if (getRequiredBooleanFields(service, defaultInput).length > 0) return true;
-  const flyoutFields = getFlyoutFields(service, defaultInput);
-  const requiredSet = new Set(getRequiredTextFields(service, defaultInput));
-  return flyoutFields.some((f) => !REGION_FIELD_NAMES.has(f) && !requiredSet.has(f));
+  const allInputs = service.inputs;
+  if (!allInputs || allInputs.length === 0) {
+    return hasConfigurableFlyoutFieldsForInput(service, getDefaultInput(service));
+  }
+  return allInputs.some((input) => hasConfigurableFlyoutFieldsForInput(service, input));
 }
 
 export function getRegionFieldName(
