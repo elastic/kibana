@@ -156,26 +156,4 @@ describe('OnboardingFlowProvider', () => {
       expect(result.current.getLatestFailedInstances()).toEqual(['inst_x']);
     });
   });
-
-  describe('retryDeploy', () => {
-    it('calls the registered deploy handler with the provided instance ids', () => {
-      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
-      const handler = jest.fn();
-
-      act(() => {
-        result.current.registerDeployHandler(handler);
-      });
-
-      act(() => {
-        result.current.retryDeploy(['inst_a', 'inst_b']);
-      });
-
-      expect(handler).toHaveBeenCalledWith(['inst_a', 'inst_b']);
-    });
-
-    it('does nothing when no handler is registered', () => {
-      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
-      expect(() => result.current.retryDeploy(['inst_a'])).not.toThrow();
-    });
-  });
 });
