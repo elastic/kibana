@@ -14,9 +14,12 @@ recall hook runs only when the agent selects the memory skill,
 - Agent Builder tools: `platform.memory.remember`, `platform.memory.recall`, and
   `platform.memory.forget`
 - Opt-in `agent-memory` skill and `beforeAgent` automatic recall hook
-- Workflow steps: `memory.remember` and `memory.recall`
+- Workflow steps: `memory.remember`, `memory.recall`, and `memory.forget`
 
-The tools and workflow steps share the same core write and recall operations.
+The tools and workflow steps share the same core write, recall, and soft-delete operations.
+Explicit tool and workflow recall can require generic exact-match tags such as project,
+customer, case, workflow, or Watch identifiers. Every requested tag must be present.
+Automatic recall remains unchanged and does not add a tag constraint.
 All memory tools set `excludeFromMcp` and are omitted from the Agent Builder MCP
 server. Agent Builder's registered-tool REST execution endpoint remains an
 inherent Agent Builder surface; it is subject to Agent Builder access checks and
