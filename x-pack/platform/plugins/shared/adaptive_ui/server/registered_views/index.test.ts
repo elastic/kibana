@@ -9,10 +9,13 @@ import { registeredViewIds } from '../../common/constants';
 import { createAdaptiveUiViewRegistry, significantEventSpec } from '.';
 
 describe('createAdaptiveUiViewRegistry', () => {
-  it('registers the significant event view', () => {
+  it('registers the significant event and investigation views', () => {
     const registry = createAdaptiveUiViewRegistry();
     expect(registry.get(registeredViewIds.significantEvent)).toBeDefined();
-    expect(registry.list().map((view) => view.id)).toContain(registeredViewIds.significantEvent);
+    expect(registry.get(registeredViewIds.investigation)).toBeDefined();
+    expect(registry.list().map((view) => view.id)).toEqual(
+      expect.arrayContaining([registeredViewIds.significantEvent, registeredViewIds.investigation])
+    );
   });
 
   it('builds the curated default spec for the registered view', async () => {
@@ -29,5 +32,12 @@ describe('createAdaptiveUiViewRegistry', () => {
     });
     expect(response.validation.valid).toBe(true);
     expect(response.spec.title).toBe('Custom incident');
+  });
+
+  it('builds the curated default spec for the investigation view', async () => {
+    const registry = createAdaptiveUiViewRegistry();
+    const response = await registry.request(registeredViewIds.investigation, undefined);
+    expect(response.validation.valid).toBe(true);
+    expect(response.spec.title).toContain('payment-service v2.4.1');
   });
 });

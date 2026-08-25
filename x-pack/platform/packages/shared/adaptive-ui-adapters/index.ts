@@ -16,6 +16,7 @@ import { sampleActionPolicy, toActionPolicyViewSpec } from './src/action_policy'
 import { sampleWorkflowYaml, toWorkflowYamlViewSpec } from './src/workflow_yaml';
 import { sampleWorkflowYamlDiff, toWorkflowYamlDiffViewSpec } from './src/workflow_yaml_diff';
 import { sampleSigEvent, toSigEventViewSpec } from './src/sig_event';
+import { sampleInvestigation, toInvestigationViewSpec } from './src/investigation';
 import { sampleSigEventDetection, toSigEventDetectionViewSpec } from './src/sig_event_detection';
 import { sampleKiFeature, toKiFeatureViewSpec } from './src/ki_feature';
 import { sampleSkill, toSkillViewSpec } from './src/skill';
@@ -76,6 +77,12 @@ export {
   type SignificantEventAttachmentInput,
 } from './src/sig_event_attachment';
 export {
+  toInvestigationViewSpec,
+  sampleInvestigation,
+  investigationSpec,
+  type InvestigationInput,
+} from './src/investigation';
+export {
   toSigEventDetectionViewSpec,
   sampleSigEventDetection,
   type SigEventDetectionData,
@@ -129,6 +136,10 @@ export const adapterGallery: AdapterGalleryEntry[] = [
     spec: toWorkflowYamlDiffViewSpec(sampleWorkflowYamlDiff),
   },
   { attachmentType: 'platform.sig_event', spec: toSigEventViewSpec(sampleSigEvent) },
+  {
+    attachmentType: 'nightshift.investigation',
+    spec: toInvestigationViewSpec(sampleInvestigation),
+  },
   {
     attachmentType: 'platform.sig_event_detection',
     spec: toSigEventDetectionViewSpec(sampleSigEventDetection),

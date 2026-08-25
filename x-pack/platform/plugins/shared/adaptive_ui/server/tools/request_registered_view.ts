@@ -15,7 +15,11 @@ import type { PrimitiveNode, ViewRegistry } from '@kbn/adaptive-ui';
 import { ADAPTIVE_UI_VIEW_ATTACHMENT_TYPE, adaptiveUiTools } from '../../common/constants';
 
 const requestRegisteredViewSchema = z.object({
-  viewId: z.string().describe('Id of a registered view, e.g. "streams.significantEvent".'),
+  viewId: z
+    .string()
+    .describe(
+      'Id of a registered view, e.g. "streams.significantEvent" or "nightshift.investigation".'
+    ),
   input: z
     .record(z.string(), z.unknown())
     .optional()

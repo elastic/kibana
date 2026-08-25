@@ -264,6 +264,27 @@ describe('RelayClient', () => {
       );
     });
 
+    it('includes blocks only when Block Kit blocks are supplied', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000300', tenant_key: 'team-A' },
+      } as never);
+      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: 'hello' } }];
+
+      await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'fallback',
+        blocks,
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { tenant_key: 'team-A', channel: 'C123', message: 'fallback', blocks },
+        })
+      );
+    });
+
     it.each([403, 409, 502])(
       'turns a %s into a RelayRequestError carrying the status',
       async (status) => {

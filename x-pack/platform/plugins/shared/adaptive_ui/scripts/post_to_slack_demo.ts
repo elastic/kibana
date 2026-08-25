@@ -9,25 +9,41 @@
  * Tier A demo: post an archetype `ViewSpec` to Slack as native Block Kit, the
  * same payload Agent Builder renders to React. This POSTs `renderSlack().blocks`
  * straight to Slack's `chat.postMessage` (which accepts `blocks`), bypassing the
- * agent/connector path — the in-product `.slack2` `sendMessage` tool is text-only
- * today, so this is the highest-fidelity way to prove the portable seam. Run with:
+ * agent/connector path. Charts are not rasterized here — use the in-product
+ * `post_view_to_slack` tool for PNG upload. Run with:
  *
  *   SLACK_BOT_TOKEN=xoxb-… SLACK_CHANNEL=C012AB3CD \
  *     node --require ./src/setup_node_env \
  *     x-pack/platform/plugins/shared/adaptive_ui/scripts/post_to_slack_demo.ts \
- *     --archetype security.rule
+ *     --archetype nightshift.investigation
+ *
+ * Chart fixtures (`security.entity_analytics_dashboard`, `security.entity_risk_score_history`)
+ * dry-run as the text fallback; PNG upload is the in-product `post_view_to_slack` tool.
  *
  * Pass `--dry-run` to render and print the blocks without a token or a POST.
+ * Relative Kibana `href`s are rewritten against `--kibana-url` / `KIBANA_URL`
+ * (default `http://localhost:5601`), matching `post_view_to_slack`.
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { getViewSpecSchema, renderSlack, type ViewSpec } from '@kbn/adaptive-ui';
-import { sampleCases, toCasesViewSpec } from '../common/adapters/cases';
 import {
+  sampleCases,
+  sampleEntityAnalyticsDashboard,
+  sampleEntityRiskScoreHistory,
+  sampleInvestigation,
   sampleSecurityRuleAttachment,
+  sampleSigEvent,
+  sampleTextAttachment,
+  toCasesViewSpec,
+  toEntityAnalyticsDashboardViewSpec,
+  toEntityRiskScoreHistoryViewSpec,
+  toInvestigationViewSpec,
   toSecurityRuleViewSpec,
-} from '../common/adapters/security_rule';
-import { sampleTextAttachment, toTextViewSpec } from '../common/adapters/text';
+  toSigEventViewSpec,
+  toTextViewSpec,
+} from '@kbn/adaptive-ui-adapters';
+import { absolutizeViewSpecHrefs } from '../server/slack/absolutize_hrefs';
 
 const SLACK_POST_MESSAGE_URL = 'https://slack.com/api/chat.postMessage';
 
@@ -35,6 +51,14 @@ const archetypes: Record<string, ViewSpec> = {
   text: toTextViewSpec(sampleTextAttachment),
   cases: toCasesViewSpec(sampleCases),
   'security.rule': toSecurityRuleViewSpec(sampleSecurityRuleAttachment),
+  'streams.significantEvent': toSigEventViewSpec(sampleSigEvent),
+  'nightshift.investigation': toInvestigationViewSpec(sampleInvestigation),
+  'security.entity_analytics_dashboard': toEntityAnalyticsDashboardViewSpec(
+    sampleEntityAnalyticsDashboard
+  ),
+  'security.entity_risk_score_history': toEntityRiskScoreHistoryViewSpec(
+    sampleEntityRiskScoreHistory
+  ),
 };
 
 const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
@@ -62,9 +86,16 @@ if (!spec) {
 // Same validation the renderer framework runs before mounting.
 getViewSpecSchema().parse(spec);
 
+const kibanaOrigin = (
+  flag('kibana-url') ??
+  process.env.KIBANA_URL ??
+  'http://localhost:5601'
+).replace(/\/+$/, '');
+const slackSpec = absolutizeViewSpecHrefs(spec, kibanaOrigin);
+
 // One ViewSpec, one Slack render: `text` is the notification fallback, `blocks`
 // is the Block Kit that mirrors the React card.
-const { text, blocks } = renderSlack(spec);
+const { text, blocks } = renderSlack(slackSpec);
 
 const dryRun = hasFlag('dry-run');
 const channel = flag('channel') ?? process.env.SLACK_CHANNEL;
