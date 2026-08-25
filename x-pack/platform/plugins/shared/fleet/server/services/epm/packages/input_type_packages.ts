@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
-import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesDataStream, IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   Installation,
@@ -150,9 +150,10 @@ export const checkExistingDataStreamsAreFromDifferentPackage = (
   );
 };
 
-function shouldSkipUncorroboratedUploadAssets(
+function hasUncorroboratedUploadAssets(
   installation: Pick<Installation, 'name' | 'install_source' | 'installed_es'>,
   existingDataStreams: IndicesDataStream[],
+  existingIndexTemplate: IndicesIndexTemplate | null,
   dataStreamType: string,
   datasetName: string
 ): boolean {
@@ -160,19 +161,36 @@ function shouldSkipUncorroboratedUploadAssets(
     return false;
   }
 
-  return existingDataStreams.some(
+  const hasUncorroboratedStream = existingDataStreams.some(
     (liveStream) =>
-      !isLiveStreamCorroboratedByUpload(installation, liveStream, dataStreamType, datasetName)
+      !isAssetCorroboratedByUpload(
+        installation,
+        liveStream._meta?.package?.name,
+        dataStreamType,
+        datasetName
+      )
+  );
+  if (hasUncorroboratedStream) {
+    return true;
+  }
+
+  return Boolean(
+    existingIndexTemplate &&
+      !isAssetCorroboratedByUpload(
+        installation,
+        existingIndexTemplate._meta?.package?.name,
+        dataStreamType,
+        datasetName
+      )
   );
 }
 
-function isLiveStreamCorroboratedByUpload(
+function isAssetCorroboratedByUpload(
   installation: Pick<Installation, 'name' | 'installed_es'>,
-  liveStream: IndicesDataStream,
+  owner: string | undefined,
   dataStreamType: string,
   datasetName: string
 ): boolean {
-  const owner = liveStream._meta?.package?.name;
   if (owner !== installation.name) {
     return false;
   }
@@ -383,18 +401,17 @@ async function installAssetsForDataStreamType(opts: {
   }
 
   if (
-    existingDataStreams.length &&
-    shouldSkipUncorroboratedUploadAssets(
+    hasUncorroboratedUploadAssets(
       installedPkgWithAssets.installation,
       existingDataStreams,
+      existingIndexTemplate,
       dataStream.type,
       datasetName
     )
   ) {
-    logger.info(
-      `Data stream for dataset ${datasetName} already exists without corroborated ownership from this uploaded package, skipping index template creation`
+    throw new PackagePolicyValidationError(
+      `Data stream or index template for dataset "${datasetName}" already exists and its ownership cannot be verified for this uploaded package. Remove the existing assets or reinstall the package before reusing the dataset.`
     );
-    return;
   }
 
   try {

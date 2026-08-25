@@ -1063,6 +1063,43 @@ describe('install', () => {
       expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
     });
 
+    it('proceeds with a bundled install when the installation saved object lookup throws', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      (installStateMachine._stateMachineInstallPackage as jest.Mock).mockResolvedValueOnce({});
+      mockGetBundledPackageByPkgKey.mockResolvedValueOnce({
+        name: 'test_package',
+        version: '1.0.0',
+        getBuffer: async () => Buffer.from('test_package'),
+      });
+      jest
+        .mocked(getInstallationObject)
+        .mockImplementationOnce(async ({ failOnUnexpectedError }) => {
+          const error = new Error('so unavailable');
+          if (failOnUnexpectedError) {
+            throw error;
+          }
+          appContextService.getLogger().error(error);
+          return undefined;
+        });
+
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'test_package-1.0.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(getInstallationObject).toHaveBeenCalledWith(
+        expect.objectContaining({ failOnUnexpectedError: false })
+      );
+      expect(appContextService.getLogger().error).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'so unavailable' })
+      );
+      expect(response.error).toBeUndefined();
+      expect(installStateMachine._stateMachineInstallPackage).toHaveBeenCalled();
+    });
+
     it('rejects a legacy bundled installation recorded as upload', async () => {
       jest.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
       jest.mocked(getBundledPackageByName).mockResolvedValue({

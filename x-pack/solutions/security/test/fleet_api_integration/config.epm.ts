@@ -11,19 +11,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseFleetApiConfig = await readConfigFile(
     require.resolve('@kbn/test-suites-xpack-platform/fleet_api_integration/config.base')
   );
-  const baseConfig = baseFleetApiConfig.getAll();
 
   return {
-    ...baseConfig,
+    ...baseFleetApiConfig.getAll(),
     testFiles: [require.resolve('./apis/epm')],
-    kbnTestServer: {
-      ...baseConfig.kbnTestServer,
-      serverArgs: [
-        ...baseConfig.kbnTestServer.serverArgs,
-        // Upload fixtures in this suite share registry package names.
-        `--xpack.fleet.internal.allowRegistryPackageUploads=true`,
-      ],
-    },
     junit: {
       reportName: 'X-Pack Security Solution EPM API Integration Tests',
     },

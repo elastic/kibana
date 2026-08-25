@@ -944,7 +944,7 @@ async function installPackageByUpload({
     const installedPkg = await getInstallationObject({
       savedObjectsClient,
       pkgName,
-      failOnUnexpectedError: true,
+      failOnUnexpectedError: !isBundledPackage,
     });
 
     installType = getInstallType({ pkgVersion, installedPkg });

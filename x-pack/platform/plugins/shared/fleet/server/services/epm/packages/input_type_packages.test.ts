@@ -9,7 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { appContextService } from '../../app_context';
-import { PackageNotFoundError } from '../../../errors';
+import { PackageNotFoundError, PackagePolicyValidationError } from '../../../errors';
 
 import { dataStreamService } from '../../data_streams';
 
@@ -250,7 +250,7 @@ describe('installAssetsForInputPackagePolicy', () => {
     expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
   });
 
-  it('should skip templates for an uploaded package when the existing data stream has no _meta field', async () => {
+  it('should throw for an uploaded package when the existing data stream has no _meta field', async () => {
     jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: { name: 'uploaded_probe', version: '1.0.0', install_source: 'upload' },
       packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
@@ -267,32 +267,34 @@ describe('installAssetsForInputPackagePolicy', () => {
 
     const mockedLogger = jest.mocked(appContextService.getLogger());
 
-    await installAssetsForInputPackagePolicy({
-      pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
-      soClient: savedObjectsClientMock.create(),
-      esClient: {} as ElasticsearchClient,
-      force: true,
-      logger: mockedLogger,
-      packagePolicy: {
-        inputs: [
-          {
-            name: 'log',
-            type: 'log',
-            streams: [
-              {
-                data_stream: { type: 'logs' },
-                vars: { 'data_stream.dataset': { value: 'my_dataset' } },
-              },
-            ],
-          },
-        ],
-      } as any,
-    });
+    await expect(
+      installAssetsForInputPackagePolicy({
+        pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: true,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'log',
+              type: 'log',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      })
+    ).rejects.toThrowError(PackagePolicyValidationError);
 
     expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
   });
 
-  it('should skip templates for an uploaded package when a same-name stream is not corroborated by installed assets', async () => {
+  it('should throw for an uploaded package when a same-name stream is not corroborated by installed assets', async () => {
     jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
         name: 'uploaded_probe',
@@ -315,27 +317,29 @@ describe('installAssetsForInputPackagePolicy', () => {
 
     const mockedLogger = jest.mocked(appContextService.getLogger());
 
-    await installAssetsForInputPackagePolicy({
-      pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
-      soClient: savedObjectsClientMock.create(),
-      esClient: {} as ElasticsearchClient,
-      force: true,
-      logger: mockedLogger,
-      packagePolicy: {
-        inputs: [
-          {
-            name: 'log',
-            type: 'log',
-            streams: [
-              {
-                data_stream: { type: 'logs' },
-                vars: { 'data_stream.dataset': { value: 'my_dataset' } },
-              },
-            ],
-          },
-        ],
-      } as any,
-    });
+    await expect(
+      installAssetsForInputPackagePolicy({
+        pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: true,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'log',
+              type: 'log',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      })
+    ).rejects.toThrowError(PackagePolicyValidationError);
 
     expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
   });
@@ -360,6 +364,100 @@ describe('installAssetsForInputPackagePolicy', () => {
       },
     ] as any);
     jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue(null);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await installAssetsForInputPackagePolicy({
+      pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+      soClient: savedObjectsClientMock.create(),
+      esClient: {} as ElasticsearchClient,
+      force: true,
+      logger: mockedLogger,
+      packagePolicy: {
+        inputs: [
+          {
+            name: 'log',
+            type: 'log',
+            streams: [
+              {
+                data_stream: { type: 'logs' },
+                vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+              },
+            ],
+          },
+        ],
+      } as any,
+    });
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).toHaveBeenCalled();
+  });
+
+  it('should throw for an uploaded package when a same-name index template is not corroborated by installed assets', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'uploaded_probe',
+        version: '1.0.0',
+        install_source: 'upload',
+        installed_es: [],
+      },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+      name: 'logs-my_dataset',
+      _meta: { package: { name: 'uploaded_probe' } },
+    } as any);
+
+    const mockedLogger = jest.mocked(appContextService.getLogger());
+
+    await expect(
+      installAssetsForInputPackagePolicy({
+        pkgInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' } as any,
+        soClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+        force: true,
+        logger: mockedLogger,
+        packagePolicy: {
+          inputs: [
+            {
+              name: 'log',
+              type: 'log',
+              streams: [
+                {
+                  data_stream: { type: 'logs' },
+                  vars: { 'data_stream.dataset': { value: 'my_dataset' } },
+                },
+              ],
+            },
+          ],
+        } as any,
+      })
+    ).rejects.toThrowError(PackagePolicyValidationError);
+
+    expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
+  });
+
+  it('should install templates for an uploaded package when the existing index template is corroborated by installed assets', async () => {
+    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+      installation: {
+        name: 'uploaded_probe',
+        version: '1.0.0',
+        install_source: 'upload',
+        installed_es: [{ id: 'logs-my_dataset', type: 'index_template' }],
+      },
+      packageInfo: { ...TEST_PKG_INFO_INPUT, name: 'uploaded_probe', version: '1.0.0' },
+      assetsMap: new Map(),
+      paths: [],
+    } as any);
+
+    jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([]);
+    jest.mocked(dataStreamService).getMatchingIndexTemplate.mockResolvedValue({
+      name: 'logs-my_dataset',
+      _meta: { package: { name: 'uploaded_probe' } },
+    } as any);
 
     const mockedLogger = jest.mocked(appContextService.getLogger());
 
@@ -1962,7 +2060,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       expect(esIndexPatterns).toHaveProperty('my_custom_access');
     });
 
-    it('should skip templates for an uploaded package when a custom dataset matches an ownerless live stream', async () => {
+    it('should throw for an uploaded package when a custom dataset matches an ownerless live stream', async () => {
       jest.mocked(dataStreamService).getMatchingDataStreams.mockResolvedValue([
         {
           name: 'logs-generic-default',
@@ -1982,33 +2080,35 @@ describe('removeAssetsForInputPackagePolicy', () => {
       } as any);
 
       const mockedLogger = jest.mocked(appContextService.getLogger());
-      await installAssetsForCustomDatasetPolicy({
-        pkgInfo: {
-          type: 'integration',
-          name: 'uploaded_probe',
-          version: '1.0.0',
-          data_streams: [{ dataset: 'uploaded_probe.safe', type: 'logs', path: 'safe' }],
-        } as any,
-        soClient: savedObjectsClientMock.create(),
-        esClient: {} as ElasticsearchClient,
-        force: true,
-        logger: mockedLogger,
-        packagePolicy: {
-          inputs: [
-            {
-              enabled: true,
-              type: 'logfile',
-              streams: [
-                {
-                  enabled: true,
-                  data_stream: { type: 'logs', dataset: 'uploaded_probe.safe' },
-                  vars: { 'data_stream.dataset': { value: 'generic' } },
-                },
-              ],
-            },
-          ],
-        } as any,
-      });
+      await expect(
+        installAssetsForCustomDatasetPolicy({
+          pkgInfo: {
+            type: 'integration',
+            name: 'uploaded_probe',
+            version: '1.0.0',
+            data_streams: [{ dataset: 'uploaded_probe.safe', type: 'logs', path: 'safe' }],
+          } as any,
+          soClient: savedObjectsClientMock.create(),
+          esClient: {} as ElasticsearchClient,
+          force: true,
+          logger: mockedLogger,
+          packagePolicy: {
+            inputs: [
+              {
+                enabled: true,
+                type: 'logfile',
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { type: 'logs', dataset: 'uploaded_probe.safe' },
+                    vars: { 'data_stream.dataset': { value: 'generic' } },
+                  },
+                ],
+              },
+            ],
+          } as any,
+        })
+      ).rejects.toThrowError(PackagePolicyValidationError);
 
       expect(jest.mocked(installIndexTemplatesAndPipelines)).not.toHaveBeenCalled();
     });

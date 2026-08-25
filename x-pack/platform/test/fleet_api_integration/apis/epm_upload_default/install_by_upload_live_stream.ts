@@ -64,7 +64,7 @@ export default function (providerContext: FtrProviderContext) {
       await expectStreamAssetsUnchanged(original);
     });
 
-    it('does not install templates when an uploaded package later targets an ownerless stream through a custom dataset', async () => {
+    it('rejects a package policy when an uploaded package later targets an ownerless stream through a custom dataset', async () => {
       const original = await createOwnerlessLiveStream();
       const buf = await buildUploadPackageZip({
         name: MUTATE_PACKAGE,
@@ -81,7 +81,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       const agentPolicyId = await createAgentPolicy();
-      await supertest
+      const res = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -113,8 +113,10 @@ export default function (providerContext: FtrProviderContext) {
             },
           ],
         })
-        .expect(200);
+        .expect(400);
 
+      expect(res.body.message).to.contain(STREAM_DATASET);
+      expect(res.body.message).to.contain('ownership cannot be verified');
       await expectStreamAssetsUnchanged(original);
       const fleetTemplate = await es.indices
         .getIndexTemplate({ name: `logs-${STREAM_DATASET}` })

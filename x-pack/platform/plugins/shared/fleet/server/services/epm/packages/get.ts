@@ -811,11 +811,11 @@ export async function getInstallationObject(options: {
   const installation = await savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
     .catch((e) => {
+      // Not being installed is an expected condition (e.g. fetching input schema for a package
+      // that hasn't been installed yet), not a real error — avoid polluting logs at error level.
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         return undefined;
       }
-      // Not being installed is an expected condition (e.g. fetching input schema for a package
-      // that hasn't been installed yet), not a real error — avoid polluting logs at error level.
       if (failOnUnexpectedError) {
         throw e;
       }
