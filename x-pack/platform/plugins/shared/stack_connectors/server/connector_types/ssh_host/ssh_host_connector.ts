@@ -71,7 +71,59 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public async exec(params: ExecParams): Promise<{ stdout: string; stderr: string; code: number }> {
-    return this.execCommand(params);
+    const { script } = params;
+    const { hostname, port } = parseHost(this.config.host);
+    const { username } = this.secrets;
+
+    // Base64-encode the script so bash variables ($PID, $STATE, etc.) are not expanded
+    // by the local shell when it processes the double-quoted SSH argument.
+    const encodedScript = Buffer.from(script).toString('base64');
+    const remoteCmd = `printf '%s' '${encodedScript}' | openssl base64 -d -A | bash`;
+
+    const { sshPrefix, authOpts, env, cleanup } = await this.resolveCredentials();
+
+    const sshOpts = [
+      ...authOpts,
+      '-o StrictHostKeyChecking=no',
+      '-o UserKnownHostsFile=/dev/null',
+      '-o ConnectTimeout=10',
+      '-o ControlMaster=auto',
+      `-o ControlPath="${this.getControlPath()}"`,
+      '-o ControlPersist=10s',
+      `-p ${port}`,
+    ];
+
+    const command = `${sshPrefix} ${sshOpts.join(' ')} ${username}@${hostname} "${remoteCmd}"`;
+
+    try {
+      const { stdout, stderr } = await execPromise(command, {
+        env,
+        maxBuffer: 100 * 1024 * 1024,
+      });
+      return {
+        stdout: stdout.replace(command, '').trim(),
+        stderr: stderr.replace(command, '').trim(),
+        code: 0,
+      };
+    } catch (error) {
+      const isChildProcessError =
+        error instanceof Error && 'stdout' in error && 'stderr' in error && 'code' in error;
+      if (
+        isChildProcessError &&
+        typeof error.stdout === 'string' &&
+        typeof error.stderr === 'string' &&
+        typeof error.code === 'number'
+      ) {
+        return {
+          stdout: error.stdout.replace(command, '').trim(),
+          stderr: error.stderr.replace(command, '').trim(),
+          code: error.code,
+        };
+      }
+      throw error;
+    } finally {
+      cleanup();
+    }
   }
 
   public async downloadFile(
@@ -168,64 +220,6 @@ export class SshHostConnector extends SubActionConnector<Config, Secrets> {
       }
       default:
         throw new Error(`Unsupported authType: ${authType}`);
-    }
-  }
-
-  private async execCommand(
-    params: ExecParams
-  ): Promise<{ stdout: string; stderr: string; code: number }> {
-    const { script } = params;
-    const { hostname, port } = parseHost(this.config.host);
-    const { username } = this.secrets;
-
-    // Base64-encode the script so bash variables ($PID, $STATE, etc.) are not expanded
-    // by the local shell when it processes the double-quoted SSH argument.
-    const encodedScript = Buffer.from(script).toString('base64');
-    const remoteCmd = `printf '%s' '${encodedScript}' | openssl base64 -d -A | bash`;
-
-    const { sshPrefix, authOpts, env, cleanup } = await this.resolveCredentials();
-
-    const sshOpts = [
-      ...authOpts,
-      '-o StrictHostKeyChecking=no',
-      '-o UserKnownHostsFile=/dev/null',
-      '-o ConnectTimeout=10',
-      '-o ControlMaster=auto',
-      `-o ControlPath="${this.getControlPath()}"`,
-      '-o ControlPersist=10s',
-      `-p ${port}`,
-    ];
-
-    const command = `${sshPrefix} ${sshOpts.join(' ')} ${username}@${hostname} "${remoteCmd}"`;
-
-    try {
-      const { stdout, stderr } = await execPromise(command, {
-        env,
-        maxBuffer: 100 * 1024 * 1024,
-      });
-      return {
-        stdout: stdout.replace(command, '').trim(),
-        stderr: stderr.replace(command, '').trim(),
-        code: 0,
-      };
-    } catch (error) {
-      const isChildProcessError =
-        error instanceof Error && 'stdout' in error && 'stderr' in error && 'code' in error;
-      if (
-        isChildProcessError &&
-        typeof error.stdout === 'string' &&
-        typeof error.stderr === 'string' &&
-        typeof error.code === 'number'
-      ) {
-        return {
-          stdout: error.stdout.replace(command, '').trim(),
-          stderr: error.stderr.replace(command, '').trim(),
-          code: error.code,
-        };
-      }
-      throw error;
-    } finally {
-      cleanup();
     }
   }
 
