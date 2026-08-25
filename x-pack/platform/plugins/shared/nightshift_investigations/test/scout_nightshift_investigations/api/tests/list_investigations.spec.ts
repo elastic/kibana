@@ -7,7 +7,12 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { apiTest, COMMON_HEADERS, INVESTIGATIONS_READ_ROLE, NO_AGENT_BUILDER_ROLE } from '../fixtures';
+import {
+  apiTest,
+  COMMON_HEADERS,
+  INVESTIGATIONS_READ_ROLE,
+  NO_AGENT_BUILDER_ROLE,
+} from '../fixtures';
 
 const LIST_PATH = 'internal/nightshift/investigations';
 
