@@ -105,7 +105,7 @@ export type {
   ResolveDashboardsResult,
 } from './form/field_groups/search_related_dashboards';
 export { partitionArtifactsByDashboardType } from './form/field_groups/dashboard_artifact_selection';
-export { mapArtifacts, resolveArtifactId } from './form/utils/artifact_mappers';
+export { mapArtifacts } from './form/utils/artifact_mappers';
 export type { RuleArtifactPayload } from './form/utils/artifact_mappers';
 export { getRunbookContent, getDashboardId } from './form';
 export type { RunbookArtifactData, DashboardArtifactData } from './form';

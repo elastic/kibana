@@ -1164,7 +1164,7 @@
     },
     {
       "groupName": "stylelint",
-      "matchDepNames": ["stylelint", "stylelint-scss"],
+      "matchDepNames": ["meow", "stylelint", "stylelint-scss"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1358,15 +1358,6 @@
     {
       "groupName": "package.json/yarn.lock utils",
       "matchDepNames": ["@yarnpkg/lockfile", "sort-package-json", "yarn-deduplicate"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "aggregate-error",
-      "matchDepNames": ["aggregate-error"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
