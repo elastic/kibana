@@ -275,6 +275,7 @@ export class AgentStatusChangeTask {
 
     const agentlessPolicies: string[] = [];
     const policyNamespaceMap = new Map<string, string>();
+    const conflictedPolicies = new Set<string>();
 
     for await (const batch of agentPolicyFetcher) {
       for (const policy of batch) {
@@ -282,7 +283,19 @@ export class AgentStatusChangeTask {
           agentlessPolicies.push(policy.id);
         }
         if (policy.id && policy.namespace) {
-          policyNamespaceMap.set(policy.id, policy.namespace);
+          if (conflictedPolicies.has(policy.id)) {
+            continue;
+          }
+          const existingNamespace = policyNamespaceMap.get(policy.id);
+          if (existingNamespace && existingNamespace !== policy.namespace) {
+            this.logger.warn(
+              `[AgentStatusChangeTask] Policy '${policy.id}' has conflicting namespaces ('${existingNamespace}' vs '${policy.namespace}'); falling back to default namespace`
+            );
+            policyNamespaceMap.delete(policy.id);
+            conflictedPolicies.add(policy.id);
+          } else {
+            policyNamespaceMap.set(policy.id, policy.namespace);
+          }
         }
       }
     }
@@ -301,8 +314,7 @@ export class AgentStatusChangeTask {
       const body = {
         '@timestamp': new Date().toISOString(),
         data_stream: {
-          type: AGENT_STATUS_CHANGE_DATA_STREAM.type,
-          dataset: AGENT_STATUS_CHANGE_DATA_STREAM.dataset,
+          ...AGENT_STATUS_CHANGE_DATA_STREAM,
           namespace,
         },
         agent: {
