@@ -48,6 +48,262 @@ const runInstall = async () => {
   return { esClient, templates, byIndex };
 };
 
+const REPORT_INDEX = '.kibana-threat-reports';
+
+/** Mapping shape for a reports index that is already on the current version. */
+const fullyMigratedReportMappings = () => ({
+  properties: {
+    content: {
+      properties: {
+        external_references: {
+          properties: {
+            source_name: {},
+            url: {},
+            canonical_url: {},
+            external_id: {},
+            description: {},
+            ref_part: {},
+            ref_part_count: {},
+          },
+        },
+      },
+    },
+    lineage: { properties: { content_scrubbed_at: {} } },
+    extracted: {
+      properties: {
+        diamond: {},
+        gate: {},
+        vulnerability: {},
+        iocs: {
+          properties: {
+            tier: {},
+            tier_heuristic: {},
+            tier_basis: {},
+            port: {},
+            reference: {},
+            block_index: {},
+          },
+        },
+      },
+    },
+  },
+});
+
+/** Indicators mapping that is already on the current version. */
+const fullyMigratedIndicatorMappings = () => ({
+  properties: {
+    space_id: {},
+    ioc_tier: {},
+    sources: {},
+    threat: {
+      properties: {
+        indicator: { properties: { email: {}, network: {}, cryptocurrency: {} } },
+      },
+    },
+  },
+});
+
+/**
+ * Runs the real installer against a cluster that already has a reports index,
+ * so the migration paths actually execute (the suite above mocks `indices.get`
+ * to `{}`, which makes every report migration a no-op).
+ */
+const runMigrations = async ({
+  reportMappings = fullyMigratedReportMappings(),
+  indicatorMappings = fullyMigratedIndicatorMappings(),
+}: {
+  reportMappings?: Record<string, unknown>;
+  indicatorMappings?: Record<string, unknown>;
+} = {}) => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  esClient.indices.exists.mockResolvedValue(true);
+  esClient.indices.get.mockResolvedValue({ [REPORT_INDEX]: {} });
+  esClient.indices.getSettings.mockResolvedValue({
+    [REPORT_INDEX]: { settings: { index: { hidden: 'true' } } },
+    [THREAT_INTEL_SOURCES_INDEX]: { settings: { index: { hidden: 'true' } } },
+    [THREAT_INTEL_INDICATORS_INDEX]: { settings: { index: { hidden: 'true' } } },
+  });
+  esClient.indices.getMapping.mockImplementation((async (args: { index: string }) => ({
+    [args.index]: {
+      mappings: args.index === THREAT_INTEL_INDICATORS_INDEX ? indicatorMappings : reportMappings,
+    },
+  })) as never);
+
+  await installIndexTemplates({ esClient, logger: loggingSystemMock.createLogger() });
+
+  const putMappingArgs = esClient.indices.putMapping.mock.calls.map(([arg]) => arg);
+  /** Every property path touched by a putMapping call, as dotted strings. */
+  const patchedPaths = putMappingArgs.flatMap((arg) => {
+    const paths: string[] = [];
+    const walk = (node: Record<string, unknown>, prefix: string) => {
+      for (const [key, value] of Object.entries(node)) {
+        const propertyPath = prefix ? `${prefix}.${key}` : key;
+        const nested = (value as { properties?: Record<string, unknown> })?.properties;
+        if (nested) {
+          walk(nested, propertyPath);
+        } else {
+          paths.push(propertyPath);
+        }
+      }
+    };
+    walk((arg.properties ?? {}) as Record<string, unknown>, '');
+    return paths;
+  });
+
+  return { esClient, putMappingArgs, patchedPaths };
+};
+
+describe('index_templates — migrations', () => {
+  it('resolves the report index list once for all report migrations', async () => {
+    const { esClient } = await runMigrations();
+    // Previously each of the report-targeting migrations issued its own
+    // identical indices.get against the wildcard pattern.
+    expect(esClient.indices.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('is a no-op when every mapping is already current', async () => {
+    const { putMappingArgs } = await runMigrations();
+    expect(putMappingArgs).toEqual([]);
+  });
+
+  it.each([
+    ['extracted.diamond', 'diamond'],
+    ['extracted.gate', 'gate'],
+    ['extracted.vulnerability', 'vulnerability'],
+  ])('adds %s when absent', async (expectedPath, field) => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.extracted.properties as Record<string, unknown>)[field];
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths.some((p) => p.startsWith(expectedPath))).toBe(true);
+  });
+
+  it.each([
+    ['tier', 'extracted.iocs.tier'],
+    ['port', 'extracted.iocs.port'],
+    ['reference', 'extracted.iocs.reference'],
+  ])('adds extracted.iocs.%s when absent', async (field, expectedPath) => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.extracted.properties.iocs.properties as Record<string, unknown>)[
+      field
+    ];
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toContain(expectedPath);
+  });
+
+  it('adds lineage.content_scrubbed_at when absent', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.lineage.properties as Record<string, unknown>).content_scrubbed_at;
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toContain('lineage.content_scrubbed_at');
+  });
+
+  it('adds space_id to the indicators index when absent', async () => {
+    const indicatorMappings = fullyMigratedIndicatorMappings();
+    delete (indicatorMappings.properties as Record<string, unknown>).space_id;
+
+    const { patchedPaths } = await runMigrations({ indicatorMappings });
+
+    expect(patchedPaths).toContain('space_id');
+  });
+
+  // The four external_references states the reviewer called out. State 2 must
+  // install the complete current property set: because the branches are
+  // exclusive, a partial install would leave ref_part missing until a second
+  // boot, and strict mapping rejects chunked docs in the meantime.
+  describe('content.external_references', () => {
+    const withExternalRefs = (props: Record<string, unknown> | undefined) => {
+      const mappings = fullyMigratedReportMappings();
+      if (props === undefined) {
+        delete (mappings.properties.content.properties as Record<string, unknown>)
+          .external_references;
+      } else {
+        mappings.properties.content.properties.external_references = {
+          properties: props,
+        } as never;
+      }
+      return mappings;
+    };
+
+    it('installs the full property set on a pre-v18 index (no external_references)', async () => {
+      const { patchedPaths } = await runMigrations({ reportMappings: withExternalRefs(undefined) });
+
+      for (const field of [
+        'source_name',
+        'url',
+        'canonical_url',
+        'external_id',
+        'description',
+        'ref_part',
+        'ref_part_count',
+      ]) {
+        expect(patchedPaths).toContain(`content.external_references.${field}`);
+      }
+    });
+
+    it('adds canonical_url and ref_parts on a v18 index', async () => {
+      const { patchedPaths } = await runMigrations({
+        reportMappings: withExternalRefs({ source_name: {}, url: {} }),
+      });
+
+      expect(patchedPaths).toContain('content.external_references.canonical_url');
+      expect(patchedPaths).toContain('content.external_references.ref_part');
+      expect(patchedPaths).toContain('content.external_references.ref_part_count');
+    });
+
+    it('adds only ref_parts on a v19 index that has canonical_url', async () => {
+      const { patchedPaths } = await runMigrations({
+        reportMappings: withExternalRefs({ source_name: {}, url: {}, canonical_url: {} }),
+      });
+
+      expect(patchedPaths).toContain('content.external_references.ref_part');
+      expect(patchedPaths).not.toContain('content.external_references.canonical_url');
+    });
+
+    it('is a no-op when fully migrated', async () => {
+      const { patchedPaths } = await runMigrations();
+      expect(patchedPaths).toEqual([]);
+    });
+  });
+});
+
+describe('ensureCompanionIndex', () => {
+  const runCreateWith = async (createError: unknown) => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.exists.mockResolvedValue(false);
+    esClient.indices.get.mockResolvedValue({});
+    esClient.indices.getSettings.mockResolvedValue({});
+    esClient.indices.create.mockRejectedValue(createError);
+
+    return installIndexTemplates({ esClient, logger: loggingSystemMock.createLogger() });
+  };
+
+  it('swallows the concurrent-creation race', async () => {
+    await expect(
+      runCreateWith({
+        statusCode: 400,
+        body: { error: { type: 'resource_already_exists_exception' } },
+      })
+    ).resolves.toBeUndefined();
+  });
+
+  it('rethrows other 400s such as a shard-limit failure', async () => {
+    // Matching on the 400 status alone hid this: boot succeeded, the index did
+    // not exist, and every later write to it failed with no obvious cause.
+    await expect(
+      runCreateWith({
+        statusCode: 400,
+        body: { error: { type: 'validation_exception', reason: 'cluster shard limit exceeded' } },
+      })
+    ).rejects.toBeDefined();
+  });
+});
+
 describe('installIndexTemplates', () => {
   it('marks all three threat intel indices hidden', async () => {
     const { byIndex } = await runInstall();

@@ -465,11 +465,10 @@ const resolveReportIndices = async (
 
 const migrateExistingDiamondMappings = async (
   esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('diamond-mapping-migration');
-
-  const reportIndices = await resolveReportIndices(esClient, log);
 
   for (const indexName of reportIndices) {
     try {
@@ -551,11 +550,10 @@ const migrateExistingDiamondMappings = async (
 
 const migrateExistingIocTierMappings = async (
   esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('ioc-tier-mapping-migration');
-
-  const reportIndices = await resolveReportIndices(esClient, log);
 
   for (const indexName of reportIndices) {
     try {
@@ -605,11 +603,10 @@ const migrateExistingIocTierMappings = async (
 
 const migrateExistingIocPortMapping = async (
   esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('ioc-port-mapping-migration');
-
-  const reportIndices = await resolveReportIndices(esClient, log);
 
   for (const indexName of reportIndices) {
     try {
@@ -657,11 +654,10 @@ const migrateExistingIocPortMapping = async (
 
 const migrateExistingIocReferenceMappings = async (
   esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('ioc-reference-mapping-migration');
-
-  const reportIndices = await resolveReportIndices(esClient, log);
 
   for (const indexName of reportIndices) {
     try {
@@ -710,11 +706,10 @@ const migrateExistingIocReferenceMappings = async (
 
 const migrateExistingGateMappings = async (
   esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('gate-mapping-migration');
-
-  const reportIndices = await resolveReportIndices(esClient, log);
 
   for (const indexName of reportIndices) {
     try {
@@ -762,11 +757,10 @@ const migrateExistingGateMappings = async (
 
 const migrateExistingExternalReferencesMapping = async (
   esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('external-references-mapping-migration');
-
-  const reportIndices = await resolveReportIndices(esClient, log);
 
   for (const indexName of reportIndices) {
     try {
@@ -785,6 +779,10 @@ const migrateExistingExternalReferencesMapping = async (
 
       if (!contentProps?.external_references) {
         // State 2: index predates v18 — no external_references block at all.
+        // Install the *complete* current property set, not just the v18 fields.
+        // These branches are exclusive, so a partial install here would leave
+        // ref_part/ref_part_count missing until a second Kibana boot, and until
+        // then dynamic: strict rejects every chunked text-indicator-list doc.
         await esClient.indices.putMapping({
           index: indexName,
           properties: {
@@ -798,6 +796,8 @@ const migrateExistingExternalReferencesMapping = async (
                     canonical_url: { type: 'keyword' },
                     external_id: { type: 'keyword' },
                     description: { type: 'text', index: false },
+                    ref_part: { type: 'integer' },
+                    ref_part_count: { type: 'integer' },
                   },
                 },
               },
@@ -914,10 +914,10 @@ const migrateExistingIndicatorSourcesMapping = async (
 /** `lineage.content_scrubbed_at` (v23) for clusters created before retention existed. */
 const migrateExistingContentScrubbedMapping = async (
   esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('content-scrubbed-mapping-migration');
-  const reportIndices = await resolveReportIndices(esClient, log);
 
   for (const indexName of reportIndices) {
     try {
@@ -958,10 +958,10 @@ const migrateExistingContentScrubbedMapping = async (
  */
 const migrateExistingIndicesToHidden = async (
   esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('hidden-index-migration');
-  const reportIndices = await resolveReportIndices(esClient, log);
   const targets = [...reportIndices, THREAT_INTEL_SOURCES_INDEX, THREAT_INTEL_INDICATORS_INDEX];
 
   for (const index of targets) {
@@ -1106,11 +1106,10 @@ const migrateExistingIndicatorSpaceIdMapping = async (
 
 const migrateExistingVulnerabilityMappings = async (
   esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
   logger: Logger
 ): Promise<void> => {
   const log = logger.get('vulnerability-mapping-migration');
-
-  const reportIndices = await resolveReportIndices(esClient, log);
 
   for (const indexName of reportIndices) {
     try {
@@ -1168,9 +1167,12 @@ const ensureCompanionIndex = async (
     await esClient.indices.create({ index: indexName });
     logger.debug(`Created companion index ${indexName}`);
   } catch (err) {
-    // Concurrent creation race — ignore the conflict.
-    const status = (err as { statusCode?: number }).statusCode;
-    if (status === 400) return;
+    // Only the concurrent-creation race is safe to swallow. Matching on the
+    // 400 status alone also hid real failures such as
+    // cluster_shard_limit_exceeded: boot would succeed, the index would not
+    // exist, and every later write to it would fail with no obvious cause.
+    const errorType = (err as { body?: { error?: { type?: string } } })?.body?.error?.type;
+    if (errorType === 'resource_already_exists_exception') return;
     throw err;
   }
 };
@@ -1202,18 +1204,22 @@ export const installIndexTemplates = async ({
   await ensureCompanionIndex(esClient, THREAT_INTEL_INDICATORS_INDEX, log);
 
   // Patch mapping fields onto pre-template reports indices. Safe to re-run.
-  await migrateExistingDiamondMappings(esClient, log);
-  await migrateExistingIocTierMappings(esClient, log);
-  await migrateExistingGateMappings(esClient, log);
-  await migrateExistingIocPortMapping(esClient, log);
-  await migrateExistingExternalReferencesMapping(esClient, log);
-  await migrateExistingIocReferenceMappings(esClient, log);
+  // The report-targeting migrations all operate on the same set, so resolve the
+  // pattern once here instead of issuing an identical indices.get per migration.
+  const reportIndices = await resolveReportIndices(esClient, log);
+
+  await migrateExistingDiamondMappings(esClient, reportIndices, log);
+  await migrateExistingIocTierMappings(esClient, reportIndices, log);
+  await migrateExistingGateMappings(esClient, reportIndices, log);
+  await migrateExistingIocPortMapping(esClient, reportIndices, log);
+  await migrateExistingExternalReferencesMapping(esClient, reportIndices, log);
+  await migrateExistingIocReferenceMappings(esClient, reportIndices, log);
   await migrateExistingIndicatorSourcesMapping(esClient, log);
   await migrateExistingIndicatorTypeMappings(esClient, log);
   await migrateExistingIndicatorSpaceIdMapping(esClient, log);
-  await migrateExistingVulnerabilityMappings(esClient, log);
-  await migrateExistingContentScrubbedMapping(esClient, log);
-  await migrateExistingIndicesToHidden(esClient, log);
+  await migrateExistingVulnerabilityMappings(esClient, reportIndices, log);
+  await migrateExistingContentScrubbedMapping(esClient, reportIndices, log);
+  await migrateExistingIndicesToHidden(esClient, reportIndices, log);
 
   log.info('Threat intelligence index templates installed');
 };
