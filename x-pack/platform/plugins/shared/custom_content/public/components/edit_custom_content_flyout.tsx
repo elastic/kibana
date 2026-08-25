@@ -81,7 +81,6 @@ export const EditCustomContentFlyout = ({
     esqlDataError,
     handleFetchData,
     isRenderLoading,
-    hasPreviewedCurrentDraft,
     handleRender,
   } = useEditFlyoutState({
     esqlQuery,
@@ -307,7 +306,7 @@ export const EditCustomContentFlyout = ({
                   color="success"
                   iconType="play"
                   isLoading={isRenderLoading}
-                  disabled={!hasChanges || hasPreviewedCurrentDraft || !draftTemplate.trim()}
+                  disabled={!draftTemplate.trim()}
                   onClick={handleRender}
                   data-test-subj="customContentRunPreviewButton"
                 >
