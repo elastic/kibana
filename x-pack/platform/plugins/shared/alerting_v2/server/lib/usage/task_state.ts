@@ -117,6 +117,11 @@ const stateSchemaV3 = stateSchemaV2.extends({
   ),
 });
 
+const stateSchemaV4 = stateSchemaV3.extends({
+  count_from_rule_template: schema.maybe(schema.number()),
+  count_by_template_id: schema.maybe(schema.arrayOf(nameValuePairSchema)),
+});
+
 export const stateSchemaByVersion = {
   1: {
     up: (state: Record<string, unknown>) => ({
@@ -179,9 +184,17 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV3,
   },
+  4: {
+    up: (state: Record<string, unknown>) => ({
+      ...state,
+      count_from_rule_template: state.count_from_rule_template ?? undefined,
+      count_by_template_id: state.count_by_template_id ?? undefined,
+    }),
+    schema: stateSchemaV4,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[3].schema;
+const latestTaskStateSchema = stateSchemaByVersion[4].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {

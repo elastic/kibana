@@ -18,9 +18,10 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
+import { RULE_TEMPLATE_SOURCE_TYPE } from '@kbn/alerting-v2-constants';
 import type { NameValuePair } from '../../../../../server/lib/usage/types';
 import { AGENT_BUILDER_TAG } from '../../../../../server/agent_builder/common/constants';
-import { apiTest, buildCreateActionPolicyData, buildCreateRuleData } from '../fixtures';
+import { apiTest, buildCreateRuleData, buildCreateActionPolicyData } from '../fixtures';
 
 const sortByName = (buckets: NameValuePair[] | undefined): NameValuePair[] =>
   [...(buckets ?? [])].sort((a, b) => a.name.localeCompare(b.name));
@@ -36,7 +37,14 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
       apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           kind: 'alert',
-          metadata: { name: 'alert-rule-1', tags: [AGENT_BUILDER_TAG] },
+          metadata: {
+            name: 'alert-rule-1',
+            tags: [AGENT_BUILDER_TAG],
+            source: {
+              type: RULE_TEMPLATE_SOURCE_TYPE,
+              data: { template_id: 'nginx-error-rate' },
+            },
+          },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: {
@@ -66,7 +74,13 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
       apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           kind: 'alert',
-          metadata: { name: 'alert-rule-2' },
+          metadata: {
+            name: 'alert-rule-2',
+            source: {
+              type: RULE_TEMPLATE_SOURCE_TYPE,
+              data: { template_id: 'nginx-error-rate' },
+            },
+          },
           time_field: '@timestamp',
           schedule: { every: '5m' },
           query: {
@@ -109,7 +123,13 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
       apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           kind: 'alert',
-          metadata: { name: 'alert-rule-5' },
+          metadata: {
+            name: 'alert-rule-5',
+            source: {
+              type: RULE_TEMPLATE_SOURCE_TYPE,
+              data: { template_id: 'cpu-high' },
+            },
+          },
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '10m' },
           query: {
@@ -162,6 +182,11 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
     expect(state.count_total).toBe(6);
     expect(state.count_enabled).toBe(5);
     expect(state.count_agent_builder_assisted).toBe(1);
+    expect(state.count_from_rule_template).toBe(3);
+    expect(sortByName(state.count_by_template_id)).toStrictEqual([
+      { name: 'cpu-high', value: 1 },
+      { name: 'nginx-error-rate', value: 2 },
+    ]);
     expect(state.count_by_kind).toStrictEqual({ alert: 5, signal: 1 });
     expect(sortByName(state.count_by_schedule)).toStrictEqual([
       { name: '1m', value: 1 },

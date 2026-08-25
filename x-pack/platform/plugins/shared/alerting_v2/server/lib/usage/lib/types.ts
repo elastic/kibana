@@ -67,6 +67,8 @@ export type ExecutionStatsResults = Pick<
 export interface RuleStatsAggregations {
   count_enabled: { doc_count: number };
   count_agent_builder_assisted: { doc_count: number };
+  count_from_rule_template: { doc_count: number };
+  count_by_template_id: { buckets: TermsBucket[] };
   count_by_kind: { buckets: TermsBucket[] };
   count_by_schedule: { buckets: TermsBucket[] };
   count_by_lookback: { buckets: TermsBucket[] };
@@ -86,6 +88,8 @@ export type RuleStatsResults = Pick<
   | 'count_total'
   | 'count_enabled'
   | 'count_agent_builder_assisted'
+  | 'count_from_rule_template'
+  | 'count_by_template_id'
   | 'count_by_kind'
   | 'count_by_schedule'
   | 'count_by_lookback'
