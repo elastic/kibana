@@ -38,11 +38,13 @@ export const workflowYamlDeclaresTopLevelEnabled = (yamlString: string): boolean
 };
 
 /**
- * Reads `name`/`description` straight off the YAML without requiring it to pass
+ * Reads `name`/`description`/`tags` straight off the YAML without requiring it to pass
  * schema validation, so a workflow that fails strict validation still keeps its
- * author-given title instead of collapsing to the "Untitled workflow" fallback.
+ * author-given metadata instead of collapsing to the "Untitled workflow" fallback.
  */
-const extractLooseTitleFields = (yamlString: string): { name?: string; description?: string } => {
+const extractLooseMetadataFields = (
+  yamlString: string
+): { name?: string; description?: string; tags?: string[] } => {
   const parsed = parseYamlToJSONWithoutValidation(yamlString);
   if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
     return {};
@@ -51,6 +53,10 @@ const extractLooseTitleFields = (yamlString: string): { name?: string; descripti
   return {
     name: typeof json.name === 'string' && json.name.trim() !== '' ? json.name : undefined,
     description: typeof json.description === 'string' ? json.description : undefined,
+    tags:
+      Array.isArray(json.tags) && json.tags.every((tag) => typeof tag === 'string')
+        ? (json.tags as string[])
+        : undefined,
   };
 };
 
@@ -77,12 +83,12 @@ export const prepareWorkflowDocumentFromYaml = (params: {
     triggerDefinitions,
   } = params;
 
-  const looseTitle = extractLooseTitleFields(yaml);
+  const looseMetadata = extractLooseMetadataFields(yaml);
   let workflowToCreate: EsWorkflowCreate = {
-    name: looseTitle.name ?? 'Untitled workflow',
-    description: looseTitle.description,
+    name: looseMetadata.name ?? 'Untitled workflow',
+    description: looseMetadata.description,
     enabled: false,
-    tags: [],
+    tags: looseMetadata.tags ?? [],
     definition: undefined,
     valid: false,
   };
@@ -141,15 +147,18 @@ export const applyYamlUpdate = (params: {
   const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
 
   if (!validation.valid || !validation.parsedWorkflow) {
-    const looseTitle = extractLooseTitleFields(workflowYaml);
+    const looseMetadata = extractLooseMetadataFields(workflowYaml);
     return {
       updatedDataPatch: {
         definition: null,
         enabled: false,
         valid: false,
         triggerTypes: [],
-        ...(looseTitle.name !== undefined ? { name: looseTitle.name } : {}),
-        ...(looseTitle.description !== undefined ? { description: looseTitle.description } : {}),
+        ...(looseMetadata.name !== undefined ? { name: looseMetadata.name } : {}),
+        ...(looseMetadata.description !== undefined
+          ? { description: looseMetadata.description }
+          : {}),
+        ...(looseMetadata.tags !== undefined ? { tags: looseMetadata.tags } : {}),
       },
       validationErrors: validation.diagnostics
         .filter((d) => d.severity === 'error')
