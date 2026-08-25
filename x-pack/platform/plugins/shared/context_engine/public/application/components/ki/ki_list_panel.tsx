@@ -13,7 +13,7 @@ import {
 } from '@kbn/index-management-shared-types';
 import { i18n } from '@kbn/i18n';
 import { useLocatorUrl } from '@kbn/share-plugin/public';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { isIndexPattern } from '../../../../common/ai_index_dest';
 import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
@@ -42,9 +42,10 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
   const [typeFilter, setTypeFilter] = useState<KiListTypeFilter>(ALL_TYPE_FILTER);
   const [size, setSize] = useState(DEFAULT_KI_PAGE_SIZE);
 
-  useEffect(() => {
+  const onTypeFilterChange = (filter: KiListTypeFilter) => {
+    setTypeFilter(filter);
     setSize(DEFAULT_KI_PAGE_SIZE);
-  }, [typeFilter]);
+  };
 
   const { kis, total, summary, isLoading, error } = useKiList({
     aiIndexId,
@@ -115,7 +116,7 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
           discoverHref={discoverHref}
           typeFilter={typeFilter}
           typeFilterOptions={typeFilterOptions}
-          onTypeFilterChange={setTypeFilter}
+          onTypeFilterChange={onTypeFilterChange}
         />
 
         <EuiSpacer size="l" />

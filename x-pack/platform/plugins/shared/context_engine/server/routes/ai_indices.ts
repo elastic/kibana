@@ -376,11 +376,11 @@ export const registerAiIndexRoutes = ({
             size,
             ...(type !== undefined ? { type } : {}),
           });
-          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId }));
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
-            aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
+            aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId, error })
           );
           return handleAiIndexError(error, response);
         }

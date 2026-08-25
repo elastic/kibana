@@ -107,11 +107,9 @@ export const KiListHeader = ({
             buttonSize="compressed"
             idSelected={typeFilter.value}
             onChange={(id) => {
-              if (id === ALL_TYPE_FILTER.value) {
-                onTypeFilterChange(ALL_TYPE_FILTER);
-                return;
-              }
-              onTypeFilterChange({ kind: 'type', value: id });
+              onTypeFilterChange(
+                id === ALL_TYPE_FILTER.value ? ALL_TYPE_FILTER : { kind: 'type', value: id }
+              );
             }}
             options={typeFilterOptions}
             data-test-subj="contextKiListTypeFilters"

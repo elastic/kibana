@@ -7,7 +7,6 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { MAX_KI_TYPE_FILTER_COUNT, takeTopKiTypeCounts } from '../../common/ki_type_counts';
-import type { KiTypeCount } from '../../common/http_api/ai_indices';
 import type { KiListItem, ListKisResponse } from '../../common/http_api/knowledge_indicators';
 
 const LENIENT_INDEX_OPTIONS = {
@@ -22,16 +21,11 @@ interface KiDocumentSource {
   title?: string;
 }
 
-interface TermsAggregationBucket {
-  key: string;
-  doc_count: number;
-}
-
 interface KiSearchAggregations {
   all_kis: {
     doc_count: number;
     counts_by_type: {
-      buckets: TermsAggregationBucket[];
+      buckets: Array<{ key: string; doc_count: number }>;
     };
   };
 }
@@ -42,10 +36,13 @@ export interface GetKisOptions {
   type?: string;
 }
 
-const toKiListItem = (id: string, source: KiDocumentSource): KiListItem | undefined => {
-  const type = source.type;
-  const title = source.title;
-  if (type === undefined || title === undefined) {
+const toKiListItemFromHit = (hit: {
+  _id?: string;
+  _source?: KiDocumentSource;
+}): KiListItem | undefined => {
+  const { _id: id, _source: source } = hit;
+  const { type, title } = source ?? {};
+  if (id === undefined || type === undefined || title === undefined) {
     return undefined;
   }
 
@@ -58,36 +55,6 @@ const buildKiListQuery = ({ type }: Pick<GetKisOptions, 'type'>) => {
   }
 
   return { bool: { filter: [{ term: { type } }] } };
-};
-
-const isTermsAggregationBucket = (value: unknown): value is TermsAggregationBucket =>
-  typeof value === 'object' &&
-  value !== null &&
-  'key' in value &&
-  'doc_count' in value &&
-  typeof value.key === 'string' &&
-  typeof value.doc_count === 'number';
-
-const parseCountsByTypeBuckets = (buckets: TermsAggregationBucket[] | undefined): KiTypeCount[] => {
-  if (buckets === undefined) {
-    return [];
-  }
-
-  const counts = buckets.flatMap((bucket) =>
-    isTermsAggregationBucket(bucket) ? [{ type: bucket.key, count: bucket.doc_count }] : []
-  );
-
-  return takeTopKiTypeCounts(counts);
-};
-
-const parseAllKisAggregation = (
-  aggregations: KiSearchAggregations | undefined
-): { totalAll: number; countsByType: KiTypeCount[] } => {
-  const allKisAgg = aggregations?.all_kis;
-  return {
-    totalAll: allKisAgg?.doc_count ?? 0,
-    countsByType: parseCountsByTypeBuckets(allKisAgg?.counts_by_type?.buckets),
-  };
 };
 
 export const getKis = async (
@@ -119,20 +86,21 @@ export const getKis = async (
     },
   });
 
-  const kis = response.hits.hits.flatMap((hit) => {
-    if (hit._source === undefined || hit._id === undefined) {
-      return [];
-    }
-    const item = toKiListItem(hit._id, hit._source);
-    return item !== undefined ? [item] : [];
-  });
+  const kis = response.hits.hits
+    .map(toKiListItemFromHit)
+    .filter((item): item is KiListItem => item !== undefined);
 
   const total =
     typeof response.hits.total === 'number'
       ? response.hits.total
       : response.hits.total?.value ?? kis.length;
 
-  const { totalAll, countsByType } = parseAllKisAggregation(response.aggregations);
+  const allKisAgg = response.aggregations?.all_kis;
+  const buckets = allKisAgg?.counts_by_type?.buckets ?? [];
+  const countsByType = takeTopKiTypeCounts(
+    buckets.map(({ key, doc_count }) => ({ type: key, count: doc_count }))
+  );
+  const totalAll = allKisAgg?.doc_count ?? 0;
 
   return {
     kis,
