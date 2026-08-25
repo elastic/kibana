@@ -41,6 +41,7 @@ describe('transformStorageDocumentToWorkflowDto', () => {
       id: 'wf-123',
       name: 'Test Workflow',
       description: 'A test workflow',
+      tags: ['tag-a', 'tag-b'],
       enabled: true,
       yaml: 'name: Test Workflow',
       definition: source.definition,
@@ -50,6 +51,14 @@ describe('transformStorageDocumentToWorkflowDto', () => {
       createdAt: '2024-01-15T10:00:00.000Z',
       lastUpdatedAt: '2024-02-20T14:30:00.000Z',
     });
+  });
+
+  it('keeps tags for a schema-invalid workflow that has no definition', () => {
+    const source = makeSource({ definition: null as any, valid: false });
+    const result = transformStorageDocumentToWorkflowDto('wf-invalid', source);
+
+    expect(result.tags).toEqual(['tag-a', 'tag-b']);
+    expect(result.definition).toBeNull();
   });
 
   it('maps created_at to createdAt and updated_at to lastUpdatedAt', () => {
