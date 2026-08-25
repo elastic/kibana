@@ -271,7 +271,9 @@ describe('WorkflowsService (facade)', () => {
       await service.getWorkflow('wf-1', 'default', { includeDeleted: true });
       await service.getWorkflowsByIds(['a', 'b'], 'default', { includeDeleted: true });
       await service.getWorkflowsSourceByIds(['a'], 'default', ['name'], { includeDeleted: false });
-      await service.createWorkflow({ name: 'n' } as any, 'default', request);
+      await service.createWorkflow({ name: 'n' } as any, 'default', request, {
+        nameOverride: 'n Copy',
+      });
       await service.bulkCreateWorkflows([{ name: 'n' } as any], 'default', request, {
         overwrite: true,
       });
@@ -288,7 +290,9 @@ describe('WorkflowsService (facade)', () => {
       expect(crudSpies.getWorkflowsSourceByIds).toHaveBeenCalledWith(['a'], 'default', ['name'], {
         includeDeleted: false,
       });
-      expect(crudSpies.createWorkflow).toHaveBeenCalledWith({ name: 'n' }, 'default', request);
+      expect(crudSpies.createWorkflow).toHaveBeenCalledWith({ name: 'n' }, 'default', request, {
+        nameOverride: 'n Copy',
+      });
       expect(crudSpies.bulkCreateWorkflows).toHaveBeenCalledWith(
         [{ name: 'n' }],
         'default',
