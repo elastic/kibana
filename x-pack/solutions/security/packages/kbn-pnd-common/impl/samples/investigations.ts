@@ -29,7 +29,7 @@ const containInvestigations: Investigation[] = [
     id: 'inv-officer-impossible-travel-001',
     template_id: TEMPLATE_ID_INVESTIGATION,
     title: 'Impossible travel — exec account (cfo@corp)',
-    createdAt: '2026-07-20T13:10:00Z',
+    createdAt: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
     updatedAt: new Date().toISOString(),
     watch_id: SYSTEM_SECURITY_WATCH_OFFICER_ID,
     watch_execution_id: 'exec-officer-20260720-1310',
@@ -48,14 +48,14 @@ const containInvestigations: Investigation[] = [
     events: [
       {
         id: 'evt-it-001',
-        timestamp: '2026-07-20T13:10:00Z',
+        timestamp: new Date(Date.now() - 12 * 60 * 1000).toISOString(),
         type: 'triage',
         summary: 'Impossible-travel alert · Okta + M365',
         actor: SYSTEM_SECURITY_WATCH_OFFICER_ID,
       },
       {
         id: 'evt-it-002',
-        timestamp: '2026-07-20T13:18:00Z',
+        timestamp: new Date(Date.now() - 6 * 60 * 1000).toISOString(),
         type: 'classification',
         summary: 'true_positive · confidence 0.94 · session token likely',
         actor: 'alert-analysis',
@@ -66,8 +66,8 @@ const containInvestigations: Investigation[] = [
     id: 'inv-officer-sales-nas-002',
     template_id: TEMPLATE_ID_INVESTIGATION,
     title: 'Ransomware encryption — Sales file server',
-    createdAt: '2026-07-20T08:20:00Z',
-    updatedAt: new Date(Date.now() - 8 * 60 * 1000).toISOString(),
+    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
     watch_id: SYSTEM_SECURITY_WATCH_OFFICER_ID,
     watch_execution_id: 'exec-officer-20260720-0820',
     watch_tier: 'officer',
@@ -85,7 +85,7 @@ const containInvestigations: Investigation[] = [
     events: [
       {
         id: 'evt-nas-001',
-        timestamp: '2026-07-20T08:20:00Z',
+        timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
         type: 'triage',
         summary: 'Mass rename · ransomware pattern',
         actor: SYSTEM_SECURITY_WATCH_OFFICER_ID,
@@ -96,7 +96,7 @@ const containInvestigations: Investigation[] = [
     id: 'inv-floor-domain-admins-003',
     template_id: TEMPLATE_ID_INVESTIGATION,
     title: 'Unauthorized Domain Admins elevation',
-    createdAt: '2026-07-20T02:43:00Z',
+    createdAt: new Date(Date.now() - 14 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 13 * 60 * 1000).toISOString(),
     watch_id: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     watch_execution_id: 'exec-floor-20260720-0243',
@@ -115,7 +115,7 @@ const containInvestigations: Investigation[] = [
     events: [
       {
         id: 'evt-da-001',
-        timestamp: '2026-07-20T02:43:00Z',
+        timestamp: new Date(Date.now() - 14 * 60 * 1000).toISOString(),
         type: 'triage',
         summary: 'AD group change · Domain Admins',
         actor: SYSTEM_SECURITY_WATCH_FLOOR_ID,
@@ -126,7 +126,7 @@ const containInvestigations: Investigation[] = [
     id: 'inv-officer-sales-nas-isolation-004',
     template_id: TEMPLATE_ID_INVESTIGATION,
     title: 'Isolation in progress — Sales-NAS',
-    createdAt: '2026-07-20T09:10:00Z',
+    createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 11 * 60 * 1000).toISOString(),
     watch_id: SYSTEM_SECURITY_WATCH_OFFICER_ID,
     watch_execution_id: 'exec-officer-20260720-0910',
@@ -140,12 +140,12 @@ const containInvestigations: Investigation[] = [
     summary:
       'Network isolation is executing — share offline for users while SNAP-7740 restore prepares. No decision needed until the run finishes.',
     priorityScore: 78,
-    recordId: 'INC-2031',
+    recordId: 'INC-2032',
     primaryActionLabel: 'Cancel isolation',
     events: [
       {
         id: 'evt-iso-001',
-        timestamp: '2026-07-20T09:10:00Z',
+        timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
         type: 'action',
         summary: 'Isolation started · Sales-NAS',
         actor: SYSTEM_SECURITY_WATCH_OFFICER_ID,
@@ -159,8 +159,8 @@ const escalateInvestigations: Investigation[] = [
     id: 'inv-floor-findb-staged-005',
     template_id: TEMPLATE_ID_INVESTIGATION,
     title: 'Staged archive — FIN-DB-02',
-    createdAt: '2026-07-20T11:40:00Z',
-    updatedAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+    createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 9 * 60 * 1000).toISOString(),
     watch_id: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     watch_execution_id: 'exec-floor-20260720-1140',
     watch_tier: 'floor',
@@ -178,7 +178,7 @@ const escalateInvestigations: Investigation[] = [
     events: [
       {
         id: 'evt-db-001',
-        timestamp: '2026-08-10T11:40:00Z',
+        timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(),
         type: 'triage',
         summary: 'true_positive · confidence 0.81 · staged archive',
         actor: 'alert-analysis',
@@ -189,7 +189,7 @@ const escalateInvestigations: Investigation[] = [
     id: 'inv-floor-phishing-url-006',
     template_id: TEMPLATE_ID_INVESTIGATION,
     title: 'Phishing — invoice lure (Finance)',
-    createdAt: '2026-07-20T10:05:00Z',
+    createdAt: new Date(Date.now() - 16.5 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
     watch_id: SYSTEM_SECURITY_WATCH_FLOOR_ID,
     watch_execution_id: 'exec-floor-20260720-1005',
@@ -208,7 +208,7 @@ const escalateInvestigations: Investigation[] = [
     events: [
       {
         id: 'evt-phish-001',
-        timestamp: '2026-07-20T10:05:00Z',
+        timestamp: new Date(Date.now() - 16.5 * 60 * 1000).toISOString(),
         type: 'triage',
         summary: 'Phishing cluster · 4 users',
         actor: SYSTEM_SECURITY_WATCH_FLOOR_ID,
