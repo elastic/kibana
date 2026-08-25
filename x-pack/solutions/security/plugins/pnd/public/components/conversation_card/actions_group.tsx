@@ -19,23 +19,22 @@ const ACTION_ICONS_MAP: Record<RecommendedAction, 'gear' | 'lock' | 'flag' | 'ex
   escalate: 'lock',
 };
 
-const getActionButtonColor = (investigation: Investigation): 'primary' | 'danger' | 'warning' => {
-  if (!investigation.recommendedAction) {
-    return 'warning';
-  }
-  return ['investigate', 'tune'].includes(investigation.recommendedAction) ? 'primary' : 'danger';
-};
-
-const getActionButtonIcon = (
+const getActionButtonIconProps = (
   investigation: Investigation
-): 'flag' | 'gear' | 'lock' | 'external' | 'cross' => {
+): {
+  type: 'flag' | 'gear' | 'lock' | 'external' | 'cross';
+  color: 'primary' | 'danger' | 'warning';
+} => {
   if (!investigation.recommendedAction) {
-    return 'flag';
+    return { type: 'flag', color: 'warning' };
   }
   if (investigation.recommendedAction === 'contain' && investigation.severity === 'high') {
-    return 'cross';
+    return { type: 'cross', color: 'danger' };
   }
-  return ACTION_ICONS_MAP[investigation.recommendedAction];
+  return {
+    type: ACTION_ICONS_MAP[investigation.recommendedAction],
+    color: ['investigate', 'tune'].includes(investigation.recommendedAction) ? 'primary' : 'danger',
+  };
 };
 
 export interface ConversationsActionsGroupProps {
@@ -62,14 +61,14 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             <EuiFlexItem grow={false}>
               <EuiIcon
                 size="s"
-                type={getActionButtonIcon(investigation)}
-                color={getActionButtonColor(investigation)}
+                type={getActionButtonIconProps(investigation).type}
+                color={getActionButtonIconProps(investigation).color}
                 aria-hidden={true}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                color={getActionButtonColor(investigation)}
+                color={getActionButtonIconProps(investigation).color}
                 flush="both"
                 size="xs"
                 onClick={(event: React.MouseEvent) => {

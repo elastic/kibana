@@ -25,13 +25,25 @@ export const ConversationDetailsFlyout = memo<ConversationDetailsFlyoutProps>(
   ({ investigation, onClose, onClickAction, onOpenChat }) => {
     return (
       <EuiFlyout
+        aria-label={i18n.ariaLabel}
         type="push"
         size="s"
-        paddingSize="m"
+        paddingSize="s"
         onClose={onClose}
-        aria-label={i18n.ariaLabel}
         ownFocus={false}
-        hideCloseButton={false}
+        flyoutMenuProps={{
+          title: 'flyout menu',
+          trailingActions: [
+            {
+              iconType: 'share',
+              ['aria-label']: 'Share',
+              onClick: () => {
+                // TODO: Implement if needed
+                return;
+              },
+            },
+          ],
+        }}
       >
         <ConversationDetailsFlyoutHeader />
         <ConversationDetailsFlyoutBody investigation={investigation} />

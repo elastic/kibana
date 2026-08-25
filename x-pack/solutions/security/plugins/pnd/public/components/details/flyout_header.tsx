@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlyoutHeader } from '@elastic/eui';
 
 export const ConversationDetailsFlyoutHeader: React.FC = () => {
-  return <EuiFlyoutHeader hasBorder />;
+  return <EuiFlyoutHeader />;
 };
 
 ConversationDetailsFlyoutHeader.displayName = 'ConversationDetailsFlyoutHeader';
