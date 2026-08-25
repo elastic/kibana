@@ -97,6 +97,7 @@ describe('apiKeyAsAlertAttributes', () => {
       apiKeyOwner: 'test',
       apiKeyCreatedByUser: false,
       uiamApiKey: 'NDU2OmRlZg==',
+      uiamApiKeyExternal: false,
     });
   });
 
@@ -119,6 +120,88 @@ describe('apiKeyAsAlertAttributes', () => {
       apiKeyOwner: 'test',
       apiKeyCreatedByUser: true,
       uiamApiKey: 'NDU2OmRlZg==',
+      uiamApiKeyExternal: false,
+    });
+  });
+
+  test('stores the raw UIAM API key as-is when it has no id and is created by the user', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          uiamResult: {
+            name: 'uiam-test',
+            api_key: 'essu_user_created_key',
+          },
+        },
+        'test',
+        true
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'test',
+      apiKeyCreatedByUser: true,
+      uiamApiKey: 'essu_user_created_key',
+      uiamApiKeyExternal: false,
+    });
+  });
+
+  test('persists uiamApiKeyExternal when UIAM reported the key as external', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          uiamResult: {
+            name: 'uiam-test',
+            api_key: 'essu_user_created_key',
+            external: true,
+          },
+        },
+        'test',
+        true
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'test',
+      apiKeyCreatedByUser: true,
+      uiamApiKey: 'essu_user_created_key',
+      uiamApiKeyExternal: true,
+    });
+  });
+
+  test('writes uiamApiKeyExternal: false alongside an internal key so a stale true cannot survive', () => {
+    // `updateRuleApiKey` and `enableRule` persist through a partial saved-object update, which
+    // merges: omitting the attribute would leave a previously stored `true` in place and the run
+    // would then withhold the UIAM shared secret from this freshly granted internal key.
+    const properties = apiKeyAsRuleDomainProperties(
+      {
+        apiKeysEnabled: true,
+        uiamResult: { id: '456', name: '456', api_key: 'def' },
+      },
+      'test',
+      false
+    );
+
+    expect(properties.uiamApiKeyExternal).toBe(false);
+  });
+
+  test('does not store a UIAM API key without an id when it is not created by the user', () => {
+    expect(
+      apiKeyAsRuleDomainProperties(
+        {
+          apiKeysEnabled: true,
+          uiamResult: {
+            name: 'uiam-test',
+            api_key: 'essu_framework_key_without_id',
+          },
+        },
+        'test',
+        false
+      )
+    ).toEqual({
+      apiKey: null,
+      apiKeyOwner: 'test',
+      apiKeyCreatedByUser: false,
     });
   });
 
