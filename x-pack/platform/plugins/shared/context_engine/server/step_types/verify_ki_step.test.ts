@@ -16,12 +16,12 @@ type EsClientMock = ReturnType<typeof elasticsearchServiceMock.createElasticsear
 const makeHandlerContext = (
   ki: VerifyKiHandlerContext['input']['ki'],
   esClient: EsClientMock,
-  esqlAttributes?: string[]
+  { esqlAttributes, verifiers }: { esqlAttributes?: string[]; verifiers?: string[] } = {}
 ): VerifyKiHandlerContext =>
   ({
-    input: { ki, esql_attributes: esqlAttributes },
+    input: { ki, esql_attributes: esqlAttributes, verifiers },
     config: {},
-    rawInput: { ki, esql_attributes: esqlAttributes },
+    rawInput: { ki, esql_attributes: esqlAttributes, verifiers },
     contextManager: {
       getFakeRequest: jest.fn(),
       getScopedEsClient: jest.fn().mockReturnValue(esClient),
@@ -55,10 +55,10 @@ describe('verify_ki workflow step', () => {
 
   const runHandler = async (
     ki: VerifyKiHandlerContext['input']['ki'],
-    esqlAttributes?: string[]
+    opts: { esqlAttributes?: string[]; verifiers?: string[] } = {}
   ) => {
     const definition = createVerifyKiStepDefinition(coreSetup, loggingSystemMock.createLogger());
-    const { output } = await definition.handler(makeHandlerContext(ki, esClient, esqlAttributes));
+    const { output } = await definition.handler(makeHandlerContext(ki, esClient, opts));
     if (!output) {
       throw new Error('step returned no output');
     }
@@ -116,7 +116,7 @@ describe('verify_ki workflow step', () => {
           aggregation_query: 'FROM logs-* | STATS c = COUNT(*)',
         },
       },
-      ['aggregation_query']
+      { esqlAttributes: ['aggregation_query'] }
     );
 
     expect(output.passed).toBe(true);
@@ -126,9 +126,10 @@ describe('verify_ki workflow step', () => {
   it('passes a KI carrying none of the named attributes, without running any verifier', async () => {
     setContextEngineEnabled(true);
 
-    const output = await runHandler({ attributes: { esql: 'FROM logs-* | LIMIT 1' } }, [
-      'aggregation_query',
-    ]);
+    const output = await runHandler(
+      { attributes: { esql: 'FROM logs-* | LIMIT 1' } },
+      { esqlAttributes: ['aggregation_query'] }
+    );
 
     expect(output).toEqual({ passed: true, results: [] });
     expect(esClient.esql.query).not.toHaveBeenCalled();
@@ -140,6 +141,18 @@ describe('verify_ki workflow step', () => {
     const output = await runHandler({ title: 'no esql here' });
 
     expect(output).toEqual({ passed: true, results: [] });
+  });
+
+  it('runs only the verifiers listed in the verifiers allowlist', async () => {
+    setContextEngineEnabled(true);
+
+    const output = await runHandler(
+      { attributes: { esql: 'FROM logs-* | LIMIT 10' } },
+      { verifiers: [ESQL_VALID_SYNTAX_VERIFIER_ID] }
+    );
+
+    expect(output.results).toEqual([{ verifier: ESQL_VALID_SYNTAX_VERIFIER_ID, passed: true }]);
+    expect(esClient.esql.query).not.toHaveBeenCalled();
   });
 
   it('throws when the Context Engine setting is off', async () => {

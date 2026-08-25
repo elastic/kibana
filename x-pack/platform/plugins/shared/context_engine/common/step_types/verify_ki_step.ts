@@ -16,6 +16,7 @@ export const VERIFY_KI_STEP_TYPE_ID = 'context-engine.verifyKi';
 export const DEFAULT_ESQL_ATTRIBUTE = 'esql';
 
 export const MAX_ESQL_ATTRIBUTES = 20;
+export const MAX_VERIFIER_IDS = 20;
 
 export const VerifyKiInputSchema = z.object({
   ki: kiPartialFieldsSchema,
@@ -25,6 +26,13 @@ export const VerifyKiInputSchema = z.object({
     .optional()
     .describe(
       `Names of the KI attributes carrying ES|QL to verify, defaulting to '${DEFAULT_ESQL_ATTRIBUTE}'. A listed attribute the KI does not carry is skipped, not failed.`
+    ),
+  verifiers: z
+    .array(z.string().min(1).max(100))
+    .max(MAX_VERIFIER_IDS)
+    .optional()
+    .describe(
+      'Verifier ids to run. When omitted, all applicable verifiers run. Unknown ids are silently ignored.'
     ),
 });
 
