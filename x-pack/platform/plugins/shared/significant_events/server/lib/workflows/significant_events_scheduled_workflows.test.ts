@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   getManagedWorkflowDefinition,
+  NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
@@ -355,6 +356,14 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       'space-a',
       request
     );
+    // Nightshift indexer is installed globally (no space suffix); it is co-enabled
+    // alongside the per-space detection/review workflows in the default space.
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW_ID,
+      { enabled: true },
+      'default',
+      request
+    );
   });
 
   it('updates template values without toggling workflows that are already enabled', async () => {
@@ -439,6 +448,13 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
       SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
       { spaceId: 'space-a', workflowIdSuffix: 'space-a' }
+    );
+    // Nightshift indexer is disabled globally alongside the per-space workflows.
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW_ID,
+      { enabled: false },
+      'default',
+      request
     );
   });
 });

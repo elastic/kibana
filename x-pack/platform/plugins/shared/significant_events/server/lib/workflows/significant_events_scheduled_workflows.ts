@@ -6,11 +6,13 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+  NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { pollUntil } from './poll_until';
@@ -248,6 +250,14 @@ export const createSignificantEventsScheduledWorkflowsService = ({
       if (enabled) {
         await installOrUpdate({ client, spaceId, config });
         await setAllEnabled({ enabled: true, request, spaceId });
+        // The nightshift indexer is installed globally (DEFAULT_SPACE_ID, no per-space suffix)
+        // so it is toggled once here regardless of which space triggered the enable.
+        await setManagedEnabled({
+          documentId: NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW_ID,
+          enabled: true,
+          request,
+          spaceId: DEFAULT_SPACE_ID,
+        });
         log.info(`Enabled scheduled Significant Events discovery workflows in space ${spaceId}`);
         return;
       }
@@ -255,6 +265,13 @@ export const createSignificantEventsScheduledWorkflowsService = ({
       await setAllEnabled({ enabled: false, request, spaceId });
       await cancelRunningScheduledExecutions({ request, spaceId });
       await uninstallScheduledWorkflows({ client, spaceId });
+      // Disable the nightshift indexer alongside the other scheduled workflows.
+      await setManagedEnabled({
+        documentId: NIGHTSHIFT_SIGNIFICANT_EVENT_INDEXER_WORKFLOW_ID,
+        enabled: false,
+        request,
+        spaceId: DEFAULT_SPACE_ID,
+      });
       log.info(
         `Disabled and uninstalled scheduled Significant Events discovery workflows in space ${spaceId}`
       );
