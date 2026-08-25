@@ -28,13 +28,7 @@ interface DiscoveryFeaturesApi {
 }
 
 export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
-  const {
-    dependencies: {
-      start: {
-        significantEvents: { significantEventsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
 
   return useMemo(() => {
     // All three methods share the same cross-stream endpoint. Server resolves

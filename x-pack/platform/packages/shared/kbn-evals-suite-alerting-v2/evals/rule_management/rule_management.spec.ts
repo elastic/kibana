@@ -13,6 +13,8 @@ import {
 import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
+import { noDataExample } from '../../src/no_data';
+import { recoveryExample } from '../../src/recovery';
 import {
   ALERTING_TOOL_IDS,
   CREATE_WITH_AGENT_INITIAL_PROMPT,
@@ -92,8 +94,8 @@ evaluate.describe(
                 input: {
                   turns: [
                     CREATE_WITH_AGENT_INITIAL_PROMPT,
-                    `Average system.cpu.total.norm.pct on ${hostMetricsIndex} — alert me when it ` +
-                      'stays above 0.9 for 5 minutes, grouped by host.name.',
+                    `Average system.cpu.total.norm.pct on ${hostMetricsIndex} — create an alert rule that fires when it ` +
+                      'stays above 0.9 for 5 minutes, grouped by host.name. Check every 1 minute.',
                   ],
                 },
                 output: {
@@ -170,6 +172,42 @@ evaluate.describe(
               {
                 input: {
                   turns: [
+                    `Create alert rule on ${hostMetricsIndex} with severity critical that fires when average ` +
+                      'system.cpu.total.norm.pct exceeds 0.95, grouped by host.name.',
+                  ],
+                },
+                output: {
+                  criteria: [
+                    'The breach ES|QL query includes a `severity` column (e.g. via EVAL severity = "critical") to set the alert severity.',
+                    'The query filters for average system.cpu.total.norm.pct above 0.95 (or an equivalent threshold expression).',
+                    'The set_query operation validates successfully against Elasticsearch, and the final manage_rule call ends with a validate operation.',
+                    'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.',
+                  ],
+                  expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+                  notExpectedSkills: [DETECTION_RULE_EDIT_SKILL_ID],
+                  expectedToolIds: [ALERTING_TOOL_IDS.manageRule],
+                  expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
+                  expectAttachmentData: (attachments) => {
+                    const attachment = getLatestAttachmentData<RuleAttachmentData>(
+                      attachments,
+                      RULE_ATTACHMENT_TYPE
+                    );
+                    expect(attachment).toBeDefined();
+                    expect(attachment!.kind).toEqual('alert');
+                    expect(attachment!.grouping?.fields).toEqual(
+                      expect.arrayContaining(['host.name'])
+                    );
+                    const esql = attachment!.query ? getBreachEsqlQuery(attachment!.query) : '';
+                    expect(esql).toContain(hostMetricsIndex);
+                    expect(esql).toContain('system.cpu.total.norm.pct');
+                    expect(esql.toLowerCase()).toContain('severity');
+                    expect(esql.toLowerCase()).toContain('critical');
+                  },
+                },
+              },
+              {
+                input: {
+                  turns: [
                     'Create an alert rule on my admin console data that fires when there are ' +
                       'more than 3 errors in the last 5 minutes.',
                   ],
@@ -204,5 +242,106 @@ evaluate.describe(
         });
       }
     );
+  }
+);
+
+evaluate.describe(
+  'Alerting V2 rule-management skill - recovery strategy updates',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate('recovery strategy updates', async ({ evaluateDataset, hostMetricsIndex }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'alerting-v2: recovery strategy updates',
+          description:
+            'Composes an alert, then applies one recovery behavior per example: custom ' +
+            'threshold, no automatic recovery, or recover when the breach clears. Separate ' +
+            'examples cover composed and standalone query formats.',
+          examples: [
+            recoveryExample({
+              hostMetricsIndex,
+              format: 'composed',
+              strategy: 'query',
+            }),
+            recoveryExample({
+              hostMetricsIndex,
+              format: 'composed',
+              strategy: 'none',
+            }),
+            recoveryExample({
+              hostMetricsIndex,
+              format: 'composed',
+              strategy: 'no_breach',
+            }),
+            recoveryExample({
+              hostMetricsIndex,
+              format: 'standalone',
+              strategy: 'query',
+            }),
+            recoveryExample({
+              hostMetricsIndex,
+              format: 'standalone',
+              strategy: 'none',
+            }),
+            recoveryExample({
+              hostMetricsIndex,
+              format: 'standalone',
+              strategy: 'no_breach',
+            }),
+          ],
+        },
+      });
+    });
+  }
+);
+
+evaluate.describe(
+  'Alerting V2 rule-management skill - no-data strategy updates',
+  { tag: tags.serverless.observability.complete },
+  () => {
+    evaluate('no-data strategy updates', async ({ evaluateDataset, hostMetricsIndex }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'alerting-v2: no-data strategy updates',
+          description:
+            'Composes an alert, then applies one no-data behavior per example: hold last ' +
+            'known status, recover when quiet, or ignore missing data. Separate examples ' +
+            'cover composed (base as data-presence query) and standalone (explicit no_data ' +
+            'query) formats.',
+          examples: [
+            noDataExample({
+              hostMetricsIndex,
+              format: 'composed',
+              strategy: 'last_known_status',
+            }),
+            noDataExample({
+              hostMetricsIndex,
+              format: 'composed',
+              strategy: 'recover',
+            }),
+            noDataExample({
+              hostMetricsIndex,
+              format: 'composed',
+              strategy: 'none',
+            }),
+            noDataExample({
+              hostMetricsIndex,
+              format: 'standalone',
+              strategy: 'last_known_status',
+            }),
+            noDataExample({
+              hostMetricsIndex,
+              format: 'standalone',
+              strategy: 'recover',
+            }),
+            noDataExample({
+              hostMetricsIndex,
+              format: 'standalone',
+              strategy: 'none',
+            }),
+          ],
+        },
+      });
+    });
   }
 );

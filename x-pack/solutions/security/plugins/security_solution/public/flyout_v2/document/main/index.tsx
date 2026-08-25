@@ -46,6 +46,7 @@ import { RemoteDocumentCallout } from './components/remote_document_callout';
 import { getTimelineEventsDetailsFromRecord } from './utils/get_timeline_events_details_from_record';
 import { getAncestorsIndexById } from './utils/get_ancestors_index_by_id';
 import { FLYOUT_ORIGIN, FLYOUT_TYPE } from '../../../common/lib/telemetry';
+import { isRulePreviewDocument } from '../../shared/utils/is_rule_preview_document';
 
 const footerStyles = css`
   @media (max-width: 767px) {
@@ -95,25 +96,29 @@ export interface DocumentFlyoutProps {
    * Callback invoked after alert mutations to refresh related flyouts.
    */
   onAlertUpdated: () => void;
+  /**
+   * Optional test subject applied to the existing flyout header.
+   */
+  dataTestSubj?: string;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo(
-  ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
+  ({ hit, onAlertUpdated, renderCellActions, dataTestSubj }: DocumentFlyoutProps) => {
     const { openNotes, openDocumentFlyoutFromIndex } = useFlyoutApi();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
+    const isRulePreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const isSecurityApp = useIsInSecurityApp();
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
     // The Table and JSON tabs are only available in Security Solution, not in Discover.
-    // The selected tab is persisted to localStorage, sharing the key with the legacy
-    // document flyout so the user's preference carries across both implementations.
+    // The selected tab is persisted to localStorage.
     const { selectedTabId, setSelectedTabId } = useTabs<DocumentFlyoutTabId>({
       validTabIds: VALID_TAB_IDS,
       storageKey: FLYOUT_STORAGE_KEYS.SELECTED_TAB,
@@ -133,7 +138,11 @@ export const DocumentFlyout = memo(
     // Maps each ancestor document id to the index it lives in, so a Source event value in the Table
     // tab can open that specific ancestor document. Threshold rules are excluded (see helper).
     const ancestorsIndexById = useMemo(
-      () => getAncestorsIndexById(getTimelineEventsDetailsFromRecord(hit)),
+      () =>
+        getAncestorsIndexById(
+          getTimelineEventsDetailsFromRecord(hit),
+          hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''
+        ),
       [hit]
     );
 
@@ -171,19 +180,19 @@ export const DocumentFlyout = memo(
         }
         // Rule name fields: substitute the rule UUID as the link target (the flyout is keyed by
         // UUID) while keeping the rule name as the displayed text. When no UUID is available,
-        // render plain text to avoid opening the rule flyout with an invalid id.
+        // or when in rule preview (the rule doesn't exist yet), render plain text.
         if (
           props.field === SIGNAL_RULE_NAME_FIELD_NAME ||
           props.field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME
         ) {
-          if (!ruleId) {
+          if (!ruleId || isRulePreview) {
             return <>{props.children}</>;
           }
           return <OpenFlyoutLink {...props} value={ruleId} displayValue={props.value} asParent />;
         }
         return <OpenFlyoutLink {...props} />;
       },
-      [ruleId, ancestorsIndexById, openDocumentFlyoutFromIndex]
+      [ruleId, isRulePreview, ancestorsIndexById, openDocumentFlyoutFromIndex]
     );
 
     const onShowNotesFromHeader = useCallback(() => {
@@ -205,7 +214,7 @@ export const DocumentFlyout = memo(
     return (
       <>
         <RemoteDocumentCallout hit={hit} />
-        <EuiFlyoutHeader css={headerStyles}>
+        <EuiFlyoutHeader css={headerStyles} data-test-subj={dataTestSubj}>
           <Header
             hit={hit}
             renderCellActions={renderCellActions}
@@ -249,7 +258,7 @@ export const DocumentFlyout = memo(
               renderFlyoutLink={renderFlyoutLink}
             />
           ) : isSecurityApp && selectedTabId === 'json' ? (
-            <JsonTab hit={hit} />
+            <JsonTab hit={hit} isRulePreview={isRulePreview} />
           ) : (
             <OverviewTab
               hit={hit}
@@ -258,9 +267,11 @@ export const DocumentFlyout = memo(
             />
           )}
         </EuiFlyoutBody>
-        <EuiFlyoutFooter css={footerStyles}>
-          <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotesFromFooter} />
-        </EuiFlyoutFooter>
+        {!isRulePreview && (
+          <EuiFlyoutFooter css={footerStyles}>
+            <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotesFromFooter} />
+          </EuiFlyoutFooter>
+        )}
       </>
     );
   }

@@ -39,6 +39,7 @@ import {
   extractDiscoveriesFromToolCall,
   extractSignificantEventsFromToolCall,
   extractRequestedEventIdsFromToolCall,
+  extractWriteItemsFromToolCall,
 } from '../../src/evaluators/discovery/utils/parse_agent_output';
 import { buildDiscoveryInput } from '../../src/evaluators/discovery/discovery/build_agent_input';
 import type { ContinuationCycle } from '../../src/evaluators/discovery/discovery/continuation/continuation_stability';
@@ -49,7 +50,7 @@ const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
 
 evaluate.describe(
-  'Significant Events Discovery - Discovery Agent',
+  'Nightshift Triager - Discovery Agent',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
@@ -97,7 +98,6 @@ evaluate.describe(
           expectTopologyEventSearch?: boolean;
           seedStatus?: 'closed';
           stripSeedTopology?: boolean;
-          seedUnconfirmedDetection?: Detection;
         }
 
         const collectedExamples: CollectedExample[] = [];
@@ -225,6 +225,11 @@ evaluate.describe(
                   if (!snapshotSource) {
                     throw new Error(`No snapshot source found for scenario "${input.scenario_id}"`);
                   }
+
+                  // Each scenario must start with an empty events index. Scenarios that share a
+                  // snapshot (e.g. ledger-db-disconnect-misgrouped-auth) are independent episodes.
+                  await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
+
                   if (snapshotKey !== lastReplayedSnapshotKey) {
                     await cleanSignificantEventsDataStreams(esClient, log);
                     for (const name of SIGEVENTS_WIRED_ROOTS) {
@@ -295,22 +300,20 @@ evaluate.describe(
         const continuationSuites = [
           {
             title: 'continuation - open significant event with same rules',
-            description: 'same detection rule re-fires during an open significant event',
+            description:
+              'same detection rule re-fires during an open significant event; events_write must include topology arrays',
             includesPath: (path: string) => path === 'rule-uuid-no-topology',
           },
           {
             title: 'continuation - open significant events with topology-related rules',
-            description: 'topology-linked cascading rules join an open significant event',
+            description:
+              'topology-linked cascading rules join an open significant event; events_write must send expected causal_features and blast_radius',
             includesPath: (path: string) => path === 'cascade',
           },
           {
-            title: 'continuation - unconfirmed rule on open significant event',
-            description: 'an unconfirmed candidate rule does not establish continuation',
-            includesPath: (path: string) => path === 'unconfirmed-rule',
-          },
-          {
             title: 'continuation - closed significant event',
-            description: 'a detection starts a new significant event after the prior event closes',
+            description:
+              'a detection starts a new significant event after the prior event closes; the new write must include topology arrays',
             includesPath: (path: string) => path === 'rule-uuid-closed',
           },
         ] as const;
@@ -333,11 +336,6 @@ evaluate.describe(
                 if (detections.length === 0) return [];
                 const byRuleName = new Map(detections.map((d) => [d.rule_name, d]));
                 const continuationChains = Object.entries(scenario.continuationChains ?? {});
-                const confirmedAnchor = byRuleName.get(
-                  'Frontend → Ledger Writer Payment Submission Error'
-                );
-                const unrelatedDetection = byRuleName.get('Successful User Login');
-
                 const allPlans: ContinuationPlan[] = [
                   {
                     path: 'rule-uuid-no-topology',
@@ -350,16 +348,6 @@ evaluate.describe(
                     expectReuse: false,
                     seedStatus: 'closed',
                   },
-                  ...(confirmedAnchor && unrelatedDetection
-                    ? [
-                        {
-                          path: 'unconfirmed-rule',
-                          sequence: [confirmedAnchor, unrelatedDetection],
-                          expectReuse: false,
-                          seedUnconfirmedDetection: unrelatedDetection,
-                        },
-                      ]
-                    : []),
                   ...continuationChains
                     .filter(([path]) => path === 'cascade')
                     .map(
@@ -385,7 +373,6 @@ evaluate.describe(
                   expectTopologyEventSearch: plan.expectTopologyEventSearch,
                   seedStatus: plan.seedStatus,
                   stripSeedTopology: plan.stripSeedTopology,
-                  seedUnconfirmedDetection: plan.seedUnconfirmedDetection,
                 }));
               });
 
@@ -411,7 +398,7 @@ evaluate.describe(
                           snapshot_source: run.scenario.snapshot_source,
                           continuation_run: run.id,
                         },
-                        output: {},
+                        output: { ...run.scenario.output },
                         metadata: {
                           ...run.scenario.metadata,
                           test_index: MANAGED_STREAM_SEARCH_PATTERN,
@@ -420,7 +407,6 @@ evaluate.describe(
                             run.expectTopologyEventSearch ?? false,
                           continuation_seed_status: run.seedStatus,
                           continuation_without_topology: run.stripSeedTopology,
-                          continuation_unconfirmed_rule: run.seedUnconfirmedDetection?.rule_uuid,
                         },
                       })),
                     },
@@ -439,13 +425,7 @@ evaluate.describe(
 
                     // Continuation examples must not inherit events from a previous path.
                     // The cycles within this task still share state.
-                    await esClient
-                      .deleteByQuery({
-                        index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
-                        query: { match_all: {} },
-                        refresh: true,
-                      })
-                      .catch(() => {});
+                    await cleanSignificantEventsDataStreams(esClient, log, { includeLogs: false });
 
                     const snapshotSource = snapshotSources.get(input.scenario_id);
                     if (!snapshotSource) {
@@ -527,9 +507,15 @@ evaluate.describe(
                         cycles.push({
                           ruleName: detection.rule_name,
                           producedEventIds,
+                          producedEvents: significantEvents.map((event) => ({
+                            event_id: event.event_id,
+                            severity: event.severity,
+                            status: event.status,
+                          })),
                           requestedEventIds: extractRequestedEventIdsFromToolCall(
                             converseResult.steps
                           ),
+                          writeItems: extractWriteItemsFromToolCall(converseResult.steps),
                           expectReuse: i === 0 ? undefined : run.expectReuse ?? true,
                           expectTopologyEventSearch: run.expectTopologyEventSearch,
                           steps: converseResult.steps,
@@ -544,31 +530,6 @@ evaluate.describe(
                             ...event,
                             '@timestamp': event['@timestamp'] ?? new Date().toISOString(),
                             event_uuid: eventUuid,
-                            ...(i === 0 && run.seedUnconfirmedDetection
-                              ? {
-                                  signals: [
-                                    ...(event.signals ?? []).map((signal) => ({
-                                      ...signal,
-                                      confirmed: true as const,
-                                    })),
-                                    {
-                                      type: 'detection' as const,
-                                      stream_name: run.seedUnconfirmedDetection.stream_name,
-                                      confirmed: false,
-                                      description:
-                                        'The agent found no evidence that this signal supports the event.',
-                                      metadata: {
-                                        detection_id: run.seedUnconfirmedDetection.detection_id,
-                                        rule_name: run.seedUnconfirmedDetection.rule_name,
-                                        rule_uuid: run.seedUnconfirmedDetection.rule_uuid,
-                                        change_point_type:
-                                          run.seedUnconfirmedDetection.change_point_type,
-                                        p_value: run.seedUnconfirmedDetection.p_value,
-                                      },
-                                    },
-                                  ],
-                                }
-                              : {}),
                             ...(run.stripSeedTopology
                               ? { causal_features: [], blast_radius: [] }
                               : {}),

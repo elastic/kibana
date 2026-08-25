@@ -39,7 +39,6 @@ dependsOn:
   - '@kbn/observability-shared-plugin'
   - '@kbn/react-query'
   - '@kbn/scout-oblt'
-  - '@kbn/server-route-repository'
   - '@kbn/serverless'
   - '@kbn/share-plugin'
   - '@kbn/shared-ux-ai-components'
@@ -48,7 +47,6 @@ dependsOn:
   - '@kbn/significant-events-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/spaces-plugin'
-  - '@kbn/streams-plugin'
   - '@kbn/unified-search-plugin'
 tags:
   - plugin

@@ -98,6 +98,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('searchResponseWarningsViewDetails');
         await testSubjects.click('viewDetailsContextMenu');
         await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
+        // Wait for the accordion content to render before reading it
+        await retry.waitFor(
+          'cluster details callout to render',
+          async () =>
+            (await testSubjects.getVisibleText('inspectorRequestClustersDetails')).length > 0
+        );
         const txt = await testSubjects.getVisibleText('inspectorRequestClustersDetails');
         expect(txt).to.be(
           'Request timed out before completion. Results may be incomplete or empty.'
@@ -162,6 +168,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('searchResponseWarningsViewDetails');
         await testSubjects.click('viewDetailsContextMenu');
         await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
+        // Wait for the accordion content to render before reading it
+        await retry.waitFor(
+          'cluster details callout to render',
+          async () =>
+            (await testSubjects.getVisibleText('inspectorRequestClustersDetails')).length > 0
+        );
         const txt = await testSubjects.getVisibleText('inspectorRequestClustersDetails');
         expect(txt).to.be(
           'Request timed out before completion. Results may be incomplete or empty.'

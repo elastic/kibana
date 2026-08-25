@@ -40,7 +40,7 @@ export const ChangePointDocViewerPanel: React.FC<ChangePointDocViewerPanelProps>
   if (!chartSectionProps) {
     return (
       <EuiEmptyPrompt
-        iconType="visLine"
+        iconType="chartLine"
         title={
           <h3>
             {i18n.translate('discover.contextAwareness.changePointDocViewer.noChartTitle', {

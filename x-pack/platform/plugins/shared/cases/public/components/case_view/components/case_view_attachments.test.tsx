@@ -41,41 +41,41 @@ const buildRegistry = () => {
   const registry = new UnifiedAttachmentTypeRegistry();
   registry.register({
     id: 'security.alert',
-    displayName: 'Alerts',
-    icon: 'bell',
-    getAttachmentViewObject: () => ({ event: 'added an alert' }),
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => 'Alerts',
+    getIcon: () => 'bell',
+    getCreationActivity: () => ({ event: 'added an alert' }),
+    getAttachmentList: () => ({
       children: () => <div data-test-subj="test-alerts-table">{'Alerts table'}</div>,
     }),
     schema: z.object({}),
   });
   registry.register({
     id: 'security.event',
-    displayName: 'Events',
-    icon: 'bell',
-    getAttachmentViewObject: () => ({ event: 'added an event' }),
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => 'Events',
+    getIcon: () => 'bell',
+    getCreationActivity: () => ({ event: 'added an event' }),
+    getAttachmentList: () => ({
       children: () => <div data-test-subj="test-events-table">{'Events table'}</div>,
     }),
     schema: z.object({}),
   });
   registry.register({
     id: 'file',
-    displayName: 'Files',
-    icon: 'document',
-    getAttachmentViewObject: () => ({ event: 'added a file' }),
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => 'Files',
+    getIcon: () => 'document',
+    getCreationActivity: () => ({ event: 'added a file' }),
+    getAttachmentList: () => ({
       children: () => <div data-test-subj="test-files-table">{'Files table'}</div>,
     }),
     schema: z.object({}),
   });
-  // Comment is intentionally registered without `getAttachmentTabViewObject`
+  // Comment is intentionally registered without `getAttachmentList`
   // to mirror production: comments live in the activity tab, not here.
   registry.register({
     id: 'comment',
-    displayName: 'Comment',
-    icon: 'editorComment',
-    getAttachmentViewObject: () => ({ event: 'added a comment' }),
+    getLabel: () => 'Comment',
+    getIcon: () => 'comment',
+    getCreationActivity: () => ({ event: 'added a comment' }),
     schema: z.object({}),
   });
   return registry;
@@ -268,6 +268,79 @@ describe('Case View Attachments tab', () => {
     expect(
       screen.queryByTestId('case-view-attachment-accordion-security.event')
     ).not.toBeInTheDocument();
+  });
+
+  it('collapses and expands every visible attachment section', async () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    const caseWithComments: CaseUI = {
+      ...basicCase,
+      comments: [alertComment, { ...eventComment, id: 'event-comment-id' }],
+    };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithComments}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    const collapseAllButton = screen.getByTestId('case-view-attachments-collapse-all');
+    const expandAllButton = screen.getByTestId('case-view-attachments-expand-all');
+
+    expect(collapseAllButton).toBeEnabled();
+    expect(expandAllButton).toBeDisabled();
+
+    await userEvent.click(collapseAllButton);
+
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.alert')
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.event')
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(collapseAllButton).toBeDisabled();
+    expect(expandAllButton).toBeEnabled();
+
+    await userEvent.click(expandAllButton);
+
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.alert')
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.event')
+    ).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('collapses only the selected attachment section', async () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    const caseWithComments: CaseUI = {
+      ...basicCase,
+      comments: [alertComment, { ...eventComment, id: 'event-comment-id' }],
+    };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithComments}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    await userEvent.click(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.alert')
+    );
+
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.alert')
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.event')
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.queryByTestId('test-alerts-table')).not.toBeInTheDocument();
+    expect(screen.getByTestId('test-events-table')).toBeInTheDocument();
   });
 
   it('hides the files accordion when fileStats reports 0 files', () => {

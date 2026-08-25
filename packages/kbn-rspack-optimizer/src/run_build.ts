@@ -29,6 +29,9 @@ export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /\.mock\.[jt]sx?$/,
   /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
   /[\\/]jest(?:\.integration)?\.config\.[jt]s$/,
+  // Scout/Playwright output (test artifacts, reports, server configs) written
+  // into plugin dirs during test runs; must not trigger watch rebuilds.
+  /[\\/]\.scout[\\/]/,
 ];
 
 export interface BuildOptions {
@@ -39,6 +42,10 @@ export interface BuildOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Explicit plugin paths passed via --plugin-path */
+  pluginPaths?: string[];
+  /** Directories scanned for plugins */
+  pluginScanDirs?: string[];
   themeTags?: ThemeTag[];
   log?: ToolingLog;
   /** Enable profiling - writes stats.json and RsDoctor report */
@@ -87,6 +94,8 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cache = true,
     examples = false,
     testPlugins = false,
+    pluginPaths,
+    pluginScanDirs,
     themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
@@ -124,6 +133,8 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       cache,
       examples,
       testPlugins,
+      pluginPaths,
+      pluginScanDirs,
       themeTags,
       log,
       profile,
@@ -481,17 +492,9 @@ function processStats(
       assets: false,
       modules: false,
     });
-    const lines = warningOutput
-      .split('\n')
-      .filter(
-        (line) => !line.includes('rspack.persistentCache') && !line.includes('BuildDependencies')
-      )
-      .slice(0, 20);
-    if (lines.length > 0) {
-      log.warning('Build warnings (first 20):');
-      for (const line of lines) {
-        log.warning(line);
-      }
+
+    if (warningOutput.trim()) {
+      log.warning(warningOutput);
     }
   }
 

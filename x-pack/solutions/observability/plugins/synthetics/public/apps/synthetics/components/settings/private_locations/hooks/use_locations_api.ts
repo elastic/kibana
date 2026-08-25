@@ -16,15 +16,17 @@ import {
   getPrivateLocationsAction,
 } from '../../../../state/private_locations/actions';
 import { selectPrivateLocationsState } from '../../../../state/private_locations/selectors';
+import { useSyntheticsRefreshContext } from '../../../../contexts';
 
 export const usePrivateLocationsAPI = () => {
   const dispatch = useDispatch();
+  const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { loading, createLoading, deleteLoading, data } = useSelector(selectPrivateLocationsState);
 
   useEffect(() => {
     dispatch(getPrivateLocationsAction.get());
-  }, [dispatch]);
+  }, [dispatch, lastRefresh]);
 
   useEffect(() => {
     if (data === null) {

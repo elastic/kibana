@@ -4886,7 +4886,7 @@ This is the type of text _investigation guides_ will contain.`;
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          tags: expect.arrayContaining(['foo', 'Missing Universal Api Key']),
+          tags: expect.arrayContaining(['foo', 'Missing Elastic Cloud API Key']),
         }),
         expect.anything()
       );
@@ -5161,6 +5161,109 @@ This is the type of text _investigation guides_ will contain.`;
       expect(rulesClientParams.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Unable to log bulk rule changes for action "rule_create"')
       );
+    });
+  });
+  describe('telemetry', () => {
+    function mockSuccessfulCreate() {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          alertTypeId: '123',
+          consumer: 'bar',
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+          running: false,
+          createdAt: '2019-02-12T21:01:22.479Z',
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'test',
+              uuid: 'test-uuid',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          actions: [],
+          scheduledTaskId: 'task-123',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      });
+    }
+
+    test('reports a rule create event with the expected payload', async () => {
+      mockSuccessfulCreate();
+
+      await rulesClient.create({ data: getMockData() });
+
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        {
+          rule_id: 'mock-saved-object-id',
+          created_at: '2019-02-12T21:01:22.479Z',
+          rule_type_id: '123',
+          enabled: true,
+          consumer: 'bar',
+          producer: 'alerts',
+        }
+      );
+    });
+
+    test('includes the template id when explicitly provided', async () => {
+      mockSuccessfulCreate();
+
+      await rulesClient.create({ data: getMockData(), templateId: 'my-template' });
+
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        expect.objectContaining({ template_id: 'my-template' })
+      );
+    });
+
+    test('rejects templateId longer than the HTTP create maxLength', async () => {
+      mockSuccessfulCreate();
+
+      await expect(
+        rulesClient.create({ data: getMockData(), templateId: 'x'.repeat(1025) })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400 },
+      });
+      expect(rulesClientParams.analytics!.reportEvent).not.toHaveBeenCalled();
+    });
+
+    test('does not fail rule creation when reportEvent throws', async () => {
+      mockSuccessfulCreate();
+      (rulesClientParams.analytics!.reportEvent as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('report failed');
+      });
+
+      await expect(rulesClient.create({ data: getMockData() })).resolves.toBeDefined();
     });
   });
 });
