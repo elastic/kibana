@@ -9,6 +9,8 @@
 
 import { mockCreateWriteStream, mockMkdirSync } from './file_appender.test.mocks';
 
+import { EventEmitter } from 'events';
+
 import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { FileAppender } from './file_appender';
@@ -175,4 +177,102 @@ test('`dispose()` closes stream.', async () => {
 
   // Consequent `dispose` calls should not fail even if stream has been disposed.
   await appender.dispose();
+});
+
+describe('write failures', () => {
+  const record: LogRecord = {
+    context: 'context-1',
+    level: LogLevel.All,
+    message: 'message-1',
+    timestamp: new Date(),
+    pid: 5355,
+  };
+
+  const createMockStream = () => Object.assign(new EventEmitter(), { write: jest.fn() });
+
+  const enospc = () =>
+    Object.assign(new Error("ENOSPC: no space left on device, write 'mock://path/file.log'"), {
+      code: 'ENOSPC',
+    });
+
+  describe('when no `onWriteError` handler is configured', () => {
+    it('keeps letting a synchronous failure escape, so the process still crashes', () => {
+      mockMkdirSync.mockImplementation(() => {
+        throw enospc();
+      });
+
+      const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log');
+
+      expect(() => appender.append(record)).toThrow('ENOSPC');
+    });
+
+    it('does not subscribe to stream errors, leaving them unhandled as before', () => {
+      const stream = createMockStream();
+      const onSpy = jest.spyOn(stream, 'on');
+      mockCreateWriteStream.mockReturnValue(stream);
+
+      new FileAppender({ format: () => '' }, 'mock://path/file.log').append(record);
+
+      expect(onSpy).not.toHaveBeenCalledWith('error', expect.any(Function));
+    });
+  });
+
+  describe('when an `onWriteError` handler is configured', () => {
+    it('reports a synchronous failure instead of throwing', () => {
+      mockMkdirSync.mockImplementation(() => {
+        throw enospc();
+      });
+      const onWriteError = jest.fn();
+
+      const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', onWriteError);
+
+      expect(() => appender.append(record)).not.toThrow();
+      expect(onWriteError).toHaveBeenCalledWith({
+        path: 'mock://path/file.log',
+        code: 'ENOSPC',
+        reason: expect.stringContaining('no space left on device'),
+      });
+    });
+
+    it('reports an asynchronous stream failure instead of crashing the process', () => {
+      const stream = createMockStream();
+      mockCreateWriteStream.mockReturnValue(stream);
+      const onWriteError = jest.fn();
+
+      const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', onWriteError);
+      appender.append(record);
+
+      expect(() => stream.emit('error', enospc())).not.toThrow();
+      expect(onWriteError).toHaveBeenCalledWith(
+        expect.objectContaining({ code: 'ENOSPC', path: 'mock://path/file.log' })
+      );
+    });
+
+    it('drops subsequent records rather than writing to the broken stream', () => {
+      const stream = createMockStream();
+      mockCreateWriteStream.mockReturnValue(stream);
+
+      const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', jest.fn());
+      appender.append(record);
+      stream.write.mockClear();
+      stream.emit('error', enospc());
+
+      appender.append(record);
+
+      expect(stream.write).not.toHaveBeenCalled();
+    });
+
+    it('reports only once, so a stream erroring repeatedly does not flood the handler', () => {
+      const stream = createMockStream();
+      mockCreateWriteStream.mockReturnValue(stream);
+      const onWriteError = jest.fn();
+
+      const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', onWriteError);
+      appender.append(record);
+      stream.emit('error', enospc());
+      stream.emit('error', enospc());
+
+      expect(onWriteError).toHaveBeenCalledTimes(1);
+    });
+  });
 });

@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { LogFileWriteErrorHandler } from '@kbn/core-logging-server';
 import type { WriteStream } from 'fs';
 import { createWriteStream, mkdirSync } from 'fs';
 import { dirname } from 'path';
+import { toLogFileWriteError } from '../write_error_handler';
 import type { RollingFileContext } from './rolling_file_context';
 
 /**
@@ -18,15 +20,32 @@ import type { RollingFileContext } from './rolling_file_context';
 export class RollingFileManager {
   private readonly filePath;
   private outputStream?: WriteStream;
+  private writeFailed = false;
+  private readonly onWriteError?: LogFileWriteErrorHandler;
 
-  constructor(private readonly context: RollingFileContext) {
+  constructor(
+    private readonly context: RollingFileContext,
+    onWriteError?: LogFileWriteErrorHandler
+  ) {
     this.filePath = context.filePath;
+    this.onWriteError = typeof onWriteError === 'function' ? onWriteError : undefined;
   }
 
   write(chunk: string) {
-    const stream = this.ensureStreamOpen();
-    this.context.currentFileSize += Buffer.byteLength(chunk, 'utf8');
-    stream.write(chunk);
+    if (this.writeFailed) {
+      return;
+    }
+
+    try {
+      const stream = this.ensureStreamOpen();
+      this.context.currentFileSize += Buffer.byteLength(chunk, 'utf8');
+      stream.write(chunk);
+    } catch (error) {
+      if (!this.onWriteError) {
+        throw error;
+      }
+      this.handleWriteError(error);
+    }
   }
 
   async closeStream() {
@@ -41,6 +60,15 @@ export class RollingFileManager {
     });
   }
 
+  private handleWriteError(error: unknown) {
+    if (this.writeFailed) {
+      return;
+    }
+    this.writeFailed = true;
+    this.outputStream = undefined;
+    this.onWriteError!(toLogFileWriteError(error, this.filePath));
+  }
+
   private ensureStreamOpen() {
     if (this.outputStream === undefined) {
       this.ensureDirectory(this.filePath);
@@ -48,6 +76,9 @@ export class RollingFileManager {
         encoding: 'utf8',
         flags: 'a',
       });
+      if (this.onWriteError) {
+        this.outputStream.on('error', (error) => this.handleWriteError(error));
+      }
       // refresh the file meta in case it was not initialized yet.
       this.context.refreshFileInfo();
     }

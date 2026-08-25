@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { distinctUntilKeyChanged, map, shareReplay } from 'rxjs';
+import { distinctUntilKeyChanged, map, merge, shareReplay, Subject, withLatestFrom } from 'rxjs';
 
 import type {
   HttpServiceSetup,
   KibanaRequest,
+  LogFileWriteError,
+  LogFileWriteErrorHandler,
   Logger,
   LoggerContextConfigInput,
   LoggingServiceSetup,
@@ -82,6 +84,22 @@ export class AuditService {
   }: AuditServiceSetupParams): AuditServiceSetup {
     const auditLogPath = config.enabled ? getAuditLogPath(config.appender) : undefined;
 
+    // The startup probe only covers misconfiguration at boot and license transitions. Anything that
+    // breaks afterwards — disk full, quota exceeded, the mount going read-only, the log directory
+    // being removed — is reported by the appender through `onWriteError` instead of taking the
+    // process down, and feeds the same stream as the probe.
+    const runtimeWriteAccess$ = new Subject<AuditLogWriteAccess>();
+    const onWriteError = auditLogPath
+      ? ({ path, code, reason }: LogFileWriteError) =>
+          runtimeWriteAccess$.next({
+            granted: false,
+            path,
+            code,
+            reason,
+            checkedAt: new Date().toISOString(),
+          })
+      : undefined;
+
     const probed$ = license.features$.pipe(
       distinctUntilKeyChanged('allowAuditLogging'),
       map((features) => ({
@@ -94,19 +112,27 @@ export class AuditService {
       shareReplay(1)
     );
 
+    const state$ = merge(
+      probed$,
+      runtimeWriteAccess$.pipe(
+        withLatestFrom(probed$),
+        map(([writeAccess, { features }]) => ({ features, writeAccess }))
+      )
+    ).pipe(shareReplay(1));
+
     const writeAccess$ = auditLogPath
-      ? probed$.pipe(map(({ writeAccess }) => writeAccess))
+      ? state$.pipe(map(({ writeAccess }) => writeAccess))
       : undefined;
 
     // Report the plugin as degraded while the audit log cannot be written, so the lost audit
     // trail shows up in /api/status rather than having to be inferred.
     status.set(getAuditStatus$({ writeAccess$, derivedStatus$: status.derivedStatus$ }));
 
-    // Configure logging during setup and when the license changes
+    // Configure logging during setup, when the license changes, and when a write fails at runtime
     logging.configure(
-      probed$.pipe(
+      state$.pipe(
         map(({ features, writeAccess }) =>
-          createLoggingConfig(config, isServerless, writeAccess)(features)
+          createLoggingConfig(config, isServerless, writeAccess, onWriteError)(features)
         )
       )
     );
@@ -204,7 +230,12 @@ export class AuditService {
 }
 
 export const createLoggingConfig =
-  (config: ConfigType['audit'], isServerless = false, writeAccess?: AuditLogWriteAccess) =>
+  (
+    config: ConfigType['audit'],
+    isServerless = false,
+    writeAccess?: AuditLogWriteAccess,
+    onWriteError?: LogFileWriteErrorHandler
+  ) =>
   (features: Pick<SecurityLicenseFeatures, 'allowAuditLogging'>): LoggerContextConfigInput => {
     if (writeAccess && !writeAccess.granted) {
       return {
@@ -249,8 +280,16 @@ export const createLoggingConfig =
           }
         : baseAppender;
 
+    // Only the file-backed appenders can fail mid-write, and only this handler opts them out of
+    // crashing Kibana. Injecting it here (rather than accepting it from `config.appender`) is what
+    // keeps the behavior scoped to the audit log: it always overwrites whatever the config held.
+    const auditTrailAppender =
+      onWriteError && (appender.type === 'file' || appender.type === 'rolling-file')
+        ? { ...appender, onWriteError }
+        : appender;
+
     return {
-      appenders: { auditTrailAppender: appender },
+      appenders: { auditTrailAppender },
       loggers: [
         {
           name: 'audit.ecs',

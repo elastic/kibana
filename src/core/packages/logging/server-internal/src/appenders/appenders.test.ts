@@ -10,7 +10,8 @@
 import { mockCreateLayout } from './appenders.test.mocks';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { Appenders } from './appenders';
+import type { PluginAppenderConfigType } from '@kbn/core-logging-server';
+import { Appenders, pluginAppendersSchema } from './appenders';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
 import { OtelAppender } from './otel/otel_appender';
@@ -98,4 +99,63 @@ test('`create()` creates correct appender.', () => {
     attributes: {},
   });
   expect(otelAppender).toBeInstanceOf(OtelAppender);
+});
+
+describe('`onWriteError` is accepted only through the runtime schema', () => {
+  const fileAppenderConfig = {
+    type: 'file',
+    fileName: 'path',
+    layout: { type: 'mock' },
+  };
+
+  const rollingFileAppenderConfig = {
+    type: 'rolling-file',
+    fileName: 'path',
+    layout: { type: 'mock' },
+    strategy: { type: 'numeric', max: 5, pattern: '%i' },
+    policy: { type: 'size-limit', size: ByteSizeValue.parse('15b') },
+  };
+
+  it('is absent from the YAML appender schema, so it is not a documented operator option', () => {
+    expect(Object.keys(Appenders.configSchema.validate(fileAppenderConfig))).not.toContain(
+      'onWriteError'
+    );
+  });
+
+  it.each(['not-a-function', 42, true, null])(
+    'ignores a non-function %p, so a stray YAML value cannot disable the crash behavior',
+    (onWriteError) => {
+      // The YAML schema tolerates unknown keys, so the appender itself has to reject anything that
+      // is not callable — otherwise `logging.appenders.*` in kibana.yml could alter this.
+      const appender = Appenders.create({
+        ...fileAppenderConfig,
+        onWriteError,
+      } as unknown as PluginAppenderConfigType);
+
+      expect(appender).toHaveProperty('onWriteError', undefined);
+    }
+  );
+
+  it('keeps the handler on a plugin-validated file appender', () => {
+    const onWriteError = () => {};
+
+    expect(pluginAppendersSchema.validate({ ...fileAppenderConfig, onWriteError })).toHaveProperty(
+      'onWriteError',
+      onWriteError
+    );
+  });
+
+  it('keeps the handler on a plugin-validated rolling-file appender', () => {
+    const onWriteError = () => {};
+
+    expect(
+      pluginAppendersSchema.validate({ ...rollingFileAppenderConfig, onWriteError })
+    ).toHaveProperty('onWriteError', onWriteError);
+  });
+
+  it('rejects a non-function handler rather than silently never reporting', () => {
+    expect(() =>
+      pluginAppendersSchema.validate({ ...fileAppenderConfig, onWriteError: 'not-a-function' })
+    ).toThrow(/write-error handler function/);
+  });
 });
