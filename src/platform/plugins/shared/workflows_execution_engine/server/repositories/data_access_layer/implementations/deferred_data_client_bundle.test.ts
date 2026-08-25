@@ -15,7 +15,9 @@ import { createMockStepDataClient, createMockWorkflowDataClient } from '../mocks
 
 jest.mock('./plain_index/plain_index_data_client_bundle');
 
-const MockBundle = PlainIndexDataClientBundle as jest.MockedClass<typeof PlainIndexDataClientBundle>;
+const MockBundle = PlainIndexDataClientBundle as jest.MockedClass<
+  typeof PlainIndexDataClientBundle
+>;
 
 describe('DeferredDataClientBundle', () => {
   let innerBundle: {
