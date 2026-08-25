@@ -20,12 +20,7 @@ import { getConverseHelpers } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
 import { conversePayloadSchema } from './chat';
 
-/**
- * Events-native chat API. A thin, experimental `/api/chat` surface over the same execution service
- * as the legacy `/api/agent_builder/converse` routes: it runs the agent and returns the conversation
- * with its `events` timeline. Reads still go through the existing conversation GET (which already
- * carries `events`); this PR adds only converse. Gated by the experimental feature flag.
- */
+/** Events-native chat API */
 export function registerChatApiRoutes({
   router,
   getInternalServices,
