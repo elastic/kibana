@@ -20,7 +20,7 @@ import type {
   ActiveExecution,
 } from '@kbn/agent-builder-common/chat';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
-import type { PersistentConversationRound } from './types';
+import type { ConversationReadByEntry, PersistentConversationRound } from './types';
 
 export const conversationIndexName = chatSystemIndex('conversations');
 
@@ -65,7 +65,14 @@ const storageSettings = {
       attachments: types.object({ dynamic: false, properties: {} }),
       state: types.object({ dynamic: false, properties: {} }),
       status: types.keyword({}),
+      // legacy field, superseded by read_by
       read: types.boolean({}),
+      read_by: types.nested({
+        properties: {
+          userId: types.keyword({}),
+        },
+        dynamic: false,
+      }),
       pinned: types.boolean({}),
       read_only: types.boolean({}),
       workspace_id: types.keyword({}),
@@ -126,7 +133,9 @@ export interface ConversationProperties {
   attachments?: VersionedAttachment[];
   state?: ConversationInternalState;
   status?: ConversationRoundStatus;
+  // legacy field, superseded by read_by
   read?: boolean;
+  read_by?: ConversationReadByEntry[];
   pinned?: boolean;
   read_only?: boolean;
   workspace_id?: string;
