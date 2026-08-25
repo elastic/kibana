@@ -211,6 +211,11 @@ describe('ConversationShareButton', () => {
       fireEvent.click(screen.getByText('Public'));
     });
 
+    expect(screen.queryByText('Current members')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('agentBuilderConversationSharingUserSearch')
+    ).not.toBeInTheDocument();
+
     expect(mutate).toHaveBeenCalledWith({
       access_mode: ConversationAccessControlMode.Public,
       entries: [],

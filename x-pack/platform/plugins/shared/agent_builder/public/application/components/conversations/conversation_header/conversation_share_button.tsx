@@ -99,9 +99,6 @@ const labels = {
   saveError: i18n.translate('xpack.agentBuilder.conversationSharing.saveError', {
     defaultMessage: 'Failed to update sharing settings',
   }),
-  publicSearchHelp: i18n.translate('xpack.agentBuilder.conversationSharing.publicSearchHelp', {
-    defaultMessage: 'Switch to restricted access to add individual members.',
-  }),
 };
 
 const AccessModeOption: React.FC<{
@@ -422,6 +419,7 @@ const ConversationSharePopover: React.FC<{
         <div
           css={css`
             padding: ${euiTheme.size.m};
+            padding-bottom: ${isPublic ? euiTheme.size.l : euiTheme.size.m};
           `}
         >
           {errorMessage ? (
@@ -450,71 +448,73 @@ const ConversationSharePopover: React.FC<{
               data-test-subj="agentBuilderConversationSharingAccessModeSelect"
             />
           </EuiFormRow>
-          <EuiSpacer size="l" />
-          <EuiFormRow
-            label={labels.currentMembers}
-            fullWidth
-            helpText={isPublic ? labels.publicSearchHelp : undefined}
-          >
-            <EuiComboBox<string>
-              compressed
-              fullWidth
-              async
-              placeholder={labels.searchUsers}
-              aria-label={labels.searchUsers}
-              options={userOptions}
-              selectedOptions={[]}
-              onChange={onAddUser}
-              onSearchChange={setSearchValue}
-              isLoading={isSearchingUsers}
-              isDisabled={isSaving || isPublic}
-              isClearable={false}
-              prepend={
-                <EuiIcon
-                  type="magnify"
-                  color="subdued"
-                  data-test-subj="agentBuilderConversationSharingUserSearchIcon"
-                  aria-hidden={true}
+          {!isPublic ? (
+            <>
+              <EuiSpacer size="l" />
+              <EuiFormRow label={labels.currentMembers} fullWidth>
+                <EuiComboBox<string>
+                  compressed
+                  fullWidth
+                  async
+                  placeholder={labels.searchUsers}
+                  aria-label={labels.searchUsers}
+                  options={userOptions}
+                  selectedOptions={[]}
+                  onChange={onAddUser}
+                  onSearchChange={setSearchValue}
+                  isLoading={isSearchingUsers}
+                  isDisabled={isSaving}
+                  isClearable={false}
+                  prepend={
+                    <EuiIcon
+                      type="magnify"
+                      color="subdued"
+                      data-test-subj="agentBuilderConversationSharingUserSearchIcon"
+                      aria-hidden={true}
+                    />
+                  }
+                  singleSelection={{ asPlainText: true }}
+                  renderOption={(option) => {
+                    const profile = option.value
+                      ? suggestedProfileByUid.get(option.value)
+                      : undefined;
+
+                    if (!profile) {
+                      return null;
+                    }
+
+                    return <UserSearchOption key={option.key ?? option.value} profile={profile} />;
+                  }}
+                  rowHeight={48}
+                  data-test-subj="agentBuilderConversationSharingUserSearch"
                 />
-              }
-              singleSelection={{ asPlainText: true }}
-              renderOption={(option) => {
-                const profile = option.value ? suggestedProfileByUid.get(option.value) : undefined;
+              </EuiFormRow>
+              <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+                {ownerProfile ? (
+                  <EuiFlexItem>
+                    <UserAccessRow
+                      profile={ownerProfile}
+                      badge={labels.author}
+                      hasBottomBorder={memberProfiles.length > 0}
+                    />
+                  </EuiFlexItem>
+                ) : null}
 
-                if (!profile) {
-                  return null;
-                }
-
-                return <UserSearchOption key={option.key ?? option.value} profile={profile} />;
-              }}
-              rowHeight={48}
-              data-test-subj="agentBuilderConversationSharingUserSearch"
-            />
-          </EuiFormRow>
-          <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
-            {ownerProfile ? (
-              <EuiFlexItem>
-                <UserAccessRow
-                  profile={ownerProfile}
-                  badge={labels.author}
-                  hasBottomBorder={memberProfiles.length > 0}
-                />
-              </EuiFlexItem>
-            ) : null}
-
-            {memberProfiles.map(({ id, profile }, index) => {
-              return (
-                <EuiFlexItem key={id}>
-                  <UserAccessRow
-                    profile={profile}
-                    hasBottomBorder={index < memberProfiles.length - 1}
-                    isDisabled={isSaving}
-                    onRemove={() => onRemoveUser(id)}
-                  />
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
+                {memberProfiles.map(({ id, profile }, index) => {
+                  return (
+                    <EuiFlexItem key={id}>
+                      <UserAccessRow
+                        profile={profile}
+                        hasBottomBorder={index < memberProfiles.length - 1}
+                        isDisabled={isSaving}
+                        onRemove={() => onRemoveUser(id)}
+                      />
+                    </EuiFlexItem>
+                  );
+                })}
+              </EuiFlexGroup>
+            </>
+          ) : null}
         </div>
       </div>
     </EuiPopover>
