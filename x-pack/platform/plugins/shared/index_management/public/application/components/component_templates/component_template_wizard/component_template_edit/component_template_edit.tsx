@@ -123,7 +123,12 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
           defaultMessage: "Edit component template ''{name}''",
           values: { name: decodedName },
         })}
-        back="/app/management/data/index_management/component_templates"
+        back={{
+          href: '/app/management/data/index_management/component_templates',
+          label: i18n.translate('xpack.idxMgmt.componentTemplateEdit.backToListLabel', {
+            defaultMessage: 'Component templates',
+          }),
+        }}
         spacing="bleed"
       />
 

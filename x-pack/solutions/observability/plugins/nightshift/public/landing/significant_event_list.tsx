@@ -126,12 +126,12 @@ export function SignificantEventList({
               <EuiFlexGroup justifyContent="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="nightshiftClearBlastRadiusFilterButton"
+                    data-test-subj="nightshiftClearImpactedServicesFilterButton"
                     flush="left"
                     onClick={onClearFilter}
                     size="s"
                     {...getEbtProps({
-                      action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_BLAST_RADIUS_FILTER,
+                      action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_IMPACTED_SERVICES_FILTER,
                       element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
                       detail:
                         statusColor === 'danger'
