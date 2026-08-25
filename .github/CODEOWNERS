@@ -782,7 +782,7 @@ src/platform/packages/shared/shared-ux/card/no_data/mocks @elastic/appex-sharedu
 src/platform/packages/shared/shared-ux/card/no_data/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/code_editor/mocks @elastic/appex-sharedux
-src/platform/packages/shared/shared-ux/column-presets @elastic/eui @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/column-presets @elastic/eui-team @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker @elastic/appex-sharedux @elastic/eui-team
 src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-presets @elastic/appex-sharedux @elastic/eui-team
 src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker-presets-common @elastic/appex-sharedux @elastic/eui-team
@@ -2150,7 +2150,7 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significa
 /x-pack/platform/plugins/shared/stack_alerts/public/rule_types/geo_containment @elastic/kibana-presentation
 
 # Visualization
-/x-pack/platform/test/functional/services/lens.ts @elastic/kibana-visualization
+/x-pack/platform/test/functional/services/lens.ts @elastic/kibana-visualizations
 
 # Machine Learning
 /x-pack/platform/test/stack_functional_integration/apps/ml @elastic/search-ml-ux
@@ -3696,10 +3696,6 @@ x-pack/solutions/security/plugins/security_solution/public/security_integrations
 x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/siem-conduit
 x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/siem-conduit
 x-pack/solutions/security/plugins/security_solution/test/scout/security_integrations/ @elastic/siem-conduit
-
-# Kibana design
-# scss overrides should be below this line for specificity
-**/*.scss @elastic/kibana-design
 
 # Observability design
 /x-pack/platform/plugins/shared/fleet/**/*.scss @elastic/observability-design
