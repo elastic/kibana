@@ -17,7 +17,6 @@ import type {
 import {
   getConnectorSpec,
   isSelectedActionEnabled,
-  isToolAction,
   OAUTH_AUTHORIZATION_CODE_AUTH_ID,
   EARS_AUTH_ID,
 } from '@kbn/connector-specs';
@@ -31,14 +30,12 @@ jest.mock('@kbn/connector-specs', () => ({
   ...jest.requireActual('@kbn/connector-specs'),
   getConnectorSpec: jest.fn(),
   isSelectedActionEnabled: jest.fn(),
-  isToolAction: jest.fn(),
 }));
 
 const getConnectorSpecMock = getConnectorSpec as jest.MockedFunction<typeof getConnectorSpec>;
 const isSelectedActionEnabledMock = isSelectedActionEnabled as jest.MockedFunction<
   typeof isSelectedActionEnabled
 >;
-const isToolActionMock = isToolAction as jest.MockedFunction<typeof isToolAction>;
 
 const mockExecute = jest.fn();
 const mockGet = jest.fn();
@@ -98,7 +95,6 @@ describe('createExecuteConnectorSubActionTool', () => {
       },
       test: { handler: jest.fn(), enabled: false },
     });
-    isToolActionMock.mockReturnValue(true);
     isSelectedActionEnabledMock.mockReturnValue(true);
     mockCheckAuthorizationStatus.mockReturnValue({ status: AuthorizationStatus.unprompted });
     mockAskForAuthorization.mockImplementation((definition) => ({
@@ -218,38 +214,6 @@ describe('createExecuteConnectorSubActionTool', () => {
         subActionParams: {},
       },
     });
-  });
-
-  it('rejects sub-actions not marked as isTool', async () => {
-    getConnectorSpecMock.mockReturnValue({
-      metadata: {
-        id: '.slack2',
-        displayName: 'Slack',
-        description: 'Slack connector',
-        minimumLicense: 'enterprise' as const,
-        supportedFeatureIds: [],
-      },
-      actions: { internalAction: { isTool: false, input: {} as any, handler: jest.fn() } },
-      test: { handler: jest.fn(), enabled: false },
-    });
-    isToolActionMock.mockReturnValue(false);
-
-    const tool = createExecuteConnectorSubActionTool({ getActions, getInference });
-    const result = await tool.handler(
-      {
-        connectorId: 'conn-123',
-        subAction: 'internalAction',
-        params: {},
-      },
-      mockContext
-    );
-
-    expect((result as ToolHandlerStandardReturn).results).toHaveLength(1);
-    expect((result as ToolHandlerStandardReturn).results[0].type).toBe(ToolResultType.error);
-    expect(
-      ((result as ToolHandlerStandardReturn).results[0] as ErrorResult).data.message
-    ).toContain("Sub-action 'internalAction' is not available as a tool");
-    expect(mockExecute).not.toHaveBeenCalled();
   });
 
   it('returns error when no connector spec is found for the type', async () => {

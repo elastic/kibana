@@ -29,9 +29,6 @@ export type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
 
 const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
 
-// isTool:false actions are intended for human-in-the-loop (HITL) use and are shown alongside
-// isTool:true actions; formatConnectorActionLine annotates them with a confirmation suffix.
-
 export function shouldHideWorkflowsOnlyConnector(
   supportedFeatureIds: string[],
   uiSettings?: IUiSettingsClient
