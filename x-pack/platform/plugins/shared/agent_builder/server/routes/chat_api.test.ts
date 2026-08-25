@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { chatApiPath } from '../../common/constants';
@@ -131,6 +131,87 @@ describe('registerChatApiRoutes', () => {
 
     const response = buildResponse();
     const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(false),
+      { body: { agent_id: 'agent-1', input: 'Hello' } },
+      response
+    );
+
+    expect(response.notFound).toHaveBeenCalled();
+    expect(result).toEqual({ status: 404 });
+    expect(executeAgent).not.toHaveBeenCalled();
+  });
+
+  it('returns a 500 when the run emits no conversation event', async () => {
+    const { router, handlers } = captureHandlers();
+    const executeAgent = jest.fn().mockResolvedValue({ events$: of() });
+    const get = jest.fn();
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        conversations: { getScopedClient: jest.fn().mockResolvedValue({ get }) },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      { body: { agent_id: 'agent-1', input: 'Hello' } },
+      response
+    );
+
+    expect(result.status).toBe(500);
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it('surfaces a 500 when the agent stream errors mid-run', async () => {
+    const { router, handlers } = captureHandlers();
+    const executeAgent = jest
+      .fn()
+      .mockResolvedValue({ events$: throwError(() => new Error('stream boom')) });
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        conversations: { getScopedClient: jest.fn() },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse`](
+      activeContext(true),
+      { body: { agent_id: 'agent-1', input: 'Hello' } },
+      response
+    );
+
+    expect(result.status).toBe(500);
+  });
+
+  it('404s the streaming route when the experimental feature flag is disabled', async () => {
+    const { router, handlers } = captureHandlers();
+    const executeAgent = jest.fn();
+
+    registerChatApiRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        execution: { executeAgent },
+        conversations: { getScopedClient: jest.fn() },
+      }),
+      coreSetup: {} as never,
+      pluginsSetup: {},
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const response = buildResponse();
+    const result = await handlers[`${chatApiPath}/converse/async`](
       activeContext(false),
       { body: { agent_id: 'agent-1', input: 'Hello' } },
       response

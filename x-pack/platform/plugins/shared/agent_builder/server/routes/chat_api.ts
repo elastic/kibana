@@ -10,13 +10,6 @@ import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import {
-  isConversationCreatedEvent,
-  isConversationUpdatedEvent,
-  type ChatEvent,
-  type ConversationCreatedEvent,
-  type ConversationUpdatedEvent,
-} from '@kbn/agent-builder-common';
 import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -24,19 +17,8 @@ import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers } from './converse_helpers';
+import { findConversationEvent } from '../services/execution/utils/chat_response';
 import { conversePayloadSchema } from './chat';
-
-/** Recovers the conversation id from the chat stream's conversation created/updated event. */
-const getConversationId = (events: ChatEvent[]): string => {
-  const conversationEvent = events.find(
-    (event): event is ConversationCreatedEvent | ConversationUpdatedEvent =>
-      isConversationCreatedEvent(event) || isConversationUpdatedEvent(event)
-  );
-  if (!conversationEvent) {
-    throw new Error('No conversation event was emitted');
-  }
-  return conversationEvent.data.conversation_id;
-};
 
 /**
  * Events-native chat API. A thin, experimental `/api/chat` surface over the same execution service
@@ -100,7 +82,7 @@ export function registerChatApiRoutes({
           });
 
           const events = await firstValueFrom(chatEvents$.pipe(toArray()));
-          const conversationId = getConversationId(events);
+          const conversationId = findConversationEvent(events).data.conversation_id;
 
           const client = await conversationsService.getScopedClient({ request });
           const conversation = await client.get(conversationId);
