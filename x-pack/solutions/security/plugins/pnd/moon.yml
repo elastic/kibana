@@ -37,7 +37,6 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
-  - '@kbn/workflows-yaml'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
   - '@kbn/logging-mocks'

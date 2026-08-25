@@ -97,9 +97,6 @@ describe('PndPlugin feature-flag gating', () => {
       );
 
       expect(registerOwner).toHaveBeenCalledWith({ workflowsExtensions });
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(
-        expect.objectContaining({ 'pnd:watchesEnabled': expect.anything() })
-      );
       expect(features.registerKibanaFeature).toHaveBeenCalledWith(
         expect.objectContaining({
           privileges: expect.objectContaining({

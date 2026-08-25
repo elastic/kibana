@@ -33,7 +33,6 @@ import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { WatchesService } from './services/watches/watches_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
-import { pndUiSettings } from './ui_settings';
 
 export class PndPlugin
   implements Plugin<PndPluginSetup, PndPluginStart, PndSetupDependencies, PndStartDependencies>
@@ -65,7 +64,6 @@ export class PndPlugin
     this.workflowsManagementApi = workflowsManagement.management;
 
     registerOwner({ workflowsExtensions });
-    coreSetup.uiSettings.register(pndUiSettings);
 
     features.registerKibanaFeature({
       id: PND_FEATURE_ID,

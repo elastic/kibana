@@ -10,7 +10,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { SYSTEM_SECURITY_WATCH_FLOOR_ID } from '@kbn/pnd-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { resetWatchStore } from '../watch_store/watch_store';
 import type { WatchWorkflowsManagementClient } from './watch_workflows_management_client';
 import { WatchesService } from './watches_service';
@@ -394,62 +393,6 @@ describe('WatchesService', () => {
       expect(disabled.response.watch.enabled).toBe(false);
       expect(harness.documents.has(`${FLOOR}-space-a`)).toBe(true);
       expect(harness.managedWorkflows.uninstall).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('space enablement', () => {
-    it('installs every registered watch in the requested space', async () => {
-      const harness = createPersistentHarness();
-
-      await harness.createService().synchronizeSpaceEnabled(true, 'space-a', request);
-
-      expect(harness.documents.size).toBe(5);
-      expect(harness.documents.get(`${FLOOR}-space-a`)?.values).toEqual({
-        settingsVersion: 1,
-        autonomyLevel: 'manual',
-      });
-    });
-
-    it('disables, cancels, and uninstalls every per-space watch', async () => {
-      const harness = createPersistentHarness();
-      const service = harness.createService();
-      await service.synchronizeSpaceEnabled(true, SPACE, request);
-
-      await service.synchronizeSpaceEnabled(false, SPACE, request);
-
-      expect(harness.management.cancelAllActiveWorkflowExecutions).toHaveBeenCalledTimes(5);
-      expect(harness.managedWorkflows.uninstall).toHaveBeenCalledTimes(5);
-      expect(harness.documents.size).toBe(0);
-    });
-
-    it('continues disabling the remaining watches when one uninstall fails', async () => {
-      const harness = createPersistentHarness();
-      const service = harness.createService();
-      await service.synchronizeSpaceEnabled(true, SPACE, request);
-      harness.uninstall.mockRejectedValueOnce(new Error('execution draining'));
-
-      await expect(service.synchronizeSpaceEnabled(false, SPACE, request)).rejects.toThrow(
-        'Failed to synchronize 1 PND watch'
-      );
-
-      expect(harness.management.cancelAllActiveWorkflowExecutions).toHaveBeenCalledTimes(5);
-      expect(harness.managedWorkflows.uninstall).toHaveBeenCalledTimes(5);
-      expect(harness.documents.size).toBe(1);
-    });
-
-    it('treats an uninstall conflict as still draining instead of a failed sweep', async () => {
-      const harness = createPersistentHarness();
-      const service = harness.createService();
-      await service.synchronizeSpaceEnabled(true, SPACE, request);
-      harness.uninstall.mockRejectedValueOnce(
-        new WorkflowConflictError('Cannot force-delete workflows with running executions', FLOOR)
-      );
-
-      await expect(service.synchronizeSpaceEnabled(false, SPACE, request)).resolves.toBeUndefined();
-
-      expect(harness.management.cancelAllActiveWorkflowExecutions).toHaveBeenCalledTimes(5);
-      expect(harness.managedWorkflows.uninstall).toHaveBeenCalledTimes(5);
-      expect(harness.documents.size).toBe(1);
     });
   });
 

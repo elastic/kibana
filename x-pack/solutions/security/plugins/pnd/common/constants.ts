@@ -13,7 +13,6 @@ export {
   PND_FEATURE_ID,
   PND_INTERNAL_URL,
   PND_PLUGIN_NAME,
-  PND_SPACE_ENABLEMENT_SYNC_URL,
   PND_INVESTIGATIONS_URL,
   PND_INVESTIGATION_URL_TEMPLATE,
   PND_WATCHES_URL,
@@ -34,6 +33,3 @@ export const PND_API_PRIVILEGE_WRITE = 'pnd_write' as const;
 
 /** Owner id registered for all PND managed workflow definitions. */
 export const PND_MANAGED_WORKFLOW_OWNER_ID = 'pnd' as const;
-
-/** Space-scoped Advanced Setting controlling whether PND watch documents are installed. */
-export const PND_SPACE_ENABLED_SETTING_ID = 'pnd:watchesEnabled' as const;

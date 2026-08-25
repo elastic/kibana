@@ -14,7 +14,7 @@ import {
   PND_WATCH_URL_TEMPLATE,
   UpdateWatchRequestBody,
 } from '@kbn/pnd-common';
-import { PND_API_PRIVILEGE_WRITE, PND_SPACE_ENABLED_SETTING_ID } from '../../../common/constants';
+import { PND_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
 import { storeUnavailableResponse } from '../store_route_guard';
 
@@ -49,28 +49,8 @@ export const registerUpdateWatchRoute = ({
           },
         },
       },
-      async (context, request, response) => {
+      async (_context, request, response) => {
         try {
-          const core = await context.core;
-          const spaceEnabled = await core.uiSettings.client.get<boolean>(
-            PND_SPACE_ENABLED_SETTING_ID
-          );
-          // A disable-only patch must still land when the space is already off; otherwise a leftover
-          // enabled watch cannot be turned off without first turning the space back on.
-          const isDisableOnlyPatch =
-            request.body.enabled === false &&
-            Object.entries(request.body).every(
-              ([key, value]) => key === 'enabled' || value === undefined
-            );
-          if (!spaceEnabled && !isDisableOnlyPatch) {
-            return response.forbidden({
-              body: {
-                message: i18n.translate('xpack.pnd.watches.spaceDisabledErrorMessage', {
-                  defaultMessage: 'PND watches are disabled in this space',
-                }),
-              },
-            });
-          }
           const { watchId } = request.params;
           const result = await getWatchesService().update(
             watchId,

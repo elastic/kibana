@@ -12,7 +12,8 @@ xpack.pnd.enabled: true
 
 - **`xpack.pnd.enabled`** — deployment-level plugin gate (default `false`). When false, the plugin registers no app, routes, or features; Security nav nodes for PND are omitted automatically.
 - **`xpack.pnd.ui.useMockData`** — optional presentation-source toggle (default `true`). Watch settings use managed workflow template values in both modes; the flag controls whether the rest of the watch projection comes from fixtures or live Workflows data.
-- **`pnd:watchesEnabled`** — space-scoped Advanced Setting (default `false`). After the required page reload, a versioned internal synchronization request installs all registered watches in that space. Turning it off disables and cancels every watch, attempts every uninstall even if one execution is still draining, and retries incomplete removal on the next synchronization. Re-enabling starts from defaults.
+
+Watches install when a user enables one or saves settings on one. There is no space-level enablement switch. Disable leaves the per-space document and its settings in place. The only bulk cleanup is turning `xpack.pnd.enabled` off and restarting — PND then stops registering as a managed-workflow owner and orphan cleanup force-deletes its documents across every space.
 
 Restart Kibana after changing config, then open `/app/pnd` (or use the Security left rail).
 
@@ -27,7 +28,7 @@ Restart Kibana after changing config, then open `/app/pnd` (or use the Security 
 | Managed workflow initialization | Not called |
 | Leftover installed watches | Global Workflows orphan cleanup removes docs whose owner is unregistered |
 
-Definitions still exist in `@kbn/workflows/managed` (code registry only). Watch definitions are **not** installed into `.workflows-*` until the space Advanced Setting is synchronized. PND startup installs only the three global rule workflows before `ready()` reconciles already-installed dynamic watches.
+Definitions still exist in `@kbn/workflows/managed` (code registry only). Watch definitions are **not** installed into `.workflows-*` until a user enables that watch or saves settings on it. PND startup installs only the three global rule workflows before `ready()` reconciles already-installed dynamic watches.
 
 The only always-on cost of a soft flag is the tiny public plugin entry bundle (~page-load limit); it registers nothing when disabled.
 
@@ -84,7 +85,6 @@ PND is a **standalone Security-category app** (`/app/pnd`) that **uses platform 
 | GET | `/internal/pnd/watches` |
 | GET | `/internal/pnd/watches/{watchId}` |
 | PATCH | `/internal/pnd/watches/{watchId}` |
-| POST | `/internal/pnd/watches/_sync_enablement` |
 | GET | `/internal/pnd/investigations` |
 | GET | `/internal/pnd/investigations/{id}` |
 | GET | `/internal/pnd/investigations/{id}/proposals` |
@@ -144,7 +144,7 @@ For now, every built-in Watch is registered centrally:
 
 To add a common setting, add it to the managed template-values type shared by the Watch platform modules. Add a placeholder to every Watch YAML and have each `yamlTemplate` replace it, so changing the value changes the rendered definition. Declare its default, migration, patch behavior, and API projection in the shared PND settings registration. Watch-specific settings should extend that common behavior only after their API and runtime semantics are settled.
 
-The lifecycle service owns the rest: per-space installation, reading persisted values, enable/disable, startup migration, upgrades, and space-wide uninstall. Settings responses carry the logical workflow version, and settings patches return HTTP 409 when a fresh read shows that version was already stale. This is best-effort detection rather than an atomic write guard: overlapping requests can both pass the comparison and remain last-write-wins. The atomic conflict behavior remains open.
+The lifecycle service owns the rest: per-space installation, reading persisted values, enable/disable, startup migration, and upgrades. Settings responses carry the logical workflow version, and settings patches return HTTP 409 when a fresh read shows that version was already stale. This is best-effort detection rather than an atomic write guard: overlapping requests can both pass the comparison and remain last-write-wins. The atomic conflict behavior remains open.
 
 Do not add runtime meaning for autonomy levels, execution identities, trigger/schedule fields, per-worker or per-skill toggles, or approval policy as part of registry hookup. Those contracts remain separately owned and should be implemented only after their requirements settle.
 

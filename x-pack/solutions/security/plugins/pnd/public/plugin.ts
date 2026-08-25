@@ -14,14 +14,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import {
-  API_VERSIONS,
-  PND_APP_ID,
-  PND_APP_PATH,
-  PND_FEATURE_ID,
-  PND_PLUGIN_NAME,
-  PND_SPACE_ENABLEMENT_SYNC_URL,
-} from '@kbn/pnd-common';
+import { PND_APP_ID, PND_APP_PATH, PND_PLUGIN_NAME } from '@kbn/pnd-common';
 import { getPndDeepLinks } from './deep_links';
 import type {
   PndClientConfig,
@@ -77,23 +70,7 @@ export class PndPublicPlugin
     return {};
   }
 
-  public start(core: CoreStart, _startDeps: PndStartDependencies): PndPublicStart {
-    if (!this.config.enabled) {
-      return {};
-    }
-
-    const capabilities = core.application.capabilities[PND_FEATURE_ID];
-    if (capabilities?.write === true) {
-      Promise.resolve(
-        core.http.post(PND_SPACE_ENABLEMENT_SYNC_URL, { version: API_VERSIONS.internal.v1 })
-      ).catch((error) => {
-        core.notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.pnd.spaceEnablementSyncErrorMessage', {
-            defaultMessage: 'Unable to synchronize PND watches in this space',
-          }),
-        });
-      });
-    }
+  public start(_core: CoreStart, _startDeps: PndStartDependencies): PndPublicStart {
     return {};
   }
 

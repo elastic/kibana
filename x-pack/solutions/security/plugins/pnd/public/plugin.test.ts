@@ -40,34 +40,4 @@ describe('PndPublicPlugin feature-flag gating', () => {
       expect.objectContaining({ id: 'pnd', appRoute: '/app/pnd' })
     );
   });
-
-  it('synchronizes space enablement for users with PND write access', () => {
-    const plugin = new PndPublicPlugin(createContext(createConfig({ enabled: true })));
-    const coreStart = coreMock.createStart();
-    const capabilities = coreStart.application.capabilities as Record<
-      string,
-      Record<string, boolean>
-    >;
-    capabilities.pnd = { show: true, write: true };
-
-    plugin.start(coreStart, {} as never);
-
-    expect(coreStart.http.post).toHaveBeenCalledWith('/internal/pnd/watches/_sync_enablement', {
-      version: '1',
-    });
-  });
-
-  it('does not synchronize space enablement when the plugin is disabled', () => {
-    const plugin = new PndPublicPlugin(createContext(createConfig({ enabled: false })));
-    const coreStart = coreMock.createStart();
-    const capabilities = coreStart.application.capabilities as Record<
-      string,
-      Record<string, boolean>
-    >;
-    capabilities.pnd = { show: true, write: true };
-
-    plugin.start(coreStart, {} as never);
-
-    expect(coreStart.http.post).not.toHaveBeenCalled();
-  });
 });

@@ -24,7 +24,6 @@ import {
   type WorkflowListItemDto,
 } from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import { isWorkflowConflictError } from '@kbn/workflows-yaml';
 import {
   WATCH_TAG,
   compareWatchesForDisplay,
@@ -160,66 +159,6 @@ export class WatchesService {
       throw new Error('Managed Workflows API is not available');
     }
     return managedWorkflows;
-  }
-
-  async synchronizeSpaceEnabled(
-    enabled: boolean,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<void> {
-    const managedWorkflows = await this.requireManagedWorkflows();
-    const management = this.requireManagement();
-
-    const failures: string[] = [];
-    for (const registration of watchRegistry.list()) {
-      try {
-        const status = await managedWorkflows.getWorkflowStatus(registration.id, {
-          spaceId,
-          workflowIdSuffix: spaceId,
-        });
-
-        if (enabled) {
-          if (!status.installed) {
-            await installRegisteredWatch(managedWorkflows, registration, {
-              spaceId,
-              workflowIdSuffix: spaceId,
-              ...(registration.settings
-                ? { values: registration.settings.createDefaultValues() }
-                : {}),
-            });
-          }
-          continue;
-        }
-
-        if (!status.installed) continue;
-        if (status.enabled) {
-          await management.updateWorkflow(status.workflowId, { enabled: false }, spaceId, request);
-        }
-        await management.cancelAllActiveWorkflowExecutions(status.workflowId, spaceId, request);
-        await managedWorkflows.uninstall(registration.id, {
-          spaceId,
-          workflowId: status.workflowId,
-        });
-      } catch (error) {
-        if (error instanceof Error && isWorkflowConflictError(error)) {
-          this.logger.info(
-            `PND watch "${registration.id}" in space "${spaceId}" is still draining; retry next sync`
-          );
-          continue;
-        }
-        const message = error instanceof Error ? error.message : String(error);
-        failures.push(`${registration.id}: ${message}`);
-        this.logger.warn(
-          `Failed to synchronize PND watch "${registration.id}" in space "${spaceId}": ${message}`
-        );
-      }
-    }
-
-    if (failures.length > 0) {
-      throw new Error(
-        `Failed to synchronize ${failures.length} PND watch(es): ${failures.join('; ')}`
-      );
-    }
   }
 
   /* ---------------------------------------------------------------------- */

@@ -13,5 +13,5 @@ export const PAGE_TITLE = i18n.translate('xpack.pnd.settings.pageTitle', {
 
 export const WATCH_ENABLEMENT_NOTE = i18n.translate('xpack.pnd.settings.watchEnablementNote', {
   defaultMessage:
-    'Enable Watches for this space with pnd:watchesEnabled in Advanced Settings. Reload the page after changing it.',
+    'Enable or configure each watch from its own page. There is no space-level switch.',
 });

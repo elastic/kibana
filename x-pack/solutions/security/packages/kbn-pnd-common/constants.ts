@@ -17,7 +17,6 @@ export const PND_INTERNAL_URL = '/internal/pnd' as const;
 
 export const PND_WATCHES_URL = `${PND_INTERNAL_URL}/watches` as const;
 export const PND_WATCH_URL_TEMPLATE = `${PND_WATCHES_URL}/{watchId}` as const;
-export const PND_SPACE_ENABLEMENT_SYNC_URL = `${PND_WATCHES_URL}/_sync_enablement` as const;
 
 export const buildWatchUrl = (watchId: string) =>
   `${PND_WATCHES_URL}/${encodeURIComponent(watchId)}`;

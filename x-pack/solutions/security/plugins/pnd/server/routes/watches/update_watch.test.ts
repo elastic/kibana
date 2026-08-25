@@ -24,43 +24,11 @@ const registerHandler = () => {
   return { handler: addVersion.mock.calls[0][1], update };
 };
 
-const createContext = (spaceEnabled: boolean) => ({
-  core: Promise.resolve({
-    uiSettings: { client: { get: jest.fn().mockResolvedValue(spaceEnabled) } },
-  }),
+const createContext = () => ({
+  core: Promise.resolve({}),
 });
 
 describe('update watch route', () => {
-  it('returns 403 without writing when PND watches are disabled in the space', async () => {
-    const { handler, update } = registerHandler();
-    const request = httpServerMock.createKibanaRequest({
-      params: { watchId: 'system-security-watch-floor' },
-      body: { autonomyLevel: 'assisted', settingsRevision: null },
-    });
-    const response = httpServerMock.createResponseFactory();
-
-    await handler(createContext(false), request, response);
-
-    expect(response.forbidden).toHaveBeenCalled();
-    expect(update).not.toHaveBeenCalled();
-  });
-
-  it('still disables a leftover watch when PND watches are disabled in the space', async () => {
-    const { handler, update } = registerHandler();
-    update.mockResolvedValue({ outcome: 'updated', response: {} });
-    const request = httpServerMock.createKibanaRequest({
-      params: { watchId: 'system-security-watch-floor' },
-      body: { enabled: false },
-    });
-    const response = httpServerMock.createResponseFactory();
-
-    await handler(createContext(false), request, response);
-
-    expect(update).toHaveBeenCalled();
-    expect(response.ok).toHaveBeenCalled();
-    expect(response.forbidden).not.toHaveBeenCalled();
-  });
-
   it.each([
     [{ outcome: 'conflict' }, 'conflict'],
     [{ outcome: 'rejected', what: 'an unsupported setting' }, 'badRequest'],
@@ -73,7 +41,7 @@ describe('update watch route', () => {
     });
     const response = httpServerMock.createResponseFactory();
 
-    await handler(createContext(true), request, response);
+    await handler(createContext(), request, response);
 
     expect(response[responseMethod]).toHaveBeenCalled();
   });

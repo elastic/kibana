@@ -136,5 +136,3 @@ paths:
           description: The settings changed before this request began applying its patch
         '400':
           description: The settings patch is unsupported or omitted its revision
-        '403':
-          description: PND watches are disabled in this space

@@ -998,12 +998,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
         'Enables integration-specific entity enrichment in the Security graph (actor sub-type, target identity, display names).',
     },
   },
-  'pnd:watchesEnabled': {
-    type: 'boolean',
-    _meta: {
-      description: 'Installs built-in PND watches in the current space.',
-    },
-  },
   'elasticRamen:enabled': {
     type: 'boolean',
     _meta: {
