@@ -7,6 +7,7 @@
 
 import { useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
+import type { IToasts } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -33,20 +34,35 @@ export const retryOnTransientError = (failureCount: number, error: unknown): boo
   return true;
 };
 
-const getWatchUpdateErrorTitle = (status: number | undefined): string => {
+const WATCH_SETTINGS_CONFLICT_MESSAGE = i18n.translate(
+  'xpack.pnd.watchSettingsConflictErrorMessage',
+  { defaultMessage: 'Watch settings changed; reload and try again' }
+);
+
+const WATCH_SETTINGS_FORBIDDEN_MESSAGE = i18n.translate(
+  'xpack.pnd.watchSettingsForbiddenErrorMessage',
+  { defaultMessage: 'You do not have permission to update this watch' }
+);
+
+const WATCH_UPDATE_ERROR_TITLE = i18n.translate('xpack.pnd.watchUpdateErrorMessage', {
+  defaultMessage: 'Unable to update the watch',
+});
+
+/**
+ * 409/403 are expected outcomes — warning/danger without a stack. Everything else is addError.
+ */
+export const notifyWatchUpdateError = (toasts: IToasts, error: unknown): void => {
+  const status = isHttpFetchError(error) ? error.response?.status : undefined;
   if (status === 409) {
-    return i18n.translate('xpack.pnd.watchSettingsConflictErrorMessage', {
-      defaultMessage: 'Watch settings changed; reload and try again',
-    });
+    toasts.addWarning(WATCH_SETTINGS_CONFLICT_MESSAGE);
+    return;
   }
   if (status === 403) {
-    return i18n.translate('xpack.pnd.watchSettingsForbiddenErrorMessage', {
-      defaultMessage: 'You do not have permission to update this watch',
-    });
+    toasts.addDanger(WATCH_SETTINGS_FORBIDDEN_MESSAGE);
+    return;
   }
-  return i18n.translate('xpack.pnd.watchUpdateErrorMessage', {
-    defaultMessage: 'Unable to update the watch',
-  });
+  const cause = error instanceof Error ? error : new Error(String(error));
+  toasts.addError(cause, { title: WATCH_UPDATE_ERROR_TITLE });
 };
 
 export const useWatches = () => {
@@ -129,9 +145,7 @@ export const useUpdateWatch = (watchId: string) => {
       if (context?.previous) {
         queryClient.setQueryData(queryKey, context.previous);
       }
-      const status = isHttpFetchError(error) ? error.response?.status : undefined;
-      const cause = error instanceof Error ? error : new Error(String(error));
-      services.notifications!.toasts.addError(cause, { title: getWatchUpdateErrorTitle(status) });
+      notifyWatchUpdateError(services.notifications!.toasts, error);
     },
     onSuccess: (data) => {
       queryClient.setQueryData(queryKey, data);
