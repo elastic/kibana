@@ -160,6 +160,78 @@ describe('executeRuleOperations', () => {
       );
     });
 
+    it('uses an explicit time_field override when provided', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'cpu', type: 'double' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: { '@timestamp': { date: {} }, 'event.ingested': { date: {} } },
+      } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | STATS avg(cpu)' },
+          },
+          time_field: 'event.ingested',
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops, esClient);
+
+      expect(result.data.time_field).toBe('event.ingested');
+    });
+
+    it('throws when an explicit time_field does not exist on the index', async () => {
+      const esClient = createMockEsClient();
+      esClient.asCurrentUser.esql.query.mockResolvedValueOnce({
+        columns: [{ name: 'cpu', type: 'double' }],
+        values: [],
+      } as never);
+      esClient.asCurrentUser.fieldCaps.mockResolvedValueOnce({
+        fields: { '@timestamp': { date: {} } },
+      } as never);
+
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | STATS avg(cpu)' },
+          },
+          time_field: 'nonexistent_field',
+        },
+      ];
+
+      await expect(executeRuleOperations({}, ops, esClient)).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations({}, ops, esClient)).rejects.toThrow(
+        /The specified time_field "nonexistent_field" does not exist/
+      );
+    });
+
+    it('applies explicit time_field without ES client (no validation)', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | STATS avg(cpu)' },
+          },
+          time_field: 'event.ingested',
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.time_field).toBe('event.ingested');
+    });
+
     it('keeps the existing time field when it cannot be looked up but one is already set', async () => {
       const esClient = createMockEsClient();
       esClient.asCurrentUser.esql.query.mockResolvedValue({

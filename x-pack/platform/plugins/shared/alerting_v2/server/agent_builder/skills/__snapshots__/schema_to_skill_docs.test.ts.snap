@@ -360,6 +360,7 @@ Use \`set_query\` to define the ES|QL condition that should fire the rule. Optio
 |---|---|---|---|
 | \`operation\` | \\"set_query\\" | required |  |
 | \`query\` | { format: \\"composed\\", ... } \\\\| { format: \\"standalone\\", ... } | required | Detection query configuration. |
+| \`time_field\` | string | optional | Override the date field used for the lookback window range filter. Auto-detected from the index when omitted; set explicitly only when the index has multiple date fields and the auto-detected one is wrong. (min length: 1, max length: 128) |
 | \`recovery_strategy\` | \\"no_breach\\" \\\\| \\"query\\" \\\\| \\"none\\" | optional |  |
 | \`no_data_strategy\` | \\"last_known_status\\" \\\\| \\"emit\\" \\\\| \\"recover\\" \\\\| \\"none\\" | optional |  |
 
