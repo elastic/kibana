@@ -50,6 +50,7 @@ interface ResolvedExecutionOptions {
   callback: { url: string } | undefined;
   executionId: string | undefined;
   metadata: Record<string, string> | undefined;
+  abortSignal?: AbortSignal;
 }
 
 export const promptResponseEntrySchema = schema.oneOf([
@@ -484,6 +485,14 @@ export function registerChatRoutes({
     };
   };
 
+  const getClientAbortSignal = (request: KibanaRequest): AbortSignal => {
+    const abortController = new AbortController();
+    request.events.aborted$.subscribe(() => {
+      abortController.abort();
+    });
+    return abortController.signal;
+  };
+
   const executeAgent = async ({
     payload,
     request,
@@ -511,7 +520,7 @@ export function registerChatRoutes({
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
-    const { useTaskManager, origin, callback, executionId, metadata } =
+    const { useTaskManager, origin, callback, executionId, metadata, abortSignal } =
       executionOptions ?? defaultExecutionOptions(payload);
 
     return executionService.executeAgent({
@@ -520,6 +529,7 @@ export function registerChatRoutes({
       executionId,
       metadata,
       useTaskManager,
+      abortSignal,
       params: {
         agentId,
         connectorId,
@@ -584,6 +594,10 @@ export function registerChatRoutes({
           payload,
           request,
           executionService,
+          executionOptions: {
+            ...defaultExecutionOptions(payload),
+            abortSignal: getClientAbortSignal(request),
+          },
         });
 
         const events = await firstValueFrom(chatEvents$.pipe(toArray()));
@@ -630,15 +644,15 @@ export function registerChatRoutes({
         await validateConfigurationOverrides({ payload, request });
         validateAction(payload);
 
-        const abortController = new AbortController();
-        request.events.aborted$.subscribe(() => {
-          abortController.abort();
-        });
-
+        const abortSignal = getClientAbortSignal(request);
         const { events$: chatEvents$ } = await executeAgent({
           payload,
           request,
           executionService,
+          executionOptions: {
+            ...defaultExecutionOptions(payload),
+            abortSignal,
+          },
         });
 
         return response.ok({
@@ -646,7 +660,7 @@ export function registerChatRoutes({
           body: observableIntoEventSourceStream(
             chatEvents$ as unknown as Observable<ServerSentEvent>,
             {
-              signal: abortController.signal,
+              signal: abortSignal,
               flushThrottleMs: 100,
               flushMinBytes: cloud?.isCloudEnabled ? cloudProxyBufferSize : undefined,
               logger,
