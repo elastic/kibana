@@ -121,7 +121,7 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
 
         <EuiSpacer size="l" />
 
-        <KiListBody kis={kis} isLoading={isLoading} error={error} />
+        <KiListBody aiIndexId={aiIndexId} kis={kis} isLoading={isLoading} error={error} />
 
         <KiListFooter
           loadedCount={kis.length}

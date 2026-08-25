@@ -15,6 +15,7 @@ import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   aiIndexByIdPath,
+  aiIndexKiByIdPath,
   aiIndexKiListPath,
   aiIndexPath,
 } from '../../common/constants';
@@ -25,6 +26,7 @@ import {
   AiIndexConflictError,
   AiIndexNotFoundError,
   AiIndexAlreadyExistsError,
+  KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 
@@ -175,10 +177,11 @@ describe('ai indices routes', () => {
     await callRoute('PUT', aiIndexByIdPath, { params: { aiIndexId: 'a' }, body: {} });
     await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
     await callRoute('GET', aiIndexKiListPath, { params: { aiIndexId: 'a' } });
+    await callRoute('GET', aiIndexKiByIdPath, { params: { aiIndexId: 'a', kiId: 'ki-1' } });
     await callRoute('GET', aiIndexPath, {});
     await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
 
-    expect(response.notFound).toHaveBeenCalledTimes(6);
+    expect(response.notFound).toHaveBeenCalledTimes(7);
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
     expect(aiIndexService.get).not.toHaveBeenCalled();
@@ -200,6 +203,10 @@ describe('ai indices routes', () => {
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
     expect(getRoute('GET', aiIndexKiListPath).config).toMatchObject({
+      access: 'internal',
+      security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
+    });
+    expect(getRoute('GET', aiIndexKiByIdPath).config).toMatchObject({
       access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
@@ -562,6 +569,71 @@ describe('ai indices routes', () => {
           kis: [],
         },
       });
+    });
+  });
+
+  describe('GET /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}', () => {
+    it('returns the stored Knowledge Indicator document', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esSearch.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'ki-1',
+              _source: {
+                type: 'playbook',
+                title: 'Refund playbook',
+                content: 'Verify the order first.',
+              },
+            },
+          ],
+        },
+      });
+
+      await callRoute('GET', aiIndexKiByIdPath, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+      });
+
+      expect(esSearch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: aiIndexItem.dest.value,
+          query: { ids: { values: ['ki-1'] } },
+          size: 1,
+        })
+      );
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          id: 'ki-1',
+          document: {
+            type: 'playbook',
+            title: 'Refund playbook',
+            content: 'Verify the order first.',
+          },
+        },
+      });
+    });
+
+    it('returns 404 when the KI does not exist', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esSearch.mockResolvedValue({ hits: { hits: [] } });
+
+      await callRoute('GET', aiIndexKiByIdPath, {
+        params: { aiIndexId: 'customer_support', kiId: 'missing' },
+      });
+
+      expect(response.notFound).toHaveBeenCalledWith({
+        body: { message: new KiNotFoundError('customer_support', 'missing').message },
+      });
+    });
+
+    it('returns 404 when the AI index does not exist', async () => {
+      aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+      await callRoute('GET', aiIndexKiByIdPath, {
+        params: { aiIndexId: 'missing', kiId: 'ki-1' },
+      });
+
+      expect(response.notFound).toHaveBeenCalled();
     });
   });
 

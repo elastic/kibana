@@ -24,3 +24,15 @@ export interface ListKisResponse {
   total: number;
   summary: KiListSummary;
 }
+
+export type KiJsonPrimitive = string | number | boolean | null;
+export type KiJsonValue = KiJsonPrimitive | KiJsonValue[] | { [key: string]: KiJsonValue };
+
+export interface KiDocument {
+  [key: string]: KiJsonValue;
+}
+
+export interface GetKiResponse {
+  id: string;
+  document: KiDocument;
+}

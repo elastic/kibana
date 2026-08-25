@@ -12,6 +12,7 @@ import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types'
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { DEFAULT_KI_PAGE_SIZE, MAX_KI_PAGE_SIZE } from '../../../../common/constants';
@@ -67,10 +68,14 @@ const renderWithProviders = (ui: React.ReactElement, options: RenderOptions = {}
     return undefined;
   });
 
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
   return render(
     <I18nProvider>
       <EuiProvider>
-        <KibanaContextProvider services={services}>{ui}</KibanaContextProvider>
+        <KibanaContextProvider services={services}>
+          <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+        </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );

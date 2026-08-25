@@ -11,6 +11,7 @@ export const internalApiPath = '/internal/context_engine';
 export const aiIndexPath = `${publicApiPath}/ai_index`;
 export const aiIndexByIdPath = `${aiIndexPath}/{aiIndexId}`;
 export const aiIndexKiListPath = `${internalApiPath}/ai_index/{aiIndexId}/kis`;
+export const aiIndexKiByIdPath = `${aiIndexKiListPath}/{kiId}`;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;

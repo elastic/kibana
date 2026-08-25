@@ -18,12 +18,13 @@ import type { KiListItem } from '../../../../common/http_api/knowledge_indicator
 import { KiRow } from './ki_row';
 
 interface KiListBodyProps {
+  aiIndexId: string;
   kis: KiListItem[];
   isLoading: boolean;
   error?: Error;
 }
 
-export const KiListBody = ({ kis, isLoading, error }: KiListBodyProps) => {
+export const KiListBody = ({ aiIndexId, kis, isLoading, error }: KiListBodyProps) => {
   if (isLoading && kis.length === 0) {
     return <EuiSkeletonText lines={4} data-test-subj="contextKiListLoading" />;
   }
@@ -68,7 +69,7 @@ export const KiListBody = ({ kis, isLoading, error }: KiListBodyProps) => {
       {kis.map((ki, index) => (
         <React.Fragment key={ki.id}>
           <div role="listitem">
-            <KiRow ki={ki} />
+            <KiRow aiIndexId={aiIndexId} ki={ki} />
           </div>
           {index < kis.length - 1 && <EuiHorizontalRule margin="none" />}
         </React.Fragment>

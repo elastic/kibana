@@ -22,6 +22,7 @@ import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDICES,
   aiIndexByIdPath,
+  aiIndexKiByIdPath,
   aiIndexKiListPath,
   aiIndexPath,
   DEFAULT_KI_PAGE_SIZE,
@@ -35,7 +36,8 @@ import type {
   ListAiIndexResponse,
   PutAiIndexResponse,
 } from '../../common/http_api/ai_indices';
-import type { ListKisResponse } from '../../common/http_api/knowledge_indicators';
+import type { GetKiResponse, ListKisResponse } from '../../common/http_api/knowledge_indicators';
+import { MAX_KI_ID_LENGTH } from '../../common/step_types/ki';
 import { apiPrivileges } from '../../common/features';
 import { validateAiIndexId } from '../../common/validation';
 import {
@@ -45,8 +47,10 @@ import {
   AiIndexNotFoundError,
   AiIndexAlreadyExistsError,
   InvalidConnectorSourceError,
+  KiNotFoundError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
@@ -69,6 +73,15 @@ const aiIndexIdSchema = schema.string({
 
 const aiIndexIdParamsSchema = schema.object({
   aiIndexId: aiIndexIdSchema,
+});
+
+const kiIdParamsSchema = schema.object({
+  aiIndexId: aiIndexIdSchema,
+  kiId: schema.string({
+    minLength: 1,
+    maxLength: MAX_KI_ID_LENGTH,
+    meta: { description: 'The document id of the Knowledge Indicator.' },
+  }),
 });
 
 const aiIndexPropertiesSchema = {
@@ -160,7 +173,7 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
   if (error instanceof InvalidAiIndexDestError || error instanceof InvalidConnectorSourceError) {
     return response.badRequest({ body: { message: error.message } });
   }
-  if (error instanceof AiIndexNotFoundError) {
+  if (error instanceof AiIndexNotFoundError || error instanceof KiNotFoundError) {
     return response.notFound({ body: { message: error.message } });
   }
   if (
@@ -381,6 +394,46 @@ export const registerAiIndexRoutes = ({
         } catch (error) {
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.LIST, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response);
+        }
+      })
+    );
+
+  router.versioned
+    .get({
+      path: aiIndexKiByIdPath,
+      security: READ_SECURITY,
+      access: 'internal',
+      summary: 'Get a Knowledge Indicator',
+      description:
+        'Returns the stored Knowledge Indicator document from the AI index destination backing store.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: kiIdParamsSchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId, kiId } = request.params;
+        try {
+          const aiIndex = await getAiIndexService().get(aiIndexId);
+          const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+          const body: GetKiResponse = await getKi(esClient, {
+            aiIndexId,
+            destValue: aiIndex.dest.value,
+            kiId,
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId }));
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
           );
           return handleAiIndexError(error, response);
         }
