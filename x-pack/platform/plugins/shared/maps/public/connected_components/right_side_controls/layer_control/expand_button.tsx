@@ -29,7 +29,7 @@ export function ExpandButton({ hasErrorsOrWarnings, isLoading, onClick }: Props)
       })}
       className="mapLayerControl__openLayerTOCButton"
       css={css`
-        background-color: ${euiTheme.colors.emptyShade} !important;
+        background-color: ${euiTheme.colors.backgroundBasePlain} !important;
         ${euiShadow(euiThemeContext, 'm')}
       `}
       color="text"

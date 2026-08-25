@@ -131,7 +131,7 @@ function MapControlsThemeStyles() {
             backgroundColor: euiTheme.colors.backgroundBaseSubdued,
           },
           '.mapWidgetOverlay .mapTocEntry-isDraggingOver': {
-            backgroundColor: euiTheme.colors.emptyShade,
+            backgroundColor: euiTheme.colors.backgroundBasePlain,
           },
           '.mapWidgetOverlay .mapTocEntry-isCombineLayer': {
             backgroundColor: euiTheme.colors.backgroundBaseSuccess,
@@ -146,10 +146,10 @@ function MapControlsThemeStyles() {
             backgroundColor: `${euiTheme.colors.lightShade} !important`,
           },
           '.mapWidgetOverlay .mapLayerToc-droppable-isCombining': {
-            backgroundColor: `${euiTheme.colors.emptyShade} !important`,
+            backgroundColor: `${euiTheme.colors.backgroundBasePlain} !important`,
           },
           '.mapWidgetOverlay .mapTocEntry__detailsToggleButton': {
-            backgroundColor: euiTheme.colors.emptyShade,
+            backgroundColor: euiTheme.colors.backgroundBasePlain,
             borderColor: euiTheme.border.color,
             color: euiTheme.colors.textParagraph,
           },
