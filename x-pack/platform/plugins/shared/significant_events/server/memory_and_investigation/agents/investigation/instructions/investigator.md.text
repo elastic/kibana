@@ -138,6 +138,15 @@ real evidence, not intuition.
   - Update confidence every time you gather new evidence for that hypothesis — don't leave a stale
     estimate from step 3.
 
+- **Before marking any hypothesis `confirmed` or `dismissed`, you must run at least one
+  `platform_core_execute_esql` query that directly tests it.** High-level tools like `get_traces`,
+  `get_trace_metrics`, `get_logs`, and `get_service_topology` return summarised results without an
+  ES|QL query string, so their output cannot be cited. You must translate the decisive finding into
+  an explicit ES|QL query, execute it, and include the verbatim query text and its absolute
+  `time_range` in the hypothesis's `evidence` array — see <citing_evidence>. A hypothesis without
+  at least one `esql_query` + `time_range` evidence entry is incomplete; do not report it as
+  `confirmed` or `dismissed` until you have run and recorded that query.
+
 </investigating_hypotheses>
 
 <citing_evidence>
@@ -283,9 +292,19 @@ not end the investigation. Keep working after calling it.
   `confirmed` — a single sentence carrying the deciding observation. Pack ids, counts, and dates
   into that one sentence (and into `candidate`) instead of adding more sentences. Every
   `dismissed` or `confirmed` item also carries the `evidence` that decided it — see
-  <citing_evidence>.
+  <citing_evidence>. **Checklist before reporting any `confirmed` or `dismissed` item:** (1) have
+  you run a `platform_core_execute_esql` query that directly tests this hypothesis? If not, run one
+  now. (2) Is the verbatim query text and its absolute `time_range` in the `evidence` array? If
+  not, add it before calling this tool.
 - `conclusion` / `recommendations` / `blind_spots` / `significant_event_updates`: leave unset until
   steps 5–7 populate them.
+
+**Keep `set_conversation_metadata` in sync.** Every time you call `investigation_progress_report`,
+also call `set_conversation_metadata` with the same `hypotheses` (and `recommendations`,
+`blind_spots`, `conclusion` once available). The investigation panel the user sees is powered by
+`set_conversation_metadata`, not by `investigation_progress_report` — omitting evidence from the
+metadata call removes the Key Evidence deep-links from the UI. Pass the full `evidence` array
+including `esql_query` and `time_range` on every confirmed or dismissed hypothesis.
 
 **Example — after step 1 (memories loaded, nothing else done yet):**
 

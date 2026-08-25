@@ -25,7 +25,11 @@ export const investigationTemplate: ConversationTemplate = {
     summary: { input_type: 'TEXT', description: 'Summary' },
     conclusion: { input_type: 'TEXT', description: 'Conclusion' },
     affected_services: { input_type: 'TEXT_ARRAY', description: 'Affected services' },
-    hypotheses: { input_type: 'OBJECT_ARRAY', description: 'Hypotheses investigated (each: candidate, confidence, status, reason?, evidence?)' },
+    hypotheses: {
+      input_type: 'OBJECT_ARRAY',
+      description:
+        'Hypotheses investigated. Required on every entry: candidate (string), confidence (0–1 float), status ("investigating" | "confirmed" | "dismissed"). Required on every confirmed or dismissed entry: reason (one sentence), evidence (array of objects — each MUST include description (string) plus esql_query (verbatim query text) and time_range ({ from: ISO string, to: ISO string }) when a query decided the verdict; these fields drive the Key Evidence deep-links visible to the user, so omitting them removes the links).',
+    },
     recommendations: { input_type: 'OBJECT_ARRAY', description: 'Remediation recommendations (each: title, description?, code?)' },
     blind_spots: { input_type: 'OBJECT_ARRAY', description: 'Known blind spots in the investigation (each: title, description)' },
     assigned_to: { input_type: 'USER', description: 'Assigned to' },
