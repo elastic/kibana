@@ -8,7 +8,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHeaderAlert, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHeaderAlert,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
@@ -66,9 +73,7 @@ export const NewsfeedSidebar = ({
                     </EuiLink>
                   }
                   date={item.publishOn.format('DD MMMM YYYY')}
-                  badge={
-                    item.badge ? <EuiBadge color="hollow">{item.badge}</EuiBadge> : undefined
-                  }
+                  badge={item.badge ? <EuiBadge color="hollow">{item.badge}</EuiBadge> : undefined}
                 />
               ))}
               {!isServerless && (

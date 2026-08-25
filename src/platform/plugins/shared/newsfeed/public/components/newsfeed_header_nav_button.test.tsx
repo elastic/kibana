@@ -60,15 +60,20 @@ const renderComponent = (fetchResult: FetchResult | null = createFetchResult()) 
 
   const result = render(
     <I18nProvider>
-      <NewsfeedNavButton
-        newsfeedApi={newsfeedApi}
-        isServerless={false}
-        sidebar={sidebar}
-      />
+      <NewsfeedNavButton newsfeedApi={newsfeedApi} isServerless={false} sidebar={sidebar} />
     </I18nProvider>
   );
 
-  return { ...result, newsfeedApi, fetchResults$, markAsRead, sidebar, currentAppId$, openFn, closeFn };
+  return {
+    ...result,
+    newsfeedApi,
+    fetchResults$,
+    markAsRead,
+    sidebar,
+    currentAppId$,
+    openFn,
+    closeFn,
+  };
 };
 
 describe('NewsfeedNavButton', () => {
