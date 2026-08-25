@@ -39468,7 +39468,7 @@
     "xpack.searchInferenceEndpoints.eisModelsPage.header": "Elastic 推理服务",
     "xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton": "管理区域",
     "xpack.searchInferenceEndpoints.eisModelspage.noResults": "未找到任何模型",
-    "xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder": "搜索 Elastic Inference Service 模型……",
+    "xpack.searchInferenceEndpoints.eisModelsPage.searchPlaceholder": "搜索 Elastic Inference Service 模型……",
     "xpack.searchInferenceEndpoints.eisUtils.taskType.chatCompletion": "聊天补全",
     "xpack.searchInferenceEndpoints.eisUtils.taskType.completion": "完成",
     "xpack.searchInferenceEndpoints.eisUtils.taskType.embedding": "嵌入",

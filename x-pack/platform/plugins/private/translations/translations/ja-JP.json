@@ -39457,7 +39457,7 @@
     "xpack.searchInferenceEndpoints.eisModelsPage.header": "Elastic Inference Service",
     "xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton": "リージョンを管理",
     "xpack.searchInferenceEndpoints.eisModelspage.noResults": "モデルが見つかりませんでした",
-    "xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder": "Elastic Inference Serviceモデルを検索...",
+    "xpack.searchInferenceEndpoints.eisModelsPage.searchPlaceholder": "Elastic Inference Serviceモデルを検索...",
     "xpack.searchInferenceEndpoints.eisUtils.taskType.chatCompletion": "チャット完了",
     "xpack.searchInferenceEndpoints.eisUtils.taskType.completion": "完了",
     "xpack.searchInferenceEndpoints.eisUtils.taskType.embedding": "埋め込み",

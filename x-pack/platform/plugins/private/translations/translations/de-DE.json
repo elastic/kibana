@@ -39343,7 +39343,7 @@
     "xpack.searchInferenceEndpoints.eisModelsPage.header": "Elastic Inference Service",
     "xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton": "Regionen verwalten",
     "xpack.searchInferenceEndpoints.eisModelspage.noResults": "Keine Modelle gefunden",
-    "xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder": "Suche nach Elastic Inference Service-Modellen...",
+    "xpack.searchInferenceEndpoints.eisModelsPage.searchPlaceholder": "Suche nach Elastic Inference Service-Modellen...",
     "xpack.searchInferenceEndpoints.eisUtils.taskType.chatCompletion": "Chat-Vervollständigung",
     "xpack.searchInferenceEndpoints.eisUtils.taskType.completion": "Fertigstellung",
     "xpack.searchInferenceEndpoints.eisUtils.taskType.embedding": "Einbettung",
