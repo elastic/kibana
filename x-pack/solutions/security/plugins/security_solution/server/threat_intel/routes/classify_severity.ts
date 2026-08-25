@@ -26,11 +26,13 @@ const classifySeverityBodySchema = schema.object({
   categories: schema.maybe(
     schema.arrayOf(
       schema.string({
+        maxLength: 64,
         validate: (value) =>
           (THREAT_CATEGORIES as readonly string[]).includes(value)
             ? undefined
             : `must be one of: ${enumLiterals(THREAT_CATEGORIES)}`,
-      })
+      }),
+      { maxSize: THREAT_CATEGORIES.length }
     )
   ),
   ioc_count: schema.maybe(schema.number({ min: 0, max: 100_000 })),

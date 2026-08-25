@@ -26,6 +26,13 @@ describe('stripHtml', () => {
     expect(result).toBe('before after');
   });
 
+  it('drops script bodies whose end tag carries whitespace', () => {
+    const html = `<p>before</p><script>alert("xss")</script ><p>after</p>`;
+    const result = stripHtml(html);
+    expect(result).not.toContain('alert');
+    expect(result).toBe('before after');
+  });
+
   it('decodes the named entities feeds use most often', () => {
     const html = '<p>&copy;&nbsp;Acme &mdash; &ldquo;hello&rdquo;</p>';
     expect(stripHtml(html)).toBe('\u00a9 Acme \u2014 \u201chello\u201d');
@@ -136,6 +143,19 @@ describe('htmlToStructured', () => {
     expect(result).toContain('safe');
     expect(result).not.toContain('alert');
     expect(result).not.toContain('body{}');
+  });
+
+  it('strips script bodies whose end tag carries whitespace', () => {
+    const html = '<script>alert(1)</script ><p>safe</p>';
+    const result = htmlToStructured(html);
+    expect(result).toContain('safe');
+    expect(result).not.toContain('alert');
+  });
+
+  it('leaves no reassembled tag from nested angle brackets', () => {
+    const result = htmlToStructured('<scr<script>ipt>payload');
+    expect(result).not.toContain('<script');
+    expect(result).not.toContain('<scr');
   });
 
   it('decodes HTML entities in structured output', () => {

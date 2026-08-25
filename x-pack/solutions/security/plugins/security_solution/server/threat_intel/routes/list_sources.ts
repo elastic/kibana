@@ -304,6 +304,7 @@ const createSourceBodySchema = schema.object({
   id: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
   name: schema.string({ minLength: 1, maxLength: 256 }),
   adapter_type: schema.string({
+    maxLength: 64,
     validate: (value) =>
       ingestibleAdapterTypes.includes(value)
         ? undefined

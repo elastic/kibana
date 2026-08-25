@@ -28,6 +28,7 @@ const createThreatReportBodySchema = schema.object({
   source_url: schema.maybe(schema.uri()),
   severity: schema.maybe(
     schema.string({
+      maxLength: 32,
       validate: (value) =>
         (SEVERITY_LEVELS as readonly string[]).includes(value)
           ? undefined
