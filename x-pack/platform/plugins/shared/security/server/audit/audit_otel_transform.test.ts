@@ -47,6 +47,13 @@ describe('applyAuditOtelFieldMap', () => {
     );
   });
 
+  it('maps kibana.authentication_realm to user.domain', () => {
+    const result = applyAuditOtelFieldMap({ 'kibana.authentication_realm': 'cloud-saml-kibana' });
+
+    expect(result['user.domain']).toBe('cloud-saml-kibana');
+    expect(result).not.toHaveProperty('kibana.authentication_realm');
+  });
+
   it('passes user.email and user.full_name through unchanged', () => {
     const result = applyAuditOtelFieldMap({
       'user.name': 'jdoe',
@@ -107,7 +114,6 @@ describe('applyAuditOtelFieldMap', () => {
     const result = applyAuditOtelFieldMap({
       'kibana.lookup_realm': 'cloud-saml-kibana',
       'kibana.authentication_provider': 'cloud-saml-kibana',
-      'kibana.authentication_realm': 'cloud-saml-kibana',
       'log.logger': 'plugins.security.audit.ecs',
       'service.id': '5b2de169-2785-441b-ae8c-186a1936b17d',
       'service.node.roles': ['ui'],
@@ -119,7 +125,6 @@ describe('applyAuditOtelFieldMap', () => {
     for (const key of [
       'kibana.lookup_realm',
       'kibana.authentication_provider',
-      'kibana.authentication_realm',
       'log.logger',
       'service.id',
       'service.node.roles',
@@ -199,6 +204,7 @@ describe('applyAuditOtelFieldMap', () => {
       'source.address': '3.3.3.3',
       'source.ip': '3.3.3.3',
       'url.original': 'http://localhost/api/status',
+      'user.domain': 'cloud-saml-kibana',
       'user.id': 'jdoe',
       'user.name': 'jdoe',
     });
