@@ -27,7 +27,6 @@ export {
   appendStatsByToQuery,
   appendLimitToQuery,
   buildMetricsInfoQuery,
-  type BuildMetricsInfoQueryOptions,
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
   getESQLResults,

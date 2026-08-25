@@ -14,7 +14,7 @@ import { appendToESQLQuery } from './utils';
 
 const METRICS_INFO_SUFFIX = ' | METRICS_INFO';
 
-export interface BuildMetricsInfoQueryOptions {
+interface BuildMetricsInfoQueryOptions {
   postFilter?: string;
 }
 
