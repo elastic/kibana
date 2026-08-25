@@ -34,6 +34,7 @@ describe('PreviewResultsStep', () => {
       </EuiProvider>
     );
 
+    expect(screen.getByText('Preview results (optional)')).toBeInTheDocument();
     expect(screen.getByTestId('datasetWizardPreviewResultsButton')).toBeInTheDocument();
     expect(screen.queryByTestId('datasetWizardPreviewResultsRefreshButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('datasetWizardTestConfigurationTable')).not.toBeInTheDocument();

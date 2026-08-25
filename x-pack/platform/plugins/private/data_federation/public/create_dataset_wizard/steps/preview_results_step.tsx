@@ -56,7 +56,7 @@ export const PreviewResultsStep: FunctionComponent<PreviewResultsStepProps> = ({
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
-            <h3>{datasetWizardStrings.stepPreviewResults()}</h3>
+            <h3>{datasetWizardStrings.previewResultsTitle()}</h3>
           </EuiTitle>
         </EuiFlexItem>
         {hasPreview ? (

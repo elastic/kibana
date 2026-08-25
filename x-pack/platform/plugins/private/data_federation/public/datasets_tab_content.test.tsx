@@ -52,6 +52,10 @@ jest.mock('./datasets_table', () => ({
           onClick={() => (props.onDataSourceFilterChange as any)(['missing'])}
         />
         <button
+          data-test-subj="mockEditFirst"
+          onClick={() => (props.onEdit as any)(filteredItems[0])}
+        />
+        <button
           data-test-subj="mockCloneFirst"
           onClick={() => (props.onClone as any)(filteredItems[0])}
         />
@@ -205,6 +209,19 @@ describe('DatasetsTabContent', () => {
     fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
 
     expect(mockHistoryPush).toHaveBeenCalledWith('/create?flow=flow_1');
+  });
+
+  it('navigates to edit wizard in flow 3 when edit is clicked', async () => {
+    await renderComponent({
+      dataSources: [createDataSource('ds1')],
+      dataSets: [createDataSet({ name: 'set1', dataSource: 'ds1' })],
+      datasetsClient: { add: jest.fn(), delete: jest.fn() },
+      loadDataSets: jest.fn().mockResolvedValue(undefined),
+    });
+
+    fireEvent.click(document.querySelector('[data-test-subj="mockEditFirst"]') as Element);
+
+    expect(mockHistoryPush).toHaveBeenCalledWith('/edit/set1?flow=flow_3');
   });
 
   it('navigates to clone wizard when clone is clicked', async () => {

@@ -130,6 +130,7 @@ const DatasetsTableActionsCell: FunctionComponent<DatasetsTableActionsCellProps>
               <EuiContextMenuItem
                 key="delete"
                 icon="trash"
+                color="danger"
                 data-test-subj="dataSetsSetsDeleteIconButton"
                 onClick={() => {
                   closePopover();

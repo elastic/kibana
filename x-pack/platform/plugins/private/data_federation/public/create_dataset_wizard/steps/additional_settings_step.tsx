@@ -257,8 +257,8 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
-            color="warning"
-            iconType="alert"
+            color="primary"
+            iconType="info"
             size="s"
             title={datasetWizardStrings.dataSourceSetupWarningTitle()}
             data-test-subj="datasetWizardDataSourceSetupWarning"

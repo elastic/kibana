@@ -369,6 +369,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Schema mappings (optional)',
     }),
 
+  previewResultsTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.previewResultsTitle', {
+      defaultMessage: 'Preview results (optional)',
+    }),
+
   schemaMappingsDescription: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingsDescription', {
       defaultMessage: 'Optional definition of how documents should be indexed',

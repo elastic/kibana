@@ -50,12 +50,20 @@ export const buildCreateDatasetWizardPath = (flowVariant: DatasetWizardFlowVaria
   return `/create?${params.toString()}`;
 };
 
-export const resolveWizardFlowVariant = (search: string): DatasetWizardFlowVariant =>
-  parseWizardFlowVariantFromSearch(search) ?? DATASET_WIZARD_FLOW_VARIANT_1;
+export const resolveWizardFlowVariant = (
+  search: string,
+  defaultFlow: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
+): DatasetWizardFlowVariant => parseWizardFlowVariantFromSearch(search) ?? defaultFlow;
 
-export const buildCloneDatasetWizardPath = (datasetName: string): string => {
+const buildNamedDatasetWizardPath = (action: 'edit' | 'clone', datasetName: string): string => {
   const params = new URLSearchParams();
   params.set(DATASET_WIZARD_FLOW_VARIANT_SEARCH_PARAM, DATASET_WIZARD_FLOW_VARIANT_3);
 
-  return `/clone/${encodeURIComponent(datasetName)}?${params.toString()}`;
+  return `/${action}/${encodeURIComponent(datasetName)}?${params.toString()}`;
 };
+
+export const buildEditDatasetWizardPath = (datasetName: string): string =>
+  buildNamedDatasetWizardPath('edit', datasetName);
+
+export const buildCloneDatasetWizardPath = (datasetName: string): string =>
+  buildNamedDatasetWizardPath('clone', datasetName);

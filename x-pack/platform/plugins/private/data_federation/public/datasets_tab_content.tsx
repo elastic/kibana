@@ -16,6 +16,7 @@ import { ConfirmDeleteDataSetsModal } from './confirm_delete_data_sets_modal';
 import {
   buildCloneDatasetWizardPath,
   buildCreateDatasetWizardPath,
+  buildEditDatasetWizardPath,
 } from './create_dataset_wizard/dataset_wizard_flow_variant';
 import type { DatasetWizardFlowVariant } from './create_dataset_wizard/dataset_wizard_flow_variant';
 import { DatasetsTable, type DataSetListRow } from './datasets_table';
@@ -171,7 +172,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
 
   const handleEdit = useCallback(
     (item: DataSetListRow) => {
-      history.push(`/edit/${encodeURIComponent(item.name)}`);
+      history.push(buildEditDatasetWizardPath(item.name));
     },
     [history]
   );

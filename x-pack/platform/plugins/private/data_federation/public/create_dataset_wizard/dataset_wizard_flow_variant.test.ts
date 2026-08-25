@@ -8,6 +8,7 @@
 import {
   buildCloneDatasetWizardPath,
   buildCreateDatasetWizardPath,
+  buildEditDatasetWizardPath,
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
   DATASET_WIZARD_FLOW_VARIANT_3,
@@ -22,6 +23,7 @@ describe('dataset_wizard_flow_variant', () => {
     expect(buildCreateDatasetWizardPath(DATASET_WIZARD_FLOW_VARIANT_2)).toBe('/create?flow=flow_2');
     expect(buildCreateDatasetWizardPath(DATASET_WIZARD_FLOW_VARIANT_3)).toBe('/create?flow=flow_3');
     expect(buildCloneDatasetWizardPath('my-dataset')).toBe('/clone/my-dataset?flow=flow_3');
+    expect(buildEditDatasetWizardPath('my-dataset')).toBe('/edit/my-dataset?flow=flow_3');
   });
 
   it('parses valid flow variants from search params', () => {
@@ -47,6 +49,9 @@ describe('dataset_wizard_flow_variant', () => {
     expect(resolveWizardFlowVariant('?flow=unknown')).toBe(DATASET_WIZARD_FLOW_VARIANT_1);
     expect(resolveWizardFlowVariant('?flow=flow_2')).toBe(DATASET_WIZARD_FLOW_VARIANT_2);
     expect(resolveWizardFlowVariant('?flow=flow_3')).toBe(DATASET_WIZARD_FLOW_VARIANT_3);
+    expect(resolveWizardFlowVariant('', DATASET_WIZARD_FLOW_VARIANT_3)).toBe(
+      DATASET_WIZARD_FLOW_VARIANT_3
+    );
   });
 
   it('identifies flow 3', () => {

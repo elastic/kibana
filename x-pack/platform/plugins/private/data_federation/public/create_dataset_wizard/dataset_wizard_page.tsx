@@ -29,7 +29,11 @@ import {
   loadWizardFormDraft,
   mergeWizardFormValues,
 } from './dataset_wizard_form_persistence';
-import { resolveWizardFlowVariant } from './dataset_wizard_flow_variant';
+import {
+  DATASET_WIZARD_FLOW_VARIANT_1,
+  DATASET_WIZARD_FLOW_VARIANT_3,
+  resolveWizardFlowVariant,
+} from './dataset_wizard_flow_variant';
 
 const DATA_FEDERATION_MANAGEMENT_PATH = `/app/management/data/${PLUGIN_ID}`;
 
@@ -85,7 +89,16 @@ export const DatasetWizardPage: FunctionComponent = () => {
     return draft ? mergeWizardFormValues(base, draft) : base;
   }, [datasetName, existingDataSetNames, isCloneMode, isEditMode, sourceDataSet]);
 
-  const flowVariant = useMemo(() => resolveWizardFlowVariant(location.search), [location.search]);
+  const flowVariant = useMemo(
+    () =>
+      resolveWizardFlowVariant(
+        location.search,
+        isEditMode || isCloneMode
+          ? DATASET_WIZARD_FLOW_VARIANT_3
+          : DATASET_WIZARD_FLOW_VARIANT_1
+      ),
+    [isCloneMode, isEditMode, location.search]
+  );
 
   const pageTitle = isCloneMode
     ? datasetWizardStrings.clonePageTitle(datasetName ?? '')
