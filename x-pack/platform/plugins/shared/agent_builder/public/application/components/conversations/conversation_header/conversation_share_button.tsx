@@ -125,12 +125,11 @@ const profileToOption = (profile: UserProfileWithAvatar): UserOption => ({
 });
 
 const UserAccessRow: React.FC<{
-  name: string;
-  profile?: UserProfileWithAvatar;
+  profile: UserProfileWithAvatar;
   badge: string;
   onRemove?: () => void;
   isDisabled?: boolean;
-}> = ({ name, profile, badge, onRemove, isDisabled }) => (
+}> = ({ profile, badge, onRemove, isDisabled }) => (
   <EuiFlexGroup
     alignItems="center"
     justifyContent="spaceBetween"
@@ -141,14 +140,10 @@ const UserAccessRow: React.FC<{
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <UserAvatar
-            user={profile?.user ?? { username: name }}
-            avatar={profile?.data?.avatar}
-            size="s"
-          />
+          <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
         </EuiFlexItem>
         <EuiFlexItem grow>
-          <EuiText size="s">{name}</EuiText>
+          <EuiText size="s">{getUserDisplayName(profile.user)}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
@@ -181,7 +176,7 @@ const UserAccessRow: React.FC<{
 const OwnerRow: React.FC<{
   profile: UserProfileWithAvatar;
 }> = ({ profile }) => (
-  <UserAccessRow name={getUserDisplayName(profile.user)} profile={profile} badge={labels.author} />
+  <UserAccessRow profile={profile} badge={labels.author} />
 );
 
 const MemberRow: React.FC<{
@@ -190,7 +185,6 @@ const MemberRow: React.FC<{
   isDisabled: boolean;
 }> = ({ profile, onRemove, isDisabled }) => (
   <UserAccessRow
-    name={getUserDisplayName(profile.user)}
     profile={profile}
     badge={labels.member}
     onRemove={onRemove}
@@ -240,7 +234,7 @@ export const ConversationShareButton: React.FC = () => {
     }
   );
 
-  const excludedIds = new Set([ownerId, ...memberIds].filter(Boolean));
+  const excludedIds = new Set([conversation?.user.id, ...memberIds].filter(Boolean));
   const userOptions = suggestedProfiles
     .filter((profile) => !excludedIds.has(profile.uid))
     .map((profile) => profileToOption(profile));
@@ -334,8 +328,8 @@ export const ConversationShareButton: React.FC = () => {
     return null;
   }
 
-  const ownerProfile = ownerId ? profileByUid.get(ownerId) : undefined;
   const isPublic = accessMode === ConversationAccessControlMode.Public;
+  const ownerProfile = ownerId ? profileByUid.get(ownerId) : undefined;
 
   return (
     <EuiPopover
