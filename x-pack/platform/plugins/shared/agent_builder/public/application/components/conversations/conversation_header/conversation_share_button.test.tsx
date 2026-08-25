@@ -178,6 +178,7 @@ describe('ConversationShareButton', () => {
     expect(screen.getByText('Author')).toBeInTheDocument();
     expect(screen.queryByText('Member')).not.toBeInTheDocument();
     expect(screen.getByText('Only manually added members can see this chat')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderConversationSharingUserSearchIcon')).toBeInTheDocument();
   });
 
   it('saves public access with no ACL entries', async () => {
