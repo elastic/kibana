@@ -599,6 +599,33 @@ export const COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION = i18n.
   }
 );
 
+export const EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.extendedFieldsUpdated.eventSchema.changedFields', {
+    defaultMessage:
+      'The extended-field keys whose values changed. This is the only field that supports key-level KQL filtering in trigger conditions (e.g. event.changedFields: "priority_as_keyword"). Filtering on event.extendedFields by key is not supported.',
+  });
+
+export const EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_EXTENDED_FIELDS_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.extendedFieldsUpdated.eventSchema.extendedFields', {
+    defaultMessage:
+      'The new extended-field values after the update, restricted to the keys that changed. A key present in changedFields but absent here was cleared (removed). Values may be truncated; see truncatedFields.',
+  });
+
+export const EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_EXTENDED_FIELDS_DESCRIPTION =
+  i18n.translate(
+    'xpack.cases.workflowTriggers.extendedFieldsUpdated.eventSchema.previousExtendedFields',
+    {
+      defaultMessage:
+        'The previous extended-field values before the update, restricted to the keys that changed. A key present in changedFields but absent here was newly added. Values may be truncated; see truncatedFields.',
+    }
+  );
+
+export const EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_TRUNCATED_FIELDS_DESCRIPTION =
+  i18n.translate('xpack.cases.workflowTriggers.extendedFieldsUpdated.eventSchema.truncatedFields', {
+    defaultMessage:
+      'Keys whose values were truncated to 1024 characters in either extendedFields or previousExtendedFields. Retrieve full values with the cases.getCase step.',
+  });
+
 export const CUSTOM_FIELD_CAN_BE_USED_MESSAGE = (fieldName: string) =>
   i18n.translate('xpack.cases.workflowSteps.shared.customFieldCanBeUsedMessage', {
     defaultMessage: 'Custom field "{fieldName}" can be updated by this step.',

@@ -18,6 +18,10 @@ import {
   COMMENTS_ADDED_TRIGGER_EVENT_SCHEMA_COMMENT_IDS_DESCRIPTION,
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_STATUS_DESCRIPTION,
   CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTION,
+  EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION,
+  EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_EXTENDED_FIELDS_DESCRIPTION,
+  EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_EXTENDED_FIELDS_DESCRIPTION,
+  EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_TRUNCATED_FIELDS_DESCRIPTION,
 } from '../translations';
 
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
@@ -247,6 +251,108 @@ triggers:
           triggerId: CommentsAddedTriggerId,
         },
       }),
+    ],
+  },
+};
+
+export const ExtendedFieldsUpdatedTriggerId = 'cases.extendedFieldsUpdated' as const;
+
+// IMPORTANT: Do not "improve" this schema shape.
+//
+// • ZodRecord with a scalar value type (z.record(z.string(), z.string())) contributes ZERO child
+//   paths to `extractSchemaPropertyPaths`, so `event.extendedFields.<key>: "value"` is rejected
+//   at workflow-save time by `validateKqlAgainstSchema`. This is intentional — value-based
+//   key filtering is a platform constraint, not a Cases choice.
+//
+// • An array-of-change-objects shape ({ key, value, previousValue }[]) passes save-time
+//   validation (ZodArray recurses) but `readContextPath` in @kbn/eval-kql never flattens
+//   arrays, so conditions would silently evaluate to false forever — a hidden trap.
+//
+// Key-level filtering works correctly through `event.changedFields` (ZodArray of strings).
+// Document this constraint to users; do not try to work around it in the schema.
+const extendedFieldsUpdatedEventSchema = baseCaseEventSchema.extend({
+  changedFields: z
+    .array(z.string())
+    .meta({ description: EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_CHANGED_FIELDS_DESCRIPTION }),
+  extendedFields: z.record(z.string(), z.string()).meta({
+    description: EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_EXTENDED_FIELDS_DESCRIPTION,
+  }),
+  previousExtendedFields: z.record(z.string(), z.string()).meta({
+    description: EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_EXTENDED_FIELDS_DESCRIPTION,
+  }),
+  truncatedFields: z.array(z.string()).meta({
+    description: EXTENDED_FIELDS_UPDATED_TRIGGER_EVENT_SCHEMA_TRUNCATED_FIELDS_DESCRIPTION,
+  }),
+});
+
+export type ExtendedFieldsUpdatedPayload = z.infer<typeof extendedFieldsUpdatedEventSchema>;
+
+export const extendedFieldsUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
+  id: ExtendedFieldsUpdatedTriggerId,
+  stability: 'tech_preview',
+  eventSchema: extendedFieldsUpdatedEventSchema,
+  title: i18n.translate('xpack.cases.workflowTriggers.extendedFieldsUpdated.title', {
+    defaultMessage: 'Cases - Extended fields updated',
+  }),
+  description: i18n.translate('xpack.cases.workflowTriggers.extendedFieldsUpdated.description', {
+    defaultMessage: 'Emitted when one or more extended-field values change on a case.',
+  }),
+  documentation: {
+    details: i18n.translate(
+      'xpack.cases.workflowTriggers.extendedFieldsUpdated.documentation.details',
+      {
+        defaultMessage: `Emitted after a case update changes at least one extended-field value. The payload includes only the keys that changed.
+
+**Payload fields**
+- event.changedFields — sorted list of extended-field keys that changed. Use this for trigger conditions.
+- event.extendedFields — new values for changed keys only. A key present in changedFields but absent here was cleared.
+- event.previousExtendedFields — previous values for changed keys only. A key present in changedFields but absent here was newly added.
+- event.truncatedFields — keys whose values were truncated to 1024 characters. Use cases.getCase to read full values.
+
+**Filtering**
+Filter by field key: event.changedFields: "priority_as_keyword"
+Filtering by value (event.extendedFields.priority_as_keyword: "P1") is not supported — the trigger condition validator rejects it.
+
+**Mirror-driven changes**
+This trigger fires when extended fields change via any write path, including a customFields patch on a field linked to a global field definition. In that case event.updatedFields on the caseUpdated trigger may only contain "customFields", not "extended_fields".
+
+**Multi-value controls**
+Values for USER_PICKER and similar multi-value controls are JSON-encoded strings (e.g. '["alice","bob"]'). Compare them in steps, not in trigger conditions.
+
+**Self-feeding chains**
+A workflow step that writes extended fields will re-emit this trigger. The chain is bounded by eventDriven.maxChainDepth (default 10).`,
+      }
+    ),
+    examples: [
+      i18n.translate(
+        'xpack.cases.workflowTriggers.extendedFieldsUpdated.documentation.exampleOwnerFilter',
+        {
+          defaultMessage: `## Run only for Security cases
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.owner: "securitySolution"'
+\`\`\``,
+          values: { triggerId: ExtendedFieldsUpdatedTriggerId },
+        }
+      ),
+      i18n.translate(
+        'xpack.cases.workflowTriggers.extendedFieldsUpdated.documentation.exampleFieldFilter',
+        {
+          defaultMessage: `## Run when a specific extended field changes
+\`\`\`yaml
+triggers:
+  - type: {triggerId}
+    on:
+      condition: 'event.changedFields: "{exampleKey}"'
+\`\`\``,
+          values: {
+            triggerId: ExtendedFieldsUpdatedTriggerId,
+            exampleKey: 'priority_as_keyword',
+          },
+        }
+      ),
     ],
   },
 };
