@@ -126,6 +126,8 @@ const WORKFLOW_RUN_TASK_MAX_ATTEMPTS = 3;
  */
 const WORKFLOW_RESUME_TASK_MAX_ATTEMPTS = 3;
 
+const WORKFLOW_SCHEDULED_TASK_MAX_ATTEMPTS = 3;
+
 /** Batch size for bulk cancel search_after paging (internal; not exposed on the public API). */
 const BULK_CANCEL_PAGE_SIZE = 10;
 
@@ -341,12 +343,15 @@ export class WorkflowsExecutionEnginePlugin
                   }
                 }
               } catch (error) {
+                const aborted = taskAbortController.signal.aborted;
                 logWorkflowTaskFailure(logger, error, {
                   taskType: WORKFLOW_RUN_TASK_TYPE,
                   workflowRunId,
                   spaceId,
                   taskId: taskInstance.id,
                   attempt: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RUN_TASK_MAX_ATTEMPTS,
+                  aborted,
                 });
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
@@ -358,7 +363,7 @@ export class WorkflowsExecutionEnginePlugin
                   error,
                   logger,
                 });
-                if (taskAbortController.signal.aborted) {
+                if (aborted) {
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
                     workflow_execution_id: workflowRunId,
                     space_id: spaceId,
@@ -546,12 +551,15 @@ export class WorkflowsExecutionEnginePlugin
                   }
                 }
               } catch (error) {
+                const aborted = taskAbortController.signal.aborted;
                 logWorkflowTaskFailure(logger, error, {
                   taskType: WORKFLOW_RESUME_TASK_TYPE,
                   workflowRunId,
                   spaceId,
                   taskId: taskInstance.id,
                   attempt: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_RESUME_TASK_MAX_ATTEMPTS,
+                  aborted,
                 });
                 await resolveExhaustedWorkflowRunTask({
                   workflowExecutionRepository,
@@ -563,7 +571,7 @@ export class WorkflowsExecutionEnginePlugin
                   error,
                   logger,
                 });
-                if (taskAbortController.signal.aborted) {
+                if (aborted) {
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
                     workflow_execution_id: workflowRunId,
                     space_id: spaceId,
@@ -609,7 +617,7 @@ export class WorkflowsExecutionEnginePlugin
         // This is high value to allow long-running workflows.
         // The workflow timeout logic defined in workflow execution engine logic is the primary control.
         timeout: '365d',
-        maxAttempts: 3,
+        maxAttempts: WORKFLOW_SCHEDULED_TASK_MAX_ATTEMPTS,
         createTaskRunner: ({ taskInstance, fakeRequest, signal, setCustomTaskRunEventFields }) => {
           if (!fakeRequest) {
             throw new Error('Cannot execute a scheduled workflow without Kibana Request');
@@ -909,6 +917,7 @@ export class WorkflowsExecutionEnginePlugin
                   `Successfully executed ${scheduleType}-scheduled workflow ${workflow.id}`
                 );
               } catch (error) {
+                const aborted = taskAbortController.signal.aborted;
                 logWorkflowTaskFailure(logger, error, {
                   taskType: WORKFLOW_SCHEDULED_TASK_TYPE,
                   workflowId,
@@ -916,8 +925,10 @@ export class WorkflowsExecutionEnginePlugin
                   spaceId,
                   taskId: taskInstance.id,
                   attempt: taskInstance.attempts,
+                  maxAttempts: WORKFLOW_SCHEDULED_TASK_MAX_ATTEMPTS,
+                  aborted,
                 });
-                if (taskAbortController.signal.aborted) {
+                if (aborted) {
                   stampWorkflowTaskRunEventFields(setCustomTaskRunEventFields, {
                     workflow_execution_id: workflowExecutionId,
                     workflow_id: workflowId,
