@@ -50,7 +50,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
     expect(installResponse.statusCode).toBe(201);
 
     await setupLogsTestDataStream(esClient);
-    await esArchiver.load(
+    await esArchiver.loadIfNeeded(
       'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
     );
   });

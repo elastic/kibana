@@ -57,7 +57,7 @@ apiTest.describe(
       expect(response.statusCode).toBe(201);
 
       await setupLogsTestDataStream(esClient);
-      await esArchiver.load(
+      await esArchiver.loadIfNeeded(
         'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
       );
     });
