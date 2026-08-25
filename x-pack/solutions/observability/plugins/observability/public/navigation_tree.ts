@@ -67,6 +67,15 @@ function createNavTree({
             {
               link: 'nightshift' as const,
               icon: NightshiftNavigationIcon,
+              children: [
+                {
+                  link: 'significantEvents' as const,
+                  title: i18n.translate('xpack.observability.obltNav.nightshift.management', {
+                    defaultMessage: 'Management',
+                  }),
+                  sideNavStatus: 'hidden' as const,
+                },
+              ],
             },
           ]
         : []),
