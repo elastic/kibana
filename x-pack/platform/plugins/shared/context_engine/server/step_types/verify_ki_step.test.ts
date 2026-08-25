@@ -158,10 +158,7 @@ describe('verify_ki workflow step', () => {
   it('skips KIs with no applicable verifiers', async () => {
     setContextEngineEnabled(true);
 
-    const output = await runHandler(
-      { title: 'no esql here' },
-      { verifiers: ALL_ESQL_VERIFIERS }
-    );
+    const output = await runHandler({ title: 'no esql here' }, { verifiers: ALL_ESQL_VERIFIERS });
 
     expect(output).toEqual({ passed: true, results: [] });
   });

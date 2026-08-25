@@ -31,7 +31,8 @@ describe('KiVerificationService', () => {
     };
   });
 
-  const run = (...verifierIds: string[]) => service.verifyKi({}, { ...context, verifiers: verifierIds });
+  const run = (...verifierIds: string[]) =>
+    service.verifyKi({}, { ...context, verifiers: verifierIds });
 
   it('runs no verification when verifiers is not specified', async () => {
     registry.register(makeVerifier('a', { passed: false, reason: 'x' }));
