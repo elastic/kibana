@@ -168,19 +168,41 @@ describe('validateVariables', () => {
     expect(result[2].message).toBe('Variable anotherInvalidVar is invalid');
   });
 
-  it('propagates context schema construction failures', () => {
-    const variables = [
-      createVariableItem({ key: 'var1', yamlPath: ['steps', 0, 'with', 'value'] }),
-    ];
+  it('skips a context schema construction failure and validates remaining variables', () => {
+    const skippedVariable = createVariableItem({
+      id: 'skipped',
+      key: 'var1',
+      yamlPath: ['steps', 0, 'with', 'value'],
+    });
+    const validatedVariable = createVariableItem({
+      id: 'validated',
+      key: 'var2',
+      yamlPath: ['steps', 2, 'with', 'value'],
+    });
+    const expectedError: YamlValidationResult = {
+      ...validatedVariable,
+      message: 'Variable var2 is invalid',
+      severity: 'error',
+      owner: 'variable-validation',
+      ruleId: 'undefinedVariable',
+      hoverMessage: null,
+    };
 
-    mockGetContextSchemaForStep.mockImplementation(() => {
+    mockGetContextSchemaForStep.mockImplementationOnce(() => {
       throw new Error('Invalid path');
     });
+    mockValidateVariable.mockReturnValue(expectedError);
 
-    expect(() => validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition)).toThrow(
-      'Invalid path'
+    const result = validateVariables(
+      [skippedVariable, validatedVariable],
+      mockWorkflowGraph,
+      mockWorkflowDefinition
     );
-    expect(mockValidateVariable).not.toHaveBeenCalled();
+
+    expect(result).toEqual([expectedError]);
+    expect(mockGetContextSchemaForStep).toHaveBeenCalledTimes(2);
+    expect(mockValidateVariable).toHaveBeenCalledTimes(1);
+    expect(mockValidateVariable).toHaveBeenCalledWith(validatedVariable, mockStepSchema);
   });
 
   it('propagates unexpected validator failures', () => {
