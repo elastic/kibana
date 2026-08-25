@@ -171,25 +171,12 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       });
     }
 
-    // --- Changing to pending for the first time ---
+    // --- Entering a new status (inactive does not carry a count) ---
     if (
-      this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.pending)
+      basicResult.status !== currentEpisodeStatus &&
+      basicResult.status !== alertEpisodeStatus.inactive
     ) {
-      return { status: alertEpisodeStatus.pending, statusCount: DEFAULT_STATUS_COUNT };
-    }
-
-    // --- Changing to recovering for the first time ---
-    if (
-      this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.recovering)
-    ) {
-      return { status: alertEpisodeStatus.recovering, statusCount: DEFAULT_STATUS_COUNT };
-    }
-
-    // --- Changing to active for the first time ---
-    if (
-      this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.active)
-    ) {
-      return { status: alertEpisodeStatus.active, statusCount: DEFAULT_STATUS_COUNT };
+      return { status: basicResult.status, statusCount: DEFAULT_STATUS_COUNT };
     }
 
     // --- Staying in the same status (inactive does not carry a count) ---
@@ -239,14 +226,6 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     return (
       currentStatus === alertEpisodeStatus.recovering && nextStatus === alertEpisodeStatus.inactive
     );
-  }
-
-  private isChangingStatus(
-    currentStatus: AlertEpisodeStatus | undefined | null,
-    nextStatus: AlertEpisodeStatus,
-    targetStatus: AlertEpisodeStatus
-  ): boolean {
-    return nextStatus === targetStatus && currentStatus !== targetStatus;
   }
 
   private getNextStateTransition({
