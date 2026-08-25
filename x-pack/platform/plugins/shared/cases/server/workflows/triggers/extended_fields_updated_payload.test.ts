@@ -64,7 +64,9 @@ describe('buildExtendedFieldsUpdatedPayload', () => {
       previousExtendedFields: {},
       extendedFields: { priority: atCap },
     });
-    expect(result?.extendedFields.priority).toHaveLength(MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH);
+    expect(result?.extendedFields.priority).toHaveLength(
+      MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH
+    );
     expect(result?.truncatedFields).toEqual([]);
   });
 
@@ -75,7 +77,9 @@ describe('buildExtendedFieldsUpdatedPayload', () => {
       previousExtendedFields: {},
       extendedFields: { priority: overCap },
     });
-    expect(result?.extendedFields.priority).toHaveLength(MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH);
+    expect(result?.extendedFields.priority).toHaveLength(
+      MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH
+    );
     expect(result?.truncatedFields).toEqual(['priority']);
   });
 
@@ -97,7 +101,7 @@ describe('buildExtendedFieldsUpdatedPayload', () => {
     const result = buildExtendedFieldsUpdatedPayload({
       ...BASE,
       previousExtendedFields: { beta: overCap },
-      extendedFields: { beta: overCap.slice(0, overCap.length - 1) + 'X' },
+      extendedFields: { beta: `${overCap.slice(0, overCap.length - 1)}X` },
     });
     // beta is truncated in both maps but should appear only once in truncatedFields
     expect(result?.truncatedFields).toEqual(['beta']);

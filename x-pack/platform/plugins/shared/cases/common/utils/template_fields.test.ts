@@ -600,10 +600,7 @@ describe('template field key utils', () => {
     });
 
     it('returns changedFields sorted alphabetically', () => {
-      const result = diffExtendedFields(
-        { c: '1', a: '2', b: '3' },
-        { c: 'x', a: 'y', b: 'z' }
-      );
+      const result = diffExtendedFields({ c: '1', a: '2', b: '3' }, { c: 'x', a: 'y', b: 'z' });
       expect(result.changedFields).toEqual(['a', 'b', 'c']);
     });
 
@@ -617,7 +614,7 @@ describe('template field key utils', () => {
     it('ignores inherited properties', () => {
       const proto = { inherited_key: 'should-be-ignored' };
       const prev = Object.create(proto) as Record<string, unknown>;
-      prev['priority'] = 'low';
+      prev.priority = 'low';
       const result = diffExtendedFields(prev, { priority: 'low' });
       expect(result.changedFields).toEqual([]);
     });

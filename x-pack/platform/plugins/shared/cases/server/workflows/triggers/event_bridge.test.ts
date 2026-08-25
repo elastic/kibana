@@ -389,7 +389,9 @@ describe('registerCasesWorkflowEventBridge', () => {
         { ...basePayload, updatedFields: ['extended_fields'] },
         {
           // @ts-expect-error - partial case objects for testing
-          previousCase: { attributes: { extended_fields: { priority: 'low', severity: 'medium' } } },
+          previousCase: {
+            attributes: { extended_fields: { priority: 'low', severity: 'medium' } },
+          },
           // @ts-expect-error - partial case objects for testing
           updatedCase: { extended_fields: { priority: 'high', severity: 'medium' } },
         }
@@ -408,7 +410,9 @@ describe('registerCasesWorkflowEventBridge', () => {
         { ...basePayload, updatedFields: ['extended_fields'] },
         {
           // @ts-expect-error - partial case objects for testing
-          previousCase: { attributes: { extended_fields: { charlie: '1', alpha: '2', beta: '3' } } },
+          previousCase: {
+            attributes: { extended_fields: { charlie: '1', alpha: '2', beta: '3' } },
+          },
           // @ts-expect-error - partial case objects for testing
           updatedCase: { extended_fields: { charlie: 'x', alpha: 'y', beta: 'z' } },
         }
@@ -444,7 +448,9 @@ describe('registerCasesWorkflowEventBridge', () => {
         extendedFields: Record<string, string>;
         truncatedFields: string[];
       };
-      expect(p.extendedFields.priority).toHaveLength(MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH);
+      expect(p.extendedFields.priority).toHaveLength(
+        MAX_WORKFLOW_TRIGGER_EXTENDED_FIELD_VALUE_LENGTH
+      );
       expect(p.truncatedFields).toEqual(['priority']);
       // Key must be present even though truncated (absence would signal removal)
       expect(p.extendedFields).toHaveProperty('priority');
@@ -467,9 +473,21 @@ describe('registerCasesWorkflowEventBridge', () => {
       await flushMicrotasks();
 
       expect(mockClient.emitEvent).toHaveBeenCalledTimes(3);
-      expect(mockClient.emitEvent).toHaveBeenNthCalledWith(1, CaseUpdatedTriggerId, expect.anything());
-      expect(mockClient.emitEvent).toHaveBeenNthCalledWith(2, CaseStatusUpdatedTriggerId, expect.anything());
-      expect(mockClient.emitEvent).toHaveBeenNthCalledWith(3, ExtendedFieldsUpdatedTriggerId, expect.anything());
+      expect(mockClient.emitEvent).toHaveBeenNthCalledWith(
+        1,
+        CaseUpdatedTriggerId,
+        expect.anything()
+      );
+      expect(mockClient.emitEvent).toHaveBeenNthCalledWith(
+        2,
+        CaseStatusUpdatedTriggerId,
+        expect.anything()
+      );
+      expect(mockClient.emitEvent).toHaveBeenNthCalledWith(
+        3,
+        ExtendedFieldsUpdatedTriggerId,
+        expect.anything()
+      );
     });
 
     it('does not fire when previousCase is missing', async () => {
@@ -575,7 +593,9 @@ describe('registerCasesWorkflowEventBridge', () => {
       await flushMicrotasks();
 
       expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining(`Failed to emit workflow trigger "${ExtendedFieldsUpdatedTriggerId}"`)
+        expect.stringContaining(
+          `Failed to emit workflow trigger "${ExtendedFieldsUpdatedTriggerId}"`
+        )
       );
     });
   });
