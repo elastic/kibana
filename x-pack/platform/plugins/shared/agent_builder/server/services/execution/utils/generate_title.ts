@@ -14,6 +14,7 @@ import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-
 import type { Conversation, ConversationRound, ConverseInput } from '@kbn/agent-builder-common';
 import { CONVERSATION_TITLE_MAX_LENGTH } from '@kbn/agent-builder-common';
 import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
+import { roundsForContext } from '../../conversation';
 
 /**
  * Enforces the stored title bound on a model-generated title. The prompt asks the model to stay
@@ -36,7 +37,7 @@ export const generateTitle = ({
   return defer(async () => {
     try {
       const title = await generateConversationTitle({
-        previousRounds: conversation.rounds,
+        previousRounds: roundsForContext(conversation),
         nextInput,
         chatModel,
       });

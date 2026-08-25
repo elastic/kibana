@@ -147,8 +147,6 @@ export function createAlertEventsBatchBuilder({
   // Include spaceId to avoid collisions when multiple spaces write into the same data stream.
   const executionUuid = buildExecutionUuid({ ruleId, spaceId, scheduledTimestamp });
 
-  // Timestamp when the alert event is written to the index.
-  const wroteAt = new Date().toISOString();
   const source = 'internal';
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
   const hasGroupingFields = groupingFields.length > 0;
@@ -157,6 +155,8 @@ export function createAlertEventsBatchBuilder({
   let index = 0;
 
   const buildBatch = (batch: Array<Record<string, unknown>>): AlertEvent[] => {
+    // Timestamp when the alert event is written to the index.
+    const wroteAt = new Date().toISOString();
     const alertEventsBatch: AlertEvent[] = [];
 
     for (const rowDoc of batch) {
