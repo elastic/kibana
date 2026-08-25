@@ -635,6 +635,7 @@ describe('customContentEmbeddableFactory', () => {
               data: expect.objectContaining({ embeddable_id: 'test-uuid' }),
             }),
           ]),
+          sessionTag: 'dashboard',
         })
       );
     });

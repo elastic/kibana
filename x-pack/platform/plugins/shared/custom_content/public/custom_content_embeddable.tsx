@@ -57,6 +57,7 @@ import {
 } from '../common/panel_context_attachment';
 import { buildCustomContentContextAttachment } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
+import { CUSTOM_CONTENT_CHAT_SESSION_TAG } from '../common/constants';
 import type { CustomContentEmbeddableState } from '../server';
 import { CustomContentComponent } from './components/custom_content_component';
 
@@ -174,6 +175,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                     titleManager.api.title$.getValue() ?? undefined
                   ),
                 ],
+                sessionTag: CUSTOM_CONTENT_CHAT_SESSION_TAG,
               });
             };
 
@@ -382,6 +384,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             attachments: [
               buildCustomContentContextAttachment('', undefined, uuid, panelTitle ?? undefined),
             ],
+            sessionTag: CUSTOM_CONTENT_CHAT_SESSION_TAG,
           });
         }, [panelTitle]);
 
