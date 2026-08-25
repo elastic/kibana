@@ -7,8 +7,7 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo '--- Lint: stylelint'
-checks-reporter-with-killswitch "Lint: stylelint" \
-  node scripts/stylelint
+node scripts/stylelint
 echo "stylelint ✅"
 
 echo '--- Lint: eslint'
@@ -16,19 +15,16 @@ echo '--- Lint: eslint'
 # after possibly commiting fixed files to the repo
 set +e;
 if is_pr && ! is_auto_commit_disabled; then
-  node scripts/eslint --no-cache --fix
+  desc="node scripts/eslint_all_files --no-cache --fix"
+  node scripts/eslint_all_files --no-cache --fix
 else
-  node scripts/eslint --no-cache
+  desc="node scripts/eslint_all_files --no-cache"
+  node scripts/eslint_all_files --no-cache
 fi
 
 eslint_exit=$?
 # re-enable "Exit immediately" mode
 set -e;
-
-desc="node scripts/eslint --no-cache"
-if is_pr && ! is_auto_commit_disabled; then
-  desc="$desc --fix"
-fi
 
 check_for_changed_files "$desc" true
 

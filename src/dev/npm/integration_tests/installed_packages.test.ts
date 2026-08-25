@@ -1,17 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve, sep } from 'path';
 
 import { uniq } from 'lodash';
 
-import { REPO_ROOT } from '@kbn/utils';
-import { getInstalledPackages, InstalledPackage } from '../installed_packages';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { InstalledPackage } from '../installed_packages';
+import { getInstalledPackages } from '../installed_packages';
 
 const FIXTURE1_ROOT = resolve(__dirname, '__fixtures__/fixture1');
 

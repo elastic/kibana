@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/ml-date-picker",
+  "owner": [
+    "@elastic/search-ml-ux"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

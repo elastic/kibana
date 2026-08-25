@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Transform: Transform List Actions <DeleteAction /> Minimal initialization 1`] = `
-<Fragment>
-  Delete
-</Fragment>
-`;

@@ -1,17 +1,22 @@
 {
-  "extends": "../../tsconfig.bazel.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
-    "rootDir": "src",
-    "stripInternal": false,
+    "outDir": "target/types",
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts"
+  ],
+  "kbn_references": [
+    "@kbn/import-resolver",
+    "@kbn/babel-preset",
+    "@kbn/import-locator",
+    "@kbn/repo-info",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

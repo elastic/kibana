@@ -1,0 +1,7 @@
+service:
+  pipelines:
+    metrics/mysqld_exporter:
+      receivers: [mysqld_exporter]
+receivers:
+  mysqld_exporter:
+    endpoint: 0.0.0.0:9104

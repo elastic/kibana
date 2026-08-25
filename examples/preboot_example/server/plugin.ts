@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { schema } from '@kbn/config-schema';
@@ -39,8 +40,18 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.get(
         {
           path: '/api/preboot/state',
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route is available during the preboot phase before authentication is set up.',
+            },
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out of authorization as it is a core preboot route',
+            },
+          },
           validate: false,
-          options: { authRequired: false },
         },
         (_, request, response) => {
           const isSetupModeActive = !skipSetup && core.preboot.isSetupOnHold();
@@ -54,10 +65,20 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.post(
         {
           path: '/api/preboot/complete_setup',
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route is available during the preboot phase before authentication is set up.',
+            },
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out of authorization as it is a core preboot route',
+            },
+          },
           validate: {
             body: schema.object({ shouldReloadConfig: schema.boolean() }),
           },
-          options: { authRequired: false },
         },
         (_, request, response) => {
           completeSetup({ shouldReloadConfig: request.body.shouldReloadConfig });
@@ -68,10 +89,20 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.post(
         {
           path: '/api/preboot/write_config',
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route is available during the preboot phase before authentication is set up.',
+            },
+            authz: {
+              enabled: false,
+              reason: 'This route is opted out of authorization as it is a core preboot route',
+            },
+          },
           validate: {
             body: schema.object({ key: schema.string(), value: schema.string() }),
           },
-          options: { authRequired: false },
         },
         async (_, request, response) => {
           const configPath = this.#initializerContext.env.configs.find((path) =>
@@ -90,6 +121,14 @@ export class PrebootExamplePlugin implements PrebootPlugin {
       prebootRouter.post(
         {
           path: '/api/preboot/connect_to_es',
+          security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route is available during the preboot phase before authentication is set up.',
+            },
+            authz: { enabled: false, reason: 'This route delegates authorization to es client' },
+          },
           validate: {
             body: schema.object({
               host: schema.string(),
@@ -97,7 +136,6 @@ export class PrebootExamplePlugin implements PrebootPlugin {
               password: schema.string(),
             }),
           },
-          options: { authRequired: false },
         },
         async (_, request, response) => {
           const esClient = core.elasticsearch.createClient('data', {

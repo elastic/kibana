@@ -1,0 +1,13 @@
+{
+  "update_by_query": {
+    "data_autocomplete_rules": {
+      "script": {
+        "__template": {
+          "source": "",
+          "lang": "painless"
+        },
+        "__scope_link": "GLOBAL.script"
+      }
+    }
+  }
+}

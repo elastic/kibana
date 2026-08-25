@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WeTried should render "we tried" message 1`] = `
+<div
+  data-test-subj="weTriedContainer"
+>
+  <h2
+    class="euiTitle emotion-euiTitle-l"
+  >
+    We couldn't activate monitoring
+  </h2>
+  <hr
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
+  />
+  <div
+    class="euiText eui-textLeft emotion-euiText-m"
+  >
+    <p>
+      No monitoring data found. Try setting the time filter to "Last 1 hour" or check if data is available for a different time period.
+    </p>
+    <p>
+      If data is in your cluster, your monitoring dashboards will show up here.
+    </p>
+  </div>
+</div>
+`;

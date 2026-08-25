@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/actions-simulators-plugin",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "actionsSimulators",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "actions",
+      "features",
+      "encryptedSavedObjects"
+    ]
+  }
+}

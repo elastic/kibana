@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Favorite API
+  version: '2023-10-31'
+paths:
+  /api/timeline/_favorite:
+    patch:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: PersistFavoriteRoute
+      summary: Favorite a Timeline or Timeline template
+      description: Favorite a Timeline or Timeline template for the current user.
+      tags:
+        - access:securitySolution
+      requestBody:
+        description: The required fields used to favorite a (template) Timeline.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [timelineId, templateTimelineId, templateTimelineVersion, timelineType]
+              properties:
+                timelineId:
+                  type: string
+                  nullable: true
+                templateTimelineId:
+                  type: string
+                  nullable: true
+                templateTimelineVersion:
+                  type: number
+                  nullable: true
+                timelineType:
+                  $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
+                  nullable: true
+            examples:
+              favoriteDefault:
+                summary: Favorite a default timeline
+                value:
+                  timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                  templateTimelineId: null
+                  templateTimelineVersion: null
+                  timelineType: default
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '../model/components.schema.yaml#/components/schemas/FavoriteTimelineResponse'
+              examples:
+                favoriteResponse:
+                  summary: Favorite metadata updated
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzE2LDFd
+                    timelineType: default
+                    favorite:
+                      - userName: elastic
+                        favoriteDate: 1741337636741
+
+        '403':
+          description: Indicates the user does not have the required permissions to persist the favorite status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+              examples:
+                forbidden:
+                  summary: Forbidden
+                  value:
+                    body: Forbidden
+                    statusCode: 403

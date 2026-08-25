@@ -1,0 +1,170 @@
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
+html, body, div, span, svg {
+  margin: 0;
+  padding: 0;
+  border: none;
+  vertical-align: baseline;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  display: block;
+}
+
+.kbnWelcomeView {
+  line-height: 1.5;
+  height: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 0 auto;
+  -ms-flex: 1 0 auto;
+  flex: 1 0 auto;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
+
+.kbnWelcomeTitle {
+  color: #000;
+  font-size: 20px;
+  font-family: sans-serif;
+  margin: 16px 0;
+  animation: fadeIn 1s ease-in-out;
+  animation-fill-mode: forwards;
+  opacity: 0;
+  animation-delay: 1.0s;
+}
+
+.kbnWelcomeText {
+  display: block;
+  font-size: 14px;
+  font-family: sans-serif;
+  line-height: 40px !important;
+  height: 40px !important;
+  color: #98A2B3;
+}
+
+.kbnLoaderWrap {
+  text-align: center;
+  line-height: 1;
+  font-family: sans-serif;
+  letter-spacing: -.005em;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  font-kerning: normal;
+  font-weight: 400;
+}
+
+/*
+ * Sized to match <EuiLoadingElastic size="xxl" /> (euiTheme.size.xxl,
+ * i.e. 2.5 * 16px = 40px on the Borealis base). This rule is the
+ * single source of truth for the splash-logo size: it applies to both
+ * the default `Logo` SVG (views/logo.tsx) and the `<img>` rendered by
+ * `template.tsx` when an operator configures `customBranding.logo`, so
+ * default and custom-branded splashes always render at the same size.
+ */
+.kbnLoaderWrap > svg,
+.kbnLoaderWrap > img {
+  width: 40px;
+  height: 40px;
+  margin: auto;
+  line-height: 1;
+}
+
+/*
+ * Replica of @elastic/eui's `euiLoadingElasticStyles` so the boot
+ * splash animates identically to <EuiLoadingElastic />. We can't use
+ * the EUI component on the splash because this markup is rendered
+ * before any JS / Emotion has booted, so the animation lives in plain
+ * CSS shipped via /ui/legacy_styles.css (parser-blocking <link> in
+ * <head>, loaded before the inline body script flips the splash to
+ * `display: flex`).
+ *
+ * Scoped to `.kbnLoaderWrap` so the same <Logo /> stays static when
+ * reused by the legacy browser error screen.
+ */
+@keyframes kbnLoadingElastic {
+  0%   { transform: scale3d(.2, .2, -.7); }
+  40%  { transform: scale3d(1, 1, 2); }
+  50%  { transform: scale3d(.99, .99, 2); }
+  70%  { transform: scale3d(.96, .96, -2.5); }
+  100% { transform: scale3d(.98, .98, 2); }
+}
+
+.kbnLoaderWrap .kbnLoader path {
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  .kbnLoaderWrap .kbnLoader path {
+    animation-name: kbnLoadingElastic;
+    animation-fill-mode: forwards;
+    animation-direction: alternate;
+    animation-duration: 1s;
+    animation-timing-function: cubic-bezier(0, 0.63, 0.49, 1);
+    animation-iteration-count: infinite;
+  }
+
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(1) { animation-delay: 0s; }
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(2) { animation-delay: 0.035s; }
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(3) { animation-delay: 0.125s; }
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(4) { animation-delay: 0.155s; }
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(5) { animation-delay: 0.075s; }
+  .kbnLoaderWrap .kbnLoader path:nth-of-type(6) { animation-delay: 0.06s; }
+}
+
+.kbnProgress {
+  display: inline-block;
+  position: relative;
+  width: 32px;
+  height: 4px;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.kbnProgress:before {
+  position: absolute;
+  content: '';
+  height: 4px;
+  width: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  transform: scaleX(0) translateX(0%);
+  animation: kbnProgress 1s cubic-bezier(.694, .0482, .335, 1) infinite;
+}
+
+@keyframes kbnProgress {
+  0% {
+    transform: scaleX(1) translateX(-100%);
+  }
+
+  100% {
+    transform: scaleX(1) translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion) {
+  .kbnProgress {
+    display: none;
+  }
+}

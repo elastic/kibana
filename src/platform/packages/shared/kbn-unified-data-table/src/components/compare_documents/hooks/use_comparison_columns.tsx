@@ -1,0 +1,168 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { EuiDataGridColumn, EuiListGroupItemProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useMemo } from 'react';
+import type { DocMap } from '../../../types';
+
+export interface UseComparisonColumnsProps {
+  wrapper: HTMLElement | null;
+  isPlainRecord: boolean;
+  fieldColumnId: string;
+  selectedDocIds: string[];
+  docMap: DocMap;
+  replaceSelectedDocs: (docIds: string[]) => void;
+}
+
+export const DEFAULT_COLUMN_WIDTH = 300;
+export const FIELD_COLUMN_WIDTH = 200;
+export const FIELD_COLUMN_NAME = i18n.translate('unifiedDataTable.fieldColumnTitle', {
+  defaultMessage: 'Field',
+});
+
+export const useComparisonColumns = ({
+  wrapper,
+  isPlainRecord,
+  fieldColumnId,
+  selectedDocIds,
+  docMap,
+  replaceSelectedDocs,
+}: UseComparisonColumnsProps) => {
+  const comparisonColumns = useMemo<EuiDataGridColumn[]>(() => {
+    const fieldsColumn: EuiDataGridColumn = {
+      id: fieldColumnId,
+      displayAsText: FIELD_COLUMN_NAME,
+      initialWidth: FIELD_COLUMN_WIDTH,
+      isSortable: false,
+      isExpandable: false,
+      actions: false,
+    };
+
+    const currentColumns = [fieldsColumn];
+    const wrapperWidth = wrapper?.offsetWidth ?? 0;
+    const columnWidth =
+      DEFAULT_COLUMN_WIDTH * selectedDocIds.length + FIELD_COLUMN_WIDTH > wrapperWidth
+        ? DEFAULT_COLUMN_WIDTH
+        : undefined;
+
+    selectedDocIds.forEach((docId, selectedIndex) => {
+      const docEntry = docMap.get(docId);
+
+      if (!docEntry) {
+        return;
+      }
+
+      const { doc, docIndex } = docEntry;
+      const additional: EuiListGroupItemProps[] = [];
+
+      if (selectedIndex !== 0) {
+        additional.push({
+          iconType: 'pin',
+          label: i18n.translate('unifiedDataTable.pinForComparison', {
+            defaultMessage: 'Pin for comparison',
+          }),
+          onClick: () => {
+            const newSelectedDocs = [...selectedDocIds];
+            const index = newSelectedDocs.indexOf(docId);
+            const [baseDocId] = newSelectedDocs;
+
+            newSelectedDocs[0] = docId;
+            newSelectedDocs[index] = baseDocId;
+
+            replaceSelectedDocs(newSelectedDocs);
+          },
+        });
+      }
+
+      if (selectedDocIds.length > 2) {
+        additional.push({
+          iconType: 'cross',
+          label: i18n.translate('unifiedDataTable.removeFromComparison', {
+            defaultMessage: 'Remove from comparison',
+          }),
+          onClick: () => {
+            replaceSelectedDocs(selectedDocIds.filter((id) => id !== docId));
+          },
+        });
+      }
+
+      const displayId = doc.raw._id ?? (docIndex + 1).toString();
+      const columnTitle =
+        doc.raw._id ??
+        i18n.translate('unifiedDataTable.comparisonColumnResultDisplay', {
+          defaultMessage: 'Result {resultNumber}',
+          values: { resultNumber: displayId },
+        });
+
+      const display =
+        selectedIndex === 0 ? (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="pinFill" aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{columnTitle}</EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          columnTitle
+        );
+
+      const displayAsText =
+        selectedIndex === 0
+          ? isPlainRecord
+            ? i18n.translate('unifiedDataTable.comparisonColumnResultPinnedTooltip', {
+                defaultMessage: 'Pinned result: {resultNumber}',
+                values: { resultNumber: displayId },
+              })
+            : i18n.translate('unifiedDataTable.comparisonColumnPinnedTooltip', {
+                defaultMessage: 'Pinned document: {documentId}',
+                values: { documentId: displayId },
+              })
+          : isPlainRecord
+          ? i18n.translate('unifiedDataTable.comparisonColumnResultTooltip', {
+              defaultMessage: 'Comparison result: {resultNumber}',
+              values: { resultNumber: displayId },
+            })
+          : i18n.translate('unifiedDataTable.comparisonColumnTooltip', {
+              defaultMessage: 'Comparison document: {documentId}',
+              values: { documentId: displayId },
+            });
+
+      currentColumns.push({
+        id: docId,
+        display,
+        displayAsText,
+        initialWidth: columnWidth,
+        isSortable: false,
+        isExpandable: false,
+        actions: {
+          showHide: false,
+          showMoveLeft: selectedIndex > 1,
+          showMoveRight: selectedIndex > 0 && selectedIndex < selectedDocIds.length - 1,
+          showSortAsc: false,
+          showSortDesc: false,
+          additional,
+        },
+      });
+    });
+
+    return currentColumns;
+  }, [
+    docMap,
+    fieldColumnId,
+    isPlainRecord,
+    selectedDocIds,
+    replaceSelectedDocs,
+    wrapper?.offsetWidth,
+  ]);
+
+  return comparisonColumns;
+};

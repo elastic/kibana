@@ -1,16 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { Filter, Query, isFilterPinned } from '@kbn/es-query';
-import type { TimeRange } from '@kbn/data-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { isFilterPinned } from '@kbn/es-query';
 import { getStatesFromKbnUrl, setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { LocatorDefinition } from '@kbn/share-plugin/common';
+import type { LocatorDefinition } from '@kbn/share-plugin/common';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
@@ -38,6 +39,16 @@ export class SearchSessionsExamplesAppLocatorDefinition
   public readonly id = SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR;
 
   constructor(protected readonly getAppBasePath: () => Promise<string>) {}
+
+  public readonly getTimeRange = (params: SearchSessionsExamplesAppLocatorParams) => params.time;
+
+  public readonly setTimeRange = (
+    params: SearchSessionsExamplesAppLocatorParams,
+    timeRange?: TimeRange
+  ) => ({
+    ...params,
+    time: timeRange,
+  });
 
   public readonly getLocation = async (params: SearchSessionsExamplesAppLocatorParams) => {
     const appBasePath = await this.getAppBasePath();

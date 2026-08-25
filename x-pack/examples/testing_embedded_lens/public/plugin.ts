@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { mount } from './mount';
 import image from './image.png';
 
@@ -19,6 +20,7 @@ export interface SetupDependencies {
 export interface StartDependencies {
   data: DataPublicPluginStart;
   lens: LensPublicStart;
+  settings: SettingsStart;
 }
 
 export class TestingEmbeddedLensPlugin
@@ -28,7 +30,7 @@ export class TestingEmbeddedLensPlugin
     core.application.register({
       id: 'testing_embedded_lens',
       title: 'Embedded Lens testing playground',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: mount(core),
     });
 
@@ -41,7 +43,6 @@ export class TestingEmbeddedLensPlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/testing_embedded_lens',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import getopts from 'getopts';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
 
-import { BuildOptions } from './build_distributables';
+import type { BuildOptions } from './build_distributables';
 
 export function readCliArgs(argv: string[]) {
   const unknownFlags: string[] = [];
   const flags = getopts(argv, {
     boolean: [
       'skip-archives',
+      'skip-cdn-assets',
       'skip-initialize',
       'skip-generic-folders',
       'skip-platform-folders',
@@ -28,36 +30,44 @@ export function readCliArgs(argv: string[]) {
       'docker-push',
       'skip-docker-contexts',
       'skip-docker-ubi',
-      'skip-docker-ubuntu',
+      'skip-docker-wolfi',
       'skip-docker-cloud',
+      'skip-docker-cloud-fips',
+      'skip-docker-serverless',
+      'skip-docker-fips',
+      'skip-serverless',
       'release',
       'skip-node-download',
       'skip-cloud-dependencies-download',
       'verbose',
       'debug',
       'all-platforms',
-      'example-plugins',
       'verbose',
       'quiet',
       'silent',
       'debug',
       'help',
+      'with-test-plugins',
+      'with-example-plugins',
+      'serverless',
+      'tar-zstd',
     ],
-    string: ['epr-registry'],
+    string: ['docker-namespace', 'epr-registry'],
     alias: {
       v: 'verbose',
       d: 'debug',
     },
     default: {
       debug: true,
-      'example-plugins': false,
       rpm: null,
       deb: null,
       'docker-images': null,
       'docker-context-use-local-artifact': null,
       'docker-cross-compile': false,
       'docker-push': false,
+      'docker-tag': null,
       'docker-tag-qualifier': null,
+      'docker-namespace': null,
       'version-qualifier': '',
       'epr-registry': 'snapshot',
     },
@@ -118,7 +128,9 @@ export function readCliArgs(argv: string[]) {
     versionQualifier: flags['version-qualifier'],
     dockerContextUseLocalArtifact: flags['docker-context-use-local-artifact'],
     dockerCrossCompile: Boolean(flags['docker-cross-compile']),
+    dockerNamespace: flags['docker-namespace'],
     dockerPush: Boolean(flags['docker-push']),
+    dockerTag: flags['docker-tag'],
     dockerTagQualifier: flags['docker-tag-qualifier'],
     initialize: !Boolean(flags['skip-initialize']),
     downloadFreshNode: !Boolean(flags['skip-node-download']),
@@ -126,16 +138,27 @@ export function readCliArgs(argv: string[]) {
     createGenericFolders: !Boolean(flags['skip-generic-folders']),
     createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
-    createExamplePlugins: Boolean(flags['example-plugins']),
+    createCdnAssets: !Boolean(flags['skip-cdn-assets']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
-    createDockerUbuntu:
-      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
+    createDockerWolfi: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-wolfi']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
+    createDockerCloudFIPS:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud-fips']),
+    createDockerServerless:
+      !Boolean(flags['skip-serverless']) &&
+      ((isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
+        Boolean(flags.serverless)),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
+    createDockerFIPS: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-fips']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
+    targetServerlessPlatforms: Boolean(flags.serverless),
+    skipServerless: Boolean(flags['skip-serverless']),
     eprRegistry: flags['epr-registry'],
+    tarZstd: Boolean(flags['tar-zstd']),
+    withExamplePlugins: Boolean(flags['with-example-plugins']),
+    withTestPlugins: Boolean(flags['with-test-plugins']),
   };
 
   return {

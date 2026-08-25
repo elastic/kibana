@@ -1,0 +1,10 @@
+{
+  "snapshot.restore": {
+    "data_autocomplete_rules": {
+      "indices": "*",
+      "include_global_state": false,
+      "rename_pattern": "index_(.+)",
+      "rename_replacement": "restored_index_$1"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ServerStatus renders correctly for green state 2`] = `
+<span
+  aria-label="Green"
+  class="euiBadge emotion-euiBadge-success"
+  data-test-subj="serverStatusTitleBadge"
+  title="Green"
+>
+  <span
+    class="euiBadge__content emotion-euiBadge__content"
+  >
+    <span
+      class="euiBadge__text emotion-euiBadge__text"
+    >
+      Green
+    </span>
+  </span>
+</span>
+`;
+
+exports[`ServerStatus renders correctly for red state 2`] = `
+<span
+  aria-label="Red"
+  class="euiBadge emotion-euiBadge-success"
+  data-test-subj="serverStatusTitleBadge"
+  title="Red"
+>
+  <span
+    class="euiBadge__content emotion-euiBadge__content"
+  >
+    <span
+      class="euiBadge__text emotion-euiBadge__text"
+    >
+      Red
+    </span>
+  </span>
+</span>
+`;
+
+exports[`ServerStatus renders correctly for yellow state 2`] = `
+<span
+  aria-label="Yellow"
+  class="euiBadge emotion-euiBadge-success"
+  data-test-subj="serverStatusTitleBadge"
+  title="Yellow"
+>
+  <span
+    class="euiBadge__content emotion-euiBadge__content"
+  >
+    <span
+      class="euiBadge__text emotion-euiBadge__text"
+    >
+      Yellow
+    </span>
+  </span>
+</span>
+`;

@@ -1,0 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { KbnFieldTypeOptions, ES_FIELD_TYPES } from './types';
+import { KBN_FIELD_TYPES } from './types';
+
+export class KbnFieldType {
+  public readonly name: string;
+  public readonly sortable: boolean;
+  public readonly filterable: boolean;
+  public readonly esTypes: readonly ES_FIELD_TYPES[];
+
+  constructor(options: Partial<KbnFieldTypeOptions> = {}) {
+    this.name = options.name || KBN_FIELD_TYPES.UNKNOWN;
+    this.sortable = options.sortable || false;
+    this.filterable = options.filterable || false;
+    this.esTypes = Object.freeze((options.esTypes || []).slice());
+  }
+}

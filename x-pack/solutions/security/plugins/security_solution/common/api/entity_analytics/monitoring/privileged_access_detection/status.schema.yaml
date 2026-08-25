@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  title: Get the status of the privileged access detection package
+  version: "2023-10-31"
+paths:
+  /api/entity_analytics/privileged_user_monitoring/pad/status:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetPrivilegedAccessDetectionPackageStatus
+      summary: Gets the status of the privileged access detection package for the Entity Analytics privileged user monitoring experience
+      description: Returns the installation and ML module setup status of the privileged access detection package, along with the state of each associated ML job.
+
+      responses:
+        "200":
+          description: Privileged access detection status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - package_installation_status
+                  - ml_module_setup_status
+                  - jobs
+                properties:
+                  package_installation_status:
+                    type: string
+                    enum: [complete, incomplete]
+                  ml_module_setup_status:
+                    type: string
+                    enum: [complete, incomplete]
+                  jobs:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - job_id
+                        - state
+                      properties:
+                        job_id:
+                          type: string
+                        description:
+                          type: string
+                        state:
+                          type: string
+                          enum: [closing, closed, opened, failed, opening]
+              examples:
+                GetPrivilegedAccessDetectionPackageStatusResponse:
+                  summary: Package fully installed and running
+                  value:
+                    package_installation_status: complete
+                    ml_module_setup_status: complete
+                    jobs:
+                      - job_id: pad-high-risk-login
+                        description: Detects high-risk login patterns
+                        state: opened
+                      - job_id: pad-privilege-escalation
+                        description: Detects privilege escalation events
+                        state: opened

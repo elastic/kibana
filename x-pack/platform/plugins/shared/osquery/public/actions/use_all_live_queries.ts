@@ -1,0 +1,85 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useQuery } from '@kbn/react-query';
+
+import { i18n } from '@kbn/i18n';
+import { API_VERSIONS } from '../../common/constants';
+import { useKibana } from '../common/lib/kibana';
+import type { ActionEdges, ActionsStrategyResponse } from '../../common/search_strategy';
+
+import { useErrorToast } from '../common/hooks/use_error_toast';
+import { Direction } from '../../common/search_strategy';
+
+export interface UseAllLiveQueriesConfig {
+  activePage?: number;
+  direction?: Direction;
+  limit?: number;
+  sortField?: string;
+  kuery?: string;
+  skip?: boolean;
+  alertId?: string;
+  withResultCounts?: boolean;
+}
+
+// Make sure we keep this and ACTIONS_QUERY_KEY in osquery_flyout.tsx in sync.
+const ACTIONS_QUERY_KEY = 'actions';
+
+export const useAllLiveQueries = ({
+  activePage = 0,
+  direction = Direction.desc,
+  limit = 100,
+  sortField = '@timestamp',
+  kuery,
+  skip = false,
+  alertId,
+  withResultCounts = false,
+}: UseAllLiveQueriesConfig) => {
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
+
+  return useQuery(
+    [
+      ACTIONS_QUERY_KEY,
+      {
+        activePage,
+        direction,
+        limit,
+        sortField,
+        kuery,
+        withResultCounts,
+        ...(alertId ? { alertId } : {}),
+      },
+    ],
+    () =>
+      http.get<{ data: Omit<ActionsStrategyResponse, 'edges'> & { items: ActionEdges } }>(
+        '/api/osquery/live_queries',
+        {
+          version: API_VERSIONS.public.v1,
+          query: {
+            kuery,
+            page: activePage,
+            pageSize: limit,
+            sort: sortField,
+            sortOrder: direction,
+            ...(withResultCounts ? { withResultCounts } : {}),
+          },
+        }
+      ),
+    {
+      keepPreviousData: true,
+      enabled: !skip,
+      onSuccess: () => setErrorToast(),
+      onError: (error: Error) =>
+        setErrorToast(error, {
+          title: i18n.translate('xpack.osquery.live_queries_all.fetchError', {
+            defaultMessage: 'Error while fetching live queries',
+          }),
+        }),
+    }
+  );
+};

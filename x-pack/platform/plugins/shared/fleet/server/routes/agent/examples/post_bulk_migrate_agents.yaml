@@ -1,0 +1,35 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postBulkMigrateAgentsRequestExample:
+          description: 'Migrate multiple agents to another cluster'
+          value:
+            enrollment_token: 'enrollment-token-value'
+            uri: 'https://fleet-server.example.com:8220'
+            agents:
+              - 'agent-id-1'
+              - 'agent-id-2'
+            settings:
+              retry_max: 5
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postBulkMigrateAgentsExample:
+            description: 'Bulk agent migration initiated'
+            value:
+              actionId: 'action-id-1'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

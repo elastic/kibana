@@ -1,0 +1,8 @@
+{
+  "ml.get_model_snapshots": {
+    "data_autocomplete_rules": {
+      "from": 0,
+      "size": 1000
+    }
+  }
+}

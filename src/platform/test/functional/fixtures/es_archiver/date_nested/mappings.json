@@ -1,0 +1,30 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "date-nested",
+    "mappings": {
+      "properties": {
+        "message": {
+          "type": "text"
+        },
+        "nested": {
+          "properties": {
+            "timestamp": {
+              "type": "date"
+            }
+          },
+          "type": "nested"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

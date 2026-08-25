@@ -1,0 +1,4 @@
+type: object
+properties:
+  externalService:
+    $ref: 'external_service.yaml'

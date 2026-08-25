@@ -3,7 +3,7 @@ from os import path
 from build_util import (
   runcmd,
   runcmdsilent,
-  md5_file,
+  sha256_file,
 )
 
 # This file builds Chromium headless on Linux.
@@ -38,6 +38,7 @@ if arch_name != 'x64' and arch_name != 'arm64':
   raise Exception('Unexpected architecture: ' + arch_name + '. `x64` and `arm64` are supported.')
 
 print('Fetching locale files')
+# TODO: move this into the repo itself, so we are only writing the build output to the bucket
 runcmd('gsutil cp gs://headless_shell_staging/en-US.pak .')
 
 print('Building Chromium ' + source_version + ' for ' + arch_name + ' from ' + src_path)
@@ -66,12 +67,8 @@ print('Updating PATH for depot_tools: ' + full_path)
 os.environ['PATH'] = full_path
 
 # configure environment: build dependencies
-if platform.system() == 'Linux':
-  if arch_name:
-    print('Running sysroot install script...')
-    runcmd(src_path + '/build/linux/sysroot_scripts/install-sysroot.py --arch=' + arch_name)
-  print('Running install-build-deps...')
-  runcmd(src_path + '/build/install-build-deps.sh')
+print('Running sysroot install script...')
+runcmd(src_path + '/build/linux/sysroot_scripts/install-sysroot.py --arch=' + arch_name)
 
 print('Updating all modules')
 runcmd('gclient sync -D')
@@ -95,16 +92,16 @@ runcmd('autoninja -C out/headless headless_shell')
 
 # Optimize the output on Linux x64 by stripping inessentials from the binary
 # ARM must be cross-compiled from Linux and can not read the ARM binary in order to strip
-if platform.system() != 'Windows' and arch_name != 'arm64':
+if arch_name != 'arm64':
   print('Optimizing headless_shell')
   shutil.move('out/headless/headless_shell', 'out/headless/headless_shell_raw')
   runcmd('strip -o out/headless/headless_shell out/headless/headless_shell_raw')
 
-# Create the zip and generate the md5 hash using filenames like:
+# Create the zip and generate the sha256 hash using filenames like:
 # chromium-4747cc2-linux_x64.zip
-base_filename = 'out/headless/chromium-' + base_version + '-' + platform.system().lower() + '_' + arch_name
+base_filename = 'out/headless/chromium-' + base_version + '-locales-' + platform.system().lower() + '_' + arch_name
 zip_filename = base_filename + '.zip'
-md5_filename = base_filename + '.md5'
+sha256_filename = base_filename + '.sha256'
 
 print('Creating '  + path.join(src_path, zip_filename))
 archive = zipfile.ZipFile(zip_filename, mode='w', compression=zipfile.ZIP_DEFLATED)
@@ -115,13 +112,16 @@ path_prefix = 'headless_shell-' + platform.system().lower() + '_' + arch_name
 archive.write('out/headless/headless_shell', path.join(path_prefix, 'headless_shell'))
 archive.write('out/headless/libEGL.so', path.join(path_prefix, 'libEGL.so'))
 archive.write('out/headless/libGLESv2.so', path.join(path_prefix, 'libGLESv2.so'))
+archive.write('out/headless/libvk_swiftshader.so', path.join(path_prefix, 'libvk_swiftshader.so'))
+archive.write('out/headless/libvulkan.so.1', path.join(path_prefix, 'libvulkan.so.1'))
+archive.write('out/headless/vk_swiftshader_icd.json', path.join(path_prefix, 'vk_swiftshader_icd.json'))
 archive.write(en_us_locale_file_path, path.join(path_prefix, 'locales', en_us_locale_pak_file_name))
 
 archive.close()
 
-print('Creating ' + path.join(src_path, md5_filename))
-with open (md5_filename, 'w') as f:
-  f.write(md5_file(zip_filename))
+print('Creating ' + path.join(src_path, sha256_filename))
+with open (sha256_filename, 'w') as f:
+  f.write(sha256_file(zip_filename))
 
 runcmd('gsutil cp ' + path.join(src_path, zip_filename) + ' gs://headless_shell_staging')
-runcmd('gsutil cp ' + path.join(src_path, md5_filename) + ' gs://headless_shell_staging')
+runcmd('gsutil cp ' + path.join(src_path, sha256_filename) + ' gs://headless_shell_staging')

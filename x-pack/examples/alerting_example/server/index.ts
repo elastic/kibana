@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/server';
-import { AlertingExamplePlugin } from './plugin';
+import type { PluginInitializer } from '@kbn/core/server';
 
-export const plugin: PluginInitializer<void, void> = () => new AlertingExamplePlugin();
+export const plugin: PluginInitializer<void, void> = async () => {
+  const { AlertingExamplePlugin } = await import('./plugin');
+  return new AlertingExamplePlugin();
+};

@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NewNote renders correctly 1`] = `
+<NewNoteTabs
+  data-test-subj="new-note-tabs"
+>
+  <Memo(MarkdownEditorComponent)
+    ariaLabel="Note"
+    autoFocusDisabled={false}
+    dataTestSubj="add-a-note"
+    height={200}
+    onChange={[MockFunction]}
+    setIsMarkdownInvalid={[MockFunction]}
+    value="The contents of a new note"
+  />
+</NewNoteTabs>
+`;

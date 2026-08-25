@@ -1,0 +1,251 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { TypeOf } from '@kbn/config-schema';
+
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { omit, pick } from 'lodash';
+
+import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
+
+import type {
+  GetEnrollmentSettingsResponse,
+  AgentPolicy,
+  EnrollmentSettingsFleetServerPolicy,
+  FleetProxy,
+  FleetServerHost,
+  Output,
+  DownloadSource,
+} from '../../../common/types';
+import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '../../types';
+import { agentPolicyService, appContextService, downloadSourceService } from '../../services';
+import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_host';
+import { getFleetProxy } from '../../services/fleet_proxies';
+import { getFleetServerPolicies, hasFleetServersForPolicies } from '../../services/fleet_server';
+import { getDataOutputForAgentPolicy } from '../../services/agent_policies';
+
+export const getEnrollmentSettingsHandler: FleetRequestHandler<
+  undefined,
+  TypeOf<typeof GetEnrollmentSettingsRequestSchema.query>
+> = async (context, request, response) => {
+  const agentPolicyId = request.query?.agentPolicyId;
+  const settingsResponse: GetEnrollmentSettingsResponse = {
+    fleet_server: {
+      policies: [],
+      has_active: false,
+    },
+  };
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+  const unscopedSoClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+  // Fetch all fleet server policies once (cross-space). Used for both the space-filtered
+  // policy list and the global has_active check.
+  const allFleetServerPolicies = await getFleetServerPolicies(unscopedSoClient);
+
+  // Get the space-filtered policy list and the scoped agent policy for host/output lookups
+  const { fleetServerPolicies, scopedAgentPolicy: scopedAgentPolicyResponse } =
+    await getFleetServerOrAgentPolicies(soClient, agentPolicyId, allFleetServerPolicies);
+  const scopedAgentPolicy = scopedAgentPolicyResponse || {
+    id: undefined,
+    name: undefined,
+    fleet_server_host_id: undefined,
+    download_source_id: undefined,
+    data_output_id: undefined,
+  };
+  // Check if there is any active fleet server enrolled into the fleet server policies policies
+  if (fleetServerPolicies) {
+    settingsResponse.fleet_server.policies = fleetServerPolicies.map(
+      ({ id, name, is_managed, is_default_fleet_server, has_fleet_server }) => ({
+        id,
+        name,
+        is_managed,
+        is_default_fleet_server,
+        has_fleet_server,
+      })
+    );
+    // has_active is a global check: fleet servers in any space count as active.
+    // Use all cross-space policies
+    settingsResponse.fleet_server.has_active = await hasFleetServersForPolicies(
+      esClient,
+      unscopedSoClient,
+      allFleetServerPolicies,
+      true
+    );
+  }
+
+  // Get download source
+  // ignore errors if the download source is not found
+  try {
+    const downloadSource = await getDownloadSource(
+      scopedAgentPolicy.download_source_id ?? undefined
+    );
+    settingsResponse.download_source = downloadSource
+      ? sanitizeEnrollmentDownloadSource(downloadSource)
+      : undefined;
+  } catch (e) {
+    settingsResponse.download_source = undefined;
+  }
+
+  // Get download source proxy
+  // ignore errors if the download source proxy is not found
+  try {
+    if (settingsResponse.download_source?.proxy_id) {
+      const proxy = await getFleetProxy(soClient, settingsResponse.download_source.proxy_id);
+      settingsResponse.download_source_proxy = sanitizeEnrollmentProxy(proxy);
+    }
+  } catch (e) {
+    settingsResponse.download_source_proxy = undefined;
+  }
+
+  // Get associated fleet server host, or default one if it doesn't exist
+  // `getFleetServerHostsForAgentPolicy` errors if there is no default, so catch it
+  try {
+    const fleetServerHost = await getFleetServerHostsForAgentPolicy(soClient, scopedAgentPolicy);
+    settingsResponse.fleet_server.host = sanitizeEnrollmentFleetServerHost(fleetServerHost);
+  } catch (e) {
+    settingsResponse.fleet_server.host = undefined;
+  }
+
+  // If a fleet server host was found, get associated fleet server host proxy if any
+  // ignore errors if the proxy is not found
+  try {
+    if (settingsResponse.fleet_server.host?.proxy_id) {
+      const proxy = await getFleetProxy(soClient, settingsResponse.fleet_server.host.proxy_id);
+      settingsResponse.fleet_server.host_proxy = sanitizeEnrollmentProxy(proxy);
+    }
+  } catch (e) {
+    settingsResponse.fleet_server.host_proxy = undefined;
+  }
+
+  // Get associated output and proxy (if any) to use for Fleet Server enrollment
+  try {
+    if (settingsResponse.fleet_server.policies.length > 0) {
+      const dataOutput = await getDataOutputForAgentPolicy(soClient, scopedAgentPolicy);
+      if (dataOutput.type === 'elasticsearch' && dataOutput.hosts?.[0]) {
+        settingsResponse.fleet_server.es_output = sanitizeEnrollmentOutput(dataOutput);
+        if (dataOutput.proxy_id) {
+          const proxy = await getFleetProxy(soClient, dataOutput.proxy_id);
+          settingsResponse.fleet_server.es_output_proxy = sanitizeEnrollmentProxy(proxy);
+        }
+      }
+    }
+  } catch (e) {
+    settingsResponse.fleet_server.es_output = undefined;
+    settingsResponse.fleet_server.es_output_proxy = undefined;
+  }
+
+  return response.ok({ body: settingsResponse });
+};
+
+const mapPolicy = (policy: AgentPolicy) => ({
+  id: policy.id,
+  name: policy.name,
+  is_managed: policy.is_managed,
+  is_default_fleet_server: policy.is_default_fleet_server,
+  has_fleet_server: policy.has_fleet_server,
+  fleet_server_host_id: policy.fleet_server_host_id,
+  download_source_id: policy.download_source_id,
+  space_ids: policy.space_ids,
+  data_output_id: policy.data_output_id,
+});
+
+const filterPoliciesForCurrentSpace = (
+  soClient: SavedObjectsClientContract,
+  allFleetServerPolicies?: AgentPolicy[]
+) => {
+  // Filter the pre-fetched cross-space policies to those visible in the current space
+  const currentSpaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
+  const currentSpacePolicies = (allFleetServerPolicies ?? []).filter((p) => {
+    if (!p.space_ids || p.space_ids.length === 0) {
+      return currentSpaceId === DEFAULT_SPACE_ID;
+    }
+    return p.space_ids.includes(currentSpaceId);
+  });
+  return currentSpacePolicies;
+};
+
+export const getFleetServerOrAgentPolicies = async (
+  soClient: SavedObjectsClientContract,
+  agentPolicyId?: string,
+  allFleetServerPolicies?: AgentPolicy[]
+): Promise<{
+  fleetServerPolicies?: EnrollmentSettingsFleetServerPolicy[];
+  scopedAgentPolicy?: EnrollmentSettingsFleetServerPolicy;
+}> => {
+  // If an agent policy is specified, return only that policy
+  if (agentPolicyId) {
+    const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId, true);
+    if (agentPolicy) {
+      if (agentPolicy.package_policies?.find((p) => p.package?.name === FLEET_SERVER_PACKAGE)) {
+        return {
+          fleetServerPolicies: [mapPolicy(agentPolicy)],
+          scopedAgentPolicy: mapPolicy(agentPolicy),
+        };
+      } else {
+        return {
+          scopedAgentPolicy: mapPolicy(agentPolicy),
+        };
+      }
+    }
+    return {};
+  }
+
+  const currentSpacePolicies = filterPoliciesForCurrentSpace(soClient, allFleetServerPolicies);
+  return { fleetServerPolicies: currentSpacePolicies.map(mapPolicy) };
+};
+
+export const getDownloadSource = async (
+  downloadSourceId?: string
+): Promise<GetEnrollmentSettingsResponse['download_source'] | undefined> => {
+  const sources = await downloadSourceService.list();
+  const foundSource = downloadSourceId
+    ? sources.items.find((s) => s.id === downloadSourceId)
+    : undefined;
+  return foundSource || sources.items.find((s) => s.is_default);
+};
+
+function sanitizeEnrollmentProxy(
+  proxy: FleetProxy
+): NonNullable<GetEnrollmentSettingsResponse['download_source_proxy']> {
+  return pick(proxy, ['id', 'name', 'url']);
+}
+
+function sanitizeEnrollmentFleetServerHost(host: FleetServerHost): FleetServerHost {
+  return {
+    ...omit(host, ['secrets']),
+    ssl: host.ssl ? omit(host.ssl, ['key', 'es_key', 'agent_key']) : host.ssl,
+  };
+}
+
+function sanitizeEnrollmentOutput(output: Output): Output {
+  return {
+    ...omit(output, ['secrets']),
+    ssl: output.ssl ? omit(output.ssl, ['key']) : output.ssl,
+    ...(output.type === 'kafka'
+      ? {
+          password: undefined,
+        }
+      : {}),
+    ...(output.type === 'remote_elasticsearch'
+      ? {
+          service_token: undefined,
+        }
+      : {}),
+  };
+}
+
+function sanitizeEnrollmentDownloadSource(downloadSource: DownloadSource): DownloadSource {
+  return {
+    ...omit(downloadSource, ['secrets']),
+    ssl: downloadSource.ssl ? omit(downloadSource.ssl, ['key']) : downloadSource.ssl,
+    auth: downloadSource.auth
+      ? omit(downloadSource.auth, ['password', 'api_key'])
+      : downloadSource.auth,
+  };
+}

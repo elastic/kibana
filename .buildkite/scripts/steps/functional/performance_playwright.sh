@@ -4,47 +4,67 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-.buildkite/scripts/bootstrap.sh
+is_test_execution_step
+
+run_bootstrap() {
+    echo "Running yarn kbn bootstrap --force-install"
+    yarn kbn bootstrap --force-install
+}
+
+echo "--- yarn install and boostrap"
+if ! run_bootstrap; then
+  echo "--- bootstrap failed, trying again in 15 seconds"
+  sleep 15
+
+  # Most bootstrap failures will result in a problem inside node_modules that does not get fixed on the next bootstrap
+  # So, we should just delete node_modules in between attempts
+  rm -rf node_modules
+
+  run_bootstrap
+fi
+
+if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
+  check_for_changed_files 'yarn kbn bootstrap'
+fi
+
+# These tests are running on static workers so we have to make sure we delete previous build of Kibana
+rm -rf "$KIBANA_BUILD_LOCATION"
 .buildkite/scripts/download_build_artifacts.sh
 
-echo --- Run Performance Tests with Playwright config
+echo '--- Cleaning ports used by performance tests'
+# If a performance test shuts down uncleanly it might leave some ports bound
+# 6104 is the package registry running in docker
+force_clean_ports 6104
 
-node scripts/es snapshot&
+if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; then
+  # 'performance-data-set-extraction' uses 'n2-2-spot' agent, performance metrics don't matter
+  # and we skip warmup phase for each test
+  echo "--- Running single user journeys"
+  node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --skip-warmup
+else
+  # pipeline should use bare metal static worker
+  if [[ -z "${JOURNEYS_GROUP+x}" ]]; then
+    echo "--- Running performance tests"
+    node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+  else
+    echo "--- Running performance tests: '$JOURNEYS_GROUP' group"
+    node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --group "$JOURNEYS_GROUP"
+  fi
+fi
 
-esPid=$!
+echo "--- Upload journey step screenshots"
+JOURNEY_SCREENSHOTS_DIR="${KIBANA_DIR}/data/journey_screenshots"
+if [ -d "$JOURNEY_SCREENSHOTS_DIR" ]; then
+  cd "$JOURNEY_SCREENSHOTS_DIR"
+  buildkite-agent artifact upload "**/*fullscreen*.png"
+  cd "$KIBANA_DIR"
+fi
 
-export TEST_ES_URL=http://elastic:changeme@localhost:9200
-export TEST_ES_DISABLE_STARTUP=true
-
-sleep 120
-
-journeys=("login" "ecommerce_dashboard" "flight_dashboard" "web_logs_dashboard" "promotion_tracking_dashboard" "many_fields_discover")
-
-for i in "${journeys[@]}"; do
-    echo "JOURNEY[${i}] is running"
-
-    export TEST_PERFORMANCE_PHASE=WARMUP
-    export ELASTIC_APM_ACTIVE=false
-    export JOURNEY_NAME="${i}"
-
-    checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: WARMUP)" \
-      node scripts/functional_tests \
-      --config x-pack/test/performance/config.playwright.ts \
-      --include "x-pack/test/performance/tests/playwright/${i}.ts" \
-      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-      --debug \
-      --bail
-
-    export TEST_PERFORMANCE_PHASE=TEST
-    export ELASTIC_APM_ACTIVE=true
-
-    checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: TEST)" \
-      node scripts/functional_tests \
-      --config x-pack/test/performance/config.playwright.ts \
-      --include "x-pack/test/performance/tests/playwright/${i}.ts" \
-      --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-      --debug \
-      --bail
-done
-
-kill "$esPid"
+echo "--- Upload server logs"
+JOURNEY_SERVER_LOGS_REL_PATH=".ftr/journey_server_logs"
+JOURNEY_SERVER_LOGS_DIR="${KIBANA_DIR}/${JOURNEY_SERVER_LOGS_REL_PATH}"
+if [ -d "$JOURNEY_SERVER_LOGS_DIR" ]; then
+  cd "$KIBANA_DIR"
+  tar -czf server-logs.tar.gz $JOURNEY_SERVER_LOGS_REL_PATH/**/*
+  buildkite-agent artifact upload server-logs.tar.gz
+fi

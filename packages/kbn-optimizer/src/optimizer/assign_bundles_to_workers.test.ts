@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 jest.mock('fs');
 
 import { Bundle } from '../common';
 
-import { assignBundlesToWorkers, Assignments } from './assign_bundles_to_workers';
+import type { Assignments } from './assign_bundles_to_workers';
+import { assignBundlesToWorkers } from './assign_bundles_to_workers';
 
 const hasWorkUnits = (b: Bundle) => b.cache.getWorkUnits() !== undefined;
 const noWorkUnits = (b: Bundle) => b.cache.getWorkUnits() === undefined;
@@ -46,11 +48,15 @@ const assertReturnVal = (workers: Assignments[]) => {
 const testBundle = (id: string) =>
   new Bundle({
     contextDir: `/repo/plugin/${id}/public`,
-    publicDirNames: ['public'],
     id,
     outputDir: `/repo/plugins/${id}/target/public`,
     sourceRoot: `/repo`,
     type: 'plugin',
+    remoteInfo: {
+      pkgId: `@kbn/${id}-plugin`,
+      targets: ['public'],
+    },
+    ignoreMetrics: false,
   });
 
 const getBundles = ({

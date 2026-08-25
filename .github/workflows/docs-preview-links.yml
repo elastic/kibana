@@ -1,0 +1,20 @@
+name: Docs Preview Links
+
+on:
+  pull_request_target:
+    types: [opened]
+    paths:
+      - '**.asciidoc'
+
+permissions:
+      pull-requests: write
+jobs:
+  doc-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: elastic/docs/.github/actions/docs-preview@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repo: ${{ github.event.repository.name }}
+          preview-path: 'guide/index.html'
+          pr: ${{ github.event.pull_request.number }}

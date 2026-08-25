@@ -1,0 +1,7 @@
+{
+  "watcher.put_watch": {
+    "data_autocomplete_rules": {
+      "throttle_period": 5
+    }
+  }
+}

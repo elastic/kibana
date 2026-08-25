@@ -7,16 +7,17 @@
 
 import React from 'react';
 import { EuiFormRow, EuiColorPicker } from '@elastic/eui';
-import { render } from 'react-dom';
-import { Ast } from '@kbn/interpreter';
-import { ThemeServiceStart } from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { Visualization, OperationMetadata } from '@kbn/lens-plugin/public';
+import type { Ast } from '@kbn/interpreter';
+import type { ThemeServiceStart } from '@kbn/core/public';
+import type { Visualization, OperationMetadata } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import type { RotatingNumberState } from '../common/types';
 import { DEFAULT_COLOR } from '../common/constants';
 
-const toExpression = (state: RotatingNumberState): Ast | null => {
+const toExpression = (
+  state: RotatingNumberState,
+  datasourceExpressionsByLayers?: Record<string, Ast>
+): Ast | null => {
   if (!state.accessor) {
     return null;
   }
@@ -24,6 +25,7 @@ const toExpression = (state: RotatingNumberState): Ast | null => {
   return {
     type: 'expression',
     chain: [
+      ...Object.values(datasourceExpressionsByLayers || {})[0].chain,
       {
         type: 'function',
         function: 'rotating_number',
@@ -42,19 +44,18 @@ export const getRotatingNumberVisualization = ({
 }): Visualization<RotatingNumberState> => ({
   id: 'rotatingNumber',
 
+  getVisualizationTypeId() {
+    return 'rotatingNumber';
+  },
   visualizationTypes: [
     {
       id: 'rotatingNumber',
       icon: 'refresh',
       label: 'Rotating number',
-      groupLabel: 'Goal and single value',
+      description: 'A number that rotates',
       sortPriority: 3,
     },
   ],
-
-  getVisualizationTypeId() {
-    return 'rotatingNumber';
-  },
 
   clearLayer(state) {
     return {
@@ -89,7 +90,7 @@ export const getRotatingNumberVisualization = ({
       {
         previewIcon: 'refresh',
         score: 0.5,
-        title: `Rotating ${table.label}` || 'Rotating number',
+        title: table.label ? `Rotating ${table.label}` : 'Rotating number',
         state: {
           layerId: table.layerId,
           color: state?.color || DEFAULT_COLOR,
@@ -149,8 +150,10 @@ export const getRotatingNumberVisualization = ({
     }
   },
 
-  toExpression: (state) => toExpression(state),
-  toPreviewExpression: (state) => toExpression(state),
+  toExpression: (state, _layers, _attributes, datasourceExpression) =>
+    toExpression(state, datasourceExpression),
+  toPreviewExpression: (state, _layers, datasourceExpression) =>
+    toExpression(state, datasourceExpression),
 
   setDimension({ prevState, columnId }) {
     return { ...prevState, accessor: columnId };
@@ -160,24 +163,16 @@ export const getRotatingNumberVisualization = ({
     return { ...prevState, accessor: undefined };
   },
 
-  renderDimensionEditor(domElement, props) {
-    render(
-      <KibanaThemeProvider theme$={theme.theme$}>
-        <EuiFormRow label="Pick a color">
-          <EuiColorPicker
-            onChange={(newColor) => {
-              props.setState({ ...props.state, color: newColor });
-            }}
-            color={props.state.color}
-          />
-        </EuiFormRow>
-      </KibanaThemeProvider>,
-      domElement
+  DimensionEditorComponent(props) {
+    return (
+      <EuiFormRow label="Pick a color">
+        <EuiColorPicker
+          onChange={(newColor) => {
+            props.setState({ ...props.state, color: newColor });
+          }}
+          color={props.state.color}
+        />
+      </EuiFormRow>
     );
-  },
-
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
   },
 });

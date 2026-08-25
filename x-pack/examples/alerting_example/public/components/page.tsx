@@ -6,17 +6,18 @@
  */
 
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import type { RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 
 import {
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
   EuiBreadcrumbs,
   EuiSpacer,
+  EuiPageSection,
 } from '@elastic/eui';
 
 type PageProps = RouteComponentProps & {
@@ -52,11 +53,15 @@ export const Page = withRouter(({ title, crumb, children, isHome = false, histor
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiBreadcrumbs responsive={false} breadcrumbs={breadcrumbs} />
+      <EuiBreadcrumbs
+        responsive={false}
+        breadcrumbs={breadcrumbs}
+        aria-label={i18n.translate('searchTestPage.breadcrumbs.ariaLabel', {
+          defaultMessage: 'Breadcrumbs',
+        })}
+      />
       <EuiSpacer />
-      <EuiPageContent>
-        <EuiPageContentBody>{children}</EuiPageContentBody>
-      </EuiPageContent>
+      <EuiPageSection>{children}</EuiPageSection>
     </EuiPageBody>
   );
 });

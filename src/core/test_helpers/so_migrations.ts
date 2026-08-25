@@ -1,14 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as kbnTestServer from './kbn_server';
-import { SavedObject } from '../types';
-import { SavedObjectsType } from '../server';
+import {
+  type TestElasticsearchUtils,
+  createRootWithCorePlugins,
+  createTestServers,
+  getSupertest,
+} from '@kbn/core-test-helpers-kbn-server';
+import type { SavedObject } from '../types';
+import type { SavedObjectsType } from '../server';
 
 type ExportOptions = { type: string } | { objects: Array<{ id: string; type: string }> };
 
@@ -43,9 +49,9 @@ type ExportOptions = { type: string } | { objects: Array<{ id: string; type: str
 export const createTestHarness = () => {
   let started = false;
   let stopped = false;
-  let esServer: kbnTestServer.TestElasticsearchUtils;
-  const { startES } = kbnTestServer.createTestServers({ adjustTimeout: jest.setTimeout });
-  const root = kbnTestServer.createRootWithCorePlugins(
+  let esServer: TestElasticsearchUtils;
+  const { startES } = createTestServers({ adjustTimeout: jest.setTimeout });
+  const root = createRootWithCorePlugins(
     // Disable reporting due to browser install issue on CI. See https://github.com/elastic/kibana/issues/102919
     { xpack: { reporting: { enabled: false } } },
     { oss: false }
@@ -61,21 +67,21 @@ export const createTestHarness = () => {
       throw new Error(`SavedObjectTestHarness must be started before objects can be imported`);
     if (stopped) throw new Error(`SavedObjectTestHarness cannot import objects after stopped`);
 
-    const response = await kbnTestServer
+    const response =
       // Always use overwrite=true flag so we can isolate this harness to migrations
-      .getSupertest(root, 'post', '/api/saved_objects/_import?overwrite=true')
-      .set('Content-Type', 'multipart/form-data; boundary=EXAMPLE')
-      .send(
-        [
-          '--EXAMPLE',
-          'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
-          'Content-Type: application/ndjson',
-          '',
-          ...objects.map((o) => JSON.stringify(o)),
-          '--EXAMPLE--',
-        ].join('\r\n')
-      )
-      .expect(200);
+      await getSupertest(root, 'post', '/api/saved_objects/_import?overwrite=true')
+        .set('Content-Type', 'multipart/form-data; boundary=EXAMPLE')
+        .send(
+          [
+            '--EXAMPLE',
+            'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+            'Content-Type: application/ndjson',
+            '',
+            ...objects.map((o) => JSON.stringify(o)),
+            '--EXAMPLE--',
+          ].join('\r\n')
+        )
+        .expect(200);
 
     if (response.body.errors?.length > 0) {
       throw new Error(
@@ -93,8 +99,7 @@ export const createTestHarness = () => {
       throw new Error(`SavedObjectTestHarness must be started before objects can be imported`);
     if (stopped) throw new Error(`SavedObjectTestHarness cannot import objects after stopped`);
 
-    const response = await kbnTestServer
-      .getSupertest(root, 'post', '/api/saved_objects/_export')
+    const response = await getSupertest(root, 'post', '/api/saved_objects/_export')
       .send({
         ...options,
         excludeExportDetails: true,
@@ -128,8 +133,21 @@ export const createTestHarness = () => {
 
       await waitForTrue({
         predicate: async () => {
-          const statusApi = kbnTestServer.getSupertest(root, 'get', '/api/status');
+          const statusApi = getSupertest(root, 'get', '/api/status');
           const response = await statusApi.send();
+          return response.status === 200;
+        },
+      });
+
+      // Even after `/api/status` reports ready, other APIs (like Saved Objects import/export) can briefly return 503
+      // while Kibana finishes transitioning out of preboot / completes startup tasks.
+      await waitForTrue({
+        predicate: async () => {
+          const response = await getSupertest(
+            root,
+            'get',
+            '/api/saved_objects/_find?type=config&per_page=1'
+          ).send();
           return response.status === 200;
         },
       });
@@ -147,8 +165,8 @@ export const createTestHarness = () => {
       if (stopped)
         throw new Error(`SavedObjectTestHarness already stopped! Cannot call stop again`);
 
-      await root.shutdown();
-      await esServer.stop();
+      await root?.shutdown();
+      await esServer?.stop();
       stopped = true;
     },
 

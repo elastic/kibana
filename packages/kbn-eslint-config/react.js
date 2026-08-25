@@ -1,5 +1,5 @@
 const semver = require('semver');
-const { kibanaPackageJson: PKG } = require('@kbn/utils');
+const { PKG_JSON } = require('@kbn/repo-info');
 
 module.exports = {
   plugins: [
@@ -16,7 +16,7 @@ module.exports = {
 
   settings: {
     react: {
-      version: semver.valid(semver.coerce(PKG.dependencies.react)),
+      version: semver.valid(semver.coerce(PKG_JSON.dependencies.react)),
     },
   },
 
@@ -61,7 +61,7 @@ module.exports = {
     'react/no-will-update-set-state': 'error',
     'react/no-is-mounted': 'error',
     'react/no-multi-comp': ['error', { ignoreStateless: true }],
-    'react/no-unknown-property': 'error',
+    'react/no-unknown-property': ['error', { ignore: ['css'] }],
     'react/prefer-es6-class': ['error', 'always'],
     'react/prefer-stateless-function': ['error', { ignorePureComponents: true }],
     'react/no-unescaped-entities': 'error',

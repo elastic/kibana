@@ -11,9 +11,16 @@ cat << EOF | buildkite-agent annotate --style "info"
   $ES_SNAPSHOT_MANIFEST
 EOF
 
-node "$(dirname "${0}")/promote_manifest.js" "$ES_SNAPSHOT_MANIFEST"
+ts-node "$(dirname "${0}")/promote_manifest.ts" "$ES_SNAPSHOT_MANIFEST"
 
-if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
-  echo "--- Trigger agent packer cache pipeline"
-  node .buildkite/scripts/steps/trigger_packer_cache.js
-fi
+cat << EOF | buildkite-agent pipeline upload
+steps:
+  - label: "Update cache for ES $BUILDKITE_BRANCH snapshot"
+    trigger: kibana-vm-images
+    async: true
+    build:
+      env:
+        IMAGES_CONFIG: 'kibana/image_cache.tpl.yml'
+        BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
+        RETRY: "1"
+EOF

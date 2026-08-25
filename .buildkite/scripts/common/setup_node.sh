@@ -1,12 +1,27 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
+source .buildkite/scripts/common/util.sh
+
 echo "--- Setup Node"
 
 NODE_VERSION="$(cat "$KIBANA_DIR/.node-version")"
 export NODE_VERSION
-export NODE_DIR="$CACHE_DIR/node/$NODE_VERSION"
+NODE_VARIANT=""
+if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
+  echo ' -- Using Node.js variant with pointer compression enabled'
+  NODE_VARIANT="node-pointer-compression/"
+  export NODE_DIR="$CACHE_DIR/node-pointer-compression/$NODE_VERSION"
+elif [[ "${CI_FORCE_NODE_GLIBC_217:-}" = "true" ]]; then
+  echo ' -- Using Node.js variant compatible with glibc 2.17'
+  NODE_VARIANT="node-glibc-217/"
+  export NODE_DIR="$CACHE_DIR/node-glibc-217/$NODE_VERSION"
+else
+  export NODE_DIR="$CACHE_DIR/node/$NODE_VERSION"
+  echo ' -- Using default Node.js'
+fi
 export NODE_BIN_DIR="$NODE_DIR/bin"
-export YARN_OFFLINE_CACHE="$CACHE_DIR/yarn-offline-cache"
 
 ## Install node for whatever the current os/arch are
 hostArch="$(command uname -m)"
@@ -28,7 +43,7 @@ elif [[ "$UNAME" == "Darwin" ]]; then
 fi
 echo " -- Running on OS: $OS"
 
-nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v$NODE_VERSION/node-v$NODE_VERSION-${OS}-${classifier}"
+nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${NODE_VARIANT}dist/v${NODE_VERSION}/node-v${NODE_VERSION}-${OS}-${classifier}"
 
 echo " -- node: version=v${NODE_VERSION} dir=$NODE_DIR"
 
@@ -54,25 +69,3 @@ else
 fi
 
 export PATH="$NODE_BIN_DIR:$PATH"
-
-echo "--- Setup Yarn"
-
-YARN_VERSION=$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")
-export YARN_VERSION
-
-if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
-  rm -rf "$(npm root -g)/yarn" # in case the directory is in a bad state
-  if [[ ! $(npm install -g "yarn@^${YARN_VERSION}") ]]; then
-    # If this command is terminated early, e.g. because the build was cancelled in buildkite,
-    # a yarn directory is left behind in a bad state that can cause all subsequent installs to fail
-    rm -rf "$(npm root -g)/yarn"
-    echo "Trying again to install yarn..."
-    npm install -g "yarn@^${YARN_VERSION}"
-  fi
-fi
-
-yarn config set yarn-offline-mirror "$YARN_OFFLINE_CACHE"
-
-YARN_GLOBAL_BIN=$(yarn global bin)
-export YARN_GLOBAL_BIN
-export PATH="$PATH:$YARN_GLOBAL_BIN"

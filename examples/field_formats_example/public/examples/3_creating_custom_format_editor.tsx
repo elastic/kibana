@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import {
+import type {
   FieldFormatEditor,
   FieldFormatEditorFactory,
   IndexPatternFieldEditorSetup,
@@ -41,12 +42,12 @@ const ExampleCurrencyFormatEditor: FieldFormatEditor<{ currency: string }> = (pr
 ExampleCurrencyFormatEditor.formatId = ExampleCurrencyFormat.id;
 
 // 3. Wrap editor component in a factory. This is needed to support and encourage code-splitting.
-const ExampleCurrencyFormatEditorFactory: FieldFormatEditorFactory<{
-  currency: string;
-}> = async () => ExampleCurrencyFormatEditor;
+const ExampleCurrencyFormatEditorFactory = async () => ExampleCurrencyFormatEditor;
 ExampleCurrencyFormatEditorFactory.formatId = ExampleCurrencyFormatEditor.formatId;
 
 export function registerExampleFormatEditor(indexPatternFieldEditor: IndexPatternFieldEditorSetup) {
   // 4. Register a field editor. This should happen in setup plugin lifecycle phase.
-  indexPatternFieldEditor.fieldFormatEditors.register(ExampleCurrencyFormatEditorFactory);
+  indexPatternFieldEditor.fieldFormatEditors.register(
+    ExampleCurrencyFormatEditorFactory as FieldFormatEditorFactory
+  );
 }

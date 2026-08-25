@@ -1,0 +1,123 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Subscription } from 'rxjs';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PublicAppInfo,
+} from '@kbn/core/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { EmbeddableStateTransfer } from './state_transfer';
+import { setKibanaServices } from './kibana_services';
+import { registerEmbeddablePublicDefinition } from './react_embeddable_system';
+import { registerAddFromLibraryType } from './add_from_library/registry';
+import type {
+  EmbeddableSetup,
+  EmbeddableSetupDependencies,
+  EmbeddableStart,
+  EmbeddableStartDependencies,
+} from './types';
+import {
+  registerLegacyURLTransform,
+  hasLegacyURLTransform,
+  getLegacyURLTransform,
+} from './bwc/legacy_url_transform';
+import { registerDrilldown } from './drilldowns/registry';
+import { registerActions } from './ui_actions/register_actions';
+import { closeSetup } from './react_embeddable_system/react_embeddable_registry';
+import type {
+  SearchLibraryRequestType,
+  SearchLibraryResponseType,
+} from '../server/search_route/types';
+import { SEARCH_ROUTE_PATH } from '../common/constants';
+import { getEmbeddableDefinition } from './react_embeddable_system/react_embeddable_registry';
+
+export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
+  private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
+  private appList?: ReadonlyMap<string, PublicAppInfo>;
+  private appListSubscription?: Subscription;
+
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
+    registerActions(uiActions);
+
+    return {
+      registerDrilldown,
+      registerEmbeddablePublicDefinition,
+      registerAddFromLibraryType,
+      registerLegacyURLTransform,
+    };
+  }
+
+  public start(core: CoreStart, deps: EmbeddableStartDependencies): EmbeddableStart {
+    closeSetup();
+    this.appListSubscription = core.application.applications$.subscribe((appList) => {
+      this.appList = appList;
+    });
+
+    this.stateTransferService = new EmbeddableStateTransfer(
+      core.application.navigateToApp,
+      core.application.currentAppId$,
+      this.appList
+    );
+
+    const embeddableStart: EmbeddableStart = {
+      getSavedObjects: async (request: SearchLibraryRequestType) => {
+        try {
+          const result = await core.http.post(SEARCH_ROUTE_PATH, {
+            body: JSON.stringify(request),
+          });
+          return result as SearchLibraryResponseType;
+        } catch (e) {
+          if (e.body.statusCode === 403) {
+            // we should not surface any forbidden errors to the front end
+            return { hits: [], total: 0 } as SearchLibraryResponseType;
+          }
+          throw e;
+        }
+      },
+      getAddFromLibraryComponent: async () => {
+        const { AddFromLibraryFlyout } = await import('./add_from_library/add_from_library_flyout');
+        return AddFromLibraryFlyout;
+      },
+      getAddFromLibraryContentComponent: async () => {
+        const { AddFromLibraryContent } = await import(
+          './add_from_library/add_from_library_flyout'
+        );
+        return AddFromLibraryContent;
+      },
+      // @ts-ignore
+      getEmbeddableDefinition,
+      getStateTransfer: (storage?: Storage) =>
+        storage
+          ? new EmbeddableStateTransfer(
+              core.application.navigateToApp,
+              core.application.currentAppId$,
+              this.appList,
+              storage
+            )
+          : this.stateTransferService,
+      hasLegacyURLTransform,
+      getLegacyURLTransform,
+    };
+
+    setKibanaServices(core, embeddableStart, deps);
+    return embeddableStart;
+  }
+
+  public stop() {
+    if (this.appListSubscription) {
+      this.appListSubscription.unsubscribe();
+    }
+  }
+}

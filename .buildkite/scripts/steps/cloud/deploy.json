@@ -7,11 +7,11 @@
         "plan": {
           "cluster_topology": [
             {
-              "instance_configuration_id": "gcp.integrationsserver.1",
+              "instance_configuration_id": "gcp.integrationsserver.n2.68x32x45",
               "zone_count": 1,
               "size": {
-                "value": 512,
-                "resource": "memory"
+                "resource": "memory",
+                "value": 1024
               }
             }
           ],
@@ -29,11 +29,10 @@
           "dedicated_masters_threshold": 6
         },
         "plan": {
-          "autoscaling_enabled": false,
           "cluster_topology": [
             {
-              "zone_count": 2,
-              "instance_configuration_id": "gcp.coordinating.1",
+              "zone_count": 1,
+              "instance_configuration_id": "gcp.es.coordinating.n2.68x16x45",
               "node_roles": [
                 "ingest",
                 "remote_cluster_client"
@@ -42,9 +41,6 @@
               "size": {
                 "resource": "memory",
                 "value": 0
-              },
-              "elasticsearch": {
-                "enabled_built_in_plugins": []
               }
             },
             {
@@ -52,10 +48,9 @@
               "elasticsearch": {
                 "node_attributes": {
                   "data": "hot"
-                },
-                "enabled_built_in_plugins": []
+                }
               },
-              "instance_configuration_id": "gcp.data.highio.1",
+              "instance_configuration_id": "gcp.es.datahot.n2.68x32x45",
               "node_roles": [
                 "master",
                 "ingest",
@@ -66,19 +61,18 @@
               ],
               "id": "hot_content",
               "size": {
-                "value": 1024,
+                "value": 2048,
                 "resource": "memory"
               }
             },
             {
-              "zone_count": 2,
+              "zone_count": 1,
               "elasticsearch": {
                 "node_attributes": {
                   "data": "warm"
-                },
-                "enabled_built_in_plugins": []
+                }
               },
-              "instance_configuration_id": "gcp.data.highstorage.1",
+              "instance_configuration_id": "gcp.es.datawarm.n2.68x10x190",
               "node_roles": [
                 "data_warm",
                 "remote_cluster_client"
@@ -94,10 +88,9 @@
               "elasticsearch": {
                 "node_attributes": {
                   "data": "cold"
-                },
-                "enabled_built_in_plugins": []
+                }
               },
-              "instance_configuration_id": "gcp.data.highstorage.1",
+              "instance_configuration_id": "gcp.es.datacold.n2.68x10x190",
               "node_roles": [
                 "data_cold",
                 "remote_cluster_client"
@@ -113,10 +106,9 @@
               "elasticsearch": {
                 "node_attributes": {
                   "data": "frozen"
-                },
-                "enabled_built_in_plugins": []
+                }
               },
-              "instance_configuration_id": "gcp.es.datafrozen.n1.64x10x95",
+              "instance_configuration_id": "gcp.es.datafrozen.n2.68x10x90",
               "node_roles": [
                 "data_frozen"
               ],
@@ -127,8 +119,8 @@
               }
             },
             {
-              "zone_count": 3,
-              "instance_configuration_id": "gcp.master.1",
+              "zone_count": 1,
+              "instance_configuration_id": "gcp.es.master.n2.68x32x45",
               "node_roles": [
                 "master",
                 "remote_cluster_client"
@@ -137,63 +129,36 @@
               "size": {
                 "resource": "memory",
                 "value": 0
-              },
-              "elasticsearch": {
-                "enabled_built_in_plugins": []
               }
             },
             {
-              "zone_count": 1,
-              "instance_configuration_id": "gcp.ml.1",
+              "autoscaling_max": {
+                "resource": "memory",
+                "value": 8192
+              },
+              "autoscaling_min": {
+                "resource": "memory",
+                "value": 0
+              },
+              "autoscaling_tier_override": true,
+              "id": "ml",
+              "instance_configuration_id": "gcp.es.ml.n2.68x32x45",
               "node_roles": [
                 "ml",
                 "remote_cluster_client"
               ],
-              "id": "ml",
-              "size": {
-                "value": 1024,
-                "resource": "memory"
-              },
-              "elasticsearch": {
-                "enabled_built_in_plugins": []
-              }
+              "zone_count": 1
             }
           ],
           "elasticsearch": {
-            "version": null
+            "version": null,
+            "enabled_built_in_plugins": []
           },
           "deployment_template": {
-            "id": "gcp-io-optimized-v2"
+            "id": "gcp-cpu-optimized"
           }
         },
         "ref_id": "main-elasticsearch"
-      }
-    ],
-    "enterprise_search": [
-      {
-        "elasticsearch_cluster_ref_id": "main-elasticsearch",
-        "region": "gcp-us-west2",
-        "plan": {
-          "cluster_topology": [
-            {
-              "node_type": {
-                "connector": true,
-                "appserver": true,
-                "worker": true
-              },
-              "instance_configuration_id": "gcp.enterprisesearch.1",
-              "zone_count": 1,
-              "size": {
-                "resource": "memory",
-                "value": 2048
-              }
-            }
-          ],
-          "enterprise_search": {
-            "version": null
-          }
-        },
-        "ref_id": "main-enterprise_search"
       }
     ],
     "kibana": [
@@ -203,11 +168,11 @@
         "plan": {
           "cluster_topology": [
             {
-              "instance_configuration_id": "gcp.kibana.1",
+              "instance_configuration_id": "gcp.kibana.n2.68x32x45",
               "zone_count": 1,
               "size": {
-                "resource": "memory",
-                "value": 2048
+                "value": null,
+                "resource": "memory"
               }
             }
           ],
@@ -219,6 +184,9 @@
         "ref_id": "main-kibana"
       }
     ]
+  },
+  "settings": {
+    "autoscaling_enabled": false
   },
   "name": null,
   "metadata": {

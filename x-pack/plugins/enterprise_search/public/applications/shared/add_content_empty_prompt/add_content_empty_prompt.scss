@@ -1,7 +1,0 @@
-.addContentEmptyPrompt {
-  @include euiBreakpoint('xs','s') {
-    flex-direction: column-reverse;
-  }
-
-  border-bottom: $euiBorderThin;
-}

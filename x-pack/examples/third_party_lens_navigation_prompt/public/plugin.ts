@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
-import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import {
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import type {
   DateHistogramIndexPatternColumn,
-  IndexPatternPersistedState,
   LensPublicSetup,
   LensPublicStart,
 } from '@kbn/lens-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import image from './image.png';
 
 export interface SetupDependencies {
@@ -56,6 +56,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
   };
 
   return {
+    version: LENS_ITEM_LATEST_VERSION,
     visualizationType: 'lnsDatatable',
     title: 'Prefilled from example app',
     references: [
@@ -72,7 +73,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: dataLayer,
           },
@@ -96,14 +97,14 @@ export class EmbeddedLensExamplePlugin
     core.application.register({
       id: 'third_party_lens_navigation_prompt',
       title: 'Third party Lens navigation prompt',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: (params) => {
         (async () => {
           const [, { lens: lensStart, dataViews }] = await core.getStartServices();
           const defaultDataView = await dataViews.getDefault();
           lensStart.navigateToPrefilledEditor({
             id: '',
-            timeRange: {
+            time_range: {
               from: 'now-5d',
               to: 'now',
             },
@@ -125,60 +126,25 @@ export class EmbeddedLensExamplePlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_lens_navigation_prompt',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],
     });
 
-    lens.registerTopNavMenuEntryGenerator(
-      ({ visualizationId, visualizationState, datasourceStates, query, filters }) => {
-        if (!datasourceStates.indexpattern.state || !visualizationState) return;
+    lens.registerTopNavMenuEntryGenerator(({ currentDoc }) => {
+      if (!currentDoc) return;
 
-        return {
-          label: 'Debug in Playground',
-          iconType: 'wrench',
-          run: async () => {
-            const [coreStart] = await core.getStartServices();
-            const datasourceState = datasourceStates.indexpattern
-              .state as IndexPatternPersistedState;
-            const layersIds = Object.keys(datasourceState.layers);
-            const layers = Object.values(datasourceState.layers) as Array<
-              PersistedIndexPatternLayer & { indexPatternId: string }
-            >;
-            const serializedFilters = JSON.parse(JSON.stringify(filters));
-            coreStart.application.navigateToApp('testing_embedded_lens', {
-              state: {
-                visualizationType: visualizationId,
-                title: 'Lens visualization',
-                references: [
-                  {
-                    id: layers[0].indexPatternId,
-                    name: 'indexpattern-datasource-current-indexpattern',
-                    type: 'index-pattern',
-                  },
-                  ...layers.map(({ indexPatternId }, i) => ({
-                    id: indexPatternId,
-                    name: `indexpattern-datasource-layer-${layersIds[i]}`,
-                    type: 'index-pattern',
-                  })),
-                ],
-                state: {
-                  datasourceStates: {
-                    indexpattern: {
-                      layers: datasourceState.layers,
-                    },
-                  },
-                  visualization: visualizationState,
-                  filters: serializedFilters,
-                  query,
-                },
-              },
-            });
-          },
-        };
-      }
-    );
+      return {
+        label: 'Debug in Playground',
+        iconType: 'wrench',
+        run: async () => {
+          const [coreStart] = await core.getStartServices();
+          coreStart.application.navigateToApp('testing_embedded_lens', {
+            state: { ...currentDoc, savedObjectId: undefined },
+          });
+        },
+      };
+    });
   }
 
   public start() {}

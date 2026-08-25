@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
-import { EventEmitter } from 'events';
+import type { EventEmitter } from 'events';
 
 import * as Rx from 'rxjs';
 import {
@@ -20,19 +21,19 @@ import {
   switchMap,
   concatMap,
   takeUntil,
-} from 'rxjs/operators';
-import { CliArgs } from '@kbn/config';
+} from 'rxjs';
+import type { CliArgs } from '@kbn/config';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
-import { Log, CliLog } from './log';
+import type { Log } from './log';
+import { CliLog } from './log';
 import { Optimizer } from './optimizer';
 import { DevServer } from './dev_server';
 import { Watcher } from './watcher';
-import { BasePathProxyServer } from './base_path_proxy_server';
+import { getBasePathProxyServer, type BasePathProxyServer } from './base_path_proxy';
 import { shouldRedirectFromOldBasePath } from './should_redirect_from_old_base_path';
-import { getServerWatchPaths } from './get_server_watch_paths';
-import { CliDevConfig } from './config';
+import type { CliDevConfig } from './config';
 
 // signal that emits undefined once a termination signal has been sent
 const exitSignal$ = new Rx.ReplaySubject<undefined>(1);
@@ -111,20 +112,17 @@ export class CliDevMode {
     this.log = log || new CliLog(!!cliArgs.silent);
 
     if (cliArgs.basePath) {
-      this.basePathProxy = new BasePathProxyServer(this.log, config.http, config.dev);
+      this.basePathProxy = getBasePathProxyServer({
+        log: this.log,
+        devConfig: config.dev,
+        httpConfig: config.http,
+      });
     }
-
-    const { watchPaths, ignorePaths } = getServerWatchPaths({
-      pluginPaths: config.plugins.additionalPluginPaths,
-      pluginScanDirs: config.plugins.pluginSearchPaths,
-    });
 
     this.watcher = new Watcher({
       enabled: !!cliArgs.watch,
       log: this.log,
-      cwd: REPO_ROOT,
-      paths: watchPaths,
-      ignore: ignorePaths,
+      repoRoot: REPO_ROOT,
     });
 
     this.devServer = new DevServer({
@@ -152,14 +150,16 @@ export class CliDevMode {
           .split(`${this.basePathProxy.host}:${this.basePathProxy.targetPort}`)
           .join(`${this.basePathProxy.host}:${this.basePathProxy.port}`);
       },
+      proxyUrl: this.basePathProxy
+        ? `${config.http.ssl.enabled ? 'https' : 'http'}://${this.basePathProxy.host}:${
+            this.basePathProxy.port
+          }${this.basePathProxy.basePath ?? ''}`
+        : undefined,
     });
 
     this.optimizer = new Optimizer({
       enabled: !cliArgs.disableOptimizer,
       repoRoot: REPO_ROOT,
-      oss: cliArgs.oss,
-      pluginPaths: config.plugins.additionalPluginPaths,
-      pluginScanDirs: config.plugins.pluginSearchPaths,
       runExamples: cliArgs.runExamples,
       cache: cliArgs.cache,
       dist: cliArgs.dist,
@@ -167,6 +167,9 @@ export class CliDevMode {
       silent: !!cliArgs.silent,
       verbose: !!cliArgs.verbose,
       watch: cliArgs.watch,
+      pluginPaths: config.plugins.additionalPluginPaths,
+      pluginScanDirs: config.plugins.pluginSearchPaths,
+      basePath: this.basePathProxy?.basePath,
     });
   }
 
@@ -248,8 +251,10 @@ export class CliDevMode {
     }
 
     this.subscription.add(
-      this.optimizer.run$
+      // the same pattern as: `kibana/packages/kbn-cli-dev-mode/src/dev_server.ts`
+      Rx.concat([undefined], this.watcher.optimizerShouldRestart$())
         .pipe(
+          switchMap(() => this.optimizer.run$),
           // stop the optimizer as soon as we get an exit signal
           takeUntil(exitSignal$)
         )

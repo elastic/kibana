@@ -1,26 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReducerStreamApiAction, API_ACTION_NAME } from '.';
+import { getInitialState, type StreamState } from '../stream_state';
+import { type ReducerStreamApiAction, API_ACTION_NAME } from './reducer_actions';
 
 export const UI_ACTION_NAME = {
   RESET: 'reset',
 } as const;
-export type UiActionName = typeof UI_ACTION_NAME[keyof typeof UI_ACTION_NAME];
-
-export interface StreamState {
-  progress: number;
-  entities: Record<string, number>;
-}
-export const initialState: StreamState = {
-  progress: 0,
-  entities: {},
-};
+export type UiActionName = (typeof UI_ACTION_NAME)[keyof typeof UI_ACTION_NAME];
 
 interface UiActionResetStream {
   type: typeof UI_ACTION_NAME.RESET;
@@ -32,14 +25,7 @@ export function resetStream(): UiActionResetStream {
 
 type UiAction = UiActionResetStream;
 export type ReducerAction = ReducerStreamApiAction | UiAction;
-export function reducerStreamReducer(
-  state: StreamState,
-  action: ReducerAction | ReducerAction[]
-): StreamState {
-  if (Array.isArray(action)) {
-    return action.reduce(reducerStreamReducer, state);
-  }
-
+export function reducerStreamReducer(state: StreamState, action: ReducerAction): StreamState {
   switch (action.type) {
     case API_ACTION_NAME.UPDATE_PROGRESS:
       return {
@@ -64,8 +50,13 @@ export function reducerStreamReducer(
         ...state,
         entities: addToEntities,
       };
+    case API_ACTION_NAME.ERROR:
+      return {
+        ...state,
+        errors: [...state.errors, action.payload],
+      };
     case UI_ACTION_NAME.RESET:
-      return initialState;
+      return getInitialState();
     default:
       return state;
   }

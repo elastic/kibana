@@ -1,32 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
 
-import { CoreStart } from '@kbn/core/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import {
-  ScreenshotModePluginSetup,
-  KBN_SCREENSHOT_MODE_HEADER,
-} from '@kbn/screenshot-mode-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { KBN_SCREENSHOT_MODE_HEADER } from '@kbn/screenshot-mode-plugin/public';
 
 import { PLUGIN_NAME, BASE_API_ROUTE } from '../../common';
 
@@ -82,8 +80,8 @@ export const ScreenshotModeExampleApp = ({
                   </h1>
                 </EuiTitle>
               </EuiPageHeader>
-              <EuiPageContent>
-                <EuiPageContentHeader>
+              <EuiPageTemplate.Section>
+                <EuiPageHeader>
                   <EuiTitle>
                     <h2>
                       {isScreenshotMode ? (
@@ -99,8 +97,8 @@ export const ScreenshotModeExampleApp = ({
                       )}
                     </h2>
                   </EuiTitle>
-                </EuiPageContentHeader>
-                <EuiPageContentBody>
+                </EuiPageHeader>
+                <EuiPageSection>
                   <EuiText>
                     {isScreenshotMode ? (
                       <p>We detected screenshot mode. The chrome navbar should be hidden.</p>
@@ -111,8 +109,8 @@ export const ScreenshotModeExampleApp = ({
                       </p>
                     )}
                   </EuiText>
-                </EuiPageContentBody>
-              </EuiPageContent>
+                </EuiPageSection>
+              </EuiPageTemplate.Section>
             </EuiPageBody>
           </EuiPage>
         </>

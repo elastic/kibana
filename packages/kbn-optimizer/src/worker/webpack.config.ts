@@ -1,71 +1,76 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 import Fs from 'fs';
 
-import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
-// @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
-import webpackMerge from 'webpack-merge';
+import { merge as webpackMerge } from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import CompressionPlugin from 'compression-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import {
+  STATS_WARNINGS_FILTER,
+  STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
+} from '@kbn/optimizer-webpack-helpers';
+import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 
-import { Bundle, BundleRefs, WorkerConfig, parseDllManifest } from '../common';
-import { BundleRefsPlugin } from './bundle_refs_plugin';
+import type { Bundle, BundleRemotes, WorkerConfig } from '../common';
+import { parseDllManifest } from '../common';
+import { BundleRemotesPlugin } from './bundle_remotes_plugin';
 import { BundleMetricsPlugin } from './bundle_metrics_plugin';
+import { BundleRemoteUsedExportsPlugin } from './bundle_remote_used_exports_plugin';
 import { EmitStatsPlugin } from './emit_stats_plugin';
 import { PopulateBundleCachePlugin } from './populate_bundle_cache_plugin';
 
-const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
-const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
-const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
+const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
 const DLL_MANIFEST = JSON.parse(Fs.readFileSync(UiSharedDepsNpm.dllManifestPath, 'utf8'));
 
-const nodeModulesButNotKbnPackages = (path: string) => {
-  if (!path.includes('node_modules')) {
-    return false;
-  }
-
-  return !path.includes(`node_modules${Path.sep}@kbn${Path.sep}`);
-};
-
-export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
+export function getWebpackConfig(
+  bundle: Bundle,
+  bundleRemotes: BundleRemotes,
+  worker: WorkerConfig
+) {
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
-    node: { fs: 'empty' },
     context: bundle.contextDir,
-    cache: true,
     entry: {
       [bundle.id]: ENTRY_CREATOR,
     },
 
-    devtool: worker.dist ? false : '#cheap-source-map',
+    devtool: worker.dist ? false : 'cheap-source-map',
     profile: worker.profileWebpack,
 
+    target: 'web',
+
     output: {
+      hashFunction: 'xxhash64',
       path: bundle.outputDir,
       filename: `${bundle.id}.${bundle.type}.js`,
       chunkFilename: `${bundle.id}.chunk.[id].js`,
-      devtoolModuleFilenameTemplate: (info) =>
+      devtoolModuleFilenameTemplate: (info: any) =>
         `/${bundle.type}:${bundle.id}/${Path.relative(
           bundle.sourceRoot,
           info.absoluteResourcePath
         )}${info.query}`,
-      jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
+      chunkLoadingGlobal: `${bundle.id}_bundle_jsonpfunction`,
+      chunkLoading: 'jsonp',
     },
 
     optimization: {
-      noEmitOnErrors: true,
+      moduleIds: worker.dist ? 'deterministic' : 'natural',
+      chunkIds: worker.dist ? 'deterministic' : 'natural',
+      emitOnErrors: false,
       splitChunks: {
         maxAsyncRequests: 10,
         cacheGroups: {
@@ -76,18 +81,58 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       },
     },
 
-    externals: [UiSharedDepsSrc.externals],
+    externals: [
+      // Function externals: skip externalizing react-redux when imported by kea
+      // so the NormalModuleReplacementPlugin can redirect it to react-redux-v7.
+      ({ context, request }, callback) => {
+        if (context && request === 'react-redux' && /node_modules[\\/]kea/.test(context)) {
+          return callback();
+        }
+        const sharedExternals: Record<string, string> = {
+          'node:crypto': 'commonjs crypto',
+          ...UiSharedDepsSrc.externals,
+        };
+        if (request && request in sharedExternals) {
+          return callback(undefined, sharedExternals[request]);
+        }
+        return callback();
+      },
+    ],
 
     plugins: [
+      // Redirect kea's react-redux import to react-redux-v7 so it shares the
+      // same React context as the <Provider> from react-redux-v7 used by
+      // consumers like enterprise_search.
+      new webpack.NormalModuleReplacementPlugin(/^react-redux$/, (resource) => {
+        if (resource.context && /node_modules[\\/]kea/.test(resource.context)) {
+          resource.request = 'react-redux-v7';
+        }
+      }),
+      new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin(),
-      new BundleRefsPlugin(bundle, bundleRefs),
+      new BundleRemotesPlugin(bundle, bundleRemotes),
       new PopulateBundleCachePlugin(worker, bundle, parseDllManifest(DLL_MANIFEST)),
       new BundleMetricsPlugin(bundle),
       new webpack.DllReferencePlugin({
         context: worker.repoRoot,
         manifest: DLL_MANIFEST,
       }),
-      ...(worker.profileWebpack ? [new EmitStatsPlugin(bundle)] : []),
+      ...((worker.profileWebpack
+        ? [
+            new EmitStatsPlugin(bundle),
+            new BundleAnalyzerPlugin({
+              analyzerMode: 'static',
+              reportFilename: `${bundle.id}.analyzer.html`,
+              openAnalyzer: false,
+              logLevel: 'silent',
+            }),
+            new StatoscopeWebpackPlugin({
+              open: false,
+              saveReportTo: `${bundle.outputDir}/${bundle.id}.statoscope.html`,
+              statsOptions: STATS_OPTIONS_DEFAULT_USEFUL_FILTER,
+            }),
+          ]
+        : []) as any),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
     ],
 
@@ -95,10 +140,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       // no parse rules for a few known large packages which have no require() statements
       // or which have require() statements that should be ignored because the file is
       // already bundled with all its necessary dependencies
-      noParse: [
-        /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
-        /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
-      ],
+      noParse: [/[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/],
 
       rules: [
         {
@@ -113,10 +155,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             {
               loader: require.resolve('val-loader'),
               options: {
-                entries: bundle.publicDirNames.map((name) => {
-                  const absolute = Path.resolve(bundle.contextDir, name);
+                entries: bundle.remoteInfo.targets.map((target) => {
+                  const absolute = Path.resolve(bundle.contextDir, target);
                   const newContext = Path.dirname(ENTRY_CREATOR);
-                  const importId = `${bundle.type}/${bundle.id}/${name}`;
+                  const importId = `${bundle.type}/${bundle.id}/${target}`;
 
                   // relative path from context of the ENTRY_CREATOR, with linux path separators
                   let requirePath = Path.relative(newContext, absolute).split('\\').join('/');
@@ -144,11 +186,20 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 sourceMap: !worker.dist,
               },
             },
+            {
+              loader: 'postcss-loader',
+              options: {
+                sourceMap: !worker.dist,
+                postcssOptions: {
+                  config: require.resolve('../../postcss.config.js'),
+                },
+              },
+            },
           ],
         },
         {
           test: /\.scss$/,
-          exclude: nodeModulesButNotKbnPackages,
+          exclude: /node_modules/,
           oneOf: [
             ...worker.themeTags.map((theme) => ({
               resourceQuery: `?${theme}`,
@@ -166,29 +217,38 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                   loader: 'postcss-loader',
                   options: {
                     sourceMap: !worker.dist,
-                    config: {
-                      path: require.resolve('@kbn/optimizer/postcss.config.js'),
+                    postcssOptions: {
+                      config: require.resolve('../../postcss.config.js'),
                     },
                   },
                 },
                 {
                   loader: 'sass-loader',
                   options: {
-                    additionalData(content: string, loaderContext: webpack.loader.LoaderContext) {
-                      return `@import ${stringifyRequest(
-                        loaderContext,
-                        Path.resolve(
-                          worker.repoRoot,
-                          `src/core/public/core_app/styles/_globals_${theme}.scss`
+                    additionalData(content: string, loaderContext: webpack.LoaderContext<any>) {
+                      const req = JSON.stringify(
+                        loaderContext.utils.contextify(
+                          loaderContext.context || loaderContext.rootContext,
+                          Path.resolve(
+                            worker.repoRoot,
+                            `src/core/public/styles/core_app/_globals_${theme}.scss`
+                          )
                         )
-                      )};\n${content}`;
+                      );
+                      return `@import ${req};\n${content}`;
                     },
-                    webpackImporter: false,
-                    implementation: require('node-sass'),
+                    implementation: require('sass-embedded'),
                     sassOptions: {
-                      outputStyle: worker.dist ? 'compressed' : 'nested',
+                      outputStyle: worker.dist ? 'compressed' : 'expanded',
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
+                      sourceMap: true,
+                      quietDeps: true,
+                      silenceDeprecations: [
+                        'color-functions',
+                        'import',
+                        'global-builtin',
+                        'legacy-js-api',
+                      ],
                     },
                   },
                 },
@@ -204,13 +264,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           ],
         },
         {
-          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
-          loader: 'url-loader',
-          options: {
-            limit: 8192,
-          },
-        },
-        {
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
           use: {
@@ -218,16 +271,43 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             options: {
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
-              presets: IS_CODE_COVERAGE
-                ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
-                : [BABEL_PRESET_PATH],
+              presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
             },
           },
         },
         {
-          test: /\.(html|md|txt|tmpl)$/,
-          use: {
-            loader: 'raw-loader',
+          test: /\.peggy$/,
+          loader: require.resolve('@kbn/peggy-loader'),
+        },
+        {
+          test: /\.text$/,
+          loader: require.resolve('@kbn/dot-text-loader'),
+        },
+        // emits a separate file and exports the URL. Previously achievable by using file-loader.
+        {
+          include: [
+            require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js'),
+            require.resolve('maplibre-gl/dist/maplibre-gl-csp-worker'),
+          ],
+          type: 'asset/resource',
+        },
+        // exports the source code of the asset. Previously achievable by using raw-loader.
+        {
+          resourceQuery: /raw/,
+          type: 'asset/source',
+        },
+        {
+          test: /\.(html|md|txt|tmpl|yaml|yml)$/,
+          type: 'asset/source',
+        },
+        // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.
+        {
+          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|webp)(\?|$)/,
+          type: 'asset',
+          parser: {
+            dataUrlCondition: {
+              maxSize: 8192,
+            },
           },
         },
       ],
@@ -235,12 +315,19 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
-      mainFields: ['browser', 'main'],
+      mainFields: ['browser', 'module', 'main'],
       alias: {
-        core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
-        vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
+        'react-dom$': 'react-dom/profiling',
+        'scheduler/tracing': 'scheduler/tracing-profiling',
+        buffer: [
+          Path.resolve(worker.repoRoot, 'node_modules/node-stdlib-browser/node_modules/buffer'),
+          require.resolve('buffer'),
+        ],
+        punycode: [
+          Path.resolve(worker.repoRoot, 'node_modules/node-stdlib-browser/node_modules/punycode'),
+          require.resolve('punycode'),
+        ],
       },
-      symlinks: false,
     },
 
     performance: {
@@ -249,43 +336,53 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       // and not for the webpack compilations performance itself
       hints: false,
     },
+
+    ignoreWarnings: [STATS_WARNINGS_FILTER],
   };
 
   const nonDistributableConfig: webpack.Configuration = {
     mode: 'development',
+
+    cache: {
+      type: 'memory',
+      cacheUnaffected: true,
+    },
+
+    experiments: {
+      cacheUnaffected: true,
+      backCompat: false,
+    },
+
+    optimization: {
+      sideEffects: false,
+      removeAvailableModules: false,
+    },
+
+    module: {
+      // This was default on webpack v4
+      unsafeCache: true,
+    },
   };
 
   const distributableConfig: webpack.Configuration = {
     mode: 'production',
 
     plugins: [
+      // NOTE: this plugin is needed to mark exports on public and extraPublicDir entry files
+      // as used otherwise the new webpack v5 aggressive exports analysis will mark them as unused
+      // and they will be removed. Without this plugin we need to run with usedExports: false which
+      // affects the bundle sizes by a big margin.
+      new BundleRemoteUsedExportsPlugin(bundle),
       new webpack.DefinePlugin({
         'process.env': {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
         },
-      }),
-      new CompressionPlugin({
-        algorithm: 'brotliCompress',
-        filename: '[path].br',
-        test: /\.(js|css)$/,
-        cache: false,
-        compressionOptions: {
-          level: 11,
-        },
-      }),
-      new CompressionPlugin({
-        algorithm: 'gzip',
-        filename: '[path].gz',
-        test: /\.(js|css)$/,
-        cache: false,
       }),
     ],
 
     optimization: {
       minimizer: [
         new TerserPlugin({
-          cache: false,
-          sourceMap: false,
           extractComments: false,
           parallel: false,
           terserOptions: {

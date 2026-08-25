@@ -1,29 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState, useEffect } from 'react';
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import {
   EuiCodeBlock,
   EuiFlexItem,
   EuiFlexGroup,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiPanel,
   EuiText,
   EuiTitle,
   EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { Adapters, Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { Adapters, Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { ExpressionEditor } from './editor/expression_editor';
 
 interface Props {
@@ -64,8 +66,8 @@ export function RunExpressionsExample({ expressions, inspector }: Props) {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
+      <EuiPageTemplate.Section>
+        <EuiPageSection>
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiText>
@@ -83,6 +85,8 @@ export function RunExpressionsExample({ expressions, inspector }: Props) {
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
+
+          <EuiSpacer />
 
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem>
@@ -104,8 +108,8 @@ export function RunExpressionsExample({ expressions, inspector }: Props) {
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPageContentBody>
-      </EuiPageContent>
+        </EuiPageSection>
+      </EuiPageTemplate.Section>
     </EuiPageBody>
   );
 }

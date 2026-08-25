@@ -1,0 +1,215 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { estypes } from '@elastic/elasticsearch';
+import { isEmpty } from 'lodash';
+import type { OverrideBodyQuery } from '../types';
+import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
+
+interface BuildEventsSearchQuery<
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined = undefined
+> {
+  aggregations: TAggs;
+  index: string[];
+  from: string;
+  to: string;
+  filter: estypes.QueryDslQueryContainer;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  size: number;
+  sortOrder?: estypes.SortOrder;
+  searchAfterSortIds: estypes.SortResults | undefined;
+  primaryTimestamp: TimestampOverride;
+  secondaryTimestamp: TimestampOverride | undefined;
+  trackTotalHits?: boolean;
+  additionalFilters?: estypes.QueryDslQueryContainer[];
+  overrideBody?: OverrideBodyQuery;
+  dateNanosTimestampFields?: string[];
+  mixedTimestampFields?: string[];
+}
+
+// Raw date_nanos sort values (~1.8e18) don't survive JS number precision, breaking
+// search_after cursors. When a timestamp field is date_nanos anywhere in the pattern,
+// sort values are formatted as ISO strings instead, which round-trip exactly.
+// `missing` must be numeric (epoch): the default _last sentinel (Long.MAX_VALUE)
+// formats to null, so pin an explicit in-range value keeping missing docs sorted last.
+// asc: max date_nanos minus 1; desc: epoch 0 (resolution-invariant).
+const NANOS_SORT_FORMAT = 'strict_date_optional_time_nanos';
+const NANOS_SORT_MISSING_ASC = '9223372036854775806';
+const NANOS_SORT_MISSING_DESC = '0';
+
+export const buildTimeRangeFilter = ({
+  to,
+  from,
+  primaryTimestamp,
+  secondaryTimestamp,
+}: {
+  to: string;
+  from: string;
+  primaryTimestamp: TimestampOverride;
+  secondaryTimestamp: TimestampOverride | undefined;
+}): estypes.QueryDslQueryContainer => {
+  // The primaryTimestamp is always provided and will contain either the timestamp override field or `@timestamp` otherwise.
+  // The secondaryTimestamp is `undefined` if
+  //   1. timestamp override field is not specified
+  //   2. timestamp override field is set and timestamp fallback is disabled
+  //   3. timestamp override field is set to `@timestamp`
+  // or `@timestamp` otherwise.
+  //
+  // If the secondaryTimestamp is provided, documents must either populate primaryTimestamp with a timestamp in the range
+  // or must NOT populate the primaryTimestamp field at all and secondaryTimestamp must fall in the range.
+  // If secondaryTimestamp is not provided, we simply use primaryTimestamp
+  return secondaryTimestamp != null
+    ? {
+        bool: {
+          minimum_should_match: 1,
+          should: [
+            {
+              range: {
+                [primaryTimestamp]: {
+                  lte: to,
+                  gte: from,
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+            {
+              bool: {
+                filter: [
+                  {
+                    range: {
+                      [secondaryTimestamp]: {
+                        lte: to,
+                        gte: from,
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                  {
+                    bool: {
+                      must_not: {
+                        exists: {
+                          field: primaryTimestamp,
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }
+    : {
+        range: {
+          [primaryTimestamp]: {
+            lte: to,
+            gte: from,
+            format: 'strict_date_optional_time',
+          },
+        },
+      };
+};
+
+export const buildEventsSearchQuery = <
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined
+>({
+  aggregations,
+  index,
+  from,
+  to,
+  filter,
+  size,
+  runtimeMappings,
+  searchAfterSortIds,
+  sortOrder,
+  primaryTimestamp,
+  secondaryTimestamp,
+  trackTotalHits,
+  additionalFilters,
+  overrideBody,
+  dateNanosTimestampFields,
+  mixedTimestampFields,
+}: BuildEventsSearchQuery<TAggs>) => {
+  const timestamps = secondaryTimestamp
+    ? [primaryTimestamp, secondaryTimestamp]
+    : [primaryTimestamp];
+  const docFields = timestamps.map((tstamp) => ({
+    field: tstamp,
+    format: 'strict_date_optional_time',
+  }));
+
+  const rangeFilter = buildTimeRangeFilter({
+    to,
+    from,
+    primaryTimestamp,
+    secondaryTimestamp,
+  });
+
+  const filterWithTime: estypes.QueryDslQueryContainer[] = [
+    filter,
+    rangeFilter,
+    ...(additionalFilters ? additionalFilters : []),
+  ];
+
+  // sort options are decided per field: a field mapped as date elsewhere in the pattern must
+  // keep millisecond semantics, otherwise its `missing` sentinel lands outside the nanos range
+  const getSortOptions = (field: string) => {
+    const order = sortOrder ?? 'asc';
+    if (!dateNanosTimestampFields?.includes(field)) {
+      return { order, unmapped_type: 'date' as const };
+    }
+
+    return {
+      order,
+      // indices where the field is absent have to resolve as nanos too, or the nanos `missing`
+      // sentinel is read as milliseconds and yields a cursor millions of years in the future
+      unmapped_type: 'date_nanos' as const,
+      format: NANOS_SORT_FORMAT,
+      missing: sortOrder === 'desc' ? NANOS_SORT_MISSING_DESC : NANOS_SORT_MISSING_ASC,
+      ...(mixedTimestampFields?.includes(field)
+        ? { numeric_type: 'date_nanos' as const }
+        : undefined),
+    };
+  };
+
+  const sort: estypes.Sort = [];
+  sort.push({ [primaryTimestamp]: getSortOptions(primaryTimestamp) });
+  if (secondaryTimestamp) {
+    sort.push({ [secondaryTimestamp]: getSortOptions(secondaryTimestamp) });
+  }
+
+  const searchQuery = {
+    allow_no_indices: true,
+    index,
+    ignore_unavailable: true,
+    track_total_hits: trackTotalHits,
+    size,
+    query: {
+      bool: {
+        filter: filterWithTime,
+      },
+    },
+    fields: [
+      {
+        field: '*',
+        include_unmapped: true,
+      },
+      ...docFields,
+    ],
+    aggregations,
+    runtime_mappings: runtimeMappings,
+    sort,
+    ...overrideBody,
+  };
+
+  if (searchAfterSortIds != null && !isEmpty(searchAfterSortIds)) {
+    return {
+      ...searchQuery,
+      search_after: searchAfterSortIds,
+    };
+  }
+  return searchQuery;
+};

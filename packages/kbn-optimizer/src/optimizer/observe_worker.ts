@@ -1,21 +1,23 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { inspect } from 'util';
 
-import execa from 'execa';
+import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
-import { map, takeUntil, first, ignoreElements } from 'rxjs/operators';
+import { map, takeUntil, first, ignoreElements } from 'rxjs';
 
-import { isWorkerMsg, WorkerConfig, WorkerMsg, Bundle, BundleRefs } from '../common';
+import type { WorkerConfig, WorkerMsg, Bundle } from '../common';
+import { isWorkerMsg, BundleRemotes } from '../common';
 
 import { observeStdio$ } from './observe_stdio';
-import { OptimizerConfig } from './optimizer_config';
+import type { OptimizerConfig } from './optimizer_config';
 
 export interface WorkerStdio {
   type: 'worker stdio';
@@ -31,7 +33,7 @@ export interface WorkerStarted {
 export type WorkerStatus = WorkerStdio | WorkerStarted;
 
 interface ProcResource extends Rx.Unsubscribable {
-  proc: execa.ExecaChildProcess;
+  proc: ChildProcess;
 }
 const isNumeric = (input: any) => String(input).match(/^[0-9]+$/);
 
@@ -55,32 +57,27 @@ if (inspectFlagIndex !== -1) {
   }
 }
 
-function usingWorkerProc<T>(
-  config: OptimizerConfig,
-  fn: (proc: execa.ExecaChildProcess) => Rx.Observable<T>
-) {
+function usingWorkerProc<T>(config: OptimizerConfig, fn: (proc: ChildProcess) => Rx.Observable<T>) {
   return Rx.using(
     (): ProcResource => {
-      const workerPath = require.resolve('../worker/run_worker');
-      const proc = execa.node(
-        workerPath.endsWith('.ts')
-          ? require.resolve('../worker/run_worker_from_source') // workerFromSourcePath
-          : workerPath,
-        [],
-        {
-          nodeOptions: [
-            '--preserve-symlinks',
-            '--preserve-symlinks-main',
-            ...(inspectFlag && config.inspectWorkers
-              ? [`${inspectFlag}=${inspectPortCounter++}`]
-              : []),
-            ...(config.maxWorkerCount <= 3 ? ['--max-old-space-size=2048'] : []),
-          ],
-          buffer: false,
-          stderr: 'pipe',
-          stdout: 'pipe',
-        }
-      );
+      const proc = fork(require.resolve('../worker/run_worker'), [], {
+        execArgv: [
+          `--require=@kbn/swc-register/install`,
+          ...(inspectFlag && config.inspectWorkers
+            ? [`${inspectFlag}=${inspectPortCounter++}`]
+            : []),
+        ],
+        stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+        env: {
+          // NOTE: with the default 2000 limit we get a lot of recursive watcher recreations (introduced in watchpack v2)
+          // which makes the experience horrible and the performance between 2.5x to 3x worse when watching.
+          // If that fails in other mac machines with lower defaults for maxfiles and maxfilesperproc
+          // or just low powerful ones we need to default to polling instead of relying in the OS events watcher system.
+          // That can be done in the worker/run_compilers file.
+          WATCHPACK_WATCHER_LIMIT: '4000',
+          ...process.env,
+        },
+      });
 
       return {
         proc,
@@ -105,7 +102,7 @@ function usingWorkerProc<T>(
  * be initialized in the worker before most of the code is run.
  */
 function initWorker(
-  proc: execa.ExecaChildProcess,
+  proc: ChildProcess,
   config: OptimizerConfig,
   workerConfig: WorkerConfig,
   bundles: Bundle[]
@@ -126,6 +123,8 @@ function initWorker(
     })
   );
 
+  const remotes = BundleRemotes.fromBundles(config.bundles).toSpecJson();
+
   return Rx.concat(
     msg$.pipe(first((msg) => msg === 'init')),
     Rx.defer(() => {
@@ -133,7 +132,7 @@ function initWorker(
         args: [
           JSON.stringify(workerConfig),
           JSON.stringify(bundles.map((b) => b.toSpec())),
-          BundleRefs.fromBundles(config.bundles).toSpecJson(),
+          remotes,
         ],
       });
       return [];

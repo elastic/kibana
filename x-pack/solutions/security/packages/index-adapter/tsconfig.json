@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+    ]
+  },
+  "include": ["**/*.ts"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/std",
+    "@kbn/safer-lodash-set",
+    "@kbn/logging-mocks",
+    "@kbn/core-elasticsearch-server-utils",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+}

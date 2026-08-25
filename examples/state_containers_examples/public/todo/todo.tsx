@@ -1,43 +1,49 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Link, Route, Router, Switch, useLocation } from 'react-router-dom';
-import { History } from 'history';
+import { Link, useLocation } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import type { History } from 'history';
 import {
   EuiButton,
   EuiCheckbox,
   EuiFieldText,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
+import type {
   BaseState,
   BaseStateContainer,
+  INullableBaseStateContainer,
+  StateContainer,
+} from '@kbn/kibana-utils-plugin/public';
+import {
   createKbnUrlStateStorage,
   createStateContainer,
   getStateFromKbnUrl,
-  INullableBaseStateContainer,
-  StateContainer,
   syncState,
   useContainerSelector,
 } from '@kbn/kibana-utils-plugin/public';
+import type {
+  TodoActions,
+  TodoState,
+} from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
 import {
   defaultState,
   pureTransitions,
-  TodoActions,
-  TodoState,
 } from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
 
 interface TodoAppProps {
@@ -201,9 +207,9 @@ export const TodoAppPage: React.FC<{
             </EuiText>
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
-            <Switch>
+        <EuiPageTemplate.Section>
+          <EuiPageSection>
+            <Routes>
               <Route path={'/completed'}>
                 <TodoApp filter={'completed'} stateContainer={stateContainer} />
               </Route>
@@ -213,7 +219,7 @@ export const TodoAppPage: React.FC<{
               <Route path={'/'}>
                 <TodoApp filter={null} stateContainer={stateContainer} />
               </Route>
-            </Switch>
+            </Routes>
             <EuiSpacer size={'xxl'} />
             <EuiText size={'s'}>
               <p>Most of kibana apps persist state in the URL in two ways:</p>
@@ -232,8 +238,8 @@ export const TodoAppPage: React.FC<{
             <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
               {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}
             </EuiButton>
-          </EuiPageContentBody>
-        </EuiPageContent>
+          </EuiPageSection>
+        </EuiPageTemplate.Section>
       </EuiPageBody>
     </Router>
   );

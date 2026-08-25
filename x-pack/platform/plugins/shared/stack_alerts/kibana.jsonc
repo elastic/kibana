@@ -1,0 +1,36 @@
+{
+  "type": "plugin",
+  "id": "@kbn/stack-alerts-plugin",
+  "owner": [
+    "@elastic/response-ops"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "stackAlerts",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "stack_alerts"
+    ],
+    "requiredPlugins": [
+      "unifiedSearch",
+      "kql",
+      "alerting",
+      "features",
+      "triggersActionsUi",
+      "kibanaReact",
+      "data",
+      "dataViews",
+      "kibanaUtils"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "esql"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

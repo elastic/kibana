@@ -1,0 +1,42 @@
+# PERCENTILE
+
+The PERCENTILE function returns the value at which a specified percentage of observed values occur. For example, the 95th percentile is the value greater than 95% of the observed values, and the 50th percentile is the median.
+
+## Syntax
+
+`PERCENTILE(number, percentile)`
+
+### Parameters
+
+#### number
+
+The column or expression containing the numeric values for which you want to calculate the percentile.
+
+#### percentile
+
+The percentile to calculate, specified as a number between 0 and 100.
+
+## Examples
+
+Calculates the 0th (minimum), 50th (median), and 99th percentiles of the salary column in the employees dataset.
+
+```esql
+FROM employees
+| STATS p0 = PERCENTILE(salary,  0)
+     , p50 = PERCENTILE(salary, 50)
+     , p99 = PERCENTILE(salary, 99)
+```
+
+Calculates the 80th percentile of the maximum salary change for each employee.
+
+```esql
+FROM employees
+| STATS p80_max_salary_change = PERCENTILE(MV_MAX(salary_change), 80)
+```
+
+## Limitations
+
+- The PERCENTILE function uses the TDigest algorithm, which calculates approximate percentiles to efficiently handle large datasets.
+- Accuracy is proportional to `q(1-q)`, meaning extreme percentiles (such as 99%) are more accurate than less extreme percentiles like the median.
+- For small datasets, percentiles are highly accurate, but as the dataset grows, the algorithm trades accuracy for memory savings.
+- The function is non-deterministic, so repeated queries on the same data may yield slightly different results.

@@ -1,0 +1,85 @@
+openapi: 3.0.0
+info:
+  title: Unified alerts (detection and attack alerts) assignees API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/unified_alerts/assignees:
+    post:
+      x-labels: [serverless, ess]
+      operationId: SetUnifiedAlertsAssignees
+      x-codegen-enabled: true
+      summary: Assign and unassign users from detection and attack alerts
+      description: |
+        Assign users to detection and attack alerts, and unassign them from alerts.
+        > info
+        > You cannot add and remove the same assignee in the same request.
+      tags:
+        - Unified Alerts API
+      requestBody:
+        description: An object containing assignees to add or remove and alert ids the changes will be applied
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../../model/set_alert_assignees_body.schema.yaml#/components/schemas/SetAlertAssigneesBody'
+            examples:
+              add:
+                value:
+                  assignees:
+                    add: ['u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0']
+                    remove: []
+                  ids: ['681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6']
+              remove:
+                value:
+                  assignees:
+                    add: []
+                    remove: ['u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0']
+                  ids: ['681c2a707335aa7df5f349b70013d87254746191712ecf0ced9b3e2d538503a6']
+
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                description: Elasticsearch update by IDs response
+              examples:
+                success:
+                  value:
+                    took: 76
+                    timed_out: false
+                    total: 1
+                    updated: 1
+                    deleted: 0
+                    batches: 1
+                    version_conflicts: 0
+                    noops: 0
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    requests_per_second: -1
+                    throttled_until_millis: 0
+                    failures: []
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

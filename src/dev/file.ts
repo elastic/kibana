@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dirname, extname, join, relative, resolve, sep, basename } from 'path';
+import { dirname, extname, join, relative, resolve, basename } from 'path';
 
 export class File {
-  private path: string;
+  public readonly path: string;
   private relativePath: string;
   private ext: string;
 
@@ -47,20 +48,6 @@ export class File {
 
   public isSass() {
     return this.ext === '.sass' || this.ext === '.scss';
-  }
-
-  public isFixture() {
-    const parts = this.relativePath.split(sep);
-    if (parts.includes('__fixtures__') || this.path.endsWith('.test-d.ts')) {
-      return true;
-    }
-
-    const i = parts.indexOf('kbn-generate');
-    if (i >= 0 && parts[i + 1] === 'templates') {
-      return true;
-    }
-
-    return false;
   }
 
   public getRelativeParentDirs() {

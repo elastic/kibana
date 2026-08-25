@@ -1,0 +1,13 @@
+title: Index connector parameters
+description: Test an action that indexes a document into Elasticsearch.
+type: object
+required:
+  - documents
+properties: 
+  documents:
+    type: array
+    description: The documents in JSON format for index connectors.
+    items:
+      type: object
+      additionalProperties: true
+      

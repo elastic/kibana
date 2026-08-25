@@ -1,80 +1,105 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dirname, resolve, relative } from 'path';
+import Path from 'path';
 import os from 'os';
-import loadJsonFile from 'load-json-file';
 
-import { getVersionInfo, VersionInfo } from './version_info';
-import { PlatformName, PlatformArchitecture, ALL_PLATFORMS } from './platform';
+import { REPO_ROOT, kibanaPackageJson, type KibanaPackageJson } from '@kbn/repo-info';
+import {
+  type Package,
+  getPackages,
+  type PluginSelector,
+  type PluginPackage,
+  getPluginPackagesFilter,
+} from '@kbn/repo-packages';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
+import type { VersionInfo } from './version_info';
+import { getVersionInfo } from './version_info';
+import type { PlatformName, PlatformArchitecture } from './platform';
+import { ALL_PLATFORMS, SERVERLESS_PLATFORMS, DOWNLOAD_PLATFORMS } from './platform';
+import type { BuildOptions } from '../build_distributables';
 
 interface Options {
   isRelease: boolean;
   targetAllPlatforms: boolean;
+  targetServerlessPlatforms: boolean;
+  skipServerless: boolean;
   versionQualifier?: string;
   dockerContextUseLocalArtifact: boolean | null;
   dockerCrossCompile: boolean;
+  dockerNamespace: string | null;
+  dockerTag: string | null;
   dockerTagQualifier: string | null;
   dockerPush: boolean;
-}
-
-interface Package {
-  version: string;
-  engines: { node: string };
-  workspaces: {
-    packages: string[];
-  };
-  [key: string]: unknown;
+  withExamplePlugins: boolean;
+  withTestPlugins: boolean;
+  downloadFreshNode: boolean;
 }
 
 export class Config {
-  static async create({
-    isRelease,
-    targetAllPlatforms,
-    versionQualifier,
-    dockerContextUseLocalArtifact,
-    dockerCrossCompile,
-    dockerTagQualifier,
-    dockerPush,
-  }: Options) {
-    const pkgPath = resolve(__dirname, '../../../../package.json');
-    const pkg: Package = loadJsonFile.sync(pkgPath);
+  static async create(opts: Options) {
+    const nodeVersion = kibanaPackageJson.engines?.node;
+    if (!nodeVersion) {
+      throw new Error('missing node version in package.json');
+    }
 
     return new Config(
-      targetAllPlatforms,
-      pkg,
-      pkg.engines.node,
-      dirname(pkgPath),
+      opts.targetAllPlatforms,
+      opts.targetServerlessPlatforms,
+      opts.skipServerless,
+      kibanaPackageJson,
+      nodeVersion,
+      REPO_ROOT,
       await getVersionInfo({
-        isRelease,
-        versionQualifier,
-        pkg,
+        isRelease: opts.isRelease,
+        versionQualifier: opts.versionQualifier,
+        pkg: kibanaPackageJson,
       }),
-      dockerContextUseLocalArtifact,
-      dockerCrossCompile,
-      dockerTagQualifier,
-      dockerPush,
-      isRelease
+      opts.dockerContextUseLocalArtifact,
+      opts.dockerCrossCompile,
+      opts.dockerNamespace,
+      opts.dockerTag,
+      opts.dockerTagQualifier,
+      opts.dockerPush,
+      opts.isRelease,
+      opts.downloadFreshNode,
+      {
+        examples: opts.withExamplePlugins,
+        testPlugins: opts.withTestPlugins,
+      },
+      opts
     );
   }
 
+  private readonly pluginFilter: (pkg: Package) => pkg is PluginPackage;
+
   constructor(
     private readonly targetAllPlatforms: boolean,
-    private readonly pkg: Package,
+    private readonly targetServerlessPlatforms: boolean,
+    private readonly skipServerless: boolean,
+    private readonly pkg: KibanaPackageJson,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
     private readonly dockerContextUseLocalArtifact: boolean | null,
     private readonly dockerCrossCompile: boolean,
+    private readonly dockerNamespace: string | null,
+    private readonly dockerTag: string | null,
     private readonly dockerTagQualifier: string | null,
     private readonly dockerPush: boolean,
-    public readonly isRelease: boolean
-  ) {}
+    public readonly isRelease: boolean,
+    public readonly downloadFreshNode: boolean,
+    public readonly pluginSelector: PluginSelector,
+    public readonly buildOptions: Partial<BuildOptions>
+  ) {
+    this.pluginFilter = getPluginPackagesFilter(this.pluginSelector);
+  }
 
   /**
    * Get Kibana's parsed package.json file
@@ -93,6 +118,13 @@ export class Config {
   /**
    * Get the docker tag qualifier
    */
+  getDockerTag() {
+    return this.dockerTag;
+  }
+
+  /**
+   * Get the docker tag qualifier
+   */
   getDockerTagQualfiier() {
     return this.dockerTagQualifier;
   }
@@ -102,6 +134,13 @@ export class Config {
    */
   getDockerPush() {
     return this.dockerPush;
+  }
+
+  /**
+   * Get docker repository namespace
+   */
+  getDockerNamespace() {
+    return this.dockerNamespace;
   }
 
   /**
@@ -122,14 +161,14 @@ export class Config {
    * Convert an absolute path to a relative path, based from the repo
    */
   getRepoRelativePath(absolutePath: string) {
-    return relative(this.repoRoot, absolutePath);
+    return Path.relative(this.repoRoot, absolutePath);
   }
 
   /**
    * Resolve a set of relative paths based from the directory of the Kibana repo
    */
   resolveFromRepo(...subPaths: string[]) {
-    return resolve(this.repoRoot, ...subPaths);
+    return Path.resolve(this.repoRoot, ...subPaths);
   }
 
   /**
@@ -137,8 +176,11 @@ export class Config {
    * specified only the platform for this OS will be returned
    */
   getTargetPlatforms() {
+    if (this.targetServerlessPlatforms) {
+      return SERVERLESS_PLATFORMS;
+    }
     if (this.targetAllPlatforms) {
-      return ALL_PLATFORMS;
+      return this.skipServerless ? DOWNLOAD_PLATFORMS : ALL_PLATFORMS;
     }
 
     return [this.getPlatformForThisOs()];
@@ -150,11 +192,14 @@ export class Config {
    * reliably get the LICENSE file, which isn't included in the windows version
    */
   getNodePlatforms() {
+    if (this.targetServerlessPlatforms) {
+      return SERVERLESS_PLATFORMS;
+    }
     if (this.targetAllPlatforms) {
-      return ALL_PLATFORMS;
+      return this.skipServerless ? DOWNLOAD_PLATFORMS : ALL_PLATFORMS;
     }
 
-    if (process.platform === 'linux') {
+    if (process.platform === 'linux' && process.arch === 'x64') {
       return [this.getPlatform('linux', 'x64')];
     }
 
@@ -202,9 +247,45 @@ export class Config {
   }
 
   /**
+   * Get the first 12 digits of the git sha for this build
+   */
+  getBuildShaShort() {
+    return this.versionInfo.buildShaShort;
+  }
+
+  /**
+   * Get the ISO 8601 date for this build
+   */
+  getBuildDate() {
+    return this.versionInfo.buildDate;
+  }
+
+  /**
    * Resolve a set of paths based from the target directory for this build.
    */
   resolveFromTarget(...subPaths: string[]) {
-    return resolve(this.repoRoot, 'target', ...subPaths);
+    return Path.resolve(this.repoRoot, 'target', ...subPaths);
+  }
+
+  getDistPackagesFromRepo() {
+    return getPackages(this.repoRoot).filter(
+      (p) =>
+        (this.pluginSelector.testPlugins || !p.isDevOnly()) &&
+        (!p.isPlugin() || (this.pluginFilter(p) && !p.isDevOnly()))
+    );
+  }
+
+  getTarZstd() {
+    return Boolean(this.buildOptions.tarZstd);
+  }
+
+  getDistPluginsFromRepo() {
+    return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
+  }
+
+  getPrivateSolutionPackagesFromRepo(project: KibanaSolution) {
+    return getPackages(this.repoRoot).filter(
+      (p) => p.group === project && p.visibility === 'private'
+    );
   }
 }

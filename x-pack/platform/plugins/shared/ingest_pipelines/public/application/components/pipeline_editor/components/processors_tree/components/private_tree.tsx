@@ -1,0 +1,271 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FunctionComponent, MutableRefObject } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
+import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
+import List from 'react-virtualized/dist/commonjs/List';
+import WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+
+import { DropSpecialLocations } from '../../../constants';
+import type { ProcessorInternal, ProcessorSelector } from '../../../types';
+import { isChildPath } from '../../../processors_reducer';
+import { selectorToDataTestSubject } from '../../../utils';
+
+import { DropZoneButton } from '.';
+import { TreeNode } from '.';
+import { calculateItemHeight } from '../utils';
+import type { OnActionHandler, ProcessorInfo } from '../processors_tree';
+import { getProcessorDescriptor } from '../../shared';
+import { i18nTexts } from '../../pipeline_processors_editor_item/i18n_texts';
+import { processorsTreeI18nTexts } from '../i18n_texts';
+
+export interface PrivateProps {
+  processors: ProcessorInternal[];
+  selector: ProcessorSelector;
+  onAction: OnActionHandler;
+  level: number;
+  movingProcessor?: ProcessorInfo;
+  movingProcessorLabel?: string;
+  // Only passed into the top level list
+  windowScrollerRef?: MutableRefObject<WindowScroller | null>;
+  listRef?: MutableRefObject<List | null>;
+}
+
+const isDropZoneAboveDisabled = (processor: ProcessorInfo, selectedProcessor: ProcessorInfo) => {
+  return Boolean(
+    // Is the selected node first in a list?
+    (!selectedProcessor.aboveId && selectedProcessor.id === processor.id) ||
+      isChildPath(selectedProcessor.selector, processor.selector)
+  );
+};
+
+const isDropZoneBelowDisabled = (processor: ProcessorInfo, selectedProcessor: ProcessorInfo) => {
+  return (
+    processor.id === selectedProcessor.id ||
+    processor.belowId === selectedProcessor.id ||
+    isChildPath(selectedProcessor.selector, processor.selector)
+  );
+};
+
+/**
+ * Recursively rendering tree component for ingest pipeline processors.
+ *
+ * Note: this tree should start at level 1. It is the only level at
+ * which we render the optimised virtual component. This gives a
+ * massive performance boost to this component which can get very tall.
+ *
+ * The first level list also contains the outside click listener which
+ * enables users to click outside of the tree and cancel moving a
+ * processor.
+ */
+export const PrivateTree: FunctionComponent<PrivateProps> = ({
+  processors,
+  selector,
+  movingProcessor,
+  movingProcessorLabel,
+  onAction,
+  level,
+  windowScrollerRef,
+  listRef,
+}) => {
+  const sectionLabel = processorsTreeI18nTexts.getSectionLabelForSelector(selector);
+
+  const selectors: string[][] = useMemo(() => {
+    return processors.map((_, idx) => selector.concat(String(idx)));
+  }, [processors, selector]);
+
+  const renderRow = ({
+    idx,
+    info,
+    processor,
+  }: {
+    idx: number;
+    info: ProcessorInfo;
+    processor: ProcessorInternal;
+  }) => {
+    const stringifiedSelector = selectorToDataTestSubject(info.selector);
+    const targetProcessorLabel = getProcessorDescriptor(processor.type)?.label ?? processor.type;
+    const movingLabel = movingProcessorLabel;
+    const moveBeforeLabel =
+      movingLabel && movingProcessor
+        ? i18nTexts.dropZoneMoveBeforeLabel({
+            movingProcessor: movingLabel,
+            targetProcessor: targetProcessorLabel,
+            section: sectionLabel,
+          })
+        : undefined;
+    const cannotMoveBeforeLabel =
+      movingLabel && movingProcessor
+        ? i18nTexts.dropZoneCannotMoveBeforeLabel({
+            movingProcessor: movingLabel,
+            targetProcessor: targetProcessorLabel,
+            section: sectionLabel,
+          })
+        : undefined;
+
+    const moveAfterLabel =
+      movingLabel && movingProcessor
+        ? i18nTexts.dropZoneMoveAfterLabel({
+            movingProcessor: movingLabel,
+            targetProcessor: targetProcessorLabel,
+            section: sectionLabel,
+          })
+        : undefined;
+    const cannotMoveAfterLabel =
+      movingLabel && movingProcessor
+        ? i18nTexts.dropZoneCannotMoveAfterLabel({
+            movingProcessor: movingLabel,
+            targetProcessor: targetProcessorLabel,
+            section: sectionLabel,
+          })
+        : undefined;
+    return (
+      <>
+        {idx === 0 ? (
+          <DropZoneButton
+            data-test-subj={`dropButtonAbove-${stringifiedSelector}`}
+            onClick={(event) => {
+              event.preventDefault();
+              onAction({
+                type: 'move',
+                payload: {
+                  destination: selector.concat(DropSpecialLocations.top),
+                  source: movingProcessor!.selector,
+                },
+              });
+            }}
+            isVisible={Boolean(movingProcessor)}
+            isDisabled={!movingProcessor || isDropZoneAboveDisabled(info, movingProcessor)}
+            availableAriaLabel={moveBeforeLabel}
+            unavailableAriaLabel={cannotMoveBeforeLabel}
+          />
+        ) : undefined}
+        <TreeNode
+          level={level}
+          processor={processor}
+          processorInfo={info}
+          onAction={onAction}
+          movingProcessor={movingProcessor}
+          movingProcessorLabel={movingProcessorLabel}
+        />
+        <DropZoneButton
+          compressed={level === 1 && idx + 1 === processors.length}
+          data-test-subj={`dropButtonBelow-${stringifiedSelector}`}
+          isVisible={Boolean(movingProcessor)}
+          isDisabled={!movingProcessor || isDropZoneBelowDisabled(info, movingProcessor)}
+          availableAriaLabel={moveAfterLabel}
+          unavailableAriaLabel={cannotMoveAfterLabel}
+          onClick={(event) => {
+            event.preventDefault();
+            onAction({
+              type: 'move',
+              payload: {
+                destination: selector.concat(String(idx + 1)),
+                source: movingProcessor!.selector,
+              },
+            });
+          }}
+        />
+      </>
+    );
+  };
+
+  useEffect(() => {
+    if (windowScrollerRef && windowScrollerRef.current) {
+      windowScrollerRef.current.updatePosition();
+    }
+    if (listRef && listRef.current) {
+      listRef.current.recomputeRowHeights();
+    }
+  }, [processors, listRef, windowScrollerRef, movingProcessor]);
+
+  // A list optimized to handle very many items.
+  const renderVirtualList = () => {
+    return (
+      <WindowScroller
+        ref={windowScrollerRef}
+        scrollElement={document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID) ?? window}
+      >
+        {({ height, registerChild, isScrolling, onChildScroll, scrollTop }: any) => {
+          return (
+            <AutoSizer disableHeight>
+              {({ width }) => {
+                return (
+                  <div style={{ width: '100%' }} ref={registerChild}>
+                    <List
+                      ref={listRef}
+                      autoHeight
+                      height={height}
+                      width={width}
+                      overScanRowCount={5}
+                      isScrolling={isScrolling}
+                      onChildScroll={onChildScroll}
+                      scrollTop={scrollTop}
+                      tabIndex={processors.length === 0 ? -1 : 0}
+                      rowCount={processors.length}
+                      rowHeight={({ index }) => {
+                        const processor = processors[index];
+                        return calculateItemHeight({
+                          processor,
+                          isFirstInArray: index === 0,
+                        });
+                      }}
+                      rowRenderer={({ index: idx, style }) => {
+                        const processor = processors[idx];
+                        const above = processors[idx - 1];
+                        const below = processors[idx + 1];
+                        const info: ProcessorInfo = {
+                          id: processor.id,
+                          selector: selectors[idx],
+                          aboveId: above?.id,
+                          belowId: below?.id,
+                        };
+
+                        return (
+                          <div style={style} key={processor.id}>
+                            {renderRow({ processor, info, idx })}
+                          </div>
+                        );
+                      }}
+                      processors={processors}
+                    />
+                  </div>
+                );
+              }}
+            </AutoSizer>
+          );
+        }}
+      </WindowScroller>
+    );
+  };
+
+  if (level === 1) {
+    // Only render the optimised list for the top level list because that is the list
+    // that will almost certainly be the tallest
+    return renderVirtualList();
+  }
+
+  return (
+    <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
+      {processors.map((processor, idx) => {
+        const above = processors[idx - 1];
+        const below = processors[idx + 1];
+        const info: ProcessorInfo = {
+          id: processor.id,
+          selector: selector.concat(String(idx)),
+          aboveId: above?.id,
+          belowId: below?.id,
+        };
+
+        return <div key={processor.id}>{renderRow({ processor, idx, info })}</div>;
+      })}
+    </EuiFlexGroup>
+  );
+};

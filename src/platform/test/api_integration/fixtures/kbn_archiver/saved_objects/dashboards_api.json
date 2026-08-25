@@ -1,0 +1,36 @@
+{
+  "attributes": {
+    "description": "",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
+    },
+    "optionsJSON": "{\"darkTheme\":false}",
+    "panelsJSON": "{}",
+    "refreshInterval": {
+      "display": "Off",
+      "pause": false,
+      "value": 0
+    },
+    "timeFrom": "Wed Sep 16 2015 22:52:17 GMT-0700",
+    "timeRestore": true,
+    "timeTo": "Fri Sep 18 2015 12:24:38 GMT-0700",
+    "title": "Dashboard with invalid as code id",
+    "version": 1
+  },
+  "coreMigrationVersion": "7.14.0",
+  "id": "(my)dashboard",
+  "migrationVersion": {
+    "dashboard": "7.11.0"
+  },
+  "references": [
+    {
+      "id": "dd7caf20-9efd-11e7-acb3-3dab96693fab",
+      "name": "1:panel_1",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard",
+  "updated_at": "2017-09-21T18:57:40.826Z",
+  "version": "WzExLDJd"
+}

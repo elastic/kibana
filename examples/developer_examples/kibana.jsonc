@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/developer-examples-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "developerExamples",
+    "server": false,
+    "browser": true
+  }
+}

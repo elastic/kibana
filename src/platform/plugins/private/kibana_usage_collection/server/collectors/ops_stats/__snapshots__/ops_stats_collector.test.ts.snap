@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`telemetry_ops_stats should return something when there is a metric 1`] = `
+Object {
+  "concurrent_connections": 1,
+  "elasticsearch_client": Object {
+    "totalActiveSockets": 25,
+    "totalIdleSockets": 2,
+    "totalQueuedRequests": 0,
+  },
+  "os": Object {
+    "load": Object {
+      "15m": 1,
+      "1m": 1,
+      "5m": 1,
+    },
+    "memory": Object {
+      "free_in_bytes": 1,
+      "total_in_bytes": 1,
+      "used_in_bytes": 1,
+    },
+    "platform": "darwin",
+    "platformRelease": "test",
+    "uptime_in_millis": 1,
+  },
+  "process": Object {
+    "event_loop_delay": 1,
+    "event_loop_delay_histogram": Any<Object>,
+    "event_loop_utilization": Object {
+      "active": 1,
+      "idle": 1,
+      "utilization": 1,
+    },
+    "memory": Object {
+      "array_buffers_in_bytes": 1,
+      "external_in_bytes": 1,
+      "heap": Object {
+        "size_limit": 1,
+        "total_in_bytes": 1,
+        "used_in_bytes": 1,
+      },
+      "resident_set_size_in_bytes": 1,
+    },
+    "uptime_in_millis": 1,
+  },
+  "processes": Array [
+    Object {
+      "event_loop_delay": 1,
+      "event_loop_delay_histogram": Any<Object>,
+      "event_loop_utilization": Object {
+        "active": 1,
+        "idle": 1,
+        "utilization": 1,
+      },
+      "memory": Object {
+        "array_buffers_in_bytes": 1,
+        "external_in_bytes": 1,
+        "heap": Object {
+          "size_limit": 1,
+          "total_in_bytes": 1,
+          "used_in_bytes": 1,
+        },
+        "resident_set_size_in_bytes": 1,
+      },
+      "uptime_in_millis": 1,
+    },
+  ],
+  "requests": Object {
+    "disconnects": 1,
+    "total": 1,
+  },
+  "response_times": Object {
+    "average": 1,
+    "max": 1,
+  },
+  "timestamp": Any<String>,
+}
+`;

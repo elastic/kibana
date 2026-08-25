@@ -1,24 +1,19 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { inspect } from 'util';
 
 import * as Rx from 'rxjs';
-import { take, mergeMap } from 'rxjs/operators';
+import { take, mergeMap } from 'rxjs';
 
-import {
-  parseBundles,
-  parseWorkerConfig,
-  WorkerMsg,
-  isWorkerMsg,
-  WorkerMsgs,
-  BundleRefs,
-} from '../common';
+import type { WorkerMsg } from '../common';
+import { parseBundles, parseWorkerConfig, isWorkerMsg, WorkerMsgs, BundleRemotes } from '../common';
 
 import { runCompilers } from './run_compilers';
 
@@ -96,7 +91,7 @@ Rx.defer(() => {
 
       const workerConfig = parseWorkerConfig(msg.args[0]);
       const bundles = parseBundles(msg.args[1]);
-      const bundleRefs = BundleRefs.parseSpec(msg.args[2]);
+      const bundleRefs = BundleRemotes.parseSpec(msg.args[2]);
 
       // set BROWSERSLIST_ENV so that style/babel loaders see it before running compilers
       process.env.BROWSERSLIST_ENV = workerConfig.browserslistEnv;

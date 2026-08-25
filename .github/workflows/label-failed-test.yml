@@ -1,3 +1,5 @@
+name: Label failed-test issues
+
 on:
   issues:
     types:
@@ -12,17 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout kibana-operations
-        uses: actions/checkout@v2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: 'elastic/kibana-operations'
           ref: main
           path: ./kibana-operations
           token: ${{secrets.KIBANAMACHINE_TOKEN}}
+          persist-credentials: false
 
       - name: Label failed test issue
         working-directory: ./kibana-operations/triage
         env:
           GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+          SLACK_TOKEN: ${{secrets.SLACK_TOKEN_FAILED_TEST_NOTIFIER}}
         run: |
-          npm install
+          npm ci --omit=dev
           node failed-test-label ${{github.event.issue.number}} || true

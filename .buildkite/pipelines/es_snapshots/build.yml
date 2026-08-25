@@ -1,5 +1,12 @@
 steps:
   - command: .buildkite/scripts/steps/es_snapshots/build.sh
     label: Build ES Snapshot
+    timeout_in_minutes: 30
     agents:
-      queue: c2-8
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: c2-standard-8
+      diskSizeGb: 130

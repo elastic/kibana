@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useCallback } from 'react';
@@ -17,9 +18,8 @@ import {
   EuiFormRow,
   EuiTextArea,
 } from '@elastic/eui';
-import { HttpFetchError } from '@kbn/core/public';
-import { isError } from './is_error';
-import { Services } from './services';
+import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
+import type { Services } from './services';
 
 interface Props {
   postMessage: Services['postMessage'];
@@ -27,7 +27,7 @@ interface Props {
 }
 
 export function PostMessageRouteExample({ postMessage, addSuccessToast }: Props) {
-  const [error, setError] = useState<HttpFetchError | undefined>();
+  const [error, setError] = useState<IHttpFetchError | undefined>();
   const [isPosting, setIsPosting] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [id, setId] = useState<string>('');
@@ -37,7 +37,7 @@ export function PostMessageRouteExample({ postMessage, addSuccessToast }: Props)
     setIsPosting(true);
     const response = await postMessage(message, id);
 
-    if (response && isError(response)) {
+    if (response && isHttpFetchError(response)) {
       setError(response);
     } else {
       setError(undefined);
@@ -83,7 +83,7 @@ export function PostMessageRouteExample({ postMessage, addSuccessToast }: Props)
         </EuiFormRow>
 
         {error !== undefined ? (
-          <EuiCallOut color="danger" iconType="alert">
+          <EuiCallOut announceOnMount color="danger" iconType="warning">
             {error.message}
           </EuiCallOut>
         ) : null}

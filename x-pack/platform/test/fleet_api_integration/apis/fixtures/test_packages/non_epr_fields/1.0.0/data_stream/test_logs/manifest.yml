@@ -1,0 +1,13 @@
+title: Test Dataset
+
+type: logs
+
+streams:
+  - input: test_input1
+    title: "test input 1"
+    vars:
+    - name: test_var_required
+      type: string
+      title: Test Var
+      required: false
+      show_user: true

@@ -1,0 +1,679 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { noop } from 'lodash';
+import { Collector } from './collector';
+import type { CollectorSetConfig } from './collector_set';
+import { CollectorSet } from './collector_set';
+import { UsageCollector } from './usage_collector';
+
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+  executionContextServiceMock,
+} from '@kbn/core/server/mocks';
+import type { ExecutionContextSetup, Logger } from '@kbn/core/server';
+
+describe('CollectorSet', () => {
+  let logger: jest.Mocked<Logger>;
+  let executionContext: jest.Mocked<ExecutionContextSetup>;
+
+  let collectorSetConfig: CollectorSetConfig;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    executionContext = executionContextServiceMock.createSetupContract();
+    collectorSetConfig = { logger, executionContext };
+  });
+
+  describe('registers a collector set and runs lifecycle events', () => {
+    let fetch: Function;
+    beforeEach(() => {
+      fetch = noop;
+    });
+    const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const mockSoClient = savedObjectsClientMock.create();
+
+    it('should throw an error if non-Collector type of object is registered', () => {
+      const collectors = new CollectorSet(collectorSetConfig);
+      const registerPojo = () => {
+        collectors.registerCollector({
+          type: 'type_collector_test',
+          // @ts-expect-error we are intentionally sending it wrong.
+          fetch,
+        });
+      };
+
+      expect(registerPojo).toThrowError(
+        'CollectorSet can only have Collector instances registered'
+      );
+    });
+
+    it('should throw when 2 collectors with the same type are registered', () => {
+      const collectorSet = new CollectorSet(collectorSetConfig);
+      collectorSet.registerCollector(
+        new Collector(logger, { type: 'test_duplicated', fetch: () => 1, isReady: () => true })
+      );
+      expect(() =>
+        collectorSet.registerCollector(
+          // Even for Collector vs. UsageCollector
+          new UsageCollector(logger, {
+            type: 'test_duplicated',
+            fetch: () => ({ prop: 2 }),
+            isReady: () => false,
+            schema: { prop: { type: 'long' } },
+          })
+        )
+      ).toThrowError(`Usage collector's type "test_duplicated" is duplicated.`);
+    });
+
+    it('should log debug status of fetching from the collector', async () => {
+      // @ts-expect-error we are just mocking the output of any call
+      mockEsClient.ping.mockResolvedValue({ passTest: 1000 });
+      const collectors = new CollectorSet(collectorSetConfig);
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          fetch: (collectorFetchContext) => {
+            return collectorFetchContext.esClient.ping();
+          },
+          isReady: () => true,
+        })
+      );
+
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient);
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenCalledWith('Getting ready collectors');
+      expect(logger.debug).toHaveBeenCalledWith('Fetching data from MY_TEST_COLLECTOR collector');
+      expect(result).toStrictEqual([
+        {
+          type: 'MY_TEST_COLLECTOR',
+          result: { passTest: 1000 },
+        },
+        {
+          type: 'usage_collector_stats',
+          result: {
+            not_ready: { count: 0, names: [] },
+            not_ready_timeout: { count: 0, names: [] },
+            succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
+            failed: { count: 0, names: [] },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            total_duration: 0,
+            total_fetch_duration: 0,
+            total_is_ready_duration: 0,
+          },
+        },
+      ]);
+    });
+
+    it('should gracefully handle a collector fetch method throwing an error', async () => {
+      const collectors = new CollectorSet(collectorSetConfig);
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          fetch: () => new Promise((_resolve, reject) => reject()),
+          isReady: () => true,
+        })
+      );
+
+      let result;
+      try {
+        result = await collectors.bulkFetch(mockEsClient, mockSoClient);
+      } catch (err) {
+        // Do nothing
+      }
+      // This must return an empty object instead of null/undefined
+      expect(result).toStrictEqual([
+        {
+          type: 'usage_collector_stats',
+          result: {
+            not_ready: { count: 0, names: [] },
+            not_ready_timeout: { count: 0, names: [] },
+            succeeded: { count: 0, names: [] },
+            failed: { count: 1, names: ['MY_TEST_COLLECTOR'] },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            total_duration: 0,
+            total_fetch_duration: 0,
+            total_is_ready_duration: 0,
+          },
+        },
+      ]);
+    });
+
+    it('should not break if isReady is not a function', async () => {
+      const collectors = new CollectorSet(collectorSetConfig);
+      collectors.registerCollector(
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          fetch: () => ({ test: 1 }),
+          // @ts-expect-error we are intentionally sending it wrong
+          isReady: true,
+        })
+      );
+
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient);
+      expect(result).toStrictEqual([
+        {
+          type: 'MY_TEST_COLLECTOR',
+          result: { test: 1 },
+        },
+        {
+          type: 'usage_collector_stats',
+          result: {
+            not_ready: { count: 0, names: [] },
+            not_ready_timeout: { count: 0, names: [] },
+            succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
+            failed: { count: 0, names: [] },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            total_duration: 0,
+            total_fetch_duration: 0,
+            total_is_ready_duration: 0,
+          },
+        },
+      ]);
+    });
+
+    it('should not break if isReady is not provided', async () => {
+      const collectors = new CollectorSet(collectorSetConfig);
+      collectors.registerCollector(
+        // @ts-expect-error we are intentionally sending it wrong.
+        new Collector(logger, {
+          type: 'MY_TEST_COLLECTOR',
+          fetch: () => ({ test: 1 }),
+        })
+      );
+
+      const result = await collectors.bulkFetch(mockEsClient, mockSoClient);
+      expect(result).toStrictEqual([
+        {
+          type: 'MY_TEST_COLLECTOR',
+          result: { test: 1 },
+        },
+        {
+          type: 'usage_collector_stats',
+          result: {
+            not_ready: { count: 0, names: [] },
+            not_ready_timeout: { count: 0, names: [] },
+            succeeded: { count: 1, names: ['MY_TEST_COLLECTOR'] },
+            failed: { count: 0, names: [] },
+            fetch_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            is_ready_duration_breakdown: [{ name: 'MY_TEST_COLLECTOR', duration: 0 }],
+            total_duration: 0,
+            total_fetch_duration: 0,
+            total_is_ready_duration: 0,
+          },
+        },
+      ]);
+    });
+  });
+
+  describe('toApiFieldNames', () => {
+    let collectorSet: CollectorSet;
+
+    beforeEach(() => {
+      collectorSet = new CollectorSet(collectorSetConfig);
+    });
+
+    it('should snake_case and convert field names to api standards', () => {
+      const apiData = {
+        os: {
+          load: {
+            '15m': 2.3525390625,
+            '1m': 2.22412109375,
+            '5m': 2.4462890625,
+          },
+          memory: {
+            free_in_bytes: 458280960,
+            total_in_bytes: 17179869184,
+            used_in_bytes: 16721588224,
+          },
+          uptime_in_millis: 137844000,
+        },
+        process: {
+          heap: {
+            total_in_bytes: 1,
+            used_in_bytes: 2,
+            size_limit: 3,
+          },
+          resident_set_size_in_bytes: 4,
+          array_buffers_in_bytes: 5,
+          external_in_bytes: 6,
+        },
+        daysOfTheWeek: ['monday', 'tuesday', 'wednesday'],
+      };
+
+      const result = collectorSet.toApiFieldNames(apiData);
+      expect(result).toStrictEqual({
+        os: {
+          load: { '15m': 2.3525390625, '1m': 2.22412109375, '5m': 2.4462890625 },
+          memory: { free_bytes: 458280960, total_bytes: 17179869184, used_bytes: 16721588224 },
+          uptime_ms: 137844000,
+        },
+        process: {
+          heap: {
+            total_bytes: 1,
+            used_bytes: 2,
+            size_limit: 3,
+          },
+          resident_set_size_bytes: 4,
+          array_buffers_bytes: 5,
+          external_bytes: 6,
+        },
+        days_of_the_week: ['monday', 'tuesday', 'wednesday'],
+      });
+    });
+
+    it('should correct object key fields nested in arrays', () => {
+      const apiData = {
+        daysOfTheWeek: [
+          {
+            dayName: 'monday',
+            dayIndex: 1,
+          },
+          {
+            dayName: 'tuesday',
+            dayIndex: 2,
+          },
+          {
+            dayName: 'wednesday',
+            dayIndex: 3,
+          },
+        ],
+      };
+
+      const result = collectorSet.toApiFieldNames(apiData);
+      expect(result).toStrictEqual({
+        days_of_the_week: [
+          { day_index: 1, day_name: 'monday' },
+          { day_index: 2, day_name: 'tuesday' },
+          { day_index: 3, day_name: 'wednesday' },
+        ],
+      });
+    });
+  });
+
+  describe('makeStatsCollector', () => {
+    let collectorSet: CollectorSet;
+
+    beforeEach(() => {
+      collectorSet = new CollectorSet(collectorSetConfig);
+    });
+
+    test('fetch can use the logger (TS allows it)', () => {
+      const collector = collectorSet.makeStatsCollector({
+        type: 'MY_TEST_COLLECTOR',
+        isReady: () => true,
+        schema: { test: { type: 'long' } },
+        fetch() {
+          this.log.info("I can use the Collector's class logger!");
+          return { test: 1 };
+        },
+      });
+      expect(
+        collector.fetch(
+          // @ts-expect-error: the test implementation is not using it
+          {}
+        )
+      ).toStrictEqual({ test: 1 });
+    });
+  });
+
+  describe('makeUsageCollector', () => {
+    let collectorSet: CollectorSet;
+
+    beforeEach(() => {
+      collectorSet = new CollectorSet(collectorSetConfig);
+    });
+
+    test('fetch can use the logger (TS allows it)', () => {
+      const collector = collectorSet.makeUsageCollector({
+        type: 'MY_TEST_COLLECTOR',
+        isReady: () => true,
+        schema: { test: { type: 'long' } },
+        fetch() {
+          this.log.info("I can use the Collector's class logger!");
+          return { test: 1 };
+        },
+      });
+      expect(
+        collector.fetch(
+          // @ts-expect-error: the test implementation is not using it
+          {}
+        )
+      ).toStrictEqual({ test: 1 });
+    });
+  });
+
+  describe('bulkFetch', () => {
+    let collectorSet: CollectorSet;
+
+    beforeEach(() => {
+      const collectorSetConfigWithMaxTime: CollectorSetConfig = {
+        ...collectorSetConfig,
+        maximumWaitTimeForAllCollectorsInS: 1,
+      };
+      collectorSet = new CollectorSet(collectorSetConfigWithMaxTime);
+    });
+
+    it('skips collectors that are not ready', async () => {
+      const mockIsReady = jest.fn().mockReturnValue(true);
+      const mockIsNotReady = jest.fn().mockResolvedValue(false);
+      const mockNonReadyFetch = jest.fn().mockResolvedValue({});
+      const mockReadyFetch = jest.fn().mockResolvedValue({});
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'ready_col',
+          isReady: mockIsReady,
+          schema: {},
+          fetch: mockReadyFetch,
+        })
+      );
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'not_ready_col',
+          isReady: mockIsNotReady,
+          schema: {},
+          fetch: mockNonReadyFetch,
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+      const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
+
+      expect(mockIsReady).toBeCalledTimes(1);
+      expect(mockReadyFetch).toBeCalledTimes(1);
+      expect(mockIsNotReady).toBeCalledTimes(1);
+      expect(mockNonReadyFetch).toBeCalledTimes(0);
+
+      // Passing object instead of array due to https://github.com/facebook/jest/issues/13352
+      expect({ results }).toMatchSnapshot({
+        results: [
+          {
+            result: {},
+            type: 'ready_col',
+          },
+          {
+            result: {
+              failed: {
+                count: 0,
+                names: [],
+              },
+              fetch_duration_breakdown: [
+                {
+                  name: 'ready_col',
+                  duration: 0,
+                },
+              ],
+              is_ready_duration_breakdown: [
+                {
+                  name: 'ready_col',
+                  duration: 0,
+                },
+                {
+                  name: 'not_ready_col',
+                  duration: 0,
+                },
+              ],
+              not_ready: {
+                count: 1,
+                names: ['not_ready_col'],
+              },
+              not_ready_timeout: {
+                count: 0,
+                names: [],
+              },
+              succeeded: {
+                count: 1,
+                names: ['ready_col'],
+              },
+              total_duration: 0,
+              total_fetch_duration: 0,
+              total_is_ready_duration: 0,
+            },
+            type: 'usage_collector_stats',
+          },
+        ],
+      });
+    });
+
+    it('skips collectors that have timed out', async () => {
+      const mockFastReady = jest.fn().mockImplementation(async () => {
+        return new Promise((res) => {
+          setTimeout(() => res(true), 0.5 * 1000);
+        });
+      });
+      const mockTimedOutReady = jest.fn().mockImplementation(async () => {
+        return new Promise((res) => {
+          setTimeout(() => res(true), 2 * 1000);
+        });
+      });
+      const mockNonReadyFetch = jest.fn().mockResolvedValue({});
+      const mockReadyFetch = jest.fn().mockResolvedValue({});
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'ready_col',
+          isReady: mockFastReady,
+          schema: {},
+          fetch: mockReadyFetch,
+        })
+      );
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'timeout_col',
+          isReady: mockTimedOutReady,
+          schema: {},
+          fetch: mockNonReadyFetch,
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+      const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
+
+      expect(mockFastReady).toBeCalledTimes(1);
+      expect(mockReadyFetch).toBeCalledTimes(1);
+      expect(mockTimedOutReady).toBeCalledTimes(1);
+      expect(mockNonReadyFetch).toBeCalledTimes(0);
+
+      // Passing object instead of array due to https://github.com/facebook/jest/issues/13352
+      expect({ results }).toMatchSnapshot({
+        results: [
+          {
+            result: {},
+            type: 'ready_col',
+          },
+          {
+            result: {
+              failed: {
+                count: 0,
+                names: [],
+              },
+              fetch_duration_breakdown: [
+                {
+                  name: 'ready_col',
+                  duration: 0,
+                },
+              ],
+              is_ready_duration_breakdown: [
+                {
+                  name: 'ready_col',
+                  duration: expect.any(Number),
+                },
+                {
+                  name: 'timeout_col',
+                  duration: expect.any(Number),
+                },
+              ],
+              not_ready: {
+                count: 0,
+                names: [],
+              },
+              not_ready_timeout: {
+                count: 1,
+                names: ['timeout_col'],
+              },
+              succeeded: {
+                count: 1,
+                names: ['ready_col'],
+              },
+              total_duration: expect.any(Number),
+              total_fetch_duration: 0,
+              total_is_ready_duration: expect.any(Number),
+            },
+            type: 'usage_collector_stats',
+          },
+        ],
+      });
+    });
+
+    it('passes context to fetch', async () => {
+      const mockReadyFetch = jest.fn().mockResolvedValue({});
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'ready_col',
+          isReady: () => true,
+          schema: {},
+          fetch: mockReadyFetch,
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+      const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
+
+      expect(mockReadyFetch).toBeCalledTimes(1);
+      expect(mockReadyFetch).toBeCalledWith({
+        esClient: mockEsClient,
+        soClient: mockSoClient,
+      });
+      expect(results).toHaveLength(2);
+    });
+
+    it('calls fetch with execution context', async () => {
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'ready_col',
+          isReady: () => true,
+          schema: { test: { type: 'long' } },
+          fetch: () => ({ test: 1000 }),
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+      await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
+
+      expect(executionContext.withContext).toHaveBeenCalledTimes(1);
+      expect(executionContext.withContext).toHaveBeenCalledWith(
+        {
+          type: 'usage_collection',
+          name: 'collector.fetch',
+          id: 'ready_col',
+          description: `Fetch method in the Collector "ready_col"`,
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('calls fetch with execution context for every collector', async () => {
+      ['ready_col_1', 'ready_col_2'].forEach((type) =>
+        collectorSet.registerCollector(
+          collectorSet.makeUsageCollector({
+            type,
+            isReady: () => true,
+            schema: { test: { type: 'long' } },
+            fetch: () => ({ test: 1000 }),
+          })
+        )
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+      await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
+
+      expect(executionContext.withContext).toHaveBeenCalledTimes(2);
+      expect(executionContext.withContext).toHaveBeenCalledWith(
+        {
+          type: 'usage_collection',
+          name: 'collector.fetch',
+          id: 'ready_col_1',
+          description: `Fetch method in the Collector "ready_col_1"`,
+        },
+        expect.any(Function)
+      );
+
+      expect(executionContext.withContext).toHaveBeenCalledWith(
+        {
+          type: 'usage_collection',
+          name: 'collector.fetch',
+          id: 'ready_col_2',
+          description: `Fetch method in the Collector "ready_col_2"`,
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('reuses ongoing collectors for subsequent calls', async () => {
+      const fetchMock = jest.fn(
+        () => new Promise((resolve) => setTimeout(() => resolve({ test: 1000 }), 100))
+      );
+
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'slow_collector',
+          isReady: () => true,
+          schema: { test: { type: 'long' } },
+          fetch: fetchMock,
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+
+      // Call bulkFetch twice concurrently
+      await Promise.all([
+        collectorSet.bulkFetch(mockEsClient, mockSoClient),
+        collectorSet.bulkFetch(mockEsClient, mockSoClient),
+      ]);
+
+      // It should be called once
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls completed collectors on subsequent calls', async () => {
+      const fetchMock = jest.fn(
+        () => new Promise((resolve) => setTimeout(() => resolve({ test: 1000 }), 100))
+      );
+
+      collectorSet.registerCollector(
+        collectorSet.makeUsageCollector({
+          type: 'slow_collector',
+          isReady: () => true,
+          schema: { test: { type: 'long' } },
+          fetch: fetchMock,
+        })
+      );
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const mockSoClient = savedObjectsClientMock.create();
+
+      // Call bulkFetch twice sequentially
+      await collectorSet.bulkFetch(mockEsClient, mockSoClient);
+      await collectorSet.bulkFetch(mockEsClient, mockSoClient);
+
+      // It should be called once
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
+  });
+});

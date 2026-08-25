@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/server';
-import { ThirdPartyVisLensExamplePlugin } from './plugin';
+import type { PluginInitializer } from '@kbn/core/server';
 
-export const plugin: PluginInitializer<void, void> = () => new ThirdPartyVisLensExamplePlugin();
+export const plugin: PluginInitializer<void, void> = async () => {
+  const { ThirdPartyVisLensExamplePlugin } = await import('./plugin');
+  return new ThirdPartyVisLensExamplePlugin();
+};

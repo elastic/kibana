@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getRandomString } from '@kbn/test-jest-helpers';
+import type { AutoFollowPattern } from '../../../../common/types';
+
+type AutoFollowPatternMockParams = Partial<{
+  name: string;
+  active: boolean;
+  remoteCluster: string;
+  leaderIndexPatterns: string[];
+  followIndexPattern: string;
+}>;
+
+export const getAutoFollowPatternMock = ({
+  name = getRandomString(),
+  active = false,
+  remoteCluster = getRandomString(),
+  leaderIndexPatterns = [`${getRandomString()}-*`],
+  followIndexPattern = getRandomString(),
+}: AutoFollowPatternMockParams = {}): AutoFollowPattern => ({
+  name,
+  active,
+  remoteCluster,
+  leaderIndexPatterns,
+  followIndexPattern,
+});

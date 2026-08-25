@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createMetricsAggregations(options) should just work 1`] = `
+Object {
+  "metric_0": Object {
+    "avg": Object {
+      "field": "system.cpu.user.pct",
+    },
+  },
+  "metric_1": Object {
+    "derivative": Object {
+      "buckets_path": "metric_1_max",
+      "gap_policy": "skip",
+      "unit": "1s",
+    },
+  },
+  "metric_1_max": Object {
+    "max": Object {
+      "field": "test.field.that.is.a.counter",
+    },
+  },
+}
+`;

@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/screenshotting-example-plugin",
+  "owner": "@elastic/response-ops",
+  "description": "An example integration with the screenshotting plugin.",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "screenshottingExample",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "screenshotting",
+      "developerExamples",
+      "kibanaReact",
+      "navigation"
+    ]
+  }
+}

@@ -1,18 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
-import { transformFileWithBabel, transformFileStream } from '@kbn/dev-utils';
+import { transformFileStream } from '@kbn/dev-utils';
+import { transformFileWithBabel } from './transform_file_with_babel';
 
-import { BuildContext } from '../build_context';
+import type { TaskContext } from '../task_context';
 
 const asyncPipeline = promisify(pipeline);
 
@@ -23,7 +25,7 @@ export async function writeServerFiles({
   sourceDir,
   buildDir,
   kibanaVersion,
-}: BuildContext) {
+}: TaskContext) {
   log.info('copying server source into the build and converting with babel');
 
   // copy source files and apply some babel transformations in the process
@@ -31,6 +33,7 @@ export async function writeServerFiles({
     vfs.src(
       [
         'kibana.json',
+        '.i18nrc.json',
         ...(plugin.manifest.server
           ? config.serverSourcePatterns || [
               'yarn.lock',
@@ -52,6 +55,7 @@ export async function writeServerFiles({
           '**/*.{test,test.mocks,mock,mocks}.*',
         ],
         allowEmpty: true,
+        encoding: false,
       }
     ),
 

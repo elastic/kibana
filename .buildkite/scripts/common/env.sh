@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo '--- Setup environment vars'
+
 export CI=true
 
 KIBANA_DIR=$(pwd)
@@ -12,6 +14,8 @@ PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 
+export DOCS_REPO_CACHE_DIR="$HOME/.docs-repos"
+
 # A few things, such as Chrome, respect this variable
 # For many agent types, the workspace is mounted on a local ssd, so will be faster than the default tmp dir location
 if [[ -d /opt/local-ssd/buildkite ]]; then
@@ -19,17 +23,51 @@ if [[ -d /opt/local-ssd/buildkite ]]; then
   mkdir -p "$TMPDIR"
 fi
 
-KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
-export KIBANA_PKG_BRANCH
-export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
+if command -v jq >/dev/null 2>&1; then
+  KIBANA_PKG_BRANCH="$(jq -r .branch "$KIBANA_DIR/package.json")"
+  export KIBANA_PKG_BRANCH
+  export KIBANA_BASE_BRANCH="$KIBANA_PKG_BRANCH"
 
-KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
-export KIBANA_PKG_VERSION
+  KIBANA_PKG_VERSION="$(jq -r .version "$KIBANA_DIR/package.json")"
+  export KIBANA_PKG_VERSION
+fi
 
-export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
-export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
-export RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
-export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
+# Detects and exports the final target branch when using a merge queue
+if [[ "${BUILDKITE_BRANCH:-}" == "gh-readonly-queue"* ]]; then
+  # removes gh-readonly-queue/
+  BKBRANCH_WITHOUT_GH_MQ_PREFIX="${BUILDKITE_BRANCH#gh-readonly-queue/}"
+
+  # extracts target mqueue branch
+  MERGE_QUEUE_TARGET_BRANCH=${BKBRANCH_WITHOUT_GH_MQ_PREFIX%/*}
+else
+  MERGE_QUEUE_TARGET_BRANCH=""
+fi
+export MERGE_QUEUE_TARGET_BRANCH
+
+# Exports BUILDKITE_BRANCH_MERGE_QUEUE which will use the value from MERGE_QUEUE_TARGET_BRANCH if defined otherwise
+# will fallback to BUILDKITE_BRANCH.
+BUILDKITE_BRANCH_MERGE_QUEUE="${MERGE_QUEUE_TARGET_BRANCH:-${BUILDKITE_BRANCH:-}}"
+export BUILDKITE_BRANCH_MERGE_QUEUE
+
+if [[ "$MERGE_QUEUE_TARGET_BRANCH" ]]; then
+  set_merge_queue_git_info
+fi
+
+BUILDKITE_AGENT_GCP_REGION=""
+if [[ "$(curl -is metadata.google.internal || true)" ]]; then
+  # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
+  BUILDKITE_AGENT_GCP_REGION=$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone | rev | cut -d'/' -f1 | cut -c3- | rev)
+fi
+export BUILDKITE_AGENT_GCP_REGION
+
+CI_PROXY_CACHE_SUFFIX=""
+if [[ "$BUILDKITE_AGENT_GCP_REGION" ]]; then
+  CI_PROXY_CACHE_SUFFIX="/region/$BUILDKITE_AGENT_GCP_REGION"
+fi
+
+export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX"
+export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX"
+export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache$CI_PROXY_CACHE_SUFFIX/cypress"
 
 export NODE_OPTIONS="--max-old-space-size=4096"
 
@@ -37,30 +75,32 @@ export FORCE_COLOR=1
 export TEST_BROWSER_HEADLESS=1
 
 export ELASTIC_APM_ENVIRONMENT=ci
-export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
-export ELASTIC_APM_SERVER_URL=https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io
-# Not really a secret, if APM supported public auth we would use it and APM requires that we use this name
-export ELASTIC_APM_SECRET_TOKEN=7YKhoXsO4MzjhXjx2c
+export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.01
+export ELASTIC_APM_KIBANA_FRONTEND_ACTIVE=false
 
 if is_pr; then
   if is_pr_with_label "ci:collect-apm"; then
     export ELASTIC_APM_ACTIVE=true
+    export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=1.0
     export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
+    # set higher timeouts as # of requests can temporarily overwhelm APM Server
+    export ELASTIC_APM_API_REQUEST_TIME=10s
+    export ELASTIC_APM_SERVER_TIMEOUT=60s
+    export ELASTIC_APM_KIBANA_FRONTEND_ACTIVE=true
   else
     export ELASTIC_APM_ACTIVE=true
     export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=true
   fi
 
-  if [[ "${GITHUB_STEP_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
-    export CHECKS_REPORTER_ACTIVE=true
-  else
-    export CHECKS_REPORTER_ACTIVE=false
+  # value for security genai prompts evals
+  if is_pr_with_label "ci:security-genai-run-evals-local-prompts"; then
+    export IS_SECURITY_AI_PROMPT_TEST=true
   fi
 
-  # These can be removed once we're not supporting Jenkins and Buildkite at the same time
-  # These are primarily used by github checks reporter and can be configured via /github_checks_api.json
-  export ghprbGhRepository="elastic/kibana"
-  export ghprbActualCommit="$BUILDKITE_COMMIT"
+  if is_pr_with_label "ci:ingest-test-logs"; then
+    export CI_STATS_INGEST_TEST_LOGS=true
+  fi
+  
   export BUILD_URL="$BUILDKITE_BUILD_URL"
 
   set_git_merge_base
@@ -71,7 +111,6 @@ if is_pr; then
 else
   export ELASTIC_APM_ACTIVE=true
   export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
-  export CHECKS_REPORTER_ACTIVE=false
 fi
 
 # These are for backwards-compatibility
@@ -94,11 +133,6 @@ export GCS_UPLOAD_PREFIX=FAKE_UPLOAD_PREFIX # TODO remove the need for this
 
 export KIBANA_BUILD_LOCATION="$WORKSPACE/kibana-build-xpack"
 
-if [[ "${BUILD_TS_REFS_CACHE_ENABLE:-}" != "true" ]]; then
-  export BUILD_TS_REFS_CACHE_ENABLE=false
-fi
-
-export BUILD_TS_REFS_DISABLE=true
 export DISABLE_BOOTSTRAP_VALIDATION=true
 
 # Prevent Browserlist from logging on CI about outdated database versions
@@ -108,3 +142,23 @@ export BROWSERSLIST_IGNORE_OLD_DATA=true
 export TEST_GROUP_TYPE_UNIT="Jest Unit Tests"
 export TEST_GROUP_TYPE_INTEGRATION="Jest Integration Tests"
 export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
+
+# tells the gh command what our default repo is
+export GH_REPO=github.com/elastic/kibana
+
+if should_enable_fips; then
+  ES_SECURITY_ENABLED=true
+  export ES_SECURITY_ENABLED
+  # used by FIPS agents to link FIPS OpenSSL modules
+  export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
+
+  if [[ -f "$KIBANA_DIR/config/node.options" ]]; then
+    echo -e '\n--enable-fips' >>"$KIBANA_DIR/config/node.options"
+    echo "--openssl-config=$HOME/nodejs.cnf" >>"$KIBANA_DIR/config/node.options"
+  fi
+
+  if [[ -f "$KIBANA_DIR/config/kibana.yml" ]]; then
+    echo -e '\nxpack.security.fipsMode.enabled: true' >>"$KIBANA_DIR/config/kibana.yml"
+  fi
+fi
+

@@ -1,0 +1,17 @@
+summary: Run a Webhook - Case Management connector to create a case.
+value:
+  params:
+    subAction: pushToService
+    subActionParams:
+      comments:
+        - commentId: 1
+          comment: A comment about the incident.
+      incident:
+        title: Case title
+        description: Description of the incident.
+        tags:
+          - tag1
+          - tag2
+        severity: low
+        status: open
+        id: caseID

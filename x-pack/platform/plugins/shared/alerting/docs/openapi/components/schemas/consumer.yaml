@@ -1,0 +1,4 @@
+type: string
+description: >
+  The name of the application or feature that owns the rule.
+  For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.

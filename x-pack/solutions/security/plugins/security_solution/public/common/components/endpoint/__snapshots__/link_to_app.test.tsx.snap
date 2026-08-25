@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LinkToApp component should render with href 1`] = `
+<a
+  class="euiLink emotion-euiLink-primary"
+  href="/app/fleet"
+  rel="noreferrer"
+>
+  link
+</a>
+`;
+
+exports[`LinkToApp component should render with minimum input 1`] = `
+<button
+  class="euiLink emotion-euiLink-primary"
+  type="button"
+>
+  link
+</button>
+`;

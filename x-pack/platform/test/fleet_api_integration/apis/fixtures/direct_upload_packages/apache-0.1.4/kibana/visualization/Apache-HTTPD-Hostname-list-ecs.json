@@ -1,0 +1,25 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[]}"
+    },
+    "savedSearchRefName": "search_0",
+    "title": "Hostname list [Metrics Apache] ECS",
+    "uiStateJSON": "{\"vis\":{\"params\":{\"sort\":{\"columnIndex\":null,\"direction\":null}}}}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"id\":\"1\",\"params\":{\"customLabel\":\"Events count\"},\"schema\":\"metric\",\"type\":\"count\"},{\"id\":\"2\",\"params\":{\"customLabel\":\"Apache HTTD Hostname\",\"field\":\"apache.status.hostname\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"bucket\",\"type\":\"terms\"}],\"listeners\":{},\"params\":{\"perPage\":10,\"showMeticsAtAllLevels\":false,\"showPartialRows\":false,\"sort\":{\"columnIndex\":null,\"direction\":null}},\"title\":\"Apache HTTPD - Hostname list ECS\",\"type\":\"table\"}"
+  },
+  "id": "Apache-HTTPD-Hostname-list-ecs",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [
+    {
+      "id": "Apache-HTTPD-ecs",
+      "name": "search_0",
+      "type": "search"
+    }
+  ],
+  "type": "visualization"
+}

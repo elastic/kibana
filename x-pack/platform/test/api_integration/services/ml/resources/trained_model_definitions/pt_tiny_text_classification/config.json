@@ -1,0 +1,9 @@
+{
+  "description": "Tiny/Dummy PyTorch model (text_classification)",
+  "model_type": "pytorch",
+  "inference_config": {
+    "text_classification": {
+      "classification_labels": ["POSITIVE", "NEGATIVE"]
+    }
+  }
+}

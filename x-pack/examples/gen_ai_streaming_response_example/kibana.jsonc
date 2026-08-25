@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/gen-ai-streaming-response-example-plugin",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "genAiStreamingResponseExample",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "triggersActionsUi",
+      "actions",
+      "kibanaReact",
+      "developerExamples"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "stackConnectors"
+    ]
+  }
+}

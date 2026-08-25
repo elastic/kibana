@@ -1,0 +1,17 @@
+{
+  "comments": [],
+  "description": "Test comments - exception list item",
+  "entries": [
+    {
+      "field": "host.name",
+      "type": "match",
+      "value": "rock01",
+      "operator": "included"
+    }
+  ],
+  "item_id": "simple_list_item",
+  "name": "Test comments - exception list item",
+  "namespace_type": "single",
+  "tags": [],
+  "type": "simple"
+}

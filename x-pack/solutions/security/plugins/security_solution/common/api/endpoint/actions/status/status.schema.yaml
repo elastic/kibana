@@ -1,0 +1,99 @@
+openapi: 3.0.0
+info:
+  title: Get Action status schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action_status:
+    get:
+      summary: Get response actions status 
+      operationId: EndpointGetActionsStatus
+      description: Get the status of response actions for the specified agent IDs.
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      parameters:
+        - name: agent_ids
+          in: query
+          required: true
+          description: A list of agent IDs to get the action status for.
+          schema:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentIds'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionStatusSuccessResponse'
+              examples:
+                actionStatus:
+                  summary: Pending response actions per agent
+                  value:
+                    data:
+                      - agent_id: 'afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0'
+                        pending_actions:
+                          isolate: 0
+                          unisolate: 0
+                          kill-process: 1
+                          running-processes: 0
+                          get-file: 0
+                          execute: 0
+                          upload: 0
+                          scan: 0
+
+components:
+  schemas:
+    PendingActionsSchema:
+      oneOf:
+        - type: object
+          properties:
+              'isolate':
+                description: Number of pending isolate actions.
+                $ref: '#/components/schemas/PendingActionDataType'
+              'unisolate':
+                description: Number of pending unisolate (release) actions.
+                $ref: '#/components/schemas/PendingActionDataType'
+              'kill-process':
+                description: Number of pending kill-process actions.
+                $ref: '#/components/schemas/PendingActionDataType'
+              'suspend-process':
+                description: Number of pending suspend-process actions.
+                $ref: '#/components/schemas/PendingActionDataType'
+              'running-processes':
+                description: Number of pending running-processes (get processes) actions.
+                $ref: '#/components/schemas/PendingActionDataType'
+              'get-file':
+                description: Number of pending get-file actions.
+                $ref: '#/components/schemas/PendingActionDataType'
+              'execute':
+                description: Number of pending execute actions.
+                $ref: '#/components/schemas/PendingActionDataType'
+              'upload':
+                description: Number of pending upload actions.
+                $ref: '#/components/schemas/PendingActionDataType'
+              'scan':
+                description: Number of pending scan actions.
+                $ref: '#/components/schemas/PendingActionDataType'
+        - type: object
+          additionalProperties: true
+
+    PendingActionDataType:
+      type: integer
+      description: Number of pending actions of this type.
+
+    ActionStatusSuccessResponse:
+      type: object
+      required: ['data']
+      properties:
+        data:
+          type: array
+          description: One pending-actions summary entry per requested agent.
+          items:
+            type: object
+            required: ['agent_id', 'pending_actions']
+            properties:
+              agent_id:
+                $ref: '../../model/schema/common.schema.yaml#/components/schemas/AgentId'
+              pending_actions:
+                $ref: '#/components/schemas/PendingActionsSchema'
+
+

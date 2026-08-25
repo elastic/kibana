@@ -1,11 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('./no_transpilation');
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('@kbn/optimizer').registerNodeAutoTranspilation();
+// development env setup includes a require hook after the env is initialized
+require('./setup_env');
+
+// restore < Node 16 default DNS lookup behavior
+require('./dns_ipv4_first');
+
+var fromRoot = require('@kbn/repo-info').fromRoot;
+var enableCompileCache = require('node:module').enableCompileCache;
+
+if (!process.env.NODE_DISABLE_COMPILE_CACHE) {
+  process.env.NODE_COMPILE_CACHE =
+    process.env.NODE_COMPILE_CACHE || fromRoot('data', 'node_compile_cache');
+  if (enableCompileCache) {
+    enableCompileCache();
+  }
+}
+
+require('@kbn/swc-register').install();
+
+require('@kbn/security-hardening');

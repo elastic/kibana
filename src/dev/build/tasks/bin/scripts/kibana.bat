@@ -5,9 +5,11 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
-set NODE=%DIR%\node\node.exe
-
-set NODE_ENV="production"
+set NODE=%DIR%\node\default\node.exe
+set NODE_ENV=production
+{{#rspack}}
+set KBN_USE_RSPACK=true
+{{/rspack}}
 
 If Not Exist "%NODE%" (
   Echo unable to find usable node.js executable.
@@ -15,7 +17,7 @@ If Not Exist "%NODE%" (
 )
 
 set CONFIG_DIR=%KBN_PATH_CONF%
-If ["%KBN_PATH_CONF%"] == [] (
+If ["%KBN_PATH_CONF%"] == [""] (
   set "CONFIG_DIR=%DIR%\config"
 )
 
@@ -31,10 +33,15 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 
 :: Include pre-defined node option
 set "NODE_OPTIONS=--no-warnings --max-http-header-size=65536 %NODE_OPTIONS%"
+:: Code generation from strings (eval / new Function) is disallowed by default.
+:: Opt out by setting KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false.
+IF NOT "%KBN_DISALLOW_CODE_GEN_FROM_STRINGS%"=="false" (
+  set "NODE_OPTIONS=--disallow-code-generation-from-strings %NODE_OPTIONS%"
+)
 
 :: This should run independently as the last instruction
 :: as we need NODE_OPTIONS previously set to expand
-"%NODE%" "%DIR%\src\cli\dist" %*
+"%NODE%" "%DIR%\node_modules\@kbn\cli\kibana\dist" %*
 
 :finally
 

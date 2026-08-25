@@ -1,0 +1,51 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "title": "stresstest",
+    "typeMeta": "{}"
+  },
+  "coreMigrationVersion": "8.3.0",
+  "id": "6244bd06-f711-44db-b756-bc25e4a32a60",
+  "migrationVersion": {
+    "index-pattern": "8.0.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "updated_at": "2022-04-13T09:07:56.793Z",
+  "version": "WzQwLDFd"
+}
+
+{
+  "accessControl": {
+    "accessMode": "default",
+    "owner": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+  },
+  "attributes": {
+    "controlGroupInput": {
+      "panelsJSON": "{}"
+    },
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true,\"autoApplyFilters\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
+    "panelsJSON": "[{\"type\":\"lens\",\"embeddableConfig\":{\"enhancements\":{\"dynamicActions\":{\"events\":[]}},\"title\":\"\",\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"filters\":[],\"query\":{\"esql\":\"FROM stresstest | STATS count = COUNT(*) BY BUCKET(@timestamp, 100 millisecond), field0 | LIMIT 100000\"},\"attributes\":{\"title\":\"count over BUCKET(@timestamp, 100 millisecond)\",\"references\":[],\"state\":{\"datasourceStates\":{\"textBased\":{\"layers\":{\"f13b5fd1-eb67-4609-992b-b5d1a1daaf53\":{\"index\":\"b5ab5448d77c28ac55700603c109527343acae7a5ecd8e839c903565fbb82bdb\",\"query\":{\"esql\":\"FROM stresstest | STATS count = COUNT(*) BY BUCKET(@timestamp, 100 millisecond), field0 | LIMIT 100000\"},\"columns\":[{\"columnId\":\"count\",\"fieldName\":\"count\",\"label\":\"count\",\"customLabel\":false,\"meta\":{\"type\":\"number\",\"esType\":\"long\"},\"inMetricDimension\":true},{\"columnId\":\"BUCKET(@timestamp, 100 millisecond)\",\"fieldName\":\"BUCKET(@timestamp, 100 millisecond)\",\"label\":\"BUCKET(@timestamp, 100 millisecond)\",\"customLabel\":false,\"meta\":{\"type\":\"date\",\"esType\":\"date\"}},{\"columnId\":\"field0\",\"fieldName\":\"field0\",\"label\":\"field0\",\"customLabel\":false,\"meta\":{\"type\":\"string\",\"esType\":\"keyword\"}}],\"timeField\":\"@timestamp\"}},\"indexPatternRefs\":[{\"id\":\"b5ab5448d77c28ac55700603c109527343acae7a5ecd8e839c903565fbb82bdb\",\"title\":\"stresstest\",\"timeField\":\"@timestamp\"}]}},\"filters\":[],\"query\":{\"esql\":\"FROM stresstest | STATS count = COUNT(*) BY BUCKET(@timestamp, 100 millisecond), field0 | LIMIT 100000\"},\"visualization\":{\"legend\":{\"isVisible\":true,\"position\":\"right\"},\"valueLabels\":\"hide\",\"fittingFunction\":\"Linear\",\"axisTitlesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"tickLabelsVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"labelsOrientation\":{\"x\":0,\"yLeft\":0,\"yRight\":0},\"gridlinesVisibilitySettings\":{\"x\":true,\"yLeft\":true,\"yRight\":true},\"preferredSeriesType\":\"bar_stacked\",\"layers\":[{\"layerId\":\"f13b5fd1-eb67-4609-992b-b5d1a1daaf53\",\"seriesType\":\"bar_stacked\",\"xAccessor\":\"BUCKET(@timestamp, 100 millisecond)\",\"splitAccessors\":[\"field0\"],\"accessors\":[\"count\"],\"layerType\":\"data\",\"colorMapping\":{\"assignments\":[],\"specialAssignments\":[{\"rules\":[{\"type\":\"other\"}],\"color\":{\"type\":\"loop\"},\"touched\":false}],\"paletteId\":\"default\",\"colorMode\":{\"type\":\"categorical\"}}}]},\"adHocDataViews\":{\"b5ab5448d77c28ac55700603c109527343acae7a5ecd8e839c903565fbb82bdb\":{\"id\":\"b5ab5448d77c28ac55700603c109527343acae7a5ecd8e839c903565fbb82bdb\",\"title\":\"stresstest\",\"timeFieldName\":\"@timestamp\",\"sourceFilters\":[],\"type\":\"esql\",\"fieldFormats\":{},\"runtimeFieldMap\":{},\"allowNoIndex\":false,\"name\":\"stresstest\",\"allowHidden\":false,\"managed\":false}},\"needsRefresh\":false},\"visualizationType\":\"lnsXY\",\"version\":2}},\"panelIndex\":\"a80119a4-d6fa-4e9a-887e-d6407cf38007\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"a80119a4-d6fa-4e9a-887e-d6407cf38007\"}}]",
+    "timeFrom": "2022-09-07T10:53:30.262Z",
+    "timeRestore": true,
+    "timeTo": "2022-09-07T10:55:09.280Z",
+    "title": "Stresstest (ES|QL)"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-01-30T20:41:52.508Z",
+  "created_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "id": "86588d89-b172-43bc-8c4a-55621459bbd0",
+  "managed": false,
+  "references": [],
+  "type": "dashboard",
+  "typeMigrationVersion": "10.3.0",
+  "updated_at": "2026-01-30T20:46:20.259Z",
+  "updated_by": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0",
+  "version": "WzE4LDFd"
+}

@@ -1,0 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Capabilities } from '@kbn/core/public';
+import type {
+  PluginSetupContract as AlertingPluginPublicSetup,
+  PluginStartContract as AlertingPluginPublicStart,
+} from '@kbn/alerting-plugin/public';
+
+export const getAlertingCapabilities = (
+  plugins: { alerting?: AlertingPluginPublicSetup | AlertingPluginPublicStart },
+  capabilities: Capabilities
+) => {
+  const canReadAlerts = !!capabilities.apm['alerting:show'];
+  const canSaveAlerts = !!capabilities.apm['alerting:save'];
+  const isAlertingPluginEnabled = !!plugins.alerting;
+  const isAlertingAvailable = isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
+
+  return {
+    isAlertingAvailable,
+    canReadAlerts,
+    canSaveAlerts,
+  };
+};

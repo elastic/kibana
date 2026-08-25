@@ -1,34 +1,29 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs';
+import Fsp from 'fs/promises';
+import os from 'os';
+import * as Rx from 'rxjs';
 import { createHash } from 'crypto';
-import { pipeline, Writable } from 'stream';
-import { resolve, dirname, isAbsolute, sep } from 'path';
-import { createGunzip } from 'zlib';
-import { inspect, promisify } from 'util';
+import { pipeline } from 'stream/promises';
+import { resolve, dirname, isAbsolute, basename, sep } from 'path';
+import { createGunzip, createGzip } from 'zlib';
+import { inspect } from 'util';
 
 import archiver from 'archiver';
-import vfs from 'vinyl-fs';
-import File from 'vinyl';
+import { globby } from 'globby';
+import pMap from 'p-map';
 import del from 'del';
-import deleteEmpty from 'delete-empty';
-import tar, { ExtractOptions } from 'tar';
-import { ToolingLog } from '@kbn/tooling-log';
-
-const pipelineAsync = promisify(pipeline);
-const mkdirAsync = promisify(fs.mkdir);
-const writeFileAsync = promisify(fs.writeFile);
-const readFileAsync = promisify(fs.readFile);
-const readdirAsync = promisify(fs.readdir);
-const utimesAsync = promisify(fs.utimes);
-const copyFileAsync = promisify(fs.copyFile);
-const statAsync = promisify(fs.stat);
+import * as tar from 'tar';
+import { pack as tarFsPack } from 'tar-fs';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export function assertAbsolute(path: string) {
   if (!isAbsolute(path)) {
@@ -37,6 +32,13 @@ export function assertAbsolute(path: string) {
     );
   }
 }
+
+export const rmdir$ = Rx.bindNodeCallback(fs.rmdir);
+export const fsReadDir$ = Rx.bindNodeCallback(
+  (path: string, cb: (err: Error | null, ents: fs.Dirent[]) => void) => {
+    fs.readdir(path, { withFileTypes: true }, cb);
+  }
+);
 
 export function isFileAccessible(path: string) {
   assertAbsolute(path);
@@ -57,23 +59,23 @@ function longInspect(value: any) {
 
 export async function mkdirp(path: string) {
   assertAbsolute(path);
-  await mkdirAsync(path, { recursive: true });
+  await Fsp.mkdir(path, { recursive: true });
 }
 
 export async function write(path: string, contents: string) {
   assertAbsolute(path);
   await mkdirp(dirname(path));
-  await writeFileAsync(path, contents);
+  await Fsp.writeFile(path, contents);
 }
 
 export async function read(path: string) {
   assertAbsolute(path);
-  return await readFileAsync(path, 'utf8');
+  return await Fsp.readFile(path, 'utf8');
 }
 
 export async function getChildPaths(path: string) {
   assertAbsolute(path);
-  const childNames = await readdirAsync(path);
+  const childNames = await Fsp.readdir(path);
   return childNames.map((name) => resolve(path, name));
 }
 
@@ -109,28 +111,48 @@ export async function deleteEmptyFolders(
     throw new TypeError('Expected root folder to be a string path');
   }
 
+  assertAbsolute(rootFolderPath);
   log.debug(
     'Deleting all empty folders and their children recursively starting on ',
     rootFolderPath
   );
-  assertAbsolute(rootFolderPath.startsWith('!') ? rootFolderPath.slice(1) : rootFolderPath);
 
-  // Delete empty is used to gather all the empty folders and
-  // then we use del to actually delete them
-  const emptyFoldersList = (await deleteEmpty(rootFolderPath, {
-    // @ts-expect-error DT package has incorrect types https://github.com/jonschlinkert/delete-empty/blob/6ae34547663e6845c3c98b184c606fa90ef79c0a/index.js#L160
-    dryRun: true,
-  })) as unknown as string[]; // DT package has incorrect types
+  const handleDir$ = (path: string): Rx.Observable<string> => {
+    if (foldersToKeep.includes(path)) {
+      return Rx.EMPTY;
+    }
 
-  const foldersToDelete = emptyFoldersList.filter((folderToDelete) => {
-    return !foldersToKeep.some((folderToKeep) => folderToDelete.includes(folderToKeep));
-  });
-  const deletedEmptyFolders = await del(foldersToDelete, {
-    concurrency: 4,
-  });
+    return fsReadDir$(path).pipe(
+      Rx.mergeMap((stats) => {
+        if (stats.length === 0) {
+          return rmdir$(path, { maxRetries: 1 }).pipe(Rx.map(() => path));
+        }
 
-  log.debug('Deleted %d empty folders', deletedEmptyFolders.length);
-  log.verbose('Deleted:', longInspect(deletedEmptyFolders));
+        return Rx.from(stats).pipe(
+          Rx.mergeMap((s) => (s.isDirectory() ? handleDir$(resolve(path, s.name)) : [])),
+          Rx.toArray(),
+          Rx.mergeMap((deletedChildren) =>
+            fsReadDir$(path).pipe(
+              Rx.mergeMap((currentEntries) => {
+                if (currentEntries.length === 0) {
+                  return Rx.concat(
+                    Rx.from(deletedChildren),
+                    rmdir$(path, { maxRetries: 1 }).pipe(Rx.map(() => path))
+                  );
+                }
+                return Rx.from(deletedChildren);
+              })
+            )
+          )
+        );
+      })
+    );
+  };
+
+  const deleted = await Rx.lastValueFrom(handleDir$(rootFolderPath).pipe(Rx.toArray()));
+
+  log.debug('Deleted %d empty folders', deleted.length);
+  log.verbose('Deleted:', longInspect(deleted));
 }
 
 interface CopyOptions {
@@ -141,13 +163,9 @@ export async function copy(source: string, destination: string, options: CopyOpt
   assertAbsolute(destination);
 
   // ensure source exists before creating destination directory and copying source
-  await statAsync(source);
+  await Fsp.stat(source);
   await mkdirp(dirname(destination));
-  return await copyFileAsync(
-    source,
-    destination,
-    options.clone ? fs.constants.COPYFILE_FICLONE : 0
-  );
+  return await Fsp.copyFile(source, destination, options.clone ? fs.constants.COPYFILE_FICLONE : 0);
 }
 
 interface CopyAllOptions {
@@ -161,67 +179,63 @@ export async function copyAll(
   destination: string,
   options: CopyAllOptions = {}
 ) {
-  const { select = ['**/*'], dot = false, time = new Date() } = options;
+  const { select = ['**/*'], dot = false, time } = options;
 
   assertAbsolute(sourceDir);
   assertAbsolute(destination);
 
-  await pipelineAsync(
-    vfs.src(select, {
-      buffer: false,
-      cwd: sourceDir,
-      base: sourceDir,
-      dot,
-    }),
-    vfs.dest(destination)
+  const relativePaths = await globby(select, {
+    cwd: sourceDir,
+    dot,
+    onlyFiles: true,
+  });
+
+  const copiedFiles = await pMap(
+    relativePaths,
+    async (relativePath) => {
+      const from = resolve(sourceDir, relativePath);
+      const to = resolve(destination, relativePath);
+      await mkdirp(dirname(to));
+      await Fsp.copyFile(from, to);
+      return to;
+    },
+    // Mirror `cpy`'s default concurrency, which scaled with the CPU count.
+    { concurrency: (os.cpus().length || 1) * 2 }
   );
 
   // we must update access and modified file times after the file copy
   // has completed, otherwise the copy action can effect modify times.
-  if (Boolean(time)) {
-    await pipelineAsync(
-      vfs.src(select, {
-        buffer: false,
-        cwd: destination,
-        base: destination,
-        dot,
-      }),
-      new Writable({
-        objectMode: true,
-        write(file: File, _, cb) {
-          utimesAsync(file.path, time, time).then(() => cb(), cb);
-        },
-      })
+  if (time) {
+    const copiedDirectories = await globby(select, {
+      cwd: destination,
+      dot,
+      onlyDirectories: true,
+      absolute: true,
+    });
+    await Promise.all(
+      [...copiedFiles, ...copiedDirectories].map((entry) => Fsp.utimes(entry, time, time))
     );
   }
 }
 
 export async function getFileHash(path: string, algo: string) {
   assertAbsolute(path);
-
   const hash = createHash(algo);
-  const readStream = fs.createReadStream(path);
-  await new Promise((res, rej) => {
-    readStream
-      .on('data', (chunk) => hash.update(chunk))
-      .on('error', rej)
-      .on('end', res);
-  });
-
+  await pipeline(fs.createReadStream(path), hash);
   return hash.digest('hex');
 }
 
 export async function untar(
   source: string,
   destination: string,
-  extractOptions: ExtractOptions = {}
+  extractOptions: tar.TarOptionsWithAliasesAsyncNoFile = {}
 ) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  await mkdirAsync(destination, { recursive: true });
+  await Fsp.mkdir(destination, { recursive: true });
 
-  await pipelineAsync(
+  await pipeline(
     fs.createReadStream(source),
     createGunzip(),
     tar.extract({
@@ -235,13 +249,9 @@ export async function gunzip(source: string, destination: string) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  await mkdirAsync(dirname(destination), { recursive: true });
+  await Fsp.mkdir(dirname(destination), { recursive: true });
 
-  await pipelineAsync(
-    fs.createReadStream(source),
-    createGunzip(),
-    fs.createWriteStream(destination)
-  );
+  await pipeline(fs.createReadStream(source), createGunzip(), fs.createWriteStream(destination));
 }
 
 interface CompressTarOptions {
@@ -249,29 +259,37 @@ interface CompressTarOptions {
   rootDirectoryName?: string;
   source: string;
   destination: string;
-  archiverOptions?: archiver.TarOptions & archiver.CoreOptions;
+  gzipLevel?: number;
 }
 export async function compressTar({
   source,
   destination,
-  archiverOptions,
+  gzipLevel = 9,
   createRootDirectory,
   rootDirectoryName,
-}: CompressTarOptions) {
-  const output = fs.createWriteStream(destination);
-  const archive = archiver('tar', archiverOptions);
-  const folder = rootDirectoryName ? rootDirectoryName : source.split(sep).slice(-1)[0];
-  const name = createRootDirectory ? folder : false;
-  archive.pipe(output);
+}: CompressTarOptions): Promise<number> {
+  assertAbsolute(source);
+  assertAbsolute(destination);
+
+  const folder = rootDirectoryName || basename(source);
 
   let fileCount = 0;
-  archive.on('entry', (entry) => {
-    if (entry.stats?.isFile()) {
-      fileCount += 1;
-    }
+  const packStream = tarFsPack(source, {
+    map(header) {
+      if (header.type === 'file') {
+        fileCount += 1;
+      }
+      if (createRootDirectory) {
+        header.name = folder + '/' + header.name;
+      }
+      return header;
+    },
   });
 
-  await archive.directory(source, name).finalize();
+  const gzip = createGzip({ level: gzipLevel });
+  const output = fs.createWriteStream(destination);
+
+  await pipeline(packStream, gzip, output);
 
   return fileCount;
 }
@@ -289,7 +307,10 @@ export async function compressZip({
   archiverOptions,
   createRootDirectory,
   rootDirectoryName,
-}: CompressZipOptions) {
+}: CompressZipOptions): Promise<number> {
+  assertAbsolute(source);
+  assertAbsolute(destination);
+
   const output = fs.createWriteStream(destination);
   const archive = archiver('zip', archiverOptions);
   const folder = rootDirectoryName ? rootDirectoryName : source.split(sep).slice(-1)[0];

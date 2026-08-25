@@ -1,0 +1,37 @@
+- name: processor
+  title: Message Processor
+  description: >
+    Fields that represent the message processor status
+  type: group
+  fields:
+    - name: accepted
+      type: long
+      level: custom
+      description: >
+        The number of accepted messages
+    - name: processed
+      type: long
+      level: custom
+      description: >
+        The number of processed messages
+    - name: latency
+      type: histogram
+      level: custom
+      description: >
+        The latency per message processed
+    - name: outcome
+      type: keyword
+      level: custom
+      description: >
+        The outcome of the events
+    - name: bytes
+      type: unsigned_long
+      level: custom
+      description: >
+        The number of bytes processed
+    - name: timeSpent
+      type: unsigned_long
+      level: custom
+      description: >
+        The millisecond spent processing messages
+

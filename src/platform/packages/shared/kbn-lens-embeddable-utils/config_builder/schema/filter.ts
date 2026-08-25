@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { z } from '@kbn/zod';
+
+export const filterSchema = z
+  .object({
+    language: z
+      .union([z.literal('kql'), z.literal('lucene')])
+      .default('kql')
+      .meta({
+        description:
+          'Query language: `kql` (Kibana Query Language) or `lucene`. Defaults to `kql`.',
+      }),
+    expression: z.string().meta({
+      description: 'A query expression in KQL or Lucene syntax',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'filterSimple',
+    title: 'Filter',
+    description:
+      'A KQL or Lucene query that filters panel data. Applied on top of any dashboard-level filters.',
+  });
+
+export const filterWithLabelSchema = z
+  .object({
+    /**
+     * Filter query
+     */
+    filter: filterSchema,
+    /**
+     * Label for the filter
+     */
+    label: z.string().optional().meta({
+      description: 'Label for the filter',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'filterWithLabel',
+    title: 'Filter with Label',
+    description: 'A KQL or Lucene filter with an optional display label.',
+  });
+
+export type LensApiFilterType = z.output<typeof filterSchema>;

@@ -1,0 +1,26 @@
+$schema: https://moonrepo.dev/schemas/v2/tasks.json
+
+inheritedBy:
+  tags:
+    - jest-unit-tests
+
+tasks:
+  jest:
+    command: node
+    args:
+      - scripts/jest.js
+      - '--passWithNoTests'
+      - '--config'
+      - '@files(jest-config)'
+    deps:
+      # Moon 2.3+ defaults output-less deps to cacheStrategy: ignored; keep hash so
+      # local/upstream source changes invalidate the jest cache.
+      - target: '~:source'
+        cacheStrategy: hash
+      - target: '~:source-upstream'
+        cacheStrategy: hash
+    inputs:
+      - '@group(src)'
+    options:
+      mergeArgs: append
+      runFromWorkspaceRoot: true

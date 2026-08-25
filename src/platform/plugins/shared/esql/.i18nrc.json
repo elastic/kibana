@@ -1,0 +1,6 @@
+{
+  "prefix": "esql",
+  "paths": {
+    "esql": "."
+  }
+}

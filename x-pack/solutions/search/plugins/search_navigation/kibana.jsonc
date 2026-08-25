@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-navigation",
+  "owner": "@elastic/search-ml-ux",
+  "group": "search",
+  "visibility": "private",
+  "plugin": {
+    "id": "searchNavigation",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchNavigation"
+    ],
+    "requiredPlugins": ["share"],
+    "optionalPlugins": [
+      "serverless",
+      "spaces",
+      "indexManagement",
+      "contextEngine"
+    ],
+    "requiredBundles": []
+  }
+}

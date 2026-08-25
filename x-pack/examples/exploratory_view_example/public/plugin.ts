@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
+import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
 
@@ -18,6 +19,7 @@ export interface SetupDependencies {
 export interface StartDependencies {
   data: DataPublicPluginStart;
   observability: ObservabilityPublicStart;
+  exploratoryView: ExploratoryViewPublicStart;
 }
 
 export class ExploratoryViewExamplePlugin
@@ -27,7 +29,7 @@ export class ExploratoryViewExamplePlugin
     core.application.register({
       id: 'exploratory_view_example',
       title: 'Observability Exploratory View example',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount: mount(core),
       order: 1000,
     });

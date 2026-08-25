@@ -1,0 +1,77 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { CoreSetup } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type {
+  AppDependencies,
+  IManagementSectionsPluginsSetup,
+  IManagementSectionsPluginsStart,
+} from '..';
+import { APP } from '..';
+import { SearchSessionsMgmtAPI } from '../lib/api';
+import { renderApp } from './render';
+import type { SearchSessionsConfigSchema } from '../../../../../server/config';
+export class SearchSessionsMgmtApp {
+  constructor(
+    private coreSetup: CoreSetup<IManagementSectionsPluginsStart>,
+    private setupDeps: IManagementSectionsPluginsSetup,
+    private config: SearchSessionsConfigSchema,
+    private kibanaVersion: string,
+    private params: ManagementAppMountParams
+  ) {}
+
+  public async mountManagementSection() {
+    const { coreSetup, params, setupDeps } = this;
+    const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+
+    const {
+      chrome: { docTitle },
+      http,
+      i18n,
+      notifications,
+      uiSettings,
+      application,
+    } = coreStart;
+
+    const pluginName = APP.getI18nName();
+    docTitle.change(pluginName);
+    this.params.setBreadcrumbs([{ text: pluginName }]);
+
+    const api = new SearchSessionsMgmtAPI(setupDeps.sessionsClient, this.config, {
+      notifications,
+      application,
+      usageCollector: setupDeps.searchUsageCollector,
+      featureFlags: coreStart.featureFlags,
+    });
+
+    const dependencies: AppDependencies = {
+      config: this.config,
+      core: coreStart,
+      api,
+      http,
+      i18n,
+      uiSettings,
+      share: pluginsStart.share,
+      kibanaVersion: this.kibanaVersion,
+      searchUsageCollector: setupDeps.searchUsageCollector,
+      searchSessionEBTManager: setupDeps.searchSessionEBTManager,
+    };
+
+    const { element } = params;
+    const unmountAppCb = renderApp(element, dependencies);
+
+    return () => {
+      docTitle.reset();
+      unmountAppCb();
+    };
+  }
+}
+
+export { renderApp };

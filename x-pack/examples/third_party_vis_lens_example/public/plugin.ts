@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
-import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Plugin, CoreSetup } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { TypedLensByValueInput, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import { getRotatingNumberRenderer, rotatingNumberFunction } from './expression';
 import { getRotatingNumberVisualization } from './visualization';
-import { RotatingNumberState } from '../common/types';
+import type { RotatingNumberState } from '../common/types';
 import image from './image.png';
 
 export interface SetupDependencies {
@@ -51,6 +52,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
   };
 
   return {
+    version: LENS_ITEM_LATEST_VERSION,
     visualizationType: 'rotatingNumber',
     title: 'Prefilled from example app',
     references: [
@@ -67,7 +69,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: dataLayer,
           },
@@ -90,19 +92,25 @@ export class EmbeddedLensExamplePlugin
     core.application.register({
       id: 'third_party_lens_vis_example',
       title: 'Third party Lens vis example',
-      navLinkStatus: AppNavLinkStatus.hidden,
-      mount: (params) => {
+      visibleIn: [],
+      mount: ({ history }) => {
         (async () => {
-          const [, { lens: lensStart, dataViews }] = await core.getStartServices();
-          const defaultDataView = await dataViews.getDefault();
-          lensStart.navigateToPrefilledEditor({
-            id: '',
-            timeRange: {
-              from: 'now-5d',
-              to: 'now',
-            },
-            attributes: getLensAttributes(defaultDataView!),
-          });
+          const [coreStart, { lens: lensStart, dataViews }] = await core.getStartServices();
+          // if it's a regular navigation, redirect to Lens
+          if (history.action === 'PUSH') {
+            const defaultDataView = await dataViews.getDefault();
+            lensStart.navigateToPrefilledEditor({
+              id: '',
+              time_range: {
+                from: 'now-5d',
+                to: 'now',
+              },
+              attributes: getLensAttributes(defaultDataView!),
+            });
+          } else {
+            // if it's a "back" navigation, go to developer examples
+            coreStart.application.navigateToApp('developerExamples');
+          }
         })();
         return () => {};
       },
@@ -118,7 +126,6 @@ export class EmbeddedLensExamplePlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_vis_lens_example',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

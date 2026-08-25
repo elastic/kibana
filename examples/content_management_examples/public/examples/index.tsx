@@ -1,0 +1,90 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { EuiPageTemplate, EuiSideNav } from '@elastic/eui';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { StartDeps } from '../types';
+import { TodoApp } from './todos';
+import { MSearchApp } from './msearch';
+import { FinderApp } from './finder';
+
+export const renderApp = (
+  core: CoreStart,
+  { contentManagement, savedObjectsTaggingOss }: StartDeps,
+  { element, history }: AppMountParameters
+) => {
+  ReactDOM.render(
+    core.rendering.addContext(
+      <Router history={history}>
+        <EuiPageTemplate offset={0}>
+          <EuiPageTemplate.Sidebar>
+            <EuiSideNav
+              items={[
+                {
+                  id: 'Examples',
+                  name: 'Examples',
+                  items: [
+                    {
+                      id: 'todos',
+                      name: 'Todo app',
+                      'data-test-subj': 'todosExample',
+                      href: '/app/contentManagementExamples/todos',
+                    },
+                    {
+                      id: 'msearch',
+                      name: 'MSearch',
+                      'data-test-subj': 'msearchExample',
+                      href: '/app/contentManagementExamples/msearch',
+                    },
+                    {
+                      id: 'finder',
+                      name: 'Finder',
+                      'data-test-subj': 'finderExample',
+                      href: '/app/contentManagementExamples/finder',
+                    },
+                  ],
+                },
+              ]}
+            />
+          </EuiPageTemplate.Sidebar>
+
+          <EuiPageTemplate.Section>
+            <Routes>
+              <Redirect from="/" to="/todos" exact />
+              <Route path="/todos">
+                <TodoApp contentClient={contentManagement.client} />
+              </Route>
+              <Route path="/msearch">
+                <MSearchApp
+                  contentClient={contentManagement.client}
+                  core={core}
+                  savedObjectsTagging={savedObjectsTaggingOss}
+                />
+              </Route>
+              <Route path="/finder">
+                <FinderApp
+                  contentClient={contentManagement.client}
+                  core={core}
+                  savedObjectsTagging={savedObjectsTaggingOss}
+                />
+              </Route>
+            </Routes>
+          </EuiPageTemplate.Section>
+        </EuiPageTemplate>
+      </Router>
+    ),
+    element
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(element);
+};

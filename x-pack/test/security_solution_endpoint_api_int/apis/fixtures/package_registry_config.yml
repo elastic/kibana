@@ -1,4 +1,0 @@
-package_paths:
-  - /packages/production
-  - /packages/staging
-  - /packages/snapshot

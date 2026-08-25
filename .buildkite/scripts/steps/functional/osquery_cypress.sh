@@ -2,18 +2,20 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/steps/functional/common.sh
 
-export BUILD_TS_REFS_DISABLE=false
-.buildkite/scripts/bootstrap.sh
-node scripts/build_kibana_platform_plugins.js
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
 export JOB=kibana-osquery-cypress
 
 echo "--- Osquery Cypress tests"
 
-checks-reporter-with-killswitch "Osquery Cypress Tests" \
- node scripts/functional_tests \
-   --debug --bail \
-   --config x-pack/test/osquery_cypress/cli_config.ts
+cd x-pack/platform/plugins/shared/osquery
 
+set +e
+yarn cypress:run; status=$?; yarn junit:merge || :
+
+# Scout reporter
+upload_scout_cypress_events "Cypress tests"
+
+exit $status

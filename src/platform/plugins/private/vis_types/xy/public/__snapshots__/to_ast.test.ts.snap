@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`xy vis toExpressionAst function should match basic snapshot 1`] = `
+Object {
+  "addArgument": [Function],
+  "arguments": Object {
+    "addTimeMarker": Array [
+      false,
+    ],
+    "layers": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "legend": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "showTooltip": Array [
+      true,
+    ],
+    "singleTable": Array [
+      true,
+    ],
+    "valueLabels": Array [
+      "hide",
+    ],
+    "xAxisConfig": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "yAxisConfigs": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+  },
+  "getArgument": [Function],
+  "name": "layeredXyVis",
+  "removeArgument": [Function],
+  "replaceArgument": [Function],
+  "toAst": [Function],
+  "toString": [Function],
+  "type": "expression_function_builder",
+}
+`;

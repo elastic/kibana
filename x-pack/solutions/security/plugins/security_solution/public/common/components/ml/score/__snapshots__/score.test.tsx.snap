@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`draggable_score renders correctly against snapshot 1`] = `
+<SecurityCellActions
+  data={
+    Object {
+      "field": "process.name",
+      "value": "du",
+    }
+  }
+  mode="hover-down"
+  triggerId="security-default-cellActions"
+  visibleCellActions={5}
+>
+  17
+</SecurityCellActions>
+`;
+
+exports[`draggable_score renders correctly against snapshot when the index is not included 1`] = `
+<SecurityCellActions
+  data={
+    Object {
+      "field": "process.name",
+      "value": "du",
+    }
+  }
+  mode="hover-down"
+  triggerId="security-default-cellActions"
+  visibleCellActions={5}
+>
+  17
+</SecurityCellActions>
+`;

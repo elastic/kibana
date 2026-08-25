@@ -1,26 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters } from '@kbn/core/public';
 import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiText,
   EuiHorizontalRule,
-  EuiPageContentHeader,
   EuiListGroup,
 } from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { RandomNumberRouteExample } from './random_number_example';
 import { RandomNumberBetweenRouteExample } from './random_number_between_example';
-import { Services } from './services';
+import type { Services } from './services';
 import { PostMessageRouteExample } from './post_message_example';
 import { GetMessageRouteExample } from './get_message_example';
 
@@ -32,56 +32,56 @@ function RoutingExplorer({
   addSuccessToast,
   postMessage,
   getMessageById,
+  startServices,
 }: Props) {
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageContent>
-          <EuiPageContentHeader>
-            <EuiText>
-              <h1>Routing examples</h1>
-            </EuiText>
-          </EuiPageContentHeader>
+    <KibanaRenderContextProvider {...startServices}>
+      <EuiPageTemplate>
+        <EuiPageTemplate.Header>
           <EuiText>
-            <EuiListGroup
-              listItems={[
-                {
-                  label: 'IRouter API docs',
-                  href: 'https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.irouter.md',
-                  iconType: 'logoGithub',
-                  target: '_blank',
-                  size: 's',
-                },
-                {
-                  label: 'HttpHandler (core.http.fetch) API docs',
-                  href: 'https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.httphandler.md',
-                  iconType: 'logoGithub',
-                  target: '_blank',
-                  size: 's',
-                },
-                {
-                  label: 'Conventions',
-                  href: 'https://github.com/elastic/kibana/tree/main/STYLEGUIDE.mdx#api-endpoints',
-                  iconType: 'logoGithub',
-                  target: '_blank',
-                  size: 's',
-                },
-              ]}
-            />
+            <h1>Routing examples</h1>
           </EuiText>
-          <EuiHorizontalRule />
-          <RandomNumberRouteExample fetchRandomNumber={fetchRandomNumber} />
-          <EuiHorizontalRule />
-          <RandomNumberBetweenRouteExample fetchRandomNumberBetween={fetchRandomNumberBetween} />
+        </EuiPageTemplate.Header>
+        <EuiPageTemplate.Section>
+          <EuiPageSection>
+            <EuiText>
+              <EuiListGroup
+                listItems={[
+                  {
+                    label: 'IRouter API docs',
+                    href: 'https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-http-server#:~:text=IRouter',
+                    iconType: 'logoGithub',
+                    target: '_blank',
+                  },
+                  {
+                    label: 'HttpHandler (core.http.fetch) API docs',
+                    href: 'https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-http-browser#:~:text=HttpHandler',
+                    iconType: 'logoGithub',
+                    target: '_blank',
+                  },
+                  {
+                    label: 'Conventions',
+                    href: 'https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#api-endpoints',
+                    iconType: 'logoGithub',
+                    target: '_blank',
+                  },
+                ]}
+              />
+            </EuiText>
+            <EuiHorizontalRule />
+            <RandomNumberRouteExample fetchRandomNumber={fetchRandomNumber} />
+            <EuiHorizontalRule />
+            <RandomNumberBetweenRouteExample fetchRandomNumberBetween={fetchRandomNumberBetween} />
 
-          <EuiHorizontalRule />
-          <PostMessageRouteExample addSuccessToast={addSuccessToast} postMessage={postMessage} />
+            <EuiHorizontalRule />
+            <PostMessageRouteExample addSuccessToast={addSuccessToast} postMessage={postMessage} />
 
-          <EuiHorizontalRule />
-          <GetMessageRouteExample getMessageById={getMessageById} />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+            <EuiHorizontalRule />
+            <GetMessageRouteExample getMessageById={getMessageById} />
+          </EuiPageSection>
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    </KibanaRenderContextProvider>
   );
 }
 

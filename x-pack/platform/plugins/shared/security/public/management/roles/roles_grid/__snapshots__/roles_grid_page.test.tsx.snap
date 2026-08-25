@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<RolesGridPage /> renders permission denied if required 1`] = `
+<section
+  class="emotion-euiPageSection-l-center-danger"
+>
+  <div
+    class="emotion-euiPageSection__content-l-center"
+  >
+    <div
+      class="euiPanel euiPanel--transparent euiEmptyPrompt emotion-euiPanel-m-transparent-euiEmptyPrompt-vertical"
+    >
+      <div
+        class="euiEmptyPrompt__main emotion-euiEmptyPrompt__main-vertical-l"
+      >
+        <div
+          class="euiEmptyPrompt__icon emotion-euiEmptyPrompt__icon-vertical"
+        >
+          <span
+            color="subdued"
+            data-euiicon-type="securityApp"
+          />
+        </div>
+        <div
+          class="euiEmptyPrompt__content emotion-euiEmptyPrompt__content-vertical"
+        >
+          <h2
+            class="euiTitle emotion-euiTitle-m"
+          >
+            You need permission to manage roles
+          </h2>
+          <div
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          >
+            <p
+              data-test-subj="permissionDeniedMessage"
+            >
+              Contact your system administrator.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+`;

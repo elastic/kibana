@@ -1,0 +1,46 @@
+---
+##
+## This the automation to let Observability team members to know what are the
+## supported GitHub commands to interact with the Observability test environments.
+##
+## Owner: @elastic/observablt-robots
+##
+name: oblt-github-commands
+
+on:
+  pull_request_target:
+    types:
+      - labeled
+
+permissions:
+  contents: read
+
+jobs:
+  comment:
+    if: ${{ github.event.label.name == 'ci:project-deploy-observability' }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const body = `
+              ### :robot: GitHub comments
+
+              <details><summary>Expand to view the GitHub comments</summary>
+              <p>
+
+              Just comment with:
+              - \`/oblt-deploy\` : Deploy a Kibana instance using the Observability test environments.
+              - \`run\` \`docs-build\` : Re-trigger the docs validation. (use unformatted text in the comment!)
+              </p>
+              </details>
+            `.replace(/  +/g, '')
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })

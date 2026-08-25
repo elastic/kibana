@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU"
+      crossorigin="anonymous"
+    />
+    <style type="text/css">
+      pre {
+        font-size: 0.75em !important;
+        margin-bottom: 0;
+        padding: 0.75rem;
+        background: #f6f8fa;
+        border: 1px solid #e3e6ea;
+        border-radius: 0.25rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 60vh;
+        overflow: auto;
+      }
+
+      header .reportName {
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.75em;
+      }
+
+      header h1 {
+        font-size: 1.35rem;
+        margin-bottom: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6c757d;
+        margin: 1.5rem 0 0.5rem;
+      }
+
+      table.details {
+        table-layout: fixed;
+      }
+      table.details th[scope='row'] {
+        width: 15rem;
+        font-weight: 600;
+        color: #6c757d;
+      }
+      table.details td {
+        overflow-wrap: anywhere;
+      }
+      table.details td code {
+        word-break: keep-all;
+      }
+
+      ul.aborted {
+        font-size: 0.85em;
+      }
+
+      details {
+        margin-top: 0.5rem;
+      }
+      details > summary {
+        cursor: pointer;
+        color: #0d6efd;
+        font-size: 0.85em;
+      }
+
+      .copyable {
+        position: relative;
+      }
+      .copyable pre {
+        /* keep the first lines clear of the absolutely positioned copy button */
+        padding-right: 4rem;
+      }
+      .copyable .copyBtn {
+        position: absolute;
+        top: 0.35rem;
+        right: 0.35rem;
+        z-index: 1;
+        font-size: 0.7em;
+        padding: 0.1rem 0.4rem;
+        background: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.2rem;
+        color: #495057;
+      }
+      .copyable .copyBtn:hover {
+        background: #e9ecef;
+      }
+
+      img.screenshot {
+        cursor: pointer;
+        margin: 5px 0;
+      }
+      .screenshotContainer:not(.expanded) img.screenshot {
+        height: 200px;
+      }
+
+      .screenshotContainer:not(.fs) img.screenshot.fs,
+      .screenshotContainer:not(.fs) button.toggleFs.off,
+      .screenshotContainer.fs img.screenshot:not(.fs),
+      .screenshotContainer.fs button.toggleFs.on {
+        display: none;
+      }
+
+      .screenshotContainer .toggleFs {
+        background: none;
+        border: none;
+        margin: 0 0 0 5px;
+        vertical-align: top;
+      }
+    </style>
+    <title>$TITLE</title>
+  </head>
+  <body>
+    <div class="col-lg-10 mx-auto p-3 py-md-5">
+      <main>$MAIN</main>
+    </div>
+    <script type="text/javascript">
+      /**
+       * @param {HTMLElement} el
+       * @param {(el: HTMLElement) => boolean} className
+       */
+      function findParent(el, test) {
+        while (el) {
+          if (test(el)) {
+            return el
+          }
+
+          // stop if we iterate all the way up to the document body
+          if (el.parentElement === document.body) {
+            break
+          }
+
+          el = el.parentElement
+        }
+
+        return null
+      }
+
+      function isContainer(el) {
+        return el.classList.contains('screenshotContainer')
+      }
+
+      function isButtonOrImg(el) {
+        return el instanceof HTMLImageElement || el instanceof HTMLButtonElement
+      }
+
+      function copyToClipboard(button) {
+        const pre = findParent(button, (el) => el.classList.contains('copyable'))?.querySelector('pre')
+        if (!pre || !navigator.clipboard) {
+          return
+        }
+
+        navigator.clipboard.writeText(pre.textContent).then(() => {
+          const label = button.textContent
+          button.textContent = 'Copied'
+          setTimeout(() => {
+            button.textContent = label
+          }, 1500)
+        })
+      }
+
+      document.addEventListener('click', (event) => {
+        const el = findParent(event.target, isButtonOrImg)
+
+        if (el instanceof HTMLImageElement && el.classList.contains('screenshot')) {
+          findParent(el, isContainer)?.classList.toggle('expanded')
+        }
+
+        if (el instanceof HTMLButtonElement && el.classList.contains('toggleFs')) {
+          findParent(el, isContainer)?.classList.toggle('fs')
+        }
+
+        if (el instanceof HTMLButtonElement && el.classList.contains('copyBtn')) {
+          copyToClipboard(el)
+        }
+      })
+    </script>
+  </body>
+</html>

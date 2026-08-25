@@ -1,8 +1,0 @@
-.mlExpandedRowJobMessages {
-  padding: 0 $euiSizeS $euiSizeS $euiSizeS;
-}
-
-/* override ML legacy class "job-messages-table" */
-.mlExpandedRowJobMessages .euiTable, .mlExpandedRowJobMessages .euiTableRowCell {
-  background-color: transparent !important;
-}

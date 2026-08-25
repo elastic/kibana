@@ -1,0 +1,55 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ReactNode, OptionHTMLAttributes } from 'react';
+import React from 'react';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
+
+import type { FieldHook } from '../../hook_form_lib';
+import { getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+
+export interface Props {
+  field: FieldHook;
+  euiFieldProps: {
+    options: Array<
+      { text: string | ReactNode; [key: string]: any } & OptionHTMLAttributes<HTMLOptionElement>
+    >;
+    [key: string]: any;
+  };
+  idAria?: string;
+  [key: string]: any;
+}
+
+export const SelectField = ({ field, euiFieldProps, idAria, ...rest }: Props) => {
+  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
+  return (
+    <EuiFormRow
+      label={field.label}
+      helpText={field.helpText}
+      error={errorMessage}
+      isInvalid={isInvalid}
+      fullWidth
+      describedByIds={idAria ? [idAria] : undefined}
+      {...rest}
+    >
+      <EuiSelect
+        fullWidth
+        value={field.value as string}
+        onChange={(e) => {
+          field.setValue(e.target.value);
+        }}
+        hasNoInitialSelection={true}
+        isInvalid={isInvalid}
+        data-test-subj="select"
+        {...euiFieldProps}
+      />
+    </EuiFormRow>
+  );
+};

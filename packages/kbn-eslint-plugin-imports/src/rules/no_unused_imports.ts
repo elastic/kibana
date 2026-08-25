@@ -1,29 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Rule, Scope, AST } from 'eslint';
+import type { Rule, Scope, AST } from 'eslint';
 import type { Comment } from 'estree';
-import * as T from '@babel/types';
-import { TSESTree } from '@typescript-eslint/typescript-estree';
+import type * as T from '@babel/types';
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
 
+import { isImportDeclaration } from '../helpers/ast';
 import { RUNNING_IN_EDITOR } from '../helpers/running_in_editor';
 
-type WithParent<T> = T & { parent?: WithParent<T> };
+type WithParent<TNode> = TNode & { parent?: WithParent<TNode> };
 type SomeNode = WithParent<T.Node> | TSESTree.Node;
 type SomeImportNode = NonNullable<ReturnType<typeof findImportParent>>;
 
 function findImportParent(def: Scope.Definition) {
   let cursor: SomeNode | undefined = def.node;
   while (cursor) {
-    if (
-      T.isImportDeclaration(cursor) ||
-      cursor.type === TSESTree.AST_NODE_TYPES.ImportDeclaration
-    ) {
+    if (isImportDeclaration(cursor)) {
       return cursor;
     }
     cursor = cursor.parent;
@@ -78,9 +77,10 @@ function isTsOrEslintIgnore(comment: Comment) {
 
 export const NoUnusedImportsRule: Rule.RuleModule = {
   meta: {
+    hasSuggestions: true,
     fixable: 'code',
     docs: {
-      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.md#kbnimportsno_unused_imports',
+      url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsno_unused_imports',
     },
   },
   create(context) {
@@ -129,9 +129,11 @@ export const NoUnusedImportsRule: Rule.RuleModule = {
     }
 
     return {
-      'Program:exit': () => {
+      'Program:exit': (node) => {
         const unusedByImport = new Map<SomeImportNode, Scope.Definition[]>();
-        for (const { importParent, def } of findUnusedImportDefs(context.getScope())) {
+        for (const { importParent, def } of findUnusedImportDefs(
+          context.sourceCode.getScope(node)
+        )) {
           const group = unusedByImport.get(importParent);
           if (group) {
             group.push(def);

@@ -1,0 +1,31 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "task:data_enhanced_search_sessions_monitor",
+    "index": ".kibana_task_manager",
+    "source": {
+      "references": [],
+      "task": {
+        "attempts": 0,
+        "ownerId": null,
+        "params": "{}",
+        "retryAt": "2020-11-30T15:43:39.626Z",
+        "runAt": "2020-11-30T15:43:08.277Z",
+        "scheduledAt": "2020-11-30T15:43:08.277Z",
+        "retryAt": null,
+        "schedule": {
+          "interval": "3s"
+        },
+        "scope": [
+          "testing"
+        ],
+        "startedAt": null,
+        "state": "{}",
+        "status": "idle",
+        "taskType": "search_sessions_monitor"
+      },
+      "type": "task",
+      "updated_at": "2020-11-30T15:43:08.277Z"
+    }
+  }
+}

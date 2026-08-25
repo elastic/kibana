@@ -1,0 +1,15 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*", "../../typings/**/*"],
+  "kbn_references": [
+    "@kbn/resizable-layout",
+    "@kbn/core",
+    "@kbn/i18n-react",
+    "@kbn/developer-examples-plugin",
+    "@kbn/react-kibana-context-theme",
+  ],
+  "exclude": ["target/**/*"]
+}

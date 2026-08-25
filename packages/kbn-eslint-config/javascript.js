@@ -7,15 +7,13 @@ module.exports = {
      * Main JS configuration
      */
     {
-      files: ['**/*.js'],
+      files: ['**/*.js', '**/*.mjs'],
       parser: require.resolve('@babel/eslint-parser'),
 
       plugins: [
         'mocha',
-        '@babel',
         'import',
         'no-unsanitized',
-        'prefer-object-spread',
       ],
 
       env: {
@@ -30,7 +28,10 @@ module.exports = {
         ecmaVersion: 2018,
         requireConfigFile: false,
         babelOptions: {
-          presets: ['@kbn/babel-preset/node_preset']
+          presets: ['@kbn/babel-preset/node_preset'],
+          parserOpts: {
+            plugins: ['importAttributes']
+          }
         },
       },
 
@@ -94,7 +95,7 @@ module.exports = {
         'import/no-duplicates': 'error',
         'import/no-dynamic-require': 'error',
 
-        'prefer-object-spread/prefer-object-spread': 'error',
+        'prefer-object-spread': 'error',
       }
     },
   ]

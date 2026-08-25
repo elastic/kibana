@@ -1,0 +1,26 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "semantic_text_fields",
+    "source": {
+      "@timestamp": "2024-11-01T15:52:16.648Z",
+      "content": "my favorite color is green",
+      "text": "my favorite color is green"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "semantic_text_fields",
+    "source": {
+      "@timestamp": "2024-11-01T15:59:34.610Z",
+      "content": "my favorite food is pasta",
+      "text": "my favorite food is pasta"
+    }
+  }
+}
+

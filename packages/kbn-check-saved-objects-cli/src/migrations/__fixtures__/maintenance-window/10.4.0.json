@@ -1,0 +1,89 @@
+{
+  "10.3.0": [
+    {
+      "title": "Test Maintenance Window",
+      "duration": 3600000,
+      "enabled": true,
+      "rRule": {
+        "tzid": "UTC",
+        "dtstart": "2023-02-26T00:00:00.000Z",
+        "freq": 2,
+        "count": 2,
+        "byweekday": ["MO"]
+      },
+      "events": [
+        {
+          "gte": "2023-02-26T00:00:00.000Z",
+          "lte": "2023-02-26T01:00:00.000Z"
+        },
+        {
+          "gte": "2023-03-05T00:00:00.000Z",
+          "lte": "2023-03-05T01:00:00.000Z"
+        }
+      ],
+      "scopedQuery": {
+        "kql": "kibana.alert.rule.name : \"Elasticsearch query rule\"",
+        "filters": [],
+        "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
+      },
+      "createdAt": "2023-02-26T00:00:00.000Z",
+      "updatedAt": "2023-02-26T00:00:00.000Z",
+      "createdBy": "test-user",
+      "updatedBy": "test-user",
+      "expirationDate": "2023-03-26T00:00:00.000Z"
+    }
+  ],
+  "10.4.0": [
+    {
+      "title": "Test Maintenance Window",
+      "duration": 3600000,
+      "enabled": true,
+      "rRule": {
+        "tzid": "UTC",
+        "dtstart": "2023-02-26T00:00:00.000Z",
+        "freq": 2,
+        "count": 2,
+        "byweekday": ["MO"]
+      },
+      "events": [
+        {
+          "gte": "2023-02-26T00:00:00.000Z",
+          "lte": "2023-02-26T01:00:00.000Z"
+        },
+        {
+          "gte": "2023-03-05T00:00:00.000Z",
+          "lte": "2023-03-05T01:00:00.000Z"
+        }
+      ],
+      "scopedQuery": {
+        "kql": "kibana.alert.rule.name : \"Elasticsearch query rule\"",
+        "filters": [],
+        "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
+      },
+      "createdAt": "2023-02-26T00:00:00.000Z",
+      "updatedAt": "2023-02-26T00:00:00.000Z",
+      "createdBy": "test-user",
+      "updatedBy": "test-user",
+      "expirationDate": "2023-03-26T00:00:00.000Z",
+      "schedule": {
+        "custom": {
+          "start": "2023-02-26T00:00:00.000Z",
+          "duration": "60m",
+          "timezone": "UTC",
+          "recurring": {
+            "every": "1w",
+            "occurrences": 2,
+            "onWeekDay": ["MO"]
+          }
+        }
+      },
+      "scope": {
+        "alerting": {
+          "kql": "kibana.alert.rule.name : \"Elasticsearch query rule\"",
+          "filters": [],
+          "dsl": "{\"bool\":{\"must\":[],\"filter\":[{\"bool\":{\"should\":[{\"match_phrase\":{\"kibana.alert.rule.name\":\"Elasticsearch query rule\"}}],\"minimum_should_match\":1}}],\"should\":[],\"must_not\":[]}}"
+        }
+      }
+    }
+  ]
+}

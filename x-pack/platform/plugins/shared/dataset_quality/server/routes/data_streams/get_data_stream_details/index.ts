@@ -1,0 +1,265 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { badRequest } from '@hapi/boom';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import type { DataStreamDetails } from '../../../../common/api_types';
+import {
+  FAILURE_STORE_PRIVILEGE,
+  MANAGE_FAILURE_STORE_PRIVILEGE,
+  MAX_HOSTS_METRIC_VALUE,
+} from '../../../../common/constants';
+import { _IGNORED } from '../../../../common/es_fields';
+import { datasetQualityPrivileges } from '../../../services';
+import { createDatasetQualityESClient, isFieldAggregatable } from '../../../utils';
+import { rangeQuery } from '../../../utils/queries';
+import { getFailedDocsPaginated } from '../failed_docs/get_failed_docs';
+import { getDataStreams } from '../get_data_streams';
+import { getDataStreamsMeteringStats } from '../get_data_streams_metering_stats';
+
+export async function getDataStreamDetails({
+  esClient,
+  dataStream,
+  start,
+  end,
+  isServerless,
+  isSecurityEnabled,
+}: {
+  esClient: IScopedClusterClient;
+  dataStream: string;
+  start: number;
+  end: number;
+  isServerless: boolean;
+  isSecurityEnabled: boolean;
+}): Promise<DataStreamDetails> {
+  throwIfInvalidDataStreamParams(dataStream);
+
+  // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+  const esClientAsCurrentUser = esClient.asCurrentUser;
+
+  const dataStreamPrivileges = (
+    await datasetQualityPrivileges.getHasIndexPrivileges(
+      esClientAsCurrentUser,
+      [dataStream],
+      ['monitor', FAILURE_STORE_PRIVILEGE, MANAGE_FAILURE_STORE_PRIVILEGE],
+      isSecurityEnabled
+    )
+  )[dataStream];
+
+  const esDataStream = dataStreamPrivileges.monitor
+    ? (
+        await getDataStreams({
+          esClient: esClientAsCurrentUser,
+          datasetQuery: dataStream,
+          isSecurityEnabled,
+        })
+      ).dataStreams[0]
+    : undefined;
+
+  try {
+    const dataStreamSummaryStats = await getDataStreamSummaryStats(
+      esClientAsCurrentUser,
+      dataStream,
+      start,
+      end
+    );
+
+    const failedDocs = !dataStreamPrivileges[FAILURE_STORE_PRIVILEGE]
+      ? undefined
+      : (
+          await getFailedDocsPaginated({
+            esClient: esClientAsCurrentUser,
+            types: [],
+            datasetQuery: dataStream,
+            start,
+            end,
+          })
+        )?.[0];
+
+    const avgDocSizeInBytes =
+      dataStreamPrivileges.monitor && dataStreamSummaryStats.docsCount > 0
+        ? isServerless
+          ? await getMeteringAvgDocSizeInBytes(esClient.asSecondaryAuthUser, dataStream)
+          : await getAvgDocSizeInBytes(esClientAsCurrentUser, dataStream)
+        : 0;
+
+    const sizeBytes = Math.ceil(avgDocSizeInBytes * dataStreamSummaryStats.docsCount);
+
+    return {
+      ...dataStreamSummaryStats,
+      failedDocsCount: failedDocs?.count,
+      sizeBytes,
+      hasFailureStore: esDataStream?.hasFailureStore,
+      lastActivity: esDataStream?.lastActivity,
+      userPrivileges: {
+        canMonitor: dataStreamPrivileges.monitor,
+        canReadFailureStore: dataStreamPrivileges[FAILURE_STORE_PRIVILEGE],
+        canManageFailureStore: dataStreamPrivileges[MANAGE_FAILURE_STORE_PRIVILEGE],
+      },
+      customRetentionPeriod: esDataStream?.customRetentionPeriod,
+      defaultRetentionPeriod: esDataStream?.defaultRetentionPeriod,
+    };
+  } catch (e) {
+    // ES surfaces `index_not_found_exception` as a 500 when triggered
+    // mid-search (e.g. a missing backing index), so check the error type too.
+    if (
+      e.statusCode === 404 ||
+      e.body?.error?.type === 'index_closed_exception' ||
+      e.body?.error?.type === 'index_not_found_exception'
+    ) {
+      return {};
+    }
+    throw e;
+  }
+}
+
+type TermAggregation = Record<string, { terms: { field: string; size: number } }>;
+
+const MAX_HOSTS = MAX_HOSTS_METRIC_VALUE + 1; // Adding 1 so that we can show e.g. '50+'
+
+const entityFields = [
+  'host.name',
+  'container.id',
+  'kubernetes.pod.uid',
+  'cloud.instance.id',
+  'aws.s3.bucket.name',
+  'aws.rds.db_instance.arn',
+  'aws.sqs.queue.name',
+];
+
+const buildTermsAgg = (fields: string[]): TermAggregation =>
+  fields.reduce(
+    (acc, field) => ({ ...acc, [field]: { terms: { field, size: MAX_HOSTS } } }),
+    {} as TermAggregation
+  );
+
+async function getDataStreamSummaryStats(
+  esClient: ElasticsearchClient,
+  dataStream: string,
+  start: number,
+  end: number
+): Promise<{
+  docsCount: number;
+  degradedDocsCount: number;
+  services: Record<string, string[]>;
+  hosts: Record<string, string[]>;
+}> {
+  const datasetQualityESClient = createDatasetQualityESClient(esClient);
+
+  const fieldCapsResponse = await datasetQualityESClient.fieldCaps({
+    index: dataStream,
+    fields: ['*'],
+    include_unmapped: false,
+    index_filter: {
+      ...rangeQuery(start, end)[0],
+    },
+  });
+
+  const aggregatableHostFields = entityFields.filter((field) =>
+    isFieldAggregatable(fieldCapsResponse, field)
+  );
+
+  // service.name may be text-mapped without fielddata; guard the agg.
+  const serviceNamesAgg: TermAggregation = isFieldAggregatable(fieldCapsResponse, 'service.name')
+    ? buildTermsAgg(['service.name'])
+    : {};
+
+  const hostsAgg = buildTermsAgg(aggregatableHostFields);
+
+  const response = await datasetQualityESClient.search({
+    index: dataStream,
+    query: rangeQuery(start, end)[0],
+    size: 0,
+    aggs: {
+      total_count: {
+        value_count: { field: '_index' },
+      },
+      degraded_count: {
+        filter: { exists: { field: _IGNORED } },
+      },
+      ...serviceNamesAgg,
+      ...hostsAgg,
+    },
+  });
+
+  const docsCount = Number(response.aggregations?.total_count.value ?? 0);
+  const degradedDocsCount = Number(response.aggregations?.degraded_count.doc_count ?? 0);
+
+  return {
+    docsCount,
+    degradedDocsCount,
+    services: getTermsFromAgg(
+      serviceNamesAgg,
+      response.aggregations as Record<string, TermsAggregationResult> | undefined
+    ),
+    hosts: getTermsFromAgg(
+      hostsAgg,
+      response.aggregations as Record<string, TermsAggregationResult> | undefined
+    ),
+  };
+}
+
+async function getMeteringAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string) {
+  const meteringStats = await getDataStreamsMeteringStats({
+    esClient,
+    dataStreams: [index],
+  });
+
+  const docCount = meteringStats[index].totalDocs ?? 0;
+  const sizeInBytes = meteringStats[index].sizeBytes ?? 0;
+
+  return docCount ? sizeInBytes / docCount : 0;
+}
+
+async function getAvgDocSizeInBytes(esClient: ElasticsearchClient, index: string) {
+  // `indices.stats` does not support `ignore_unavailable`, so if any backing
+  // index of the data stream is missing (e.g. a `partial-` index from a
+  // partial snapshot restore, or a legacy time-based index deleted by ILM)
+  // it throws `index_not_found_exception`. Treat that as "no size info" so we
+  // do not lose the rest of the details payload.
+  let indexStats: Awaited<ReturnType<ElasticsearchClient['indices']['stats']>>;
+  try {
+    indexStats = await esClient.indices.stats({ index, forbid_closed_indices: false });
+  } catch (e) {
+    if (e.body?.error?.type === 'index_not_found_exception' || e.statusCode === 404) {
+      return 0;
+    }
+    throw e;
+  }
+  const docCount = indexStats._all.total?.docs?.count ?? 0;
+  const sizeInBytes = indexStats._all.total?.store?.size_in_bytes ?? 0;
+
+  return docCount ? sizeInBytes / docCount : 0;
+}
+
+interface TermsAggregationBucket {
+  key: string;
+}
+
+interface TermsAggregationResult {
+  buckets?: TermsAggregationBucket[];
+}
+
+function getTermsFromAgg(
+  termAgg: TermAggregation,
+  aggregations: Record<string, TermsAggregationResult> | undefined
+) {
+  if (!aggregations) {
+    return {};
+  }
+
+  return Object.entries(termAgg).reduce((acc, [key, _value]) => {
+    const values = aggregations[key]?.buckets?.map((bucket) => bucket.key) ?? [];
+    return { ...acc, [key]: values };
+  }, {} as Record<string, string[]>);
+}
+
+function throwIfInvalidDataStreamParams(dataStream?: string) {
+  if (!dataStream?.trim()) {
+    throw badRequest(`Data Stream name cannot be empty. Received value "${dataStream}"`);
+  }
+}

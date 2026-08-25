@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.bazel.json",
-  "compilerOptions": {
-    "skipLibCheck": false
-  },
-  "include": [
-    "expect.d.ts"
-  ]
-}

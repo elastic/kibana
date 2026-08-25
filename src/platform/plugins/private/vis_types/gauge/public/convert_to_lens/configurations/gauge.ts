@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import type { GaugeVisualizationState } from '@kbn/lens-common';
+import { getDefaultGaugeArgsFromParams } from '../../to_ast';
+import type { GaugeVisParams } from '../../types';
+
+type GaugeVisConfiguration = Omit<GaugeVisualizationState, 'palette'> & {
+  palette?: PaletteOutput<CustomPaletteParams>;
+};
+
+export const getConfiguration = (
+  layerId: string,
+  params: GaugeVisParams,
+  palette: PaletteOutput<CustomPaletteParams> | undefined,
+  {
+    metricAccessor,
+    minAccessor,
+    maxAccessor,
+  }: {
+    metricAccessor: string;
+    minAccessor: string;
+    maxAccessor: string;
+  }
+): GaugeVisConfiguration => {
+  return {
+    ...getDefaultGaugeArgsFromParams(params.gauge),
+    layerId,
+    layerType: 'data',
+    palette,
+    metricAccessor,
+    minAccessor,
+    maxAccessor,
+    colorMode: palette ? 'palette' : 'none',
+  };
+};

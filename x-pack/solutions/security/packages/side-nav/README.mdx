@@ -1,0 +1,50 @@
+## Security Solution Side Nav
+
+This package provides a component to render a two-level side navigation for Security.
+
+It uses `EuiPortal` to render the secondary panel.
+
+> This package is being considered for adoption by Shared UX so it can be reused by other solutions.
+
+## Example
+
+Using the `SecurityNav` wrapper provided by `@kbn/shared-ux-page-solution-nav` is recommended in order to display the proper layout.
+
+```JSX
+<SolutionNav
+    name={'Security'}
+    icon={'logoSecurity'}
+    children={
+        <SolutionSideNavigation
+            items={items}
+            selectedId={selectedId}
+        />
+    }
+/>
+```
+
+Both `items` and `footerItems` props are arrays of `SolutionSideNavItem` type. The definition of this type is the following:
+
+| Prop  | Type | Description |
+| ------------- | ------------- |------------- |
+| `id` (required)  | `string` | The identifier of the link |
+| `label` (required) | `string` | The label that will be displayed for the link |
+| `href` (required) | `string` | The path to be used in the link anchor |
+| `onClick` | `React.MouseEventHandler` | The handler for the click event |
+| `position` | `string` (`top` \| `bottom`) | The position of the link in the main panel, defaults: `top` |
+| `items` | `SolutionSideNavItem[]` | The sub-items that will be displayed in the panel |
+| `categories` | `Category[]` | The categories to display in the panel for sub-items |
+| `iconType` | `IconType` | The EUI IconType to be pre-pended to the label |
+| `labelSize` | `string` | The custom size for the label (`xs` \| `s` \| `m` \| `l`), default: `s` |
+| `description` | `string` | The description displayed in the panel. Only for sub-items |
+| `appendSeparator` | `boolean` | The flag to display an horizontal line separator after the item link |
+| `isBeta` | `boolean` | The flag to display "beta" badge next to the item link |
+| `betaOptions` | `Object` | The beta badge option only `text` is supported to define a custom badge label |
+
+
+The `Category` object consists of:
+
+| Prop  | Type | Description |
+| ------------- | ------------- |------------- |
+| `label` (required)  | `string` | The label displayed for the category |
+| `linkIds` (required)  | `string[]` | The list of links that the category include, in order |

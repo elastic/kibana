@@ -1,5 +1,0 @@
-schema:
-  type: string
-in: header
-name: kbn-xsrf
-required: true

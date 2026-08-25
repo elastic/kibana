@@ -1,0 +1,25 @@
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[]}"
+    },
+    "savedSearchRefName": "search_0",
+    "title": "CPU usage [Metrics Apache] ECS",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[{\"id\":\"1\",\"params\":{\"customLabel\":\"CPU load\",\"field\":\"apache.status.cpu.load\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"id\":\"2\",\"params\":{\"extended_bounds\":{},\"field\":\"@timestamp\",\"interval\":\"auto\",\"min_doc_count\":1},\"schema\":\"segment\",\"type\":\"date_histogram\"},{\"id\":\"3\",\"params\":{\"field\":\"apache.status.hostname\",\"order\":\"desc\",\"orderBy\":\"1\",\"size\":5},\"schema\":\"split\",\"type\":\"terms\"},{\"id\":\"4\",\"params\":{\"customLabel\":\"CPU user\",\"field\":\"apache.status.cpu.user\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"id\":\"5\",\"params\":{\"customLabel\":\"CPU system\",\"field\":\"apache.status.cpu.system\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"id\":\"6\",\"params\":{\"customLabel\":\"CPU children user\",\"field\":\"apache.status.cpu.children_user\"},\"schema\":\"metric\",\"type\":\"avg\"},{\"id\":\"7\",\"params\":{\"customLabel\":\"CPU children system\",\"field\":\"apache.status.cpu.children_system\"},\"schema\":\"metric\",\"type\":\"avg\"}],\"listeners\":{},\"params\":{\"addLegend\":true,\"addTimeMarker\":false,\"addTooltip\":true,\"defaultYExtents\":false,\"drawLinesBetweenPoints\":true,\"interpolate\":\"linear\",\"radiusRatio\":9,\"row\":true,\"scale\":\"linear\",\"setYExtents\":false,\"shareYAxis\":true,\"showCircles\":true,\"smoothLines\":false,\"times\":[],\"yAxis\":{}},\"title\":\"Apache HTTPD - CPU ECS\",\"type\":\"line\"}"
+  },
+  "id": "Apache-HTTPD-CPU-ecs",
+  "migrationVersion": {
+    "visualization": "7.8.0"
+  },
+  "references": [
+    {
+      "id": "Apache-HTTPD-ecs",
+      "name": "search_0",
+      "type": "search"
+    }
+  ],
+  "type": "visualization"
+}

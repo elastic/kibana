@@ -1,30 +1,47 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
-import { useFetchStream } from '@kbn/aiops-utils';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
-import { ApiSimpleStringStream } from '../../../../../common/api';
+import { useFetchStream } from '@kbn/ml-response-stream/client';
+
+import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
 
 import { useDeps } from '../../../../hooks/use_deps';
 import { Page } from '../../../../components/page';
 
 export const PageSimpleStringStream: FC = () => {
   const { core } = useDeps();
-  const basePath = core.http?.basePath.get() ?? '';
 
-  const { dispatch, error, start, cancel, data, isRunning } = useFetchStream<
-    ApiSimpleStringStream,
-    typeof basePath
-  >(`${basePath}/internal/response_stream/simple_string_stream`, { timeout: 500 });
+  const [compressResponse, setCompressResponse] = useState(true);
+
+  const { dispatch, errors, start, cancel, data, isRunning } = useFetchStream(
+    core.http,
+    RESPONSE_STREAM_API_ENDPOINT.SIMPLE_STRING_STREAM,
+    '1',
+    {
+      compressResponse,
+      timeout: 500,
+    }
+  );
 
   const onClickHandler = async () => {
     if (isRunning) {
@@ -52,19 +69,42 @@ export const PageSimpleStringStream: FC = () => {
       <br />
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButton type="primary" size="s" onClick={onClickHandler} aria-label={buttonLabel}>
+          <EuiButton
+            data-test-subj="responseStreamStartButton"
+            color="primary"
+            size="s"
+            onClick={onClickHandler}
+            aria-label={buttonLabel}
+          >
             {buttonLabel}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
+      <EuiCheckbox
+        id="responseStreamCompressionCheckbox"
+        label="Toggle compression setting for response stream."
+        checked={compressResponse}
+        onChange={(e) => setCompressResponse(!compressResponse)}
+      />
+      <EuiSpacer />
       <EuiText>
-        <p>{data}</p>
+        <p data-test-subj="responseStreamString">{data}</p>
       </EuiText>
-      {error && (
-        <EuiCallOut title="Sorry, there was an error" color="danger" iconType="alert">
-          <p>{error}</p>
-        </EuiCallOut>
+      {errors.length > 0 && (
+        <KbnDangerCallout
+          announceOnMount
+          title="Sorry, there was an error"
+          text={errors.length === 1 ? errors[0] : undefined}
+        >
+          {errors.length > 1 && (
+            <ul>
+              {errors.map((e, i) => (
+                <li key={i}>{e}</li>
+              ))}
+            </ul>
+          )}
+        </KbnDangerCallout>
       )}
     </Page>
   );

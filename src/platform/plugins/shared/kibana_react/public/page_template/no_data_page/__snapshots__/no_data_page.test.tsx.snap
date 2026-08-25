@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoDataPage render 1`] = `
+<div
+  className="kbnNoDataPageContents"
+>
+  <NoDataPageBody
+    actionCards={
+      Array [
+        <ElasticAgentCard
+          solution="Elastic"
+        />,
+        <ElasticAgentCard
+          solution="Elastic"
+        />,
+        <NoDataCard />,
+      ]
+    }
+    docsLink="test"
+    pageTitle="Welcome to Elastic Elastic!"
+    solution="Elastic"
+  />
+  <EuiSpacer
+    size="xxl"
+  />
+  <EuiText
+    color="subdued"
+    textAlign="center"
+  >
+    <p>
+      <MemoizedFormattedMessage
+        defaultMessage="Confused on which to use? {link}"
+        id="kibana-react.noDataPage.cantDecide"
+        values={
+          Object {
+            "link": <EuiLink
+              href="https://www.elastic.co/guide/en/fleet/current/beats-agent-comparison.html"
+            >
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Check our docs for more information."
+                id="kibana-react.noDataPage.cantDecide.link"
+              />
+            </EuiLink>,
+          }
+        }
+      />
+    </p>
+  </EuiText>
+</div>
+`;

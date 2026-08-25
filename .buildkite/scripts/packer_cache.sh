@@ -10,6 +10,14 @@ export FORCE_BOOTSTRAP_REMOTE_CACHE=true
 
 yarn kbn bootstrap
 
+cd .buildkite && npm ci && cd ..
+
+tar -cf - node_modules | zstd -T0 -o node_modules.tar.zst
+
 for version in $(cat versions.json | jq -r '.versions[].version'); do
   node scripts/es snapshot --download-only --base-path "$ES_CACHE_DIR" --version "$version"
+done
+
+for version in $(cat versions.json | jq -r '.versions[].version'); do
+  node x-pack/solutions/security/plugins/security_solution/scripts/endpoint/agent_downloader --version "$version"
 done

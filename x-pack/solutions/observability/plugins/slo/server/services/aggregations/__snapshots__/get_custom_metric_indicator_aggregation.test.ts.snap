@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GetHistogramIndicatorAggregation should generate a aggregation for good events 1`] = `
+Object {
+  "_good_A": Object {
+    "aggs": Object {
+      "metric": Object {
+        "sum": Object {
+          "field": "total",
+        },
+      },
+    },
+    "filter": Object {
+      "match_all": Object {},
+    },
+  },
+  "_good_B": Object {
+    "aggs": Object {
+      "metric": Object {
+        "sum": Object {
+          "field": "processed",
+        },
+      },
+    },
+    "filter": Object {
+      "match_all": Object {},
+    },
+  },
+  "goodEvents": Object {
+    "bucket_script": Object {
+      "buckets_path": Object {
+        "A": "_good_A>metric",
+        "B": "_good_B>metric",
+      },
+      "script": Object {
+        "lang": "painless",
+        "source": "params.A - params.B",
+      },
+    },
+  },
+}
+`;
+
+exports[`GetHistogramIndicatorAggregation should generate a aggregation for total events 1`] = `
+Object {
+  "_total_A": Object {
+    "aggs": Object {
+      "metric": Object {
+        "sum": Object {
+          "field": "total",
+        },
+      },
+    },
+    "filter": Object {
+      "match_all": Object {},
+    },
+  },
+  "totalEvents": Object {
+    "bucket_script": Object {
+      "buckets_path": Object {
+        "A": "_total_A>metric",
+      },
+      "script": Object {
+        "lang": "painless",
+        "source": "params.A",
+      },
+    },
+  },
+}
+`;

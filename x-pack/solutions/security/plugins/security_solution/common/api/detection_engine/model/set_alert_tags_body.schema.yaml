@@ -1,0 +1,41 @@
+openapi: 3.0.0
+info:
+  title: Set Alert Tags Body
+  version: '1.0.0'
+paths: {}
+components:
+  examples:
+    SetAlertTagsBodyAdd:
+      value:
+        tags:
+          tags_to_add: ['Duplicate']
+          tags_to_remove: []
+        ids: ['549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e']
+    SetAlertTagsBodyRemove:
+      value:
+        tags:
+          tags_to_add: []
+          tags_to_remove: ['Duplicate']
+        ids: ['549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e']
+  schemas:
+    SetAlertTagsBody:
+      type: object
+      properties:
+        ids:
+          $ref: '../../model/alert.schema.yaml#/components/schemas/AlertIds'
+        tags:
+          $ref: '#/components/schemas/SetAlertTags'
+      required:
+        - ids
+        - tags
+    SetAlertTags:
+      description: Object with list of tags to add and remove.
+      type: object
+      properties:
+        tags_to_add:
+          $ref: '../../model/alert.schema.yaml#/components/schemas/AlertTags'
+        tags_to_remove:
+          $ref: '../../model/alert.schema.yaml#/components/schemas/AlertTags'
+      required:
+        - tags_to_add
+        - tags_to_remove

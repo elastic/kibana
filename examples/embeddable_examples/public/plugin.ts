@@ -1,187 +1,113 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EmbeddableSetup,
-  EmbeddableStart,
-  CONTEXT_MENU_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
-import { Plugin, CoreSetup, CoreStart, SavedObjectsClientContract } from '@kbn/core/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  HelloWorldEmbeddableFactory,
-  HELLO_WORLD_EMBEDDABLE,
-  HelloWorldEmbeddableFactoryDefinition,
-} from './hello_world';
-import { TODO_EMBEDDABLE, TodoEmbeddableFactory, TodoEmbeddableFactoryDefinition } from './todo';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type {
+  ContentManagementPublicSetup,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
+import { setupApp } from './app/setup_app';
+import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './react_embeddables/data_table/constants';
+import { FIELD_LIST_ID } from './react_embeddables/field_list/constants';
+import { ADD_SAVED_BOOK_ACTION_ID } from './react_embeddables/saved_book/constants';
+import { ADD_FIELD_LIST_ACTION_ID } from './react_embeddables/field_list/constants';
+import { registerSearchEmbeddable } from './react_embeddables/search/register_search_embeddable';
+import { setKibanaServices } from './kibana_services';
+import { setupBookEmbeddable } from './react_embeddables/saved_book/setup_book_embeddable';
+import { registerSearchPanelAction } from './react_embeddables/search/register_search_panel_action';
 
-import {
-  MULTI_TASK_TODO_EMBEDDABLE,
-  MultiTaskTodoEmbeddableFactory,
-  MultiTaskTodoEmbeddableFactoryDefinition,
-} from './multi_task_todo';
-import {
-  SEARCHABLE_LIST_CONTAINER,
-  SearchableListContainerFactoryDefinition,
-  SearchableListContainerFactory,
-} from './searchable_list_container';
-import {
-  LIST_CONTAINER,
-  ListContainerFactoryDefinition,
-  ListContainerFactory,
-} from './list_container';
-import { createSampleData } from './create_sample_data';
-import { TODO_REF_EMBEDDABLE } from './todo/todo_ref_embeddable';
-import {
-  TodoRefEmbeddableFactory,
-  TodoRefEmbeddableFactoryDefinition,
-} from './todo/todo_ref_embeddable_factory';
-import { createEditBookAction } from './book/edit_book_action';
-import { BOOK_EMBEDDABLE } from './book/book_embeddable';
-import {
-  BookEmbeddableFactory,
-  BookEmbeddableFactoryDefinition,
-} from './book/book_embeddable_factory';
-import { createAddBookToLibraryAction } from './book/add_book_to_library_action';
-import { createUnlinkBookFromLibraryAction } from './book/unlink_book_from_library_action';
-import {
-  SIMPLE_EMBEDDABLE,
-  SimpleEmbeddableFactory,
-  SimpleEmbeddableFactoryDefinition,
-} from './migrations';
-
-export interface EmbeddableExamplesSetupDependencies {
+export interface SetupDeps {
+  contentManagement: ContentManagementPublicSetup;
+  developerExamples: DeveloperExamplesSetup;
   embeddable: EmbeddableSetup;
-  uiActions: UiActionsStart;
+  uiActions: UiActionsSetup;
 }
 
-export interface EmbeddableExamplesStartDependencies {
+export interface StartDeps {
+  contentManagement: ContentManagementPublicStart;
+  dataViews: DataViewsPublicPluginStart;
+  dataViewFieldEditor: DataViewFieldEditorStart;
   embeddable: EmbeddableStart;
-  savedObjectsClient: SavedObjectsClientContract;
+  uiActions: UiActionsStart;
+  data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
+  fieldFormats: FieldFormatsStart;
+  dashboard: DashboardStart;
 }
 
-interface ExampleEmbeddableFactories {
-  getHelloWorldEmbeddableFactory: () => HelloWorldEmbeddableFactory;
-  getMultiTaskTodoEmbeddableFactory: () => MultiTaskTodoEmbeddableFactory;
-  getSearchableListContainerEmbeddableFactory: () => SearchableListContainerFactory;
-  getListContainerEmbeddableFactory: () => ListContainerFactory;
-  getTodoEmbeddableFactory: () => TodoEmbeddableFactory;
-  getTodoRefEmbeddableFactory: () => TodoRefEmbeddableFactory;
-  getBookEmbeddableFactory: () => BookEmbeddableFactory;
-  getMigrationsEmbeddableFactory: () => SimpleEmbeddableFactory;
-}
-
-export interface EmbeddableExamplesStart {
-  createSampleData: () => Promise<void>;
-  factories: ExampleEmbeddableFactories;
-}
-
-export class EmbeddableExamplesPlugin
-  implements
-    Plugin<
-      void,
-      EmbeddableExamplesStart,
-      EmbeddableExamplesSetupDependencies,
-      EmbeddableExamplesStartDependencies
-    >
-{
-  private exampleEmbeddableFactories: Partial<ExampleEmbeddableFactories> = {};
-
+export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   public setup(
-    core: CoreSetup<EmbeddableExamplesStartDependencies>,
-    deps: EmbeddableExamplesSetupDependencies
+    core: CoreSetup<StartDeps>,
+    { contentManagement, embeddable, developerExamples }: SetupDeps
   ) {
-    this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        HELLO_WORLD_EMBEDDABLE,
-        new HelloWorldEmbeddableFactoryDefinition()
+    setupApp(core, developerExamples);
+
+    const startServicesPromise = core.getStartServices();
+
+    embeddable.registerEmbeddablePublicDefinition(FIELD_LIST_ID, async () => {
+      const { getFieldListFactory } = await import(
+        './react_embeddables/field_list/field_list_embeddable'
       );
+      const [coreStart, deps] = await startServicesPromise;
+      return getFieldListFactory(coreStart, deps);
+    });
 
-    this.exampleEmbeddableFactories.getMigrationsEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        SIMPLE_EMBEDDABLE,
-        new SimpleEmbeddableFactoryDefinition()
+    embeddable.registerEmbeddablePublicDefinition(DATA_TABLE_ID, async () => {
+      const { getDataTableFactory } = await import(
+        './react_embeddables/data_table/data_table_react_embeddable'
       );
+      const [coreStart, deps] = await startServicesPromise;
+      return getDataTableFactory(coreStart, deps);
+    });
 
-    this.exampleEmbeddableFactories.getMultiTaskTodoEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        MULTI_TASK_TODO_EMBEDDABLE,
-        new MultiTaskTodoEmbeddableFactoryDefinition()
-      );
+    setupBookEmbeddable(core, embeddable, contentManagement);
 
-    this.exampleEmbeddableFactories.getSearchableListContainerEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        SEARCHABLE_LIST_CONTAINER,
-        new SearchableListContainerFactoryDefinition(async () => ({
-          embeddableServices: (await core.getStartServices())[1].embeddable,
-        }))
-      );
-
-    this.exampleEmbeddableFactories.getListContainerEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        LIST_CONTAINER,
-        new ListContainerFactoryDefinition(async () => ({
-          embeddableServices: (await core.getStartServices())[1].embeddable,
-        }))
-      );
-
-    this.exampleEmbeddableFactories.getTodoEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        TODO_EMBEDDABLE,
-        new TodoEmbeddableFactoryDefinition(async () => ({
-          openModal: (await core.getStartServices())[0].overlays.openModal,
-        }))
-      );
-
-    this.exampleEmbeddableFactories.getTodoRefEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        TODO_REF_EMBEDDABLE,
-        new TodoRefEmbeddableFactoryDefinition(async () => ({
-          savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
-          getEmbeddableFactory: (await core.getStartServices())[1].embeddable.getEmbeddableFactory,
-        }))
-      );
-    this.exampleEmbeddableFactories.getBookEmbeddableFactory =
-      deps.embeddable.registerEmbeddableFactory(
-        BOOK_EMBEDDABLE,
-        new BookEmbeddableFactoryDefinition(async () => ({
-          getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
-          openModal: (await core.getStartServices())[0].overlays.openModal,
-          savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
-          overlays: (await core.getStartServices())[0].overlays,
-        }))
-      );
-
-    const editBookAction = createEditBookAction(async () => ({
-      getAttributeService: (await core.getStartServices())[1].embeddable.getAttributeService,
-      openModal: (await core.getStartServices())[0].overlays.openModal,
-      savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
-    }));
-    deps.uiActions.registerAction(editBookAction);
-    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, editBookAction.id);
-
-    const addBookToLibraryAction = createAddBookToLibraryAction();
-    deps.uiActions.registerAction(addBookToLibraryAction);
-    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, addBookToLibraryAction.id);
-
-    const unlinkBookFromLibraryAction = createUnlinkBookFromLibraryAction();
-    deps.uiActions.registerAction(unlinkBookFromLibraryAction);
-    deps.uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkBookFromLibraryAction.id);
+    registerSearchEmbeddable(
+      embeddable,
+      new Promise((resolve) => startServicesPromise.then(([_, startDeps]) => resolve(startDeps)))
+    );
   }
 
-  public start(
-    core: CoreStart,
-    deps: EmbeddableExamplesStartDependencies
-  ): EmbeddableExamplesStart {
-    return {
-      createSampleData: () => createSampleData(core.savedObjects.client),
-      factories: this.exampleEmbeddableFactories as ExampleEmbeddableFactories,
-    };
+  public start(core: CoreStart, deps: StartDeps) {
+    setKibanaServices(core, deps);
+
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_FIELD_LIST_ACTION_ID, async () => {
+      const { createFieldListAction } = await import(
+        './react_embeddables/field_list/create_field_list_action'
+      );
+      return createFieldListAction;
+    });
+
+    registerSearchPanelAction(deps.uiActions);
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
+      const { createDataTableAction } = await import(
+        './react_embeddables/data_table/create_data_table_action'
+      );
+      return createDataTableAction;
+    });
+
+    deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SAVED_BOOK_ACTION_ID, async () => {
+      const { createSavedBookAction } = await import(
+        './react_embeddables/saved_book/create_saved_book_action'
+      );
+      return createSavedBookAction(core);
+    });
   }
 
   public stop() {}

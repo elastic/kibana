@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { relative, resolve } from 'path';
@@ -61,7 +62,9 @@ function readModuleInfo(
   const keyParts = pkgAndVersion.split('@');
   const name = keyParts.slice(0, -1).join('@');
   const version = keyParts[keyParts.length - 1];
-  const override = options.licenseOverrides && options.licenseOverrides[pkgAndVersion];
+  const override =
+    options.licenseOverrides &&
+    (options.licenseOverrides[pkgAndVersion] || options.licenseOverrides[name]);
 
   return {
     name,
@@ -92,6 +95,10 @@ async function _getInstalledPackages(dev: boolean, options: Options) {
   const result = [];
 
   for (const [pkgAndVersion, moduleInfo] of Object.entries(lcResult)) {
+    if (pkgAndVersion.startsWith('@kbn/')) {
+      continue;
+    }
+
     const installedPackage = readModuleInfo(pkgAndVersion, moduleInfo, dev, options);
     if (installedPackage) {
       result.push(installedPackage);

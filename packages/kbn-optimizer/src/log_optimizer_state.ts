@@ -1,19 +1,22 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { inspect } from 'util';
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { tap } from 'rxjs/operators';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { hasNonDefaultThemeTags } from '@kbn/core-ui-settings-common';
+import { tap } from 'rxjs';
 
-import { OptimizerConfig } from './optimizer';
-import { OptimizerUpdate$ } from './run_optimizer';
-import { CompilerMsg, pipeClosure, ALL_THEMES } from './common';
+import type { OptimizerConfig } from './optimizer';
+import type { OptimizerUpdate$ } from './run_optimizer';
+import type { CompilerMsg } from './common';
+import { pipeClosure } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
   return pipeClosure((update$: OptimizerUpdate$) => {
@@ -29,7 +32,7 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           log.warning(`worker`, event.stream, event.line);
         }
 
-        if (event?.type === 'bundle not cached') {
+        if (event?.type === 'bundle not cached' && event.reason !== 'cache disabled') {
           log.debug(
             `[${event.bundle.id}] bundle not cached because [${event.reason}]${
               event.diff ? `, diff:\n${event.diff}` : ''
@@ -42,19 +45,24 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         }
 
         if (event?.type === 'worker started') {
-          let moduleCount = 0;
-          let workUnits = 0;
-          for (const bundle of event.bundles) {
-            moduleCount += bundle.cache.getModuleCount() ?? NaN;
-            workUnits += bundle.cache.getWorkUnits() ?? NaN;
-          }
+          const moduleCount = event.bundles.reduce(
+            (acc, b) => acc + (b.cache.getModuleCount() ?? NaN),
+            0
+          );
+          const workUnits = event.bundles.reduce(
+            (acc, b) => acc + (b.cache.getWorkUnits() ?? NaN),
+            0
+          );
 
           log.info(
             `starting worker [${event.bundles.length} ${
               event.bundles.length === 1 ? 'bundle' : 'bundles'
             }]`
           );
-          log.debug(`modules [${moduleCount}] work units [${workUnits}]`);
+
+          if (moduleCount || workUnits) {
+            log.debug(`modules [${moduleCount || '?'}] work units [${workUnits || '?'}]`);
+          }
         }
 
         if (state.phase === 'reallocating') {
@@ -65,10 +73,18 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         if (state.phase === 'initialized') {
           if (!loggedInit) {
             loggedInit = true;
-            log.info(`initialized, ${state.offlineBundles.length} bundles cached`);
-            if (config.themeTags.length !== ALL_THEMES.length) {
+            if (config.cache) {
+              log.info(`initialized, ${state.offlineBundles.length} bundles cached`);
+            } else {
+              log.info('initialized');
               log.warning(
-                `only building [${config.themeTags}] themes, customize with the KBN_OPTIMIZER_THEMES environment variable`
+                'cache disabled, new caches will still be written but existing caches are ignored'
+              );
+            }
+
+            if (hasNonDefaultThemeTags(config.themeTags)) {
+              log.warning(
+                `running with non-default [${config.themeTags}] set of themes, customize with the KBN_OPTIMIZER_THEMES environment variable`
               );
             }
           }

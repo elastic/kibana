@@ -1,0 +1,36 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getFleetProxyExample:
+            description: 'A Fleet proxy'
+            value:
+              item:
+                id: 'proxy-id-1'
+                name: 'My proxy'
+                url: 'http://proxy.example.com:3128'
+                is_preconfigured: false
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  404:
+    description: 'Not Found'
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            description: 'No proxy was found with the given ID'
+            value:
+              statusCode: 404
+              error: 'Not Found'
+              message: 'Fleet proxy proxy-id-1 not found'

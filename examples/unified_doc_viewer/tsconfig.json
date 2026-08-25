@@ -1,0 +1,25 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/discover-utils",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/i18n-react",
+  ]
+}

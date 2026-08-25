@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { readdirSync } from 'fs';
@@ -33,52 +34,28 @@ afterAll(async () => {
 
 it('requires absolute paths', async () => {
   await expect(
-    scanDelete({
-      directory: relative(process.cwd(), TMP),
-      regularExpressions: [],
-    })
-  ).rejects.toMatchInlineSnapshot(
-    `[TypeError: Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`.]`
-  );
-
-  await expect(
-    scanDelete({
-      directory: TMP,
-      regularExpressions: [],
-      excludePaths: ['foo'],
+    scanDelete(relative(process.cwd(), TMP), {
+      match: [],
     })
   ).rejects.toMatchInlineSnapshot(
     `[TypeError: Please use absolute paths to keep things explicit. You probably want to use \`build.resolvePath()\` or \`config.resolveFromRepo()\`.]`
   );
 });
 
-it('deletes files/folders matching regular expression', async () => {
-  await scanDelete({
-    directory: TMP,
-    regularExpressions: [/^.*[\/\\](bar|c)([\/\\]|$)/],
+it('only deletes files/folders matching patterns', async () => {
+  await scanDelete(TMP, {
+    match: ['**/{bar,c}/**'],
   });
   expect(readdirSync(resolve(TMP, 'foo'))).toEqual([]);
   expect(readdirSync(resolve(TMP, 'a'))).toEqual(['b']);
   expect(readdirSync(resolve(TMP, 'a/b'))).toEqual([]);
 });
 
-it('exludes directories mentioned in excludePaths', async () => {
-  await scanDelete({
-    directory: TMP,
-    regularExpressions: [/^.*[\/\\](bar|c)([\/\\]|$)/],
-    excludePaths: [resolve(TMP, 'foo')],
+it('exludes items matched by negative patterns', async () => {
+  await scanDelete(TMP, {
+    match: ['**/{bar,c}/**', '!foo/**'],
   });
   expect(readdirSync(resolve(TMP, 'foo'))).toEqual(['bar']);
   expect(readdirSync(resolve(TMP, 'a'))).toEqual(['b']);
   expect(readdirSync(resolve(TMP, 'a/b'))).toEqual([]);
-});
-
-it('exludes files mentioned in excludePaths', async () => {
-  await scanDelete({
-    directory: TMP,
-    regularExpressions: [/box/],
-    excludePaths: [resolve(TMP, 'foo/bar/box')],
-  });
-
-  expect(readdirSync(resolve(TMP, 'foo/bar'))).toEqual(['baz', 'box']);
 });

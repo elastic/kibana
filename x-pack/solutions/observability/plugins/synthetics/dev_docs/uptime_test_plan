@@ -1,0 +1,64 @@
+# Uptime Manual Test Plan
+
+This plan outlines the manual testing steps for the Uptime application. It leverages the Synthetics app for data generation, as it is the primary source of Uptime data.
+
+## Feature testing
+
+### Create monitors (via Synthetics App)
+
+The easiest way to generate data for the Uptime app is by creating monitors in the Synthetics app. The following steps should be performed there.
+
+1. Create a Single Page browser monitor.
+2. Create a Multistep monitor.
+3. Create an HTTP Ping monitor.
+4. Create a TCP Ping monitor.
+5. Create an ICMP Ping monitor.
+
+### Prerequisites
+
+1.  **Enable the Uptime App:** The Uptime app is hidden by default if no data is present. To ensure it is always visible for testing, navigate to **Stack Management > Advanced Settings** and enable the `observability:enableLegacyUptimeApp` setting.
+2.  **Set the Index Pattern:** To view data from Synthetics monitors, navigate to the **Uptime > Settings** page and change the "Indices" field to `synthetics-*`.
+
+---
+
+### Uptime Overview Page
+
+1.  Navigate to the Uptime app.
+2.  Ensure all monitors created in the previous step are displayed in the main list.
+3.  Verify that the snapshot counts ("Up", "Down", etc.) at the top of the page are accurate.
+4.  Use the search bar to filter the monitors by name and verify the results are correct.
+5.  Test the filter pills:
+    - Filter by `Status` (Up, Down).
+    - Filter by `Type` (browser, http, etc.).
+    - Filter by `Location`.
+    - Filter by `Tags`.
+6.  Verify that the "Pings over time" chart accurately reflects the status of the monitors within the selected time range.
+7.  Click on a monitor's name in the list. Ensure it navigates you to that monitor's detail page.
+8.  Select `All permitted spaces` in the Spaces dropdown and make sure all monitors from all accessible spaces are shown.
+9.  Test the sorting functionality for the monitor list (e.g., by name, by status).
+
+### Uptime Monitor Detail Page
+
+1.  From the Uptime Overview page, click on a monitor to navigate to its detail page.
+2.  Verify that the header correctly displays the monitor's name, URL, and current status.
+3.  Check that the "Pings over time" chart shows the historical status for this specific monitor.
+4.  Use the time filter to select a different time range and verify that the chart and the ping history list update correctly.
+5.  In the "Ping history" list at the bottom, verify that individual check results are displayed with the correct status, duration, and timestamp.
+6.  If the monitor has failed, ensure that a clear error message is visible in the ping history.
+7.  If the monitor runs from multiple locations, use the location filter at the top of the page to filter the view and verify the data updates.
+
+### Test Run Detail Page (Browser Monitors)
+
+1.  From the Monitor Detail page for a **browser** monitor, click on a specific test run in the "Ping history" list to navigate to its detail page.
+2.  Verify the page displays a breakdown of the steps for that specific test run.
+3.  Click on an individual step.
+4.  Ensure the **waterfall chart** is displayed for the selected step, showing the network requests and performance timings.
+5.  Interact with the waterfall chart to ensure its features (like filtering and inspecting requests) are working as expected.
+
+### Certificates Page
+
+1.  Navigate to the "Certificates" tab within the Uptime app.
+2.  Verify that any TLS certificates associated with your monitors are listed.
+3.  Test the search bar to filter for a specific certificate.
+4.  Test the sorting functionality, especially sorting by "Expires in" to find certificates that are expiring soon.
+5.  Click on a certificate to ensure it navigates to a filtered view of the monitors that use it.

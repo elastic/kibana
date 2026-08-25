@@ -1,0 +1,110 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import PropTypes from 'prop-types';
+import styled from '@emotion/styled';
+import { EuiIcon, euiFontSize } from '@elastic/eui';
+import { unit } from '@kbn/apm-common';
+
+const typeColors = {
+  field: { base: 'backgroundBaseWarning', text: 'textWarning' },
+  value: { base: 'backgroundBaseSuccess', text: 'textSuccess' },
+  operator: { base: 'backgroundBasePrimary', text: 'textPrimary' },
+  conjunction: { base: 'backgroundBaseSubdued', text: 'textSubdued' },
+  recentSearch: { base: 'backgroundBaseSubdued', text: 'textSubdued' },
+};
+
+const Description = styled.div`
+  color: ${({ theme }) => theme.euiTheme.colors.darkShade};
+
+  p {
+    display: inline;
+
+    span {
+      font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
+      color: ${({ theme }) => theme.euiTheme.colors.fullShade};
+      padding: 0 ${({ theme }) => theme.euiTheme.size.xs};
+      display: inline-block;
+      background: ${({ selected, theme }) =>
+        selected ? theme.euiTheme.colors.emptyShade : theme.euiTheme.colors.lightestShade};
+    }
+  }
+`;
+
+const ListItem = styled.li`
+  font-size: ${({ theme }) => euiFontSize(theme, 'xs').fontSize};
+  height: ${({ theme }) => theme.euiTheme.size.xl};
+  align-items: center;
+  display: flex;
+  background: ${({ selected, theme }) =>
+    selected ? theme.euiTheme.colors.lightestShade : 'initial'};
+  cursor: pointer;
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.small};
+`;
+
+const Icon = styled.div`
+  flex: 0 0 ${({ theme }) => theme.euiTheme.size.xl};
+  background: ${({ type, theme }) =>
+    theme.euiTheme.colors[(typeColors[type] ?? typeColors.recentSearch).base]};
+  color: ${({ type, theme }) =>
+    theme.euiTheme.colors[(typeColors[type] ?? typeColors.recentSearch).text]};
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: ${({ theme }) => theme.euiTheme.size.xl};
+`;
+
+const TextValue = styled.div`
+  flex: 0 0 ${unit * 16}px;
+  color: ${({ theme }) => theme.euiTheme.colors.darkestShade};
+  padding: 0 ${({ theme }) => theme.euiTheme.size.s};
+`;
+
+function getEuiIconType(type) {
+  switch (type) {
+    case 'field':
+      return 'queryField';
+    case 'value':
+      return 'queryValue';
+    case 'recentSearch':
+      return 'magnify';
+    case 'conjunction':
+      return 'querySelector';
+    case 'operator':
+      return 'queryOperand';
+    default:
+      throw new Error('Unknown type', type);
+  }
+}
+
+function Suggestion(props) {
+  return (
+    <ListItem
+      innerRef={props.innerRef}
+      selected={props.selected}
+      onClick={() => props.onClick(props.suggestion)}
+      onMouseEnter={props.onMouseEnter}
+    >
+      <Icon type={props.suggestion.type}>
+        <EuiIcon type={getEuiIconType(props.suggestion.type)} aria-hidden={true} />
+      </Icon>
+      <TextValue>{props.suggestion.text}</TextValue>
+      <Description selected={props.selected}>{props.suggestion.description}</Description>
+    </ListItem>
+  );
+}
+
+Suggestion.propTypes = {
+  onClick: PropTypes.func.isRequired,
+  onMouseEnter: PropTypes.func.isRequired,
+  selected: PropTypes.bool,
+  suggestion: PropTypes.object.isRequired,
+  innerRef: PropTypes.func.isRequired,
+};
+
+export default Suggestion;

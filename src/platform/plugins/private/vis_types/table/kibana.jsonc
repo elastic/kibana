@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/vis-type-table-plugin",
+  "owner": [
+    "@elastic/kibana-visualizations"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Registers the datatable aggregation-based visualization.",
+  "plugin": {
+    "id": "visTypeTable",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "expressions",
+      "visualizations",
+      "fieldFormats",
+      "dataViews",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "data",
+      "kibanaUtils",
+      "kibanaReact",
+      "share",
+      "visDefaultEditor"
+    ]
+  }
+}

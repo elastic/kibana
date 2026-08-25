@@ -1,0 +1,30 @@
+title: The status of the bulk deletion
+description: Indicates if the bulk deletion is completed, with the detailed results of the operation.
+type: object
+properties:
+  isDone:
+    type: boolean
+    example: true
+    description: Indicates if the bulk deletion operation is completed
+  error:
+    type: string
+    example: 'Task not found'
+    description: The error message if the bulk deletion operation failed
+  results:
+    description: The results of the bulk deletion operation, including the success status and any errors for each SLO
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+          example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+          description: The ID of the SLO that was deleted
+        success:
+          type: boolean
+          example: true
+          description: The result of the deletion operation for this SLO
+        error:
+          type: string
+          example: SLO [d08506b7-f0e8-4f8b-a06a-a83940f4db91] not found
+          description: The error message if the deletion operation failed for this SLO
