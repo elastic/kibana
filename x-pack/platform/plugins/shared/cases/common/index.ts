@@ -128,3 +128,5 @@ export {
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
 } from './types/api/workflow/v1';
+
+export { UserActionTypes } from './types/domain';

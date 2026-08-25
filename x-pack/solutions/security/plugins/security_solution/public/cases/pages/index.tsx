@@ -23,7 +23,7 @@ import { useAlertsPrivileges } from '../../detections/containers/detection_engin
 import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { CASES_FEATURES } from '..';
-import { renderWorkflowUserActionAction } from '../components/render_workflow_user_action_action';
+import { renderUserActionExtraActions } from '../components/render_user_action_extra_actions';
 
 const LazySelectTimelineModal = lazy(async () => {
   const { SelectTimelineModal: Component } = await import(
@@ -105,7 +105,7 @@ const CaseContainerComponent: React.FC = () => {
             },
           },
           permissions: userCasesPermissions,
-          renderWorkflowUserActionAction,
+          renderUserActionExtraActions,
         })}
       </CaseDetailsRefreshContext.Provider>
       <SpyRoute pageName={SecurityPageName.case} />

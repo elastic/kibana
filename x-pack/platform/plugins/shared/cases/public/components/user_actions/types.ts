@@ -9,7 +9,6 @@ import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { CasesPermissions } from '../../../common/ui/types';
 import type { UserActionTypes } from '../../../common/types/domain';
-import type { RenderWorkflowUserActionAction } from '../cases_context';
 import type {
   CaseUI,
   CaseConnectors,
@@ -61,7 +60,6 @@ export interface UserActionBuilderArgs {
   handleOutlineComment: (id: string) => void;
   handleDeleteComment: (id: string, successToasterTitle: string) => void;
   euiTheme: EuiThemeComputed<{}>;
-  renderWorkflowUserActionAction?: RenderWorkflowUserActionAction;
 }
 
 export type UserActionBuilder = (args: UserActionBuilderArgs) => {

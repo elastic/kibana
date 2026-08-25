@@ -29,6 +29,7 @@ const CasesProviderLazyWrapper = ({
   children,
   releasePhase,
   getFilesClient,
+  renderUserActionExtraActions,
 }: GetCasesContextPropsInternal & { children: ReactNode }) => (
   <Suspense fallback={<EuiLoadingSpinner />}>
     <CasesProviderLazy
@@ -39,6 +40,7 @@ const CasesProviderLazyWrapper = ({
         features,
         releasePhase,
         getFilesClient,
+        renderUserActionExtraActions,
       }}
     >
       {children}

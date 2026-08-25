@@ -25,7 +25,7 @@ import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import type { ReleasePhase } from '../../components/types';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import type { CasesContextProps } from '../../components/cases_context';
+import type { CasesContextProps, RenderUserActionExtraActions } from '../../components/cases_context';
 import { CasesProvider } from '../../components/cases_context';
 import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
 import { allCasesPermissions } from './permissions';
@@ -44,6 +44,7 @@ interface TestProviderProps {
   queryClient?: QueryClient;
   coreStart?: CoreStart;
   filesClient?: BaseFilesClient;
+  renderUserActionExtraActions?: RenderUserActionExtraActions;
 }
 
 jest.spyOn(window, 'scrollTo').mockImplementation(() => {});
@@ -88,6 +89,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   services,
   queryClient,
   filesClient,
+  renderUserActionExtraActions,
 }) => {
   const finalCoreStart = useMemo(() => {
     const baseServices = createStartServicesMock({ license });
@@ -157,6 +159,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       permissions: permissions ?? defaultPermissions,
       releasePhase: releasePhase ?? 'ga',
       getFilesClient: getFilesClientFinal,
+      renderUserActionExtraActions,
     }),
     [
       defaultPermissions,
@@ -167,6 +170,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       owner,
       permissions,
       releasePhase,
+      renderUserActionExtraActions,
     ]
   );
 

@@ -128,7 +128,6 @@ export const createWorkflowUserActionBuilder: UserActionBuilder = ({
   userProfiles,
   handleOutlineComment,
   casesConfiguration,
-  renderWorkflowUserActionAction,
 }: UserActionBuilderArgs) => ({
   build: () => {
     const action = userAction as SnakeToCamelCase<WorkflowUserAction>;
@@ -142,18 +141,12 @@ export const createWorkflowUserActionBuilder: UserActionBuilder = ({
       />
     );
 
-    const extraActions = renderWorkflowUserActionAction?.({
-      origin,
-      userActionId: userAction.id,
-    });
-
     return createCommonUpdateUserActionBuilder({
       userProfiles,
       userAction,
       handleOutlineComment,
       label,
       icon: 'workflow',
-      extraActions,
     }).build();
   },
 });

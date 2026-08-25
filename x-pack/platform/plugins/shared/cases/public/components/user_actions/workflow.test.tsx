@@ -155,45 +155,4 @@ describe('createWorkflowUserActionBuilder', () => {
     });
   });
 
-  describe('extraActions slot', () => {
-    it('renders what renderWorkflowUserActionAction returns', () => {
-      const builderArgs = getMockBuilderArgs();
-      const userAction = getUserAction(UserActionTypes.workflow, UserActionActions.create, {
-        payload: {
-          workflow: { id: 'wf-1', name: 'My Workflow', executionId: 'exec-1' },
-          origin: { type: ALERT_WORKFLOW_ORIGIN_TYPE, id: 'alert-1', index: '.alerts' },
-        },
-      });
-
-      const renderWorkflowUserActionAction = jest.fn().mockReturnValue(
-        <button type="button" data-test-subj="custom-action">
-          {'Show alert'}
-        </button>
-      );
-
-      const builder = createWorkflowUserActionBuilder({
-        ...builderArgs,
-        userAction,
-        renderWorkflowUserActionAction,
-      });
-
-      renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
-
-      expect(screen.getByTestId('custom-action')).toBeInTheDocument();
-      expect(renderWorkflowUserActionAction).toHaveBeenCalledWith({
-        origin: { type: ALERT_WORKFLOW_ORIGIN_TYPE, id: 'alert-1', index: '.alerts' },
-        userActionId: userAction.id,
-      });
-    });
-
-    it('does not crash when renderWorkflowUserActionAction is not provided', () => {
-      const builderArgs = getMockBuilderArgs();
-      const userAction = getUserAction(UserActionTypes.workflow, UserActionActions.create);
-
-      const builder = createWorkflowUserActionBuilder({ ...builderArgs, userAction });
-      expect(() =>
-        renderWithTestingProviders(<EuiCommentList comments={builder.build()} />)
-      ).not.toThrow();
-    });
-  });
 });

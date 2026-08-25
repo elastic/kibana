@@ -11,8 +11,9 @@ import {
   CASE_VIEW_PAGE_TABS,
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
+  UserActionTypes,
 } from '@kbn/cases-plugin/common';
-import type { RenderWorkflowUserActionAction } from '@kbn/cases-plugin/public';
+import type { RenderUserActionExtraActions } from '@kbn/cases-plugin/public';
 import { ShowTableButton } from '@kbn/cases-plugin/public';
 
 const ShowAlertButton = lazy(async () => {
@@ -23,23 +24,27 @@ const ShowAlertButton = lazy(async () => {
 });
 
 /**
- * Extension point for workflow user actions in the Cases Activity Log.
+ * Extension point for the Cases Activity Log's per-row extra actions slot.
  *
- * - `cases.alert` with an index → renders the "Show alert" flyout button.
- * - `cases.alert` or `cases.alerts` without an index → deep-links to the case Alerts tab.
- * - All other origins → renders nothing.
+ * - Workflow user action triggered by a single alert with an index → renders the "Show alert"
+ *   flyout button.
+ * - Workflow user action triggered by one or more alerts → deep-links to the case Alerts tab.
+ * - All other user action types → renders nothing.
  *
  * This is a module-level const so the reference is stable and the CasesContext memo does
  * not thrash on every render.
  */
-export const renderWorkflowUserActionAction: RenderWorkflowUserActionAction = ({
-  origin,
-  userActionId,
-}) => {
+export const renderUserActionExtraActions: RenderUserActionExtraActions = ({ userAction }) => {
+  if (userAction.type !== UserActionTypes.workflow) {
+    return null;
+  }
+
+  const { origin } = userAction.payload;
+
   if (origin.type === ALERT_WORKFLOW_ORIGIN_TYPE && origin.index) {
     return (
       <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-        <ShowAlertButton id={userActionId} alertId={origin.id} index={origin.index} />
+        <ShowAlertButton id={userAction.id} alertId={origin.id} index={origin.index} />
       </Suspense>
     );
   }
