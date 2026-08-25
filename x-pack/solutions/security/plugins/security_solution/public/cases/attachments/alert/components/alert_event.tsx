@@ -11,7 +11,7 @@ import { UserActionTitle } from '@kbn/cases-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getRuleInfo, type AlertAttachmentMetadata } from '@kbn/cases-plugin/common';
 import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
-import { useAlertDataRetry } from './use_alert_data_retry';
+import { useAlertDataLoading } from './use_alert_data_loading';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import * as i18n from '../translations';
@@ -76,9 +76,11 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   );
   const [loadingAlertData, alertsData, refetchAlertData] = useFetchAlertData(idsToFetch);
 
-  const firstFetchReturnedNoData = useAlertDataRetry({
+  const isLoadingAlertData = useAlertDataLoading({
     hasRuleIdFromMetadata,
     loadingAlertData,
+    loadingPrivileges,
+    hasAlertsRead,
     alertsData,
     alertId,
     refetchAlertData,
@@ -111,21 +113,7 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
     }
   }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
-  // Only relevant when we need a live alert lookup (no rule ID in metadata).
-  // - waitingForPrivileges: hasAlertsRead defaults to false while loading; show spinner
-  //   until the check resolves so authorized users don't see "Unknown rule" prematurely.
-  // - waitingForFirstFetch: refetchAlertData is null until the first fetch completes
-  //   (see use_query.tsx), distinguishing "not fetched yet" from "fetched, no data".
-  const needsLiveFetch = !hasRuleIdFromMetadata;
-  const waitingForPrivileges = needsLiveFetch && loadingPrivileges;
-  const waitingForFirstFetch = needsLiveFetch && hasAlertsRead && refetchAlertData === null;
-
-  if (
-    loadingAlertData ||
-    waitingForPrivileges ||
-    waitingForFirstFetch ||
-    firstFetchReturnedNoData
-  ) {
+  if (isLoadingAlertData) {
     return <EuiLoadingSpinner size="m" />;
   }
 
