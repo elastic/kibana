@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/scout'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/files-plugin'
   - '@kbn/ftr-llm-proxy'
   - '@kbn/ui-callout'
 tags:

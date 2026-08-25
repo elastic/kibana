@@ -8,21 +8,32 @@
 // @ts-expect-error no types for dom-to-image-more
 import domtoimage from 'dom-to-image-more';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
-import type {
-  ImageAttachmentData,
-  ImageAttachmentMediaType,
+import {
+  MAX_IMAGE_BYTES,
+  type SupportedImageMimeType,
 } from '@kbn/agent-builder-common/attachments';
-import { IMAGE_ATTACHMENT_MAX_BASE64_LENGTH } from '@kbn/agent-builder-common/attachments';
 
 /** Enough for layout + labels; Anthropic image tokens scale with width×height. */
 const MAX_WIDTH_PX = 1024;
 const JPEG_QUALITY = 0.68;
-const WEBP_QUALITY = 0.72;
 /**
  * Prefer PNG when it is close to the smallest lossy encode — Kibana UIs are mostly
  * flat color + sharp text, where PNG stays readable and often competitive in size.
  */
 const PNG_PREFERENCE_RATIO = 1.2;
+
+const MAX_BASE64_LENGTH = Math.ceil((MAX_IMAGE_BYTES * 4) / 3);
+
+export interface ScreenshotEncodingCandidate {
+  mimeType: SupportedImageMimeType;
+  data: string;
+}
+
+export interface CapturedScreenshot {
+  mimeType: SupportedImageMimeType;
+  blob: Blob;
+  name: string;
+}
 
 const blobToBase64 = (blob: Blob): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -41,19 +52,28 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
+const base64ToBlob = (data: string, mimeType: SupportedImageMimeType): Blob => {
+  const binary = atob(data);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new Blob([bytes], { type: mimeType });
+};
+
 const canvasToBase64 = async (
   canvas: HTMLCanvasElement,
-  mediaType: ImageAttachmentMediaType,
+  mimeType: SupportedImageMimeType,
   quality?: number
 ): Promise<string | undefined> => {
   const blob = await new Promise<Blob | null>((resolve) => {
-    canvas.toBlob(resolve, mediaType, quality);
+    canvas.toBlob(resolve, mimeType, quality);
   });
   if (!blob) {
     return undefined;
   }
   const data = await blobToBase64(blob);
-  if (data.length > IMAGE_ATTACHMENT_MAX_BASE64_LENGTH) {
+  if (data.length > MAX_BASE64_LENGTH) {
     return undefined;
   }
   return data;
@@ -61,11 +81,11 @@ const canvasToBase64 = async (
 
 /**
  * Among valid encodings, prefer PNG when near the smallest size (crisp UI text);
- * otherwise pick the smallest payload (typically WebP/JPEG).
+ * otherwise pick the smallest payload (typically JPEG).
  */
 export const pickScreenshotEncoding = (
-  candidates: ImageAttachmentData[]
-): ImageAttachmentData | undefined => {
+  candidates: ScreenshotEncodingCandidate[]
+): ScreenshotEncodingCandidate | undefined => {
   if (candidates.length === 0) {
     return undefined;
   }
@@ -73,14 +93,29 @@ export const pickScreenshotEncoding = (
   const smallest = candidates.reduce((best, current) =>
     current.data.length < best.data.length ? current : best
   );
-  const png = candidates.find((candidate) => candidate.media_type === 'image/png');
+  const png = candidates.find((candidate) => candidate.mimeType === 'image/png');
   if (png && png.data.length <= smallest.data.length * PNG_PREFERENCE_RATIO) {
     return png;
   }
   return smallest;
 };
 
-const compressCaptureBlob = async (blob: Blob): Promise<ImageAttachmentData | undefined> => {
+const toCapturedScreenshot = (
+  candidate: ScreenshotEncodingCandidate
+): CapturedScreenshot | undefined => {
+  const blob = base64ToBlob(candidate.data, candidate.mimeType);
+  if (blob.size > MAX_IMAGE_BYTES) {
+    return undefined;
+  }
+  const extension = candidate.mimeType === 'image/jpeg' ? 'jpg' : 'png';
+  return {
+    mimeType: candidate.mimeType,
+    blob,
+    name: `dashboard-screenshot.${extension}`,
+  };
+};
+
+const compressCaptureBlob = async (blob: Blob): Promise<CapturedScreenshot | undefined> => {
   if (typeof createImageBitmap !== 'function' || typeof document === 'undefined') {
     return undefined;
   }
@@ -97,29 +132,26 @@ const compressCaptureBlob = async (blob: Blob): Promise<ImageAttachmentData | un
     if (!ctx) {
       return undefined;
     }
-    // Flat white backdrop matches Kibana light UI and helps PNG/WebP compress empty space.
+    // Flat white backdrop matches Kibana light UI and helps PNG compress empty space.
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
     ctx.drawImage(bitmap, 0, 0, width, height);
 
     const encodings: Array<{
-      mediaType: ImageAttachmentMediaType;
+      mimeType: SupportedImageMimeType;
       quality?: number;
-    }> = [
-      { mediaType: 'image/png' },
-      { mediaType: 'image/webp', quality: WEBP_QUALITY },
-      { mediaType: 'image/jpeg', quality: JPEG_QUALITY },
-    ];
+    }> = [{ mimeType: 'image/png' }, { mimeType: 'image/jpeg', quality: JPEG_QUALITY }];
 
-    const candidates: ImageAttachmentData[] = [];
-    for (const { mediaType, quality } of encodings) {
-      const data = await canvasToBase64(canvas, mediaType, quality);
+    const candidates: ScreenshotEncodingCandidate[] = [];
+    for (const { mimeType, quality } of encodings) {
+      const data = await canvasToBase64(canvas, mimeType, quality);
       if (data) {
-        candidates.push({ media_type: mediaType, data });
+        candidates.push({ mimeType, data });
       }
     }
 
-    return pickScreenshotEncoding(candidates);
+    const picked = pickScreenshotEncoding(candidates);
+    return picked ? toCapturedScreenshot(picked) : undefined;
   } finally {
     bitmap.close();
   }
@@ -167,9 +199,9 @@ const measureElement = (element: HTMLElement): { width: number; height: number }
 
 /**
  * Captures the full dashboard (or app main content), not just the visible scroll
- * viewport, then downscales and picks PNG/WebP/JPEG.
+ * viewport, then downscales and picks PNG/JPEG for the Files image pipeline.
  */
-export const captureAppMainScreenshot = async (): Promise<ImageAttachmentData | undefined> => {
+export const captureAppMainScreenshot = async (): Promise<CapturedScreenshot | undefined> => {
   const element = resolveDashboardCaptureElement();
   if (!element) {
     return undefined;
@@ -233,10 +265,10 @@ export const captureAppMainScreenshot = async (): Promise<ImageAttachmentData | 
 
     // Fallback when canvas compression is unavailable (e.g. some test environments).
     const pngData = await blobToBase64(blob);
-    if (pngData.length > IMAGE_ATTACHMENT_MAX_BASE64_LENGTH) {
+    if (pngData.length > MAX_BASE64_LENGTH) {
       return undefined;
     }
-    return { media_type: 'image/png', data: pngData };
+    return toCapturedScreenshot({ mimeType: 'image/png', data: pngData });
   } catch {
     return undefined;
   } finally {

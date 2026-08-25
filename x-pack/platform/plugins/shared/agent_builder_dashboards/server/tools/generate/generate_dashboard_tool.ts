@@ -10,10 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  isSection,
-  type DashboardAttachmentData,
-} from '@kbn/agent-builder-dashboards-common';
+import { isSection, type DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { DASHBOARD_APPLY_UI_EVENT, dashboardTools } from '../../../common';
@@ -53,7 +50,7 @@ const generateDashboardSchema = z
       .boolean()
       .optional()
       .describe(
-        '(optional) When false, applies the dashboard to the live UI and keeps a hidden draft only — no user-visible attachment yet. Use false during generate → screenshot → fix loops; set true (or omit, default true) on the final call so a single attachment is published. Do not render_attachment until persistAttachment is true / data.persisted is true.'
+        '(optional) When false, applies the dashboard to the live UI and keeps a hidden draft only — no user-visible attachment yet. Use false during generate → fix loops; set true (or omit, default true) on the final call so a single attachment is published. Do not render_attachment until persistAttachment is true / data.persisted is true.'
       ),
   })
   .check((ctx) => {
@@ -169,9 +166,9 @@ export const generateDashboardTool = ({
     type: ToolType.builtin,
     description: `Generate or update a dashboard from ordered operations.
 
-By default (\`persistAttachment\` omitted/true) persists a user-visible dashboard attachment and returns its id, version, and a compact summary. During generate → screenshot → fix loops, set \`persistAttachment: false\` so only a hidden draft is kept and the live dashboard is updated mid-round; pass the returned \`draft_id\` as \`dashboardAttachmentId\` on follow-ups. When the layout looks good, call again with \`persistAttachment: true\` (operations may be empty) to publish a single attachment — only then use render_attachment.
+By default (\`persistAttachment\` omitted/true) persists a user-visible dashboard attachment and returns its id, version, and a compact summary. During generate → fix loops, set \`persistAttachment: false\` so only a hidden draft is kept and the live dashboard is updated mid-round; pass the returned \`draft_id\` as \`dashboardAttachmentId\` on follow-ups. When the layout looks good, call again with \`persistAttachment: true\` (operations may be empty) to publish a single attachment — only then use render_attachment.
 
-After a successful call that changed layout/panels, the live dashboard is updated mid-round. You MUST then call \`browser_capture_dashboard_screenshot\` alone (not in parallel) with a settle_ms of at least 1500 so panels can render. Use the returned screenshot to describe visual problems and fix them with a follow-up generate_dashboard (still persistAttachment: false) when needed. Skip the screenshot only when this call failed or made no visible layout/panel changes.
+If a dashboard screenshot is attached to this conversation, it is already included as visual input — use it to assess layout quality. Do not capture another screenshot.
 
 Use operations[] to:
 1. set metadata
@@ -290,17 +287,17 @@ Use operations[] to:
           persistAttachment,
         });
 
-        // Push the new payload to the open dashboard app immediately so a mid-round
-        // browser_capture_dashboard_screenshot sees the applied UI (round_complete is too late).
+        // Push the new payload to the open dashboard app immediately so the user
+        // sees live updates (round_complete is too late for in-round iteration).
         events.sendUiEvent(DASHBOARD_APPLY_UI_EVENT, {
           attachment_id: persistedResult.attachmentId,
           data: finalDashboardData,
         });
 
         logger.info(
-          `Dashboard payload ${
-            persistedResult.persisted ? 'persisted' : 'drafted'
-          } (${persistedResult.attachmentId})`
+          `Dashboard payload ${persistedResult.persisted ? 'persisted' : 'drafted'} (${
+            persistedResult.attachmentId
+          })`
         );
 
         return {

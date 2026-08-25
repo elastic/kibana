@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { FilesStart } from '@kbn/files-plugin/public';
 import type { IdGenerator } from '.';
 import { submitPrettifyWithScreenshot } from './submit_prettify_with_screenshot';
 
@@ -19,10 +20,12 @@ export const registerPrettifyAppMenuItem = ({
   dashboard,
   agentBuilder,
   draftAttachmentId,
+  files,
 }: {
   dashboard: DashboardStart;
   agentBuilder: AgentBuilderPluginStart;
   draftAttachmentId: IdGenerator;
+  files: FilesStart;
 }): (() => void) => {
   return dashboard.registerAppMenuItemGenerator(({ viewMode }) => {
     if (viewMode !== 'edit') {
@@ -38,7 +41,7 @@ export const registerPrettifyAppMenuItem = ({
       iconType: 'brush',
       testId: 'dashboardAgentBuilderPrettifyButton',
       run: () => {
-        void submitPrettifyWithScreenshot({ agentBuilder, dashboard, draftAttachmentId });
+        void submitPrettifyWithScreenshot({ agentBuilder, dashboard, draftAttachmentId, files });
       },
     };
   });

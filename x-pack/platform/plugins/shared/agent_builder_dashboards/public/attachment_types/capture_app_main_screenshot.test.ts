@@ -28,20 +28,18 @@ describe('pickScreenshotEncoding', () => {
 
   it('prefers png when it is within 20% of the smallest lossy encode', () => {
     const picked = pickScreenshotEncoding([
-      { media_type: 'image/png', data: 'p'.repeat(110) },
-      { media_type: 'image/webp', data: 'w'.repeat(100) },
-      { media_type: 'image/jpeg', data: 'j'.repeat(120) },
+      { mimeType: 'image/png', data: 'p'.repeat(110) },
+      { mimeType: 'image/jpeg', data: 'j'.repeat(100) },
     ]);
-    expect(picked?.media_type).toBe('image/png');
+    expect(picked?.mimeType).toBe('image/png');
   });
 
   it('picks the smallest encode when png is much larger', () => {
     const picked = pickScreenshotEncoding([
-      { media_type: 'image/png', data: 'p'.repeat(200) },
-      { media_type: 'image/webp', data: 'w'.repeat(100) },
-      { media_type: 'image/jpeg', data: 'j'.repeat(130) },
+      { mimeType: 'image/png', data: 'p'.repeat(200) },
+      { mimeType: 'image/jpeg', data: 'j'.repeat(100) },
     ]);
-    expect(picked?.media_type).toBe('image/webp');
+    expect(picked?.mimeType).toBe('image/jpeg');
   });
 });
 
@@ -100,8 +98,9 @@ describe('captureAppMainScreenshot', () => {
 
     const result = await captureAppMainScreenshot();
 
-    expect(result?.media_type).toBe('image/png');
-    expect(result?.data.length).toBeGreaterThan(0);
+    expect(result?.mimeType).toBe('image/png');
+    expect(result?.name).toBe('dashboard-screenshot.png');
+    expect(result?.blob.size).toBeGreaterThan(0);
     expect(mockToBlob).toHaveBeenCalled();
 
     global.createImageBitmap = original;

@@ -20,7 +20,6 @@ import {
   CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
   UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
-import { createCaptureDashboardScreenshotTool } from '../../browser_tools/capture_dashboard_screenshot';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
@@ -149,11 +148,6 @@ export const registerDashboardAppIntegration = ({
     .pipe(debounceTime(MANUAL_CHANGES_DEBOUNCE_MS))
     .subscribe(addAttachmentFromDashboard);
 
-  // Two-way screenshot tool for mid-flight visual validation (no Chromium / serverless-safe).
-  agentBuilder.setChatConfig({
-    browserApiTools: [createCaptureDashboardScreenshotTool()],
-  });
-
   return () => {
     agentLiveUpdatesSubscription.unsubscribe();
     newAttachmentIdRegenerationSubscription.unsubscribe();
@@ -166,7 +160,6 @@ export const registerDashboardAppIntegration = ({
     }
     state.attachments = undefined;
     state.conversationId = undefined;
-    agentBuilder.clearChatConfig();
   };
 };
 

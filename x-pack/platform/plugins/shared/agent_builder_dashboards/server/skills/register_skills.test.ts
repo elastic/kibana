@@ -47,11 +47,9 @@ describe('registerSkills', () => {
   });
 
   it('keeps the prettify design pass as referenced content', () => {
-    expect(dashboardManagementSkill.content).toContain(
-      './references/prettifying-existing-dashboard.md'
-    );
-    expect(dashboardManagementSkill.content).not.toContain('prettifyPanelConfigs');
-    expect(dashboardManagementSkill.referencedContent).toEqual(
+    expect(skill.content).toContain('./references/prettifying-existing-dashboard.md');
+    expect(skill.content).not.toContain('prettifyPanelConfigs');
+    expect(skill.referencedContent).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           name: 'prettifying-existing-dashboard',

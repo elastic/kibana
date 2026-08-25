@@ -28,7 +28,7 @@ export const dashboardTools = {
 /**
  * `tool_ui` custom event name emitted by {@link dashboardTools.generateDashboard}
  * after a draft or persisted dashboard payload is ready. The dashboard app listens
- * and applies the payload to the live UI so a mid-round screenshot can see the new state.
+ * and applies the payload to the live UI so in-round generation is visible immediately.
  */
 export const DASHBOARD_APPLY_UI_EVENT = 'dashboard_apply' as const;
 

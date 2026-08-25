@@ -35,15 +35,14 @@ export interface ProcessedAttachmentVersionRef extends AttachmentVersionRef {
 }
 
 /**
- * Image payload to emit as a multimodal HumanMessage content part for a round.
+ * Image attachment referenced on a round. Bytes are resolved lazily at prompt-build
+ * time via the Files plugin — never stored inline on the processed conversation.
  */
 export interface ProcessedImagePart {
-  /** Attachment id (for debugging / stubs) */
+  /** Attachment id */
   attachmentId: string;
-  /** MIME type of the image */
-  mediaType: string;
-  /** Raw base64-encoded image bytes (no `data:` prefix) */
-  data: string;
+  /** Optional version pin; omitted means current */
+  version?: number;
 }
 
 /**
@@ -59,8 +58,7 @@ export interface ProcessedRoundInput {
   /** Author attributed to this input */
   author?: ConversationRoundAuthor;
   /**
-   * Image attachments for this round, inlined into the HumanMessage as multimodal content.
-   * Produced in prepareRoundInput from attachmentStateManager.
+   * Image attachments for this round. Resolved to multimodal content at prompt-build time.
    */
   image_parts?: ProcessedImagePart[];
 }

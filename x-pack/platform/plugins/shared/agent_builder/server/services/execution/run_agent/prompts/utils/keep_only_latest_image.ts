@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
-  HumanMessage,
-  isHumanMessage,
-  type BaseMessage,
-  type BaseMessageLike,
-} from '@langchain/core/messages';
+import type { HumanMessage } from '@langchain/core/messages';
+import { isHumanMessage, type BaseMessage, type BaseMessageLike } from '@langchain/core/messages';
 import { createUserMessage } from '@kbn/agent-builder-genai-utils/langchain/messages';
 
 /** Replaces dropped prior screenshots so the model knows why an image is missing. */
 export const PRIOR_SCREENSHOT_OMITTED_STUB =
-  '[Prior screenshot omitted — only the latest visual QA image is kept in context.]';
+  '[Prior screenshot omitted — only the latest image is kept in context.]';
 
-type ContentPart = { type?: string; text?: string; image_url?: unknown };
+interface ContentPart {
+  type?: string;
+  text?: string;
+  image_url?: unknown;
+}
 
 const isImageUrlPart = (part: unknown): part is ContentPart => {
   return (
@@ -93,8 +93,7 @@ const stripImageUrlParts = (message: BaseMessageLike): BaseMessageLike => {
  * Keeps multimodal `image_url` parts only on the chronologically last human
  * message that has them. Earlier screenshots become a short text stub.
  *
- * Covers both round `image_parts` (attachment screenshots) and mid-round
- * `UserImage` actions from browser screenshot tools.
+ * Covers round `image_parts` (attachment screenshots) inlined as `image_url` content.
  */
 export const keepOnlyLatestImageUrlParts = (messages: BaseMessageLike[]): BaseMessageLike[] => {
   const imageIndexes: number[] = [];

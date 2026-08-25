@@ -7,12 +7,7 @@
 
 import { ConversationRoundStatus, ToolResultType } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
-import {
-  AgentActionType,
-  isExecuteToolAction,
-  isToolCallAction,
-  isUserImageAction,
-} from '../actions';
+import { isExecuteToolAction, isToolCallAction } from '../actions';
 import { pendingBrowserToolResultPromptsToActions } from './pending_browser_tool_result_prompts_to_actions';
 
 describe('pendingBrowserToolResultPromptsToActions', () => {
@@ -29,15 +24,14 @@ describe('pendingBrowserToolResultPromptsToActions', () => {
       {
         type: AgentPromptType.browser_tool_result,
         id: 'p1',
-        tool_id: 'capture_dashboard_screenshot',
+        tool_id: 'set_time_range',
         tool_call_id: 'call-1',
         params: {},
       },
     ],
   } as any;
 
-  it('materializes tool call, tool result, and user image actions on success', async () => {
-    const image = { media_type: 'image/png' as const, data: 'abc' };
+  it('materializes tool call and tool result actions on success', async () => {
     const result = await pendingBrowserToolResultPromptsToActions({
       round: baseRound,
       promptState: {
@@ -47,7 +41,6 @@ describe('pendingBrowserToolResultPromptsToActions', () => {
             response: {
               ok: true,
               results: [{ type: ToolResultType.other, data: { message: 'ok' } }],
-              image,
             },
           },
         },
@@ -55,14 +48,9 @@ describe('pendingBrowserToolResultPromptsToActions', () => {
     });
 
     expect(result.consumedPromptIds).toEqual(['p1']);
-    expect(result.actions).toHaveLength(3);
+    expect(result.actions).toHaveLength(2);
     expect(isToolCallAction(result.actions[0])).toBe(true);
     expect(isExecuteToolAction(result.actions[1])).toBe(true);
-    expect(isUserImageAction(result.actions[2])).toBe(true);
-    expect(result.actions[2]).toMatchObject({
-      type: AgentActionType.UserImage,
-      image,
-    });
   });
 
   it('materializes an error tool result when ok is false', async () => {

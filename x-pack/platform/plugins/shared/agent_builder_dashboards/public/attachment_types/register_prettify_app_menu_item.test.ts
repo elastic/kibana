@@ -39,7 +39,13 @@ describe('registerPrettifyAppMenuItem', () => {
     } as unknown as AgentBuilderPluginStart;
 
     const draftAttachmentId = { current: 'draft-id', next: jest.fn() };
-    const cleanup = registerPrettifyAppMenuItem({ dashboard, agentBuilder, draftAttachmentId });
+    const files = {} as import('@kbn/files-plugin/public').FilesStart;
+    const cleanup = registerPrettifyAppMenuItem({
+      dashboard,
+      agentBuilder,
+      draftAttachmentId,
+      files,
+    });
 
     expect(generator?.({ viewMode: 'view' })).toBeUndefined();
 
@@ -58,6 +64,7 @@ describe('registerPrettifyAppMenuItem', () => {
       agentBuilder,
       dashboard,
       draftAttachmentId,
+      files,
     });
     // prompt constant still exported for consumers
     expect(PRETTIFY_DASHBOARD_PROMPT).toBe('Prettify this dashboard');

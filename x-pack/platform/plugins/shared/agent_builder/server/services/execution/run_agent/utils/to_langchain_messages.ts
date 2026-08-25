@@ -45,6 +45,7 @@ import type { ToolCallResultTransformer } from './tool_summarization';
 import { serializeCompactionSummary } from './compaction_serialize';
 import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
 import { attachmentTypeInstructions } from '../prompts/utils/attachments';
+import type { PromptImageResolver } from '../prompts/types';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -71,6 +72,10 @@ export interface ConversationToLangchainOptions {
    * prefix stays stable across rounds (prompt-cache friendly).
    */
   conversationTimestamp?: string;
+  /**
+   * Resolves Files-backed image attachments to base64 at prompt-build time.
+   */
+  imageResolver?: PromptImageResolver;
 }
 
 /**
@@ -85,6 +90,7 @@ export const convertPreviousRounds = async ({
   ignoreSteps = false,
   compactionSummary,
   conversationTimestamp,
+  imageResolver,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const subagentRosterFallback = conversation.subagentRosterFallback;
   const messages: BaseMessage[] = [];
@@ -126,16 +132,18 @@ export const convertPreviousRounds = async ({
         ignoreSteps,
         attachmentTypes: conversation.attachmentTypes,
         attachmentTypeInstructionsProvided,
+        imageResolver,
       }))
     );
   }
 
   messages.push(
-    formatRoundInput({
+    await formatRoundInput({
       input,
       timestamp: inputTimestamp,
       attachmentTypes: conversation.attachmentTypes,
       attachmentTypeInstructionsProvided,
+      imageResolver,
     })
   );
 
@@ -147,6 +155,7 @@ export interface RoundToLangchainOptions {
   ignoreSteps?: boolean;
   attachmentTypes?: ProcessedAttachmentType[];
   attachmentTypeInstructionsProvided?: Set<string>;
+  imageResolver?: PromptImageResolver;
 }
 
 export const roundToLangchain = async (
@@ -156,17 +165,19 @@ export const roundToLangchain = async (
     ignoreSteps = false,
     attachmentTypes,
     attachmentTypeInstructionsProvided,
+    imageResolver,
   }: RoundToLangchainOptions = {}
 ): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
   // user message
   messages.push(
-    formatRoundInput({
+    await formatRoundInput({
       input: round.input,
       timestamp: round.started_at,
       attachmentTypes,
       attachmentTypeInstructionsProvided,
+      imageResolver,
     })
   );
 
@@ -219,17 +230,19 @@ export const roundToLangchain = async (
   return messages;
 };
 
-const formatRoundInput = ({
+const formatRoundInput = async ({
   input,
   timestamp,
   attachmentTypes,
   attachmentTypeInstructionsProvided,
+  imageResolver,
 }: {
   input: ProcessedRoundInput;
   timestamp?: string;
   attachmentTypes?: ProcessedAttachmentType[];
   attachmentTypeInstructionsProvided?: Set<string>;
-}): HumanMessage => {
+  imageResolver?: PromptImageResolver;
+}): Promise<HumanMessage> => {
   const { message, attachments, attachment_context, attachment_refs, author, image_parts } = input;
 
   let content = message;
@@ -276,19 +289,22 @@ const formatRoundInput = ({
     content = `${prefix}\n\n${content}`;
   }
 
-  if (!image_parts || image_parts.length === 0) {
+  if (!image_parts || image_parts.length === 0 || !imageResolver) {
     return createUserMessage(content);
   }
 
-  return createUserMessage([
-    { type: 'text', text: content },
-    ...image_parts.map((imagePart) => ({
-      type: 'image_url' as const,
-      image_url: {
-        url: `data:${imagePart.mediaType};base64,${imagePart.data}`,
-      },
-    })),
-  ]);
+  const images: Array<{ base64: string; mimeType: string }> = [];
+  for (const imagePart of image_parts) {
+    const resolved = await imageResolver({
+      attachmentId: imagePart.attachmentId,
+      version: imagePart.version,
+    });
+    if (resolved) {
+      images.push({ base64: resolved.base64, mimeType: resolved.mimeType });
+    }
+  }
+
+  return createUserMessage(content, { images });
 };
 
 const formatInputPrefix = ({

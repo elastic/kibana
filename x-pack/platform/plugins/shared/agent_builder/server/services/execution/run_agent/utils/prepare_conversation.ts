@@ -15,7 +15,7 @@ import type {
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 import { createBadRequestError } from '@kbn/agent-builder-common';
-import type { AttachmentInput, ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
   AttachmentType,
@@ -347,11 +347,9 @@ const collectImageParts = (
     if (!parseResult.success) {
       continue;
     }
-    const imageData: ImageAttachmentData = parseResult.data;
     imageParts.push({
       attachmentId: snapshot.id,
-      mediaType: imageData.media_type,
-      data: imageData.data,
+      version: ref.version,
     });
   }
   return imageParts;

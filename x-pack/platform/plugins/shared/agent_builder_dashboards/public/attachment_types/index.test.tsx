@@ -25,11 +25,14 @@ import { ChatEventType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_OPERATION } from '@kbn/agent-builder-common/attachments';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
+import type { FilesStart } from '@kbn/files-plugin/public';
 import { registerDashboardAttachmentUiDefinition } from '.';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardRenderer: jest.fn(() => null),
 }));
+
+const files = { filesClientFactory: {} } as unknown as FilesStart;
 
 const createMockRoundCompleteEvent = (
   attachments: VersionedAttachment[],
@@ -238,6 +241,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       dashboardPlugin,
       unifiedSearch,
       dashboardLocator: undefined,
+      files,
       dashboardAppClientApi$,
       addAttachmentType,
       updateAttachmentOrigin,
@@ -345,6 +349,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       unifiedSearch: {
         ui: { SearchBar: jest.fn() },
       } as unknown as UnifiedSearchPublicPluginStart,
+      files,
     };
 
     let cleanup: (() => void) | undefined;

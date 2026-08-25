@@ -56,6 +56,10 @@ export const createImageAttachmentType = ({
         }),
       };
     },
+    getAgentDescription: () => {
+      return `An image attachment is a screenshot or other picture stored in the Files plugin.
+When it was added on the current user turn, the image pixels are already included in the user message as visual input — inspect them directly. Do not capture another screenshot. Call attachment_read only if you need the image again later in the same turn.`;
+    },
     getTools: () => [],
   };
 };

@@ -41,6 +41,7 @@ export const getStructuredAnswerPrompt = async (
     resultTransformer,
     compactionSummary: processedConversation.compactionSummary,
     conversationTimestamp,
+    imageResolver,
   });
 
   return [

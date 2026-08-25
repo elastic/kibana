@@ -119,7 +119,7 @@ export const RoundAttachmentPill: React.FC<RoundAttachmentPillProps> = ({
         tabIndex={canOpenCanvas ? 0 : undefined}
         onKeyDown={
           canOpenCanvas
-            ? (event) => {
+            ? (event: React.KeyboardEvent) => {
                 if (event.key === 'Enter' || event.key === ' ') {
                   event.preventDefault();
                   openAttachmentCanvas();

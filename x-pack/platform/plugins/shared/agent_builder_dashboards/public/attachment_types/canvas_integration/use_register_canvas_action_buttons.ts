@@ -13,6 +13,7 @@ import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useLatest from 'react-use/lib/useLatest';
+import type { FilesStart } from '@kbn/files-plugin/public';
 import { handleEditInDashboard } from '../handle_edit_in_dashboard';
 import { submitPrettifyWithScreenshotInConversation } from '../submit_prettify_with_screenshot';
 
@@ -35,6 +36,7 @@ interface UseRegisterCanvasActionButtonsParams {
   submitMessage?: (message: string) => void;
   addAttachment?: (attachment: AttachmentInput) => void;
   canWriteDashboards: boolean;
+  files: FilesStart;
 }
 
 export const useRegisterCanvasActionButtons = ({
@@ -48,6 +50,7 @@ export const useRegisterCanvasActionButtons = ({
   canWriteDashboards,
   dashboardLocatorParams,
   getExistingDashboardId,
+  files,
 }: UseRegisterCanvasActionButtonsParams) => {
   const dashboardLocatorParamsRef = useLatest(dashboardLocatorParams);
   const getExistingDashboardIdRef = useLatest(getExistingDashboardId);
@@ -165,6 +168,7 @@ export const useRegisterCanvasActionButtons = ({
           await submitPrettifyWithScreenshotInConversation({
             addAttachment: addAttachmentRef.current,
             submitMessage: submitMessageRef.current,
+            files,
           });
           closeCanvas();
           openSidebarConversationRef.current?.();
@@ -188,5 +192,6 @@ export const useRegisterCanvasActionButtons = ({
     missingDashboardWriteControlsReason,
     managedDashboardDisabledReason,
     readOnlyDashboardDisabledReason,
+    files,
   ]);
 };

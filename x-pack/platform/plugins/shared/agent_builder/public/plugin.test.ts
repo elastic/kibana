@@ -17,6 +17,11 @@ import type {
 } from './types';
 import { setSidebarRuntimeContext } from './sidebar';
 import { AgentBuilderAccessChecker } from './services';
+import {
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  MAX_IMAGE_BYTES,
+  SUPPORTED_IMAGE_MIME_TYPES,
+} from '@kbn/agent-builder-common/attachments';
 
 jest.mock('./services/access', () => ({
   ...jest.requireActual('./services/access'),
@@ -153,6 +158,7 @@ const createMockSetupDeps = (): AgentBuilderSetupDependencies =>
     licenseManagement: undefined,
     share: {},
     workflowsExtensions: {},
+    files: { registerFileKind: jest.fn() },
   } as unknown as AgentBuilderSetupDependencies);
 
 const createMockStartDeps = (): AgentBuilderStartDependencies =>
@@ -197,6 +203,20 @@ describe('AgentBuilderPlugin', () => {
           }),
         } as unknown as AgentBuilderAccessChecker)
     );
+  });
+
+  describe('setup', () => {
+    it('registers the chat-attachment-images file kind', () => {
+      const plugin = new AgentBuilderPlugin(createMockInitializerContext());
+      const setupDeps = createMockSetupDeps();
+      plugin.setup(createMockCoreSetup(), setupDeps);
+
+      expect(setupDeps.files.registerFileKind).toHaveBeenCalledWith({
+        id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+        allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
+        maxSizeBytes: MAX_IMAGE_BYTES,
+      });
+    });
   });
 
   describe('getAgentBuilderAccess', () => {

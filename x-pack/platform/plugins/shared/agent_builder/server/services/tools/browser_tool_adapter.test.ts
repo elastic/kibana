@@ -29,8 +29,8 @@ describe('runBrowserToolAdapter', () => {
   it('returns a browser_tool_result prompt interrupt for two-way tools', () => {
     const [content, artifact] = runBrowserToolAdapter({
       browserTool: {
-        id: 'capture_dashboard_screenshot',
-        description: 'Capture',
+        id: 'read_visible_text',
+        description: 'Read visible text',
         schema: { type: 'object', properties: {} },
         returns_result: true,
       },
@@ -43,7 +43,7 @@ describe('runBrowserToolAdapter', () => {
     expect(artifact).toMatchObject({
       prompt: {
         type: AgentPromptType.browser_tool_result,
-        tool_id: 'capture_dashboard_screenshot',
+        tool_id: 'read_visible_text',
         tool_call_id: 'call-2',
         params: { settle_ms: 100 },
       },

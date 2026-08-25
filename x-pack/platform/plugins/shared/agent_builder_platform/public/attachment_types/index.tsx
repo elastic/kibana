@@ -12,6 +12,7 @@ import type {
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 import type { CoreStart } from '@kbn/core/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { FilesStart } from '@kbn/files-plugin/public';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import {
   GRAPH_ATTACHMENT_TYPE,
@@ -24,7 +25,7 @@ import { screenContextAttachmentDefinition } from './screen_context_attachment';
 import { graphAttachmentDefinition } from './graph_attachment/graph_attachment';
 import { createSkillAttachmentDefinition } from './skill_attachment/skill_attachment';
 import { createConnectorSetupAttachmentDefinition } from './connector_setup/connector_setup_attachment';
-import { imageAttachmentDefinition } from './image_attachment';
+import { createImageAttachmentDefinition } from './image_attachment';
 
 export const registerAttachmentUiDefinitions = ({
   attachments,
@@ -32,17 +33,19 @@ export const registerAttachmentUiDefinitions = ({
   locators,
   core,
   triggersActionsUi,
+  files,
 }: {
   attachments: AttachmentServiceStartContract;
   agents: AgentsServiceStartContract;
   locators: ILocatorClient;
   core: CoreStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  files: FilesStart;
 }) => {
   attachments.addAttachmentType(AttachmentType.text, textAttachmentDefinition);
   attachments.addAttachmentType(AttachmentType.screenContext, screenContextAttachmentDefinition);
   attachments.addAttachmentType(AttachmentType.esql, createEsqlAttachmentDefinition({ locators }));
-  attachments.addAttachmentType(AttachmentType.image, imageAttachmentDefinition);
+  attachments.addAttachmentType(AttachmentType.image, createImageAttachmentDefinition({ files }));
   attachments.addAttachmentType(GRAPH_ATTACHMENT_TYPE, graphAttachmentDefinition);
   attachments.addAttachmentType(
     SKILL_ATTACHMENT_TYPE,

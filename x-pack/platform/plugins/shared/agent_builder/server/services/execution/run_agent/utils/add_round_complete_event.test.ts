@@ -460,7 +460,7 @@ describe('addRoundCompleteEvent', () => {
         prompt: {
           type: AgentPromptType.browser_tool_result,
           id: 'prompt-1',
-          tool_id: 'capture_dashboard_screenshot',
+          tool_id: 'read_visible_text',
           tool_call_id: 'toolu_bdrk_01McDJFswpnajsdBdPg73s9z',
           params: { settle_ms: 1500 },
         },
@@ -491,7 +491,7 @@ describe('addRoundCompleteEvent', () => {
     expect(roundCompleteEvent?.data.round.pending_prompts).toEqual([
       expect.objectContaining({
         type: AgentPromptType.browser_tool_result,
-        tool_id: 'capture_dashboard_screenshot',
+        tool_id: 'read_visible_text',
       }),
     ]);
     expect(roundCompleteEvent?.data.round.state?.agent.nodes).toEqual([]);

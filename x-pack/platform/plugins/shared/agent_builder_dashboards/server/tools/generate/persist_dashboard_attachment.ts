@@ -31,7 +31,7 @@ export interface PersistDashboardAttachmentResult {
 }
 
 /**
- * Persists dashboard payload either as a hidden draft (for generate → screenshot → fix
+ * Persists dashboard payload either as a hidden draft (for generate → fix
  * loops) or as the single user-visible attachment (finalize / one-shot).
  *
  * Drafts survive HITL because they are real attachments (hidden). On finalize, the draft
@@ -48,8 +48,7 @@ export const persistDashboardAttachment = async ({
     ? attachments.getAttachmentRecord(previousAttachmentId)
     : undefined;
   const isHiddenDraft = previous?.hidden === true;
-  const sourceAttachmentId =
-    isHiddenDraft && previous?.group_id ? previous.group_id : undefined;
+  const sourceAttachmentId = isHiddenDraft && previous?.group_id ? previous.group_id : undefined;
 
   if (!persistAttachment) {
     return saveDraft({
@@ -57,8 +56,7 @@ export const persistDashboardAttachment = async ({
       previousAttachmentId,
       previousHidden: isHiddenDraft,
       sourceAttachmentId:
-        sourceAttachmentId ??
-        (previous && !previous.hidden ? previousAttachmentId : undefined),
+        sourceAttachmentId ?? (previous && !previous.hidden ? previousAttachmentId : undefined),
       dashboardData,
       description,
     });

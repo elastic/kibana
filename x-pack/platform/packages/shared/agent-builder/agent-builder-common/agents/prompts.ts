@@ -6,7 +6,6 @@
  */
 
 import type { ToolResult } from '../tools/tool_result';
-import type { ImageAttachmentData } from '../attachments/attachment_types';
 
 export enum AgentPromptType {
   confirmation = 'confirmation',
@@ -120,12 +119,11 @@ export interface AskUserQuestionPromptResponse {
 
 /**
  * Client response for a two-way browser tool interrupt.
- * Carries structured tool results and an optional image for multimodal injection.
+ * Carries structured tool results.
  */
 export interface BrowserToolResultPromptResponse {
   ok: boolean;
   results?: Array<Omit<ToolResult, 'tool_result_id'> & { tool_result_id?: string }>;
-  image?: ImageAttachmentData;
   error?: string;
 }
 

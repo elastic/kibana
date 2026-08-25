@@ -37,10 +37,7 @@ describe('convertPreviousRounds', () => {
     message: string,
     attachments: ProcessedAttachment[] = [],
     overrides: Partial<
-      Pick<
-        ProcessedRoundInput,
-        'attachment_refs' | 'attachment_context' | 'author' | 'image_parts'
-      >
+      Pick<ProcessedRoundInput, 'attachment_refs' | 'attachment_context' | 'author' | 'image_parts'>
     > = {}
   ): ProcessedRoundInput => ({
     message,
@@ -519,15 +516,19 @@ describe('convertPreviousRounds', () => {
         image_parts: [
           {
             attachmentId: 'img-1',
-            mediaType: 'image/png',
-            data: 'abc123',
           },
         ],
       });
+      const imageResolver = jest.fn().mockResolvedValue({
+        base64: 'abc123',
+        mimeType: 'image/png',
+      });
       const result = await convertPreviousRounds({
         conversation: createConversation({ previousRounds: [], nextInput }),
+        imageResolver,
       });
 
+      expect(imageResolver).toHaveBeenCalledWith({ attachmentId: 'img-1', version: undefined });
       expect(result).toHaveLength(1);
       expect(isHumanMessage(result[0])).toBe(true);
       expect(Array.isArray(result[0].content)).toBe(true);
@@ -544,12 +545,12 @@ describe('convertPreviousRounds', () => {
         attachment: {
           id: 'img-1',
           type: 'image',
-          data: { media_type: 'image/png', data: 'abc123' },
+          data: { file_id: 'file-1', name: 'shot.png', mime_type: 'image/png' },
         },
         representation: {
           type: 'image',
-          mediaType: 'image/png',
-          data: 'abc123',
+          mimeType: 'image/png',
+          getBase64: async () => 'abc123',
         },
         tools: [],
       };
@@ -558,7 +559,7 @@ describe('convertPreviousRounds', () => {
         conversation: createConversation({ previousRounds: [], nextInput }),
       });
 
-      expect(result[0].content).toContain('[image media_type=image/png]');
+      expect(result[0].content).toContain('<attachment type="image" id="img-1">');
       expect(result[0].content).not.toContain('abc123');
     });
 

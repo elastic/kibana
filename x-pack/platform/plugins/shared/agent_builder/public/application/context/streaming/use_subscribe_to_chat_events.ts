@@ -149,7 +149,6 @@ const executeTwoWayBrowserTool = async ({
   return {
     ok: true,
     results: outcome.result?.results,
-    image: outcome.result?.image,
   };
 };
 

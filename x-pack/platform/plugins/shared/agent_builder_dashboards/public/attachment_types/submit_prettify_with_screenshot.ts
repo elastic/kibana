@@ -14,20 +14,27 @@ import {
   isDashboardAttachment,
 } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi, DashboardStart } from '@kbn/dashboard-plugin/public';
-import { createCaptureDashboardScreenshotTool } from '../browser_tools/capture_dashboard_screenshot';
+import type { FilesStart } from '@kbn/files-plugin/public';
 import { captureAppMainScreenshot } from './capture_app_main_screenshot';
 import { PRETTIFY_DASHBOARD_PROMPT } from './canvas_integration/use_register_canvas_action_buttons';
+import { uploadChatImage } from './upload_chat_image';
 import type { IdGenerator } from '.';
 
-const screenshotAttachment = async (): Promise<AttachmentInput | undefined> => {
+const screenshotAttachment = async (files: FilesStart): Promise<AttachmentInput | undefined> => {
   const image = await captureAppMainScreenshot();
   if (!image) {
     return undefined;
   }
+  const data = await uploadChatImage({
+    files,
+    blob: image.blob,
+    name: image.name,
+    mimeType: image.mimeType,
+  });
   return {
     type: AttachmentType.image,
     description: 'Dashboard screenshot',
-    data: image,
+    data,
   };
 };
 
@@ -107,12 +114,14 @@ export const submitPrettifyWithScreenshot = async ({
   agentBuilder,
   dashboard,
   draftAttachmentId,
+  files,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   dashboard: DashboardStart;
   draftAttachmentId: IdGenerator;
+  files: FilesStart;
 }): Promise<void> => {
-  const screenshot = await screenshotAttachment();
+  const screenshot = await screenshotAttachment(files);
   const dashboardAttachment = buildCurrentDashboardAttachment({
     agentBuilder,
     dashboardApi: dashboard.dashboardAppClientApi$.getValue(),
@@ -126,18 +135,15 @@ export const submitPrettifyWithScreenshot = async ({
 
   // Fresh sidebar: attachments come from openChat initial props.
   // Already-open sidebar: also upsert via addAttachment (updateProps is a full replace).
-  agentBuilder.openChat({
-    ...(attachments.length > 0 ? { attachments } : {}),
-    browserApiTools: [createCaptureDashboardScreenshotTool()],
-  });
+  agentBuilder.openChat(attachments.length > 0 ? { attachments } : {});
   for (const attachment of attachments) {
     agentBuilder.addAttachment(attachment);
   }
-  // // Defer so React props/state updates (attachments) can commit before send.
-  // // Fresh sidebars also queue via pendingSubmitMessage until Conversation mounts.
-  // setTimeout(() => {
-  //   agentBuilder.submitMessage(PRETTIFY_DASHBOARD_PROMPT);
-  // }, 0);
+  // Defer so React props/state updates (attachments) can commit before send.
+  // Fresh sidebars also queue via pendingSubmitMessage until Conversation mounts.
+  setTimeout(() => {
+    agentBuilder.submitMessage(PRETTIFY_DASHBOARD_PROMPT);
+  }, 0);
 };
 
 /**
@@ -147,14 +153,16 @@ export const submitPrettifyWithScreenshot = async ({
 export const submitPrettifyWithScreenshotInConversation = async ({
   addAttachment,
   submitMessage,
+  files,
 }: {
   addAttachment?: (attachment: AttachmentInput) => void;
   submitMessage?: (message: string) => void;
+  files: FilesStart;
 }): Promise<void> => {
   if (!submitMessage) {
     return;
   }
-  const attachment = await screenshotAttachment();
+  const attachment = await screenshotAttachment(files);
   if (attachment && addAttachment) {
     addAttachment(attachment);
   }

@@ -155,6 +155,7 @@ describe('DashboardCanvasAttachment', () => {
     isSidebar: false,
     dashboardLocator: undefined,
     searchBarComponent: MockSearchBar as any,
+    files: {} as import('@kbn/files-plugin/public').FilesStart,
   };
 
   beforeEach(() => {

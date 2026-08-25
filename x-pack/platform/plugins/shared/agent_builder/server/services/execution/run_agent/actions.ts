@@ -8,7 +8,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
-import type { ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
 import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
 import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
 
@@ -21,8 +20,6 @@ export enum AgentActionType {
   StructuredAnswer = 'structured_answer',
   BackgroundExecutionComplete = 'background_execution_complete',
   SubagentRosterUpdated = 'subagent_roster_updated',
-  /** Synthetic multimodal user message (e.g. browser screenshot after two-way tool). */
-  UserImage = 'user_image',
 }
 
 export interface ToolCallResult {
@@ -80,13 +77,6 @@ export interface SubagentRosterUpdatedAction {
   roster: SubagentRosterEntry[];
 }
 
-export interface UserImageAction {
-  type: AgentActionType.UserImage;
-  image: ImageAttachmentData;
-  /** Short caption shown as text alongside the image. */
-  caption: string;
-}
-
 export type ResearchAgentAction =
   | ToolCallAction
   | ExecuteToolAction
@@ -94,8 +84,7 @@ export type ResearchAgentAction =
   | HandoverAction
   | AgentErrorAction
   | BackgroundExecutionCompleteAction
-  | SubagentRosterUpdatedAction
-  | UserImageAction;
+  | SubagentRosterUpdatedAction;
 
 // answer phase actions
 
@@ -146,10 +135,6 @@ export function isSubagentRosterUpdatedAction(
   action: AgentAction
 ): action is SubagentRosterUpdatedAction {
   return action.type === AgentActionType.SubagentRosterUpdated;
-}
-
-export function isUserImageAction(action: AgentAction): action is UserImageAction {
-  return action.type === AgentActionType.UserImage;
 }
 
 // creation helpers
@@ -230,19 +215,5 @@ export function subagentRosterUpdatedAction(
   return {
     type: AgentActionType.SubagentRosterUpdated,
     roster,
-  };
-}
-
-export function userImageAction({
-  image,
-  caption,
-}: {
-  image: ImageAttachmentData;
-  caption: string;
-}): UserImageAction {
-  return {
-    type: AgentActionType.UserImage,
-    image,
-    caption,
   };
 }

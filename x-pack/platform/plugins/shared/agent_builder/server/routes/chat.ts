@@ -77,22 +77,11 @@ export const promptResponseEntrySchema = schema.oneOf([
     {
       ok: schema.boolean(),
       results: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 50 })),
-      image: schema.maybe(
-        schema.object({
-          media_type: schema.oneOf([
-            schema.literal('image/png'),
-            schema.literal('image/jpeg'),
-            schema.literal('image/webp'),
-          ]),
-          data: schema.string({ minLength: 1, maxLength: 1_500_000 }),
-        })
-      ),
       error: schema.maybe(schema.string({ maxLength: 10_000 })),
     },
     {
       meta: {
-        description:
-          'Result of a two-way browser tool (`browser_tool_result` prompt). Includes optional image for multimodal injection.',
+        description: 'Result of a two-way browser tool (`browser_tool_result` prompt).',
       },
     }
   ),
@@ -160,7 +149,7 @@ export const conversePayloadSchema = schema.object({
     schema.recordOf(schema.string({ minLength: 1, maxLength: 512 }), promptResponseEntrySchema, {
       meta: {
         description:
-          'Use this field to respond to a `confirmation`, `authorization`, `ask_user_question`, or `browser_tool_result` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, an `answers` array to answer an `ask_user_question` prompt, or `{ ok, results?, image?, error? }` for a two-way browser tool.',
+          'Use this field to respond to a `confirmation`, `authorization`, `ask_user_question`, or `browser_tool_result` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, an `answers` array to answer an `ask_user_question` prompt, or `{ ok, results?, error? }` for a two-way browser tool.',
       },
     })
   ),

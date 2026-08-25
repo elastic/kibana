@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { isHumanMessage, type HumanMessage } from '@langchain/core/messages';
-import { createAIMessage, createUserMessage } from '@kbn/agent-builder-genai-utils/langchain/messages';
+import { isHumanMessage, type BaseMessageLike, type HumanMessage } from '@langchain/core/messages';
+import {
+  createAIMessage,
+  createUserMessage,
+} from '@kbn/agent-builder-genai-utils/langchain/messages';
 import {
   keepOnlyLatestImageUrlParts,
   PRIOR_SCREENSHOT_OMITTED_STUB,
@@ -23,8 +26,8 @@ const imageMessage = (label: string, data: string) =>
 
 describe('keepOnlyLatestImageUrlParts', () => {
   it('leaves messages unchanged when there is at most one image', () => {
-    const messages = [
-      ['system', 'sys'] as const,
+    const messages: BaseMessageLike[] = [
+      ['system', 'sys'],
       createUserMessage('hello'),
       imageMessage('only shot', 'aaa'),
     ];
@@ -35,8 +38,8 @@ describe('keepOnlyLatestImageUrlParts', () => {
   it('keeps only the latest image and stubs earlier ones', () => {
     const first = imageMessage('first screenshot', 'aaa');
     const second = imageMessage('second screenshot', 'bbb');
-    const messages = [
-      ['system', 'sys'] as const,
+    const messages: BaseMessageLike[] = [
+      ['system', 'sys'],
       first,
       createAIMessage('thinking'),
       second,

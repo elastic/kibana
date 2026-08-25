@@ -6,7 +6,6 @@
  */
 
 import type { BrowserApiToolMetadata, ToolResult } from '@kbn/agent-builder-common';
-import type { ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { z, type ZodType } from '@kbn/zod/v4';
 
 /**
@@ -16,8 +15,6 @@ import { z, type ZodType } from '@kbn/zod/v4';
  */
 export interface BrowserApiToolHandlerResult {
   results: Array<Omit<ToolResult, 'tool_result_id'> & { tool_result_id?: string }>;
-  /** Optional screenshot / image for multimodal injection on resume. */
-  image?: ImageAttachmentData;
 }
 /**
  * Definition of a browser API tool that can be provided by consumers
@@ -60,7 +57,7 @@ export interface BrowserApiToolDefinition<TParams = unknown> {
    *
    * For one-way tools (`returnsResult` omitted/false), the return value is ignored.
    * For two-way tools (`returnsResult: true`), return {@link BrowserApiToolHandlerResult}
-   * so the client can resume the round with results (and optional image) for the LLM.
+   * so the client can resume the round with results for the LLM.
    */
   handler: (
     params: TParams

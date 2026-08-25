@@ -12,23 +12,23 @@ import type { DashboardGuidanceModule } from '../guidance_module';
 
 const guidance = `## Kibana Workflow
 
-In Kibana, a dashboard request follows: resolve inputs → draft/generate + visual QA → persist once → render.
+In Kibana, a dashboard request follows: resolve inputs → draft/generate + visual QA from attached context → persist once → render.
 
 1. **Resolve inputs**:
    - To work with a saved dashboard, search for it with \`platform.core.sml_search\`, then attach it with \`platform.core.sml_attach\` using the exact \`entry_id\` from the search result. The attached \`${DASHBOARD_ATTACHMENT_TYPE}\` attachment is your editable working copy; pass its \`attachment_id\` to generation as \`dashboardAttachmentId\`.
    - To put an existing visualization onto a dashboard, read that visualization attachment's content with \`${attachmentTools.read}\` and pass its configuration as a \`source: "config"\` panel input (with panel \`type: "vis"\` and \`config\`). The generation core never reads attachments itself, so the visualization config must be passed by value here.
-2. **Generate as a draft** (while iterating with screenshots):
+2. **Generate as a draft** (while iterating):
    - Call ${dashboardTools.generateDashboard} with \`persistAttachment: false\`, \`dashboardAttachmentId\` set to the dashboard you are editing (omit it for a new dashboard), and your batched \`operations\`. The live dashboard updates mid-round; a hidden draft is kept — **no user-visible attachment is published yet**.
    - It returns \`data.draft_id\`, \`data.persisted: false\`, a compact \`data.dashboard\` summary (panels may include \`authoring_note\`), and optional \`data.failures\`. On follow-up draft calls, pass \`data.draft_id\` as \`dashboardAttachmentId\`. Do **not** pass the dashboard payload back into any tool. Do **not** \`render_attachment\` until after persist.
-3. **Visual validation** (required after a successful generate that changed layout or panels):
-   - Call \`browser_capture_dashboard_screenshot\` **alone** (never in parallel) with \`settle_ms\` of at least \`1500\`.
-   - Inspect the screenshot and briefly describe issues (overlap, empty/broken charts, cramped titles, uneven composition). Fix with another ${dashboardTools.generateDashboard} call still using \`persistAttachment: false\` and the \`draft_id\`, then screenshot again only if you made another visual change.
-   - Skip the screenshot when generation failed or when the call made no visible UI change (e.g. metadata-only with no layout impact).
+3. **Visual context**:
+   - If a dashboard screenshot image is attached to this conversation (typical for Prettify), it is already included as visual input on the user turn. Use it to assess overlap, empty/broken charts, cramped titles, and uneven composition.
+   - Do **not** capture another screenshot and do **not** call a browser screenshot tool.
+   - Fix issues with another ${dashboardTools.generateDashboard} call still using \`persistAttachment: false\` and the \`draft_id\`.
 4. **Persist once**, then **render**:
    - When the dashboard looks good, call ${dashboardTools.generateDashboard} with \`persistAttachment: true\` and \`dashboardAttachmentId\` set to the \`draft_id\` (operations may be empty). This publishes a **single** user-visible \`${DASHBOARD_ATTACHMENT_TYPE}\` attachment.
    - Only then render inline with the returned \`attachment_id\` and \`version\`:
      \`<render_attachment id="{attachment_id}" version="{version}" />\`
-   - One-shot creates with no screenshot loop may omit \`persistAttachment\` (defaults to true).
+   - One-shot creates may omit \`persistAttachment\` (defaults to true).
 
 ## Discovering Dashboards
 

@@ -299,48 +299,6 @@ describe('attachment tools', () => {
       expect((result.results[0] as any).data.data).toBe('v1');
     });
 
-    it('stubs image content for readonly image attachments', async () => {
-      const imageAttachmentsService = {
-        getTypeDefinition: () => ({
-          id: 'image',
-          validate: (input: unknown) => ({ valid: true, data: input }),
-          format: () => ({
-            getRepresentation: () => ({
-              type: 'image',
-              mediaType: 'image/png',
-              data: 'aGVsbG8=',
-            }),
-          }),
-          isReadonly: true,
-        }),
-      } as any;
-      const imageManager = createAttachmentStateManager([], {
-        getTypeDefinition: imageAttachmentsService.getTypeDefinition,
-      });
-      const attachment = await imageManager.add({
-        type: 'image',
-        data: { media_type: 'image/png', data: 'aGVsbG8=' },
-      });
-
-      const tool = createAttachmentTools({
-        attachmentManager: imageManager,
-        attachmentsService: imageAttachmentsService,
-        formatContext,
-      }).find((t) => t.id === attachmentTools.read)!;
-
-      const result = (await tool.handler(
-        { attachment_id: attachment.id },
-        {} as any
-      )) as ToolHandlerStandardReturn;
-
-      expect((result.results[0] as any).data.data).toEqual({
-        media_type: 'image/png',
-        byte_length: 6,
-        note: 'Image content is already available in the user message as multimodal content.',
-      });
-      expect(JSON.stringify(result.results[0])).not.toContain('aGVsbG8=');
-    });
-
     it('returns error for non-existent attachment', async () => {
       const tool = getTool(attachmentTools.read);
       const result = (await tool.handler(

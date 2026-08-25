@@ -14,16 +14,16 @@ import {
   type AttachmentVersionRef,
 } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { DashboardAttachment, DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
+import type {
+  DashboardAttachment,
+  DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common';
 import {
   attachmentDataToDashboardState,
   isDashboardAttachment,
 } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import {
-  DASHBOARD_APPLY_UI_EVENT,
-  type DashboardApplyUiEventData,
-} from '../../../common';
+import { DASHBOARD_APPLY_UI_EVENT, type DashboardApplyUiEventData } from '../../../common';
 
 export interface AgentLiveUpdatesSubscriptionParams {
   agentBuilder: AgentBuilderPluginStart;
@@ -63,7 +63,7 @@ const applyDashboardDataToApi = ({
  * to the dashboard currently open in the app.
  *
  * Applies on:
- * - `tool_ui` {@link DASHBOARD_APPLY_UI_EVENT} mid-round (so screenshot HITL sees new state)
+ * - `tool_ui` {@link DASHBOARD_APPLY_UI_EVENT} mid-round (live preview while generating)
  * - `round_complete` with agent-driven attachment refs (existing path)
  */
 export const createAgentLiveUpdatesSubscription = ({
@@ -108,9 +108,9 @@ export const createAgentLiveUpdatesSubscription = ({
 
       // Ignore hidden drafts from persistAttachment: false generate loops.
       const dashboardAttachments =
-        event.data.attachments?.filter(
-          (attachment) => isDashboardAttachment(attachment) && attachment.hidden !== true
-        ) ?? [];
+        event.data.attachments?.filter(isDashboardAttachment).filter((attachment) => {
+          return attachment.hidden !== true;
+        }) ?? [];
       const incomingAttachments = dashboardAttachments.filter((attachment) => {
         return (
           event.data.round.input.attachment_refs?.some((ref) =>

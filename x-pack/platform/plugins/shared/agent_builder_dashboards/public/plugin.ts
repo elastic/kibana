@@ -56,12 +56,14 @@ export class AgentBuilderDashboardsPlugin
       data: plugins.data,
       dashboardPlugin: plugins.dashboard,
       draftAttachmentId,
+      files: plugins.files,
     });
 
     this.cleanupPrettifyMenuItem = registerPrettifyAppMenuItem({
       dashboard: plugins.dashboard,
       agentBuilder: plugins.agentBuilder,
       draftAttachmentId,
+      files: plugins.files,
     });
 
     if (core.application.capabilities.agentBuilder?.show === true) {

@@ -36,9 +36,11 @@ Check the existing layout against the panel layout rules (grid packing and chart
 
 If the layout already conforms, do not emit layout operations — \`prettifyPanelConfigs: true\` with empty \`operations\` is the correct call for a config-only prettify. When the user chooses the existing-panels-only option, do not add or remove panels or restructure sections.
 
-## Visual validation (browser screenshot)
+## Visual context
 
-Use \`persistAttachment: false\` on every \`generate_dashboard\` during the prettify loop so only a hidden draft is kept (pass returned \`draft_id\` as \`dashboardAttachmentId\` on follow-ups). After a successful generate that changed layout or panels, you **must** call \`browser_capture_dashboard_screenshot\` alone with \`settle_ms\` ≥ 1500. Use the screenshot to describe visual problems — overlap, empty charts, cramped titles, uneven composition — and fix them with another draft \`generate_dashboard\` when warranted. Prefer structural layout rules first; the screenshot is confirmation, not a substitute for grid rules. Do not call it in parallel with other tools. Skip only when generation failed or there was no visible UI change.
+When the user started prettify from the dashboard Prettify action, a screenshot of the current dashboard is already attached to this turn as visual input. Use that image to assess overlap, empty charts, cramped titles, and uneven composition. Do not capture another screenshot and do not call a browser screenshot tool.
+
+Use \`persistAttachment: false\` on every \`generate_dashboard\` during the prettify loop so only a hidden draft is kept (pass returned \`draft_id\` as \`dashboardAttachmentId\` on follow-ups). Prefer structural layout rules first; the attached screenshot is confirmation, not a substitute for grid rules.
 
 When the dashboard looks good, call \`generate_dashboard\` once with \`persistAttachment: true\` and the \`draft_id\` (operations may be empty) to publish a single attachment, then \`render_attachment\`. Do not render or publish intermediate drafts.
 

@@ -50,6 +50,7 @@ export const getResearchAgentPrompt = async (
     resultTransformer,
     compactionSummary: processedConversation.compactionSummary,
     conversationTimestamp,
+    imageResolver,
   });
 
   const relevantSkillsMessages =
