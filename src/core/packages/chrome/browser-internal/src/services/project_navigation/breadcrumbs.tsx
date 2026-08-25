@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import type {
   AppDeepLinkId,
+  ChromeExtensionPointNavigationNode,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
   ChromeBreadcrumb,
@@ -46,7 +47,7 @@ export function buildBreadcrumbs({
   };
   chromeBreadcrumbs: ChromeBreadcrumb[];
   cloudLinks: CloudLinks;
-  activeNodes: ChromeProjectNavigationNode[][];
+  activeNodes: Array<Array<ChromeProjectNavigationNode | ChromeExtensionPointNavigationNode>>;
   isServerless: boolean;
 }): ChromeBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
@@ -60,9 +61,10 @@ export function buildBreadcrumbs({
   }
 
   // breadcrumbs take the first active path
-  const activePath: ChromeProjectNavigationNode[] = activeNodes[0] ?? [];
+  const activePath = activeNodes[0] ?? [];
   const navBreadcrumbPath = activePath.filter(
-    (n) => Boolean(n.title) && n.breadcrumbStatus !== 'hidden'
+    (n): n is ChromeProjectNavigationNode =>
+      n.renderAs !== 'extension' && Boolean(n.title) && n.breadcrumbStatus !== 'hidden'
   );
   const navBreadcrumbs = navBreadcrumbPath.map(
     (node): ChromeBreadcrumb => ({

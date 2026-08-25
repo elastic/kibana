@@ -20,6 +20,7 @@ import { useBasePath } from '../../../shared/chrome_hooks';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
+import { ExtensionVisibilityProvider, useRenderNavExtensionPoint } from './extensions';
 
 export interface ChromeNavigationProps {
   isCollapsed: boolean;
@@ -31,26 +32,34 @@ export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
   const isNextChrome = useIsNextChrome();
   const onCustomizeNavigation = useCustomizeNavigation();
+  const renderExtensionPoint = useRenderNavExtensionPoint();
 
   if (!state) {
     return null;
   }
 
-  const { navItems, logoItem, activeItemId, solutionId } = state;
-
   return (
     <KibanaSectionErrorBoundary sectionName={'Navigation'} maxRetries={3}>
-      <NavigationComponent
-        items={navItems}
-        logo={logoItem}
-        isCollapsed={props.isCollapsed}
-        setWidth={props.setWidth}
-        onToggleCollapsed={props.onToggleCollapsed}
-        onCustomizeNavigation={onCustomizeNavigation}
-        activeItemId={activeItemId}
-        showTopSeparator={isNextChrome}
-        data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
-      />
+      <ExtensionVisibilityProvider {...state}>
+        {({ navItems, logoItem, activeItemId, solutionId }) => (
+          <NavigationComponent
+            items={navItems}
+            logo={logoItem}
+            isCollapsed={props.isCollapsed}
+            setWidth={props.setWidth}
+            onToggleCollapsed={props.onToggleCollapsed}
+            onCustomizeNavigation={onCustomizeNavigation}
+            activeItemId={activeItemId}
+            showTopSeparator={isNextChrome}
+            renderExtensionPoint={renderExtensionPoint}
+            data-test-subj={classnames(
+              `${solutionId}SideNav`,
+              'projectSideNav',
+              'projectSideNavV2'
+            )}
+          />
+        )}
+      </ExtensionVisibilityProvider>
     </KibanaSectionErrorBoundary>
   );
 };
