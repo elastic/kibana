@@ -77,13 +77,6 @@ export interface SignificantEventsPluginStartDependencies {
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 }
 
-/**
- * The shared `StreamsServer` bag, extended with the nightshift investigations start
- * contract. Significant events reuses `StreamsServer` as its own route-handler `server`
- * type (see other significant-events-only fields like `kibanaVersion`/`relayClient`
- * already carried on that interface); nightshift is added here instead of on the shared
- * type because streams itself has no use for it.
- */
 export type SignificantEventsServer = StreamsServer & {
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
 };
