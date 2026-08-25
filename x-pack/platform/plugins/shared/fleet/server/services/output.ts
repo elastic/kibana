@@ -661,12 +661,6 @@ class OutputService {
     }
 
     await validateOutputServerless(this, output, options?.id);
-    if (isBeatsOutput(output)) {
-      validateOutputSslPaths(output);
-    }
-    ensureNoDuplicateSecrets(output);
-
-    await validateOutputServerless(this, output);
     const isPreconfigured =
       (options?.fromPreconfiguration ||
         ('is_preconfigured' in output && output.is_preconfigured)) ??
