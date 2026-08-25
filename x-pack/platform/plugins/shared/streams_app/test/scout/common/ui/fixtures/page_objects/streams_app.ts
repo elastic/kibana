@@ -609,33 +609,15 @@ export class StreamsApp {
 
   // Drag and drop utility methods, use with keyboard to test accessibility
   async dragRoutingRule(sourceStream: string, steps: number) {
-    // Focus source item and activate DnD
-    await this.page.getByTestId(`routingRuleDragHandle-${sourceStream}`).focus();
-    await this.page.keyboard.press('Space');
-    const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
-    let absoluteSteps = Math.abs(steps);
-    while (absoluteSteps > 0) {
-      await this.page.keyboard.press(arrowButton);
-      absoluteSteps--;
-    }
-    // Release DnD
-    await this.page.keyboard.press('Space');
+    await this.page.components.draggable(`routingRuleDragHandle-${sourceStream}`).reorder(steps);
   }
 
   async dragProcessor({ processorPos, steps }: { processorPos: number; steps: number }) {
-    // Focus source item and activate DnD
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[processorPos];
-    await targetProcessor.getByTestId('streamsAppProcessorDragHandle').focus();
-    await this.page.keyboard.press('Space');
-    const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
-    let absoluteSteps = Math.abs(steps);
-    while (absoluteSteps > 0) {
-      await this.page.keyboard.press(arrowButton);
-      absoluteSteps--;
-    }
-    // Release DnD
-    await this.page.keyboard.press('Space');
+    await this.page.components
+      .draggable('streamsAppProcessorDragHandle', targetProcessor)
+      .reorder(steps);
   }
 
   // Expectation utility methods
