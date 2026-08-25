@@ -93196,6 +93196,14 @@ components:
           type: array
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -93499,6 +93507,14 @@ components:
           type: array
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_datatableStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -96072,6 +96088,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -96211,6 +96235,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_gaugeStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -97346,6 +97378,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -97501,6 +97541,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_heatmapStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -101701,6 +101749,14 @@ components:
           maximum: 1
           minimum: 0
           type: number
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -102943,6 +102999,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_metricStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -103159,6 +103223,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_metricStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -105784,6 +105856,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -105956,6 +106036,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_mosaicStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -109594,6 +109682,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_pieStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -109752,6 +109848,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_pieStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -110043,6 +110147,14 @@ components:
           maximum: 1
           minimum: 0
           type: number
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -110117,6 +110229,14 @@ components:
           maximum: 1
           minimum: 0
           type: number
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -113101,6 +113221,14 @@ components:
               type: string
           required:
             - column
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -113200,6 +113328,14 @@ components:
               properties:
                 color:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -113759,6 +113895,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -113917,6 +114061,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_treemapStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -115757,6 +115909,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -115920,6 +116080,14 @@ components:
           type: number
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_waffleStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -117559,6 +117727,14 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLegend'
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_xyStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
@@ -117595,6 +117771,14 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         styling:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_xyStyling'
+        tags:
+          default: []
+          description: Tag IDs associated with this visualization.
+          items:
+            maxLength: 250
+            type: string
+          maxItems: 1000
+          type: array
         title:
           description: The title of the chart displayed in the panel. Optional. Any string value or undefined.
           type: string
