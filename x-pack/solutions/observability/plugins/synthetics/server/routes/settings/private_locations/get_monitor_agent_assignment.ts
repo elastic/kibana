@@ -36,13 +36,10 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
 > = () => ({
   method: 'GET',
   path: SYNTHETICS_API_URLS.MONITOR_AGENT_ASSIGNMENT,
-  validate: {},
-  validation: {
-    request: {
-      params: schema.object({
-        monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
-      }),
-    },
+  validate: {
+    params: schema.object({
+      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+    }),
   },
   handler: async ({
     request,
@@ -116,7 +113,8 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
                 typeof policy.id === 'string'
             ),
             monitorId,
-            monitorLocation.id
+            monitorLocation.id,
+            spaceId
           );
           const assigned = assignedAgentId ? enrolled.get(assignedAgentId) : undefined;
           agents = assigned ? [toAssignedAgent(assigned)] : [];

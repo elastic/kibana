@@ -168,7 +168,8 @@ describe('assignedAgentIdForMonitorLocation', () => {
         { id: 'mon-1-loc-1', condition: agentIdCondition('new-agent') },
       ],
       'mon-1',
-      'loc-1'
+      'loc-1',
+      'default'
     );
 
     expect(agentId).toBe('new-agent');
@@ -178,19 +179,32 @@ describe('assignedAgentIdForMonitorLocation', () => {
     const agentId = assignedAgentIdForMonitorLocation(
       [{ id: 'mon-1-loc-1-default', condition: agentIdCondition('legacy-agent') }],
       'mon-1',
-      'loc-1'
+      'loc-1',
+      'default'
     );
 
     expect(agentId).toBe('legacy-agent');
   });
 
+  it('does not treat a prefix-matching unrelated policy as the legacy twin', () => {
+    expect(
+      assignedAgentIdForMonitorLocation(
+        [{ id: 'mon-1-loc-1-other-space', condition: agentIdCondition('other-agent') }],
+        'mon-1',
+        'loc-1',
+        'default'
+      )
+    ).toBeUndefined();
+  });
+
   it('returns undefined when no matching policy is assigned', () => {
-    expect(assignedAgentIdForMonitorLocation([], 'mon-1', 'loc-1')).toBeUndefined();
+    expect(assignedAgentIdForMonitorLocation([], 'mon-1', 'loc-1', 'default')).toBeUndefined();
     expect(
       assignedAgentIdForMonitorLocation(
         [{ id: 'mon-1-loc-1', condition: UNASSIGNED_CONDITION }],
         'mon-1',
-        'loc-1'
+        'loc-1',
+        'default'
       )
     ).toBeUndefined();
   });

@@ -57,6 +57,17 @@ const makeContext = ({
 const run = async (routeContext: any) => getMonitorAgentAssignment().handler(routeContext);
 
 describe('getMonitorAgentAssignment route', () => {
+  it('binds monitorId on validate.params so the unversioned router populates request.params', () => {
+    const route = getMonitorAgentAssignment();
+    const paramsSchema = (
+      route.validate as {
+        params: { validate: (value: { monitorId: string }) => { monitorId: string } };
+      }
+    ).params;
+
+    expect(paramsSchema.validate({ monitorId: 'mon-1' })).toEqual({ monitorId: 'mon-1' });
+  });
+
   beforeEach(() => {
     mockGetLocations.mockResolvedValue({
       locations: [

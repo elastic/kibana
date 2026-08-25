@@ -155,15 +155,16 @@ export const countMonitorsByAssignedAgent = (
 export const assignedAgentIdForMonitorLocation = (
   packagePolicies: ReadonlyArray<{ id: string; condition?: string | null }>,
   monitorId: string,
-  locationId: string
+  locationId: string,
+  spaceId: string
 ): string | undefined => {
   const newId = `${monitorId}-${locationId}`;
   const exact = packagePolicies.find((policy) => policy.id === newId);
   if (exact) {
     return agentIdFromCondition(exact.condition);
   }
-  const legacyPrefix = `${newId}-`;
-  const legacy = packagePolicies.find((policy) => policy.id.startsWith(legacyPrefix));
+  const legacyId = `${monitorId}-${locationId}-${spaceId}`;
+  const legacy = packagePolicies.find((policy) => policy.id === legacyId);
   return legacy ? agentIdFromCondition(legacy.condition) : undefined;
 };
 
