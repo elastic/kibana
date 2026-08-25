@@ -31,7 +31,8 @@ apiTest.describe(
   () => {
     let oauthAccessToken: string;
     let kibanaBaseUrl: string;
-    let adminHeaders: Record<string, string>;
+    // Initialized to empty so afterAll is a no-op when beforeAll fails before auth completes.
+    let adminHeaders: Record<string, string> = {};
 
     apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
       kibanaBaseUrl = new URL(kbnUrl.get()).origin;
@@ -51,7 +52,13 @@ apiTest.describe(
       const samlCallback = await apiClient.post('api/security/saml/callback', {
         body: `SAMLResponse=${encodeURIComponent(samlResponse)}`,
       });
-      const cookie = parseCookie(samlCallback.headers['set-cookie'][0])!.cookieString();
+      const setCookieHeader = samlCallback.headers['set-cookie']?.[0];
+      if (!setCookieHeader) {
+        throw new Error(
+          'SAML callback did not return a session cookie — check SAML provider config'
+        );
+      }
+      const cookie = parseCookie(setCookieHeader)!.cookieString();
       adminHeaders = { ...COMMON_UNSAFE_HEADERS, Cookie: cookie };
 
       const spaceResponse = await apiClient.post('api/spaces/space', {
@@ -74,6 +81,10 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient }) => {
+      // Guard: skip if beforeAll failed before populating adminHeaders.
+      if (!adminHeaders.Cookie) {
+        return;
+      }
       await apiClient.delete(`api/spaces/space/${SPACE_ID}`, { headers: adminHeaders });
     });
 
