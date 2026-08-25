@@ -9,6 +9,7 @@ import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type { UserProfileAvatarData, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { Conversation } from '@kbn/agent-builder-common';
 import {
+  ConversationAccessControlMode,
   normalizeConversationAccessControl,
   type ConversationAccessControl,
 } from '@kbn/agent-builder-common';
@@ -41,6 +42,54 @@ export const useConversationAccessControlProfiles = ({
       });
     },
   });
+};
+
+export const hasInviteMembersSummary = (accessControl: ConversationAccessControl) => {
+  return (
+    accessControl.access_mode === ConversationAccessControlMode.Private &&
+    accessControl.entries.length > 0
+  );
+};
+
+export const useInviteMembersSummary = ({ conversationId }: { conversationId: string }) => {
+  const { conversationsService } = useAgentBuilderServices();
+  const { data: conversation } = useQuery({
+    queryKey: queryKeys.conversations.byId(conversationId),
+    enabled: Boolean(conversationId),
+    queryFn: () => conversationsService.get({ conversationId }),
+  });
+
+  const accessControl = normalizeConversationAccessControl(conversation?.access_control);
+  const hasSummary = hasInviteMembersSummary(accessControl);
+
+  const memberIdsByLatestAdded = [...accessControl.entries]
+    .sort((firstEntry, secondEntry) => {
+      const firstAddedAtTime = Date.parse(firstEntry.added_at);
+      const secondAddedAtTime = Date.parse(secondEntry.added_at);
+
+      return secondAddedAtTime - firstAddedAtTime;
+    })
+    .map((entry) => entry.id);
+
+  const visibleMemberIds = memberIdsByLatestAdded.slice(0, 2);
+
+  const { data: visibleMemberProfiles = [] } = useConversationAccessControlProfiles({
+    uids: visibleMemberIds,
+    enabled: hasSummary && visibleMemberIds.length > 0,
+  });
+
+  const visibleMemberProfileByUid = new Map(
+    visibleMemberProfiles.map((profile) => [profile.uid, profile])
+  );
+  const profiles = visibleMemberIds
+    .map((memberId) => visibleMemberProfileByUid.get(memberId))
+    .filter((profile): profile is UserProfileWithAvatar => Boolean(profile));
+
+  return {
+    profiles,
+    extraCount: Math.max(accessControl.entries.length - 2, 0),
+    shouldShowSummary: hasSummary && profiles.length > 0,
+  };
 };
 
 export const useUpdateConversationAccessControl = ({

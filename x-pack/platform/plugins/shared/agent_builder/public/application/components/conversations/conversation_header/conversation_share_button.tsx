@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiAvatar,
   EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -50,6 +51,7 @@ import {
 import { useSuggestUsers } from '../../../hooks/use_suggest_users';
 import {
   useConversationAccessControlProfiles,
+  useInviteMembersSummary,
   useUpdateConversationAccessControl,
 } from '../../../hooks/use_conversation_access_control';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
@@ -219,6 +221,79 @@ const UserSearchOption: React.FC<{
   );
 };
 
+const InviteMembersSummary: React.FC<{
+  conversationId: string;
+}> = ({ conversationId }) => {
+  const { euiTheme } = useEuiTheme();
+  const { profiles, extraCount, shouldShowSummary } = useInviteMembersSummary({ conversationId });
+
+  if (!shouldShowSummary) {
+    return (
+      <span
+        css={css`
+          display: inline-flex;
+          align-items: center;
+          gap: ${euiTheme.size.xs};
+        `}
+      >
+        <EuiIcon type="users" color="inherit" aria-hidden={true} />
+        <span>{labels.invite}</span>
+      </span>
+    );
+  }
+
+  const avatarStyles = css`
+    border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.emptyShade};
+  `;
+  const avatarOverlap = euiTheme.size.s;
+
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="none"
+      responsive={false}
+      data-test-subj="agentBuilderConversationInviteMembersSummary"
+    >
+      {profiles.map((profile, index) => (
+        <EuiFlexItem
+          key={profile.uid}
+          grow={false}
+          css={css`
+            margin-inline-start: ${index === 0 ? 0 : `-${avatarOverlap}`};
+            z-index: ${profiles.length - index + 1};
+          `}
+        >
+          <UserAvatar
+            user={profile.user}
+            avatar={profile.data?.avatar}
+            size="s"
+            css={avatarStyles}
+            data-test-subj={`agentBuilderConversationInviteMemberAvatar-${profile.uid}`}
+          />
+        </EuiFlexItem>
+      ))}
+
+      {extraCount > 0 ? (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            margin-inline-start: -${avatarOverlap};
+          `}
+        >
+          <EuiAvatar
+            name={`${extraCount} more members`}
+            initials={`+${extraCount}`}
+            size="s"
+            color={euiTheme.colors.primary}
+            css={avatarStyles}
+            data-test-subj="agentBuilderConversationInviteMembersExtraCount"
+          />
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  );
+};
+
 export const ConversationShareButton: React.FC = () => {
   const hasPersistedConversation = useHasPersistedConversation();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
@@ -361,7 +436,7 @@ const ConversationSharePopover: React.FC<{
         <EuiButtonEmpty
           size="s"
           color="text"
-          iconType="users"
+          aria-label={labels.invite}
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
           data-test-subj="agentBuilderConversationInviteButton"
           {...getEbtProps({
@@ -370,7 +445,7 @@ const ConversationSharePopover: React.FC<{
             detail: 'conversation',
           })}
         >
-          {labels.invite}
+          <InviteMembersSummary conversationId={conversation.id} />
         </EuiButtonEmpty>
       }
       isOpen={isPopoverOpen}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   ConversationAccessControlMode,
@@ -21,6 +21,7 @@ import {
 import { useSuggestUsers } from '../../../hooks/use_suggest_users';
 import {
   useConversationAccessControlProfiles,
+  useInviteMembersSummary,
   useUpdateConversationAccessControl,
 } from '../../../hooks/use_conversation_access_control';
 import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
@@ -36,10 +37,16 @@ jest.mock('../../../hooks/use_suggest_users', () => ({
   useSuggestUsers: jest.fn(),
 }));
 
-jest.mock('../../../hooks/use_conversation_access_control', () => ({
-  useConversationAccessControlProfiles: jest.fn(),
-  useUpdateConversationAccessControl: jest.fn(),
-}));
+jest.mock('../../../hooks/use_conversation_access_control', () => {
+  const actual = jest.requireActual('../../../hooks/use_conversation_access_control');
+
+  return {
+    hasInviteMembersSummary: actual.hasInviteMembersSummary,
+    useConversationAccessControlProfiles: jest.fn(),
+    useInviteMembersSummary: jest.fn(),
+    useUpdateConversationAccessControl: jest.fn(),
+  };
+});
 
 jest.mock('../../../hooks/use_experimental_features', () => ({
   useExperimentalFeatures: jest.fn(),
@@ -50,6 +57,7 @@ const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
 const mockUseHasPersistedConversation = jest.mocked(useHasPersistedConversation);
 const mockUseSuggestUsers = jest.mocked(useSuggestUsers);
 const mockUseConversationAccessControlProfiles = jest.mocked(useConversationAccessControlProfiles);
+const mockUseInviteMembersSummary = jest.mocked(useInviteMembersSummary);
 const mockUseUpdateConversationAccessControl = jest.mocked(useUpdateConversationAccessControl);
 const mockUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 
@@ -66,6 +74,20 @@ const ownerProfile = {
 const memberProfile = {
   uid: 'member-1',
   user: { username: 'alex', full_name: 'Alex Kim' },
+  data: {},
+  enabled: true,
+};
+
+const secondMemberProfile = {
+  uid: 'member-2',
+  user: { username: 'sam', full_name: 'Sam Delacroix' },
+  data: {},
+  enabled: true,
+};
+
+const thirdMemberProfile = {
+  uid: 'member-3',
+  user: { username: 'yuki', full_name: 'Yuki Tanaka' },
   data: {},
   enabled: true,
 };
@@ -93,10 +115,12 @@ const renderShareButton = ({
   conversation = baseConversation,
   canUpdateAccessControl = true,
   isExperimentalFeaturesEnabled = true,
+  inviteMembersSummary = { profiles: [], extraCount: 0, shouldShowSummary: false },
 }: {
   conversation?: ConversationWithPermissions;
   canUpdateAccessControl?: boolean;
   isExperimentalFeaturesEnabled?: boolean;
+  inviteMembersSummary?: ReturnType<typeof useInviteMembersSummary>;
 } = {}) => {
   mockUseConversation.mockReturnValue({
     conversation,
@@ -114,8 +138,9 @@ const renderShareButton = ({
   });
   mockUseExperimentalFeatures.mockReturnValue(isExperimentalFeaturesEnabled);
   mockUseSuggestUsers.mockReturnValue({ data: [], isFetching: false } as never);
+  mockUseInviteMembersSummary.mockReturnValue(inviteMembersSummary);
   mockUseConversationAccessControlProfiles.mockReturnValue({
-    data: [ownerProfile, memberProfile],
+    data: [ownerProfile, memberProfile, secondMemberProfile, thirdMemberProfile],
   } as never);
   mockUseUpdateConversationAccessControl.mockImplementation((options) => {
     updateOptions = options;
@@ -179,6 +204,68 @@ describe('ConversationShareButton', () => {
     expect(screen.queryByText('Member')).not.toBeInTheDocument();
     expect(screen.getByText('Only manually added members can see this chat')).toBeInTheDocument();
     expect(screen.getByTestId('agentBuilderConversationSharingUserSearchIcon')).toBeInTheDocument();
+  });
+
+  it('shows the latest shared member avatars in the invite trigger', () => {
+    renderShareButton({
+      inviteMembersSummary: {
+        profiles: [thirdMemberProfile, secondMemberProfile],
+        extraCount: 1,
+        shouldShowSummary: true,
+      },
+      conversation: {
+        ...baseConversation,
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [
+            {
+              type: 'user',
+              id: 'member-1',
+              role: ConversationAccessControlRole.Member,
+              added_at: '2026-01-01T00:00:00.000Z',
+            },
+            {
+              type: 'user',
+              id: 'member-2',
+              role: ConversationAccessControlRole.Member,
+              added_at: '2026-01-02T00:00:00.000Z',
+            },
+            {
+              type: 'user',
+              id: 'member-3',
+              role: ConversationAccessControlRole.Member,
+              added_at: '2026-01-03T00:00:00.000Z',
+            },
+          ],
+        },
+      },
+    });
+
+    const membersSummary = screen.getByTestId('agentBuilderConversationInviteMembersSummary');
+    const visibleMemberAvatars = within(membersSummary).getAllByTestId(
+      /agentBuilderConversationInviteMemberAvatar-/
+    );
+
+    expect(membersSummary).toBeInTheDocument();
+    expect(mockUseInviteMembersSummary).toHaveBeenCalledWith({
+      conversationId: 'conversation-1',
+    });
+    expect(
+      screen.queryByTestId('agentBuilderConversationInviteMemberAvatar-member-1')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('agentBuilderConversationInviteMemberAvatar-member-2')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('agentBuilderConversationInviteMemberAvatar-member-3')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderConversationInviteMembersExtraCount')).toHaveTextContent(
+      '+1'
+    );
+    expect(visibleMemberAvatars.map((avatar) => avatar.getAttribute('data-test-subj'))).toEqual([
+      'agentBuilderConversationInviteMemberAvatar-member-3',
+      'agentBuilderConversationInviteMemberAvatar-member-2',
+    ]);
   });
 
   it('saves public access with no ACL entries', async () => {
