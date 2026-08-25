@@ -22,6 +22,7 @@ export const ConfigSchema = z.object({
 
 export const InputSchema = z.object({
   code: z.string().max(REMOTE_HOST_COMMAND_TEMPLATE_MAX_CHARS),
+  env: z.record(z.string(), z.string()).optional(),
 });
 
 export const OutputSchema = z.unknown();
@@ -76,9 +77,26 @@ Standard output and stderr are captured to logs.
       STEP_OUTPUT="{\"available\": \"$AVAILABLE\"}"
 \`\`\`
 
+## Environment Variables
+
+\`\`\`yaml
+- name: deploy
+  type: remoteHost.runCommand
+  config:
+    connector-id: my-ssh-host-connector
+  with:
+    env:
+      APP_DIR: /opt/myapp
+      DEPLOY_ENV: production
+    code: |
+      cd "$APP_DIR"
+      echo "Deploying to $DEPLOY_ENV"
+\`\`\`
+
 ## Inputs
 
 - **code** (required): Shell script to execute on the remote host.
+- **env** (optional): Key-value map of environment variables exported before \`code\` runs.
 
 ## Output
 
