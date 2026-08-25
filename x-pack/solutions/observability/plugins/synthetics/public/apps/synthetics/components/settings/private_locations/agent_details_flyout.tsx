@@ -57,7 +57,7 @@ export const AgentDetailsFlyout = ({
 }: {
   agent: AgentStat;
   agentPolicyId: string;
-  /** Monitors this agent runs (all of the location's monitors in the single-agent model). */
+  /** Monitors this agent runs (assigned count on a sharded location, else the location total). */
   monitorsRun: number;
   onClose: () => void;
 }) => {
