@@ -128,11 +128,12 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
   // refetchAlertData stays null permanently when hasAlertsRead=false (query is skipped).
-  // Also guard on loadingPrivileges: hasAlertsRead defaults to false while loading,
-  // so without this guard authorized users briefly see "Unknown rule" before privileges resolve.
+  // Also guard on loadingPrivileges (scoped to the live-fetch path): hasAlertsRead defaults
+  // to false while loading, so without this guard authorized users briefly see "Unknown rule"
+  // before privileges resolve. Attachments with a rule ID in metadata skip both checks.
   if (
     loadingAlertData ||
-    loadingPrivileges ||
+    (!hasRuleIdFromMetadata && loadingPrivileges) ||
     (!hasRuleIdFromMetadata && hasAlertsRead && refetchAlertData === null) ||
     firstFetchReturnedNoData
   ) {
