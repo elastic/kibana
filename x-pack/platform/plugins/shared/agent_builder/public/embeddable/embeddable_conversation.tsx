@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiTab,
-  EuiTabs,
+  EuiFlexGroup,
+  EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
@@ -28,22 +27,16 @@ import { EmbeddableAccessBoundary } from './embeddable_access_boundary';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useConversation } from '../application/hooks/use_conversation';
 
-const CHAT_TAB_ID = '__chat__';
-
-const chatLabel = i18n.translate('agentBuilder.embeddable.tabs.chat', {
-  defaultMessage: 'Chat',
-});
-
 /**
- * Renders the body section of the sidebar: tabs (when the conversation has a template with
- * registered UI tabs) plus either the active template tab content or the chat.
+ * Renders the body section of the sidebar. When the conversation's template has registered
+ * UI tabs, shows a side-by-side layout: chat on the left, the first tab's content on the
+ * right. When there are no tabs, renders only the chat (original behaviour).
  * Must live inside EmbeddableConversationsProvider so it can read conversation + services.
  */
 function TemplateAwareBody(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { conversationTemplatesService } = useAgentBuilderServices();
   const { conversation } = useConversation();
-  const [selectedTabId, setSelectedTabId] = useState<string>(CHAT_TAB_ID);
 
   const uiDef = conversation?.template_id
     ? conversationTemplatesService.getTemplateUIDefinition(conversation.template_id)
@@ -57,17 +50,6 @@ function TemplateAwareBody(): React.ReactElement {
     );
 
   const hasTabs = resolvedTabs.length > 0;
-
-  // If the selected tab no longer exists (e.g. conversation switched), fall back to chat.
-  const activeTabId =
-    selectedTabId === CHAT_TAB_ID || resolvedTabs.some((t) => t.id === selectedTabId)
-      ? selectedTabId
-      : CHAT_TAB_ID;
-
-  const ActiveTabContent =
-    activeTabId !== CHAT_TAB_ID
-      ? resolvedTabs.find((t) => t.id === activeTabId)?.def.content ?? null
-      : null;
 
   const bodyStyles = css`
     flex: 1;
@@ -89,44 +71,43 @@ function TemplateAwareBody(): React.ReactElement {
     }
   `;
 
-  const tabContentStyles = css`
-    flex: 1;
-    overflow-y: auto;
-    padding: ${euiTheme.size.base};
-  `;
+  if (!hasTabs) {
+    return (
+      <EuiFlyoutBody css={bodyStyles}>
+        <Conversation />
+      </EuiFlyoutBody>
+    );
+  }
+
+  const FirstTabContent = resolvedTabs[0].def.content;
 
   return (
-    <>
-      {hasTabs && (
-        <EuiTabs size="s" css={css`padding-inline: ${euiTheme.size.base};`}>
-          <EuiTab
-            isSelected={activeTabId === CHAT_TAB_ID}
-            onClick={() => setSelectedTabId(CHAT_TAB_ID)}
-          >
-            {chatLabel}
-          </EuiTab>
-          {resolvedTabs.map(({ id, def }) => (
-            <EuiTab
-              key={id}
-              isSelected={activeTabId === id}
-              onClick={() => setSelectedTabId(id)}
-            >
-              {def.label}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-      )}
-
-      {ActiveTabContent && conversation ? (
-        <div css={tabContentStyles}>
-          <ActiveTabContent conversation={conversation} />
-        </div>
-      ) : (
+    <EuiFlexGroup
+      direction="row"
+      responsive={false}
+      css={css`
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+      `}
+    >
+      <EuiFlexItem grow={3}>
         <EuiFlyoutBody css={bodyStyles}>
           <Conversation />
         </EuiFlyoutBody>
-      )}
-    </>
+      </EuiFlexItem>
+      <EuiFlexItem grow={2}>
+        <div
+          css={css`
+            overflow-y: auto;
+            height: 100%;
+            padding: ${euiTheme.size.base};
+          `}
+        >
+          {conversation && <FirstTabContent conversation={conversation} />}
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

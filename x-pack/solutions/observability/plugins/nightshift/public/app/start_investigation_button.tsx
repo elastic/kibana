@@ -55,7 +55,7 @@ export function StartInvestigationButton({ onSuccess }: Props): React.ReactEleme
     <EuiButton
       color="primary"
       data-test-subj="nightshiftStartInvestigationButton"
-      iconType="discuss"
+      iconType="plusInCircle"
       onClick={() => setIsOpen((v) => !v)}
       size="s"
     >

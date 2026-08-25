@@ -215,6 +215,24 @@ export function useInvestigationState({
         if (output?.conversation_id) {
           setConversationId(output.conversation_id);
         }
+
+        // Try reading InvestigationState from conversation metadata first (new path: no structured_output).
+        if (output?.conversation_id) {
+          try {
+            const conversation = await http.get<{ metadata?: Record<string, unknown> }>(
+              `/api/agent_builder/conversations/${output.conversation_id}`
+            );
+            const metadataParsed = investigationStateSchema.safeParse(conversation.metadata);
+            if (metadataParsed.success) {
+              applySettled({ status: 'complete', state: metadataParsed.data });
+              return;
+            }
+          } catch (_err) {
+            // Metadata fetch failed; fall through to legacy structured_output path.
+          }
+        }
+
+        // Legacy fallback: try structured_output for investigations created before metadata-based reporting.
         const parsed = investigationStateSchema.safeParse(
           normalizeLegacyInvestigationState(output?.structured_output)
         );

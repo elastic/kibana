@@ -9,6 +9,7 @@ import { css, keyframes } from '@emotion/react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -22,8 +23,10 @@ import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useInvestigationState } from '@kbn/investigation-output';
+import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 import { StartInvestigationButton } from './start_investigation_button';
+import { useFetchInvestigations } from '../hooks/use_fetch_investigations';
 import { buildNewSignificantEventChatOptions } from '../chat/open_significant_event_in_chat';
 import {
   byCriticalityAndUpdatedAtDesc,
@@ -56,6 +59,14 @@ import {
 } from '../common/url_params';
 
 const COMPACT_APP_HEADER_HEIGHT_PX = 48;
+
+const INVESTIGATION_STATUS_BADGE_COLORS: Record<ListInvestigationItem['status'], string> = {
+  pending: 'default',
+  running: 'primary',
+  completed: 'success',
+  failed: 'danger',
+  cancelled: 'hollow',
+};
 const POPULATED_CONTENT_TRANSITION_MS = 400;
 
 const loadingStateExitAnimation = keyframes`
@@ -94,8 +105,12 @@ export function NightshiftApp(): React.ReactElement {
   const [isTransitioningFromLoading, setIsTransitioningFromLoading] = useState(false);
   const [pendingChatEvent, setPendingChatEvent] = useState<SignificantEvent | null>(null);
   const [pendingNewInvestigationId, setPendingNewInvestigationId] = useState<string | null>(null);
+  const [pendingRecentInvestigationId, setPendingRecentInvestigationId] = useState<string | null>(
+    null
+  );
 
   const { data, error: eventsError, isFetching, isLoading, refetch } = useFetchSignificantEvents();
+  const { data: investigationsData } = useFetchInvestigations();
   const { closeSignificantEvent, closingEventUuid } = useCloseSignificantEvent();
   const wasLoadingRef = useRef(isLoading);
 
@@ -516,6 +531,62 @@ export function NightshiftApp(): React.ReactElement {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+
+          {agentBuilder && investigationsData?.results?.length ? (
+            <EuiFlexItem
+              css={css`
+                margin-top: ${euiTheme.size.xl};
+              `}
+            >
+              <EuiText size="s">
+                <h3>
+                  {i18n.translate('xpack.nightshift.recentInvestigations.title', {
+                    defaultMessage: 'Recent Investigations',
+                  })}
+                </h3>
+              </EuiText>
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="xs"
+                responsive={false}
+                css={css`
+                  margin-top: ${euiTheme.size.s};
+                `}
+              >
+                {investigationsData.results.map((item) => (
+                  <EuiFlexItem key={item.investigation_id}>
+                    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color={INVESTIGATION_STATUS_BADGE_COLORS[item.status]}>
+                          {item.status}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s" color="subdued">
+                          {item.started_at
+                            ? new Date(item.started_at).toLocaleString()
+                            : '—'}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="s"
+                          onClick={() =>
+                            setPendingRecentInvestigationId(item.investigation_id)
+                          }
+                        >
+                          {i18n.translate(
+                            'xpack.nightshift.recentInvestigations.openChatButton',
+                            { defaultMessage: 'Open chat' }
+                          )}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
         </div>
       )}
 
@@ -569,6 +640,15 @@ export function NightshiftApp(): React.ReactElement {
           investigationId={pendingNewInvestigationId}
           agentBuilder={agentBuilder}
           onOpened={() => setPendingNewInvestigationId(null)}
+        />
+      )}
+
+      {pendingRecentInvestigationId && agentBuilder && (
+        <RecentInvestigationOpener
+          key={pendingRecentInvestigationId}
+          investigationId={pendingRecentInvestigationId}
+          agentBuilder={agentBuilder}
+          onOpened={() => setPendingRecentInvestigationId(null)}
         />
       )}
 
@@ -651,6 +731,41 @@ function NewInvestigationTracker({
     http,
     workflowExecutionId: investigationId,
     isRunning: true,
+  });
+
+  const onOpenedRef = useRef(onOpened);
+  onOpenedRef.current = onOpened;
+
+  useEffect(() => {
+    if (conversationId) {
+      agentBuilder.openChat({ conversationId });
+      onOpenedRef.current();
+    }
+  }, [agentBuilder, conversationId]);
+
+  useEffect(() => {
+    if (status === 'failed' || status === 'unavailable') {
+      onOpenedRef.current();
+    }
+  }, [status]);
+
+  return null;
+}
+
+function RecentInvestigationOpener({
+  investigationId,
+  agentBuilder,
+  onOpened,
+}: {
+  investigationId: string;
+  agentBuilder: NonNullable<ReturnType<typeof useKibana>['services']['agentBuilder']>;
+  onOpened: () => void;
+}): null {
+  const { http } = useKibana().services;
+  const { conversationId, status } = useInvestigationState({
+    http,
+    workflowExecutionId: investigationId,
+    isRunning: false,
   });
 
   const onOpenedRef = useRef(onOpened);
