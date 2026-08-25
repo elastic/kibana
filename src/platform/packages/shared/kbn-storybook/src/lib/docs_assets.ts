@@ -11,11 +11,17 @@ import { createHash } from 'crypto';
 import { createReadStream, createWriteStream } from 'fs';
 import { mkdir, readFile, stat, writeFile } from 'fs/promises';
 import { dirname, join, resolve } from 'path';
-import archiver from 'archiver';
+import * as archiver from 'archiver';
 import webpack from 'webpack';
 import type { Configuration, StatsError, Watching } from 'webpack';
 import { default as WebpackConfig } from '../webpack.config';
 import { EMBEDDABLE_STORYBOOK_TAG } from './embeddable';
+
+const TarArchive = (
+  archiver as typeof archiver & {
+    TarArchive: new (options?: archiver.ArchiverOptions) => archiver.Archiver;
+  }
+).TarArchive;
 
 export interface StorybookIndexEntry {
   id?: string;
@@ -676,7 +682,7 @@ export const buildDocsArchive = async ({
 
   await new Promise<void>((resolvePromise, reject) => {
     const output = createWriteStream(outputPath);
-    const archive = archiver('tar', {
+    const archive = new TarArchive({
       gzip: true,
       gzipOptions: {
         level: 9,

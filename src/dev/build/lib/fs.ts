@@ -17,13 +17,19 @@ import { resolve, dirname, isAbsolute, basename, sep } from 'path';
 import { createGunzip, createGzip } from 'zlib';
 import { inspect } from 'util';
 
-import archiver from 'archiver';
+import * as archiver from 'archiver';
 import { globby } from 'globby';
 import pMap from 'p-map';
 import del from 'del';
 import * as tar from 'tar';
 import { pack as tarFsPack } from 'tar-fs';
 import type { ToolingLog } from '@kbn/tooling-log';
+
+const ZipArchive = (
+  archiver as typeof archiver & {
+    ZipArchive: new (options?: archiver.ArchiverOptions) => archiver.Archiver;
+  }
+).ZipArchive;
 
 export function assertAbsolute(path: string) {
   if (!isAbsolute(path)) {
@@ -312,7 +318,7 @@ export async function compressZip({
   assertAbsolute(destination);
 
   const output = fs.createWriteStream(destination);
-  const archive = archiver('zip', archiverOptions);
+  const archive = new ZipArchive(archiverOptions);
   const folder = rootDirectoryName ? rootDirectoryName : source.split(sep).slice(-1)[0];
   const name = createRootDirectory ? folder : false;
   archive.pipe(output);
