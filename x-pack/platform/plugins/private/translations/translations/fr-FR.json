@@ -11675,7 +11675,6 @@
     "xpack.agentBuilder.featureRegistry.subFeatures.management": "Gestion",
     "xpack.agentBuilder.featureRegistry.subFeatures.manageSkills.privilege": "Créer et modifier des compétences",
     "xpack.agentBuilder.featureRegistry.subFeatures.manageTools.privilege": "Créer et modifier des outils personnalisés",
-    "xpack.agentBuilder.labels.viewMore.buttonLabel": "Voir plus",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.ariaLabel": "Triez et filtrez",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.filterActive": "Attribué à cet agent",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.filterAll": "Tous",
