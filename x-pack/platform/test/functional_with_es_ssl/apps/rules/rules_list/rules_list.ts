@@ -72,6 +72,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     });
 
     afterEach(async () => {
+      await toasts.dismissAll();
       await objectRemover.removeAll();
     });
 
