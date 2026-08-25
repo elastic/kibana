@@ -98,7 +98,7 @@ describe(`useActions`, () => {
         getDisplayName(): string {
           return 'mockExtraAction';
         },
-        getIconType(): string | undefined {
+        getIconType() {
           return 'redo';
         },
         type: 'actionButton',

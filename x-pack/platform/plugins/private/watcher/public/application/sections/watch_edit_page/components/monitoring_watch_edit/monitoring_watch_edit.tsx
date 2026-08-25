@@ -29,7 +29,7 @@ export const MonitoringWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
 
   return (
     <EuiPageTemplate.EmptyPrompt
-      iconType=""
+      iconType="empty"
       title={<h1>{pageTitle}</h1>}
       body={<p>{systemWatchMessage}</p>}
       actions={[

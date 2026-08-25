@@ -57,7 +57,7 @@ describe('connector_add_modal', () => {
   it('renders connector modal form if addModalVisible is true', async () => {
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
@@ -96,7 +96,7 @@ describe('connector_add_modal', () => {
 
     const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'my-action-type',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
@@ -130,7 +130,7 @@ describe('connector_add_modal', () => {
     it(`does not render beta badge when isExperimental=false`, async () => {
       const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         isExperimental: false,
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
@@ -156,7 +156,7 @@ describe('connector_add_modal', () => {
     it(`renders beta badge when isExperimental=true`, async () => {
       const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         isExperimental: true,
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {

@@ -43,7 +43,7 @@ export function createOpenInSingleMetricViewerAction(
     id: 'open-in-single-metric-viewer',
     type: OPEN_IN_SINGLE_METRIC_VIEWER_ACTION,
     order: 100,
-    getIconType(): string {
+    getIconType() {
       return 'singleMetricViewer';
     },
     getDisplayName() {

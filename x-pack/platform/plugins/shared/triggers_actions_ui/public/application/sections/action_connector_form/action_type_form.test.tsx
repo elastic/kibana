@@ -154,7 +154,7 @@ describe('action_type_form', () => {
   it('calls "setActionParamsProperty" to set the default value for the empty dedupKey', async () => {
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.pagerduty',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
@@ -205,7 +205,7 @@ describe('action_type_form', () => {
   it('renders the actionParamsField with the execution mode set to ActionForm', async () => {
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.pagerduty',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
@@ -253,7 +253,7 @@ describe('action_type_form', () => {
   it('renders the alerts filters with the producerId set to SIEM', async () => {
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.pagerduty',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
@@ -302,7 +302,7 @@ describe('action_type_form', () => {
   it('does not call "setActionParamsProperty" because dedupKey is not empty', async () => {
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.pagerduty',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
@@ -354,7 +354,7 @@ describe('action_type_form', () => {
   it('shows an error icon when there is a form error and the action accordion is closed ', async () => {
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.pagerduty',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         // Add errors to the form
@@ -428,7 +428,7 @@ describe('action_type_form', () => {
     const mockTransformActionVariables = transformActionVariables as jest.Mock;
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.pagerduty',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
@@ -509,7 +509,7 @@ describe('action_type_form', () => {
     it('should not have "On status changes" notify when option for summary actions', async () => {
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: '.pagerduty',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };
@@ -561,7 +561,7 @@ describe('action_type_form', () => {
     it('should have only "Per rule run" notify when option for "For each alert" actions', async () => {
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: '.pagerduty',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };

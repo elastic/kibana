@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { isPlainObject } from 'lodash';
 import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import type {
-  EuiFilePickerClass,
+  EuiFilePickerRef,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { UploadFileButton } from '../../../../../../../common/components/migration_steps';
@@ -46,7 +46,7 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
     createMigration,
   }) => {
     const [uploadedDashboards, setUploadedDashboards] = useState<SplunkDashboardsResult[]>([]);
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
 
     const onFileParsed = useCallback(
       (content: string) => {

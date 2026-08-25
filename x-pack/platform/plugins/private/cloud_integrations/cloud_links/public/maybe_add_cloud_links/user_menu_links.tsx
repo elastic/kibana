@@ -74,7 +74,7 @@ export const createUserMenuLinks = async ({
     ),
     order: 400,
     label: '',
-    iconType: '',
+    iconType: 'empty',
     href: '',
   });
 
@@ -84,7 +84,7 @@ export const createUserMenuLinks = async ({
     ),
     order: 500,
     label: '',
-    iconType: '',
+    iconType: 'empty',
     href: '',
   });
 

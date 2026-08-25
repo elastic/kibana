@@ -11,7 +11,7 @@ import React, { useImperativeHandle, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFilePicker, EuiImage } from '@elastic/eui';
 import type {
-  EuiFilePickerClass,
+  EuiFilePickerRef,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 
@@ -50,7 +50,7 @@ const errorMessage = i18n.translate('management.settings.field.imageChangeErrorM
  */
 export const ImageInput = React.forwardRef<ResetInputRef, ImageInputProps>(
   ({ field, unsavedChange, isSavingEnabled, onInputChange }, ref) => {
-    const inputRef = useRef<EuiFilePickerClass>(null);
+    const inputRef = useRef<EuiFilePickerRef>(null);
 
     useImperativeHandle(ref, () => ({
       reset: () => inputRef.current?.removeFiles(),

@@ -72,7 +72,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
       className={classes}
       iconSide="right"
       css={toolbarButtonStyles(euiThemeContext)}
-      iconType={hasArrow ? 'chevronSingleDown' : ''}
+      iconType={hasArrow ? 'chevronSingleDown' : undefined}
       color="text"
       contentProps={{
         className: 'kbnToolbarButton__content',

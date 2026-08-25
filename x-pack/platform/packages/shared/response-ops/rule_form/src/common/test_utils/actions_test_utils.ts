@@ -78,7 +78,7 @@ export const getActionTypeModel = (
 ): ActionTypeModel => {
   return actionTypeRegistryMock.createMockActionTypeModel({
     id: `actionTypeModel-${id}`,
-    iconClass: 'test',
+    iconClass: 'test.svg',
     selectMessage: 'test',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };

@@ -62,7 +62,21 @@ export interface Props {
   css?: SerializedStyles;
 }
 
-type Option = EuiButtonGroupOptionProps & Omit<IconButton, 'label' | 'css'>;
+type Option = {
+  id: string;
+  label: string;
+  iconType: IconType;
+  title?: string;
+  'aria-label'?: string;
+  'data-test-subj'?: string;
+  isDisabled?: boolean;
+  toolTipContent?: React.ReactNode;
+  toolTipProps?: EuiButtonGroupOptionProps['toolTipProps'];
+  'aria-expanded'?: boolean;
+  'aria-controls'?: string;
+  css?: SerializedStyles;
+  onClick: () => void;
+};
 
 /**
  * A group of buttons each performing an action, represented by an icon.

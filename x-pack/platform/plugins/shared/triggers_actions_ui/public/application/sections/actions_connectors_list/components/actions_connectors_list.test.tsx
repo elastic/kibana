@@ -199,7 +199,7 @@ describe('actions_connectors_list', () => {
       actionTypeRegistry.get.mockImplementation((id: string) => {
         return {
           id,
-          iconClass: 'test',
+          iconClass: 'test.svg',
           selectMessage: 'test',
           validateParams: (): Promise<GenericValidationResult<unknown>> =>
             Promise.resolve({ errors: {} }),
@@ -648,7 +648,7 @@ describe('actions_connectors_list', () => {
       actionTypeRegistry.get.mockImplementation((id: string) => {
         return {
           id,
-          iconClass: 'test',
+          iconClass: 'test.svg',
           selectMessage: 'test',
           validateParams: (): Promise<GenericValidationResult<unknown>> =>
             Promise.resolve({ errors: {} }),
@@ -870,7 +870,7 @@ describe('actions_connectors_list', () => {
       actionTypeRegistry.has.mockReturnValue(true);
       actionTypeRegistry.get.mockImplementation((id: string) => ({
         id,
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> =>
           Promise.resolve({ errors: {} }),

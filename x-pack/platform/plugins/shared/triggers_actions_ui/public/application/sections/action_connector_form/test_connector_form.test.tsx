@@ -47,7 +47,7 @@ const mockedActionParamsFields = lazy(async () => ({
 
 const actionType = {
   id: 'my-action-type',
-  iconClass: 'test',
+  iconClass: 'test.svg',
   selectMessage: 'test',
   validateParams: (): Promise<GenericValidationResult<unknown>> => {
     const validationResult = { errors: {} };
@@ -114,7 +114,7 @@ describe('test_connector_form', () => {
   it('renders the execution test field', async () => {
     const actionTypeExecutionMode = {
       id: 'execution-mode-type',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };

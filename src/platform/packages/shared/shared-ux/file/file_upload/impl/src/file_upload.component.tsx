@@ -21,7 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type {
-  EuiFilePickerClass,
+  EuiFilePickerRef,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 
@@ -53,7 +53,7 @@ const styles = {
   `,
 };
 
-export const FileUpload = React.forwardRef<EuiFilePickerClass, Props>(
+export const FileUpload = React.forwardRef<EuiFilePickerRef, Props>(
   (
     {
       compressed,

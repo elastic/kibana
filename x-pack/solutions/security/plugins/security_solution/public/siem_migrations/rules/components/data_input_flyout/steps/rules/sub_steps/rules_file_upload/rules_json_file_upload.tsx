@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import type {
-  EuiFilePickerClass,
+  EuiFilePickerRef,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { UploadFileButton } from '../../../../../../../common/components';
@@ -55,7 +55,7 @@ const extractResources = (parsed: unknown): SentinelArmResource[] => {
 export const SentinelRulesJsonFileUpload = React.memo<SentinelRulesJsonFileUploadProps>(
   ({ createMigration, migrationName, apiError, isLoading, isCreated, onRulesFileChanged }) => {
     const [resourcesToUpload, setResourcesToUpload] = useState<SentinelArmResource[]>();
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
     const { rulesFileUpload } = useRuleMigrationVendorCopy(MigrationSource.SENTINEL);
 
     const createRules = useCallback(() => {

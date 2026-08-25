@@ -289,7 +289,7 @@ export const getDisabledByLicenseRuleTypeFromApi = (authorized = true) => ({
 export const ruleType = {
   id: 'test_rule_type',
   description: 'test',
-  iconClass: 'test',
+  iconClass: 'test.svg',
   documentationUrl: null,
   validate: (): ValidationResult => {
     return { errors: {} };

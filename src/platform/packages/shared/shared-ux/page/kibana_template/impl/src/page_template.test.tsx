@@ -99,7 +99,7 @@ describe('KibanaPageTemplate', () => {
     renderWithI18n(
       <KibanaPageTemplate
         pageHeader={{
-          iconType: 'test',
+          iconType: 'test.svg',
           pageTitle: 'Test Page',
           description: 'Test description',
           rightSideItems: [<div key="test">test</div>],

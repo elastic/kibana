@@ -515,7 +515,7 @@ describe('rule_details', () => {
     ruleTypeRegistry.has.mockReturnValue(true);
     const ruleTypeR: RuleTypeModel = {
       id: 'my-rule-type',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       description: 'Rule when testing',
       documentationUrl: 'https://localhost.local/docs',
       validate: () => {
@@ -610,7 +610,7 @@ describe('rule_details', () => {
     ruleTypeRegistry.has.mockReturnValue(true);
     const ruleTypeR: RuleTypeModel = {
       id: 'my-rule-type',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       description: 'Rule when testing',
       documentationUrl: 'https://localhost.local/docs',
       validate: () => {

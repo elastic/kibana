@@ -67,7 +67,7 @@ describe('alert_form', () => {
 
   const ruleType: RuleTypeModel = {
     id: 'alert-type',
-    iconClass: 'test',
+    iconClass: 'test.svg',
     description: 'Testing',
     documentationUrl: 'https://...',
     validate: validationMethod,

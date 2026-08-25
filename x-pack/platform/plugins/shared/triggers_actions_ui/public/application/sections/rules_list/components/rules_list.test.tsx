@@ -364,7 +364,7 @@ describe('rules_list ', () => {
 
     const ruleTypeMock: RuleTypeModel = {
       id: 'test_rule_type',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       description: 'Rule when testing',
       documentationUrl: 'https://localhost.local/docs',
       validate: () => {
@@ -800,7 +800,7 @@ describe('rules_list ', () => {
     it('does not render edit and delete button when rule type does not allow editing in rules management', async () => {
       const ruleTypeMock: RuleTypeModel = {
         id: 'test_rule_type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         description: 'Rule when testing',
         documentationUrl: 'https://localhost.local/docs',
         validate: () => {
@@ -935,7 +935,7 @@ describe('internally managed rule', () => {
     const ruleTypeMock: RuleTypeModel = {
       isInternallyManaged: true,
       id: 'internally_managed_rule_type',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       description: 'Rule when testing',
       documentationUrl: 'https://localhost.local/docs',
       validate: () => {
@@ -1168,7 +1168,7 @@ describe('rule list with different rule types', () => {
     });
     const ruleTypeMock: RuleTypeModel = {
       id: 'test_rule_type',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       description: 'Rule when testing',
       documentationUrl: 'https://localhost.local/docs',
       validate: () => {
@@ -1290,7 +1290,7 @@ describe('rules_list with show only capability', () => {
       getRuleTypes.mockResolvedValue([ruleTypeFromApi]);
       const ruleTypeMock: RuleTypeModel = {
         id: 'test_rule_type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         description: 'Rule when testing',
         documentationUrl: 'https://localhost.local/docs',
         validate: () => {

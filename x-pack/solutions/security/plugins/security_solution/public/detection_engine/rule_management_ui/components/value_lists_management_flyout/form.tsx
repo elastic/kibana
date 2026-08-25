@@ -18,7 +18,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import type {
-  EuiFilePickerClass,
+  EuiFilePickerRef,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 
@@ -59,7 +59,7 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
   const ctrl = useRef(new AbortController());
   const [file, setFile] = useState<File | null>(null);
   const [type, setType] = useState<Type>(defaultListType);
-  const filePickerRef = useRef<EuiFilePickerClass | null>(null);
+  const filePickerRef = useRef<EuiFilePickerRef | null>(null);
   const { http } = useKibana().services;
   const { start: importList, ...importState } = useImportList();
 

@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type {
-  EuiFilePickerClass,
+  EuiFilePickerRef,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { UploadFileButton } from '../..';
@@ -37,7 +37,7 @@ export interface LookupsFileUploadProps {
 export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
   ({ createResources, apiError, isLoading, migrationSource, onSkip }) => {
     const [lookupResources, setLookupResources] = useState<SiemMigrationResourceData[]>([]);
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
     const { lookupsFileUpload } = useRuleMigrationVendorCopy(migrationSource);
 
     const createLookups = useCallback(() => {

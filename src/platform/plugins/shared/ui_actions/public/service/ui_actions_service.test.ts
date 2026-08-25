@@ -23,7 +23,7 @@ const testAction1: ActionDefinition = {
   type: 'type1',
   execute: async () => {},
   getDisplayName: () => 'test1',
-  getIconType: () => '',
+  getIconType: () => undefined,
   isCompatible: async () => true,
 };
 
@@ -33,7 +33,7 @@ const testAction2: ActionDefinition = {
   type: 'type2',
   execute: async () => {},
   getDisplayName: () => 'test2',
-  getIconType: () => '',
+  getIconType: () => undefined,
   isCompatible: async () => true,
 };
 
@@ -67,7 +67,7 @@ describe('UiActionsService', () => {
         id: 'test',
         execute: async () => {},
         getDisplayName: () => 'test',
-        getIconType: () => '',
+        getIconType: () => undefined,
         isCompatible: async () => true,
         type: 'test',
       }));
@@ -81,7 +81,7 @@ describe('UiActionsService', () => {
       type: 'type1',
       execute: async () => {},
       getDisplayName: () => 'test',
-      getIconType: () => '',
+      getIconType: () => undefined,
       isCompatible: async () => true,
     };
     const action2: ActionDefinition = {
@@ -90,7 +90,7 @@ describe('UiActionsService', () => {
       type: 'type2',
       execute: async () => {},
       getDisplayName: () => 'test',
-      getIconType: () => '',
+      getIconType: () => undefined,
       isCompatible: async () => true,
     };
 

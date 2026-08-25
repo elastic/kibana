@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { IconType } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /** @public */
@@ -29,7 +30,7 @@ export interface ChromeHelpMenuLink {
   title: string;
   href?: string;
   onClick?: () => void;
-  iconType?: string;
+  iconType?: IconType;
   dataTestSubj?: string;
 }
 

@@ -331,7 +331,7 @@ export function QuickSearchVisor({
                   <KQLComponent
                     isDisabled={!isVisible}
                     // If we remove the prop, the icon still appears (!!)
-                    iconType=""
+                    iconType="empty"
                     disableLanguageSwitcher={true}
                     indexPatterns={adHocDataView ? [adHocDataView] : []}
                     bubbleSubmitEvent={false}

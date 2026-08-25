@@ -40,7 +40,7 @@ export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContex
     private readonly embeddable: EmbeddableStart
   ) {}
 
-  getIconType(): string | undefined {
+  getIconType() {
     return 'discoverApp';
   }
 

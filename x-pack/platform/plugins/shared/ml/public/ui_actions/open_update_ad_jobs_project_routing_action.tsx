@@ -22,7 +22,7 @@ export function updateADJobsProjectRouting(
   return {
     id: 'update-ad-jobs-project-routing-action',
     type: UPDATE_AD_JOBS_PROJECT_ROUTING_ACTION,
-    getIconType(): string {
+    getIconType() {
       return 'machineLearningApp';
     },
     getDisplayName: () =>

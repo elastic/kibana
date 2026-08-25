@@ -60,7 +60,7 @@ export function createOpenInExplorerAction(
     id: 'open-in-anomaly-explorer',
     type: OPEN_IN_ANOMALY_EXPLORER_ACTION,
     order: 40,
-    getIconType(): string {
+    getIconType() {
       return 'table';
     },
     getDisplayName() {

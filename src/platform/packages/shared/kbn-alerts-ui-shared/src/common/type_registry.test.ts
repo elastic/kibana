@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import { TypeRegistry } from './type_registry';
 import type {
   ActionTypeModel,
@@ -20,11 +21,11 @@ export const ExpressionComponent: React.FunctionComponent = () => {
   return null;
 };
 
-const getTestRuleType = (id?: string, iconClass?: string) => {
+const getTestRuleType = (id?: string, iconClass?: IconType) => {
   return {
     id: id || 'test-alet-type',
     description: 'Test description',
-    iconClass: iconClass || 'icon',
+    iconClass: iconClass || 'empty',
     documentationUrl: null,
     validate: (): ValidationResult => {
       return { errors: {} };
@@ -36,12 +37,12 @@ const getTestRuleType = (id?: string, iconClass?: string) => {
 
 const getTestActionType = (
   id?: string,
-  iconClass?: string,
+  iconClass?: IconType,
   selectedMessage?: string
 ): ActionTypeModel<any, any> => {
   return actionTypeRegistryMock.createMockActionTypeModel({
     id: id || 'my-action-type',
-    iconClass: iconClass || 'test',
+    iconClass: iconClass || 'test.svg',
     selectMessage: selectedMessage || 'test',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
@@ -87,7 +88,7 @@ describe('get()', () => {
             "_status": -1,
           },
         },
-        "iconClass": "test",
+        "iconClass": "test.svg",
         "id": "my-action-type-snapshot",
         "selectMessage": "test",
         "validateParams": [Function],
@@ -114,7 +115,7 @@ describe('list()', () => {
     expect(actionTypes).toEqual([
       {
         id: 'my-action-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         actionConnectorFields: null,
         actionParamsFields: actionType.actionParamsFields,

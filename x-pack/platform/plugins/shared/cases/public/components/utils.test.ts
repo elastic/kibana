@@ -50,7 +50,7 @@ describe('Utils', () => {
     const { createMockActionTypeModel } = actionTypeRegistryMock;
     const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
     mockTriggersActionsUiService.actionTypeRegistry.register(
-      createMockActionTypeModel({ id: '.test', iconClass: 'test' })
+      createMockActionTypeModel({ id: '.test', iconClass: 'test.svg' })
     );
 
     it('it returns the correct icon class', () => {

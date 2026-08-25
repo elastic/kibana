@@ -6,7 +6,7 @@
  */
 import type { EuiFilePickerProps } from '@elastic/eui';
 import { EuiFormRow, EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
@@ -20,7 +20,7 @@ interface Props {
 }
 
 export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = false }) => {
-  const filePickerRef = useRef<EuiFilePickerClass>(null);
+  const filePickerRef = useRef<EuiFilePickerRef>(null);
 
   const onFilePickerChange = useCallback(
     async (files: FileList | null) => {

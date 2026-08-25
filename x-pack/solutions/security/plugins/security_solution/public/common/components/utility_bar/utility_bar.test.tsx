@@ -32,7 +32,7 @@ describe('UtilityBar', () => {
             <UtilityBarGroup>
               <UtilityBarAction
                 dataTestSubj="popover"
-                iconType=""
+                iconType="empty"
                 popoverContent={() => <p>{'Test popover'}</p>}
               >
                 {'Test action'}
@@ -66,7 +66,7 @@ describe('UtilityBar', () => {
             <UtilityBarGroup>
               <UtilityBarAction
                 dataTestSubj="popover"
-                iconType=""
+                iconType="empty"
                 popoverContent={() => <p>{'Test popover'}</p>}
               >
                 {'Test action'}
@@ -102,7 +102,7 @@ describe('UtilityBar', () => {
             <UtilityBarGroup>
               <UtilityBarAction
                 dataTestSubj="popover"
-                iconType=""
+                iconType="empty"
                 popoverContent={() => <p>{'Test popover'}</p>}
               >
                 {'Test action'}

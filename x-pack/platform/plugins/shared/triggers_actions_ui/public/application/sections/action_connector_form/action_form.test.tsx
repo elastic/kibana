@@ -54,7 +54,7 @@ describe('action_form', () => {
 
   const alertType = {
     id: 'my-alert-type',
-    iconClass: 'test',
+    iconClass: 'test.svg',
     name: 'test-alert',
     validate: (): ValidationResult => {
       return { errors: {} };
@@ -65,7 +65,7 @@ describe('action_form', () => {
 
   const actionType = {
     id: 'my-action-type',
-    iconClass: 'test',
+    iconClass: 'test.svg',
     selectMessage: 'test',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
@@ -78,7 +78,7 @@ describe('action_form', () => {
 
   const disabledByConfigActionType = {
     id: 'disabled-by-config',
-    iconClass: 'test',
+    iconClass: 'test.svg',
     selectMessage: 'test',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
@@ -90,7 +90,7 @@ describe('action_form', () => {
 
   const disabledByActionType = {
     id: '.jira',
-    iconClass: 'test',
+    iconClass: 'test.svg',
     selectMessage: 'test',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
@@ -102,7 +102,7 @@ describe('action_form', () => {
 
   const disabledByLicenseActionType = {
     id: 'disabled-by-license',
-    iconClass: 'test',
+    iconClass: 'test.svg',
     selectMessage: 'test',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
@@ -114,7 +114,7 @@ describe('action_form', () => {
 
   const preconfiguredOnly = {
     id: 'preconfigured',
-    iconClass: 'test',
+    iconClass: 'test.svg',
     selectMessage: 'test',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
@@ -126,7 +126,7 @@ describe('action_form', () => {
 
   const systemActionType = {
     id: 'my-system-action-type',
-    iconClass: 'test',
+    iconClass: 'test.svg',
     selectMessage: 'system action',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };
@@ -139,7 +139,7 @@ describe('action_form', () => {
 
   const workflowsSystemActionType = {
     id: '.workflows',
-    iconClass: 'test',
+    iconClass: 'test.svg',
     selectMessage: 'workflows system action',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };

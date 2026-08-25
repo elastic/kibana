@@ -57,7 +57,7 @@ describe('connector_add_flyout', () => {
       const onActionTypeChange = jest.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };
@@ -92,7 +92,7 @@ describe('connector_add_flyout', () => {
       const onActionTypeChange = jest.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };
@@ -127,7 +127,7 @@ describe('connector_add_flyout', () => {
       const onActionTypeChange = jest.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };
@@ -162,7 +162,7 @@ describe('connector_add_flyout', () => {
       const onActionTypeChange = jest.fn();
       const actionType1 = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type-1',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test 1',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };
@@ -173,7 +173,7 @@ describe('connector_add_flyout', () => {
       });
       const actionType2 = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type-2',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test 2',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };
@@ -228,7 +228,7 @@ describe('connector_add_flyout', () => {
 
     const actionType1 = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'action-type-1',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'Select Test1',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
@@ -239,7 +239,7 @@ describe('connector_add_flyout', () => {
 
     const actionType2 = actionTypeRegistryMock.createMockActionTypeModel({
       id: 'action-type-2',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'Select Test2',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
@@ -460,7 +460,7 @@ describe('connector_add_flyout', () => {
       const onActionTypeChange = jest.fn();
       const deprecatedActionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-deprecated-action-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };
@@ -470,7 +470,7 @@ describe('connector_add_flyout', () => {
       });
       const activeActionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-active-action-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };
@@ -564,7 +564,7 @@ describe('connector_add_flyout', () => {
       const onActionTypeChange = jest.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };
@@ -598,7 +598,7 @@ describe('connector_add_flyout', () => {
       const onActionTypeChange = jest.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };
@@ -634,7 +634,7 @@ describe('connector_add_flyout', () => {
       const onActionTypeChange = jest.fn();
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };

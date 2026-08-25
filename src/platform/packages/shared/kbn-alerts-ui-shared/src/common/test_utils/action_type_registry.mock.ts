@@ -31,7 +31,7 @@ const createMockActionTypeModel = (actionType: Partial<ActionTypeModel> = {}): A
   const id = uuidv4();
   return {
     id,
-    iconClass: `iconClass-${id}`,
+    iconClass: 'empty',
     selectMessage: `selectMessage-${id}`,
     validateParams: jest.fn(),
     actionConnectorFields: null,

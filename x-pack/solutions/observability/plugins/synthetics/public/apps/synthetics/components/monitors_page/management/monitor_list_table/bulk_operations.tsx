@@ -177,7 +177,7 @@ export const BulkOperations = ({
       name: i18n.translate('xpack.synthetics.bulkOperations.editServiceName', {
         defaultMessage: 'Edit service name',
       }),
-      icon: 'apmTrace',
+      icon: 'chartWaterfall',
       disabled: isActionDisabled,
       toolTipContent: disabledTooltip,
       'data-test-subj': 'syntheticsBulkEditServiceNameItem',
@@ -235,7 +235,7 @@ export const BulkOperations = ({
       name: i18n.translate('xpack.synthetics.bulkOperations.editSchedule', {
         defaultMessage: 'Edit schedule',
       }),
-      icon: 'timeRefresh',
+      icon: 'refreshTime',
       disabled: isActionDisabled,
       toolTipContent: disabledTooltip,
       'data-test-subj': 'syntheticsBulkEditScheduleItem',

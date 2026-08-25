@@ -27,7 +27,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type {
-  EuiFilePickerClass,
+  EuiFilePickerRef,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import type {
@@ -62,7 +62,7 @@ export const ImportExceptionListFlyout = React.memo(
     addError: (error: unknown, options: ErrorToastOptions) => Toast;
     setDisplayImportListFlyout: Dispatch<SetStateAction<boolean>>;
   }) => {
-    const filePickerRef = useRef<EuiFilePickerClass | null>(null);
+    const filePickerRef = useRef<EuiFilePickerRef | null>(null);
 
     const filePickerId = useGeneratedHtmlId({ prefix: 'filePicker' });
     const [files, setFiles] = useState<FileList | null>(null);

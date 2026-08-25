@@ -759,6 +759,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFlyoutMenu.back': i18n.translate('core.euiFlyoutMenu.back', {
       defaultMessage: 'Back',
     }),
+    'euiFlyoutMenu.back.tooltip': ({ previousPage }: EuiValues) =>
+      i18n.translate('core.euiFlyoutMenu.back.tooltip', {
+        defaultMessage: 'Back to {previousPage}',
+        values: { previousPage },
+      }),
     'euiFlyoutMenu.history': i18n.translate('core.euiFlyoutMenu.history', {
       defaultMessage: 'History',
     }),

@@ -6,7 +6,7 @@
  */
 
 declare module '*.svg' {
-  const content: string;
+  const content: `${string}.svg`;
   // eslint-disable-next-line import/no-default-export
   export default content;
 }

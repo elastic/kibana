@@ -14,9 +14,10 @@ import { EuiContextMenu } from '@elastic/eui';
 
 import { Toolbar } from './toolbar';
 import { AddFromLibraryButton, IconButtonGroup, ToolbarButton } from '../buttons';
+import type { IconButton } from '../buttons';
 import { ToolbarPopover } from '../popover';
 
-const iconButtons = [
+const iconButtons: IconButton[] = [
   {
     label: 'Text',
     onClick: action('onTextClick'),

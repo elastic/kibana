@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiListGroupItemProps } from '@elastic/eui';
+import type { EuiListGroupItemProps, IconType } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -76,7 +76,7 @@ export function createEuiListItem({
       iconProps,
       icon:
         !euiIconType && icon ? (
-          <EuiIcon type={basePath.prepend(`/${icon}`)} size="m" aria-hidden={true} />
+          <EuiIcon type={basePath.prepend(`/${icon}`) as IconType} size="m" aria-hidden={true} />
         ) : undefined,
     }),
   };
@@ -132,7 +132,7 @@ export interface RecentNavLink {
   label: string;
   title: string;
   'aria-label': string;
-  iconType?: string;
+  iconType?: IconType;
   onClick: React.MouseEventHandler;
 }
 
