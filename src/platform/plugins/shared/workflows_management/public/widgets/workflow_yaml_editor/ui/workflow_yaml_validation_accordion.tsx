@@ -116,7 +116,7 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
       ) ?? [],
     [validationErrors]
   );
-  const hasAccordionContent = allValidationErrors.length > 0 || errorValidating !== null;
+  const hasAccordionContent = allValidationErrors.length > 0;
 
   // Report telemetry when validation errors change (only when errors are present and stable)
   useEffect(() => {
@@ -163,10 +163,7 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
     );
   } else if (errorValidating) {
     icon = <EuiIcon type="errorFill" color="danger" size="m" aria-hidden={true} />;
-    buttonContent = i18n.translate(
-      'workflowsManagement.workflowYAMLValidationErrors.validationFailed',
-      { defaultMessage: 'Validation failed' }
-    );
+    buttonContent = errorValidating.message;
   } else if (allValidationErrors.length === 0) {
     icon = (
       <EuiIcon
@@ -199,7 +196,11 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s" css={styles.buttonContent}>
           <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
-          <EuiFlexItem css={styles.buttonContentText} className="button-content-text">
+          <EuiFlexItem
+            css={styles.buttonContentText}
+            className="button-content-text"
+            data-test-subj={errorValidating ? 'workflowValidationRunError' : undefined}
+          >
             {buttonContent}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -213,32 +214,6 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
       <div css={styles.separator} />
       <div css={styles.accordionContent} className="eui-yScrollWithShadows">
         <EuiFlexGroup direction="column" gutterSize="s">
-          {errorValidating ? (
-            <EuiFlexGroup
-              gutterSize="s"
-              responsive={false}
-              data-test-subj="workflowValidationRunError"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type="errorFill"
-                  color="danger"
-                  size="s"
-                  css={styles.validationErrorIcon}
-                  aria-hidden={true}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem css={styles.validationErrorText}>
-                <EuiText color="text" size="xs">
-                  <FormattedMessage
-                    id="workflowsManagement.workflowYAMLValidationErrors.validationRunError"
-                    defaultMessage="Validation could not be completed: {message}"
-                    values={{ message: errorValidating.message }}
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
           {sortedValidationErrors?.map((error, index) => (
             <button
               type="button"

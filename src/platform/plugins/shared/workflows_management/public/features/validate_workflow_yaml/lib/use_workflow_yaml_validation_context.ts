@@ -74,9 +74,11 @@ export const getWorkflowYamlValidationContextError = (
   context.connectorTypes.status === 'failed'
     ? new Error(
         i18n.translate('workflowsManagement.validation.connectorMetadataUnavailable', {
-          defaultMessage: 'Connector metadata is unavailable: {reason}',
-          values: { reason: context.connectorTypes.error },
-        })
+          defaultMessage: 'Validation unavailable: connectors failed to load',
+        }),
+        // The underlying reason is usually generic transport text ("Failed to fetch"), so it
+        // stays off the accordion title and rides along here for logs and devtools.
+        { cause: context.connectorTypes.error }
       )
     : null;
 

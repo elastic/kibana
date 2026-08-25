@@ -540,7 +540,8 @@ steps: []
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
-      expect(result.current.error?.message).toContain('Connector metadata is unavailable');
+      expect(result.current.error?.message).toContain('connectors failed to load');
+      expect(result.current.error?.cause).toBe('Connector request failed');
     });
     expect(result.current.validationResults).not.toEqual(
       expect.arrayContaining([expect.objectContaining({ owner: 'connector-id-validation' })])
