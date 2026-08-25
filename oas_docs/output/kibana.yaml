@@ -51675,7 +51675,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all OR fleet-agent-policies-all.
+        Update output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.
       operationId: put-fleet-outputs-outputid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -104260,6 +104260,11 @@ components:
                 type: object
                 properties:
                   description:
+                    type: string
+                  engine:
+                    enum:
+                      - v1
+                      - v2
                     type: string
                   service:
                     type: string

@@ -28,6 +28,13 @@ const nonBlankString = (max: number) =>
     });
 
 /**
+ * Bounded non-blank string used as `data.dashboardId` on dashboard artifacts.
+ * Also reused by the agent-builder `set_dashboards` operation so tool-level
+ * validation stays in sync with the registered dashboard schema.
+ */
+export const dashboardIdSchema = nonBlankString(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT);
+
+/**
  * Registers the RnA-owned built-in artifact types (runbook, dashboard).
  * Solution-owned types register via `AlertingServerSetup.registerArtifactType`
  * from their own plugins.
@@ -46,7 +53,7 @@ export function registerBuiltinArtifactTypes(registry: ArtifactTypeRegistry): vo
     type: DASHBOARD_ARTIFACT_TYPE,
     dataSchema: z
       .object({
-        dashboardId: nonBlankString(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT),
+        dashboardId: dashboardIdSchema,
       })
       .strict(),
     references: [{ field: 'dashboardId', savedObjectType: 'dashboard' }],
