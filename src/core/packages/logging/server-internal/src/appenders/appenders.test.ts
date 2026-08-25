@@ -122,11 +122,26 @@ describe('`onWriteError` is accepted only through the runtime schema', () => {
     );
   });
 
+  // Every shape `kibana.yml` can produce. None survives the YAML schema, so an operator cannot
+  // switch any other log file out of the default crash-on-write-failure behavior.
+  it.each([
+    ['string', 'true'],
+    ['boolean', true],
+    ['number', 1],
+    ['null', null],
+    ['object', { a: 1 }],
+    ['array', ['a']],
+  ])('rejects a %s from the YAML appender schema', (_label, onWriteError) => {
+    expect(() => Appenders.configSchema.validate({ ...fileAppenderConfig, onWriteError })).toThrow(
+      /Additional properties are not allowed/
+    );
+  });
+
   it.each(['not-a-function', 42, true, null])(
-    'ignores a non-function %p, so a stray YAML value cannot disable the crash behavior',
+    'ignores a non-function %p that reached the constructor, preserving the crash behavior',
     (onWriteError) => {
-      // The YAML schema tolerates unknown keys, so the appender itself has to reject anything that
-      // is not callable — otherwise `logging.appenders.*` in kibana.yml could alter this.
+      // Defense in depth: both schemas already stop this. The YAML schema rejects every value
+      // `kibana.yml` can express as an unknown key, and the runtime schema requires a function.
       const appender = Appenders.create({
         ...fileAppenderConfig,
         onWriteError,
