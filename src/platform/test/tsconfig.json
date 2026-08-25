@@ -58,7 +58,6 @@
     "@kbn/event-annotation-common",
     "@kbn/links-plugin",
     "@kbn/ftr-common-functional-ui-services",
-    "@kbn/console-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/core-deprecations-common",
