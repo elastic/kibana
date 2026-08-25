@@ -8,11 +8,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
+import { PLUGIN_NAME } from '../../common';
 import type { EvalsStartDependencies } from '../types';
 import { EvalsApp } from '../application';
 
@@ -39,9 +39,19 @@ export const mountStandaloneApp = async ({
     },
   });
 
-  const setBreadcrumbs = coreStart.chrome.setBreadcrumbs.bind(coreStart.chrome);
-  const getHref = (path: string) =>
-    coreStart.application.getUrlForApp(PLUGIN_ID, { path, absolute: false });
+  const getHref = (path: string) => path;
+  const wrapBreadcrumb = (breadcrumb: ChromeBreadcrumb): ChromeBreadcrumb => ({
+    ...breadcrumb,
+    ...(breadcrumb.href ? reactRouterNavigate(history, breadcrumb.href) : {}),
+  });
+  const setBreadcrumbs = (breadcrumbs: ChromeBreadcrumb[]) => {
+    const trailingBreadcrumbs = breadcrumbs.map(wrapBreadcrumb);
+    const rootBreadcrumb = wrapBreadcrumb({ text: PLUGIN_NAME, href: getHref('/') });
+
+    coreStart.chrome.setBreadcrumbs([rootBreadcrumb, ...trailingBreadcrumbs], {
+      project: { value: trailingBreadcrumbs },
+    });
+  };
 
   const App = () => (
     <QueryClientProvider client={queryClient}>
