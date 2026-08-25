@@ -82,6 +82,10 @@ export const createNavigationTree = ({
           return pathNameSerialized.startsWith(prepend('/app/dashboards'));
         },
       },
+      {
+        link: EVALS_APP_ID,
+        icon: 'flask',
+      },
       ...getWorkflowsNavPanel(core),
       {
         link: 'observability-overview:alerts',
@@ -277,10 +281,6 @@ export const createNavigationTree = ({
       {
         icon: 'sparkles',
         link: 'context_engine',
-      },
-      {
-        link: EVALS_APP_ID,
-        icon: 'flask',
       },
       ...filterForFeatureAvailability(
         {

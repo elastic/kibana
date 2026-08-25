@@ -91,6 +91,10 @@ function createNavTree({
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
+      {
+        link: EVALS_APP_ID,
+        icon: 'flask',
+      },
       ...getWorkflowsNavPanel(coreStart),
       {
         link: 'observability-overview:alerts',
@@ -293,10 +297,6 @@ function createNavTree({
       {
         icon: 'sparkles',
         link: 'context_engine' as const,
-      },
-      {
-        link: EVALS_APP_ID,
-        icon: 'flask',
       },
       {
         id: 'machine_learning-landing',
