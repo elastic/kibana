@@ -19,6 +19,24 @@ import {
 
 const updateCustomContentSchema = customContentPanelUpdateSchema;
 
+/**
+ * Id of the dashboard generation tool, named in agent-facing copy so the agent can fall back to it
+ * for panels that have no context attachment. Inlined rather than imported from
+ * `@kbn/agent-builder-dashboards-common` to avoid a plugin dependency for a prompt string; keep in
+ * sync with `dashboardTools.generateDashboard` there.
+ */
+const GENERATE_DASHBOARD_TOOL_ID = 'platform.dashboard.generate_dashboard';
+
+/**
+ * Only panels the user explicitly sent to chat have a context attachment, but any panel on the
+ * attached dashboard can still be edited through the dashboard tool, which targets by `panelId` and
+ * needs no attachment. Spelling that route out is what stops the agent from dead-ending — left to
+ * itself it invents remediations like asking the user to click the panel, which attaches nothing.
+ */
+const NOT_ATTACHED_REMEDIATION =
+  `If this panel is on the dashboard attached to this conversation, do not ask the user for anything — edit it with \`${GENERATE_DASHBOARD_TOOL_ID}\` using an \`edit_panels\` operation with \`source: "config"\`, \`type: "custom_content"\`, and the panel's \`panelId\` (read the dashboard attachment to find it; for a dashboard panel the panelId is the same value as embeddable_id). ` +
+  'Only if no dashboard is attached, ask the user to open that panel\'s context menu, choose Edit, then "Refine with chat". Never suggest clicking the panel — that attaches nothing.';
+
 export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
   typeof updateCustomContentSchema
 > => ({
@@ -39,6 +57,8 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 - When only \`prompt\` is provided (style or layout change, no query change), the server refines the existing template directly — no query sampling, preserving layout and design.
 - Pass \`esqlQuery: null\` to remove the query entirely.
 
+This tool only reaches panels whose context is attached to the conversation — that happens when the user picks "Refine with chat" on a panel. For any other custom content panel on the attached dashboard, use \`${GENERATE_DASHBOARD_TOOL_ID}\` with an \`edit_panels\` operation instead; it targets by \`panelId\` and needs no attachment.
+
 On success this returns \`attachment_id\` and \`version\`. You MUST render the updated panel inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\` — without it the user cannot preview or step back through earlier versions of the panel.`,
   schema: updateCustomContentSchema,
   handler: async (
@@ -58,7 +78,6 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       logger.warn(
         `custom_content_update_panel: no custom_content_context attachment found for embeddable_id "${embeddable_id}"`
       );
-      // List what is attached so a wrong id is recoverable in the same round rather than a dead end.
       const availableIds = panelAttachments
         .map(
           (a) =>
@@ -73,10 +92,10 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
             type: ToolResultType.error,
             data: {
               message: availableIds.length
-                ? `No custom content panel with embeddable_id "${embeddable_id}" in this conversation. Attached panels: ${availableIds.join(
+                ? `No custom content panel with embeddable_id "${embeddable_id}" is attached to this conversation. Attached panels: ${availableIds.join(
                     ', '
-                  )}.`
-                : 'No custom content panel context found in this conversation.',
+                  )}. ${NOT_ATTACHED_REMEDIATION}`
+                : `No custom content panel is attached to this conversation. ${NOT_ATTACHED_REMEDIATION}`,
             },
           },
         ],

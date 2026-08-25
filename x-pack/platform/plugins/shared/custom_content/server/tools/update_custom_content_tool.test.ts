@@ -69,6 +69,28 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(results[0].type).toBe(ToolResultType.error);
       expect(ctx.update).not.toHaveBeenCalled();
     });
+
+    // A miss is routine — most panels on a dashboard were never sent to chat — so the error has to
+    // name the route that does work, or the agent dead-ends and invents its own advice.
+    it('points at the dashboard tool rather than dead-ending', async () => {
+      const { results } = await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs' });
+      const result = results[0] as ToolResult;
+      if (!isErrorResult(result)) throw new Error('Expected error result');
+      expect(result.data.message).toContain('platform.dashboard.generate_dashboard');
+    });
+
+    it('lists the attached panels so a wrong id is recoverable', async () => {
+      const { results } = await callHandler(
+        { embeddable_id: 'wrong-id', prompt: 'Show KPIs' },
+        {
+          panel_template: '<p>old</p>',
+          embeddable_id: 'p1',
+        }
+      );
+      const result = results[0] as ToolResult;
+      if (!isErrorResult(result)) throw new Error('Expected error result');
+      expect(result.data.message).toContain('p1');
+    });
   });
 
   describe('prompt path', () => {
