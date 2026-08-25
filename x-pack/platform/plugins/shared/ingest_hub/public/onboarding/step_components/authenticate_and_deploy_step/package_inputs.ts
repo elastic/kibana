@@ -82,15 +82,14 @@ export function buildPackageInputs(
   const inputs: Record<string, PackageInputEntry> = {};
 
   for (const service of services) {
+    // Distinguish "never configured" (key absent → default to all DS) from "explicitly emptied"
+    // (key present with enabledDataStreams: [] → user turned everything off → skip).
     const serviceVars: ServiceVars = storedServiceVars[service.id] ?? {
-      enabledDataStreams: [],
+      enabledDataStreams: service.dataStreams,
       varsByDataStream: {},
     };
 
-    const activeDataStreams =
-      serviceVars.enabledDataStreams.length > 0
-        ? serviceVars.enabledDataStreams
-        : service.dataStreams;
+    const activeDataStreams = serviceVars.enabledDataStreams;
 
     for (const dsId of activeDataStreams) {
       const dsInfo = service.varDefsByDataStream?.[dsId];

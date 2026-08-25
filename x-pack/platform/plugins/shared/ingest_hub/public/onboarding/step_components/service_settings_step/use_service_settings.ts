@@ -270,8 +270,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         const service = awsServicesMap?.get(inst.serviceId);
         if (!service) return false;
         const config = getServiceVars(inst.instanceId);
-        const activeDataStreams =
-          config.enabledDataStreams.length > 0 ? config.enabledDataStreams : service.dataStreams;
+        // getServiceVars returns service.dataStreams when the key is absent (never configured).
+        // An explicitly stored empty array means the user disabled all inputs — respect it.
+        const activeDataStreams = config.enabledDataStreams;
         return activeDataStreams.some((dsId) => {
           const dsInfo = service.varDefsByDataStream?.[dsId];
           const dsVars = config.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
