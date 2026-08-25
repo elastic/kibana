@@ -30,13 +30,38 @@ export interface AiIndexAutomation {
   value: string;
 }
 
+/**
+ * Which signals the feedback analysis reads. A read filter only: it narrows the
+ * `@timestamp` range the analysis selects over, and never deletes or retains
+ * signals. `relative` is date math evaluated per run (`now-30d`); `absolute` is
+ * an open-ended "since this ISO date".
+ */
+export type AiIndexSignalTimeRange =
+  | { type: 'relative'; from: string }
+  | { type: 'absolute'; from: string };
+
+/**
+ * Per-index control plane for the feedback loop: whether to analyze this
+ * index's signals, with which agent, how often, and over what window.
+ */
+export interface AiIndexFeedbackAnalysis {
+  /**
+   * Desired state. The scheduler remains authoritative for whether analysis is
+   * actually running, because a schedule also needs credentials bound to it.
+   */
+  enabled: boolean;
+  /** Agent Builder agent to analyze with. */
+  agent_id?: string;
+  schedule?: { interval: string };
+  signal_time_range?: AiIndexSignalTimeRange;
+}
+
 export interface AiIndexProperties {
   description?: string;
   dest: AiIndexDest;
   automations: AiIndexAutomation[];
   sources: AiIndexSource[];
-  /** Agent Builder agent id used for this index's Analyze & improve analysis. */
-  feedback_agent_id?: string;
+  feedback_analysis?: AiIndexFeedbackAnalysis;
 }
 
 export interface AiIndexHttpItem extends AiIndexProperties {
@@ -54,6 +79,13 @@ export interface ListAiIndexResponse {
 
 export interface CreateAiIndexRequest extends AiIndexProperties {
   id: string;
+}
+
+export type PutAiIndexFeedbackAnalysisRequest = AiIndexFeedbackAnalysis;
+
+export interface PutAiIndexFeedbackAnalysisResponse {
+  /** The stored block with defaults resolved, so callers see what will actually run. */
+  feedback_analysis: AiIndexFeedbackAnalysis;
 }
 
 export interface CreateAiIndexResponse {

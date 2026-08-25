@@ -16,6 +16,7 @@ import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   aiIndexByIdPath,
+  aiIndexFeedbackAnalysisPath,
   aiIndexKiSummaryPath,
   aiIndexPath,
 } from '../../common/constants';
@@ -85,7 +86,7 @@ const aiIndexItem: AiIndexHttpItem = {
 describe('ai indices routes', () => {
   let routes: Record<string, RegisteredRoute>;
   let aiIndexService: jest.Mocked<
-    Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete'>
+    Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis'>
   >;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
@@ -133,6 +134,7 @@ describe('ai indices routes', () => {
       get: jest.fn(),
       list: jest.fn(),
       delete: jest.fn(),
+      setFeedbackAnalysis: jest.fn(),
     };
 
     const createVersionedRoute = (method: string) => (config: RegisteredRoute['config']) => ({
@@ -178,13 +180,18 @@ describe('ai indices routes', () => {
     await callRoute('GET', aiIndexKiSummaryPath, { params: { aiIndexId: 'a' } });
     await callRoute('GET', aiIndexPath, {});
     await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
+    await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+      params: { aiIndexId: 'a' },
+      body: { enabled: true },
+    });
 
-    expect(response.notFound).toHaveBeenCalledTimes(6);
+    expect(response.notFound).toHaveBeenCalledTimes(7);
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
     expect(aiIndexService.get).not.toHaveBeenCalled();
     expect(aiIndexService.list).not.toHaveBeenCalled();
     expect(aiIndexService.delete).not.toHaveBeenCalled();
+    expect(aiIndexService.setFeedbackAnalysis).not.toHaveBeenCalled();
   });
 
   it('registers routes with the expected access and privileges', () => {
@@ -210,6 +217,10 @@ describe('ai indices routes', () => {
     });
     expect(getRoute('DELETE', aiIndexByIdPath).config).toMatchObject({
       access: 'public',
+      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
+    });
+    expect(getRoute('PUT', aiIndexFeedbackAnalysisPath).config).toMatchObject({
+      access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
     });
   });
@@ -530,6 +541,135 @@ describe('ai indices routes', () => {
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: "AI index 'missing' not found" },
       });
+    });
+  });
+
+  describe('PUT /internal/context_engine/ai_index/{aiIndexId}/feedback_analysis', () => {
+    const feedbackAnalysis = {
+      enabled: true,
+      agent_id: 'my-analysis-agent',
+      schedule: { interval: '24h' },
+      signal_time_range: { type: 'relative' as const, from: 'now-30d' },
+    };
+
+    it('stores the configuration and returns what was stored', async () => {
+      aiIndexService.setFeedbackAnalysis.mockResolvedValue(feedbackAnalysis);
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: feedbackAnalysis,
+      });
+
+      expect(aiIndexService.setFeedbackAnalysis).toHaveBeenCalledWith(
+        'customer_support',
+        feedbackAnalysis
+      );
+      expect(response.ok).toHaveBeenCalledWith({
+        body: { feedback_analysis: feedbackAnalysis },
+      });
+    });
+
+    it('returns 404 when the AI index does not exist', async () => {
+      aiIndexService.setFeedbackAnalysis.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'missing' },
+        body: feedbackAnalysis,
+      });
+
+      expect(response.notFound).toHaveBeenCalled();
+    });
+
+    it('returns 409 when a concurrent write wins', async () => {
+      aiIndexService.setFeedbackAnalysis.mockRejectedValue(
+        new AiIndexConflictError('customer_support')
+      );
+
+      await callRoute('PUT', aiIndexFeedbackAnalysisPath, {
+        params: { aiIndexId: 'customer_support' },
+        body: feedbackAnalysis,
+      });
+
+      expect(response.conflict).toHaveBeenCalled();
+    });
+  });
+
+  describe('feedback analysis body validation', () => {
+    const validateBody = (body: unknown) => {
+      const { validate } = getRoute('PUT', aiIndexFeedbackAnalysisPath);
+      if (validate === false || !validate.request?.body) {
+        throw new Error('Expected a body schema');
+      }
+      return validate.request.body.validate(body);
+    };
+
+    it('defaults the schedule and the signal time range', () => {
+      expect(validateBody({ enabled: true })).toEqual({
+        enabled: true,
+        schedule: { interval: '24h' },
+        signal_time_range: { type: 'relative', from: 'now-30d' },
+      });
+    });
+
+    it('requires enabled', () => {
+      expect(() => validateBody({})).toThrow(/enabled/);
+    });
+
+    it('rejects an interval below the floor', () => {
+      expect(() => validateBody({ enabled: true, schedule: { interval: '5m' } })).toThrow(
+        /at least 15 minutes/
+      );
+    });
+
+    it('rejects a malformed interval', () => {
+      expect(() => validateBody({ enabled: true, schedule: { interval: 'hourly' } })).toThrow(
+        /positive number followed by/
+      );
+    });
+
+    it('accepts an interval at the floor', () => {
+      expect(
+        validateBody({
+          enabled: true,
+          schedule: { interval: '15m' },
+          signal_time_range: { type: 'relative', from: 'now-1d' },
+        })
+      ).toMatchObject({ schedule: { interval: '15m' } });
+    });
+
+    it('rejects a relative window shorter than the schedule interval', () => {
+      expect(() =>
+        validateBody({
+          enabled: true,
+          schedule: { interval: '24h' },
+          signal_time_range: { type: 'relative', from: 'now-1h' },
+        })
+      ).toThrow(/must cover at least one schedule interval/);
+    });
+
+    it('accepts an absolute window regardless of the interval, being open-ended', () => {
+      expect(
+        validateBody({
+          enabled: true,
+          schedule: { interval: '24h' },
+          signal_time_range: { type: 'absolute', from: '2026-01-31T00:00:00.000Z' },
+        })
+      ).toMatchObject({ signal_time_range: { type: 'absolute' } });
+    });
+
+    it('rejects a malformed absolute window', () => {
+      expect(() =>
+        validateBody({
+          enabled: true,
+          signal_time_range: { type: 'absolute', from: 'last tuesday' },
+        })
+      ).toThrow();
+    });
+
+    it('rejects a malformed relative window', () => {
+      expect(() =>
+        validateBody({ enabled: true, signal_time_range: { type: 'relative', from: '30d' } })
+      ).toThrow();
     });
   });
 

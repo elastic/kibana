@@ -12,6 +12,8 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
+  DEFAULT_FEEDBACK_ANALYSIS_INTERVAL,
+  DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM,
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
   MAX_AI_INDEX_DESCRIPTION_LENGTH,
@@ -21,7 +23,11 @@ import {
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDICES,
+  MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
+  MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
+  MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
   aiIndexByIdPath,
+  aiIndexFeedbackAnalysisPath,
   aiIndexKiSummaryPath,
   aiIndexPath,
 } from '../../common/constants';
@@ -31,10 +37,17 @@ import type {
   GetAiIndexKiSummaryResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
+  PutAiIndexFeedbackAnalysisResponse,
   PutAiIndexResponse,
 } from '../../common/http_api/ai_indices';
 import { apiPrivileges } from '../../common/features';
-import { validateAiIndexId } from '../../common/validation';
+import {
+  validateAbsoluteSignalWindow,
+  validateAiIndexId,
+  validateFeedbackAnalysisInterval,
+  validateRelativeSignalWindow,
+  validateSignalWindowCoversInterval,
+} from '../../common/validation';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
@@ -68,6 +81,70 @@ const aiIndexIdParamsSchema = schema.object({
   aiIndexId: aiIndexIdSchema,
 });
 
+const signalTimeRangeSchema = schema.oneOf(
+  [
+    schema.object({
+      type: schema.literal('relative'),
+      from: schema.string({
+        maxLength: MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
+        validate: validateRelativeSignalWindow,
+        meta: { description: 'Date math relative to now, for example `now-30d`.' },
+      }),
+    }),
+    schema.object({
+      type: schema.literal('absolute'),
+      from: schema.string({
+        maxLength: MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH,
+        validate: validateAbsoluteSignalWindow,
+        meta: { description: 'ISO 8601 date to analyze signals since.' },
+      }),
+    }),
+  ],
+  {
+    defaultValue: {
+      type: 'relative' as const,
+      from: DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM,
+    },
+    meta: { description: 'Which signals the analysis reads. A read filter only.' },
+  }
+);
+
+const feedbackAnalysisSchema = schema.object(
+  {
+    enabled: schema.boolean({
+      meta: {
+        description:
+          'Desired state of the recurring analysis. The scheduler stays authoritative for whether it is actually running.',
+      },
+    }),
+    agent_id: schema.maybe(
+      schema.string({
+        maxLength: MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
+        meta: {
+          description: 'Agent Builder agent id that runs this index’s feedback-loop analysis.',
+        },
+      })
+    ),
+    schedule: schema.object(
+      {
+        interval: schema.string({
+          maxLength: MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH,
+          validate: validateFeedbackAnalysisInterval,
+          meta: {
+            description: `How often to analyze, for example \`1h\` or \`24h\`. At least ${MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES} minutes.`,
+          },
+        }),
+      },
+      { defaultValue: { interval: DEFAULT_FEEDBACK_ANALYSIS_INTERVAL } }
+    ),
+    signal_time_range: signalTimeRangeSchema,
+  },
+  {
+    validate: ({ schedule, signal_time_range: signalTimeRange }) =>
+      validateSignalWindowCoversInterval(schedule.interval, signalTimeRange),
+  }
+);
+
 const aiIndexPropertiesSchema = {
   description: schema.maybe(
     schema.string({
@@ -75,14 +152,7 @@ const aiIndexPropertiesSchema = {
       meta: { description: 'Human-readable description of the AI index.' },
     })
   ),
-  feedback_agent_id: schema.maybe(
-    schema.string({
-      maxLength: MAX_AI_INDEX_FEEDBACK_AGENT_ID_LENGTH,
-      meta: {
-        description: 'Agent Builder agent id that runs this index’s feedback-loop analysis.',
-      },
-    })
-  ),
+  feedback_analysis: schema.maybe(feedbackAnalysisSchema),
   dest: schema.object({
     type: schema.oneOf([schema.literal('data_stream'), schema.literal('index')], {
       meta: {
@@ -362,6 +432,46 @@ export const registerAiIndexRoutes = ({
         } catch (error) {
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response);
+        }
+      })
+    );
+
+  // Update the feedback analysis configuration of an AI index
+  router.versioned
+    .put({
+      path: aiIndexFeedbackAnalysisPath,
+      security: WRITE_SECURITY,
+      access: 'internal',
+      summary: 'Update AI index feedback analysis configuration',
+      description:
+        'Replaces the feedback analysis configuration of an AI index without touching the rest of the entry. Permitted on managed AI indices, whose definition is otherwise immutable.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: aiIndexIdParamsSchema,
+            body: feedbackAnalysisSchema,
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
+        try {
+          const feedbackAnalysis = await getAiIndexService().setFeedbackAnalysis(
+            aiIndexId,
+            request.body
+          );
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
+          const body: PutAiIndexFeedbackAnalysisResponse = { feedback_analysis: feedbackAnalysis };
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId, error })
           );
           return handleAiIndexError(error, response);
         }

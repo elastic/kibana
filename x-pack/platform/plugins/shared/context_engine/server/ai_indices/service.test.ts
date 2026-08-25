@@ -187,7 +187,7 @@ describe('AiIndexService', () => {
       expect(indexArgs.document?.date_modified).not.toBe(aiIndexDocument.date_modified);
     });
 
-    it('persists feedback_agent_id when updating an existing AI index', async () => {
+    it('persists feedback_analysis when updating an existing AI index', async () => {
       storageClient.get.mockResolvedValue({
         _id: 'customer_support',
         _index: '.contextengine-ai-indices',
@@ -198,11 +198,17 @@ describe('AiIndexService', () => {
       });
 
       await expect(
-        service.put('customer_support', { ...properties, feedback_agent_id: 'my-analysis-agent' })
+        service.put('customer_support', {
+          ...properties,
+          feedback_analysis: { enabled: true, agent_id: 'my-analysis-agent' },
+        })
       ).resolves.toBe('updated');
 
       const [indexArgs] = storageClient.index.mock.calls[0];
-      expect(indexArgs.document?.feedback_agent_id).toBe('my-analysis-agent');
+      expect(indexArgs.document?.feedback_analysis).toEqual({
+        enabled: true,
+        agent_id: 'my-analysis-agent',
+      });
     });
 
     it('throws AiIndexConflictError when a concurrent create wins (409)', async () => {
@@ -514,6 +520,105 @@ describe('AiIndexService', () => {
     });
   });
 
+  describe('setFeedbackAnalysis', () => {
+    const feedbackAnalysis = {
+      enabled: true,
+      agent_id: 'my-analysis-agent',
+      schedule: { interval: '24h' },
+      signal_time_range: { type: 'relative' as const, from: 'now-30d' },
+    };
+
+    const mockStored = (document: AiIndexDocument) => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 7,
+        _primary_term: 2,
+        _source: document,
+      });
+    };
+
+    it('writes the block and leaves the rest of the entry untouched', async () => {
+      mockStored(aiIndexDocument);
+
+      await expect(
+        service.setFeedbackAnalysis('customer_support', feedbackAnalysis)
+      ).resolves.toEqual(feedbackAnalysis);
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document).toEqual(
+        expect.objectContaining({
+          feedback_analysis: feedbackAnalysis,
+          description: aiIndexDocument.description,
+          dest: aiIndexDocument.dest,
+          automations: aiIndexDocument.automations,
+          sources: aiIndexDocument.sources,
+          date_created: aiIndexDocument.date_created,
+        })
+      );
+    });
+
+    it('guards the write with optimistic concurrency control', async () => {
+      mockStored(aiIndexDocument);
+
+      await service.setFeedbackAnalysis('customer_support', feedbackAnalysis);
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.if_seq_no).toBe(7);
+      expect(indexArgs.if_primary_term).toBe(2);
+    });
+
+    it('is permitted on managed AI indices, and preserves the managed flag', async () => {
+      mockStored({ ...aiIndexDocument, managed: true });
+
+      await expect(
+        service.setFeedbackAnalysis('customer_support', feedbackAnalysis)
+      ).resolves.toEqual(feedbackAnalysis);
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document?.managed).toBe(true);
+    });
+
+    it('replaces the previous block rather than merging into it', async () => {
+      mockStored({
+        ...aiIndexDocument,
+        feedback_analysis: { enabled: true, agent_id: 'previous-agent' },
+      });
+
+      await service.setFeedbackAnalysis('customer_support', { enabled: false });
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document?.feedback_analysis).toEqual({ enabled: false });
+    });
+
+    it('does not re-validate the dest, so a stale backing store can still be switched off', async () => {
+      mockStored(aiIndexDocument);
+
+      await service.setFeedbackAnalysis('customer_support', { enabled: false });
+
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+    });
+
+    it('throws AiIndexNotFoundError when the AI index does not exist', async () => {
+      storageClient.get.mockRejectedValue(createNotFoundError());
+
+      await expect(service.setFeedbackAnalysis('missing', feedbackAnalysis)).rejects.toBeInstanceOf(
+        AiIndexNotFoundError
+      );
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('throws AiIndexConflictError when a concurrent write wins (409)', async () => {
+      mockStored(aiIndexDocument);
+      storageClient.index.mockRejectedValue(createConflictError());
+
+      await expect(
+        service.setFeedbackAnalysis('customer_support', feedbackAnalysis)
+      ).rejects.toBeInstanceOf(AiIndexConflictError);
+    });
+  });
+
   describe('get', () => {
     it('returns the AI index with its id', async () => {
       storageClient.get.mockResolvedValue({
@@ -544,20 +649,35 @@ describe('AiIndexService', () => {
       );
     });
 
-    it('round-trips feedback_agent_id from the stored document to the item', async () => {
+    it('round-trips feedback_analysis from the stored document to the item', async () => {
       storageClient.get.mockResolvedValue({
         _id: 'customer_support',
         _index: '.contextengine-ai-indices',
         found: true,
-        _source: { ...aiIndexDocument, feedback_agent_id: 'my-analysis-agent' },
+        _source: {
+          ...aiIndexDocument,
+          feedback_analysis: {
+            enabled: true,
+            agent_id: 'my-analysis-agent',
+            schedule: { interval: '24h' },
+            signal_time_range: { type: 'relative' as const, from: 'now-30d' },
+          },
+        },
       });
 
       await expect(service.get('customer_support')).resolves.toEqual(
-        expect.objectContaining({ feedback_agent_id: 'my-analysis-agent' })
+        expect.objectContaining({
+          feedback_analysis: {
+            enabled: true,
+            agent_id: 'my-analysis-agent',
+            schedule: { interval: '24h' },
+            signal_time_range: { type: 'relative', from: 'now-30d' },
+          },
+        })
       );
     });
 
-    it('omits feedback_agent_id when the stored document has none', async () => {
+    it('omits feedback_analysis when the stored document has none', async () => {
       storageClient.get.mockResolvedValue({
         _id: 'customer_support',
         _index: '.contextengine-ai-indices',
@@ -566,19 +686,21 @@ describe('AiIndexService', () => {
       });
 
       await expect(service.get('customer_support')).resolves.not.toHaveProperty(
-        'feedback_agent_id'
+        'feedback_analysis'
       );
     });
 
-    it('persists feedback_agent_id when creating an AI index', async () => {
+    it('persists feedback_analysis when creating an AI index', async () => {
       await service.create('customer_support', {
         ...properties,
-        feedback_agent_id: 'my-analysis-agent',
+        feedback_analysis: { enabled: false, agent_id: 'my-analysis-agent' },
       });
 
       expect(storageClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
-          document: expect.objectContaining({ feedback_agent_id: 'my-analysis-agent' }),
+          document: expect.objectContaining({
+            feedback_analysis: { enabled: false, agent_id: 'my-analysis-agent' },
+          }),
         })
       );
     });
