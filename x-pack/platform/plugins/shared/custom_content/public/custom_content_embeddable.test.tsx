@@ -361,7 +361,7 @@ describe('customContentEmbeddableFactory', () => {
 
       await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('draft', undefined));
 
-      expect(openChat).toHaveBeenCalled();
+      expect(openChat).toHaveBeenCalledWith(expect.objectContaining({ newConversation: true }));
     });
 
     it('clicking "Generate with chat" from the flyout on a new panel does not remove it', async () => {
@@ -635,6 +635,9 @@ describe('customContentEmbeddableFactory', () => {
               data: expect.objectContaining({ embeddable_id: 'test-uuid' }),
             }),
           ]),
+          // Which stored conversation gets restored depends on the entry point the user last used,
+          // so refining always starts fresh; the attachments carry the state the agent needs.
+          newConversation: true,
         })
       );
     });

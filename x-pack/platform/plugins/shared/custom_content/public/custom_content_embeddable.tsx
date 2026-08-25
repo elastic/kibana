@@ -166,6 +166,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               hasSaved = true;
               closeFlyout();
               agentBuilder.openChat({
+                newConversation: true,
                 attachments: [
                   buildCustomContentContextAttachment(
                     draftTemplate,
@@ -379,6 +380,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           isRetained = true;
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
+            newConversation: true,
             attachments: [
               buildCustomContentContextAttachment('', undefined, uuid, panelTitle ?? undefined),
             ],
