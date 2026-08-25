@@ -6,15 +6,15 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import fileSaver from 'file-saver';
 
 import type { Processor } from '../../../../common/types';
 import { FieldCopyAction } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
+import { PipelineAppHeader } from '../../components';
 import { PipelinesCsvUploader } from './pipelines_csv_uploader';
 import { PipelinesPreview } from './pipelines_preview';
 import { Error } from './error_display';
@@ -158,34 +158,13 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
 
   return (
     <>
-      <EuiPageHeader
-        bottomBorder
-        pageTitle={
-          <span data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.ingestPipelines.createFromCsv.pageTitle"
-              defaultMessage="Create pipeline from CSV"
-            />
-          </span>
-        }
-        rightSideItems={[
-          <EuiButtonEmpty
-            size="s"
-            flush="right"
-            href={services.documentation.getCreatePipelineCSVUrl()}
-            target="_blank"
-            iconType="question"
-            data-test-subj="documentationLink"
-          >
-            <FormattedMessage
-              id="xpack.ingestPipelines.createFromCSV.docsButtonLabel"
-              defaultMessage="CSV to pipeline docs"
-            />
-          </EuiButtonEmpty>,
-        ]}
+      <PipelineAppHeader
+        title={i18n.translate('xpack.ingestPipelines.createFromCsv.pageTitle', {
+          defaultMessage: 'Create pipeline from CSV',
+        })}
+        history={history}
+        docLink={services.documentation.getCreatePipelineCSVUrl()}
       />
-
-      <EuiSpacer size="xl" />
 
       <Instructions />
 
