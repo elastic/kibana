@@ -89,6 +89,14 @@ describe('eval_pipeline', () => {
       expect(shouldRunEvals('evals:agent-builder,models:eis/openai-gpt-5.4')).toBe(true);
     });
 
+    it('maps `models:judge:openrouter/<provider>-<model>` to an openrouter-* connector id', () => {
+      const yaml = getEvalPipeline(
+        'evals:agent-builder,models:openrouter/openai-gpt-5.4,models:judge:openrouter/anthropic-claude-sonnet-4.6'
+      ) as string;
+
+      expect(yaml).toContain('EVAL_CONNECTOR_ID: "openrouter-anthropic-claude-sonnet-4-6"');
+    });
+
     it('does not trigger when the only model label is dropped by forwarding (gate parity)', () => {
       expect(getEvalTriggerStep('evals:agent-builder,models:gpt 5')).toBeNull();
     });
