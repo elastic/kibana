@@ -86,4 +86,8 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./create_rule_step/create_rule_step').then((m) => m.createRuleStepDefinition)
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./update_rule_step/update_rule_step').then((m) => m.updateRuleStepDefinition)
+  );
 };
