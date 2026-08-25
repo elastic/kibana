@@ -14,7 +14,12 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
-import { FIND_RULES_INLINE_TOOL_ID, buildToolFilter, findRulesSchema } from './find_rules_tool';
+import {
+  FIND_RULES_INLINE_TOOL_ID,
+  buildDescriptionSearchClause,
+  buildToolFilter,
+  findRulesSchema,
+} from './find_rules_tool';
 import {
   DISCOVER_RULE_TAGS_INLINE_TOOL_ID,
   discoverRuleTagsSchema,
@@ -274,6 +279,29 @@ describe('discoverRuleTagsSchema', () => {
 });
 
 describe('buildToolFilter', () => {
+  it('searchTerm also searches rule descriptions', () => {
+    const result = buildToolFilter({ searchTerm: 'tunneling' });
+    expect(result).toContain('alert.attributes.name');
+    expect(result).toContain(
+      'alert.attributes.params.description: (*tunneling* OR *TUNNELING* OR *Tunneling*)'
+    );
+  });
+
+  it('description clause ANDs tokens and skips short ones', () => {
+    const clause = buildDescriptionSearchClause('DNS by TXT');
+    expect(clause).toContain('*DNS*');
+    expect(clause).toContain('*TXT*');
+    expect(clause).not.toContain('*by*');
+    expect(clause).toContain(' AND ');
+  });
+
+  it('description clause is omitted when every token is too short', () => {
+    expect(buildDescriptionSearchClause('a of')).toBeUndefined();
+    const result = buildToolFilter({ searchTerm: 'ab' });
+    expect(result).toContain('alert.attributes.name');
+    expect(result).not.toContain('params.description');
+  });
+
   it('returns undefined when no parameters are provided', () => {
     expect(buildToolFilter({})).toBeUndefined();
   });
