@@ -63,7 +63,6 @@ interface OnboardingFlowState {
   removeDeployInstance: (instanceId: string) => void;
   getLatestFailedInstances: () => string[];
   registerDeployHandler: (fn: (instanceIds?: string[]) => void) => void;
-  retryDeploy: (instanceIds?: string[]) => void;
   awsServiceMatrix: AwsServiceMatrixEntry[] | undefined;
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
   awsServiceMatrixError: boolean;
@@ -194,10 +193,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     deployHandlerRef.current = fn;
   }, []);
 
-  const retryDeploy = useCallback((instanceIds?: string[]) => {
-    deployHandlerRef.current?.(instanceIds);
-  }, []);
-
   const {
     matrix: awsServiceMatrix,
     isError: awsServiceMatrixError,
@@ -245,7 +240,6 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         removeDeployInstance,
         getLatestFailedInstances,
         registerDeployHandler,
-        retryDeploy,
         awsServiceMatrix,
         awsServicesMap,
         awsServiceMatrixError,
