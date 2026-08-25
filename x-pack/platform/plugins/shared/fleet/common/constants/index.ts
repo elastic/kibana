@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AGENT_STATUS_CHANGE_DATA_STREAM_NAME } from './agent';
+import { AGENT_STATUS_CHANGE_DATA_STREAM } from './agent';
 
 export { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from './plugin';
 export {
@@ -70,6 +70,6 @@ export * from './mappings';
 
 export const AUTO_UPGRADE_DEFAULT_RETRIES = ['30m', '1h', '2h', '4h', '8h', '16h', '24h'];
 
-export const FLEET_LOG_INDICES = [AGENT_STATUS_CHANGE_DATA_STREAM_NAME];
+export const FLEET_LOG_INDICES = [`logs-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-*`];
 
 export const SCHEDULED_UNENROLL_ACTION_ID_PREFIX = 'ScheduledUnenrollInactiveAgents-';
