@@ -72,7 +72,8 @@ export class ApplyMaintenanceWindowStep implements DispatcherStep {
       return maintenanceWindow ? maintenanceWindowReason(maintenanceWindow.id) : undefined;
     });
 
-    if (newTriage.suppressed.length === triage.suppressed.length) {
+    if (newTriage === triage) {
+      // Nothing newly suppressed — no state to emit.
       return { type: 'continue' };
     }
 

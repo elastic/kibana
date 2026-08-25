@@ -47,6 +47,15 @@ describe('EpisodeTriage', () => {
       expect(initial.dispatchable).toHaveLength(2);
       expect(initial.suppressed).toHaveLength(1);
     });
+
+    it('returns the same instance when nothing is newly suppressed', () => {
+      const initial = EpisodeTriage.partition(
+        [createAlertEpisode({ episode_id: 'e1' })],
+        () => undefined
+      );
+
+      expect(initial.suppressDispatchableWhere(() => undefined)).toBe(initial);
+    });
   });
 
   describe('mapDispatchable', () => {

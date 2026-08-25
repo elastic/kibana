@@ -16,6 +16,8 @@ export type SuppressedEpisode = AlertEpisode & { reason: string };
  * re-partitioned by ApplyMaintenanceWindowStep — each returns a new instance.
  */
 export class EpisodeTriage {
+  private static readonly EMPTY = new EpisodeTriage([], []);
+
   private constructor(
     public readonly dispatchable: readonly AlertEpisode[],
     public readonly suppressed: readonly SuppressedEpisode[]
@@ -32,7 +34,7 @@ export class EpisodeTriage {
   }
 
   public static empty(): EpisodeTriage {
-    return new EpisodeTriage([], []);
+    return EpisodeTriage.EMPTY;
   }
 
   /** Partition episodes: a returned reason means "suppress". */
@@ -40,13 +42,14 @@ export class EpisodeTriage {
     episodes: readonly AlertEpisode[],
     suppressionReasonFor: (episode: AlertEpisode) => string | undefined
   ): EpisodeTriage {
-    return EpisodeTriage.empty().suppressWhere(episodes, suppressionReasonFor);
+    return EpisodeTriage.EMPTY.suppressWhere(episodes, suppressionReasonFor);
   }
 
   /**
    * Re-partition the dispatchable set: episodes with a reason move to
    * `suppressed` (appended after the already-suppressed ones), the rest stay
-   * dispatchable.
+   * dispatchable. Returns `this` unchanged when nothing was newly suppressed,
+   * so callers can detect a no-op by identity.
    */
   public suppressDispatchableWhere(
     suppressionReasonFor: (episode: AlertEpisode) => string | undefined
@@ -64,17 +67,21 @@ export class EpisodeTriage {
   }
 
   public dispatchableEpisodeIds(): string[] {
-    return [...new Set(this.dispatchable.map((episode) => episode.episode_id))];
+    const ids = new Set<string>();
+    for (const episode of this.dispatchable) {
+      ids.add(episode.episode_id);
+    }
+    return Array.from(ids);
   }
 
   public dispatchableRuleIds(): RuleId[] {
-    return [
-      ...new Set(
-        this.dispatchable
-          .map((episode) => episode.rule_id)
-          .filter((id): id is RuleId => id !== null)
-      ),
-    ];
+    const ids = new Set<RuleId>();
+    for (const episode of this.dispatchable) {
+      if (episode.rule_id !== null) {
+        ids.add(episode.rule_id);
+      }
+    }
+    return Array.from(ids);
   }
 
   private suppressWhere(
@@ -82,17 +89,24 @@ export class EpisodeTriage {
     suppressionReasonFor: (episode: AlertEpisode) => string | undefined
   ): EpisodeTriage {
     const dispatchable: AlertEpisode[] = [];
-    const suppressed: SuppressedEpisode[] = [...this.suppressed];
+    // Only copied on the first newly suppressed episode, so a tick where
+    // nothing matches allocates no suppressed array and returns `this`.
+    let suppressed: SuppressedEpisode[] | undefined;
 
     for (const episode of episodes) {
       const reason = suppressionReasonFor(episode);
       if (reason !== undefined) {
+        suppressed ??= [...this.suppressed];
         suppressed.push({ ...episode, reason });
       } else {
         dispatchable.push(episode);
       }
     }
 
-    return new EpisodeTriage(dispatchable, suppressed);
+    if (suppressed === undefined && episodes === this.dispatchable) {
+      return this;
+    }
+
+    return new EpisodeTriage(dispatchable, suppressed ?? this.suppressed);
   }
 }

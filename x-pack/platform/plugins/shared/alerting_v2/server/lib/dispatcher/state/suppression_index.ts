@@ -13,28 +13,28 @@ import type { AlertEpisode, AlertEpisodeSuppression } from '../types';
  * indexed by episode- and series-scoped keys for per-episode lookup.
  */
 export class SuppressionIndex {
-  private constructor(
-    public readonly rows: readonly AlertEpisodeSuppression[],
-    private readonly byKey: ReadonlyMap<string, AlertEpisodeSuppression>
-  ) {}
+  private static readonly EMPTY = new SuppressionIndex(new Map());
+
+  private constructor(private readonly byKey: ReadonlyMap<string, AlertEpisodeSuppression>) {}
 
   public static of(suppressions: readonly AlertEpisodeSuppression[]): SuppressionIndex {
     const byKey = new Map<string, AlertEpisodeSuppression>();
     for (const suppression of suppressions) {
-      if (suppression.episode_id) {
-        byKey.set(
-          suppressionEpisodeKey({ ...suppression, episode_id: suppression.episode_id }),
-          suppression
-        );
-      } else {
-        byKey.set(suppressionSeriesKey(suppression), suppression);
-      }
+      const { episode_id: episodeId } = suppression;
+      const key = episodeId
+        ? suppressionEpisodeKey({ ...suppression, episode_id: episodeId })
+        : suppressionSeriesKey(suppression);
+      byKey.set(key, suppression);
     }
-    return new SuppressionIndex(suppressions, byKey);
+    return new SuppressionIndex(byKey);
   }
 
   public static empty(): SuppressionIndex {
-    return SuppressionIndex.of([]);
+    return SuppressionIndex.EMPTY;
+  }
+
+  public get size(): number {
+    return this.byKey.size;
   }
 
   /**
