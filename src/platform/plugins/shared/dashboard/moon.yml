@@ -133,6 +133,8 @@ dependsOn:
   - '@kbn/core-chrome-browser-hooks'
   - '@kbn/ui-callout'
   - '@kbn/zod-helpers'
+  - '@kbn/core-chrome-browser'
+  - '@kbn/shared-ux-navigation-extension-templates'
 tags:
   - plugin
   - prod

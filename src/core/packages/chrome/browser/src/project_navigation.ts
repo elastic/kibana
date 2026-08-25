@@ -41,7 +41,9 @@ import type { DeepLinkId as ContextEngineLink } from '@kbn/deeplinks-context-eng
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
 import type { BadgeType } from '@kbn/ui-side-navigation';
+import type { Serializable } from '@kbn/utility-types';
 
+import type { NavExtensionId } from './nav_extensions';
 import type { ChromeNavLink } from './nav_links';
 
 export type SolutionId = KibanaProject;
@@ -111,7 +113,7 @@ export type CloudLinks = {
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
-export type RenderAs = 'home' | 'panelOpener';
+export type RenderAs = 'home' | 'panelOpener' | 'extension';
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -168,6 +170,19 @@ interface ChromeNavigationNodeCommon
 }
 
 /** @public */
+export interface ChromeExtensionPointNavigationNode extends ChromeNavigationNodeCommon {
+  renderAs: Extract<RenderAs, 'extension'>;
+  extensionId: string;
+  popoverOnly?: boolean;
+  /**
+   * When true, chrome omits this extension section from the nav when its data$
+   * emits no value (null, undefined, or empty array). Default false.
+   */
+  hideWhenEmpty?: boolean;
+  children?: never;
+}
+
+/** @public */
 /**
  * Chrome project navigation node. This is the tree definition stored in the Chrome service
  * that is generated based on the NodeDefinition below.
@@ -181,14 +196,19 @@ export interface ChromeProjectNavigationNode extends ChromeNavigationNodeCommon 
    * Indicate if this is a special node
    * - home - node should be rendered as the home link
    */
-  renderAs?: RenderAs;
+  renderAs?: Exclude<RenderAs, 'extension'>;
+  /**
+   * When true on a panel opener, sections are only shown in the hover popover and never
+   * in the persistent expanded side panel.
+   */
+  popoverOnly?: boolean;
   /** App id or deeplink id */
   deepLink?: ChromeNavLink;
   /**
    * Optional children of the navigation node. Once a node has "children" defined it is
    * considered a "group" node.
    */
-  children?: Array<ChromeProjectNavigationNode>;
+  children?: Array<ChromeProjectNavigationNode | ChromeExtensionPointNavigationNode>;
   /**
    * Flag to indicate if the node is an "external" cloud link
    */
@@ -203,6 +223,27 @@ export interface ChromeProjectNavigationNode extends ChromeNavigationNodeCommon 
  */
 export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
+}
+
+/**
+ * Extension point node definition.
+ * This node is used to render a framework template (an "extension slot").
+ * The node is plain serializable data: the node `id` serves as the slot key, and `extensionId` references
+ * the plugin-published extension definition. The powering `data$` is supplied separately
+ * in the slot data-source map at registration, keyed by the node `id`.
+ */
+export interface ExtensionPointNodeDefinition<Id extends string = string>
+  extends Omit<NodeDefinitionCommon<AppDeepLinkId, Id>, 'cloudLink' | 'link' | 'href'> {
+  id: Id;
+  renderAs: Extract<RenderAs, 'extension'>;
+  extensionId: NavExtensionId;
+  popoverOnly?: boolean;
+  /**
+   * When true, chrome omits this extension section from the nav when its data$
+   * emits no value (null, undefined, or empty array). Default false.
+   */
+  hideWhenEmpty?: boolean;
+  children?: never;
 }
 
 /** Standard nav node used outside panel-opener section lists. */
@@ -225,7 +266,7 @@ export type StandardNodeDefinition<
 export type PanelOpenerChildDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string
-> = StandardNodeDefinition<LinkId, Id, Id>;
+> = ExtensionPointNodeDefinition<Id> | StandardNodeDefinition<LinkId, Id, Id>;
 
 export type RootNodePanelOpenerDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -322,6 +363,9 @@ export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = App
 export type SolutionNavigationDefinitions = {
   [id in SolutionId]?: SolutionNavigationDefinition;
 };
+
+/** Value emitted by an extension data `Observable` (row object, row array, etc.). */
+export type NavExtensionSlotData = Serializable;
 
 /**
  * Temporary helper interface while we have to maintain both the legacy side navigation

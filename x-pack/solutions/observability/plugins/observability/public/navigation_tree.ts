@@ -86,9 +86,19 @@ function createNavTree({
       {
         link: 'dashboards',
         icon: 'productDashboard',
+        renderAs: 'panelOpener',
         getIsActive: ({ pathNameSerialized, prepend, location }) =>
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
+        children: [
+          {
+            id: 'recent-dashboards',
+            renderAs: 'extension',
+            extensionId: 'recentlyAccessedDashboards',
+            popoverOnly: true,
+            hideWhenEmpty: true,
+          },
+        ],
       },
       ...getWorkflowsNavPanel(coreStart),
       {

@@ -29,6 +29,7 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
 
+import { BehaviorSubject } from 'rxjs';
 import { setKibanaServices } from './kibana_services';
 import { setLogger } from './logger';
 import type { DashboardCapabilities } from '../../common';
@@ -83,4 +84,10 @@ export const mockDashboardBackupService = {
     .fn()
     .mockReturnValue(['dashboardUnsavedOne', 'dashboardUnsavedTwo']),
   dashboardHasUnsavedEdits: jest.fn(),
+};
+
+export const mockDashboardRecentlyAccessedService = {
+  add: jest.fn(),
+  get: jest.fn(),
+  get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
 };
