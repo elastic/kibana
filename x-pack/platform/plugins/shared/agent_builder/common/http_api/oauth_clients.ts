@@ -11,22 +11,13 @@ export interface ListOAuthClientsResponse {
   clients: OAuthClient[];
 }
 
-export interface OAuthClientResource {
-  value: string;
-  label: string;
-}
-
-export interface ListOAuthResourcesResponse {
-  resources: OAuthClientResource[];
-}
-
 export interface CreateOAuthClientPayload {
   client_name: string;
   client_type?: OAuthClientType;
   client_metadata?: Record<string, string>;
   client_logo?: OAuthClientLogo;
   redirect_uris?: string[];
-  resource?: string;
+  resource?: 'mcp' | 'a2a';
 }
 
 export interface CreateOAuthClientResponse extends OAuthClient {

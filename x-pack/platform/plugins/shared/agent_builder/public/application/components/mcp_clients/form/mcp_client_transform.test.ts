@@ -149,7 +149,7 @@ describe('toCreateOAuthClientPayload', () => {
       uris: [{ value: 'http://127.0.0.1:3000/callback' }],
     },
     isConfidential: false,
-    resource: '',
+    resource: 'mcp',
   };
 
   it('builds a payload for a public client with no logo and a single redirect URI', () => {
@@ -158,6 +158,7 @@ describe('toCreateOAuthClientPayload', () => {
       client_logo: undefined,
       redirect_uris: ['http://127.0.0.1:3000/callback'],
       client_type: OAuthClientType.PUBLIC,
+      resource: 'mcp',
     });
   });
 
@@ -249,7 +250,7 @@ describe('toUpdateOAuthClientPayload', () => {
       uris: [{ value: 'http://127.0.0.1:3000/callback' }],
     },
     isConfidential: false,
-    resource: '',
+    resource: 'mcp',
   };
 
   it('never sends client_type, which is immutable after registration', () => {
@@ -387,7 +388,7 @@ describe('oauthClientToFormData', () => {
         uris: [{ value: 'https://example.com/callback' }],
       },
       isConfidential: true,
-      resource: 'resource-1',
+      resource: 'mcp',
     });
   });
 

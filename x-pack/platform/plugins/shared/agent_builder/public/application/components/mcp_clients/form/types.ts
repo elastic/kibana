@@ -54,5 +54,5 @@ export interface McpClientFormData {
   clientLogo: ClientLogo;
   redirect: RedirectUriConfig;
   isConfidential: boolean;
-  resource: string;
+  resource: 'mcp' | 'a2a';
 }

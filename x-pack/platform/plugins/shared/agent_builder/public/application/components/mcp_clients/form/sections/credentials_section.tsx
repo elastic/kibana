@@ -5,33 +5,19 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import {
-  EuiButtonGroup,
-  EuiCheckbox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiButtonGroup, EuiCheckbox, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { McpClientFormData } from '../types';
 import { labels } from '../../../../utils/i18n';
-import { useOAuthResources } from '../../../../hooks/oauth_clients/use_oauth_resources';
+
+const RESOURCE_OPTIONS = [
+  { id: 'mcp', label: 'MCP Server' },
+  { id: 'a2a', label: 'A2A Agent' },
+];
 
 export const CredentialsSection = () => {
-  const { control, setValue, watch } = useFormContext<McpClientFormData>();
-  const { resources, isLoading } = useOAuthResources();
-  const resourceValue = watch('resource');
-
-  useEffect(() => {
-    if (resources.length > 0 && !resourceValue) {
-      setValue('resource', resources[0].value, { shouldValidate: false });
-    }
-  }, [resources, resourceValue, setValue]);
+  const { control } = useFormContext<McpClientFormData>();
 
   return (
     <EuiPanel hasShadow={false} color="highlighted">
@@ -64,33 +50,20 @@ export const CredentialsSection = () => {
         )}
       />
       <EuiSpacer size="m" />
-      {isLoading ? (
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              Loading endpoint options…
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : resources.length > 0 ? (
-        <Controller
-          control={control}
-          name="resource"
-          render={({ field }) => (
-            <EuiButtonGroup
-              legend="Endpoint type"
-              options={resources.map(({ value, label }) => ({ id: value, label }))}
-              idSelected={field.value}
-              onChange={(id) => field.onChange(id)}
-              type="single"
-              data-test-subj="mcpClientResourceButtonGroup"
-            />
-          )}
-        />
-      ) : null}
+      <Controller
+        control={control}
+        name="resource"
+        render={({ field }) => (
+          <EuiButtonGroup
+            legend="Endpoint type"
+            options={RESOURCE_OPTIONS}
+            idSelected={field.value}
+            onChange={(id) => field.onChange(id)}
+            type="single"
+            data-test-subj="mcpClientResourceButtonGroup"
+          />
+        )}
+      />
     </EuiPanel>
   );
 };

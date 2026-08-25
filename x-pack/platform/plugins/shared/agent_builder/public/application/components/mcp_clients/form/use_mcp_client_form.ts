@@ -119,7 +119,7 @@ export const DEFAULT_MCP_CLIENT_FORM_VALUES: McpClientFormData = {
     uris: [{ value: 'http://localhost/callback' }, { value: 'http://localhost/oauth/callback' }],
   },
   isConfidential: false,
-  resource: '',
+  resource: 'mcp',
 };
 
 export const useMcpClientForm = (initialValues?: McpClientFormData) => {

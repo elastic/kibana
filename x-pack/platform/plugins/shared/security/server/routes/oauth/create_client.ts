@@ -14,7 +14,6 @@ import {
   type KibanaSolution,
 } from '@kbn/projects-solutions-groups';
 
-import { getConfiguredOAuthResources } from './list_resources';
 import { createClientBodySchema } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
@@ -61,21 +60,16 @@ export function defineCreateOAuthClientRoute({
           });
         }
 
-        const configuredResources = getConfiguredOAuthResources(config);
-        if (!configuredResources) {
+        const { resource: resourceType = 'mcp', ...clientBody } = request.body;
+        const resourceUrl =
+          resourceType === 'a2a'
+            ? config.a2a?.oauth2?.metadata?.resource
+            : config.mcp?.oauth2?.metadata?.resource;
+        if (!resourceUrl) {
           return response.notFound({
             body: {
-              message:
-                'OAuth management is not available: MCP protected resource metadata is not configured',
+              message: `OAuth management is not available: ${resourceType.toUpperCase()} resource is not configured`,
             },
-          });
-        }
-        const { resource: requestedResource, ...clientBody } = request.body;
-        const allowedValues = configuredResources.map((r) => r.value);
-        const resource = requestedResource ?? allowedValues[0];
-        if (!allowedValues.includes(resource)) {
-          return response.badRequest({
-            body: { message: `Invalid resource. Allowed values: ${allowedValues.join(', ')}` },
           });
         }
 
@@ -108,7 +102,7 @@ export function defineCreateOAuthClientRoute({
 
         const result = await oauth.createClient(request, {
           ...clientBody,
-          resource,
+          resource: resourceUrl,
           project_id: serverlessProjectId,
           project_type: projectType,
         });

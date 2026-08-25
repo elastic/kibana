@@ -124,5 +124,5 @@ export const oauthClientToFormData = (
   clientLogo,
   redirect: deriveRedirectConfig(client.redirect_uris),
   isConfidential: client.type === OAuthClientType.CONFIDENTIAL,
-  resource: client.resource ?? '',
+  resource: client.resource?.endsWith('/a2a') ? 'a2a' : 'mcp',
 });

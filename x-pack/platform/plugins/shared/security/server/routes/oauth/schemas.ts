@@ -57,7 +57,7 @@ export const createClientBodySchema = schema.object({
   client_metadata: schema.maybe(clientMetadataSchema),
   client_logo: schema.maybe(clientLogoSchema),
   redirect_uris: schema.maybe(redirectUrisSchema),
-  resource: schema.maybe(schema.string({ minLength: 1 })),
+  resource: schema.maybe(schema.oneOf([schema.literal('mcp'), schema.literal('a2a')])),
 });
 
 export const updateClientBodySchema = schema.object({
