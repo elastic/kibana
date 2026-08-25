@@ -1224,7 +1224,9 @@ describe('DispatcherService', () => {
 
   // Shared builder: aborted pipeline that held the watermark. Pass `recordedEpisodes` to
   // simulate DispatchStep writing some chunks before the abort; omit (undefined) to simulate
-  // no records written — the only path where computeNextWatermark returns input.eventWatermark.
+  // no records written. Note: computeNextWatermark holds on any abort regardless of
+  // recordedEpisodes — the recordedEpisodes value only affects the stuck-tick counter
+  // in DispatcherService (isStuck = watermarkHeld && recordedEpisodes === 0).
   function buildAbortedPipeline(
     episodes: AlertEpisode[],
     recordedEpisodes?: number

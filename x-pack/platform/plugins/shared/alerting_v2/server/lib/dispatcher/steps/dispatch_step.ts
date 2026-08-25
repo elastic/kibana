@@ -164,7 +164,7 @@ export class DispatchStep implements DispatcherStep {
           // and can cause throttle intervals to appear satisfied prematurely.
           const now = new Date();
           try {
-            await this.recordFiredGroups(newlyDispatched, policies, now);
+            await this.recordFiredGroups(newlyDispatched, policies, now, logger);
             firedEpisodesCount += newlyDispatched.reduce(
               (sum, group) => sum + group.episodes.length,
               0
@@ -172,12 +172,15 @@ export class DispatchStep implements DispatcherStep {
           } catch (err) {
             // Write failed after workflows were already scheduled. These groups
             // have no dedup record and will be re-dispatched next tick (duplicate
-            // risk). Log with group IDs so an operator can identify affected groups.
-            const groupIds = newlyDispatched.map((g) => g.id).join(',');
+            // risk). Log a sample of group IDs so an operator can identify the tick.
+            const MAX_LOG_IDS = 10;
+            const ids = newlyDispatched.slice(0, MAX_LOG_IDS).map((g) => g.id);
+            const overflow = newlyDispatched.length - MAX_LOG_IDS;
+            const suffix = overflow > 0 ? ` …+${overflow} more` : '';
             logger.error({
               error: toError(err),
               code: ALERTING_LOG_CODES.DISPATCH_FIRE_RECORD_FAILED,
-              message: () => `fire/notified record write failed for groups [${groupIds}]`,
+              message: () => `fire/notified record write failed for groups [${ids.join(',')}${suffix}]`,
             });
             // Do NOT increment firedEpisodesCount — records were not written.
           }
@@ -191,26 +194,38 @@ export class DispatchStep implements DispatcherStep {
   private async recordFiredGroups(
     groups: ActionGroup[],
     policies: DispatcherPipelineState['policies'],
-    now: Date
+    now: Date,
+    logger: LoggerServiceContract
   ): Promise<void> {
-    await this.storageService.bulkIndexDocs({
-      index: ALERT_ACTIONS_DATA_STREAM,
-      docs: groups.flatMap((group) => {
-        const groupingMode = policies?.get(group.policyId)?.groupingMode;
-        return [
-          ...group.episodes.map((episode) =>
-            toAction({
-              episode,
-              actionType: 'fire',
-              now,
-              reason: `dispatched by policy ${group.policyId}`,
-              spaceId: episode.space_id,
-            })
-          ),
-          toNotifiedAction(group, groupingMode, now),
-        ];
-      }),
+    const docs = groups.flatMap((group) => {
+      if (group.episodes.length === 0) {
+        // An empty-episode group has no valid group_hash for the notified dedup record.
+        // Skip it individually so other groups in the bulk still get their records.
+        logger.error({
+          error: new Error(`group ${group.id} has no episodes`),
+          code: ALERTING_LOG_CODES.DISPATCH_GROUP_UNHANDLED_ERROR,
+          labels: { group_id: group.id, policy_id: group.policyId },
+        });
+        return [];
+      }
+      const groupingMode = policies?.get(group.policyId)?.groupingMode;
+      return [
+        ...group.episodes.map((episode) =>
+          toAction({
+            episode,
+            actionType: 'fire',
+            now,
+            reason: `dispatched by policy ${group.policyId}`,
+            spaceId: episode.space_id,
+          })
+        ),
+        toNotifiedAction(group, groupingMode, now),
+      ];
     });
+
+    if (docs.length > 0) {
+      await this.storageService.bulkIndexDocs({ index: ALERT_ACTIONS_DATA_STREAM, docs });
+    }
   }
 
   private recordMissingApiKey(

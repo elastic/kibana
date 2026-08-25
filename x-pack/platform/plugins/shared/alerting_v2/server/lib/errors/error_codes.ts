@@ -312,7 +312,8 @@ export const ALERTING_LOG_CODES = {
   /**
    * Writing fire/notified dedup records after a dispatched chunk failed. The
    * workflows were already scheduled; affected groups will be re-dispatched on
-   * the next tick (duplicate risk). The episode IDs are in `labels.group_ids`.
+   * the next tick (duplicate risk). The affected group IDs are included in the
+   * log message.
    */
   DISPATCH_FIRE_RECORD_FAILED: 'DISPATCH_FIRE_RECORD_FAILED',
   /**

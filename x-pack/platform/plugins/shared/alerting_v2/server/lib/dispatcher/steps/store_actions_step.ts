@@ -31,16 +31,22 @@ export class StoreActionsStep implements DispatcherStep {
       throttled = [],
       dispatch = [],
       dispatchable = [],
+      dispatchFailures = [],
       firedEpisodes = 0,
     } = state;
 
     const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled);
 
+    // Only halt when there is truly nothing to record or emit. Include
+    // dispatchFailures so the pipeline continues to StoreExecutionHistoryStep
+    // when dispatch was attempted but all destinations failed — otherwise
+    // dispatch_failed history events are dropped for that tick.
     if (
       suppressed.length === 0 &&
       throttled.length === 0 &&
       firedEpisodes === 0 &&
-      unmatched.length === 0
+      unmatched.length === 0 &&
+      dispatchFailures.length === 0
     ) {
       return { type: 'halt', reason: 'no_actions' };
     }

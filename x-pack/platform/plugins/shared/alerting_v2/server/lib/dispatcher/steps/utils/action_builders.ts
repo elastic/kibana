@@ -16,7 +16,7 @@ export function toAction({
   spaceId,
 }: {
   episode: AlertEpisode;
-  actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
+  actionType: 'suppress' | 'fire' | 'unmatched';
   now: Date;
   reason?: string;
   spaceId: string;
