@@ -10,7 +10,10 @@
 import { type MutableRefObject, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowYamlValidationContext } from './collect_full_workflow_yaml_validation_results';
+import type {
+  ConnectorTypesValidationState,
+  WorkflowYamlValidationContext,
+} from './collect_full_workflow_yaml_validation_results';
 import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import {
@@ -19,6 +22,19 @@ import {
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowEsqlCallbacks } from '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks';
+
+const getConnectorTypesValidationState = (
+  connectorsData: ReturnType<typeof useAvailableConnectors>,
+  connectorsLoadState: ReturnType<typeof selectConnectorsLoadState>
+): ConnectorTypesValidationState => {
+  if (connectorsLoadState.status === 'ready' && connectorsData) {
+    return { status: 'ready', value: connectorsData.connectorTypes };
+  }
+  if (connectorsLoadState.status === 'failed') {
+    return connectorsLoadState;
+  }
+  return { status: 'loading' };
+};
 
 /** Live Kibana context shared by the YAML editor and change-history preview validators. */
 export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContext {
@@ -38,12 +54,7 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
 
   return useMemo(
     () => ({
-      connectorTypes:
-        connectorsLoadState.status === 'ready' && connectorsData
-          ? { status: 'ready' as const, value: connectorsData.connectorTypes }
-          : connectorsLoadState.status === 'failed'
-          ? connectorsLoadState
-          : { status: 'loading' as const },
+      connectorTypes: getConnectorTypesValidationState(connectorsData, connectorsLoadState),
       connectorsManagementUrl: application.getUrlForApp('management', {
         deepLinkId: 'triggersActionsConnectors',
         absolute: true,

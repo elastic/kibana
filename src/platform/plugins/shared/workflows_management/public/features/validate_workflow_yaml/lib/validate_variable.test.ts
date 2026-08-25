@@ -145,24 +145,6 @@ describe('validateVariable', () => {
     });
   });
 
-  it('should return warning when context is null', () => {
-    const variableItem = createVariableItem({ key: 'test.variable' });
-    mockParseVariablePath.mockReturnValue({
-      errors: null,
-      propertyPath: 'test.variable',
-    } as any);
-
-    const result = validateVariable(variableItem, null);
-
-    expect(result).toMatchObject({
-      message: 'Variable test.variable cannot be validated, because the workflow schema is invalid',
-      severity: 'warning',
-      owner: 'variable-validation',
-      ruleId: 'variableUncheckableInvalidSchema',
-      hoverMessage: null,
-    });
-  });
-
   it('should return error when schema is not found at path', () => {
     const variableItem = createVariableItem({ key: 'nonexistent.variable' });
     mockParseVariablePath.mockReturnValue({

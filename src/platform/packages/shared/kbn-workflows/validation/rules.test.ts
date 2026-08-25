@@ -36,7 +36,6 @@ describe('workflow validation rules registry', () => {
         "invalidVariableReference",
         "invalidWorkflowOutput",
         "liquidSyntaxError",
-        "liquidUnexpectedError",
         "missingRequiredInput",
         "parallelFanOutExceedsLimit",
         "schemaViolation",
@@ -46,7 +45,6 @@ describe('workflow validation rules registry', () => {
         "unknownInputKey",
         "unknownVariableType",
         "variablePathParseError",
-        "variableUncheckableInvalidSchema",
         "yamlSyntaxError",
       ]
     `);

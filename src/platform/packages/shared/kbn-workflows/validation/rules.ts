@@ -54,12 +54,6 @@ export interface WorkflowValidationRules {
     defaultSeverity: 'error';
     values: Record<string, never>;
   };
-  /** The variable may be fine, but the workflow schema is too broken to tell. */
-  variableUncheckableInvalidSchema: {
-    owner: 'variable-validation';
-    defaultSeverity: 'warning';
-    values: { key: string };
-  };
   /** A foreach item whose element type is only known at runtime. */
   foreachItemRuntimeType: {
     owner: 'variable-validation';
@@ -102,12 +96,6 @@ export interface WorkflowValidationRules {
   };
   // -- liquid templates ---------------------------------------------------------
   liquidSyntaxError: {
-    owner: 'liquid-template-validation';
-    defaultSeverity: 'error';
-    values: { reason: string };
-  };
-  /** The Liquid checker itself threw. */
-  liquidUnexpectedError: {
     owner: 'liquid-template-validation';
     defaultSeverity: 'error';
     values: { reason: string };
@@ -263,7 +251,6 @@ export const WORKFLOW_VALIDATION_RULES: {
   graphBuildError: { owner: 'graph-build-validation', defaultSeverity: 'error' },
 
   undefinedVariable: { owner: 'variable-validation', defaultSeverity: 'error' },
-  variableUncheckableInvalidSchema: { owner: 'variable-validation', defaultSeverity: 'warning' },
   foreachItemRuntimeType: { owner: 'variable-validation', defaultSeverity: 'warning' },
   invalidVariablePath: { owner: 'variable-validation', defaultSeverity: 'error' },
   variablePathParseError: { owner: 'variable-validation', defaultSeverity: 'error' },
@@ -273,7 +260,6 @@ export const WORKFLOW_VALIDATION_RULES: {
   invalidForeachParameter: { owner: 'variable-validation', defaultSeverity: 'warning' },
 
   liquidSyntaxError: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
-  liquidUnexpectedError: { owner: 'liquid-template-validation', defaultSeverity: 'error' },
 
   connectorNotFound: { owner: 'connector-id-validation', defaultSeverity: 'error' },
 

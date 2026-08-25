@@ -21,7 +21,7 @@ import type { VariableItem, YamlValidationResult } from '../model/types';
 
 export function validateVariable(
   variableItem: VariableItem,
-  context: typeof DynamicStepContextSchema | null
+  context: typeof DynamicStepContextSchema
 ): YamlValidationResult {
   const { key, type } = variableItem;
 
@@ -37,17 +37,6 @@ export function validateVariable(
   }
 
   const parsedPath = parseVariablePath(key);
-
-  if (!context) {
-    return {
-      ...variableItem,
-      message: `Variable ${key} cannot be validated, because the workflow schema is invalid`,
-      severity: 'warning',
-      owner: 'variable-validation',
-      ruleId: 'variableUncheckableInvalidSchema',
-      hoverMessage: null,
-    };
-  }
 
   if (type === 'foreach') {
     try {
