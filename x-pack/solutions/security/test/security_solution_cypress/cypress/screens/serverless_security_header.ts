@@ -118,7 +118,11 @@ const clickWhenVisibleElseOpenMore = (selector: string) => {
   // Wait for chrome to settle before checking visibility — the SideNav can cover elements with a
   // transient overlay (css-1rrlroc) while it is still measuring/laying out after initial render.
   // https://github.com/elastic/kibana/issues/239331
-  cy.get('[data-test-subj~="nav-item"]').should('exist');
+  // nav-item is a serverless-only chrome selector; skip this check in stateful/ESS environments
+  // where openNavigationPanel from this file may still be called (e.g. siem_migrations.ts).
+  if (Cypress.env('IS_SERVERLESS')) {
+    cy.get('[data-test-subj~="nav-item"]').should('exist');
+  }
   cy.get('[data-test-subj="globalLoadingIndicator-hidden"]').should('exist');
   cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   cy.get('body').then(($body) => {
