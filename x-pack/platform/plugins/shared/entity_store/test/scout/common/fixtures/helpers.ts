@@ -88,7 +88,7 @@ export const ingestLogDoc = async (esClient: EsClient, body: Record<string, unkn
 /**
  * Creates an index template that overrides data_stream.dataset from constant_keyword
  * to keyword for the test data stream, then resets it so the new mapping applies.
- * Must be called before esArchiver.loadIfNeeded for the logs test archive.
+ * Must be called before esArchiver.load for the logs test archive.
  *
  * The standard `logs` component template locks data_stream.dataset as constant_keyword
  * (one value per backing index). Our test archive has multiple dataset values, so we

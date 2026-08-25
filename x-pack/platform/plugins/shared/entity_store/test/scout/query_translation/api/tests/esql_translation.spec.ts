@@ -48,7 +48,7 @@ apiTest.describe('ESQL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     expect(response.statusCode).toBe(201);
 
     await setupLogsTestDataStream(esClient);
-    await esArchiver.loadIfNeeded(
+    await esArchiver.load(
       'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
     );
   });
