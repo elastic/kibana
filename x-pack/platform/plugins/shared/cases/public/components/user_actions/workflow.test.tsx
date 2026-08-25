@@ -154,5 +154,4 @@ describe('createWorkflowUserActionBuilder', () => {
       );
     });
   });
-
 });

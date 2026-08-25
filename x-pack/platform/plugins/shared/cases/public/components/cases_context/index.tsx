@@ -19,10 +19,10 @@ import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
   CasesPermissions,
+  UserActionUI,
 } from '../../containers/types';
 import type { ReleasePhase } from '../types';
 import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
-import type { UserActionUI } from '../../containers/types';
 
 import { CasesGlobalComponents } from './cases_global_components';
 import { DEFAULT_FEATURES } from '../../../common/constants';
@@ -38,9 +38,7 @@ export interface RenderUserActionExtraActionsArgs {
   userAction: UserActionUI;
 }
 
-export type RenderUserActionExtraActions = (
-  args: RenderUserActionExtraActionsArgs
-) => ReactNode;
+export type RenderUserActionExtraActions = (args: RenderUserActionExtraActionsArgs) => ReactNode;
 
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 

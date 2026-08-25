@@ -21,9 +21,7 @@ jest.mock('../attachments/alert/components/show_alert_button', () => ({
 }));
 
 /** Minimal workflow user action stub for tests. */
-const makeWorkflowUserAction = (
-  origin: Record<string, unknown>
-): UserActionUI =>
+const makeWorkflowUserAction = (origin: Record<string, unknown>): UserActionUI =>
   ({
     id: 'user-action-1',
     type: 'workflow',
