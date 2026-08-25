@@ -9,10 +9,10 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/268088
+// Excluding MKI runs due to consistent failures. See https://github.com/elastic/kibana/issues/268088
 test.describe.skip(
   'CustomStatusAlert',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
   () => {
     let configId: string;
 
