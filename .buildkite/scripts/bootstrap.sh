@@ -4,18 +4,16 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-# Dual-cache agent images bake package managers under:
-#   ~/.cache/kibana/yarn/{.yarn-local-mirror,node_modules}
-#   ~/.cache/kibana/pnpm/{pnpm-store,node_modules,Cypress}
-# Older images still use the flat ~/.kibana/{.yarn-local-mirror,node_modules[,pnpm-store,Cypress]} layout.
+# Dual-cache agent images (elastic/ci-agent-images) bake one tree per package manager:
+#   pnpm -> ~/.cache/kibana/pnpm/{.pnpm-store,node_modules,Cypress}
+#   yarn -> ~/.kibana/{node_modules,.yarn-local-mirror}   (legacy layout, unchanged)
 # Detect the checkout's package manager so the same bootstrap (and VM image) works on
 # main (pnpm) and legacy release branches (yarn).
 CACHES_ROOT="${HOME}/.cache/kibana"
 mkdir -p "${CACHES_ROOT}"
 
-YARN_IMAGE_CACHE="${CACHES_ROOT}/yarn"
 PNPM_IMAGE_CACHE="${CACHES_ROOT}/pnpm"
-LEGACY_IMAGE_CACHE="${HOME}/.kibana"
+YARN_IMAGE_CACHE="${HOME}/.kibana"
 
 USE_PNPM=false
 if [[ -f pnpm-lock.yaml ]]; then
@@ -57,20 +55,12 @@ seed_from_image_cache() {
 # slower than extracting/linking from the package manager cache.
 if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   if [[ "$USE_PNPM" == true ]]; then
-    seed_from_image_cache ./node_modules \
-      "${PNPM_IMAGE_CACHE}/node_modules" \
-      "${LEGACY_IMAGE_CACHE}/node_modules"
-    seed_from_image_cache ./.pnpm-store \
-      "${PNPM_IMAGE_CACHE}/pnpm-store" \
-      "${LEGACY_IMAGE_CACHE}/pnpm-store"
+    seed_from_image_cache ./node_modules "${PNPM_IMAGE_CACHE}/node_modules"
+    seed_from_image_cache ./.pnpm-store "${PNPM_IMAGE_CACHE}/.pnpm-store"
     export npm_config_store_dir="${KIBANA_DIR:-$(pwd)}/.pnpm-store"
   else
-    seed_from_image_cache ./node_modules \
-      "${YARN_IMAGE_CACHE}/node_modules" \
-      "${LEGACY_IMAGE_CACHE}/node_modules"
-    seed_from_image_cache ./.yarn-local-mirror \
-      "${YARN_IMAGE_CACHE}/.yarn-local-mirror" \
-      "${LEGACY_IMAGE_CACHE}/.yarn-local-mirror"
+    seed_from_image_cache ./node_modules "${YARN_IMAGE_CACHE}/node_modules"
+    seed_from_image_cache ./.yarn-local-mirror "${YARN_IMAGE_CACHE}/.yarn-local-mirror"
   fi
 
   # Check if there's a cache artifact uploaded from a previous step
@@ -83,13 +73,6 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     fi
     .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   fi
-fi
-
-# Restore the baked cypress binary (pnpm image cache) so postinstall skips download.
-if [[ "$USE_PNPM" == true && ! -d "${HOME}/.cache/Cypress" ]]; then
-  seed_from_image_cache "${HOME}/.cache/Cypress" \
-    "${PNPM_IMAGE_CACHE}/Cypress" \
-    "${LEGACY_IMAGE_CACHE}/Cypress"
 fi
 
 if ! ("${BOOTSTRAP_CMD[@]}" "${BOOTSTRAP_PARAMS[@]}"); then
