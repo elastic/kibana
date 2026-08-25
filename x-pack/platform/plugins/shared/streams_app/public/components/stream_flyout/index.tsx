@@ -156,8 +156,6 @@ const TAB_PAGES: Record<StreamFlyoutTabId, (props: StreamFlyoutPageProps) => Rea
   ),
 };
 
-const streamKey = Symbol('stream');
-
 function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
   const { loading, definition } = useStreamFlyoutDetail();
   const { push } = useStreamsAppRouter();
