@@ -9,6 +9,8 @@
 
 export type {
   ESQLExpressionWithParams,
+  EsqlOperationColumnMap,
+  EsqlSupportedOperation,
   GetSerializedFormatFn,
   ToEsqlFn,
   UiSettingsReader,
@@ -20,6 +22,8 @@ export { buildMetricToESQL } from './metric_to_esql';
 export { dateHistogramToESQL, getDateHistogramSerializedFormat } from './date_histogram_to_esql';
 export { rangesToESQL } from './ranges_to_esql';
 export { toEsqlRegistry, DATE_HISTOGRAM_ID, RANGE_ID, STATIC_VALUE_ID } from './registry';
+export { getToEsqlFn, getEsqlOperationMeta } from './registry';
+export { getDefaultLabelFn } from './default_labels';
 export {
   countEsqlMeta,
   cardinalityEsqlMeta,

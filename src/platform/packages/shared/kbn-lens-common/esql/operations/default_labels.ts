@@ -23,11 +23,7 @@ import {
   SUM_ID,
 } from '@kbn/lens-formula-docs';
 import type { DateRange, IndexPattern, IndexPatternField, TimeScaleUnit } from '../../types';
-import type {
-  BaseIndexPatternColumn,
-  GenericIndexPatternColumn,
-  OperationType,
-} from '../../datasources/types';
+import type { BaseIndexPatternColumn, GenericIndexPatternColumn } from '../../datasources/types';
 import type {
   CardinalityIndexPatternColumn,
   CountIndexPatternColumn,
@@ -39,23 +35,20 @@ import type {
 import { adjustTimeScaleLabelSuffix } from '../../datasources/time_scale_utils';
 import { getSafeName } from '../../datasources/form_based/helpers';
 import { AUTO_INTERVAL } from './date_histogram_helpers';
-import type { UiSettingsReader } from './types';
+import type { EsqlOperationColumnMap, EsqlSupportedOperation, UiSettingsReader } from './types';
 import { DATE_HISTOGRAM_ID, STATIC_VALUE_ID } from './registry';
 
 /**
  * Resolves the default (non custom) label for a column.
  * Mirrors `OperationDefinition['getDefaultLabel']` with node-safe types.
- * Declared via a method signature so the column parameter is bivariant.
  */
-export type GetDefaultLabelFn<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> = {
-  fn(
-    column: C,
-    columns: Record<string, GenericIndexPatternColumn>,
-    indexPattern?: IndexPattern,
-    uiSettings?: UiSettingsReader,
-    dateRange?: DateRange
-  ): string;
-}['fn'];
+export type GetDefaultLabelFn<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> = (
+  column: C,
+  columns: Record<string, GenericIndexPatternColumn>,
+  indexPattern?: IndexPattern,
+  uiSettings?: UiSettingsReader,
+  dateRange?: DateRange
+) => string;
 
 export const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
@@ -288,11 +281,14 @@ export const getStaticValueDefaultLabel: GetDefaultLabelFn<StaticValueIndexPatte
 ) => ofNameStaticValue(column.params?.value);
 
 /**
- * UI-free registry of per-operation default-label resolvers, keyed by
- * operation type. Mirrors `OperationDefinition['getDefaultLabel']` for the
- * operations participating in the DSL-to-ES|QL conversion.
+ * UI-free registry of per-operation default-label resolvers. Each entry is
+ * precisely typed against its column type via `EsqlOperationColumnMap`.
+ * Mirrors `OperationDefinition['getDefaultLabel']` for the operations
+ * participating in the DSL-to-ES|QL conversion.
  */
-export const defaultLabelRegistry: Partial<Record<OperationType, GetDefaultLabelFn>> = {
+export const defaultLabelRegistry: {
+  [K in EsqlSupportedOperation]?: GetDefaultLabelFn<EsqlOperationColumnMap[K]>;
+} = {
   [COUNT_ID]: getCountDefaultLabel,
   [CARDINALITY_ID]: getCardinalityDefaultLabel,
   [PERCENTILE_ID]: getPercentileDefaultLabel,
@@ -305,3 +301,13 @@ export const defaultLabelRegistry: Partial<Record<OperationType, GetDefaultLabel
   [DATE_HISTOGRAM_ID]: getDateHistogramDefaultLabel,
   [STATIC_VALUE_ID]: getStaticValueDefaultLabel,
 };
+
+/**
+ * Dynamic-dispatch read of {@link defaultLabelRegistry}. The widening to the
+ * base column type is deliberate; the caller selects the entry via
+ * `column.operationType`, which guarantees the key/column correlation.
+ */
+export const getDefaultLabelFn = (operationType: string): GetDefaultLabelFn | undefined =>
+  operationType in defaultLabelRegistry
+    ? (defaultLabelRegistry[operationType as EsqlSupportedOperation] as GetDefaultLabelFn)
+    : undefined;

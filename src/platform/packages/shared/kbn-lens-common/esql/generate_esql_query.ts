@@ -25,7 +25,7 @@ import { convertToAbsoluteDateRange } from './date_range';
 import { resolveTimeShift } from './time_shift';
 import type { EsqlConversionFailureReason } from './to_esql_failure_reasons';
 import { createEsAggsIdMapEntry } from './create_es_aggs_id_map_entry';
-import { toEsqlRegistry, esqlOperationMetaRegistry } from './operations/registry';
+import { getToEsqlFn, getEsqlOperationMeta } from './operations/registry';
 import {
   AUTO_INTERVAL,
   getTimeZoneAndInterval,
@@ -204,11 +204,11 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('formula_not_supported');
     }
 
-    const toESQL = toEsqlRegistry[col.operationType];
+    const toESQL = getToEsqlFn(col.operationType);
     if (!toESQL) {
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
-    const meta = esqlOperationMetaRegistry[col.operationType] ?? {};
+    const meta = getEsqlOperationMeta(col.operationType);
 
     const wrapInFilter = Boolean(meta.filterable && col.filter?.query);
     const wrapInTimeFilter =
@@ -309,11 +309,11 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('terms_not_supported');
     }
 
-    const toESQL = toEsqlRegistry[col.operationType];
+    const toESQL = getToEsqlFn(col.operationType);
     if (!toESQL) {
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
-    const meta = esqlOperationMetaRegistry[col.operationType] ?? {};
+    const meta = getEsqlOperationMeta(col.operationType);
 
     const wrapInFilter = Boolean(meta.filterable && col.filter?.query);
     const wrapInTimeFilter =

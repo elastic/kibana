@@ -443,10 +443,13 @@ export {
 } from './esql/trendline_query';
 export type {
   ESQLExpressionWithParams,
+  EsqlOperationColumnMap,
+  EsqlSupportedOperation,
   GetSerializedFormatFn,
   ToEsqlFn,
   UiSettingsReader,
 } from './esql/operations';
+export { getToEsqlFn, getEsqlOperationMeta, getDefaultLabelFn } from './esql/operations';
 export type { EsqlOperationMeta } from './esql/operations/registry';
 export {
   esqlOperationMetaRegistry,

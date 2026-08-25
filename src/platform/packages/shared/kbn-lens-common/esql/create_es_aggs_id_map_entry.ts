@@ -12,7 +12,7 @@ import type { DateHistogramIndexPatternColumn } from '../datasources/operations'
 import type { FormBasedLayer, GenericIndexPatternColumn } from '../datasources/types';
 import { isColumnOfType } from '../datasources/form_based/helpers';
 import { getTimeZoneAndInterval } from './operations/date_histogram_helpers';
-import { defaultLabelRegistry } from './operations/default_labels';
+import { getDefaultLabelFn } from './operations/default_labels';
 import type { UiSettingsReader } from './operations/types';
 
 export interface CreateEsAggsIdMapEntryParams {
@@ -47,7 +47,7 @@ export function createEsAggsIdMapEntry({
 }: CreateEsAggsIdMapEntryParams): OriginalColumn[] {
   const label = col.customLabel
     ? col.label
-    : defaultLabelRegistry[col.operationType]?.(
+    : getDefaultLabelFn(col.operationType)?.(
         col,
         layer.columns,
         indexPattern,

@@ -9,6 +9,20 @@
 
 import type { IndexPattern, DateRange } from '../../types';
 import type { BaseIndexPatternColumn, FormBasedLayer } from '../../datasources/types';
+import type {
+  AvgIndexPatternColumn,
+  CardinalityIndexPatternColumn,
+  CountIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
+  MaxIndexPatternColumn,
+  MedianIndexPatternColumn,
+  MinIndexPatternColumn,
+  PercentileIndexPatternColumn,
+  RangeIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
+  StaticValueIndexPatternColumn,
+  SumIndexPatternColumn,
+} from '../../datasources/operations';
 
 /**
  * Represents an ES|QL expression with parameterized values.
@@ -29,33 +43,50 @@ export interface UiSettingsReader {
 }
 
 /**
+ * Closed map of operations participating in the DSL-to-ES|QL conversion,
+ * correlating each operation type with its column type. Keys must match the
+ * operation IDs from `@kbn/lens-formula-docs` (and the local bucket /
+ * static value IDs). Registries are mapped types over this map, which keeps
+ * every entry precisely typed without casts or variance tricks.
+ */
+export interface EsqlOperationColumnMap {
+  count: CountIndexPatternColumn;
+  unique_count: CardinalityIndexPatternColumn;
+  percentile: PercentileIndexPatternColumn;
+  min: MinIndexPatternColumn;
+  max: MaxIndexPatternColumn;
+  average: AvgIndexPatternColumn;
+  sum: SumIndexPatternColumn;
+  median: MedianIndexPatternColumn;
+  standard_deviation: StandardDeviationIndexPatternColumn;
+  date_histogram: DateHistogramIndexPatternColumn;
+  range: RangeIndexPatternColumn;
+  static_value: StaticValueIndexPatternColumn;
+}
+
+export type EsqlSupportedOperation = keyof EsqlOperationColumnMap;
+
+/**
  * Signature of a per-operation DSL-to-ES|QL conversion function.
  * Mirrors `OperationDefinition['toESQL']` but only depends on node-safe types.
- * Declared via a method signature so the column parameter is bivariant,
- * allowing operation-specific functions to be stored in a shared registry.
  */
-export type ToEsqlFn<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> = {
-  fn(
-    column: C,
-    columnId: string,
-    indexPattern: IndexPattern,
-    layer: FormBasedLayer,
-    uiSettings: UiSettingsReader,
-    dateRange: DateRange
-  ): ESQLExpressionWithParams | undefined;
-}['fn'];
+export type ToEsqlFn<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> = (
+  column: C,
+  columnId: string,
+  indexPattern: IndexPattern,
+  layer: FormBasedLayer,
+  uiSettings: UiSettingsReader,
+  dateRange: DateRange
+) => ESQLExpressionWithParams | undefined;
 
 /**
  * Signature of a per-operation serialized-format resolver.
  * Mirrors `OperationDefinition['getSerializedFormat']` with node-safe types.
- * Declared via a method signature so the column parameter is bivariant.
  */
-export type GetSerializedFormatFn<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> = {
-  fn(
-    column: C,
-    targetColumn: C,
-    indexPattern?: IndexPattern,
-    uiSettings?: UiSettingsReader,
-    dateRange?: DateRange
-  ): Record<string, unknown>;
-}['fn'];
+export type GetSerializedFormatFn<C extends BaseIndexPatternColumn = BaseIndexPatternColumn> = (
+  column: C,
+  targetColumn: C,
+  indexPattern?: IndexPattern,
+  uiSettings?: UiSettingsReader,
+  dateRange?: DateRange
+) => Record<string, unknown>;
