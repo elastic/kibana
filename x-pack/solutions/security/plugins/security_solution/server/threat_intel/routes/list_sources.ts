@@ -24,6 +24,7 @@ import {
 } from '../lib/space_filter';
 import { HIDDEN_INDEX_SEARCH_OPTIONS } from '../setup/index_templates';
 import { THREAT_INTEL_READ_AUTHZ, THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
+import { rejectUntilBootstrapped } from './lib/bootstrap_ready';
 import type { RouteRegistrationDeps } from '.';
 
 const listBodySchema = schema.object({
@@ -238,6 +239,7 @@ export const registerListSourcesRoute = ({
   router,
   logger,
   getSpacesService,
+  getBootstrapReady,
 }: RouteRegistrationDeps): void => {
   router.versioned
     .post({
@@ -251,6 +253,9 @@ export const registerListSourcesRoute = ({
         validate: { request: { body: listBodySchema } },
       },
       async (context, request, response) => {
+        const notReady = await rejectUntilBootstrapped(getBootstrapReady, response);
+        if (notReady) return notReady;
+
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
@@ -360,6 +365,7 @@ export const registerCreateSourceRoute = ({
   router,
   logger,
   getSpacesService,
+  getBootstrapReady,
 }: RouteRegistrationDeps): void => {
   router.versioned
     .post({
@@ -373,6 +379,9 @@ export const registerCreateSourceRoute = ({
         validate: { request: { body: createSourceBodySchema } },
       },
       async (context, request, response) => {
+        const notReady = await rejectUntilBootstrapped(getBootstrapReady, response);
+        if (notReady) return notReady;
+
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
@@ -422,6 +431,7 @@ export const registerUpdateSourceRoute = ({
   router,
   logger,
   getSpacesService,
+  getBootstrapReady,
 }: RouteRegistrationDeps): void => {
   router.versioned
     .patch({
@@ -437,6 +447,9 @@ export const registerUpdateSourceRoute = ({
         },
       },
       async (context, request, response) => {
+        const notReady = await rejectUntilBootstrapped(getBootstrapReady, response);
+        if (notReady) return notReady;
+
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
@@ -497,6 +510,7 @@ export const registerDeleteSourceRoute = ({
   router,
   logger,
   getSpacesService,
+  getBootstrapReady,
 }: RouteRegistrationDeps): void => {
   router.versioned
     .delete({
@@ -510,6 +524,9 @@ export const registerDeleteSourceRoute = ({
         validate: { request: { params: sourceIdParamsSchema } },
       },
       async (context, request, response) => {
+        const notReady = await rejectUntilBootstrapped(getBootstrapReady, response);
+        if (notReady) return notReady;
+
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);

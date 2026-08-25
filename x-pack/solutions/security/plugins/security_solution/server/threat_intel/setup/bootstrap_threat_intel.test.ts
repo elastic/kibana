@@ -114,5 +114,25 @@ describe('ensureThreatIntelBootstrap', () => {
 
       expect(seedDefaultSourcesModule.seedDefaultSources).toHaveBeenCalledTimes(1);
     });
+
+    // A partial seed used to be treated as success. seedDefaultSources swallows
+    // per-item and bulk errors, so the next boot saw a non-empty catalog and
+    // skipped seeding forever, permanently omitting the rest of the catalog.
+    it('retries seeding when some entries failed, and succeeds once they land', async () => {
+      const esClient = makeEsClient(0);
+      (esClient.count as jest.Mock).mockResolvedValue({ count: 0 });
+      const logger = makeLogger();
+
+      (seedDefaultSourcesModule.seedDefaultSources as jest.Mock)
+        .mockResolvedValueOnce({ total: 10, created: 4, skipped: 0, failed: 6 })
+        // Retry: the four already created come back as skipped (conflicts are
+        // idempotent), and the rest land.
+        .mockResolvedValueOnce({ total: 10, created: 6, skipped: 4, failed: 0 });
+
+      const result = await ensureThreatIntelBootstrap({ esClient, logger });
+
+      expect(seedDefaultSourcesModule.seedDefaultSources).toHaveBeenCalledTimes(2);
+      expect(result?.seed).toEqual({ total: 10, created: 6, skipped: 4, failed: 0 });
+    });
   });
 });

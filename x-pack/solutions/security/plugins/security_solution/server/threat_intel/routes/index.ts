@@ -49,6 +49,14 @@ export interface RouteRegistrationDeps {
    * is optional.
    */
   getTaskManager?: () => TaskManagerStartContract | undefined;
+  /**
+   * Settles when the one-time bootstrap (index templates, mapping migrations,
+   * catalog seeding) has finished, and rejects if it failed. Handlers that
+   * touch the plugin-owned indices await it via `rejectUntilBootstrapped` so a
+   * request during startup cannot auto-create an index before its template
+   * applies.
+   */
+  getBootstrapReady: () => Promise<void>;
 }
 
 export const registerRoutes = (deps: RouteRegistrationDeps): void => {

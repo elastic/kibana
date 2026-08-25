@@ -239,6 +239,14 @@ export class Plugin implements ISecuritySolutionPlugin {
   private threatIntelInference: InferenceServerStart | undefined;
   private threatIntelSearchInferenceEndpoints: SearchInferenceEndpointsPluginStart | undefined;
   private threatIntelTaskManager: TaskManagerStartContract | undefined;
+  /**
+   * Settles when threat intel bootstrap finishes. Routes are registered during
+   * setup but must not touch the plugin-owned indices until templates and
+   * migrations have been applied, so handlers await this. Kibana only serves
+   * requests after every plugin's `start()` has returned, by which point
+   * `startThreatIntel` has replaced this with the real promise.
+   */
+  private threatIntelBootstrapReady: Promise<void> = Promise.resolve();
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -372,6 +380,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       getInference: () => this.threatIntelInference,
       getSearchInferenceEndpoints: () => this.threatIntelSearchInferenceEndpoints,
       getTaskManager: () => this.threatIntelTaskManager,
+      getBootstrapReady: () => this.threatIntelBootstrapReady,
     });
     this.logger.info(
       'Threat Intelligence supply routes registered (threatIntelSupplyEnabled is on)'
@@ -450,26 +459,48 @@ export class Plugin implements ISecuritySolutionPlugin {
     const esClient = core.elasticsearch.client.asInternalUser;
     const logger = this.logger.get('threatIntel');
 
-    void ensureThreatIntelBootstrap({ esClient, logger }).catch((err) => {
+    // Bootstrap stays detached so a slow or retrying Elasticsearch cannot block
+    // Kibana startup, but the promise is retained: route handlers await it
+    // before touching the plugin-owned indices, so a request cannot auto-create
+    // an index before its template applies (which would leave it permanently
+    // mis-mapped). The catch is attached separately so awaiting handlers still
+    // observe the rejection while the failure is logged exactly once.
+    this.threatIntelBootstrapReady = ensureThreatIntelBootstrap({ esClient, logger }).then(
+      () => undefined
+    );
+    this.threatIntelBootstrapReady.catch((err) => {
       logger.error(`Failed to ensure threat intel bootstrap on start: ${(err as Error).message}`);
     });
 
     if (plugins.taskManager) {
-      void schedulePromoteThreatIndicatorsTask({
-        taskManager: plugins.taskManager,
-        logger: this.logger.get('threatIntel', 'iocIndicatorSync'),
-      }).catch((err) => {
-        this.logger.error(`Failed to schedule Promote threat indicators task: ${err.message}`);
-      });
+      const taskManager = plugins.taskManager;
+      // Scheduling waits on bootstrap: the promote and retention tasks read and
+      // write the same indices, so starting them alongside the migrations races
+      // template installation for no benefit. A bootstrap failure means the
+      // pipeline has no schema to work against, so the tasks stay unscheduled.
+      void this.threatIntelBootstrapReady
+        .then(async () => {
+          await schedulePromoteThreatIndicatorsTask({
+            taskManager,
+            logger: this.logger.get('threatIntel', 'iocIndicatorSync'),
+          }).catch((err) => {
+            this.logger.error(`Failed to schedule Promote threat indicators task: ${err.message}`);
+          });
 
-      void scheduleScrubReportContentTask({
-        taskManager: plugins.taskManager,
-        logger: this.logger.get('threatIntel', 'contentRetention'),
-      }).catch((err) => {
-        this.logger.error(
-          `Failed to schedule threat report content retention task: ${err.message}`
-        );
-      });
+          await scheduleScrubReportContentTask({
+            taskManager,
+            logger: this.logger.get('threatIntel', 'contentRetention'),
+          }).catch((err) => {
+            this.logger.error(
+              `Failed to schedule threat report content retention task: ${err.message}`
+            );
+          });
+        })
+        .catch(() => {
+          this.logger.error(
+            'Threat intel tasks were not scheduled because bootstrap did not complete'
+          );
+        });
     }
   }
 

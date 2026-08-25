@@ -15,6 +15,7 @@ import {
 import { createThreatReport } from '../services';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { THREAT_INTEL_WRITE_AUTHZ } from './lib/authz';
+import { rejectUntilBootstrapped } from './lib/bootstrap_ready';
 import type { RouteRegistrationDeps } from '.';
 
 // Raw HTML can substantially exceed Kibana's default 1 MiB body cap.
@@ -52,6 +53,7 @@ export const registerCreateThreatReportRoute = ({
   router,
   logger,
   getSpacesService,
+  getBootstrapReady,
 }: RouteRegistrationDeps): void => {
   router.versioned
     .post({
@@ -71,6 +73,9 @@ export const registerCreateThreatReportRoute = ({
         validate: { request: { body: createThreatReportBodySchema } },
       },
       async (context, request, response) => {
+        const notReady = await rejectUntilBootstrapped(getBootstrapReady, response);
+        if (notReady) return notReady;
+
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);

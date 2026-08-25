@@ -101,7 +101,22 @@ const seedThreatIntelCatalog = async ({
   const log = logger.get('bootstrap');
 
   const seed = await withElasticsearchRetry(
-    () => seedDefaultSources({ esClient, logger }),
+    async () => {
+      const result = await seedDefaultSources({ esClient, logger });
+      // Partial failures have to retry. `seedDefaultSources` catches per-item
+      // and bulk errors and reports them as `failed`, so returning here would
+      // treat a partial seed as success: the next boot sees a non-empty catalog
+      // and skips seeding forever, permanently omitting the rest of the starter
+      // catalog. Retrying is safe because already-created entries come back as
+      // `skipped` (conflicts are idempotent).
+      if (result.failed > 0) {
+        throw new Error(
+          `${result.failed} of ${result.total} default sources failed to seed ` +
+            `(${result.created} created, ${result.skipped} already present)`
+        );
+      }
+      return result;
+    },
     log,
     'Threat intelligence default source seeding'
   );
@@ -110,13 +125,6 @@ const seedThreatIntelCatalog = async ({
     `Threat intelligence source seeding finished: ${seed.created} sources created, ` +
       `${seed.skipped} already present, ${seed.failed} failed (${seed.total} catalog entries)`
   );
-
-  if (seed.failed > 0) {
-    log.warn(
-      `Threat intelligence default-source seeding had ${seed.failed} failure(s); ` +
-        'check earlier warn logs for per-source errors'
-    );
-  }
 
   const catalogCount = await esClient.count(
     { index: THREAT_INTEL_SOURCES_INDEX },
