@@ -139,7 +139,8 @@ export const transformToUpdateSchema = ({
     return {
       ...base,
       ...restEntry,
-      users: restEntry.users ?? base.users,
+      // Always server-assign ownership; never trust client-provided users
+      users: base.users,
       query_description: queryDescription,
       input_schema:
         entry.inputSchema?.map((schema) => ({
@@ -208,7 +209,8 @@ export const transformToCreateSchema = ({
     return {
       ...base,
       ...restEntry,
-      users: restEntry.users ?? base.users,
+      // Always server-assign ownership; never trust client-provided users
+      users: base.users,
       query_description: queryDescription,
       input_schema:
         entry.inputSchema?.map((schema) => ({

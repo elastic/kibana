@@ -1,3 +1,4 @@
+@xterm/xterm
 @langchain/classic
 @swc/core
 browserslist

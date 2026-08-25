@@ -9,7 +9,11 @@ import type { PhoenixClient } from '@arizeai/phoenix-client';
 import { createClient } from '@arizeai/phoenix-client';
 import { createDataset } from '@arizeai/phoenix-client/datasets';
 import { runExperiment as runPhoenixExperiment } from '@arizeai/phoenix-client/experiments';
-import type { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/types/experiments';
+import type {
+  EvaluatorParams,
+  RanExperiment,
+  TaskOutput,
+} from '@arizeai/phoenix-client/types/experiments';
 import type { DatasetInfo, Example } from '@arizeai/phoenix-client/types/datasets';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
@@ -124,7 +128,7 @@ export class KibanaPhoenixClient {
         evaluators: evaluators.map((evaluator) => {
           return {
             ...evaluator,
-            evaluate: ({ input, output, expected, metadata }) => {
+            evaluate: ({ input, output, expected, metadata }: EvaluatorParams) => {
               return evaluator.evaluate({
                 expected: expected ?? null,
                 input,
@@ -138,6 +142,9 @@ export class KibanaPhoenixClient {
           error: this.options.log.error.bind(this.options.log),
           info: this.options.log.info.bind(this.options.log),
           log: this.options.log.info.bind(this.options.log),
+          warn: this.options.log.info.bind(this.options.log),
+          debug: this.options.log.debug.bind(this.options.log),
+          table: () => {},
         },
         repetitions: this.options.repetitions ?? 1,
         concurrency,
