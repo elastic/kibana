@@ -200,6 +200,12 @@ src/platform/plugins/shared/console/packaging/react/translations
 
 .moon/cache
 
+# Vendored @elastic/adaptive-ui-host-kibana build output and its workspace
+# closure — populated by adaptive-ui/scripts/sync_dist.mjs, never committed.
+/src/platform/packages/shared/adaptive-ui/vendor
+/src/platform/packages/shared/adaptive-ui/styles.css
+/src/platform/packages/shared/adaptive-ui/.vendored_upstream.json
+
 # Batched commits marker, e.g.: from quick checks
 .collect_commits_marker
 
