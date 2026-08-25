@@ -9,7 +9,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { selectDefaultTimeRange } from '@kbn/agent-builder-visualizations-server';
-import { extractEsqlQueries } from './dataset_probe';
+import { extractEsqlQueries } from './extract_esql_queries';
 
 export interface ApplyDefaultTimeRangeParams {
   dashboardData: DashboardAttachmentData;
