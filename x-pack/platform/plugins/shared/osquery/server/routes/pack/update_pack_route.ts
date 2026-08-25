@@ -622,33 +622,47 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             const soRefPolicyIds = new Set(currentAgentPolicyIds);
             const missingFromRefs = [...wiredPolicyIds].filter((id) => !soRefPolicyIds.has(id));
             if (missingFromRefs.length) {
-              // Union, not replacement — a reference legitimately absent from the
-              // wire must survive healing.
-              const healedPolicyIds = [...new Set([...currentAgentPolicyIds, ...wiredPolicyIds])];
-
-              // `agentPoliciesIdMap` is keyed off `policiesList`, empty in the very
-              // drift state we're healing — resolve names for the healed ids.
-              const healedAgentPolicies = await agentPolicyService?.getByIds(
-                spaceScopedClient,
-                healedPolicyIds
-              );
-              const healedNameById = mapKeys(healedAgentPolicies, 'id');
-
-              const healedRefs = [
-                ...nonAgentPolicyReferences,
-                ...healedPolicyIds.map((id) => ({
-                  id,
-                  name: healedNameById[id]?.name ?? agentPoliciesIdMap[id]?.name,
-                  type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-                })),
-              ];
+              // Everything below stays inside the try: the save already
+              // committed, so no heal-path error may surface as a route error.
               try {
-                await spaceScopedClient.update<PackSavedObject>(
-                  packSavedObjectType,
-                  request.params.id,
-                  {},
-                  { references: healedRefs }
+                // `agentPoliciesIdMap` is keyed off `policiesList`, empty in the
+                // very drift state we're healing — resolve names for the added
+                // ids. `ignoreMissing`: a wire policy_id may point at a deleted
+                // agent policy; that id is dropped from the heal, not thrown on.
+                const healedAgentPolicies = await agentPolicyService?.getByIds(
+                  spaceScopedClient,
+                  missingFromRefs,
+                  { ignoreMissing: true }
                 );
+                const healedNameById = mapKeys(healedAgentPolicies, 'id');
+                const addedRefs = missingFromRefs
+                  .filter((id) => healedNameById[id])
+                  .map((id) => ({
+                    id,
+                    name: healedNameById[id].name,
+                    type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+                  }));
+
+                if (addedRefs.length) {
+                  // Union, not replacement — existing references (agent-policy
+                  // and otherwise) survive healing byte-identical.
+                  const existingAgentPolicyReferences = filter(currentPackSO.references, [
+                    'type',
+                    LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+                  ]);
+                  await spaceScopedClient.update<PackSavedObject>(
+                    packSavedObjectType,
+                    request.params.id,
+                    {},
+                    {
+                      references: [
+                        ...nonAgentPolicyReferences,
+                        ...existingAgentPolicyReferences,
+                        ...addedRefs,
+                      ],
+                    }
+                  );
+                }
               } catch (healErr) {
                 logger.warn(
                   `update_pack_route: reference healing failed for pack ${request.params.id}: ${

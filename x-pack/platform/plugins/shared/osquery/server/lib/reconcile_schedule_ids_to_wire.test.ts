@@ -254,6 +254,143 @@ describe('reconcileScheduleIdsToWire', () => {
     expect(packBlock.queries.decoy).toBeUndefined();
   });
 
+  test('finds the exact-named pack SO when fuzzy matches fill the entire first page', async () => {
+    // 100 fuzzy matches ("reconcile-pack extended N") crowd page 1; the exact
+    // SO only arrives on page 2. A single-page lookup would skip the pack
+    // forever with just a warning.
+    const decoy = (n: number) => ({
+      id: `pack-decoy-${n}`,
+      type: 'osquery-pack',
+      score: 1,
+      references: [],
+      attributes: {
+        name: `reconcile-pack extended ${n}`,
+        enabled: true,
+        created_at: '2026-01-01T00:00:00.000Z',
+        queries: [{ id: 'decoy', query: 'SELECT 999', interval: 60, name: 'decoy' }],
+      },
+    });
+    const exactSO = {
+      id: 'pack-1',
+      type: 'osquery-pack',
+      score: 0.1,
+      references: [],
+      attributes: DEFAULT_PACK_ENTRY.attrs,
+    };
+
+    const scopedClient = {
+      find: jest.fn().mockImplementation(({ page = 1 }: { page?: number }) => {
+        if (page === 1) {
+          return Promise.resolve({
+            saved_objects: Array.from({ length: 100 }, (_, n) => decoy(n)),
+            total: 101,
+            page: 1,
+            per_page: 100,
+          });
+        }
+
+        return Promise.resolve({ saved_objects: [exactSO], total: 101, page, per_page: 100 });
+      }),
+      update: jest.fn().mockResolvedValue({}),
+      bulkGet: jest.fn().mockResolvedValue({ saved_objects: [] }),
+    };
+
+    const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+    const core = createMockCoreStart(scopedClient as never);
+    const osqueryContext = createMockOsqueryContext({
+      fetchAllItems: mockFetchAllItems([buildPackagePolicy()]),
+      update: packagePolicyUpdate,
+    });
+    const logger = createMockLogger();
+
+    const result = await reconcileScheduleIdsToWire({
+      coreStart: core,
+      osqueryContext,
+      logger: logger as unknown as Parameters<typeof reconcileScheduleIdsToWire>[0]['logger'],
+    });
+
+    expect(result).toEqual({ hadFailures: false });
+    expect(scopedClient.find).toHaveBeenCalledWith(expect.objectContaining({ page: 2 }));
+    expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+    const packBlock =
+      packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs[
+        'default--reconcile-pack'
+      ];
+    expect(packBlock.pack_id).toBe('pack-1');
+    expect(packBlock.queries.q1.schedule_id).toBe('sched-q1');
+  });
+
+  test('drains package policies across ALL spaces (spaceIds wildcard)', async () => {
+    // With Fleet space awareness enabled, the internal SO client is scoped to
+    // the default space; without the wildcard the reconciler would never see —
+    // and never repair — policies living in other spaces.
+    const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
+    const packagePolicyList = mockFetchAllItems([buildPackagePolicy()]);
+
+    await reconcileScheduleIdsToWire({
+      coreStart: createMockCoreStart(scopedClient),
+      osqueryContext: createMockOsqueryContext({
+        fetchAllItems: packagePolicyList,
+        update: jest.fn().mockResolvedValue({}),
+      }),
+      logger: createMockLogger() as unknown as Parameters<
+        typeof reconcileScheduleIdsToWire
+      >[0]['logger'],
+    });
+
+    expect(packagePolicyList).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ spaceIds: ['*'] })
+    );
+  });
+
+  test('is idempotent for a pack with no created_at (deterministic anchor, no per-run rewrite)', async () => {
+    // Degenerate packs (NDJSON imports) have neither start_date on their
+    // queries nor created_at to anchor to. The emitted fallback must be
+    // deterministic: a time-of-write now() would fail the isEqual gate on
+    // every run — one policy rewrite (agent redeploy + re-anchored execution
+    // numbering) per Kibana restart.
+    const noCreatedAtAttrs = {
+      name: 'reconcile-pack',
+      enabled: true,
+      // Explicit: the mock builder injects a default created_at otherwise.
+      created_at: undefined,
+      queries: [{ id: 'q1', query: 'SELECT 1', interval: 60, name: 'q1', schedule_id: 'sched-q1' }],
+    };
+    const scopedClient = createMockScopedClient({
+      'reconcile-pack': { id: 'pack-1', attrs: noCreatedAtAttrs },
+    });
+    const packagePolicyUpdate = jest
+      .fn()
+      .mockImplementation(async (_sc, _es, id, updated) => ({ ...updated, id }));
+
+    const run = (policies: unknown[]) =>
+      reconcileScheduleIdsToWire({
+        coreStart: createMockCoreStart(scopedClient),
+        osqueryContext: createMockOsqueryContext({
+          fetchAllItems: mockFetchAllItems(policies),
+          update: packagePolicyUpdate,
+        }),
+        logger: createMockLogger() as unknown as Parameters<
+          typeof reconcileScheduleIdsToWire
+        >[0]['logger'],
+      });
+
+    await run([buildPackagePolicy()]);
+    expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+    const writtenBlock =
+      packagePolicyUpdate.mock.calls[0][3].inputs[0].config.osquery.value.packs[
+        'default--reconcile-pack'
+      ];
+    // Deterministic anchor, never a time-of-write value.
+    expect(writtenBlock.queries.q1.start_date).toBe('1970-01-01T00:00:00.000Z');
+
+    // Second run against the written policy: in sync, no rewrite.
+    const reconciledPolicy = { ...packagePolicyUpdate.mock.calls[0][3], id: 'pp-1' };
+    await run([reconciledPolicy]);
+    expect(packagePolicyUpdate).toHaveBeenCalledTimes(1);
+  });
+
   test('mints nothing on the Saved Object (no SO update call)', async () => {
     const scopedClient = createMockScopedClient({ 'reconcile-pack': DEFAULT_PACK_ENTRY });
     const packagePolicyUpdate = jest.fn().mockResolvedValue({});

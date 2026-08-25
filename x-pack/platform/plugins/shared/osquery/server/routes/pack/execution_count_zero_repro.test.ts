@@ -90,10 +90,14 @@ describe('pack wire contract — schedule metadata reaching the agent', () => {
       //
       // Suppressing the bogus 1970 value is right; emitting nothing was not.
       // The pack's own created_at is now substituted so the agent always has
-      // an anchor.
-      const query = emittedQuery(intervalQuery({ start_date: START_DATE_EPOCH_FALLBACK }));
+      // an anchor. Every production call site passes created_at as the
+      // fallback, mirrored here.
+      const PACK_CREATED_AT = '2026-05-06T00:00:00.000Z';
+      const query = emittedQuery(intervalQuery({ start_date: START_DATE_EPOCH_FALLBACK }), {
+        fallbackStartDate: PACK_CREATED_AT,
+      });
 
-      expect(query.start_date).toBeDefined();
+      expect(query.start_date).toBe(PACK_CREATED_AT);
       expect(query.start_date).not.toBe(START_DATE_EPOCH_FALLBACK);
     });
   });
@@ -103,10 +107,29 @@ describe('pack wire contract — schedule metadata reaching the agent', () => {
       // Any pack saved object predating the V4 backfill that is written to a
       // policy without passing through a backfilled read lands here. This was
       // the exact production shape: interval present, start_date absent.
-      const query = emittedQuery(intervalQuery({ start_date: undefined }));
+      const PACK_CREATED_AT = '2026-05-06T00:00:00.000Z';
+      const query = emittedQuery(intervalQuery({ start_date: undefined }), {
+        fallbackStartDate: PACK_CREATED_AT,
+      });
 
       expect(query.interval).toBe(60);
-      expect(query.start_date).toBeDefined();
+      expect(query.start_date).toBe(PACK_CREATED_AT);
+    });
+
+    it('should emit a DETERMINISTIC anchor when the pack has no created_at either', () => {
+      // Degenerate packs (NDJSON imports predating created_at) have no anchor
+      // to fall back to. The emitted value must be stable across calls: a
+      // time-of-write `now()` would differ on every reconciler pass, defeating
+      // its isEqual diff gate — one policy rewrite plus a shifted execution
+      // numbering per Kibana restart. The epoch anchor is ugly (huge execution
+      // numbers) but stable and monotonic, which is strictly better than
+      // bucket #0 or churn.
+      const first = emittedQuery(intervalQuery({ start_date: undefined }));
+      const second = emittedQuery(intervalQuery({ start_date: undefined }));
+
+      expect(first.start_date).toBeDefined();
+      expect(first.start_date).toBe(second.start_date);
+      expect(first.start_date).toBe(START_DATE_EPOCH_FALLBACK);
     });
   });
 

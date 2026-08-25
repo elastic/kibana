@@ -76,9 +76,14 @@ export const reconcileScheduleIdsToWire = async ({
 
     const internalClient = await getInternalSavedObjectsClient(coreStart);
 
+    // `['*']`: with Fleet space awareness enabled the internal client is scoped
+    // to the default space, and a plain drain would silently skip every policy
+    // (and thus every repairable pack) living in another space.
     const packagePolicies: PackagePolicy[] = await fetchAllPackagePolicies(
       packagePolicyService,
-      internalClient
+      internalClient,
+      undefined,
+      ['*']
     );
 
     if (!packagePolicies.length) {
@@ -137,19 +142,29 @@ export const reconcileScheduleIdsToWire = async ({
 
       for (const packName of uniquePackNames) {
         try {
-          const findResult = await spaceClient.find<PackSavedObject>({
-            type: packSavedObjectType,
-            filter: `${packSavedObjectType}.attributes.name: "${escapeFilterValue(packName)}"`,
-            perPage: 100,
-          });
           // `name` is analyzed `text`, so this filter matches fuzzily ("windows"
           // hits "windows discovery"). Re-check exactly or we project the wrong
-          // pack's queries onto this block.
-          const so = findResult.saved_objects.find(
-            (candidate) => candidate.attributes?.name === packName
-          );
-          if (so) {
-            packSOsByName.set(packName, { id: so.id, attributes: so.attributes });
+          // pack's queries onto this block — and page until found, so a crowd of
+          // fuzzy matches can't push the exact-named SO off a single page.
+          const perPage = 100;
+          for (let page = 1; ; page++) {
+            const findResult = await spaceClient.find<PackSavedObject>({
+              type: packSavedObjectType,
+              filter: `${packSavedObjectType}.attributes.name: "${escapeFilterValue(packName)}"`,
+              perPage,
+              page,
+            });
+            const so = findResult.saved_objects.find(
+              (candidate) => candidate.attributes?.name === packName
+            );
+            if (so) {
+              packSOsByName.set(packName, { id: so.id, attributes: so.attributes });
+              break;
+            }
+
+            if (!findResult.saved_objects.length || page * perPage >= findResult.total) {
+              break;
+            }
           }
         } catch (err) {
           logger.warn(

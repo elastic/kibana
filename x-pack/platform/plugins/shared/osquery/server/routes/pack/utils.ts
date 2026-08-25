@@ -359,7 +359,9 @@ export interface ConvertSOQueriesToPackConfigOptions {
   // never silently ships RRULE state to Fleet.
   isRruleFeatureEnabled: boolean;
   // Anchor used when the stored start_date is absent or the epoch sentinel.
-  // Pass the pack's created_at; defaults to now() when omitted.
+  // Pass the pack's created_at. When omitted (packs predating created_at, e.g.
+  // NDJSON imports) the epoch sentinel is emitted — a deterministic anchor so
+  // repeated writes stay byte-identical and the reconciler's diff gate holds.
   fallbackStartDate?: string;
 }
 
@@ -377,7 +379,11 @@ export const convertSOQueriesToPackConfig = (
   options: ConvertSOQueriesToPackConfigOptions
 ): PackConfigOutput => {
   const { spaceId, packSchedule, isRruleFeatureEnabled, fallbackStartDate } = options;
-  const resolvedFallback = fallbackStartDate ?? new Date().toISOString();
+  // Never `now()`: a time-of-write anchor differs on every call, so the
+  // reconciler would rewrite the policy (and re-anchor execution numbering)
+  // on every Kibana restart for packs lacking created_at. The epoch anchor
+  // yields large but stable, monotonically incrementing execution counts.
+  const resolvedFallback = fallbackStartDate ?? START_DATE_EPOCH_FALLBACK;
 
   const packMode: ScheduleType | undefined = isRruleFeatureEnabled
     ? packSchedule?.schedule_type ?? undefined
@@ -791,14 +797,21 @@ export const makePackKey = (packName: string, spaceId: string) => `${spaceId}--$
 export const fetchAllPackagePolicies = async (
   packagePolicyService: PackagePolicyClient | undefined,
   soClient: SavedObjectsClientContract,
-  kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`
+  kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+  // With Fleet space awareness enabled, policies live in per-space namespaces
+  // and the drain only sees the soClient's space unless told otherwise. Pass
+  // `['*']` to enumerate every space (Fleet's documented wildcard).
+  spaceIds?: string[]
 ): Promise<PackagePolicy[]> => {
   const packagePolicies: PackagePolicy[] = [];
   if (!packagePolicyService) {
     return packagePolicies;
   }
 
-  for await (const policyBatch of await packagePolicyService.fetchAllItems(soClient, { kuery })) {
+  for await (const policyBatch of await packagePolicyService.fetchAllItems(soClient, {
+    kuery,
+    ...(spaceIds ? { spaceIds } : {}),
+  })) {
     packagePolicies.push(...policyBatch);
   }
 
