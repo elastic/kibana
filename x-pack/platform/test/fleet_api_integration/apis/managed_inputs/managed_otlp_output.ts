@@ -218,6 +218,53 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(updateBody.item.otlp_exporter).to.eql(newExporter);
       });
+
+      it('rejects changing a non-OTLP output to OTLP when a using policy has non-OTel inputs', async () => {
+        // Create a non-OTLP output and an agent policy explicitly assigned to it.
+        const { body: esOutputBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `es-to-otlp-${uuidv4()}`,
+            type: 'elasticsearch',
+            hosts: ['http://localhost:9200'],
+          })
+          .expect(200);
+        const esOutputId: string = esOutputBody.item.id;
+
+        const policyName = `mixed-type-change-${uuidv4()}`;
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: policyName, namespace: 'default', data_output_id: esOutputId })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        // Add a non-OTel package policy (filetest with empty/beats inputs) to the agent policy.
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `filetest-type-change-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: 'filetest', title: 'For File Tests', version: '0.1.0' },
+            inputs: [],
+          })
+          .expect(200);
+
+        // Changing the output type to OTLP must be rejected because the policy has non-OTel inputs.
+        const { body } = await supertest
+          .put(`/api/fleet/outputs/${esOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(400);
+
+        expect(body.message).to.contain('non-OTel inputs');
+      });
     });
 
     describe('policy gating', () => {
