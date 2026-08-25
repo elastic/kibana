@@ -35,6 +35,7 @@ jest.mock('@kbn/core-di-browser', () => {
 
       const services: Record<string, unknown> = {
         notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+        http: { basePath: { prepend: (path: string) => path } },
       };
 
       return services[token as string] ?? {};
@@ -58,6 +59,13 @@ jest.mock('../../hooks/use_install_rule_template', () => ({
     variables: mockInstallVariables,
   }),
 }));
+
+const mockInstalledCounts = new Map<string, number>();
+
+jest.mock('../../hooks/use_installed_rule_counts', () => ({
+  useInstalledRuleCounts: () => ({ counts: mockInstalledCounts, isLoading: false }),
+}));
+
 
 const createRulePayload = (overrides: Partial<CreateRuleData> = {}): CreateRuleData =>
   ({
@@ -89,6 +97,7 @@ describe('RuleLibraryList', () => {
     mockCanWriteRules = true;
     mockInstallIsLoading = false;
     mockInstallVariables = undefined;
+    mockInstalledCounts.clear();
     mockFindItems.mockResolvedValue({ items: [], total: 0 });
   });
 
@@ -193,5 +202,53 @@ describe('RuleLibraryList', () => {
     const installAction = await screen.findByTestId('ruleLibraryInstallAction');
     expect(installAction).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByTestId('ruleLibraryInstallLoading')).toBeInTheDocument();
+  });
+
+  describe('Installed column', () => {
+    it('shows a dash when no rules are installed from the template', async () => {
+      const template = createTemplate({ id: 'tpl-zero' });
+      mockFindItems.mockResolvedValue({
+        items: [
+          {
+            id: template.id,
+            title: template.rule.metadata.name,
+            description: template.rule.metadata.description,
+            tags: template.rule.metadata.tags,
+            template,
+          },
+        ],
+        total: 1,
+      });
+
+      renderList();
+
+      await waitFor(() => {
+        expect(screen.getByText('\u2014')).toBeInTheDocument();
+      });
+    });
+
+    it('shows the count as a link when rules are installed from the template', async () => {
+      mockInstalledCounts.set('template-1', 5);
+      const template = createTemplate({ id: 'template-1' });
+      mockFindItems.mockResolvedValue({
+        items: [
+          {
+            id: template.id,
+            title: template.rule.metadata.name,
+            description: template.rule.metadata.description,
+            tags: template.rule.metadata.tags,
+            template,
+          },
+        ],
+        total: 1,
+      });
+
+      renderList();
+
+      const link = await screen.findByRole('link', { name: '5' });
+      expect(link).toBeInTheDocument();
+      expect(link.getAttribute('href')).toContain('has_reference_type=alerting_rule_template');
+      expect(link.getAttribute('href')).toContain('has_reference_id=template-1');
+    });
   });
 });

@@ -331,6 +331,7 @@ Use \`set_metadata\` to name the rule and add a description or tags so the user 
 | \`description\` | string | optional | Human-readable description of the rule. (max length: 1024) |
 | \`tags\` | string[] | optional | Tags for categorization, e.g. [\\"production\\", \\"infra\\"]. (min items: 1, max items: 20) |
 | \`builder_type\` | string | optional | Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES\\\\|QL. (max length: 64) |
+| \`source\` | object | optional | Tracks the originating rule spec or content pack. Framework-agnostic envelope; consumers define the data shape per type. |
 | \`operation\` | \\"set_metadata\\" | required |  |
 
 #### \`operation: \\"set_kind\\"\`

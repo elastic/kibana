@@ -291,6 +291,14 @@ describe('rule template create-rule schema coupling', () => {
                   "maxLength": 256,
                   "type": "string",
                 },
+                "source": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/alerting_rule_source",
+                    },
+                  ],
+                  "description": "Tracks the originating rule spec or content pack. Framework-agnostic envelope; consumers define the data shape per type.",
+                },
                 "tags": Object {
                   "description": "Tags for categorization, e.g. [\\"production\\", \\"infra\\"].",
                   "items": Object {
@@ -334,6 +342,32 @@ describe('rule template create-rule schema coupling', () => {
               },
               "required": Array [
                 "every",
+              ],
+              "type": "object",
+            },
+            "alerting_rule_source": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "data": Object {
+                  "additionalProperties": Object {},
+                  "description": "Per-type payload. Shape is a consumer-side convention, not enforced by the framework.",
+                  "propertyNames": Object {
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "type": "object",
+                },
+                "type": Object {
+                  "description": "Source type discriminator, e.g. \\"prebuilt_rule\\", \\"content_pack\\". Namespaced by convention.",
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "type",
+                "data",
               ],
               "type": "object",
             },

@@ -29,6 +29,22 @@ export const AlertingV2UsageCollectorSchema: MakeSchemaFrom<AlertingV2Usage> = {
         'Number of alerting v2 rules currently tagged as created/edited via Agent Builder.',
     },
   },
+  count_from_rule_template: {
+    type: 'long',
+    _meta: {
+      description: 'Number of alerting v2 rules created from a rule template.',
+    },
+  },
+  count_by_template_id: {
+    type: 'array',
+    items: {
+      name: { type: 'keyword', _meta: { description: 'Rule template id.' } },
+      value: {
+        type: 'long',
+        _meta: { description: 'Number of rules created from this template.' },
+      },
+    },
+  },
   count_by_kind: {
     alert: {
       type: 'long',

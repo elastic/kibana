@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core-di-browser';
@@ -56,6 +57,11 @@ const toContentListItem = (rule: RuleApiResponse): RuleContentListItem => ({
 export const useRulesDataSource = (): DataSourceConfig => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
+  const location = useLocation();
+
+  const urlParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const hasReferenceType = urlParams.get('has_reference_type') || undefined;
+  const hasReferenceId = urlParams.get('has_reference_id') || undefined;
 
   return useMemo(
     (): DataSourceConfig => ({
@@ -63,16 +69,21 @@ export const useRulesDataSource = (): DataSourceConfig => {
         const { filter, search } = toRulesQueryParams(filters);
 
         try {
-          const response = await rulesApi.listRules(
-            toFindRulesRequest({
-              page: page.index + 1,
-              perPage: page.size,
-              filter,
-              search,
-              sortField: toApiSortField(sort?.field),
-              sortOrder: sort?.direction,
-            })
-          );
+          const request = toFindRulesRequest({
+            page: page.index + 1,
+            perPage: page.size,
+            filter,
+            search,
+            sortField: toApiSortField(sort?.field),
+            sortOrder: sort?.direction,
+          });
+
+          if (hasReferenceType && hasReferenceId) {
+            request.has_reference_type = hasReferenceType;
+            request.has_reference_id = hasReferenceId;
+          }
+
+          const response = await rulesApi.listRules(request);
 
           return {
             items: response.items.map(toContentListItem),
@@ -88,6 +99,6 @@ export const useRulesDataSource = (): DataSourceConfig => {
         }
       },
     }),
-    [rulesApi, toasts]
+    [rulesApi, toasts, hasReferenceType, hasReferenceId]
   );
 };

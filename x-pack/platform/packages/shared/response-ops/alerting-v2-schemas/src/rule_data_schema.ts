@@ -24,6 +24,7 @@ import {
   ID_MAX_LENGTH,
   VERSION_MAX_LENGTH,
   MAX_ARTIFACT_DATA_FIELDS,
+  MAX_SOURCE_DATA_FIELDS,
 } from './constants';
 
 /** Primitives */
@@ -58,6 +59,63 @@ export const ruleKindSchema = z
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 
+/** Source (optional, inside metadata) */
+
+export const sourceSchema = z
+  .object({
+    type: z
+      .string()
+      .min(1)
+      .max(128)
+      .describe(
+        'Source type discriminator, e.g. "prebuilt_rule", "content_pack". Namespaced by convention.'
+      ),
+    data: z
+      .record(z.string().min(1).max(MAX_FIELD_NAME_LENGTH), z.unknown())
+      .describe(
+        'Per-type payload. Shape is a consumer-side convention, not enforced by the framework.'
+      ),
+  })
+  .strict()
+  .check((ctx) => {
+    const fields = Object.entries(ctx.value.data);
+
+    if (fields.length > MAX_SOURCE_DATA_FIELDS) {
+      ctx.issues.push({
+        code: 'custom',
+        path: ['data'],
+        message: `Source data must have at most ${MAX_SOURCE_DATA_FIELDS} fields.`,
+        input: ctx.value.data,
+      });
+    }
+
+    for (const [field, value] of fields) {
+      const limit = DEFAULT_ARTIFACT_DATA_FIELD_LIMIT;
+
+      if (typeof value === 'string') {
+        if (value.length > limit) {
+          ctx.issues.push({
+            code: 'custom',
+            path: ['data', field],
+            message: `Source data field "${field}" must be at most ${limit} characters.`,
+            input: value,
+          });
+        }
+        continue;
+      }
+
+      if ((JSON.stringify(value) ?? '').length > limit) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['data', field],
+          message: `Source data field "${field}" must serialize to at most ${limit} characters.`,
+          input: value,
+        });
+      }
+    }
+  })
+  .meta({ id: 'alerting_rule_source' });
+
 /** Metadata (required) */
 
 export const metadataSchema = z
@@ -83,6 +141,11 @@ export const metadataSchema = z
       .optional()
       .describe(
         'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
+      ),
+    source: sourceSchema
+      .optional()
+      .describe(
+        'Tracks the originating rule spec or content pack. Framework-agnostic envelope; consumers define the data shape per type.'
       ),
   })
   .strict()
@@ -640,7 +703,10 @@ export const updateRuleDataSchema = z
   .object({
     metadata: metadataSchema
       .partial()
-      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .extend({
+        builder_type: z.string().max(64).optional().nullable(),
+        source: sourceSchema.optional().nullable(),
+      })
       .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),
@@ -739,6 +805,18 @@ export const findRulesRequestSchema = z.object({
     .max(MAX_SEARCH_LENGTH)
     .optional()
     .describe('A text string to search across rule fields.'),
+  has_reference_type: z
+    .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .optional()
+    .describe('Filter to rules referencing a saved object of this type.'),
+  has_reference_id: z
+    .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
+    .optional()
+    .describe('Filter to rules referencing a saved object with this id (requires has_reference_type).'),
 });
 
 export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;

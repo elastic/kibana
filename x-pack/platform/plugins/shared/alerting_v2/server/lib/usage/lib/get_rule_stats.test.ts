@@ -19,6 +19,11 @@ function mockRuleSearchResponse({
   total = 20,
   countEnabled = 15,
   countAgentBuilderAssisted = 7,
+  countFromRuleTemplate = 3,
+  templateIdBuckets = [
+    { key: 'nginx-error-rate', doc_count: 2 },
+    { key: 'cpu-high', doc_count: 1 },
+  ],
   kindBuckets = [
     { key: 'metric', doc_count: 12 },
     { key: 'log', doc_count: 8 },
@@ -48,6 +53,8 @@ function mockRuleSearchResponse({
   total?: number;
   countEnabled?: number;
   countAgentBuilderAssisted?: number;
+  countFromRuleTemplate?: number;
+  templateIdBuckets?: Array<{ key: string; doc_count: number }>;
   kindBuckets?: Array<{ key: string; doc_count: number }>;
   scheduleBuckets?: Array<{ key: string; doc_count: number }>;
   lookbackBuckets?: Array<{ key: string; doc_count: number }>;
@@ -70,6 +77,8 @@ function mockRuleSearchResponse({
     aggregations: {
       count_enabled: { doc_count: countEnabled },
       count_agent_builder_assisted: { doc_count: countAgentBuilderAssisted },
+      count_from_rule_template: { doc_count: countFromRuleTemplate },
+      count_by_template_id: { buckets: templateIdBuckets },
       count_by_kind: { buckets: kindBuckets },
       count_by_schedule: { buckets: scheduleBuckets },
       count_by_lookback: { buckets: lookbackBuckets },
@@ -100,6 +109,11 @@ describe('getRuleStats', () => {
       count_total: 20,
       count_enabled: 15,
       count_agent_builder_assisted: 7,
+      count_from_rule_template: 3,
+      count_by_template_id: [
+        { name: 'nginx-error-rate', value: 2 },
+        { name: 'cpu-high', value: 1 },
+      ],
       count_by_kind: { metric: 12, log: 8 },
       count_by_schedule: [
         { name: '1m', value: 10 },
@@ -124,6 +138,8 @@ describe('getRuleStats', () => {
       total: 0,
       countEnabled: 0,
       countAgentBuilderAssisted: 0,
+      countFromRuleTemplate: 0,
+      templateIdBuckets: [],
       kindBuckets: [],
       scheduleBuckets: [],
       lookbackBuckets: [],
@@ -145,6 +161,8 @@ describe('getRuleStats', () => {
       count_total: 0,
       count_enabled: 0,
       count_agent_builder_assisted: 0,
+      count_from_rule_template: 0,
+      count_by_template_id: [],
       count_by_kind: {},
       count_by_schedule: [],
       count_by_lookback: [],
@@ -175,6 +193,8 @@ describe('getRuleStats', () => {
       count_total: 0,
       count_enabled: 0,
       count_agent_builder_assisted: 0,
+      count_from_rule_template: 0,
+      count_by_template_id: [],
       count_by_kind: {},
       count_by_schedule: [],
       count_by_lookback: [],
@@ -200,6 +220,8 @@ describe('getRuleStats', () => {
       aggregations: {
         count_enabled: { doc_count: 2 },
         count_agent_builder_assisted: { doc_count: 1 },
+        count_from_rule_template: { doc_count: 0 },
+        count_by_template_id: { buckets: [] },
         count_by_kind: { buckets: [] },
         count_by_schedule: { buckets: [] },
         count_by_lookback: { buckets: [] },

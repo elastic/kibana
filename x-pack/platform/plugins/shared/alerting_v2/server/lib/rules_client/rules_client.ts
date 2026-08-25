@@ -86,6 +86,11 @@ import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
 } from './utils';
+import {
+  extractSourceReferences,
+  rebuildSourceReferences,
+  injectSourceReferences,
+} from './source_references';
 
 const withApm = withApmDecorator('RulesClient');
 
@@ -265,10 +270,10 @@ export class RulesClient {
 
   private async getExistingRule(
     id: string
-  ): Promise<{ attrs: RuleSavedObjectAttributes; version: string | undefined }> {
+  ): Promise<{ attrs: RuleSavedObjectAttributes; version: string | undefined; references?: import('@kbn/core/server').SavedObjectReference[] }> {
     try {
       const doc = await this.rulesSavedObjectService.get(id);
-      return { attrs: doc.attributes, version: doc.version };
+      return { attrs: doc.attributes, version: doc.version, references: doc.references };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(getRuleNotFoundMessage(id), {
@@ -304,13 +309,15 @@ export class RulesClient {
     id,
     attrs,
     version,
+    references,
   }: {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
+    references?: import('@kbn/core/server').SavedObjectReference[];
   }): Promise<{ id: string; version?: string }> {
     try {
-      return await this.rulesSavedObjectService.update({ id, attrs, version });
+      return await this.rulesSavedObjectService.update({ id, attrs, version, references });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(getRuleVersionConflictMessage(id), {
@@ -344,11 +351,14 @@ export class RulesClient {
     // A freshly created rule is always enabled, so it always counts towards the limit.
     await this.validateSchedule({ updatedEvery: ruleAttributes.schedule.every, checkLimit: true });
 
+    const sourceRefs = extractSourceReferences(ruleAttributes.metadata.source);
+
     let created: { id: string; version?: string };
     try {
       created = await this.rulesSavedObjectService.create({
         attrs: ruleAttributes,
         id: params.options?.id,
+        ...(sourceRefs.length ? { references: sourceRefs } : {}),
       });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
@@ -398,7 +408,7 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+    const { attrs: existingAttrs, version: existingVersion, references: existingRefs } = await this.getExistingRule(id);
 
     if (
       !isStateTransitionAllowed({
@@ -440,10 +450,16 @@ export class RulesClient {
       });
     }
 
+    const nextRefs = rebuildSourceReferences({
+      source: nextAttrs.metadata.source,
+      previousReferences: existingRefs,
+    });
+
     const { version: newVersion } = await this.writeRuleAttrs({
       id,
       attrs: nextAttrs,
       version: options?.version ?? existingVersion,
+      references: nextRefs,
     });
 
     const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
@@ -457,8 +473,15 @@ export class RulesClient {
 
   @withApm
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
-    const { attrs, version } = await this.getExistingRule(id);
-    return transformRuleSoAttributesToRuleApiResponse(id, attrs, version);
+    const { attrs, version, references } = await this.getExistingRule(id);
+    const injectedAttrs = {
+      ...attrs,
+      metadata: {
+        ...attrs.metadata,
+        source: injectSourceReferences(attrs.metadata.source, references),
+      },
+    };
+    return transformRuleSoAttributesToRuleApiResponse(id, injectedAttrs, version);
   }
 
   @withApm
@@ -677,12 +700,20 @@ export class RulesClient {
       searchFields: search ? RULE_SEARCH_FIELDS : undefined,
       sortField,
       sortOrder: params.sortOrder,
+      hasReference: params.hasReference,
     });
 
     return {
-      items: res.saved_objects.map((so) =>
-        transformRuleSoAttributesToRuleApiResponse(so.id, so.attributes, so.version)
-      ),
+      items: res.saved_objects.map((so) => {
+        const injectedAttrs = {
+          ...so.attributes,
+          metadata: {
+            ...so.attributes.metadata,
+            source: injectSourceReferences(so.attributes.metadata.source, so.references),
+          },
+        };
+        return transformRuleSoAttributesToRuleApiResponse(so.id, injectedAttrs, so.version);
+      }),
       total: res.total,
       page,
       per_page: perPage,

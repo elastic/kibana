@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { NoDataStrategy, QueryFormat, RecoveryStrategy } from '@kbn/alerting-v2-schemas';
+import { RULE_TEMPLATE_SOURCE_TYPE } from '@kbn/alerting-v2-constants';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { AGENT_BUILDER_TAG } from '../../../agent_builder/common/constants';
 import { TERMS_SIZE, bucketsToRecord, bucketsToArray } from './constants';
@@ -193,6 +194,27 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
           `,
         },
       },
+      rule_template_id: {
+        type: 'keyword',
+        script: {
+          source: `
+            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
+            if (rule != null) {
+              def metadata = rule['metadata'];
+              if (metadata != null) {
+                def source = metadata['source'];
+                if (source != null && source['type'] == '${RULE_TEMPLATE_SOURCE_TYPE}') {
+                  def data = source['data'];
+                  if (data != null) {
+                    def v = data['template_id'];
+                    if (v != null) emit(v);
+                  }
+                }
+              }
+            }
+          `,
+        },
+      },
     },
     aggs: {
       count_enabled: {
@@ -200,6 +222,14 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
       },
       count_agent_builder_assisted: {
         filter: { term: { [`${RULE_SAVED_OBJECT_TYPE}.metadata.tags`]: AGENT_BUILDER_TAG } },
+      },
+      count_from_rule_template: {
+        filter: {
+          term: { [`${RULE_SAVED_OBJECT_TYPE}.metadata.source.type`]: RULE_TEMPLATE_SOURCE_TYPE },
+        },
+      },
+      count_by_template_id: {
+        terms: { field: 'rule_template_id', size: TERMS_SIZE },
       },
       count_by_kind: {
         terms: { field: `${RULE_SAVED_OBJECT_TYPE}.kind`, size: TERMS_SIZE },
@@ -252,6 +282,8 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
     count_total: total,
     count_enabled: aggs?.count_enabled.doc_count ?? 0,
     count_agent_builder_assisted: aggs?.count_agent_builder_assisted.doc_count ?? 0,
+    count_from_rule_template: aggs?.count_from_rule_template?.doc_count ?? 0,
+    count_by_template_id: bucketsToArray(aggs?.count_by_template_id?.buckets),
     count_by_kind: bucketsToRecord<'alert' | 'signal'>(aggs?.count_by_kind.buckets),
     count_by_schedule: bucketsToArray(aggs?.count_by_schedule.buckets),
     count_by_lookback: bucketsToArray(aggs?.count_by_lookback.buckets),

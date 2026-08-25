@@ -6,7 +6,7 @@
  */
 
 import { decode as decodeRison } from '@kbn/rison';
-import { ALERTING_V2_EPISODES_BASE_PATH, paths } from './constants';
+import { ALERTING_V2_EPISODES_BASE_PATH, ALERTING_V2_RULES_BASE_PATH, paths } from './constants';
 
 /** Parse the `_a` rison blob from the generated URL. */
 const decodeAppState = (url: string): unknown => {
@@ -80,5 +80,20 @@ describe('paths.alertEpisodesListHref', () => {
       timeTo: '2024-01-07T00:00:00.000Z',
     });
     expect(new URL(url, 'http://localhost').searchParams.has('_g')).toBe(false);
+  });
+});
+
+describe('paths.ruleListFilteredByTemplate', () => {
+  it('builds a URL with has_reference_type and has_reference_id', () => {
+    const url = paths.ruleListFilteredByTemplate('nginx-error-rate');
+    expect(url).toBe(
+      `${ALERTING_V2_RULES_BASE_PATH}?has_reference_type=alerting_rule_template&has_reference_id=nginx-error-rate`
+    );
+  });
+
+  it('encodes special characters in the template id', () => {
+    const url = paths.ruleListFilteredByTemplate('tpl/with spaces&special');
+    const parsed = new URL(url, 'http://localhost');
+    expect(parsed.searchParams.get('has_reference_id')).toBe('tpl/with spaces&special');
   });
 });

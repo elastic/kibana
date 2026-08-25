@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-export * from './advanced_settings';
-export * from './agent_builder';
-export * from './artifacts';
-export * from './esql_params';
-export * from './labels';
-export * from './rule_kind';
-export * from './source';
+/** Source type for rules created from a rule template. */
+export const RULE_TEMPLATE_SOURCE_TYPE = 'rule_template';

@@ -153,6 +153,22 @@ describe('registerAlertingV2UsageCollector', () => {
             },
             type: 'long',
           },
+          count_from_rule_template: {
+            _meta: {
+              description: 'Number of alerting v2 rules created from a rule template.',
+            },
+            type: 'long',
+          },
+          count_by_template_id: {
+            items: {
+              name: { _meta: { description: 'Rule template id.' }, type: 'keyword' },
+              value: {
+                _meta: { description: 'Number of rules created from this template.' },
+                type: 'long',
+              },
+            },
+            type: 'array',
+          },
           count_total: {
             _meta: { description: 'Total number of alerting v2 rules.' },
             type: 'long',
