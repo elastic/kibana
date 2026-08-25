@@ -21,7 +21,6 @@ import type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
-  SideNavLogo,
 } from '@kbn/ui-side-navigation/types';
 import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
 
@@ -31,7 +30,6 @@ import { isActiveFromUrl } from './utils/is_active_from_url';
 const SKIP_WARNINGS = process.env.NODE_ENV === 'production';
 
 export interface NavigationItems {
-  logoItem?: SideNavLogo;
   navItems: NavigationStructure;
   activeItemId?: string;
 }
@@ -43,7 +41,6 @@ export interface NavigationItems {
  *
  * Structural Assumptions and Mapping
  *
- * - Root node (1st level) is used for the "logo" item and application branding
  * - 2nd level nodes are transformed into primary navigation items:
  *   - Accordion nodes are flattened (not supported) - their children become primary items
  *   - Nodes without links that aren't panel openers are treated as section dividers and not supported in new nav - their children are flattened
@@ -106,17 +103,15 @@ export const toNavigationItems = (
 
   // Home stays in `primaryNodes` as a regular, customizable sidebar item.
   // Its title/icon are normalized upstream in `applyCustomization`.
-  // `logoItem` is unused in the project shell (Chrome Next); kept undefined for API shape.
   // TODO: remove the `renderAs: 'home'` special-casing entirely in favor of
   // solution-owned nav tree config: https://github.com/elastic/kibana/issues/272291
-  const logoItem: SideNavLogo | undefined = undefined;
 
   const homeNodeIndex = primaryNodes.findIndex((node) => node.renderAs === 'home');
   if (homeNodeIndex !== -1) {
     maybeMarkActive(primaryNodes[homeNodeIndex], 0);
   } else {
     warnOnce(
-      `No "home" node found in primary nodes. There should be a logo node with solution logo, name and home page href. renderAs: "home" is expected.`
+      `No "home" node found in primary nodes. There should be a node with renderAs: "home".`
     );
   }
 
@@ -262,13 +257,12 @@ export const toNavigationItems = (
   }
 
   if (!SKIP_WARNINGS) {
-    warnAboutDuplicateIds(logoItem, primaryItems, footerItems);
-    warnAboutDuplicateIcons(logoItem, primaryItems, footerItems);
+    warnAboutDuplicateIds(primaryItems, footerItems);
+    warnAboutDuplicateIcons(primaryItems, footerItems);
     warnAboutTooManyNewItems(primaryItems, footerItems);
   }
 
   return {
-    logoItem,
     navItems: { primaryItems, overflowItems, footerItems },
     activeItemId: deepestActiveItemId,
   };
@@ -360,13 +354,9 @@ function warnAboutDuplicates(
   });
 }
 
-function warnAboutDuplicateIcons(
-  logoItem: SideNavLogo | undefined,
-  primaryItems: MenuItem[],
-  footerItems: MenuItem[]
-) {
+function warnAboutDuplicateIcons(primaryItems: MenuItem[], footerItems: MenuItem[]) {
   if (SKIP_WARNINGS) return;
-  const icons = [...(logoItem ? [logoItem] : []), ...primaryItems, ...footerItems]
+  const icons = [...primaryItems, ...footerItems]
     .filter(
       (item) =>
         item.iconType &&
@@ -382,13 +372,9 @@ function warnAboutDuplicateIcons(
   );
 }
 
-function warnAboutDuplicateIds(
-  logoItem: SideNavLogo | undefined,
-  primaryItems: MenuItem[],
-  footerItems: MenuItem[]
-) {
+function warnAboutDuplicateIds(primaryItems: MenuItem[], footerItems: MenuItem[]) {
   if (SKIP_WARNINGS) return;
-  let allIds: string[] = logoItem ? [logoItem.id] : [];
+  let allIds: string[] = [];
 
   // Helper to extract IDs from menu items including their secondary sections
   const collectIds = (items: MenuItem[]) => {

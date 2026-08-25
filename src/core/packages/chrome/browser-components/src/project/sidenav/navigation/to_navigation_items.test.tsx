@@ -39,12 +39,10 @@ beforeEach(() => {
 
 describe('toNavigationItems', () => {
   const {
-    logoItem,
     navItems: { footerItems, primaryItems },
   } = createNavigationItems();
 
-  it('should not extract a logoItem; home stays in primary items', () => {
-    expect(logoItem).toBeUndefined();
+  it('keeps the home node as a regular primary item', () => {
     const homeItem = primaryItems.find((item) => item.id === 'security_solution_home');
     expect(homeItem).toBeDefined();
     expect(homeItem?.label).toBe('Security');
