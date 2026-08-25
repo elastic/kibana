@@ -7,16 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as React from 'react';
-import { shallow } from 'enzyme';
-import toJson from 'enzyme-to-json';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { NewsEmptyPrompt } from './empty_news';
 
-describe('empty_news', () => {
-  describe('rendering', () => {
-    it('renders the default Empty News', () => {
-      const wrapper = shallow(<NewsEmptyPrompt />);
-      expect(toJson(wrapper)).toMatchSnapshot();
-    });
+describe('NewsEmptyPrompt', () => {
+  it('renders the empty newsfeed prompt', () => {
+    render(
+      <I18nProvider>
+        <NewsEmptyPrompt />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('emptyNewsfeed')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'No news?' })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /If your Kibana instance doesn’t have internet access, ask your administrator to disable this feature/
+      )
+    ).toBeInTheDocument();
   });
 });

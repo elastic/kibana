@@ -9,12 +9,12 @@
 
 /**
  * Custom serializer to handle Emotion-styled components in Enzyme shallow renders.
- * This must run BEFORE enzyme-to-json to properly transform Emotion components.
+ * This must run BEFORE the Enzyme snapshot serializer to properly transform Emotion components.
  *
  * The problem: When using Enzyme's shallow() with Emotion-styled components,
  * the component's internal structure (ForwardRef, __EMOTION_TYPE_PLEASE_DO_NOT_USE__)
  * gets exposed in snapshots. This serializer intercepts those components and
- * transforms them to match the expected format before enzyme-to-json processes them.
+ * transforms them to match the expected format before the Enzyme serializer processes them.
  */
 
 module.exports = {
