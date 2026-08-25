@@ -24,9 +24,9 @@ export class ApplySuppressionStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { episodes = [], suppressions = [] } = state;
+    const { scan, suppressions = [] } = state;
 
-    const { suppressed, dispatchable } = applySuppression(episodes, suppressions);
+    const { suppressed, dispatchable } = applySuppression(scan?.episodes ?? [], suppressions);
 
     return { type: 'continue', data: { suppressed, dispatchable } };
   }

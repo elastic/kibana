@@ -178,15 +178,16 @@ export class DispatcherService implements DispatcherServiceContract {
             `halt_reason=${pipelineResult.haltReason ?? 'completed'}`,
             `watermark_lag_ms=${watermarkLagMs}`,
             `window_span_ms=${windowSpanMs}`,
-            `truncated=${pipelineResult.finalState.truncated ?? false}`,
-            `episode_count=${pipelineResult.finalState.episodes?.length ?? 0}`,
+            `truncated=${pipelineResult.finalState.scan?.truncated ?? false}`,
+            `episode_count=${pipelineResult.finalState.scan?.count ?? 0}`,
             `stuck_ticks=${nextStuckTicks}`,
           ].join(' ');
         },
       });
 
       if (nextStuckTicks >= STUCK_TICK_LIMIT) {
-        const blockingEpisodes = pipelineResult.finalState.episodes ?? [];
+        const scan = pipelineResult.finalState.scan;
+        const blockingEpisodes = scan?.episodes ?? [];
         const lagMs = startedAt.getTime() - resolvedWatermark.getTime();
 
         if (blockingEpisodes.length === 0) {
@@ -230,10 +231,9 @@ export class DispatcherService implements DispatcherServiceContract {
         // `.alert-actions` dedup mark moves past them, then advance the watermark.
         // If the batch was truncated, advance only to the truncation edge so the
         // tail (beyond EPISODE_QUERY_LIMIT) is re-read and also escape-hatched next tick.
-        const truncated = pipelineResult.finalState.truncated ?? false;
-        const lastEpisode = blockingEpisodes[blockingEpisodes.length - 1];
+        const truncated = scan?.truncated ?? false;
         const escapeTarget = truncated
-          ? new Date(lastEpisode.last_event_timestamp)
+          ? scan?.truncationEdge() ?? input.windowEnd
           : input.windowEnd;
         // Clamp: never regress below the current watermark (guards against clock skew
         // producing a windowEnd behind resolvedWatermark).

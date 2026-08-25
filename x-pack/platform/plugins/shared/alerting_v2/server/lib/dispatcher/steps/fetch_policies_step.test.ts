@@ -50,7 +50,7 @@ describe('FetchPoliciesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.policies?.size).toBe(1);
+    expect(result.data?.policies?.byId.size).toBe(1);
 
     const policy = result.data?.policies?.get('p1');
     expect(policy?.name).toBe('Policy 1');
@@ -71,7 +71,7 @@ describe('FetchPoliciesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.policies?.size).toBe(0);
+    expect(result.data?.policies?.byId.size).toBe(0);
   });
 
   it('skips documents with errors and warns', async () => {
@@ -84,7 +84,7 @@ describe('FetchPoliciesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.policies?.size).toBe(0);
+    expect(result.data?.policies?.byId.size).toBe(0);
     expect(mockLogger.warn).toHaveBeenCalledWith(
       'Action policy lookup failed',
       expect.objectContaining({
@@ -155,7 +155,7 @@ describe('FetchPoliciesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.policies?.size).toBe(2);
+    expect(result.data?.policies?.byId.size).toBe(2);
     expect(result.data?.policies?.get('p1')?.apiKey).toBe('key-1');
     expect(result.data?.policies?.get('p2')?.apiKey).toBe('key-2');
     expect(mockFindAllDecrypted).toHaveBeenCalledWith({ filter: { enabled: true } });

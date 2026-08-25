@@ -48,7 +48,7 @@ describe('FetchRulesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.rules?.size).toBe(1);
+    expect(result.data?.rules?.byId.size).toBe(1);
     expect(result.data?.rules?.get('r1')?.name).toBe('Rule 1');
     expect(result.data?.rules?.get('r1')?.spaceId).toBe('default');
     expect(mockFindByIds).toHaveBeenCalledWith(['r1']);
@@ -62,7 +62,7 @@ describe('FetchRulesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.rules?.size).toBe(0);
+    expect(result.data?.rules?.byId.size).toBe(0);
     expect(mockFindByIds).not.toHaveBeenCalled();
   });
 
@@ -93,7 +93,7 @@ describe('FetchRulesStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.rules?.size).toBe(2);
+    expect(result.data?.rules?.byId.size).toBe(2);
     expect(mockFindByIds).toHaveBeenCalledWith(['r1', 'r2']);
   });
 
@@ -161,7 +161,7 @@ describe('FetchRulesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(mockFindByIds).toHaveBeenCalledWith(['r1']);
-    expect(result.data?.rules?.size).toBe(1);
+    expect(result.data?.rules?.byId.size).toBe(1);
   });
 
   it('does not call findByIds when all episodes have null rule_id', async () => {
@@ -178,6 +178,6 @@ describe('FetchRulesStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(mockFindByIds).not.toHaveBeenCalled();
-    expect(result.data?.rules?.size).toBe(0);
+    expect(result.data?.rules?.byId.size).toBe(0);
   });
 });

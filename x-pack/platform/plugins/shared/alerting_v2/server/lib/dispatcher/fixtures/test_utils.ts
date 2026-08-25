@@ -7,10 +7,12 @@
 
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { EpisodeScan, PolicyCatalog, RuleCatalog } from '../state';
 import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 import type {
   ActionGroup,
   ActionPolicy,
+  ActionPolicyId,
   AlertEpisode,
   AlertEpisodeSuppression,
   DispatchFailure,
@@ -20,6 +22,7 @@ import type {
   DispatcherStepOutput,
   MatchedPair,
   Rule,
+  RuleId,
 } from '../types';
 
 export function createStepLogger(): LoggerServiceContract {
@@ -42,14 +45,46 @@ export function createDispatcherPipelineInput(
   };
 }
 
+/**
+ * Flat overrides for building a pipeline state: value-object fields may be
+ * given either directly (`scan`) or through their pre-VO source fields
+ * (`episodes`, `truncated`), which are folded into the VO here.
+ */
+export interface DispatcherPipelineStateOverrides
+  extends Omit<Partial<DispatcherPipelineState>, 'input' | 'rules' | 'policies'> {
+  input?: DispatcherPipelineInput;
+  episodes?: AlertEpisode[];
+  truncated?: boolean;
+  rules?: Map<RuleId, Rule>;
+  policies?: Map<ActionPolicyId, ActionPolicy>;
+}
+
 export function createDispatcherPipelineState(
-  state: Partial<DispatcherPipelineState> = {}
+  state: DispatcherPipelineStateOverrides = {}
 ): DispatcherPipelineState {
-  const input = state.input ?? createDispatcherPipelineInput();
+  const { episodes, truncated, scan, rules, policies, input, ...rest } = state;
+  const resolvedScan =
+    scan ??
+    (episodes !== undefined || truncated !== undefined
+      ? createEpisodeScan({ episodes, truncated })
+      : undefined);
   return {
-    ...state,
-    input,
+    ...rest,
+    ...(resolvedScan ? { scan: resolvedScan } : {}),
+    ...(rules ? { rules: RuleCatalog.of(rules) } : {}),
+    ...(policies ? { policies: PolicyCatalog.of(policies) } : {}),
+    input: input ?? createDispatcherPipelineInput(),
   };
+}
+
+export function createEpisodeScan({
+  episodes = [],
+  truncated = false,
+}: {
+  episodes?: AlertEpisode[];
+  truncated?: boolean;
+} = {}): EpisodeScan {
+  return EpisodeScan.of({ episodes, truncated });
 }
 
 export function createAlertEpisode(overrides: Partial<AlertEpisode> = {}): AlertEpisode {

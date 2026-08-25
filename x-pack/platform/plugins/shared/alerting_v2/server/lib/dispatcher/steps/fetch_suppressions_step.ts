@@ -29,14 +29,14 @@ export class FetchSuppressionsStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { episodes } = state;
-    if (!episodes || episodes.length === 0) {
+    const { scan } = state;
+    if (!scan || scan.isEmpty()) {
       return { type: 'continue', data: { suppressions: [] } };
     }
 
     const { signal } = state.input;
 
-    const queries = getAlertEpisodeSuppressionsQueries(episodes);
+    const queries = getAlertEpisodeSuppressionsQueries(scan.episodes);
     const responses = await Promise.all(
       queries.map((request) =>
         this.queryService.executeQueryRows<AlertEpisodeSuppression>({
