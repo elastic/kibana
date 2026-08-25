@@ -909,7 +909,7 @@ describe('DispatchStep', () => {
       expect(docs[1]).toMatchObject({ action_type: 'notified', action_group_id: 'g1' });
     });
 
-    it('returns recordedEpisodes equal to dispatched episode count', async () => {
+    it('returns firedEpisodes equal to dispatched episode count', async () => {
       const step = new DispatchStep(mockWfm, mockStorage);
 
       const episode1 = createAlertEpisode({ episode_id: 'ep1' });
@@ -941,10 +941,10 @@ describe('DispatchStep', () => {
 
       expect(result.type).toBe('continue');
       if (result.type !== 'continue') return;
-      expect(result.data?.recordedEpisodes).toBe(3);
+      expect(result.data?.firedEpisodes).toBe(3);
     });
 
-    it('returns recordedEpisodes = 0 when dispatch is empty', async () => {
+    it('returns firedEpisodes = 0 when dispatch is empty', async () => {
       const step = new DispatchStep(mockWfm, mockStorage);
 
       const result = await step.execute(
@@ -954,7 +954,7 @@ describe('DispatchStep', () => {
 
       expect(result.type).toBe('continue');
       if (result.type !== 'continue') return;
-      expect(result.data?.recordedEpisodes).toBe(0);
+      expect(result.data?.firedEpisodes).toBe(0);
       expect(mockStorage.bulkIndexDocs).not.toHaveBeenCalled();
     });
 
@@ -990,7 +990,7 @@ describe('DispatchStep', () => {
       expect(mockStorage.bulkIndexDocs).toHaveBeenCalledTimes(1);
       expect(result.type).toBe('continue');
       if (result.type !== 'continue') return;
-      expect(result.data?.recordedEpisodes).toBe(DISPATCH_CHUNK_SIZE);
+      expect(result.data?.firedEpisodes).toBe(DISPATCH_CHUNK_SIZE);
     });
 
     it('writes fire/notified exactly once for a group dispatched across chunk boundary destinations', async () => {
@@ -1050,7 +1050,7 @@ describe('DispatchStep', () => {
       expect(result.type).toBe('continue');
       if (result.type !== 'continue') return;
       expect(mockStorage.bulkIndexDocs).not.toHaveBeenCalled();
-      expect(result.data?.recordedEpisodes).toBe(0);
+      expect(result.data?.firedEpisodes).toBe(0);
     });
 
     it('writes fire/notified to ALERT_ACTIONS_DATA_STREAM index', async () => {

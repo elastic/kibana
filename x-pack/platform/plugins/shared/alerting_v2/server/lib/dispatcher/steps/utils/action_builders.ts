@@ -40,21 +40,30 @@ export function toNotifiedAction(
   now: Date
 ): AlertAction {
   const firstEpisode = group.episodes[0];
-  const spaceId = firstEpisode?.space_id ?? 'default';
+  if (!firstEpisode) {
+    // A notified record without episodes has no valid group_hash, which is used
+    // as a dedup key. An empty sentinel would collide across unrelated groups.
+    throw new Error(
+      `toNotifiedAction called with empty episodes for group ${group.id} (policy ${group.policyId})`
+    );
+  }
   const action: AlertAction = {
     '@timestamp': now.toISOString(),
     actor: 'system',
     action_type: 'notified',
-    rule_id: firstEpisode?.rule_id ?? null,
-    group_hash: firstEpisode?.group_hash ?? 'unknown',
+    rule_id: firstEpisode.rule_id,
+    group_hash: firstEpisode.group_hash,
+    // last_series_event_timestamp uses dispatch time (now), not the episode's last
+    // event timestamp — notified records represent when the notification was sent,
+    // which is what throttle-window queries use via MAX(@timestamp).
     last_series_event_timestamp: now.toISOString(),
     action_group_id: group.id,
-    source: firstEpisode?.source,
+    source: firstEpisode.source,
     reason: `notified by policy ${group.policyId}`,
-    space_id: spaceId,
+    space_id: firstEpisode.space_id,
   };
   if ((groupingMode ?? 'per_episode') === 'per_episode') {
-    action.episode_status = firstEpisode?.episode_status;
+    action.episode_status = firstEpisode.episode_status;
   }
   return action;
 }

@@ -201,7 +201,7 @@ describe('StoreActionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
-      recordedEpisodes: 1,
+      firedEpisodes: 1,
       suppressed: [{ ...suppressedEpisode, reason: 'manually suppressed' }],
       throttled: [throttledGroup],
       dispatch: [dispatchGroup],
@@ -356,7 +356,7 @@ describe('StoreActionsStep', () => {
     });
 
     const state = createDispatcherPipelineState({
-      recordedEpisodes: 1,
+      firedEpisodes: 1,
       dispatchable: [dispatchedEpisode, throttledEpisode, unmatchedEpisode],
       suppressed: [],
       throttled: [throttledGroup],
@@ -536,12 +536,12 @@ describe('StoreActionsStep', () => {
       );
     });
 
-    it('propagates state.recordedEpisodes from DispatchStep', async () => {
+    it('propagates state.firedEpisodes from DispatchStep', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
       const state = createDispatcherPipelineState({
-        recordedEpisodes: 2,
+        firedEpisodes: 2,
         suppressed: [],
         throttled: [],
         dispatch: [
@@ -584,11 +584,11 @@ describe('StoreActionsStep', () => {
       );
     });
 
-    it('sums all buckets: state.recordedEpisodes + suppressed + throttled + unmatched', async () => {
+    it('sums all buckets: state.firedEpisodes + suppressed + throttled + unmatched', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
-      // state.recordedEpisodes=1 (from DispatchStep) + 1 suppressed + 1 throttled + 1 unmatched = 4
+      // state.firedEpisodes=1 (from DispatchStep) + 1 suppressed + 1 throttled + 1 unmatched = 4
       const unmatchedEpisode = createAlertEpisode({
         episode_id: 'ep-unmatched',
         group_hash: 'h-unmatched',
@@ -603,7 +603,7 @@ describe('StoreActionsStep', () => {
       });
 
       const state = createDispatcherPipelineState({
-        recordedEpisodes: 1,
+        firedEpisodes: 1,
         dispatchable: [dispatchedEpisode, throttledEpisode, unmatchedEpisode],
         suppressed: [{ ...createAlertEpisode({ episode_id: 'ep-sup' }), reason: 'acked' }],
         throttled: [createActionGroup({ id: 'g-throttle', episodes: [throttledEpisode] })],
@@ -618,8 +618,8 @@ describe('StoreActionsStep', () => {
     });
   });
 
-  describe('halt guard with state.recordedEpisodes from DispatchStep', () => {
-    it('halts with no_actions when dispatch non-empty but recordedEpisodes=0 and no suppress/throttle/unmatched', async () => {
+  describe('halt guard with state.firedEpisodes from DispatchStep', () => {
+    it('halts with no_actions when dispatch non-empty but firedEpisodes=0 and no suppress/throttle/unmatched', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
@@ -628,7 +628,7 @@ describe('StoreActionsStep', () => {
         suppressed: [],
         throttled: [],
         dispatch: [createActionGroup({ id: 'g1' })],
-        recordedEpisodes: 0,
+        firedEpisodes: 0,
       });
 
       const result = await step.execute(state, logger);
@@ -637,7 +637,7 @@ describe('StoreActionsStep', () => {
       expect(mockService.bulkIndexDocs).not.toHaveBeenCalled();
     });
 
-    it('continues when state.recordedEpisodes > 0 even if suppress/throttle/unmatched are empty', async () => {
+    it('continues when state.firedEpisodes > 0 even if suppress/throttle/unmatched are empty', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
@@ -646,7 +646,7 @@ describe('StoreActionsStep', () => {
         suppressed: [],
         throttled: [],
         dispatch: [],
-        recordedEpisodes: 3,
+        firedEpisodes: 3,
       });
 
       const result = await step.execute(state, logger);
@@ -654,7 +654,7 @@ describe('StoreActionsStep', () => {
       expect(result.type).toBe('continue');
     });
 
-    it('accumulates state.recordedEpisodes from DispatchStep with local suppress/throttle/unmatched counts', async () => {
+    it('accumulates state.firedEpisodes from DispatchStep with local suppress/throttle/unmatched counts', async () => {
       const mockService = createMockStorageServiceContract();
       const step = new StoreActionsStep(mockService);
 
@@ -669,7 +669,7 @@ describe('StoreActionsStep', () => {
       });
 
       const state = createDispatcherPipelineState({
-        recordedEpisodes: 5,
+        firedEpisodes: 5,
         dispatchable: [unmatchedEpisode],
         suppressed: [{ ...suppEpisode, reason: 'acked' }],
         throttled: [createActionGroup({ id: 'g-t', policyId: 'p1', episodes: [throttleEpisode] })],
@@ -691,7 +691,7 @@ describe('StoreActionsStep', () => {
       const group = createActionGroup({ id: 'g1', policyId: 'p1', episodes: [episode] });
 
       const state = createDispatcherPipelineState({
-        recordedEpisodes: 1,
+        firedEpisodes: 1,
         dispatchable: [episode],
         suppressed: [],
         throttled: [],

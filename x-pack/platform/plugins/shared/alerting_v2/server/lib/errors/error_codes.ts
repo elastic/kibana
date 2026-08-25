@@ -310,6 +310,12 @@ export const ALERTING_LOG_CODES = {
   /** Scheduling a workflow execution for a dispatch group failed. */
   DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
   /**
+   * Writing fire/notified dedup records after a dispatched chunk failed. The
+   * workflows were already scheduled; affected groups will be re-dispatched on
+   * the next tick (duplicate risk). The episode IDs are in `labels.group_ids`.
+   */
+  DISPATCH_FIRE_RECORD_FAILED: 'DISPATCH_FIRE_RECORD_FAILED',
+  /**
    * A dispatch group failed for a reason not covered by a more specific code
    * (outer catch of the per-group dispatch loop). Sibling groups still run.
    */

@@ -174,6 +174,13 @@ export interface DispatcherPipelineState {
   readonly episodes?: AlertEpisode[];
   /** True when the episode scan reached EPISODE_QUERY_LIMIT and a tail was deferred. */
   readonly truncated?: boolean;
+  /**
+   * Count of episodes for which DispatchStep wrote fire/notified records
+   * this tick. Set by DispatchStep; accumulated by StoreActionsStep into
+   * `recordedEpisodes`. Kept separate so the two steps' contributions are
+   * distinguishable at the type level.
+   */
+  readonly firedEpisodes?: number;
   /** Count of episodes that received an `.alert-actions` record this tick. */
   readonly recordedEpisodes?: number;
   readonly suppressions?: AlertEpisodeSuppression[];

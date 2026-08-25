@@ -164,7 +164,17 @@ export class DispatcherService implements DispatcherServiceContract {
       }
 
       const nextWatermark = computeNextWatermark({ input, result: pipelineResult });
-      const recordedEpisodes = pipelineResult.finalState.recordedEpisodes ?? 0;
+      // On abort, StoreActionsStep may not have run, so recordedEpisodes is absent.
+      // Fall back to firedEpisodes (written by DispatchStep per chunk) so partial-dispatch
+      // ticks still reset the stuck counter.
+      // Known limitation: isStuck is aggregate — if any chunk in any apiKey batch makes
+      // progress, the counter resets even when later-batch groups are chronically unreachable.
+      // Those groups are not lost (watermark holds), but the escape hatch will not fire for
+      // them while earlier groups keep resetting the counter.
+      const recordedEpisodes =
+        pipelineResult.finalState.recordedEpisodes ??
+        pipelineResult.finalState.firedEpisodes ??
+        0;
       const watermarkHeld = nextWatermark.getTime() === resolvedWatermark.getTime();
       const isStuck = watermarkHeld && recordedEpisodes === 0;
       const nextStuckTicks = isStuck ? stuckTicks + 1 : 0;
@@ -232,6 +242,11 @@ export class DispatcherService implements DispatcherServiceContract {
         // `.alert-actions` dedup mark moves past them, then advance the watermark.
         // If the batch was truncated, advance only to the truncation edge so the
         // tail (beyond EPISODE_QUERY_LIMIT) is re-read and also escape-hatched next tick.
+        // Note: blockingEpisodes includes all fetched episodes; episodes that already have
+        // fire/notified records from a partial-dispatch tick will receive a conflicting
+        // unmatched record. The dedup query uses the latest @timestamp record, so the
+        // unmatched (written last) will win — acceptable for the escape-hatch path where
+        // the alternative is permanent stall.
         const truncated = pipelineResult.finalState.truncated ?? false;
         const lastEpisode = blockingEpisodes[blockingEpisodes.length - 1];
         const escapeTarget = truncated

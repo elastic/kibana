@@ -31,8 +31,7 @@ export class StoreActionsStep implements DispatcherStep {
       throttled = [],
       dispatch = [],
       dispatchable = [],
-      // Fire/notified records already written by DispatchStep, one bulk write per chunk.
-      recordedEpisodes: dispatchedEpisodes = 0,
+      firedEpisodes = 0,
     } = state;
 
     const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled);
@@ -40,7 +39,7 @@ export class StoreActionsStep implements DispatcherStep {
     if (
       suppressed.length === 0 &&
       throttled.length === 0 &&
-      dispatchedEpisodes === 0 &&
+      firedEpisodes === 0 &&
       unmatched.length === 0
     ) {
       return { type: 'halt', reason: 'no_actions' };
@@ -88,7 +87,7 @@ export class StoreActionsStep implements DispatcherStep {
     }
 
     const recordedEpisodes =
-      dispatchedEpisodes +
+      firedEpisodes +
       suppressed.length +
       throttled.reduce((n, g) => n + g.episodes.length, 0) +
       unmatched.length;

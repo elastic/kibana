@@ -94,7 +94,7 @@ export class DispatchStep implements DispatcherStep {
 
     const result = (): DispatcherStepOutput => ({
       type: 'continue',
-      data: { dispatchedExecutions, dispatchFailures, recordedEpisodes: firedEpisodesCount },
+      data: { dispatchedExecutions, dispatchFailures, firedEpisodes: firedEpisodesCount },
     });
 
     if (dispatch.length === 0 || signal.aborted) {
@@ -119,9 +119,13 @@ export class DispatchStep implements DispatcherStep {
       [...groupsByApiKey.values()].flat()
     );
 
-    const now = new Date();
-
     for (const [apiKey, groups] of groupsByApiKey) {
+      // Skip remaining apiKey batches immediately on abort — avoids recording
+      // spurious dispatch failures for groups that were never attempted.
+      if (signal.aborted) {
+        break;
+      }
+
       const pending = this.buildPendingSchedules(
         groups,
         workflowsBySpace,
@@ -155,11 +159,28 @@ export class DispatchStep implements DispatcherStep {
           dispatchedExecutions.has(group.id)
         );
         if (newlyDispatched.length > 0) {
-          await this.recordFiredGroups(newlyDispatched, policies, now);
-          firedEpisodesCount += newlyDispatched.reduce(
-            (sum, group) => sum + group.episodes.length,
-            0
-          );
+          // Stamp now immediately before the write so @timestamp reflects the
+          // actual dispatch time — a stale timestamp inflates elapsed-since-last-notified
+          // and can cause throttle intervals to appear satisfied prematurely.
+          const now = new Date();
+          try {
+            await this.recordFiredGroups(newlyDispatched, policies, now);
+            firedEpisodesCount += newlyDispatched.reduce(
+              (sum, group) => sum + group.episodes.length,
+              0
+            );
+          } catch (err) {
+            // Write failed after workflows were already scheduled. These groups
+            // have no dedup record and will be re-dispatched next tick (duplicate
+            // risk). Log with group IDs so an operator can identify affected groups.
+            const groupIds = newlyDispatched.map((g) => g.id).join(',');
+            logger.error({
+              error: toError(err),
+              code: ALERTING_LOG_CODES.DISPATCH_FIRE_RECORD_FAILED,
+              message: () => `fire/notified record write failed for groups [${groupIds}]`,
+            });
+            // Do NOT increment firedEpisodesCount — records were not written.
+          }
         }
       }
     }
