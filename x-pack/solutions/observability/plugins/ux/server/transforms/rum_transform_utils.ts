@@ -28,6 +28,21 @@ export const esStatusCode = (error: unknown): number | undefined => {
 
 export const isEsNotFound = (error: unknown): boolean => esStatusCode(error) === 404;
 
+const esErrorType = (error: unknown): string | undefined => {
+  if (typeof error !== 'object' || error == null) {
+    return undefined;
+  }
+  const withBody = error as {
+    body?: { error?: { type?: string } };
+    meta?: { body?: { error?: { type?: string } } };
+  };
+  return withBody.body?.error?.type ?? withBody.meta?.body?.error?.type;
+};
+
+/** Transform PUT reports an existing id as 400 resource_already_exists_exception, not 409. */
+export const isEsResourceExists = (error: unknown): boolean =>
+  esStatusCode(error) === 409 || esErrorType(error) === 'resource_already_exists_exception';
+
 export const isEsAuthzDenied = (error: unknown): boolean => {
   const status = esStatusCode(error);
   return status === 401 || status === 403;
@@ -290,7 +305,7 @@ export const putOrReplaceTransform = async ({
       ...body,
     });
   } catch (error) {
-    if (esStatusCode(error) !== 409) {
+    if (!isEsResourceExists(error)) {
       throw error;
     }
     const current = await client.transform.getTransform({ transform_id: transformId });

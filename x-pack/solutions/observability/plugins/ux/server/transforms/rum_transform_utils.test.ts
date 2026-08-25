@@ -14,6 +14,7 @@ import {
   installedSourceLookbackGte,
   isEsAuthzDenied,
   isEsNotFound,
+  isEsResourceExists,
   readRollupStatus,
   transformNeedsUpgrade,
   transformSourceWindowUpdate,
@@ -96,6 +97,30 @@ describe('es status helpers', () => {
     expect(isEsAuthzDenied({ meta: { statusCode: 403 } })).toBe(true);
     expect(isEsAuthzDenied({ statusCode: 401 })).toBe(true);
     expect(isEsAuthzDenied({ statusCode: 500 })).toBe(false);
+  });
+
+  it('treats a transform PUT over an existing id as a conflict', () => {
+    // Transform PUT answers 400 resource_already_exists_exception rather than 409.
+    expect(
+      isEsResourceExists({
+        statusCode: 400,
+        meta: {
+          statusCode: 400,
+          body: {
+            error: {
+              type: 'resource_already_exists_exception',
+              reason: 'Transform with id [ux-rum-sessions-3] already exists',
+            },
+          },
+        },
+      })
+    ).toBe(true);
+    expect(
+      isEsResourceExists({ body: { error: { type: 'resource_already_exists_exception' } } })
+    ).toBe(true);
+    expect(isEsResourceExists({ statusCode: 409 })).toBe(true);
+    expect(isEsResourceExists({ statusCode: 400 })).toBe(false);
+    expect(isEsResourceExists(esError(403))).toBe(false);
   });
 });
 
