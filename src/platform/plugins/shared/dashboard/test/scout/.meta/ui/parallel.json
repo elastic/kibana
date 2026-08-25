@@ -1,5 +1,5 @@
 {
-  "sha1": "a5588345d86913d4ec91862e824e54fe77f705eb",
+  "sha1": "1335e7472b261cea33fe4a68a9724bcbc3e69aef",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -162,7 +162,7 @@
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
         "line": 75,
-        "column": 25
+        "column": 27
       }
     },
     {
@@ -181,7 +181,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 13
       }
     },
