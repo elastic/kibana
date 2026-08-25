@@ -22,9 +22,9 @@ import type {
   StartInvestigationResponse,
 } from '../../common';
 
-import { buildInvestigationMessage } from './build_investigation_message';
-import { InvestigationNotFoundError } from './errors';
-export { InvestigationNotFoundError };
+import { buildInvestigationMessage, getAlertSnapshots } from './build_investigation_message';
+import { InvestigationNotFoundError, MissingAlertContextError } from './errors';
+export { InvestigationNotFoundError, MissingAlertContextError };
 
 const SORT_FIELD_MAP: Record<
   NonNullable<ListInvestigationsRequest['sort_field']>,
@@ -135,6 +135,12 @@ export class NightshiftInvestigationsClient {
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!this.workflowsManagement) {
       throw new Error('workflowsManagement is not available');
+    }
+
+    // Enforced here rather than only in the route schema, because the workflow step definition and
+    // the plugin start contract both call this method without passing through route validation.
+    if (subject.type === 'alert' && !getAlertSnapshots(context)) {
+      throw new MissingAlertContextError();
     }
 
     const spaceId = this.getSpaceId();

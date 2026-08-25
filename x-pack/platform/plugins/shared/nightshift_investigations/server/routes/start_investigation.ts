@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { MissingAlertContextError } from '../client/investigations_client';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 const MAX_ALERTS_PER_INVESTIGATION = 20;
@@ -93,7 +95,15 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
     const client = getInvestigationsClient(request);
-    const result = await client.start(params.body);
-    return result;
+    try {
+      return await client.start(params.body);
+    } catch (err) {
+      // Unreachable through this route while the schema above agrees with the client's check, but
+      // the two are separate declarations and a 500 would be the wrong answer if they diverge.
+      if (err instanceof MissingAlertContextError) {
+        throw badRequest(err.message);
+      }
+      throw err;
+    }
   },
 });

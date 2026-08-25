@@ -12,6 +12,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { InvestigationStatus } from '../../common';
 import {
   InvestigationNotFoundError,
+  MissingAlertContextError,
   NightshiftInvestigationsClient,
 } from './investigations_client';
 
@@ -429,11 +430,30 @@ describe('NightshiftInvestigationsClient.start()', () => {
   const WORKFLOW_ID = SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID;
   const mockWorkflow = { id: WORKFLOW_ID, definition: { steps: [] } };
 
+  const alertContext = {
+    alerts: [
+      {
+        id: 'alert-1',
+        rule_id: 'rule-1',
+        rule_name: 'Latency is too high',
+        rule_type_id: 'apm.transaction_duration',
+        rule_category: 'Latency threshold',
+        reason: 'Latency is 2.5s for service checkout',
+        status: 'active',
+        start: '2026-08-24T12:00:00.000Z',
+        flapping: false,
+      },
+    ],
+  };
+
   it('calls runWorkflow with the correct inputs and returns investigation_id', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
 
-    const result = await makeClient().start({ subject: { type: 'alert', id: 'alert-1' } });
+    const result = await makeClient().start({
+      subject: { type: 'alert', id: 'alert-1' },
+      context: alertContext,
+    });
 
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: WORKFLOW_ID }),
@@ -468,8 +488,49 @@ describe('NightshiftInvestigationsClient.start()', () => {
   it('throws when the workflow is not installed', async () => {
     mockManagement.getWorkflow.mockResolvedValue(null);
 
-    await expect(makeClient().start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
-      'Investigations are not configured in this space'
-    );
+    await expect(
+      makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } })
+    ).rejects.toThrow('Investigations are not configured in this space');
+  });
+
+  // The route schema also enforces this, but the workflow step definition and the plugin start
+  // contract reach start() directly, and without the snapshots the agent gets a bare uuid.
+  describe('alert context guard', () => {
+    it.each([
+      ['no context at all', undefined],
+      ['a context with no alerts key', { source: 'alert' }],
+      ['an empty alerts array', { alerts: [] }],
+      ['an alert missing required fields', { alerts: [{ id: 'alert-1' }] }],
+    ])('rejects an alert investigation with %s', async (_label, context) => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+
+      await expect(
+        makeClient().start({ subject: { type: 'alert', id: 'alert-1' }, context })
+      ).rejects.toThrow(MissingAlertContextError);
+      expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('does not require alerts for a significant event subject', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-789');
+
+      await expect(
+        makeClient().start({ subject: { type: 'significant_event', id: 'se-1' } })
+      ).resolves.toEqual({ investigation_id: 'exec-789' });
+    });
+
+    it('builds the brief from the snapshot rather than the bare subject id', async () => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-321');
+
+      await makeClient().start({
+        subject: { type: 'alert', id: 'alert-1' },
+        context: alertContext,
+      });
+
+      const inputs = mockManagement.runWorkflow.mock.calls[0][2];
+      expect(inputs.message).toContain('Latency is too high');
+      expect(inputs.message).not.toBe('Investigation requested for alert alert-1');
+    });
   });
 });
