@@ -166,11 +166,7 @@ export class AgentStatusChangeTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
     try {
-      const processed = await this.persistAgentStatusChanges(
-        esClient,
-        soClient,
-        abortController.signal
-      );
+      const processed = await this.persistAgentStatusChanges(esClient, soClient, abortController);
 
       this.logger.debug(`[AgentStatusChangeTask] processed ${processed} agents`);
       this.endRun('success');
@@ -188,7 +184,7 @@ export class AgentStatusChangeTask {
   private persistAgentStatusChanges = async (
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    signal: AbortSignal
+    abortController: AbortController
   ): Promise<number> => {
     let agentlessPolicies: string[] | undefined;
     let processedCount = 0;
@@ -207,7 +203,7 @@ export class AgentStatusChangeTask {
         return processedCount;
       }
 
-      throwIfAborted(signal);
+      throwIfAborted(abortController);
 
       const agentsWithStatus = agentPageResults.filter((agent) => !!agent.status);
       const skippedCount = agentPageResults.length - agentsWithStatus.length;
