@@ -118,6 +118,72 @@ describe('buildIngestRequest', () => {
     expect(withoutSpaces[0].space_ids).toBeUndefined();
   });
 
+  describe('per-evaluator model attribution', () => {
+    const buildScores = (evaluationRun: Partial<EvaluationCompleteEvent['evaluationRun']>) =>
+      buildIngestRequest({
+        taskModel,
+        evaluatorModel,
+        repetitions: 1,
+        hostName: 'host-a',
+        gitMetadata: { branch: 'main', commitSha: 'abc123' },
+        source: {
+          kind: 'event',
+          event: createEvent({
+            evaluationRun: { ...createEvent().evaluationRun, ...evaluationRun },
+          }),
+        },
+      })[0].scores;
+
+    it('sends the judge model and a lowercased kind for llm evaluators', () => {
+      const judgeModel = { id: 'claude-3', family: 'Claude', provider: 'Anthropic' };
+      const scores = buildScores({ kind: 'LLM', model: judgeModel });
+
+      expect(scores[0].evaluator).toMatchObject({ kind: 'llm', model: judgeModel });
+    });
+
+    it('sends kind code with no model for code evaluators, so ingest skips the fallback', () => {
+      const scores = buildScores({ kind: 'CODE' });
+
+      expect(scores[0].evaluator).toMatchObject({ kind: 'code' });
+      expect(scores[0].evaluator.model).toBeUndefined();
+    });
+
+    it('omits both fields when the run reports no kind, leaving the top-level fallback', () => {
+      const scores = buildScores({});
+
+      expect(scores[0].evaluator.kind).toBeUndefined();
+      expect(scores[0].evaluator.model).toBeUndefined();
+      expect(
+        buildIngestRequest({
+          taskModel,
+          evaluatorModel,
+          repetitions: 1,
+          hostName: 'host-a',
+          gitMetadata: { branch: 'main', commitSha: 'abc123' },
+          source: { kind: 'event', event: createEvent() },
+        })[0].evaluator_model
+      ).toEqual(evaluatorModel);
+    });
+  });
+
+  it('includes the evaluator version', () => {
+    const [request] = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: {
+        kind: 'event',
+        event: createEvent({
+          evaluationRun: { ...createEvent().evaluationRun, version: '1.2.0' },
+        }),
+      },
+    });
+
+    expect(request.scores[0].evaluator.version).toBe('1.2.0');
+  });
+
   it('includes example metadata when taskRun.metadata is a plain object', () => {
     const requests = buildIngestRequest({
       taskModel,
