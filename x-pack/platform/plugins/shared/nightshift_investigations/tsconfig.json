@@ -6,7 +6,8 @@
   "include": [
     "common/**/*",
     "server/**/*",
-    "public/**/*"
+    "public/**/*",
+    "test/scout*/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
@@ -19,6 +20,7 @@
     "@kbn/workflows",
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/scout"
   ]
 }
