@@ -1335,10 +1335,12 @@ class OutputService {
       }
     }
 
-    if (isTypeChanged && outputTypeSupportPresets(updateData)) {
-      if (!updateData.preset) {
-        updateData.preset = getDefaultPresetForEsOutput(updateData.config_yaml ?? '', parse);
-      }
+    if (
+      !updateData.preset &&
+      updateData.config_yaml !== undefined &&
+      outputTypeSupportPresets(updateData)
+    ) {
+      updateData.preset = getDefaultPresetForEsOutput(updateData.config_yaml ?? '', parse);
     }
 
     // Remove the shipper data if the shipper is not enabled from the yaml config
