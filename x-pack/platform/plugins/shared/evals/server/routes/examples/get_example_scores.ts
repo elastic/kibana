@@ -16,15 +16,21 @@ import {
   type EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
+import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
 
 const EXAMPLE_SCORES_SORT_ORDER = [
   { '@timestamp': { order: 'desc' as const } },
   ...SCORES_SORT_ORDER,
 ];
 
-export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetExampleScoresRoute = ({
+  router,
+  logger,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_EXAMPLE_SCORES_URL,
@@ -47,9 +53,10 @@ export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependenc
         try {
           const { exampleId } = request.params;
           const evalsContext = await context.evals;
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
 
           const searchResponse = await evalsContext.evaluationScoreService.search({
-            query: buildExampleScoresQuery(exampleId),
+            query: buildExampleScoresQuery(exampleId, { spaceId }),
             sort: EXAMPLE_SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
           });
@@ -63,6 +70,14 @@ export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependenc
             body: { scores, total: scores.length },
           });
         } catch (error) {
+          const tooLarge = handleMaximumResponseSizeExceededError({
+            error,
+            response,
+            logger,
+            context: 'Get example scores',
+          });
+          if (tooLarge) return tooLarge;
+
           logger.error(`Failed to get example scores: ${error}`);
           return response.customError({
             statusCode: 500,

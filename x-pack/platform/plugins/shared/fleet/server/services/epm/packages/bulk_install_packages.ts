@@ -30,6 +30,7 @@ interface BulkInstallPackagesParams {
   >;
   esClient: ElasticsearchClient;
   force?: boolean;
+  allowOutdatedVersion?: boolean;
   spaceId: string;
   preferredSource?: 'registry' | 'bundled';
   prerelease?: boolean;
@@ -43,6 +44,7 @@ export async function bulkInstallPackages({
   esClient,
   spaceId,
   force,
+  allowOutdatedVersion,
   prerelease,
   request,
   skipIfInstalled,
@@ -145,6 +147,7 @@ export async function bulkInstallPackages({
         installSource: 'registry',
         spaceId,
         force,
+        allowOutdatedVersion,
         prerelease: prerelease || ('prerelease' in pkgKeyProps && pkgKeyProps.prerelease),
         request,
         skipDataStreamRollover: pkgKeyProps.skipDataStreamRollover,

@@ -16,11 +16,11 @@ import type {
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import styled from 'styled-components';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { dataTableActions, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import type { SetOptional } from 'type-fest';
-import { noop } from 'lodash';
+import { isEmpty, noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
@@ -47,7 +47,7 @@ import { inputsSelectors } from '../../../common/store';
 import { combineQueries } from '../../../common/lib/kuery';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
-import { useKibana } from '../../../common/lib/kibana';
+import { useKibana, KibanaServices } from '../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { CellValue, getColumns } from '../../configurations/security_solution_detections';
 import { buildTimeRangeFilter } from './helpers';
@@ -188,7 +188,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     onRuleChange,
   });
   const { dataView } = useDataView(pageScope);
-  const browserFields = useBrowserFields(pageScope);
+  const browserFields = useBrowserFields(dataView);
   const runtimeMappings = useMemo(() => dataView.getRuntimeMappings(), [dataView]);
 
   const license = useLicense();
@@ -275,10 +275,15 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     [columns, license]
   );
 
-  const finalBrowserFields = useMemo(
-    () => (isEventRenderedView ? {} : browserFields),
-    [isEventRenderedView, browserFields]
-  );
+  // Pass undefined (not {}) when browserFields is empty so the shared alerts table can fall back to
+  // its own /internal/rac/alerts/browser_fields fetch, recovering the field browser independently.
+  // Keep the deliberate {} for event-rendered view where browser fields are intentionally suppressed.
+  const finalBrowserFields = useMemo(() => {
+    if (isEventRenderedView) {
+      return {};
+    }
+    return isEmpty(browserFields) ? undefined : browserFields;
+  }, [isEventRenderedView, browserFields]);
 
   const finalColumns = useMemo(
     () => (isEventRenderedView ? eventRenderedViewColumns : alertColumns),
@@ -502,6 +507,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
               cellActionsOptions={cellActionsOptions}
               showInspectButton
               showCsvExportButton
+              kibanaVersion={KibanaServices.getKibanaVersion()}
               services={services}
               bulkAddToChatConfig={maybeBulkAddToChatConfig}
               {...tablePropsOverrides}

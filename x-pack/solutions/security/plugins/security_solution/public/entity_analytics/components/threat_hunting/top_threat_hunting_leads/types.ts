@@ -21,7 +21,7 @@ export interface HuntingLead {
   title: string;
   byline: string;
   description: string;
-  entities: Array<{ type: string; name: string }>;
+  entity: { type: string; name: string; id: string };
   tags: string[];
   priority: number;
   chatRecommendations: string[];
@@ -41,7 +41,7 @@ export const fromApiLead = (lead: ApiLead): HuntingLead => ({
   title: lead.title,
   byline: lead.byline,
   description: lead.description,
-  entities: lead.entities,
+  entity: lead.entity,
   tags: lead.tags,
   priority: lead.priority,
   chatRecommendations: lead.chatRecommendations,

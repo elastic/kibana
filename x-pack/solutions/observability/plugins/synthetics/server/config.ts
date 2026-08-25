@@ -25,22 +25,16 @@ const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),
   service: schema.maybe(serviceConfig),
   enabled: schema.boolean({ defaultValue: true }),
-  experimental: schema.maybe(
-    schema.object({
-      ccs: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
-    })
-  ),
+  // Operational kill-switch for the scalable private locations rebalance task.
+  // Defaults off; set to false to stop the task from scheduling/running (e.g.
+  // during the feature-flagged rollout) without un-sharding any location.
+  rebalancePrivateLocationShardsTaskEnabled: schema.boolean({ defaultValue: false }),
 });
 
 export const config: PluginConfigDescriptor = {
   schema: uptimeConfig,
-  exposeToBrowser: {
-    experimental: true,
-  },
+  deprecations: ({ unused }) => [unused('experimental.ccs.enabled', { level: 'warning' })],
 };
 
 export type UptimeConfig = TypeOf<typeof uptimeConfig>;
 export type ServiceConfig = TypeOf<typeof serviceConfig>;
-export type ExperimentalFeatures = UptimeConfig['experimental'];

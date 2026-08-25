@@ -5,13 +5,29 @@
  * 2.0.
  */
 
+jest.mock('uuid', () => ({
+  v4: () => '00000000-0000-4000-8000-000000000001',
+}));
+
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
+import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
+import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageRuleTool } from './manage_rule';
+import { AGENT_BUILDER_TAG } from '../../common/constants';
 
 const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
   ctx.esClient.asCurrentUser.esql.query as unknown as jest.Mock;
+
+const getFieldCapsMock = (ctx: ToolHandlerContextMock) =>
+  ctx.esClient.asCurrentUser.fieldCaps as unknown as jest.Mock;
+
+// set_query resolves the rule's time field from the source index via fieldCaps.
+// Default to an index that exposes @timestamp so query-based operations don't
+// fail time-field resolution.
+const mockResolvableTimeField = (ctx: ToolHandlerContextMock) =>
+  getFieldCapsMock(ctx).mockResolvedValueOnce({ fields: { '@timestamp': { date: {} } } });
 
 const createContext = (): ToolHandlerContextMock => {
   const ctx = agentBuilderMocks.tools.createHandlerContext();
@@ -26,8 +42,24 @@ const createContext = (): ToolHandlerContextMock => {
   return ctx;
 };
 
+const createLogger = (): jest.Mocked<
+  Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
+> => ({
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  forSubsystem: jest.fn(),
+});
+
 describe('manageRuleTool', () => {
-  const tool = manageRuleTool();
+  let logger: ReturnType<typeof createLogger>;
+  let tool: ReturnType<typeof manageRuleTool>;
+
+  beforeEach(() => {
+    logger = createLogger();
+    tool = manageRuleTool({ logger: logger as unknown as LoggerServiceContract });
+  });
 
   describe('handler', () => {
     it('creates a new rule attachment with valid operations', async () => {
@@ -39,6 +71,7 @@ describe('manageRuleTool', () => {
         ],
         values: [],
       });
+      mockResolvableTimeField(ctx);
 
       const result = await tool.handler(
         {
@@ -47,7 +80,10 @@ describe('manageRuleTool', () => {
             { operation: 'set_kind', kind: 'alert' },
             {
               operation: 'set_query',
-              base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+              },
             },
           ],
         },
@@ -84,7 +120,10 @@ describe('manageRuleTool', () => {
         {
           operations: [
             { operation: 'set_metadata', name: 'Test' },
-            { operation: 'set_query', base: 'FROM logs-* | STATS COUNT(*)' },
+            {
+              operation: 'set_query',
+              query: { format: 'standalone', breach: { query: 'FROM logs-* | STATS COUNT(*)' } },
+            },
           ],
         },
         ctx
@@ -104,7 +143,13 @@ describe('manageRuleTool', () => {
         {
           operations: [
             { operation: 'set_metadata', name: 'Bad Query Rule' },
-            { operation: 'set_query', base: 'FROM bad-index-* | STATS COUNT(*)' },
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM bad-index-* | STATS COUNT(*)' },
+              },
+            },
           ],
         },
         ctx
@@ -132,6 +177,72 @@ describe('manageRuleTool', () => {
       expect(results[0].data.message).toContain('rule name is required');
     });
 
+    it('stores recovery_strategy and no_data_strategy from set_query', async () => {
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [],
+      });
+      mockResolvableTimeField(ctx);
+
+      await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Recovery Rule' },
+            { operation: 'set_kind', kind: 'alert' },
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+                recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
+              },
+              recovery_strategy: 'query',
+            },
+          ],
+        },
+        ctx
+      );
+
+      const addCall = ctx.attachments.add.mock.calls[0][0] as {
+        data: { recovery_strategy?: string };
+      };
+      expect(addCall.data.recovery_strategy).toBe('query');
+    });
+
+    it('stores no_data_strategy and no_data from set_query', async () => {
+      const ctx = createContext();
+      getEsqlQueryMock(ctx).mockResolvedValueOnce({
+        columns: [{ name: 'host.name', type: 'keyword' }],
+        values: [],
+      });
+      mockResolvableTimeField(ctx);
+
+      await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'No-Data Rule' },
+            { operation: 'set_kind', kind: 'alert' },
+            {
+              operation: 'set_query',
+              query: {
+                format: 'standalone',
+                breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+                no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name' },
+              },
+              no_data_strategy: 'last_known_status',
+            },
+          ],
+        },
+        ctx
+      );
+
+      const addCall = ctx.attachments.add.mock.calls[0][0] as {
+        data: { no_data_strategy?: string };
+      };
+      expect(addCall.data.no_data_strategy).toBe('last_known_status');
+    });
+
     it('updates an persisted attachment when ruleAttachmentId is provided', async () => {
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
@@ -140,6 +251,7 @@ describe('manageRuleTool', () => {
             data: {
               metadata: { name: 'Persisted Rule' },
               kind: 'alert',
+              query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
             },
           },
         ],
@@ -157,6 +269,12 @@ describe('manageRuleTool', () => {
       expect(ctx.attachments.add).not.toHaveBeenCalled();
       const { results } = result as { results: Array<{ type: string }> };
       expect(results[0].type).toBe(ToolResultType.other);
+
+      // The agent-builder-assisted tag is stamped on the data persisted via update()
+      const updateCall = ctx.attachments.update.mock.calls[0][1] as {
+        data: { metadata?: { tags?: string[] } };
+      };
+      expect(updateCall.data.metadata?.tags).toContain(AGENT_BUILDER_TAG);
     });
 
     it('returns an error when attachment persistence fails', async () => {
@@ -182,11 +300,12 @@ describe('manageRuleTool', () => {
 
       await tool.handler({ operations: [{ operation: 'set_kind', kind: 'alert' }] }, ctx);
 
-      expect(ctx.logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('manage_rule tool: invalid input')
-      );
-      expect(ctx.logger.warn).not.toHaveBeenCalled();
-      expect(ctx.logger.error).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith({
+        message: 'Invalid manage_rule input',
+        labels: { space_id: ctx.spaceId },
+      });
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('logs unexpected errors at warn level (not error)', async () => {
@@ -200,10 +319,76 @@ describe('manageRuleTool', () => {
         ctx
       );
 
-      expect(ctx.logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Error in manage_rule tool')
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage rule',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+        labels: { space_id: ctx.spaceId, rule_id: expect.any(String) },
+        error: expect.any(Error),
+      });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('includes rule_id on unexpected errors when the rule is already persisted', async () => {
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue({
+        origin: 'rule-persisted-id',
+        versions: [
+          {
+            data: {
+              id: 'rule-persisted-id',
+              kind: 'alert',
+              metadata: { name: 'Existing', owner: 'observability' },
+            },
+          },
+        ],
+      } as never);
+      ctx.attachments.update.mockRejectedValueOnce(new Error('ES exploded'));
+
+      await tool.handler(
+        {
+          ruleAttachmentId: 'attachment-1',
+          operations: [{ operation: 'set_metadata', name: 'Boom' }],
+        },
+        ctx
       );
-      expect(ctx.logger.error).not.toHaveBeenCalled();
+
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage rule',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+        labels: { space_id: ctx.spaceId, rule_id: 'rule-persisted-id' },
+        error: expect.any(Error),
+      });
+    });
+
+    it('includes rule_id on unexpected errors when the rule is only in memory', async () => {
+      const ctx = createContext();
+      ctx.attachments.getAttachmentRecord.mockReturnValue({
+        versions: [
+          {
+            data: {
+              id: 'rule-in-memory-id',
+              kind: 'alert',
+              metadata: { name: 'Draft', owner: 'observability' },
+            },
+          },
+        ],
+      } as never);
+      ctx.attachments.update.mockRejectedValueOnce(new Error('ES exploded'));
+
+      await tool.handler(
+        {
+          ruleAttachmentId: 'attachment-1',
+          operations: [{ operation: 'set_metadata', name: 'Boom' }],
+        },
+        ctx
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith({
+        message: 'Failed to manage rule',
+        code: ALERTING_LOG_CODES.AGENT_BUILDER_MANAGE_RULE_FAILED,
+        labels: { space_id: ctx.spaceId, rule_id: 'rule-in-memory-id' },
+        error: expect.any(Error),
+      });
     });
   });
 });

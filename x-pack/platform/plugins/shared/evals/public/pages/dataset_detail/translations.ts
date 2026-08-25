@@ -43,6 +43,21 @@ export const METADATA_DESCRIPTION_LABEL = i18n.translate(
   }
 );
 
+export const SPACES_REQUIRED_ERROR = i18n.translate(
+  'xpack.evals.datasetDetail.spacesRequiredError',
+  {
+    defaultMessage: 'Pick at least one space, otherwise nobody can reach this dataset.',
+  }
+);
+
+export const CANNOT_LEAVE_SPACE_BY_EDITING_ERROR = i18n.translate(
+  'xpack.evals.datasetDetail.cannotLeaveSpaceByEditingError',
+  {
+    defaultMessage:
+      'A dataset cannot be removed from the current space by editing it. Use Delete to remove it from this space.',
+  }
+);
+
 export const METADATA_CREATED_AT_LABEL = i18n.translate(
   'xpack.evals.datasetDetail.metadataCreatedAtLabel',
   {
@@ -57,9 +72,23 @@ export const METADATA_UPDATED_AT_LABEL = i18n.translate(
   }
 );
 
-export const EDIT_METADATA_BUTTON = i18n.translate('xpack.evals.datasetDetail.editMetadataButton', {
-  defaultMessage: 'Edit metadata',
+export const EDIT_DATASET_BUTTON = i18n.translate('xpack.evals.datasetDetail.editDatasetButton', {
+  defaultMessage: 'Edit dataset details',
 });
+
+export const EDIT_DATASET_MODAL_TITLE = i18n.translate(
+  'xpack.evals.datasetDetail.editDatasetModalTitle',
+  {
+    defaultMessage: 'Edit dataset details',
+  }
+);
+
+export const DELETE_DATASET_BUTTON = i18n.translate(
+  'xpack.evals.datasetDetail.deleteDatasetButton',
+  {
+    defaultMessage: 'Delete dataset',
+  }
+);
 
 export const ADD_EXAMPLE_BUTTON = i18n.translate('xpack.evals.datasetDetail.addExampleButton', {
   defaultMessage: 'Add example',
@@ -159,13 +188,6 @@ export const MODAL_DELETE_BUTTON = i18n.translate('xpack.evals.datasetDetail.mod
   defaultMessage: 'Delete',
 });
 
-export const EDIT_METADATA_MODAL_TITLE = i18n.translate(
-  'xpack.evals.datasetDetail.editMetadataModalTitle',
-  {
-    defaultMessage: 'Edit dataset metadata',
-  }
-);
-
 export const ADD_EXAMPLE_MODAL_TITLE = i18n.translate(
   'xpack.evals.datasetDetail.addExampleModalTitle',
   {
@@ -259,6 +281,10 @@ export const DELETE_EXAMPLE_BUTTON = i18n.translate(
     defaultMessage: 'Delete',
   }
 );
+
+export const CLOSE_FLYOUT_BUTTON = i18n.translate('xpack.evals.datasetDetail.closeFlyoutButton', {
+  defaultMessage: 'Close',
+});
 
 export const FLYOUT_INPUT_SECTION = i18n.translate('xpack.evals.datasetDetail.flyoutInputSection', {
   defaultMessage: 'Input',

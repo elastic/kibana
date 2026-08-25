@@ -8,15 +8,19 @@
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
-import {
-  formatGroupingValueForDisplay,
-  getNonEmptyGroupingFields,
-  getValueByFieldPath,
-} from '../../utils/episode_grouping_data';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { getValueByFieldPath } from '@kbn/alerting-v2-utils';
+import { formatGroupingValue, getNonEmptyGroupingFields } from '../../utils/episode_grouping_data';
 
 export interface AlertingEpisodeGroupingTagsProps {
   fields: readonly string[];
   data: Record<string, unknown>;
+  /**
+   * Source data view of the rule that produced the episode. When provided, grouping values are formatted
+   * with each field's `fieldFormats` formatter (so typed fields like IP/date/number render correctly).
+   * Without it, values fall back to an untyped best-effort format.
+   */
+  dataView?: DataView;
   'data-test-subj'?: string;
 }
 
@@ -71,9 +75,10 @@ function GroupingTagPopover({ field, valueText }: { field: string; valueText: st
 export function AlertingEpisodeGroupingTags({
   fields,
   data,
+  dataView,
   'data-test-subj': dataTestSubj,
 }: AlertingEpisodeGroupingTagsProps) {
-  const fieldsWithValues = getNonEmptyGroupingFields(fields, data);
+  const fieldsWithValues = getNonEmptyGroupingFields(fields, data, dataView);
 
   if (fieldsWithValues.length === 0) {
     return null;
@@ -89,7 +94,7 @@ export function AlertingEpisodeGroupingTags({
     >
       {fieldsWithValues.map((field) => {
         const raw = getValueByFieldPath(data, field);
-        const valueText = formatGroupingValueForDisplay(raw);
+        const valueText = formatGroupingValue(field, raw, dataView);
         return (
           <EuiFlexItem grow={false} key={field}>
             <GroupingTagPopover field={field} valueText={valueText} />

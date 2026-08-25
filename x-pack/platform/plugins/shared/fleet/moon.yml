@@ -37,6 +37,8 @@ dependsOn:
   - '@kbn/share-plugin'
   - '@kbn/i18n-react'
   - '@kbn/custom-integrations-plugin'
+  - '@kbn/ui-callout'
+  - '@kbn/deeplinks-management'
   - '@kbn/core-application-common'
   - '@kbn/core-capabilities-common'
   - '@kbn/i18n'
@@ -65,6 +67,7 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/stdio-dev-helpers'
   - '@kbn/tooling-log'
+  - '@kbn/apm-types'
   - '@kbn/apm-utils'
   - '@kbn/core-saved-objects-common'
   - '@kbn/core-http-server'
@@ -129,6 +132,8 @@ dependsOn:
   - '@kbn/search-types'
   - '@kbn/human-readable-id'
   - '@kbn/elastic-agent-condition-language'
+  - '@kbn/app-header'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
@@ -146,5 +151,6 @@ fileGroups:
     - package.json
     - test/scout/**/*
     - test/scout_automatic_import/**/*
+    - test/scout_iac_provisioner/**/*
     - '!target/**/*'
 tasks: {}

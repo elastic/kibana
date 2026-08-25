@@ -9,15 +9,17 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { BehaviorSubject } from 'rxjs';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
+import {
+  DocumentViewModeToggle,
+  type RenderViewModeToggle,
+} from '../../../../components/view_mode_toggle';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
@@ -26,7 +28,6 @@ import { PanelsToggle } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import type { SidebarToggleState } from '../../../types';
 import {
   internalStateActions,
   useCurrentTabAction,
@@ -59,7 +60,6 @@ export interface DiscoverMainContentProps {
   }) => Promise<void>;
   onDropFieldToTable?: () => void;
   columns: string[];
-  sidebarToggleState$: BehaviorSubject<SidebarToggleState>;
   isChartAvailable?: boolean; // it will be injected by UnifiedHistogram
 }
 
@@ -70,7 +70,6 @@ export const DiscoverMainContent = ({
   onFieldEdited,
   columns,
   onDropFieldToTable,
-  sidebarToggleState$,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
@@ -119,20 +118,24 @@ export const DiscoverMainContent = ({
   const isDropAllowed = Boolean(onDropFieldToTable);
   const showChart = useAppStateSelector((state) => !state.hideChart);
   const showPanelsToggle = !isChartAvailable || !showChart;
+  const [fieldsCount, setFieldsCount] = useState<number>();
+  const viewModeFocusOnMountRef = useRef(false);
 
-  const renderViewModeToggle = useCallback(
-    (patternCount?: number) => {
+  const renderViewModeToggle = useCallback<RenderViewModeToggle>(
+    ({ patternCount, hitsCounterVariant } = {}) => {
       return (
         <DocumentViewModeToggle
           viewMode={viewMode}
           isEsqlMode={isEsqlMode}
           setDiscoverViewMode={setDiscoverViewMode}
           patternCount={patternCount}
+          fieldsCount={fieldsCount}
+          hitsCounterVariant={hitsCounterVariant}
           dataView={dataView}
+          focusOnMountRef={viewModeFocusOnMountRef}
           prepend={
             showPanelsToggle ? (
               <PanelsToggle
-                sidebarToggleState$={sidebarToggleState$}
                 omitChartButton={!isChartAvailable}
                 omitTableButton={!isChartAvailable}
                 dataTestSubjSuffix="InPage"
@@ -146,14 +149,12 @@ export const DiscoverMainContent = ({
       viewMode,
       isEsqlMode,
       setDiscoverViewMode,
+      fieldsCount,
       dataView,
       showPanelsToggle,
-      sidebarToggleState$,
       isChartAvailable,
     ]
   );
-
-  const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
 
   return (
     <Droppable
@@ -173,7 +174,7 @@ export const DiscoverMainContent = ({
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
-              viewModeToggle={viewModeToggle}
+              renderViewModeToggle={renderViewModeToggle}
               dataView={dataView}
               onAddFilter={onAddFilter}
               onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
@@ -181,13 +182,14 @@ export const DiscoverMainContent = ({
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
             <>
-              <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{renderViewModeToggle()}</EuiFlexItem>
               <FieldStatisticsTab
                 dataView={dataView}
                 columns={columns}
                 onAddFilter={!isEsqlMode ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
                 isEsqlMode={isEsqlMode}
+                onFieldsCountChange={setFieldsCount}
               />
             </>
           ) : null}
@@ -196,7 +198,7 @@ export const DiscoverMainContent = ({
               dataView={dataView}
               switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true)}
               trackUiMetric={trackUiMetric}
-              renderViewModeToggle={renderViewModeToggle}
+              renderViewModeToggle={(patternCount) => renderViewModeToggle({ patternCount })}
             />
           ) : null}
         </EuiFlexGroup>

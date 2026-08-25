@@ -6,19 +6,26 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { AnalyticsServiceStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
+import type {
+  AnalyticsServiceStart,
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 
 import type { LeadGenerationMode } from '../../../../common/entity_analytics/lead_generation/constants';
 import { LEAD_GENERATION_EXECUTION_EVENT } from '../../telemetry/event_based/events';
-import { getAlertsIndex } from '../../../../common/entity_analytics/utils';
 import { createLeadGenerationEngine } from './engine/lead_generation_engine';
-import { createRiskScoreModule } from './observation_modules/risk_score_module';
-import { createTemporalStateModule } from './observation_modules/temporal_state_module';
-import { createBehavioralAnalysisModule } from './observation_modules/behavioral_analysis_module';
+import type { LeadCandidate } from './engine/lead_generation_engine';
+import { registerObservationModules } from './observation_modules/register_modules';
 import { createLeadDataClient } from './lead_data_client';
+import type { LeadActionDecision } from './lead_data_client';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
-import type { LeadEntity } from './types';
+import type { Lead as SynthesizedLead, LeadEntity } from './types';
 
 export interface RunPipelineParams {
   readonly listEntities: () => Promise<LeadEntity[]>;
@@ -30,15 +37,25 @@ export interface RunPipelineParams {
   readonly sourceType: LeadGenerationMode;
   readonly analytics?: AnalyticsServiceStart;
   readonly chatModel: InferenceChatModel;
+  /** Optional ML deps; when present the anomaly module is enabled. */
+  readonly ml?: MlPluginSetup;
+  readonly request?: KibanaRequest;
+  readonly soClient?: SavedObjectsClientContract;
 }
 
-export interface RunPipelineResult {
-  readonly total: number;
-}
+const shouldRunLLMSynthesis = (
+  item: LeadActionDecision<LeadCandidate>
+): item is LeadActionDecision<LeadCandidate> & {
+  decision: { type: 'create' } | { type: 'update'; existingId: string; allowReopen: boolean };
+} => item.decision.type === 'create' || item.decision.type === 'update';
 
 /**
  * Shared pipeline logic used by both the ad-hoc generate route and the
  * scheduled Task Manager task.
+ *
+ * Classifies candidates against existing leads before LLM synthesis so
+ * unchanged and previously dismissed leads do not pay for
+ * narrative generation.
  */
 export const runLeadGenerationPipeline = async ({
   listEntities,
@@ -50,64 +67,118 @@ export const runLeadGenerationPipeline = async ({
   sourceType,
   analytics,
   chatModel,
-}: RunPipelineParams): Promise<RunPipelineResult> => {
+  ml,
+  request,
+  soClient,
+}: RunPipelineParams): Promise<void> => {
   const executionId = providedExecutionId ?? uuidv4();
   const pipelineStart = Date.now();
 
   const fetchStart = Date.now();
   const leadEntities = await listEntities();
   logger.info(
-    `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
+    `[LeadGeneration][Telemetry] Entities fetch: ${Date.now() - fetchStart}ms (${
       leadEntities.length
     } candidates)`
   );
-
   if (leadEntities.length === 0) {
     logger.info(
       `[LeadGeneration] No entities found — skipping generation (executionId=${executionId})`
     );
-    return { total: 0 };
+    return;
   }
 
   const engine = createLeadGenerationEngine({ logger });
-  engine.registerModule(createRiskScoreModule({ riskScoreDataClient, logger }));
-  engine.registerModule(createTemporalStateModule({ esClient, logger, spaceId }));
-  engine.registerModule(
-    createBehavioralAnalysisModule({
-      esClient,
-      logger,
-      alertsIndexPattern: getAlertsIndex(spaceId),
-    })
-  );
-
-  const generateStart = Date.now();
-  const leads = await engine.generateLeads(leadEntities, { chatModel });
-  logger.info(
-    `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
-      leads.length
-    } leads)`
-  );
-
-  const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
-  const persistStart = Date.now();
-
-  const leadsWithMeta = leads.map((lead) => ({
-    ...lead,
-    status: 'active' as const,
-    executionUuid: executionId,
-    sourceType,
-  }));
-
-  await leadDataClient.createLeads({
-    leads: leadsWithMeta,
-    executionId,
-    sourceType,
+  registerObservationModules(engine, {
+    logger,
+    esClient,
+    spaceId,
+    riskScoreDataClient,
+    ml,
+    request,
+    soClient,
   });
 
+  const prepareStart = Date.now();
+  const candidates = await engine.prepareLeadCandidates(leadEntities);
   logger.info(
-    `[LeadGeneration][Telemetry] Persistence: ${Date.now() - persistStart}ms (${
-      leads.length
-    } leads to ${sourceType} index)`
+    `[LeadGeneration][Telemetry] Prepare candidates: ${Date.now() - prepareStart}ms (${
+      candidates.length
+    } candidates)`
+  );
+  if (candidates.length === 0) {
+    return;
+  }
+
+  const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
+
+  const classifyStart = Date.now();
+  const decisions = await leadDataClient.classifyLeadCandidates(candidates);
+  const toSynthesize = decisions.filter(shouldRunLLMSynthesis);
+  const refreshes = decisions.flatMap((item) =>
+    item.decision.type === 'refresh' ? [{ existingId: item.decision.existingId }] : []
+  );
+  logger.info(
+    `[LeadGeneration][Telemetry] Classify leads: ${Date.now() - classifyStart}ms ` +
+      `(refresh=${refreshes.length}, synthesize=${toSynthesize.length})`
+  );
+
+  const synthStart = Date.now();
+  const synthesized = await engine.synthesizeLeads(
+    toSynthesize.map(({ candidate }) => candidate),
+    { chatModel }
+  );
+  logger.info(
+    `[LeadGeneration][Telemetry] LLM synthesis: ${Date.now() - synthStart}ms (${
+      synthesized.length
+    }/${candidates.length} leads; skipped ${candidates.length - toSynthesize.length})`
+  );
+
+  const runTimestamp = new Date().toISOString();
+  const creates: SynthesizedLead[] = [];
+  const updates: Array<{ existingId: string; lead: SynthesizedLead; allowReopen: boolean }> = [];
+  for (const { candidate, decision } of toSynthesize) {
+    const synthesizedLead = synthesized.find(
+      (lead) => hashEuid(lead.entity.id) === candidate.leadId
+    );
+    if (!synthesizedLead) {
+      logger.warn(
+        `[LeadGeneration] Skipping persist; no synthesized lead for entity ${candidate.leadId}`
+      );
+    } else if (decision.type === 'update') {
+      updates.push({
+        existingId: decision.existingId,
+        lead: synthesizedLead,
+        allowReopen: decision.allowReopen,
+      });
+    } else {
+      creates.push(synthesizedLead);
+    }
+  }
+
+  const newLeads = creates.length;
+  const revisedLeads = updates.length;
+  const resurfacedLeads = refreshes.length;
+  const skippedLeads = decisions.filter((item) => item.decision.type === 'skip').length;
+  const persistAttempted = newLeads + revisedLeads + resurfacedLeads;
+
+  logger.info(
+    `[LeadGeneration][Telemetry] Prepared actions: ` +
+      `new=${newLeads}, revised=${revisedLeads}, resurfaced=${resurfacedLeads}, skipped=${skippedLeads}`
+  );
+
+  const persistStart = Date.now();
+  const failedLeads = await leadDataClient.persistLeads({
+    executionId,
+    sourceType,
+    timestamp: runTimestamp,
+    refreshes,
+    creates,
+    updates,
+  });
+  logger.info(
+    `[LeadGeneration][Telemetry] Persistence: ${Date.now() - persistStart}ms ` +
+      `(failed=${failedLeads}/${persistAttempted})`
   );
   logger.info(
     `[LeadGeneration][Telemetry] Total pipeline: ${
@@ -117,9 +188,12 @@ export const runLeadGenerationPipeline = async ({
 
   analytics?.reportEvent(LEAD_GENERATION_EXECUTION_EVENT.eventType, {
     spaceId,
-    leadsGenerated: leads.length,
+    leadsGenerated: candidates.length,
+    newLeads,
+    revisedLeads,
+    resurfacedLeads,
+    skippedLeads,
+    failedLeads,
     sourceType,
   });
-
-  return { total: leads.length };
 };

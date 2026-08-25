@@ -46,12 +46,23 @@ export const GoogleCalendar: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
-      'bearer',
+      {
+        type: 'ears',
+        isRecommended: true,
+        isExperimental: true,
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'google',
+          scope: 'https://www.googleapis.com/auth/calendar.readonly',
+        },
+      },
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -67,17 +78,7 @@ export const GoogleCalendar: ConnectorSpec = {
           scope: 'https://www.googleapis.com/auth/calendar.readonly',
         },
       },
-      {
-        type: 'ears',
-        isExperimental: true,
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'google',
-          scope: 'https://www.googleapis.com/auth/calendar.readonly',
-        },
-      },
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
     headers: {
       Accept: 'application/json',
@@ -244,29 +245,11 @@ export const GoogleCalendar: ConnectorSpec = {
       defaultMessage: 'Verifies Google Calendar connection by fetching calendar list',
     }),
     handler: async (ctx) => {
-      try {
-        const response = await ctx.client.get(`${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`, {
-          params: {
-            maxResults: 1,
-          },
-        });
-
-        if (response.status !== 200) {
-          return { ok: false, message: 'Failed to connect to Google Calendar API' };
-        }
-
-        return {
-          ok: true,
-          message: 'Successfully connected to Google Calendar API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect to Google Calendar API: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        };
-      }
+      await ctx.client.get(`${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`, {
+        params: { maxResults: 1 },
+      });
+      return {};
     },
+    enabled: true,
   },
 };

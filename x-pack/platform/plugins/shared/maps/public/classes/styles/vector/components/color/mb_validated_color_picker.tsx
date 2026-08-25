@@ -8,6 +8,7 @@
 import React, { Component } from 'react';
 import type { EuiFormControlLayoutProps } from '@elastic/eui';
 import { isValidHex, EuiColorPicker } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export const RGBA_0000 = 'rgba(0,0,0,0)';
 
@@ -49,6 +50,9 @@ export class MbValidatedColorPicker extends Component<Props, State> {
         append={this.props.append}
         prepend={this.props.prepend}
         compressed
+        aria-label={i18n.translate('xpack.maps.mbValidatedColorPicker.ariaLabel', {
+          defaultMessage: 'Select color',
+        })}
       />
     );
   }

@@ -10,7 +10,12 @@
 import { createHash } from 'node:crypto';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { isOccConflictError, OccWriter } from '@kbn/occ';
 import type { WorkflowExecutionEngineModel, WorkflowYaml } from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows/managed';
 import type {
   ManagedWorkflowDefinition,
   ManagedWorkflowId,
@@ -18,8 +23,15 @@ import type {
   ManagedWorkflowTemplateValues,
 } from '@kbn/workflows/managed';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import { WorkflowConflictError } from '@kbn/workflows-yaml';
 import { ManagedWorkflowsService } from './managed_workflows_service';
 import type { VersionedWorkflowDocument, WorkflowCrudService } from './workflow_crud_service';
+import type {
+  ReadModifyWriteWorkflowDocumentParams,
+  WriteWorkflowDocumentWithOccParams,
+} from './workflow_occ_types';
+import { WorkflowChangeHistoryAction } from '../../common/lib/workflow_change_history/constants';
+import { INITIAL_WORKFLOW_VERSION } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 let mockManagedWorkflowDefinitions: ManagedWorkflowDefinition[] = [];
@@ -28,6 +40,15 @@ jest.mock('@kbn/workflows/managed', () => ({
   getManagedWorkflowDefinition: (id: string) =>
     mockManagedWorkflowDefinitions.find((definition) => definition.id === id),
   getManagedWorkflowDefinitions: () => [...mockManagedWorkflowDefinitions],
+  getManagedWorkflowSelectorVisibilityContext: (selector: string) => `selector:${selector}`,
+  getManagedWorkflowSolutionVisibilityContext: (solution: string) => `solution:${solution}`,
+  getManagedWorkflowVisibilityContexts: (visibility?: {
+    selectors?: string[];
+    solutions?: string[];
+  }) => [
+    ...(visibility?.selectors ?? []).map((selector) => `selector:${selector}`),
+    ...(visibility?.solutions ?? []).map((solution) => `solution:${solution}`),
+  ],
 }));
 
 const PLUGIN_ID = 'testPlugin';
@@ -71,6 +92,8 @@ const createDefinition = (
     id?: string;
     pluginId?: string;
     version?: number;
+    billable?: boolean;
+    visibility?: ManagedWorkflowDefinition['visibility'];
     yaml?: string;
     management?: Partial<ManagedWorkflowManagement>;
   } = {}
@@ -78,6 +101,8 @@ const createDefinition = (
   id: overrides.id ?? WORKFLOW_ID,
   pluginId: overrides.pluginId ?? PLUGIN_ID,
   version: overrides.version ?? 1,
+  billable: overrides.billable ?? false,
+  visibility: overrides.visibility,
   yaml: overrides.yaml ?? workflowYaml(),
   management: {
     ...defaultManagement,
@@ -89,12 +114,14 @@ const createTemplateDefinition = (
   overrides: {
     id?: string;
     pluginId?: string;
+    billable?: boolean;
     management?: Partial<ManagedWorkflowManagement>;
   } = {}
 ): TemplateManagedWorkflowDefinition => ({
   id: overrides.id ?? WORKFLOW_ID,
   pluginId: overrides.pluginId ?? PLUGIN_ID,
   version: 1,
+  billable: overrides.billable ?? false,
   yamlTemplate: ({ recipient, enabled }) =>
     workflowYaml({ name: `Managed Workflow - ${recipient}`, enabled }),
   management: {
@@ -116,11 +143,13 @@ const createWorkflowSource = (overrides: Partial<WorkflowProperties> = {}): Work
   spaceId: SPACE_ID,
   managed: true,
   managedBy: PLUGIN_ID,
+  billable: false,
   managedVersion: 1,
   definitionHash: 'old-hash',
   managedTemplateValues: null,
   originManagedWorkflowId: WORKFLOW_ID,
   lifecycle: 'static',
+  managedVisibilityContexts: [],
   deleted_at: null,
   valid: true,
   created_at: '2024-01-01T00:00:00.000Z',
@@ -140,13 +169,68 @@ const createVersionedDocument = (
 
 const getYamlEnabled = (yaml: string): boolean => !yaml.includes('enabled: false');
 
+const mockPrepareReturnsInitialVersion = (
+  crudService: ReturnType<typeof createCrudServiceMock>
+) => {
+  crudService.prepareWorkflowDocumentForStorage.mockImplementation(
+    async ({
+      id,
+      yaml,
+      actor,
+      now,
+      spaceId,
+    }: {
+      id: string;
+      yaml: string;
+      actor: string;
+      now: Date;
+      spaceId: string;
+    }) => {
+      const enabled = getYamlEnabled(yaml);
+      return {
+        workflowData: createWorkflowSource({
+          name: id,
+          enabled,
+          yaml,
+          definition: { name: id, enabled } as WorkflowYaml,
+          version: INITIAL_WORKFLOW_VERSION,
+          createdBy: actor,
+          lastUpdatedBy: actor,
+          spaceId,
+          created_at: now.toISOString(),
+          updated_at: now.toISOString(),
+          managed: false,
+          managedBy: null,
+          billable: null,
+          managedVersion: null,
+          definitionHash: null,
+          managedTemplateValues: null,
+          originManagedWorkflowId: null,
+          lifecycle: null,
+        }),
+      };
+    }
+  );
+};
+
 const createCrudServiceMock = () => {
   const crudService = {
     getWorkflowDocumentWithVersion: jest.fn(),
     getWorkflowDocumentSource: jest.fn(),
     getManagedWorkflowDocumentsAllSpaces: jest.fn().mockResolvedValue([]),
-    indexWorkflowDocument: jest.fn().mockResolvedValue(undefined),
+    indexWorkflowDocument: jest.fn().mockResolvedValue({ seqNo: 1, primaryTerm: 1 }),
+    createWorkflowDocument: jest.fn(
+      async (_id, _spaceId, document: WorkflowProperties) => document
+    ),
+    writeWorkflowDocumentWithOcc: jest.fn(
+      async (_id, _spaceId, params: WriteWorkflowDocumentWithOccParams) => params.document
+    ),
+    readModifyWriteWorkflowDocument: jest.fn(
+      async (_id, _spaceId, params: ReadModifyWriteWorkflowDocumentParams) =>
+        params.mutate(createWorkflowSource({}))
+    ),
     deleteWorkflows: jest.fn().mockResolvedValue(undefined),
+    logWorkflowChangesAfterWrite: jest.fn().mockResolvedValue(undefined),
     prepareWorkflowDocumentForStorage: jest.fn(
       async ({
         id,
@@ -175,6 +259,7 @@ const createCrudServiceMock = () => {
             updated_at: now.toISOString(),
             managed: false,
             managedBy: null,
+            billable: null,
             managedVersion: null,
             definitionHash: null,
             managedTemplateValues: null,
@@ -189,6 +274,94 @@ const createCrudServiceMock = () => {
   return crudService;
 };
 
+const wireOccAwareCrudWrites = (
+  crudService: ReturnType<typeof createCrudServiceMock>,
+  logger: ReturnType<typeof loggerMock.create>
+) => {
+  const index = async ({
+    id: docId,
+    document,
+    create,
+    ifSeqNo,
+    ifPrimaryTerm,
+  }: {
+    id: string;
+    document: WorkflowProperties;
+    create?: boolean;
+    ifSeqNo?: number;
+    ifPrimaryTerm?: number;
+  }) => crudService.indexWorkflowDocument(docId, document, { create, ifSeqNo, ifPrimaryTerm });
+
+  const wrapConflict = async <T>(workflowId: string, operation: () => Promise<T>): Promise<T> => {
+    try {
+      return await operation();
+    } catch (error) {
+      if (isOccConflictError(error)) {
+        throw new WorkflowConflictError(
+          `Workflow with id '${workflowId}' was updated concurrently. Please retry.`,
+          workflowId
+        );
+      }
+      throw error;
+    }
+  };
+
+  const indexWriter = new OccWriter<WorkflowProperties>({
+    index,
+    logger,
+  });
+
+  crudService.createWorkflowDocument.mockImplementation(async (id, _spaceId, document) =>
+    wrapConflict(id, async () => (await indexWriter.create({ id, document })).document)
+  );
+
+  crudService.writeWorkflowDocumentWithOcc.mockImplementation(async (id, _spaceId, params) =>
+    wrapConflict(id, async () => {
+      const { document } = await indexWriter.write({
+        id,
+        document: params.document,
+        ifSeqNo: params.ifSeqNo,
+        ifPrimaryTerm: params.ifPrimaryTerm,
+      });
+      return document;
+    })
+  );
+
+  crudService.readModifyWriteWorkflowDocument.mockImplementation(async (id, spaceId, params) => {
+    const readModifyWriter = new OccWriter<WorkflowProperties>({
+      get: async (docId) => {
+        const document = await crudService.getWorkflowDocumentWithVersion(docId, spaceId);
+        if (!document) {
+          return null;
+        }
+        return {
+          id: docId,
+          source: document.source,
+          occ: { seqNo: document.seqNo, primaryTerm: document.primaryTerm },
+        };
+      },
+      index,
+      maxRetries: params.maxRetries,
+      retryDelayMs: 0,
+      logger,
+    });
+
+    return wrapConflict(id, async () => {
+      const { document } = await readModifyWriter.readModifyWrite({
+        id,
+        mutate: params.mutate,
+      });
+      return document;
+    });
+  });
+};
+
+const getLastIndexedDocument = (
+  crudService: ReturnType<typeof createCrudServiceMock>
+): WorkflowProperties => {
+  return crudService.indexWorkflowDocument.mock.calls.at(-1)?.[1] as WorkflowProperties;
+};
+
 const createExecutionEngineMock = () =>
   ({
     executeWorkflow: jest.fn().mockResolvedValue({ workflowExecutionId: 'execution-1' }),
@@ -198,13 +371,20 @@ const createService = () => {
   const crudService = createCrudServiceMock();
   const workflowsExecutionEngine = createExecutionEngineMock();
   const logger = loggerMock.create();
+  const audit = {
+    logWorkflowCreated: jest.fn(),
+    logWorkflowUpdated: jest.fn(),
+    logWorkflowDeleted: jest.fn(),
+  };
   const service = new ManagedWorkflowsService({
     crudService: crudService as unknown as WorkflowCrudService,
     workflowsExecutionEngine,
     logger,
+    audit,
   });
 
   return {
+    audit,
     crudService,
     workflowsExecutionEngine,
     logger,
@@ -215,7 +395,29 @@ const createService = () => {
 const getIndexedDocument = (
   crudService: ReturnType<typeof createCrudServiceMock>
 ): WorkflowProperties => {
-  return crudService.indexWorkflowDocument.mock.calls.at(-1)?.[1] as WorkflowProperties;
+  const indexed = crudService.indexWorkflowDocument.mock.calls.at(-1)?.[1] as
+    | WorkflowProperties
+    | undefined;
+  if (indexed) {
+    return indexed;
+  }
+
+  const createArgs = crudService.createWorkflowDocument.mock.calls.at(-1);
+  if (createArgs) {
+    return createArgs[2];
+  }
+
+  const writeArgs = crudService.writeWorkflowDocumentWithOcc.mock.calls.at(-1);
+  if (writeArgs) {
+    return writeArgs[2].document;
+  }
+
+  throw new Error('No indexed workflow document found in test mocks');
+};
+
+const expectNoOccWrites = (crudService: ReturnType<typeof createCrudServiceMock>) => {
+  expect(crudService.createWorkflowDocument).not.toHaveBeenCalled();
+  expect(crudService.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
 };
 
 describe('ManagedWorkflowsService', () => {
@@ -225,10 +427,191 @@ describe('ManagedWorkflowsService', () => {
   });
 
   describe('installManagedWorkflow', () => {
+    it('marks install incomplete when aborting before trackInstall so ready() does not delete desired docs', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      let stopping = true;
+      const crudService = createCrudServiceMock();
+      const logger = loggerMock.create();
+      const service = new ManagedWorkflowsService({
+        crudService: crudService as unknown as WorkflowCrudService,
+        workflowsExecutionEngine: createExecutionEngineMock(),
+        logger,
+        isStopping: () => stopping,
+      });
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.getWorkflowDocumentWithVersion).not.toHaveBeenCalled();
+      expect(crudService.createWorkflowDocument).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping install '${WORKFLOW_ID}' (stopping)`)
+      );
+
+      stopping = false;
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: WORKFLOW_ID,
+          source: createWorkflowSource({
+            originManagedWorkflowId: WORKFLOW_ID,
+          }),
+        },
+      ]);
+
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
+      );
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('dynamic auto upgrade'));
+    });
+
+    it('marks install incomplete when aborting create after trackInstall so ready() does not delete desired docs', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      let stopping = false;
+      const crudService = createCrudServiceMock();
+      const logger = loggerMock.create();
+      const service = new ManagedWorkflowsService({
+        crudService: crudService as unknown as WorkflowCrudService,
+        workflowsExecutionEngine: createExecutionEngineMock(),
+        logger,
+        isStopping: () => stopping,
+      });
+
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+      const prepareImpl = crudService.prepareWorkflowDocumentForStorage.getMockImplementation()!;
+      crudService.prepareWorkflowDocumentForStorage.mockImplementation(async (params) => {
+        const result = await prepareImpl(params);
+        stopping = true;
+        return result;
+      });
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.createWorkflowDocument).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping install create '${WORKFLOW_ID}' (stopping)`)
+      );
+
+      stopping = false;
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: WORKFLOW_ID,
+          source: createWorkflowSource({
+            originManagedWorkflowId: WORKFLOW_ID,
+          }),
+        },
+      ]);
+
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
+      );
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('dynamic auto upgrade'));
+    });
+
+    it('keeps existing v1 tracked and skips reconcile delete when update aborts mid-install', async () => {
+      const definition = createDefinition({ version: 2 });
+      mockManagedWorkflowDefinitions = [definition];
+      let stopping = false;
+      const crudService = createCrudServiceMock();
+      mockPrepareReturnsInitialVersion(crudService);
+      const logger = loggerMock.create();
+      const service = new ManagedWorkflowsService({
+        crudService: crudService as unknown as WorkflowCrudService,
+        workflowsExecutionEngine: createExecutionEngineMock(),
+        logger,
+        isStopping: () => stopping,
+      });
+
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            version: 5,
+            definitionHash: 'old-hash',
+            managedVersion: 1,
+          })
+        )
+      );
+      const prepareImpl = crudService.prepareWorkflowDocumentForStorage.getMockImplementation()!;
+      crudService.prepareWorkflowDocumentForStorage.mockImplementation(async (params) => {
+        const result = await prepareImpl(params);
+        stopping = true;
+        return result;
+      });
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping install update '${WORKFLOW_ID}' (stopping)`)
+      );
+
+      stopping = false;
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: WORKFLOW_ID,
+          source: createWorkflowSource({
+            originManagedWorkflowId: WORKFLOW_ID,
+            version: 5,
+            definitionHash: 'old-hash',
+            managedVersion: 1,
+          }),
+        },
+      ]);
+
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
+      );
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('dynamic auto upgrade'));
+    });
+
+    it('skips ready() orphan cleanup when markInstallIncomplete was called for a facade-gated install', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const crudService = createCrudServiceMock();
+      const logger = loggerMock.create();
+      const service = new ManagedWorkflowsService({
+        crudService: crudService as unknown as WorkflowCrudService,
+        workflowsExecutionEngine: createExecutionEngineMock(),
+        logger,
+      });
+
+      service.markInstallIncomplete(PLUGIN_ID);
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: WORKFLOW_ID,
+          source: createWorkflowSource({
+            originManagedWorkflowId: WORKFLOW_ID,
+          }),
+        },
+      ]);
+
+      expect(service.isPluginReady(PLUGIN_ID)).toBe(false);
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(service.isPluginReady(PLUGIN_ID)).toBe(true);
+      expect(crudService.getManagedWorkflowDocumentsAllSpaces).toHaveBeenCalledWith({
+        pluginId: PLUGIN_ID,
+      });
+      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
+      );
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('dynamic auto upgrade'));
+    });
+
     it('creates a new managed workflow document', async () => {
       const definition = createDefinition();
       mockManagedWorkflowDefinitions = [definition];
-      const { crudService, service } = createService();
+      const { audit, crudService, service } = createService();
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
 
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
@@ -238,17 +621,184 @@ describe('ManagedWorkflowsService', () => {
           lightweightValidation: true,
         })
       );
-      expect(crudService.indexWorkflowDocument).toHaveBeenCalledWith(
+      expect(crudService.createWorkflowDocument).toHaveBeenCalledWith(
         WORKFLOW_ID,
+        SPACE_ID,
+        expect.any(Object)
+      );
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument).toEqual(
         expect.objectContaining({
           managed: true,
           managedBy: PLUGIN_ID,
+          billable: false,
           originManagedWorkflowId: WORKFLOW_ID,
           lifecycle: 'static',
           managedVersion: 1,
           definitionHash: definitionHash(definition.yaml),
-        }),
-        { create: true }
+        })
+      );
+      expect(audit.logWorkflowCreated).toHaveBeenCalledWith(undefined, {
+        id: WORKFLOW_ID,
+        managed: true,
+        originalWorkflowId: WORKFLOW_ID,
+        ownerPlugin: PLUGIN_ID,
+        spaceId: SPACE_ID,
+        reason: 'install',
+      });
+    });
+
+    it('persists billable managed workflow definitions', async () => {
+      const definition = createDefinition({ billable: true });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument.billable).toBe(true);
+    });
+
+    it('persists managed workflow visibility metadata', async () => {
+      const definition = createDefinition({
+        visibility: { selectors: ['rule_action'], solutions: ['security'] },
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument.managedVisibilityContexts).toEqual([
+        getManagedWorkflowSelectorVisibilityContext('rule_action'),
+        getManagedWorkflowSolutionVisibilityContext('security'),
+      ]);
+    });
+
+    it('sets document.version to 1 on managed create', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument.version).toBe(INITIAL_WORKFLOW_VERSION);
+      expect(crudService.createWorkflowDocument).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({ version: INITIAL_WORKFLOW_VERSION })
+      );
+    });
+
+    it('bumps document.version and logs history when managed update changes YAML', async () => {
+      const definition = createDefinition({
+        version: 2,
+        yaml: workflowYaml({ name: 'Managed Workflow - Updated' }),
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { audit, crudService, service } = createService();
+      mockPrepareReturnsInitialVersion(crudService);
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            version: 5,
+            definitionHash: 'old-hash',
+            managedVersion: 1,
+            yaml: workflowYaml({ name: 'Managed Workflow - Original' }),
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({
+          document: expect.objectContaining({ version: 6 }),
+          ifSeqNo: 7,
+          ifPrimaryTerm: 13,
+        })
+      );
+
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument.version).toBe(6);
+
+      expect(crudService.logWorkflowChangesAfterWrite).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: WorkflowChangeHistoryAction.workflowUpdate,
+          spaceId: SPACE_ID,
+          workflows: [
+            expect.objectContaining({
+              id: WORKFLOW_ID,
+              document: expect.objectContaining({ version: 6 }),
+            }),
+          ],
+        })
+      );
+      expect(audit.logWorkflowUpdated).toHaveBeenCalledWith(undefined, {
+        id: WORKFLOW_ID,
+        managed: true,
+        originalWorkflowId: WORKFLOW_ID,
+        ownerPlugin: PLUGIN_ID,
+        spaceId: SPACE_ID,
+        reason: 'reinstall',
+      });
+    });
+
+    it('preserves document.version and skips history when managed update YAML is unchanged', async () => {
+      const definition = createDefinition({ version: 2 });
+      mockManagedWorkflowDefinitions = [definition];
+      const { audit, crudService, service } = createService();
+      mockPrepareReturnsInitialVersion(crudService);
+      const existingYaml = workflowYaml();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            version: 5,
+            definitionHash: 'old-hash',
+            managedVersion: 1,
+            yaml: existingYaml,
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({
+          document: expect.objectContaining({ version: 5, managedVersion: 2 }),
+        })
+      );
+      expect(crudService.logWorkflowChangesAfterWrite).not.toHaveBeenCalled();
+      expect(audit.logWorkflowUpdated).toHaveBeenCalled();
+    });
+
+    it('logs workflow install to change history after creating a managed workflow', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.logWorkflowChangesAfterWrite).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: WorkflowChangeHistoryAction.workflowInstall,
+          spaceId: SPACE_ID,
+          workflows: [
+            expect.objectContaining({
+              id: WORKFLOW_ID,
+              document: expect.objectContaining({ managed: true }),
+            }),
+          ],
+        })
       );
     });
 
@@ -314,7 +864,7 @@ describe('ManagedWorkflowsService', () => {
 
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
-      expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
+      expectNoOccWrites(crudService);
     });
 
     it('skips on_adopt updates during the startup window even when template values change', async () => {
@@ -339,7 +889,7 @@ describe('ManagedWorkflowsService', () => {
         definition.pluginId
       );
 
-      expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
+      expectNoOccWrites(crudService);
     });
 
     it('applies on_adopt updates after the plugin is ready', async () => {
@@ -355,10 +905,18 @@ describe('ManagedWorkflowsService', () => {
       await service.pluginReady(definition.pluginId);
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
-      expect(crudService.indexWorkflowDocument).toHaveBeenCalledWith(
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
         WORKFLOW_ID,
-        expect.objectContaining({ definitionHash: definitionHash(definition.yaml) }),
-        { ifSeqNo: 7, ifPrimaryTerm: 13 }
+        SPACE_ID,
+        expect.objectContaining({
+          document: expect.any(Object),
+          ifSeqNo: expect.any(Number),
+          ifPrimaryTerm: expect.any(Number),
+        })
+      );
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument).toEqual(
+        expect.objectContaining({ definitionHash: definitionHash(definition.yaml) })
       );
     });
 
@@ -382,7 +940,7 @@ describe('ManagedWorkflowsService', () => {
         definition.pluginId
       );
 
-      expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
+      expectNoOccWrites(crudService);
     });
 
     it('reindexes when the definition version changed but the hash is unchanged', async () => {
@@ -400,10 +958,16 @@ describe('ManagedWorkflowsService', () => {
 
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
-      expect(crudService.indexWorkflowDocument).toHaveBeenCalledWith(
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument).toEqual(expect.objectContaining({ managedVersion: 2 }));
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
         WORKFLOW_ID,
-        expect.objectContaining({ managedVersion: 2 }),
-        { ifSeqNo: 7, ifPrimaryTerm: 13 }
+        SPACE_ID,
+        expect.objectContaining({
+          document: expect.any(Object),
+          ifSeqNo: expect.any(Number),
+          ifPrimaryTerm: expect.any(Number),
+        })
       );
     });
 
@@ -435,37 +999,175 @@ describe('ManagedWorkflowsService', () => {
       expect(indexedDocument.enabled).toBe(true);
     });
 
-    it('retries version conflicts and succeeds on a later attempt', async () => {
+    it('throws after exhausting version-conflict retries', async () => {
       const definition = createDefinition();
       mockManagedWorkflowDefinitions = [definition];
       const { crudService, logger, service } = createService();
+      wireOccAwareCrudWrites(crudService, logger);
+      const conflictError = Object.assign(new Error('conflict'), { statusCode: 409 });
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+      crudService.indexWorkflowDocument.mockRejectedValue(conflictError);
+
+      await expect(
+        service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId)
+      ).rejects.toBeInstanceOf(WorkflowConflictError);
+      expect(crudService.createWorkflowDocument).toHaveBeenCalledTimes(3);
+      expect(crudService.indexWorkflowDocument).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('installManagedWorkflow with OccWriter', () => {
+    it('retries managed create through the outer install loop when create hits a conflict', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, logger, service } = createService();
+      wireOccAwareCrudWrites(crudService, logger);
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+
+      const conflict = Object.assign(new Error('conflict'), { statusCode: 409 });
       crudService.indexWorkflowDocument
-        .mockRejectedValueOnce({ statusCode: 409 })
-        .mockResolvedValueOnce(undefined);
+        .mockRejectedValueOnce(conflict)
+        .mockResolvedValueOnce({ seqNo: 1, primaryTerm: 1 });
 
       await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
 
+      expect(crudService.createWorkflowDocument).toHaveBeenCalledTimes(2);
       expect(crudService.indexWorkflowDocument).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenCalledWith(
         expect.stringContaining(`retrying install for '${WORKFLOW_ID}'`)
       );
     });
 
-    it('throws after exhausting version-conflict retries', async () => {
-      const definition = createDefinition();
+    it('re-prepares managed updates from fresh existing after an OCC write conflict', async () => {
+      const definition = createDefinition({
+        version: 2,
+        yaml: workflowYaml({ name: 'Updated Managed Workflow' }),
+      });
       mockManagedWorkflowDefinitions = [definition];
-      const { crudService, service } = createService();
-      const conflictError = { statusCode: 409 };
-      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
-      crudService.indexWorkflowDocument.mockImplementation(async () => {
-        throw conflictError;
+      const { crudService, logger, service } = createService();
+      wireOccAwareCrudWrites(crudService, logger);
+
+      const existingEnabled = createWorkflowSource({
+        managedVersion: 1,
+        definitionHash: definitionHash(createDefinition().yaml),
+        enabled: true,
+      });
+      const existingDisabled = createWorkflowSource({
+        ...existingEnabled,
+        enabled: false,
+        yaml: workflowYaml({ enabled: false }),
       });
 
-      await expect(
-        service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId)
-      ).rejects.toBe(conflictError);
-      expect(crudService.indexWorkflowDocument).toHaveBeenCalledTimes(3);
+      const versionedReads = [
+        createVersionedDocument(existingEnabled, { seqNo: 1, primaryTerm: 1 }),
+        createVersionedDocument(existingDisabled, { seqNo: 2, primaryTerm: 1 }),
+      ];
+      let readIndex = 0;
+      crudService.getWorkflowDocumentWithVersion.mockImplementation(async () => {
+        const document = versionedReads[readIndex];
+        readIndex += 1;
+        return document;
+      });
+
+      const conflict = Object.assign(new Error('conflict'), { statusCode: 409 });
+      crudService.indexWorkflowDocument
+        .mockRejectedValueOnce(conflict)
+        .mockResolvedValueOnce({ seqNo: 3, primaryTerm: 1 });
+
+      await service.pluginReady(definition.pluginId);
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.getWorkflowDocumentWithVersion).toHaveBeenCalledTimes(2);
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledTimes(2);
+      expect(crudService.indexWorkflowDocument).toHaveBeenCalledTimes(2);
+      expect(getLastIndexedDocument(crudService).enabled).toBe(false);
+    });
+
+    it('uses optimistic OCC write with version metadata from the install pre-read', async () => {
+      const definition = createDefinition({
+        version: 2,
+        yaml: workflowYaml({ name: 'Updated Managed Workflow' }),
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, logger, service } = createService();
+      wireOccAwareCrudWrites(crudService, logger);
+
+      const existingEnabled = createWorkflowSource({
+        managedVersion: 1,
+        definitionHash: definitionHash(createDefinition().yaml),
+        enabled: true,
+      });
+      const existingDisabled = createWorkflowSource({
+        ...existingEnabled,
+        enabled: false,
+        yaml: workflowYaml({ enabled: false }),
+      });
+
+      const versionedReads = [
+        createVersionedDocument(existingEnabled, { seqNo: 1, primaryTerm: 1 }),
+        createVersionedDocument(existingDisabled, { seqNo: 2, primaryTerm: 1 }),
+      ];
+      let readIndex = 0;
+      crudService.getWorkflowDocumentWithVersion.mockImplementation(async () => {
+        const document = versionedReads[readIndex];
+        readIndex += 1;
+        return document;
+      });
+
+      const conflict = Object.assign(new Error('conflict'), { statusCode: 409 });
+      crudService.indexWorkflowDocument
+        .mockRejectedValueOnce(conflict)
+        .mockResolvedValueOnce({ seqNo: 3, primaryTerm: 1 });
+
+      await service.pluginReady(definition.pluginId);
+      await service.installManagedWorkflow(WORKFLOW_ID, { spaceId: SPACE_ID }, definition.pluginId);
+
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenNthCalledWith(
+        1,
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({ ifSeqNo: 1, ifPrimaryTerm: 1 })
+      );
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenNthCalledWith(
+        2,
+        WORKFLOW_ID,
+        SPACE_ID,
+        expect.objectContaining({ ifSeqNo: 2, ifPrimaryTerm: 1 })
+      );
+    });
+  });
+
+  describe('uninstallManagedWorkflow', () => {
+    it('force deletes and audits an existing managed workflow', async () => {
+      const definition = createDefinition();
+      mockManagedWorkflowDefinitions = [definition];
+      const { audit, crudService, service } = createService();
+      crudService.getWorkflowDocumentSource.mockResolvedValue(
+        createWorkflowSource({
+          managed: true,
+          managedBy: PLUGIN_ID,
+          originManagedWorkflowId: WORKFLOW_ID,
+        })
+      );
+
+      await service.uninstallManagedWorkflow(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID },
+        definition.pluginId
+      );
+
+      expect(crudService.deleteWorkflows).toHaveBeenCalledWith([WORKFLOW_ID], SPACE_ID, {
+        force: true,
+      });
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
+        id: WORKFLOW_ID,
+        force: true,
+        managed: true,
+        originalWorkflowId: WORKFLOW_ID,
+        ownerPlugin: PLUGIN_ID,
+        spaceId: SPACE_ID,
+        reason: 'uninstall',
+      });
     });
   });
 
@@ -734,7 +1436,7 @@ describe('ManagedWorkflowsService', () => {
         management: { lifecycle: 'dynamic', versionStrategy: 'on_adopt' },
       });
       mockManagedWorkflowDefinitions = [installedDefinition, orphanDefinition, dynamicDefinition];
-      const { crudService, service } = createService();
+      const { audit, crudService, service } = createService();
 
       crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
       await service.installManagedWorkflow(
@@ -742,7 +1444,8 @@ describe('ManagedWorkflowsService', () => {
         { spaceId: SPACE_ID },
         PLUGIN_ID
       );
-      crudService.indexWorkflowDocument.mockClear();
+      crudService.createWorkflowDocument.mockClear();
+      crudService.writeWorkflowDocumentWithOcc.mockClear();
       crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
         {
           id: installedDefinition.id,
@@ -773,6 +1476,15 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.deleteWorkflows).toHaveBeenCalledTimes(1);
       expect(crudService.deleteWorkflows).toHaveBeenCalledWith(['system-orphan'], SPACE_ID, {
         force: true,
+      });
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
+        id: 'system-orphan',
+        force: true,
+        managed: true,
+        originalWorkflowId: 'system-orphan',
+        ownerPlugin: PLUGIN_ID,
+        spaceId: SPACE_ID,
+        reason: 'ready_reconciliation',
       });
     });
 
@@ -817,15 +1529,203 @@ describe('ManagedWorkflowsService', () => {
       expect(indexedDocument.definitionHash).toBe(definitionHash(definition.yaml));
       expect(indexedDocument.yaml).toContain('name: Updated Dynamic Workflow');
       expect(indexedDocument.yaml).toContain('enabled: false');
-      expect(crudService.indexWorkflowDocument).toHaveBeenCalledWith(
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
         definition.id,
+        SPACE_ID,
         expect.objectContaining({
-          managedVersion: 2,
-          lifecycle: 'dynamic',
-          originManagedWorkflowId: definition.id,
-        }),
-        { ifSeqNo: 7, ifPrimaryTerm: 13 }
+          document: expect.any(Object),
+          ifSeqNo: expect.any(Number),
+          ifPrimaryTerm: expect.any(Number),
+        })
       );
+    });
+
+    it('skips orphan deletes but still auto-upgrades dynamic workflows when install pass is incomplete', async () => {
+      const staticDefinition = createDefinition({ id: 'system-static' });
+      const dynamicDefinition = createDefinition({
+        id: 'system-dynamic',
+        version: 2,
+        yaml: workflowYaml({ name: 'Updated Dynamic Workflow', enabled: true }),
+        management: {
+          lifecycle: 'dynamic',
+          versionStrategy: 'auto',
+          enablement: 'restorable',
+        },
+      });
+      mockManagedWorkflowDefinitions = [staticDefinition, dynamicDefinition];
+      const logger = loggerMock.create();
+      const crudService = createCrudServiceMock();
+      const service = new ManagedWorkflowsService({
+        crudService: crudService as unknown as WorkflowCrudService,
+        workflowsExecutionEngine: createExecutionEngineMock(),
+        logger,
+      });
+
+      const dynamicSource = createWorkflowSource({
+        enabled: false,
+        yaml: workflowYaml({ name: 'Old Dynamic Workflow', enabled: false }),
+        definition: { name: 'Old Dynamic Workflow', enabled: false } as WorkflowYaml,
+        definitionHash: 'old-hash',
+        lifecycle: 'dynamic',
+        managedVersion: 1,
+        originManagedWorkflowId: dynamicDefinition.id,
+      });
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: staticDefinition.id,
+          source: createWorkflowSource({
+            originManagedWorkflowId: staticDefinition.id,
+          }),
+        },
+        {
+          id: dynamicDefinition.id,
+          source: dynamicSource,
+        },
+      ]);
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(dynamicSource)
+      );
+
+      service.markInstallIncomplete(PLUGIN_ID);
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `running 1 dynamic auto upgrade(s) for plugin '${PLUGIN_ID}' despite incomplete static installs`
+        )
+      );
+      const indexedDocument = getIndexedDocument(crudService);
+      expect(indexedDocument.lifecycle).toBe('dynamic');
+      expect(indexedDocument.managedVersion).toBe(2);
+      expect(indexedDocument.definitionHash).toBe(definitionHash(dynamicDefinition.yaml));
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
+        dynamicDefinition.id,
+        SPACE_ID,
+        expect.objectContaining({
+          document: expect.any(Object),
+          ifSeqNo: expect.any(Number),
+          ifPrimaryTerm: expect.any(Number),
+        })
+      );
+    });
+
+    it('preserves tracked static docs and would-be orphans when install pass is incomplete', async () => {
+      const trackedDefinition = createDefinition({ id: 'system-tracked' });
+      const orphanDefinition = createDefinition({ id: 'system-orphan' });
+      mockManagedWorkflowDefinitions = [trackedDefinition, orphanDefinition];
+      const logger = loggerMock.create();
+      const crudService = createCrudServiceMock();
+      const service = new ManagedWorkflowsService({
+        crudService: crudService as unknown as WorkflowCrudService,
+        workflowsExecutionEngine: createExecutionEngineMock(),
+        logger,
+      });
+
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
+      await service.installManagedWorkflow(
+        trackedDefinition.id as ManagedWorkflowId,
+        { spaceId: SPACE_ID },
+        PLUGIN_ID
+      );
+      crudService.createWorkflowDocument.mockClear();
+      crudService.writeWorkflowDocumentWithOcc.mockClear();
+
+      service.markInstallIncomplete(PLUGIN_ID);
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: trackedDefinition.id,
+          source: createWorkflowSource({
+            originManagedWorkflowId: trackedDefinition.id,
+          }),
+        },
+        {
+          id: orphanDefinition.id,
+          source: createWorkflowSource({
+            originManagedWorkflowId: orphanDefinition.id,
+          }),
+        },
+      ]);
+
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(crudService.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
+      );
+      expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('dynamic auto upgrade'));
+      expect(service.isPluginReady(PLUGIN_ID)).toBe(true);
+    });
+
+    it('skips dynamic auto upgrade writes when stopping mid-upgrade under an incomplete install pass', async () => {
+      const dynamicDefinition = createDefinition({
+        id: 'system-dynamic',
+        version: 2,
+        yaml: workflowYaml({ name: 'Updated Dynamic Workflow', enabled: true }),
+        management: {
+          lifecycle: 'dynamic',
+          versionStrategy: 'auto',
+          enablement: 'restorable',
+        },
+      });
+      mockManagedWorkflowDefinitions = [dynamicDefinition];
+      let stopping = false;
+      const logger = loggerMock.create();
+      const crudService = createCrudServiceMock();
+      mockPrepareReturnsInitialVersion(crudService);
+      const service = new ManagedWorkflowsService({
+        crudService: crudService as unknown as WorkflowCrudService,
+        workflowsExecutionEngine: createExecutionEngineMock(),
+        logger,
+        isStopping: () => stopping,
+      });
+
+      const dynamicSource = createWorkflowSource({
+        enabled: false,
+        yaml: workflowYaml({ name: 'Old Dynamic Workflow', enabled: false }),
+        definition: { name: 'Old Dynamic Workflow', enabled: false } as WorkflowYaml,
+        definitionHash: 'old-hash',
+        lifecycle: 'dynamic',
+        managedVersion: 1,
+        originManagedWorkflowId: dynamicDefinition.id,
+      });
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: dynamicDefinition.id,
+          source: dynamicSource,
+        },
+      ]);
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(dynamicSource)
+      );
+      const prepareImpl = crudService.prepareWorkflowDocumentForStorage.getMockImplementation()!;
+      crudService.prepareWorkflowDocumentForStorage.mockImplementation(async (params) => {
+        const result = await prepareImpl(params);
+        stopping = true;
+        return result;
+      });
+
+      service.markInstallIncomplete(PLUGIN_ID);
+      await expect(service.pluginReady(PLUGIN_ID)).resolves.toBeUndefined();
+
+      expect(crudService.deleteWorkflows).not.toHaveBeenCalled();
+      expect(crudService.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping ready() orphan cleanup for plugin '${PLUGIN_ID}'`)
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `running 1 dynamic auto upgrade(s) for plugin '${PLUGIN_ID}' despite incomplete static installs`
+        )
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(`skipping install update '${dynamicDefinition.id}' (stopping)`)
+      );
+      expect(service.isPluginReady(PLUGIN_ID)).toBe(true);
     });
 
     it('preserves template values when auto-updating dynamic workflows at startup', async () => {
@@ -861,14 +1761,14 @@ describe('ManagedWorkflowsService', () => {
       expect(indexedDocument.managedTemplateValues).toEqual(templateValues);
       expect(indexedDocument.yaml).toContain('Managed Workflow - Persisted Override');
       expect(indexedDocument.yaml).toContain('enabled: false');
-      expect(crudService.indexWorkflowDocument).toHaveBeenCalledWith(
+      expect(crudService.writeWorkflowDocumentWithOcc).toHaveBeenCalledWith(
         `${definition.id}-instance`,
+        SPACE_ID,
         expect.objectContaining({
-          lifecycle: 'dynamic',
-          managedTemplateValues: templateValues,
-          originManagedWorkflowId: definition.id,
-        }),
-        { ifSeqNo: 7, ifPrimaryTerm: 13 }
+          document: expect.any(Object),
+          ifSeqNo: expect.any(Number),
+          ifPrimaryTerm: expect.any(Number),
+        })
       );
     });
 
@@ -884,7 +1784,7 @@ describe('ManagedWorkflowsService', () => {
       await service.pluginReady(PLUGIN_ID);
 
       expect(crudService.getManagedWorkflowDocumentsAllSpaces).not.toHaveBeenCalled();
-      expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
+      expectNoOccWrites(crudService);
     });
 
     it('does not update on_adopt templated dynamic workflows during startup reconciliation', async () => {
@@ -915,7 +1815,7 @@ describe('ManagedWorkflowsService', () => {
       await service.pluginReady(PLUGIN_ID);
 
       expect(crudService.getWorkflowDocumentWithVersion).not.toHaveBeenCalled();
-      expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
+      expectNoOccWrites(crudService);
     });
 
     it('is idempotent when called more than once', async () => {
@@ -937,7 +1837,7 @@ describe('ManagedWorkflowsService', () => {
     it('deletes managed docs whose owner or definition is no longer registered', async () => {
       const knownDefinition = createDefinition({ id: 'system-known' });
       mockManagedWorkflowDefinitions = [knownDefinition];
-      const { crudService, service } = createService();
+      const { audit, crudService, service } = createService();
       crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
         {
           id: 'system-known',
@@ -994,6 +1894,24 @@ describe('ManagedWorkflowsService', () => {
         'other-space',
         { force: true }
       );
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
+        id: 'system-missing-owner',
+        force: true,
+        managed: true,
+        originalWorkflowId: knownDefinition.id,
+        ownerPlugin: null,
+        spaceId: 'other-space',
+        reason: 'orphan_cleanup',
+      });
+      expect(audit.logWorkflowDeleted).toHaveBeenCalledWith(undefined, {
+        id: 'system-missing-definition',
+        force: true,
+        managed: true,
+        originalWorkflowId: null,
+        ownerPlugin: PLUGIN_ID,
+        spaceId: 'other-space',
+        reason: 'orphan_cleanup',
+      });
     });
 
     it('does not delete managed docs for registered owners with known definitions', async () => {

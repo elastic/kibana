@@ -12,6 +12,7 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   attachmentDataToDashboardState,
 } from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { createDashboardSmlType } from './dashboard';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
@@ -103,6 +104,14 @@ const createLogger = (): Logger =>
 const createSavedObjectsClient = () => ({} as never);
 
 describe('dashboardSmlType', () => {
+  it('equals DASHBOARD_KI_TYPE', () => {
+    const dashboardSmlType = createDashboardSmlType({
+      getDashboardClient: async () => createDashboardClient(),
+    });
+
+    expect(dashboardSmlType.id).toBe(DASHBOARD_KI_TYPE);
+  });
+
   it('lists dashboards across all spaces', async () => {
     const finder = {
       find: jest.fn().mockReturnValue(
@@ -161,30 +170,25 @@ describe('dashboardSmlType', () => {
       getDashboardClient: async () => dashboardClient,
     });
 
-    const result = await dashboardSmlType.getSmlData('dashboard-1', {
+    const result = await dashboardSmlType.getSmlEntry('dashboard-1', {
       esClient: {} as never,
       logger: createLogger(),
       savedObjectsClient,
     } as never);
 
-    expect(result).toEqual({
-      chunks: [
-        expect.objectContaining({
-          type: 'dashboard',
-          title: 'System Overview',
-          permissions: {
-            kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-            elasticsearch: { indices: [] },
-          },
-        }),
-      ],
-    });
-    expect(result?.chunks[0].content).toContain('System Overview');
-    expect(result?.chunks[0].content).toContain('Main dashboard for key metrics');
-    expect(result?.chunks[0].content).toContain('CPU Usage');
-    expect(result?.chunks[0].content).toContain('Operations');
-    expect(result?.chunks[0].content).toContain('2 panels');
-    expect(result?.chunks[0].content).toContain('1 sections');
+    expect(result).toEqual(
+      expect.objectContaining({
+        type: 'dashboard',
+        title: 'System Overview',
+      })
+    );
+    expect(result).not.toHaveProperty('permissions');
+    expect(result?.content).toContain('System Overview');
+    expect(result?.content).toContain('Main dashboard for key metrics');
+    expect(result?.content).toContain('CPU Usage');
+    expect(result?.content).toContain('Operations');
+    expect(result?.content).toContain('2 panels');
+    expect(result?.content).toContain('1 sections');
   });
 
   it('converts saved dashboards into dashboard attachments with origin', async () => {
@@ -207,7 +211,6 @@ describe('dashboardSmlType', () => {
         spaces: ['default'],
         permissions: {
           kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-          elasticsearch: { indices: [] },
         },
         ingestion_method: 'crawled',
       },
@@ -269,7 +272,6 @@ describe('dashboardSmlType', () => {
         spaces: ['default'],
         permissions: {
           kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
-          elasticsearch: { indices: [] },
         },
         ingestion_method: 'crawled',
       },
@@ -302,6 +304,22 @@ describe('dashboardSmlType', () => {
     ]);
   });
 
+  it('getPermissions returns the saved_object:dashboard/get privilege', () => {
+    const dashboardSmlType = createDashboardSmlType({
+      getDashboardClient: async () => createDashboardClient(),
+    });
+
+    const permissions = dashboardSmlType.getPermissions!('dashboard-1', {
+      esClient: {} as never,
+      logger: createLogger(),
+      savedObjectsClient: createSavedObjectsClient(),
+    } as never);
+
+    expect(permissions).toEqual({
+      kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+    });
+  });
+
   it('creates requestHandlerContext from savedObjectsClient for SML reads', async () => {
     const dashboardClient = createDashboardClient();
     const savedObjectsClient = createSavedObjectsClient();
@@ -309,16 +327,14 @@ describe('dashboardSmlType', () => {
       getDashboardClient: async () => dashboardClient,
     });
 
-    const result = await dashboardSmlType.getSmlData('dashboard-1', {
+    const result = await dashboardSmlType.getSmlEntry('dashboard-1', {
       esClient: {} as never,
       logger: createLogger(),
       savedObjectsClient,
     } as never);
 
     expect(result).toEqual(
-      expect.objectContaining({
-        chunks: [expect.objectContaining({ type: 'dashboard', title: 'System Overview' })],
-      })
+      expect.objectContaining({ type: 'dashboard', title: 'System Overview' })
     );
   });
 });

@@ -51,6 +51,11 @@ const defaultActionsConfig: ActionsConfig = {
     },
     ears: { enabled: false, enableExperimental: false },
   },
+  inboundEvents: {
+    enabled: false,
+    maxBodyBytes: new ByteSizeValue(1024 * 1024),
+    maxEmitted: 25,
+  },
 };
 
 describe('ensureUriAllowed', () => {
@@ -461,7 +466,19 @@ describe('getProxySettings', () => {
   });
 });
 
+jest.mock('fs', () => {
+  const actual = jest.requireActual<typeof import('fs')>('fs');
+  return { ...actual, readFileSync: jest.fn().mockImplementation(actual.readFileSync) };
+});
+
+import { readFileSync } from 'fs';
+const mockReadFileSync = readFileSync as jest.MockedFunction<typeof readFileSync>;
+
 describe('getSSLSettings', () => {
+  beforeEach(() => {
+    mockReadFileSync.mockClear();
+  });
+
   test('returns proper verificationMode value, based on the SSL proxy configuration', () => {
     const configTrue: ActionsConfig = {
       ...defaultActionsConfig,
@@ -480,6 +497,166 @@ describe('getSSLSettings', () => {
     };
     sslSettings = getActionsConfigurationUtilities(configFalse).getSSLSettings();
     expect(sslSettings.verificationMode).toBe('none');
+  });
+});
+
+describe('getEARSSSLSettings', () => {
+  beforeEach(() => {
+    mockReadFileSync.mockClear();
+  });
+
+  const configWithEarsSsl = (ssl: NonNullable<NonNullable<ActionsConfig['auth']['ears']>['ssl']>) =>
+    ({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true, enableExperimental: false, ssl },
+      },
+    } as ActionsConfig);
+
+  test('returns verificationMode from the EARS ssl configuration', () => {
+    let sslSettings = getActionsConfigurationUtilities(
+      configWithEarsSsl({ verificationMode: 'full' })
+    ).getEARSSSLSettings();
+    expect(sslSettings.verificationMode).toBe('full');
+
+    sslSettings = getActionsConfigurationUtilities(
+      configWithEarsSsl({ verificationMode: 'none' })
+    ).getEARSSSLSettings();
+    expect(sslSettings.verificationMode).toBe('none');
+  });
+
+  test('reads cert and key buffers from configured EARS ssl file paths', () => {
+    mockReadFileSync
+      .mockReturnValueOnce(Buffer.from('cert-pem'))
+      .mockReturnValueOnce(Buffer.from('key-pem'));
+
+    const sslSettings = getActionsConfigurationUtilities(
+      configWithEarsSsl({
+        verificationMode: 'full',
+        certificate: '/path/to/cert.pem',
+        key: '/path/to/key.pem',
+      })
+    ).getEARSSSLSettings();
+
+    expect(sslSettings.cert).toEqual(Buffer.from('cert-pem'));
+    expect(sslSettings.key).toEqual(Buffer.from('key-pem'));
+    expect(mockReadFileSync).toHaveBeenNthCalledWith(1, '/path/to/cert.pem');
+    expect(mockReadFileSync).toHaveBeenNthCalledWith(2, '/path/to/key.pem');
+  });
+
+  test('returns undefined cert and key when EARS ssl paths are not configured', () => {
+    const sslSettings = getActionsConfigurationUtilities(defaultActionsConfig).getEARSSSLSettings();
+
+    expect(sslSettings.cert).toBeUndefined();
+    expect(sslSettings.key).toBeUndefined();
+    expect(mockReadFileSync).not.toHaveBeenCalled();
+  });
+
+  test('caches the SSL settings and reads files only once across multiple calls', () => {
+    mockReadFileSync
+      .mockReturnValueOnce(Buffer.from('cert-pem'))
+      .mockReturnValueOnce(Buffer.from('key-pem'));
+
+    const configUtils = getActionsConfigurationUtilities(
+      configWithEarsSsl({
+        verificationMode: 'full',
+        certificate: '/path/to/cert.pem',
+        key: '/path/to/key.pem',
+      })
+    );
+
+    const first = configUtils.getEARSSSLSettings();
+    const second = configUtils.getEARSSSLSettings();
+
+    expect(first).toBe(second);
+    expect(mockReadFileSync).toHaveBeenCalledTimes(2);
+  });
+
+  test('throws a descriptive config error when the EARS ssl.certificate file cannot be read', () => {
+    mockReadFileSync.mockImplementationOnce(() => {
+      throw new Error("ENOENT: no such file or directory, open '/path/to/missing-cert.pem'");
+    });
+
+    const sslConfigUtils = getActionsConfigurationUtilities(
+      configWithEarsSsl({
+        verificationMode: 'full',
+        certificate: '/path/to/missing-cert.pem',
+        key: '/path/to/key.pem',
+      })
+    );
+
+    expect(() => sslConfigUtils.getEARSSSLSettings()).toThrow(
+      "EARS SSL configuration error: failed to read certificate file: ENOENT: no such file or directory, open '/path/to/missing-cert.pem'"
+    );
+  });
+
+  test('throws a descriptive config error when the EARS ssl.key file cannot be read', () => {
+    mockReadFileSync
+      // certificate reads fine, key cannot be read
+      .mockReturnValueOnce(Buffer.from('cert-pem'))
+      .mockImplementationOnce(() => {
+        throw new Error("EACCES: permission denied, open '/path/to/key.pem'");
+      });
+
+    const sslConfigUtils = getActionsConfigurationUtilities(
+      configWithEarsSsl({
+        verificationMode: 'full',
+        certificate: '/path/to/cert.pem',
+        key: '/path/to/key.pem',
+      })
+    );
+
+    expect(() => sslConfigUtils.getEARSSSLSettings()).toThrow(
+      "EARS SSL configuration error: failed to read key file: EACCES: permission denied, open '/path/to/key.pem'"
+    );
+  });
+});
+
+describe('getRelaySSLSettings', () => {
+  beforeEach(() => {
+    mockReadFileSync.mockReset();
+  });
+
+  test('reads and caches Relay certificate, key, and CA files', () => {
+    mockReadFileSync.mockImplementation((filePath) => Buffer.from(String(filePath)));
+    const configUtils = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      relay: {
+        url: 'https://relay.test',
+        ssl: {
+          verificationMode: 'full',
+          certificate: '/path/to/cert.pem',
+          key: '/path/to/key.pem',
+          certificateAuthorities: ['/path/to/ca-1.pem', '/path/to/ca-2.pem'],
+        },
+      },
+    });
+
+    const first = configUtils.getRelaySSLSettings();
+    const second = configUtils.getRelaySSLSettings();
+
+    expect(first).toBe(second);
+    expect(first).toMatchObject({
+      verificationMode: 'full',
+      cert: Buffer.from('/path/to/cert.pem'),
+      key: Buffer.from('/path/to/key.pem'),
+      allowPartialTrustChain: true,
+    });
+    expect(first.ca).toEqual(expect.any(Buffer));
+    expect(first.ca?.includes(Buffer.from('/path/to/ca-1.pem'))).toBe(true);
+    expect(first.ca?.includes(Buffer.from('/path/to/ca-2.pem'))).toBe(true);
+    expect(mockReadFileSync).toHaveBeenCalledTimes(4);
+  });
+
+  test('does not enable partial trust chains without Relay SSL configuration', () => {
+    const sslSettings = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      relay: { url: 'https://relay.test' },
+    }).getRelaySSLSettings();
+
+    expect(sslSettings).not.toHaveProperty('allowPartialTrustChain');
+    expect(mockReadFileSync).not.toHaveBeenCalled();
   });
 });
 
@@ -828,6 +1005,61 @@ describe('isEarsExperimentalEnabled()', () => {
       },
     });
     expect(acu.isEarsExperimentalEnabled()).toBe(true);
+  });
+});
+
+describe('isInboundEventsEnabled()', () => {
+  test('returns false by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isInboundEventsEnabled()).toBe(false);
+  });
+
+  test('returns true when inboundEvents.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        enabled: true,
+      },
+    });
+    expect(acu.isInboundEventsEnabled()).toBe(true);
+  });
+});
+
+describe('getInboundEventsMaxBodyBytes()', () => {
+  test('returns 1mb by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsMaxBodyBytes()).toBe(1024 * 1024);
+  });
+
+  test('returns configured maxBodyBytes in bytes', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        enabled: false,
+        maxBodyBytes: new ByteSizeValue(512 * 1024),
+        maxEmitted: 25,
+      },
+    });
+    expect(acu.getInboundEventsMaxBodyBytes()).toBe(512 * 1024);
+  });
+});
+
+describe('getInboundEventsMaxEmitted()', () => {
+  test('returns 25 by default', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getInboundEventsMaxEmitted()).toBe(25);
+  });
+
+  test('returns configured maxEmitted', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      inboundEvents: {
+        ...defaultActionsConfig.inboundEvents,
+        maxEmitted: 100,
+      },
+    });
+    expect(acu.getInboundEventsMaxEmitted()).toBe(100);
   });
 });
 

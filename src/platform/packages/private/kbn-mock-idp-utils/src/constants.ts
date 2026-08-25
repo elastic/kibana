@@ -47,6 +47,18 @@ export const MOCK_IDP_UIAM_ORGANIZATION_ID = 'org1234567890';
 export const MOCK_IDP_UIAM_PROJECT_ID = 'abcdef12345678901234567890123456';
 export const MOCK_IDP_UIAM_PROJECT_ID2 = 'fedcba65432109876543210987654321';
 
+// Canonical project type names used in UIAM role assignments and ES Serverless configuration.
+// Test users get one project grant per type (like an org admin with mixed projects) so they can
+// reach cross-project (CPS) linked projects of any type, not just the type of the Kibana
+// instance they logged in to.
+export const MOCK_IDP_UIAM_PROJECT_TYPES = [
+  'elasticsearch',
+  'observability',
+  'security',
+  'workplaceai',
+  'vectordb',
+] as const;
+
 // cloud.id is decoded by the security plugin to obtain the ES endpoint for UIAM API key conversion.
 // CI:    decodes to https://es01:9220 (ES listens on port 9220 inside the Docker network)
 // Local: decodes to https://host.docker.internal:9220 (ES is on the host, reached via Docker bridge)

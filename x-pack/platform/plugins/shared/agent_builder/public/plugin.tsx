@@ -19,22 +19,18 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { dynamic } from '@kbn/shared-ux-utility';
+import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
-
-const LazyAgentBuilderAnnouncementChromeInner = dynamic(() =>
-  import('./components/announcement/agent_builder_announcement_chrome_inner').then((m) => ({
-    default: m.AgentBuilderAnnouncementChromeInner,
-  }))
-);
 import {
   AgentBuilderAccessChecker,
   AgentService,
   AttachmentsService,
+  RenderersService,
   ChatService,
   ConversationsService,
+  ConversationTemplatesService,
   DocLinksService,
   NavigationService,
   ToolsService,
@@ -43,9 +39,13 @@ import {
   OAuthClientsService,
   PluginsService,
   EventsService,
+  SpaceSettingsService,
   type AgentBuilderInternalService,
 } from './services';
+import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
+import { createPublicConversationTemplatesContract } from './services/conversation_templates';
+import { createPublicRenderersContract } from './services/renderers';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
 import { createPublicEventsContract } from './services/events';
@@ -59,15 +59,19 @@ import type {
   ConversationSidebarRef,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
-import type { PublicEmbeddableConversationProps } from './types';
+import type {
+  PublicEmbeddableConversationProps,
+  PublicEmbeddableConversationInputProps,
+  EmbeddableConversationInputRef,
+} from './types';
 import type { OpenConversationSidebarOptions, OpenSidebarInternalOptions } from './sidebar/types';
 import {
   setSidebarServices,
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
-import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
 import { storageKeys } from './application/storage_keys';
+import { AGENTBUILDER_APP_ID } from '../common/features';
 
 export class AgentBuilderPlugin
   implements
@@ -90,6 +94,7 @@ export class AgentBuilderPlugin
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
@@ -147,23 +152,26 @@ export class AgentBuilderPlugin
     const { http } = core;
     const { licensing, inference } = startDependencies;
 
+    startDependencies.cps?.cpsManager?.registerAppAccess(
+      AGENTBUILDER_APP_ID,
+      () => ProjectRoutingAccess.EDITABLE
+    );
+
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
-
-    attachmentsService.addAttachmentType(
-      'visualization',
-      createVisualizationAttachmentDefinition({ startDependencies })
-    );
+    const renderersService = new RenderersService();
 
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
+    const conversationTemplatesService = new ConversationTemplatesService();
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const skillsService = new SkillsService({ http });
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
     const oauthClientsService = new OAuthClientsService({ http });
+    const spaceSettingsService = new SpaceSettingsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -222,8 +230,10 @@ export class AgentBuilderPlugin
     const internalServices: AgentBuilderInternalService = {
       agentService,
       attachmentsService,
+      renderersService,
       chatService,
       conversationsService,
+      conversationTemplatesService,
       docLinksService,
       navigationService,
       toolsService,
@@ -231,6 +241,7 @@ export class AgentBuilderPlugin
       smlService,
       pluginsService,
       oauthClientsService,
+      spaceSettingsService,
       startDependencies,
       usageCollection,
       accessChecker,
@@ -273,6 +284,28 @@ export class AgentBuilderPlugin
       </React.Suspense>
     );
 
+    const LazyConfiguredEmbeddableConversationInput = React.lazy(async () => {
+      const { createEmbeddableConversationInput } = await import(
+        './embeddable/create_embeddable_conversation_input'
+      );
+
+      return {
+        default: createEmbeddableConversationInput({
+          services: internalServices,
+          coreStart: core,
+        }),
+      };
+    });
+
+    const PublicEmbeddableConversationInput = React.forwardRef<
+      EmbeddableConversationInputRef,
+      PublicEmbeddableConversationInputProps
+    >((props, ref) => (
+      <React.Suspense fallback={null}>
+        <LazyConfiguredEmbeddableConversationInput {...props} ref={ref} />
+      </React.Suspense>
+    ));
+
     this.experimentalDeepLinksSubscription = core.uiSettings
       .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
       .pipe(distinctUntilChanged())
@@ -285,11 +318,24 @@ export class AgentBuilderPlugin
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
+      conversationTemplates: createPublicConversationTemplatesContract({
+        conversationTemplatesService,
+      }),
+      renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      getAgentBuilderAccess: createPublicEmbeddableChatAccess({
+        accessChecker,
+        application: core.application,
+      }),
       addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);
+        }
+      },
+      removeAttachment: (attachmentId: string) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.removeAttachmentById(attachmentId);
         }
       },
       setChatConfig: (config: EmbeddableConversationProps) => {
@@ -328,27 +374,10 @@ export class AgentBuilderPlugin
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
       EmbeddableConversation: PublicEmbeddableConversation,
+      EmbeddableConversationInput: PublicEmbeddableConversationInput,
     };
 
     if (hasAgentBuilder) {
-      core.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <LazyAgentBuilderAnnouncementChromeInner
-              coreStart={core}
-              pluginsStart={startDependencies}
-            />,
-            element,
-            () => {}
-          );
-
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        order: 1000,
-      });
-
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(

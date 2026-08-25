@@ -124,6 +124,7 @@ import {
   type FleetUsage,
   registerFleetUsageCollector,
 } from './collectors/register';
+import { setupIacProvisionerTelemetry } from './services/telemetry/iac_provisioner_telemetry';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -148,7 +149,8 @@ import { registerFieldsMetadataExtractors } from './services/register_fields_met
 import { registerUpgradeManagedPackagePoliciesTask } from './services/setup/managed_package_policies';
 import { registerDeployAgentPoliciesTask } from './services/agent_policies/deploy_agent_policies_task';
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
-import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
+import { registerBumpMigratedAgentPoliciesTask } from './services/agent_policies/bump_migrated_agent_policies_task';
+import { registerBumpAgentPoliciesByIdTask } from './services/agent_policies/bump_agent_policies_by_id_task';
 import { UpgradeAgentlessDeploymentsTask } from './tasks/agentless/upgrade_agentless_deployment';
 import { SyncIntegrationsTask } from './tasks/sync_integrations/sync_integrations_task';
 import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task';
@@ -171,6 +173,7 @@ import {
 } from './tasks/agentless/verify_permissions_task';
 import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
 import { registerSyncNamespaceTemplatesTask } from './tasks/sync_namespace_templates_task';
+import { registerSyncIlmPolicyTask } from './tasks/sync_ilm_policy_task';
 import {
   type AgentlessPoliciesService,
   AgentlessPoliciesServiceImpl,
@@ -236,7 +239,7 @@ export interface FleetAppContext {
   agentStatusChangeTask?: AgentStatusChangeTask;
   fleetPolicyRevisionsCleanupTask?: FleetPolicyRevisionsCleanupTask;
   taskManagerStart?: TaskManagerStartContract;
-  fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  fetchUsage?: (signal: AbortSignal) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
   lockManagerService?: LockManagerService;
   alertingStart?: AlertingServerStart;
@@ -358,7 +361,7 @@ export class FleetPlugin
   private packageService?: PackageService;
   private packagePolicyService?: PackagePolicyService;
   private policyWatcher?: PolicyWatcher;
-  private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  private fetchUsage?: (signal: AbortSignal) => Promise<FleetUsage | undefined>;
   private lockManagerService?: LockManagerService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -677,13 +680,12 @@ export class FleetPlugin
 
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
-    this.fetchUsage = async (abortController: AbortController) =>
-      await fetchFleetUsage(core, config, abortController);
+    this.fetchUsage = async (signal: AbortSignal) => await fetchFleetUsage(core, config, signal);
     this.fleetUsageSender = new FleetUsageSender(deps.taskManager, core, this.fetchUsage);
     registerFleetUsageLogger(deps.taskManager, async () => fetchAgentsUsage(core, config));
+    setupIacProvisionerTelemetry(core.analytics);
 
-    const fetchAgents = async (abortController: AbortController) =>
-      await fetchAgentMetrics(core, abortController);
+    const fetchAgents = async (signal: AbortSignal) => await fetchAgentMetrics(core, signal);
     this.fleetMetricsTask = new FleetMetricsTask(deps.taskManager, fetchAgents);
 
     const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
@@ -703,7 +705,8 @@ export class FleetPlugin
     // Register tasks
     registerUpgradeManagedPackagePoliciesTask(deps.taskManager);
     registerDeployAgentPoliciesTask(deps.taskManager);
-    registerBumpAgentPoliciesTask(deps.taskManager);
+    registerBumpMigratedAgentPoliciesTask(deps.taskManager);
+    registerBumpAgentPoliciesByIdTask(deps.taskManager);
     registerPackagesBulkOperationTask(deps.taskManager);
     registerSetupTasks(deps.taskManager);
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
@@ -711,6 +714,7 @@ export class FleetPlugin
     registerVerifierPolicyCleanupTask(deps.taskManager);
     registerReindexIntegrationKnowledgeTask(deps.taskManager);
     registerSyncNamespaceTemplatesTask(deps.taskManager);
+    registerSyncIlmPolicyTask(deps.taskManager);
     registerReassignAgentsToVersionSpecificPoliciesTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);

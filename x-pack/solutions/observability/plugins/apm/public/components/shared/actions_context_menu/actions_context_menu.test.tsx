@@ -164,6 +164,59 @@ describe('ActionsContextMenu', () => {
     expect(onClickMock).toHaveBeenCalledTimes(1);
   });
 
+  describe('when an action has both href and onClick', () => {
+    function renderMenuWithHrefAndOnClick(onClickMock: jest.Mock) {
+      const actions: ActionGroups = [
+        {
+          id: 'discover',
+          actions: [
+            {
+              id: 'openInDiscover',
+              name: 'Open in Discover',
+              href: '/app/discover',
+              onClick: onClickMock,
+            },
+          ],
+        },
+      ];
+      render(
+        <ActionsContextMenu
+          actions={actions}
+          button={<button data-test-subj="triggerButton">Actions</button>}
+          dataTestSubjPrefix="testMenu"
+        />
+      );
+      fireEvent.click(screen.getByTestId('triggerButton'));
+    }
+
+    it('renders the item as a link with the href', () => {
+      renderMenuWithHrefAndOnClick(jest.fn());
+      const item = screen.getByTestId('testMenuItem-openInDiscover');
+      expect(item.closest('a')).toHaveAttribute('href', '/app/discover');
+    });
+
+    it('calls onClick on a plain left-click', () => {
+      const onClickMock = jest.fn();
+      renderMenuWithHrefAndOnClick(onClickMock);
+      fireEvent.click(screen.getByTestId('testMenuItem-openInDiscover'));
+      expect(onClickMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not call onClick on a ctrl+click', () => {
+      const onClickMock = jest.fn();
+      renderMenuWithHrefAndOnClick(onClickMock);
+      fireEvent.click(screen.getByTestId('testMenuItem-openInDiscover'), { ctrlKey: true });
+      expect(onClickMock).not.toHaveBeenCalled();
+    });
+
+    it('does not call onClick on a meta+click', () => {
+      const onClickMock = jest.fn();
+      renderMenuWithHrefAndOnClick(onClickMock);
+      fireEvent.click(screen.getByTestId('testMenuItem-openInDiscover'), { metaKey: true });
+      expect(onClickMock).not.toHaveBeenCalled();
+    });
+  });
+
   it('uses default prefix when dataTestSubjPrefix is not specified', () => {
     const actions: ActionGroups = [
       { id: 'g', groupLabel: 'Group', actions: [{ id: 'a', name: 'A', onClick: () => {} }] },

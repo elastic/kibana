@@ -22,12 +22,19 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     templates: {
       enabled: true,
     },
+    runWorkflows: {
+      enabled: true,
+    },
+    // NOTE: these are visibility flags (expose to browser), not the feature flag values.
     casesRedesign: {
       list: true,
       details: true,
       settings: true,
     },
     attachments: {
+      enabled: true,
+    },
+    chat: {
       enabled: true,
     },
   },

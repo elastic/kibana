@@ -40,6 +40,7 @@ import {
 } from './utils';
 
 import type {
+  AttachmentV2,
   CaseCustomFields,
   CustomFieldsConfiguration,
   Observable,
@@ -50,15 +51,17 @@ import {
   CaseStatuses,
   CustomFieldTypes,
   UserActionActions,
+  UserActionTypes,
   CaseSeverity,
   ConnectorTypes,
 } from '../../../common/types/domain';
+import { FieldType } from '../../../common/types/domain/template/fields';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
 import { userProfiles, userProfilesMap } from '../user_profiles.mock';
 import { mappings, mockCases } from '../../mocks';
-import type { ObservablePost } from '../../../common/types/api';
+import type { ObservablePost, CaseUserActionsDeprecatedResponse } from '../../../common/types/api';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 const allComments = [
@@ -477,6 +480,66 @@ describe('utils', () => {
           commentId: 'comment-user-1',
         },
       ]);
+    });
+
+    it('counts unified alert attachments toward the alerts total', async () => {
+      const unifiedAlertSingle = {
+        ...omit(commentAlert, ['alertId', 'index', 'rule']),
+        id: 'unified-alert-1',
+        type: 'security.alert',
+        attachmentId: 'alert-id-3',
+      } as unknown as AttachmentV2;
+      const unifiedAlertMulti = {
+        ...omit(commentAlert, ['alertId', 'index', 'rule']),
+        id: 'unified-alert-2',
+        type: 'security.alert',
+        attachmentId: ['alert-id-4', 'alert-id-5'],
+      } as unknown as AttachmentV2;
+
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          // 1 legacy alert (1 id) + 2 unified alerts (1 + 2 ids) = 4 alerts total
+          comments: [commentAlert, unifiedAlertSingle, unifiedAlertMulti],
+        },
+        userActions,
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([
+        {
+          comment: 'Elastic Alerts attached to the case: 4',
+          commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('skips the alerts summary when every alert (legacy or unified) has been pushed', async () => {
+      const pushedAt = '2019-11-25T21:55:00.177Z';
+      const unifiedAlertPushed = {
+        ...omit(commentAlert, ['alertId', 'index', 'rule']),
+        id: 'unified-alert-1',
+        type: 'security.alert',
+        attachmentId: ['alert-id-3', 'alert-id-4'],
+        pushed_at: pushedAt,
+      } as unknown as AttachmentV2;
+
+      const res = await createIncident({
+        theCase: {
+          ...theCase,
+          comments: [{ ...commentAlertMultipleIds, pushed_at: pushedAt }, unifiedAlertPushed],
+        },
+        userActions,
+        connector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res.comments).toEqual([]);
     });
 
     it('adds the backlink to cases correctly', async () => {
@@ -949,6 +1012,46 @@ describe('utils', () => {
           comment:
             'Elastic Alerts attached to the case: 1\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://example.com/s/test-space/app/security/cases/mock-id-1/?tabId=alerts',
           commentId: 'mock-id-1-total-alerts',
+        },
+      ]);
+    });
+
+    it('formats unified `comment` attachments using data.content', () => {
+      const unifiedComment = {
+        ...omit(commentObj, ['comment']),
+        id: 'comment-unified-1',
+        type: 'comment',
+        data: { content: 'Unified comment body' },
+      } as unknown as AttachmentV2;
+
+      const userActionsWithUnified = [
+        ...userActions,
+        {
+          ...userActions.find((action) => action.type === UserActionTypes.comment)!,
+          comment_id: unifiedComment.id,
+        },
+      ] as CaseUserActionsDeprecatedResponse;
+
+      const theCase = {
+        ...flattenCaseSavedObject({ savedObject: mockCases[0] }),
+        comments: [unifiedComment],
+        totalComments: 1,
+      };
+
+      const latestPushInfo = getLatestPushInfo('not-exists', userActionsWithUnified);
+
+      expect(
+        formatComments({
+          userActions: userActionsWithUnified,
+          theCase,
+          latestPushInfo,
+          userProfiles: userProfilesMap,
+          spaceId: 'default',
+        })
+      ).toEqual([
+        {
+          comment: 'Unified comment body\n\nAdded by elastic.',
+          commentId: 'comment-unified-1',
         },
       ]);
     });
@@ -2141,14 +2244,14 @@ describe('enrichCasesWithFieldLabels', () => {
       definition: '',
       templateVersion: 1,
       deletedAt: null,
-      fieldNames: [
+      fieldDefinitions: [
         { name: 'priority', label: 'Priority Level', type: 'keyword', control: 'INPUT_TEXT' },
         { name: 'effort', label: 'Effort Points', type: 'integer', control: 'INPUT_NUMBER' },
       ],
     },
   };
 
-  it('populates extended_fields_labels from the matched template fieldNames', () => {
+  it('populates extended_fields_labels from the matched template fieldDefinitions', () => {
     const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO]);
 
     expect(result[0].extended_fields_labels).toEqual({
@@ -2161,6 +2264,42 @@ describe('enrichCasesWithFieldLabels', () => {
     const result = enrichCasesWithFieldLabels([baseCase], [templateSO]);
 
     expect(result[0]).toEqual(baseCase);
+  });
+
+  it('populates labels for a template-less case from global field definitions', () => {
+    const caseWithGlobalOnly = {
+      ...baseCase,
+      extended_fields: { team_as_keyword: 'soc' },
+    };
+    const globalFields = [
+      { name: 'team', label: 'Team', control: 'INPUT_TEXT' as const, type: 'keyword' as const },
+    ];
+
+    const result = enrichCasesWithFieldLabels([caseWithGlobalOnly], [], globalFields);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      team_as_keyword: 'Team',
+    });
+  });
+
+  it('merges global and template labels with template winning on key collision', () => {
+    const globalFields = [
+      {
+        name: 'priority',
+        label: 'Global Priority',
+        control: 'INPUT_TEXT' as const,
+        type: 'keyword' as const,
+      },
+      { name: 'team', label: 'Team', control: 'INPUT_TEXT' as const, type: 'keyword' as const },
+    ];
+
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO], globalFields);
+
+    expect(result[0].extended_fields_labels).toEqual({
+      priority_as_keyword: 'Priority Level',
+      effort_as_integer: 'Effort Points',
+      team_as_keyword: 'Team',
+    });
   });
 
   it('returns case unchanged when it has no extended_fields', () => {
@@ -2202,7 +2341,7 @@ describe('enrichCasesWithFieldLabels', () => {
       attributes: {
         ...templateSO.attributes,
         templateVersion: 2,
-        fieldNames: [
+        fieldDefinitions: [
           { name: 'priority', label: 'Priority Level v2', type: 'keyword', control: 'INPUT_TEXT' },
         ],
       },
@@ -2236,7 +2375,7 @@ describe('enrichCasesWithFieldLabels', () => {
         ...templateSO.attributes,
         templateId: 'template-id-2',
         templateVersion: 1,
-        fieldNames: [
+        fieldDefinitions: [
           { name: 'severity', label: 'Severity Label', type: 'keyword', control: 'SELECT_BASIC' },
         ],
       },
@@ -2260,6 +2399,36 @@ describe('enrichCasesWithFieldLabels', () => {
     });
     expect(result[1].extended_fields_labels).toEqual({
       severity_as_keyword: 'Severity Label',
+    });
+  });
+
+  it('populates extended_fields_controls alongside extended_fields_labels', () => {
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO]);
+
+    expect(result[0].extended_fields_controls).toEqual({
+      priority_as_keyword: 'INPUT_TEXT',
+      effort_as_integer: 'INPUT_NUMBER',
+    });
+  });
+
+  it('merges global and template controls with template winning on key collision', () => {
+    const globalFields = [
+      {
+        name: 'priority',
+        label: 'Global Priority',
+        control: FieldType.USER_PICKER,
+        type: 'keyword' as const,
+      },
+      { name: 'team', label: 'Team', control: FieldType.USER_PICKER, type: 'keyword' as const },
+    ];
+
+    const result = enrichCasesWithFieldLabels([caseWithTemplate], [templateSO], globalFields);
+
+    expect(result[0].extended_fields_controls).toEqual({
+      // template wins over the global definition for the same key
+      priority_as_keyword: 'INPUT_TEXT',
+      effort_as_integer: 'INPUT_NUMBER',
+      team_as_keyword: 'USER_PICKER',
     });
   });
 });

@@ -20,6 +20,13 @@ export function registerGetConnectorsTool(
   agentBuilder.tools.register({
     id: workflowTools.getConnectors,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Connectors',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Get connector instances configured in the user's environment.
 
 **When to use:** To find connector IDs needed for the \`connector-id\` field in workflow steps (e.g., which Slack or Jira connectors are available).
@@ -42,7 +49,6 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
       search: z.string().optional().describe('Search term to match against connector names'),
     }),
     tags: ['workflows', 'connectors'],
-    experimental: true,
     handler: async ({ actionTypeId, stepType, search }, { spaceId, request }) => {
       const { connectorTypes, totalConnectors } = await api.getAvailableConnectors(
         spaceId,

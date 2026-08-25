@@ -29,6 +29,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
+  /**
+   * Purpose: Validation smoke test
+   *
+   * Migration: migrate to scout
+   */
   describe('Dashboard options list validation', () => {
     const controlId = 'cd881630-fd28-4e9c-aec5-ae9711d48369';
 

@@ -155,7 +155,7 @@ describe('ServiceMapEmbeddable', () => {
   });
 
   describe('when license is not platinum', () => {
-    it('renders loading state while blocking error takes effect', () => {
+    it('renders the license upgrade prompt', () => {
       const goldLicense = new License({
         signature: 'test',
         license: {
@@ -178,7 +178,8 @@ describe('ServiceMapEmbeddable', () => {
         </ApmEmbeddableContext>
       );
       expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
-      expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+      expect(screen.getByTestId('apmLicensePromptStartTrialButton')).toBeInTheDocument();
+      expect(screen.getByText(/Platinum license/)).toBeInTheDocument();
     });
 
     it('calls onBlockingError with license error', () => {
@@ -210,7 +211,7 @@ describe('ServiceMapEmbeddable', () => {
   });
 
   describe('when service map is not enabled', () => {
-    it('renders loading state while blocking error takes effect', () => {
+    it('renders the disabled prompt', () => {
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
@@ -228,7 +229,7 @@ describe('ServiceMapEmbeddable', () => {
         }
       );
       expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
-      expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
+      expect(screen.getByText('Service map is disabled')).toBeInTheDocument();
     });
 
     it('calls onBlockingError with disabled error', () => {
@@ -315,7 +316,17 @@ describe('ServiceMapEmbeddable', () => {
     it('renders the map with a link to view the full map', () => {
       renderEmbeddable();
       expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /View full service map/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /View in Service map/i })).toBeInTheDocument();
+    });
+
+    it('seeds panel kuery into the View in Service map href', () => {
+      renderEmbeddable({ kuery: 'transaction.type: "request"' });
+
+      const fullMapLink = screen.getByRole('link', { name: /View in Service map/i });
+      expect(fullMapLink).toHaveAttribute(
+        'href',
+        expect.stringContaining('kuery=transaction.type')
+      );
     });
 
     it('shows the fit view button when embedded', () => {

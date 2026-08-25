@@ -26,6 +26,11 @@ interface ServiceEntry {
   connectorsHash?: string;
   /** The serverConfigSet used to start Scout */
   serverConfigSet?: string;
+  /**
+   * SHA-256 of the env the service was started with (Scout: TRACING_EXPORTERS,
+   * GCS_CREDENTIALS; EDOT: ELASTICSEARCH_HOST).
+   */
+  envHash?: string;
 }
 
 interface ServicesState {
@@ -63,10 +68,19 @@ export const isAlive = (pid: number): boolean => {
   }
 };
 
-export const connectorsHash = (): string => {
-  const raw = process.env.KIBANA_TESTING_AI_CONNECTORS ?? '';
-  return createHash('sha256').update(raw).digest('hex').slice(0, 12);
-};
+const hashParts = (parts: Array<string | undefined>): string =>
+  createHash('sha256')
+    .update(parts.map((part) => part ?? '').join('\0'))
+    .digest('hex')
+    .slice(0, 12);
+
+export const connectorsHash = (): string => hashParts([process.env.KIBANA_TESTING_AI_CONNECTORS]);
+
+export const scoutEnvHash = (env: Record<string, string> | undefined): string =>
+  hashParts([env?.TRACING_EXPORTERS, env?.GCS_CREDENTIALS]);
+
+export const edotEnvHash = (elasticsearchHost: string | undefined): string =>
+  hashParts([elasticsearchHost]);
 
 export const isServiceRunning = (repoRoot: string, name: ServiceName): boolean => {
   const state = readState(repoRoot);
@@ -76,11 +90,13 @@ export const isServiceRunning = (repoRoot: string, name: ServiceName): boolean =
 
 /**
  * Returns true if the running Scout was started with a different set of connectors
- * than what's currently in the environment, or with a different serverConfigSet.
+ * than what's currently in the environment, a different serverConfigSet, or
+ * different forwarded env vars (e.g. TRACING_EXPORTERS, GCS_CREDENTIALS).
  */
 export const isScoutStale = (
   repoRoot: string,
-  requestedConfigSet?: string
+  requestedConfigSet?: string,
+  scoutEnv?: Record<string, string>
 ): { stale: boolean; reason?: string } => {
   const state = readState(repoRoot);
   const entry = state.scout;
@@ -88,6 +104,11 @@ export const isScoutStale = (
 
   if (entry.connectorsHash !== connectorsHash()) {
     return { stale: true, reason: 'KIBANA_TESTING_AI_CONNECTORS changed' };
+  }
+
+  const currentEnvHash = scoutEnvHash(scoutEnv);
+  if (entry.envHash && entry.envHash !== currentEnvHash) {
+    return { stale: true, reason: 'TRACING_EXPORTERS or GCS_CREDENTIALS changed' };
   }
 
   const runningConfigSet = entry.serverConfigSet ?? DEFAULT_SERVER_CONFIG_SET;
@@ -106,6 +127,27 @@ export const isScoutStale = (
 };
 
 /**
+ * Returns true if the running EDOT collector exports to a different
+ * Elasticsearch than this run reads traces from. Switching profiles between
+ * runs is what moves the target, and a collector left pointing at the previous
+ * one goes on accepting spans while indexing them somewhere the trace-based
+ * evaluators never look.
+ */
+export const isEdotStale = (
+  repoRoot: string,
+  elasticsearchHost: string | undefined
+): { stale: boolean; reason?: string } => {
+  const entry = readState(repoRoot).edot;
+  if (!entry || !isAlive(entry.pid)) return { stale: false };
+
+  if (entry.envHash && entry.envHash !== edotEnvHash(elasticsearchHost)) {
+    return { stale: true, reason: 'TRACING_ES_URL changed' };
+  }
+
+  return { stale: false };
+};
+
+/**
  * Spawn a detached service process. Stdout/stderr are written to a log file.
  * Returns the child PID.
  */
@@ -118,6 +160,7 @@ export const startService = (
   opts?: {
     connectorsHash?: string;
     serverConfigSet?: string;
+    envHash?: string;
     env?: Record<string, string | undefined>;
   }
 ): number => {
@@ -149,6 +192,7 @@ export const startService = (
     startedAt: new Date().toISOString(),
     ...(opts?.connectorsHash ? { connectorsHash: opts.connectorsHash } : {}),
     ...(opts?.serverConfigSet ? { serverConfigSet: opts.serverConfigSet } : {}),
+    ...(opts?.envHash ? { envHash: opts.envHash } : {}),
   };
   writeState(repoRoot, state);
 

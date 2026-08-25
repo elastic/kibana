@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
 
+import { BOUNDARY_VALIDATION_ERROR } from '@kbn/data-lifecycle-phases';
 import { useBlurCommitDraft } from '../../../shared';
 import type { DlmPhasesFlyoutFormInternal } from '../types';
 
@@ -67,8 +68,16 @@ export const AfterField = ({
     },
   });
 
+  const isBoundaryError = isInvalid && error === BOUNDARY_VALIDATION_ERROR;
+
   return (
-    <EuiFormRow fullWidth label={label} helpText={helpText} isInvalid={isInvalid} error={error}>
+    <EuiFormRow
+      fullWidth
+      label={label}
+      helpText={isBoundaryError ? undefined : helpText}
+      isInvalid={isInvalid}
+      error={isBoundaryError ? helpText : error}
+    >
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber

@@ -15,16 +15,17 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   createPackagePolicyServiceMock,
-  createMockAgentService,
+  createMockAgentClient,
   createMockAgentlessPoliciesService,
 } from '@kbn/fleet-plugin/server/mocks';
 import type {
+  AgentClient,
   AgentlessPoliciesService,
-  AgentService,
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
-import type { AgentPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { createAgentPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { FleetUnauthorizedError } from '@kbn/fleet-plugin/server';
+import type { AgentlessPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { createAgentlessPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
 jest.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
   const mockedGetPackageInfo = ({ pkgName }: { pkgName: string }) => {
@@ -73,7 +74,7 @@ describe('AgentlessConnectorsInfraService', () => {
   let esClient: ElasticsearchClientMock;
   let packagePolicyService: jest.Mocked<PackagePolicyClient>;
   let agentlessPoliciesService: jest.Mocked<AgentlessPoliciesService>;
-  let agentService: jest.Mocked<AgentService>;
+  let agentClient: jest.Mocked<AgentClient>;
   let logger: MockedLogger;
   let service: AgentlessConnectorsInfraService;
 
@@ -82,7 +83,7 @@ describe('AgentlessConnectorsInfraService', () => {
     esClient = elasticsearchClientMock.createClusterClient().asInternalUser;
     packagePolicyService = createPackagePolicyServiceMock();
     agentlessPoliciesService = createMockAgentlessPoliciesService();
-    agentService = createMockAgentService();
+    agentClient = createMockAgentClient();
     logger = loggerMock.create();
 
     service = new AgentlessConnectorsInfraService(
@@ -90,7 +91,6 @@ describe('AgentlessConnectorsInfraService', () => {
       esClient,
       packagePolicyService,
       agentlessPoliciesService,
-      agentService,
       logger
     );
 
@@ -351,12 +351,98 @@ describe('AgentlessConnectorsInfraService', () => {
       expect(policies.length).toBe(2);
     });
   });
+  describe('getAgentPolicyForConnectorId', () => {
+    const getMockPolicyFetchAllItems = (pages: PackagePolicy[][]) => {
+      return {
+        async *[Symbol.asyncIterator]() {
+          for (const page of pages) {
+            yield page;
+          }
+        },
+      } as AsyncIterable<PackagePolicy[]>;
+    };
+
+    test('queries agents with a kuery that also matches version-specific policy variants', async () => {
+      const packagePolicy = createPackagePolicyMock();
+      packagePolicy.policy_ids = ['this-is-agent-policy-id'];
+      packagePolicy.supports_agentless = true;
+      packagePolicy.inputs = [
+        {
+          type: 'connectors-py',
+          compiled_input: {
+            connector_id: 'connector-1',
+            connector_name: 'Connector One',
+            service_type: 'sharepoint_online',
+          },
+        } as PackagePolicyInput,
+      ];
+
+      packagePolicyService.fetchAllItems.mockResolvedValue(
+        getMockPolicyFetchAllItems([[packagePolicy]])
+      );
+      (agentClient.listAgents as jest.Mock).mockResolvedValue({
+        agents: [],
+        total: 0,
+      });
+
+      await service.getAgentPolicyForConnectorId({
+        connectorId: 'connector-1',
+        agentClient,
+      });
+
+      expect(agentClient.listAgents as jest.Mock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kuery:
+            '(fleet-agents.policy_id:"this-is-agent-policy-id" or fleet-agents.policy_id:this-is-agent-policy-id#*)',
+        })
+      );
+    });
+
+    test('returns policy without agent metadata when user lacks Fleet agent privileges', async () => {
+      const packagePolicy = createPackagePolicyMock();
+      packagePolicy.policy_ids = ['this-is-agent-policy-id'];
+      packagePolicy.name = 'Connector Package Policy';
+      packagePolicy.supports_agentless = true;
+      packagePolicy.inputs = [
+        {
+          type: 'connectors-py',
+          compiled_input: {
+            connector_id: 'connector-1',
+            connector_name: 'Connector One',
+            service_type: 'sharepoint_online',
+          },
+        } as PackagePolicyInput,
+      ];
+
+      packagePolicyService.fetchAllItems.mockResolvedValue(
+        getMockPolicyFetchAllItems([[packagePolicy]])
+      );
+      (agentClient.listAgents as jest.Mock).mockRejectedValue(
+        new FleetUnauthorizedError(
+          'User does not have adequate permissions to access Fleet agents.'
+        )
+      );
+
+      const result = await service.getAgentPolicyForConnectorId({
+        connectorId: 'connector-1',
+        agentClient,
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          package_policy_name: 'Connector Package Policy',
+          agent_policy_ids: ['this-is-agent-policy-id'],
+        })
+      );
+      expect(result?.agent_metadata).toBeUndefined();
+    });
+  });
   describe('deployConnector', () => {
-    let agentPolicy: AgentPolicy;
+    let agentlessPolicy: AgentlessPolicy;
     let sharepointOnlinePackagePolicy: PackagePolicy;
 
     beforeAll(() => {
-      agentPolicy = createAgentPolicyMock();
+      agentlessPolicy = createAgentlessPolicyMock();
 
       sharepointOnlinePackagePolicy = createPackagePolicyMock();
       sharepointOnlinePackagePolicy.id = 'this-is-package-policy-id';
@@ -467,10 +553,10 @@ describe('AgentlessConnectorsInfraService', () => {
         is_deleted: false,
       };
 
-      agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(agentPolicy);
+      agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(agentlessPolicy);
 
       const result = await service.deployConnector(connector);
-      expect(result).toBe(agentPolicy);
+      expect(result).toBe(agentlessPolicy);
     });
 
     test('call agentlessPoliciesService.createAgentlessPolicy with correct params', async () => {
@@ -481,15 +567,13 @@ describe('AgentlessConnectorsInfraService', () => {
         is_deleted: false,
       };
 
-      const fakeAgentPolicy = { id: 'agent-policy-005' } as AgentPolicy;
+      const fakeAgentPolicy = { id: 'agent-policy-005' } as AgentlessPolicy;
       agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(fakeAgentPolicy);
 
       const result = await service.deployConnector(testConnector);
 
       expect(agentlessPoliciesService.createAgentlessPolicy).toHaveBeenCalledWith(
         expect.objectContaining({
-          description: '',
-          enabled: true,
           inputs: {
             'github-connectors-py': {
               enabled: true,
@@ -503,7 +587,7 @@ describe('AgentlessConnectorsInfraService', () => {
           policy_template: 'github',
           name: 'github connector 000000005',
           namespace: '',
-          package: { name: 'elastic_connectors', title: 'Elastic Connectors', version: '0.0.5' },
+          package: { name: 'elastic_connectors', version: '0.0.5' },
         })
       );
 
@@ -524,7 +608,7 @@ describe('AgentlessConnectorsInfraService', () => {
           is_deleted: false,
         };
 
-        const fakeAgentPolicy = { id: 'agent-policy-006' } as AgentPolicy;
+        const fakeAgentPolicy = { id: 'agent-policy-006' } as AgentlessPolicy;
         agentlessPoliciesService.createAgentlessPolicy.mockResolvedValue(fakeAgentPolicy);
 
         await service.deployConnector(testConnector);

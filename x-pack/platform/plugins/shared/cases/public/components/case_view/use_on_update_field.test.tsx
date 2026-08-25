@@ -249,9 +249,10 @@ describe('useOnUpdateField', () => {
       );
     });
 
-    it('normalizes camelCase extendedFields keys to snake_case before merging', () => {
-      // The server returns extendedFields with camelCase keys (via convertToCamelCase).
-      // processExtendedFields must convert them back to snake_case before sending the PATCH.
+    it('sends only the incoming extended fields without client-side merge', () => {
+      // The server merges extended_fields with existing values so that concurrent saves
+      // from GlobalCaseFields and TemplateFields do not overwrite each other.
+      // The client must send only its own section's fields — not the full merged object.
       const caseWithCamelCaseFields: CaseUI = {
         ...basicCase,
         extendedFields: { riskScoreAsKeyword: 'low' },
@@ -271,16 +272,14 @@ describe('useOnUpdateField', () => {
       expect(mockMutate).toHaveBeenCalledWith(
         expect.objectContaining({
           updateKey: CASE_EXTENDED_FIELDS,
-          updateValue: {
-            risk_score_as_keyword: 'low',
-            severity_as_keyword: 'high',
-          },
+          updateValue: { severity_as_keyword: 'high' },
         }),
         expect.anything()
       );
     });
 
-    it('merges with existing extended fields', () => {
+    it('does not include existing extended fields from caseData in the update payload', () => {
+      // Merge is done server-side; the client sends only the changed section's fields.
       const caseWithExtendedFields: CaseUI = {
         ...basicCase,
         extendedFields: { existing_field: 'existing_value' },
@@ -300,10 +299,7 @@ describe('useOnUpdateField', () => {
       expect(mockMutate).toHaveBeenCalledWith(
         expect.objectContaining({
           updateKey: CASE_EXTENDED_FIELDS,
-          updateValue: {
-            existing_field: 'existing_value',
-            impact_as_text: 'high',
-          },
+          updateValue: { impact_as_text: 'high' },
         }),
         expect.anything()
       );
@@ -338,5 +334,60 @@ describe('useOnUpdateField', () => {
     });
 
     expect(onError).toHaveBeenCalled();
+  });
+
+  describe('confirming two fields in quick succession', () => {
+    // Regression test for a single `useOnUpdateField` instance being shared by multiple
+    // fields (e.g. the sidebar's "Attributes" section owns one instance for severity, tags,
+    // category, and assignees). Both mutations are still fired independently and each
+    // resolves correctly, but the shared `loadingKey` reflects only the most recently
+    // confirmed field while the first is still in flight.
+    it('sends both updates and converges back to a non-loading state once both resolve', () => {
+      const pendingCallbacks: Array<() => void> = [];
+      mockMutate.mockImplementation((_req: unknown, options: { onSuccess: () => void }) => {
+        pendingCallbacks.push(options.onSuccess);
+      });
+
+      const { result } = renderHook(() => useOnUpdateField({ caseData: basicCase }), { wrapper });
+
+      act(() => {
+        result.current.onUpdateField({ key: 'severity', value: CaseSeverity.CRITICAL });
+      });
+
+      expect(result.current.loadingKey).toBe('severity');
+
+      act(() => {
+        result.current.onUpdateField({ key: 'tags', value: ['tag1', 'tag2'] });
+      });
+
+      // Confirming tags while severity is still in flight overwrites the shared
+      // loadingKey: severity's own loading indicator is dropped even though its
+      // request hasn't resolved yet.
+      expect(result.current.loadingKey).toBe('tags');
+
+      expect(mockMutate).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ updateKey: 'severity', updateValue: CaseSeverity.CRITICAL }),
+        expect.anything()
+      );
+      expect(mockMutate).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ updateKey: 'tags', updateValue: ['tag1', 'tag2'] }),
+        expect.anything()
+      );
+
+      // Resolve the tags request first, then the severity request. Both eventually
+      // settle back to "nothing pending" -- no deadlock -- even though the intermediate
+      // loadingKey above didn't reflect severity's in-flight state.
+      act(() => {
+        pendingCallbacks[1]();
+      });
+      expect(result.current.loadingKey).toBeNull();
+
+      act(() => {
+        pendingCallbacks[0]();
+      });
+      expect(result.current.loadingKey).toBeNull();
+    });
   });
 });

@@ -66,7 +66,7 @@ export interface FleetUsage extends Usage, AgentData {
 export const fetchFleetUsage = async (
   core: CoreSetup,
   config: FleetConfigType,
-  abortController: AbortController
+  signal: AbortSignal
 ): Promise<FleetUsage | undefined> => {
   const [soClient, esClient] = await getInternalClients(core);
   if (!soClient || !esClient) {
@@ -84,7 +84,7 @@ export const fetchFleetUsage = async (
     agents: await getAgentUsage(soClient, esClient),
     fleet_server: await getFleetServerUsage(soClient, esClient),
     packages: await getPackageUsage(soClient),
-    ...(await getAgentData(esClient, soClient, abortController)),
+    ...(await getAgentData(esClient, soClient, signal)),
     fleet_server_config: await getFleetServerConfig(soClient),
     agent_policies: {
       ...(await getAgentPoliciesUsage(soClient)),

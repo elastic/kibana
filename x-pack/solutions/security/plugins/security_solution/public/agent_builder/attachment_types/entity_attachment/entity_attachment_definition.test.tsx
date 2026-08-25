@@ -7,6 +7,7 @@
 
 import type { ReactElement } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
@@ -37,12 +38,21 @@ const resolveSecurityCanvasContext = jest.fn();
 const buildDefinition = ({
   withCanvas = true,
   searchSession,
-}: { withCanvas?: boolean; searchSession?: ISessionService } = {}) =>
+  newFlyoutEnabled,
+}: {
+  withCanvas?: boolean;
+  searchSession?: ISessionService;
+  newFlyoutEnabled?: boolean;
+} = {}) =>
   createEntityAttachmentDefinition({
     experimentalFeatures,
     application: withCanvas ? application : undefined,
     resolveSecurityCanvasContext: withCanvas ? resolveSecurityCanvasContext : undefined,
     searchSession,
+    uiSettings:
+      newFlyoutEnabled == null
+        ? undefined
+        : ({ get: jest.fn(() => newFlyoutEnabled) } as unknown as IUiSettingsClient),
   });
 
 const attachmentOf = (data: unknown): EntityAttachment =>
@@ -118,6 +128,7 @@ describe('createEntityAttachmentDefinition', () => {
       (navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock).mockClear();
       (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mockClear();
       const searchSession = { clear: jest.fn() } as unknown as ISessionService;
+      const closeCanvas = jest.fn();
       const def = buildDefinition({ searchSession });
       const buttons = def.getActionButtons!({
         attachment: attachmentOf({
@@ -128,16 +139,21 @@ describe('createEntityAttachmentDefinition', () => {
         isSidebar: false,
         isCanvas: true,
         updateOrigin: jest.fn(),
-        openCanvas: jest.fn(),
+        closeCanvas,
+        // openCanvas intentionally omitted in canvas mode
       });
 
       expect(buttons).toHaveLength(1);
       expect(buttons[0].label).toBe('Open in Entity Analytics');
-      expect(buttons[0].icon).toBe('popout');
+      expect(buttons[0].icon).toBe('external');
       expect(buttons[0].type).toBe(ActionButtonType.SECONDARY);
 
-      buttons[0].handler!();
+      buttons[0].handler();
 
+      expect(closeCanvas).toHaveBeenCalledTimes(1);
+      expect(closeCanvas.mock.invocationCallOrder[0]).toBeLessThan(
+        (navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock).mock.invocationCallOrder[0]
+      );
       expect(navigateToEntityAnalyticsWithFlyoutInApp).toHaveBeenCalledTimes(1);
       expect(navigateToEntityAnalyticsHomePageInApp).not.toHaveBeenCalled();
       expect(navigateToEntityAnalyticsWithFlyoutInApp).toHaveBeenCalledWith(
@@ -159,26 +175,49 @@ describe('createEntityAttachmentDefinition', () => {
       );
     });
 
-    it('falls back to the unfiltered Entity Analytics home when the flyout-capable identifier has no entityStoreId', () => {
+    it('falls back to Entity Analytics home from Canvas Open when the entity has no entityStoreId', () => {
       (navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock).mockClear();
       (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mockClear();
-      const searchSession = { clear: jest.fn() } as unknown as ISessionService;
-      const def = buildDefinition({ searchSession });
+      const closeCanvas = jest.fn();
+      const def = buildDefinition();
       const buttons = def.getActionButtons!({
         attachment: attachmentOf({ identifierType: 'host', identifier: 'alpha' }),
         isSidebar: false,
         isCanvas: true,
         updateOrigin: jest.fn(),
-        openCanvas: jest.fn(),
+        closeCanvas,
       });
 
       expect(buttons).toHaveLength(1);
-      buttons[0].handler!();
+      buttons[0].handler();
 
+      expect(closeCanvas).toHaveBeenCalledTimes(1);
+      expect(closeCanvas.mock.invocationCallOrder[0]).toBeLessThan(
+        (navigateToEntityAnalyticsHomePageInApp as jest.Mock).mock.invocationCallOrder[0]
+      );
       expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledTimes(1);
       expect(navigateToEntityAnalyticsWithFlyoutInApp).not.toHaveBeenCalled();
-      expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledWith(
-        expect.objectContaining({ searchSession })
+    });
+
+    it('uses the v2 flyout URL contract when the new flyout setting is enabled', () => {
+      (navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock).mockClear();
+      const def = buildDefinition({ newFlyoutEnabled: true });
+      const buttons = def.getActionButtons!({
+        attachment: attachmentOf({
+          identifierType: 'host',
+          identifier: 'alpha',
+          entityStoreId: 'host:alpha@default',
+        }),
+        isSidebar: false,
+        isCanvas: true,
+        updateOrigin: jest.fn(),
+        closeCanvas: jest.fn(),
+      });
+
+      buttons[0].handler();
+
+      expect(navigateToEntityAnalyticsWithFlyoutInApp).toHaveBeenCalledWith(
+        expect.objectContaining({ isNewFlyoutEnabled: true })
       );
     });
 
@@ -251,11 +290,15 @@ describe('createEntityAttachmentDefinition', () => {
     } as unknown as Parameters<
       NonNullable<ReturnType<typeof buildDefinition>['renderInlineContent']>
     >[0];
-    const renderCallbacks = {} as unknown as Parameters<
+    const renderCallbacks = {
+      registerActionButtons: jest.fn(),
+      updateOrigin: jest.fn(),
+      closeCanvas: jest.fn(),
+    } as unknown as Parameters<
       NonNullable<ReturnType<typeof buildDefinition>['renderCanvasContent']>
     >[1];
 
-    it('forwards searchSession into the canvas content element', () => {
+    it('forwards searchSession into the navigation provider wrapping canvas content', () => {
       const searchSession = { clear: jest.fn() } as unknown as ISessionService;
       const def = buildDefinition({ searchSession });
 
@@ -265,6 +308,18 @@ describe('createEntityAttachmentDefinition', () => {
       ) as ReactElement<{ searchSession?: ISessionService }>;
 
       expect(providerElement.props.searchSession).toBe(searchSession);
+    });
+
+    it('forwards closeCanvas from canvas render callbacks into the navigation provider', () => {
+      const closeCanvas = jest.fn();
+      const def = buildDefinition();
+
+      const providerElement = def.renderCanvasContent!(renderProps, {
+        ...renderCallbacks,
+        closeCanvas,
+      }) as ReactElement<{ closeCanvas?: () => void }>;
+
+      expect(providerElement.props.closeCanvas).toBe(closeCanvas);
     });
 
     it('forwards searchSession into the inline content element', () => {

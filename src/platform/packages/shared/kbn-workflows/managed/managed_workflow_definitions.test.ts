@@ -10,8 +10,13 @@
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
-import type { ManagedWorkflowTemplateValuesById, TemplatedManagedWorkflowId } from '.';
-import { EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions';
+import type { ManagedWorkflowTemplateValuesById } from '.';
+import {
+  EXAMPLE_MANAGED_WORKFLOW_ID,
+  SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
+} from './definitions';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -34,6 +39,20 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
+  },
+  [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
+    detectionIntervalMinutes: 30,
+    detectionBucketIntervalMinutes: 1,
+    detectionLookbackMinutes: 40,
+    targetCoverageMinutes: 30,
+  },
+  [SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID]: {
+    reviewIntervalMinutes: 10,
+    discoveryBatchSize: 3,
+    maxReviewPasses: 3,
+    flakyRuleDetectionThreshold: 10,
+    flakyRuleProbeAfterMinutes: 360,
+    flakyRuleExemptSeverityScore: 80,
   },
 };
 
@@ -83,6 +102,9 @@ function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
   return definition.yamlTemplate(representativeValues);
 }
 
+/** Matches the `__SCREAMING_SNAKE__` placeholders that yamlTemplate definitions substitute. */
+const UNREPLACED_TOKEN_PATTERN = /__[A-Z][A-Z0-9_]*__/g;
+
 function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): void {
   let parsedYaml: unknown;
   try {
@@ -109,6 +131,11 @@ describe('managedWorkflowDefinitions', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('contains the Security alert analysis workflow', () => {
+    const ids = managedWorkflowDefinitions.map(({ id }) => id);
+    expect(ids).toContain(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID);
+  });
+
   it.each(managedDefinitionsById)('%s uses the reserved system- id prefix', (id) => {
     expect(id.startsWith('system-')).toBe(true);
   });
@@ -126,6 +153,10 @@ describe('managedWorkflowDefinitions', () => {
       expect(definition.version).toBeGreaterThanOrEqual(1);
     }
   );
+
+  it.each(managedDefinitionsById)('%s declares whether it is billable', (_id, definition) => {
+    expect(typeof definition.billable).toBe('boolean');
+  });
 
   it.each(managedDefinitionsById)(
     '%s defines exactly one source field: yaml xor yamlTemplate',
@@ -156,13 +187,16 @@ describe('managedWorkflowDefinitions', () => {
   it.each(managedTemplateDefinitionsById)(
     '%s yamlTemplate renders cleanly with representative values',
     (id, definition) => {
-      const representativeValues =
-        templateRepresentativeValuesById[id as TemplatedManagedWorkflowId];
-      const renderedYaml = definition.yamlTemplate(representativeValues);
+      const renderedYaml = renderWorkflowYaml(definition);
 
       expect(typeof renderedYaml).toBe('string');
       expect(renderedYaml.trim()).not.toHaveLength(0);
       expect(renderedYaml).not.toContain('undefined');
+      // A token the template map never replaces stays behind as a valid YAML
+      // string, so it survives schema validation and ships a workflow pointing
+      // at the literal placeholder. Only a mismatch between the yaml text and
+      // the token keys can cause this, and nothing else would catch it.
+      expect(renderedYaml.match(UNREPLACED_TOKEN_PATTERN) ?? []).toEqual([]);
       assertWorkflowYamlIsValid(id, renderedYaml);
     }
   );

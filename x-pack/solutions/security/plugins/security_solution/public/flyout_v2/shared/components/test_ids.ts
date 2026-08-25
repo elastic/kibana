@@ -39,8 +39,10 @@ export const NOTES_LOADING_TEST_ID = `${PREFIX}HeaderNotesLoading` as const;
 
 export const TOOLS_FLYOUT_HEADER_TEST_ID = `${PREFIX}ToolsFlyoutHeader` as const;
 export const TOOLS_FLYOUT_HEADER_TITLE_TEST_ID = `${PREFIX}ToolsFlyoutHeaderTitle` as const;
+export const CHILD_DOCUMENT_FLYOUT_TEST_ID = `${PREFIX}ChildDocumentFlyout` as const;
+export const TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID = `${PREFIX}ToolsFlyoutHeaderTimestamp` as const;
 
-export const CHILD_LINK_TEST_ID = `${PREFIX}ChildLink` as const;
+export const OPEN_FLYOUT_LINK_TEST_ID = `${PREFIX}OpenFlyoutLink` as const;
 
 export const FLYOUT_LOADING_TEST_ID = `${PREFIX}Loading` as const;
 export const FLYOUT_ERROR_TEST_ID = `${PREFIX}Error` as const;
@@ -49,3 +51,5 @@ export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
 export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;
 export const GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID =
   `${GRAPH_PREVIEW_TEST_ID}TechnicalPreview` as const;
+
+export const DOCUMENT_FLYOUT_HEADER_SHARE_BUTTON_TEST_ID = `${PREFIX}HeaderShareButton` as const;

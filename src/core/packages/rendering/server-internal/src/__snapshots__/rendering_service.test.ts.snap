@@ -17,6 +17,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -52,7 +53,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -93,6 +94,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -116,6 +118,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -151,7 +154,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -188,6 +191,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -211,6 +215,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -246,7 +251,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -287,6 +292,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -310,6 +316,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -345,7 +352,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -382,6 +389,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -405,6 +413,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -440,7 +449,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -477,6 +486,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -500,6 +510,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -535,7 +546,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -576,6 +587,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -599,6 +611,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -634,7 +647,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -671,6 +684,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -694,6 +708,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -729,7 +744,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -766,6 +781,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -789,6 +805,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -824,7 +841,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -861,6 +878,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -884,6 +902,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": true,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -919,7 +938,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -956,6 +975,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -984,6 +1004,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1019,7 +1040,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1060,6 +1081,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1083,6 +1105,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1120,7 +1143,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1157,6 +1180,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1185,6 +1209,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1220,7 +1245,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1261,6 +1286,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1289,6 +1315,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1324,7 +1351,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1361,6 +1388,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1384,6 +1412,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1419,7 +1448,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1456,6 +1485,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1484,6 +1514,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1519,7 +1550,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1560,6 +1591,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1588,6 +1620,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1623,7 +1656,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1660,6 +1693,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1688,6 +1722,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1723,7 +1758,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1760,6 +1795,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1788,6 +1824,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1825,7 +1862,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1862,6 +1899,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,
@@ -1890,6 +1928,7 @@ Object {
   "customBranding": Object {},
   "env": Object {
     "airgapped": Any<Boolean>,
+    "exposeNavDependencies": false,
     "isCoreRenderingInReactConcurrentMode": false,
     "mode": Object {
       "dev": Any<Boolean>,
@@ -1927,7 +1966,7 @@ Object {
         "label": "English",
       },
     ],
-    "translationsUrl": "/mock-server-basepath/translations/MOCK_HASH/en.json",
+    "translationsUrl": null,
   },
   "legacyMetadata": Object {
     "globalUiSettings": Object {
@@ -1964,6 +2003,7 @@ Object {
   },
   "uiPlugins": Array [],
   "userStorage": Object {
+    "available": false,
     "values": Object {},
   },
   "version": Any<String>,

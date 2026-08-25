@@ -38,7 +38,9 @@ export type CreateToolPayload = Omit<
 > &
   Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
 
-export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {
+export type UpdateToolPayload = Partial<
+  Pick<ToolDefinition, 'description' | 'tags' | 'confirmation'>
+> & {
   configuration?: Partial<ToolDefinition['configuration']>;
 };
 
@@ -87,6 +89,7 @@ export interface WorkflowItem {
   id: string;
   name: string;
   description: string;
+  enabled: boolean;
 }
 
 export interface GetWorkflowResponse {
@@ -181,6 +184,11 @@ export interface BulkCreateMcpToolsResponse {
   };
 }
 
+export interface ConnectorSubAction {
+  name: string;
+  description?: string;
+}
+
 export interface ConnectorItem {
   id: string;
   name: string;
@@ -193,6 +201,8 @@ export interface ConnectorItem {
   isConnectorTypeDeprecated: boolean;
   authMode?: 'shared' | 'per-user';
   oauthStatus?: OAuthStatus;
+  /** Sub-actions derived from the connector spec (isTool: true actions) */
+  subActions: ConnectorSubAction[];
 }
 
 export const OAUTH_STATUS = {

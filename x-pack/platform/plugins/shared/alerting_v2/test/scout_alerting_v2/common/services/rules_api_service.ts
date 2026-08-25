@@ -9,12 +9,17 @@ import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type {
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
   BulkGetRulesResponse,
-  BulkOperationParams,
-  BulkOperationResponse,
+  BulkResponse,
   CreateRuleData,
-  FindRulesParams,
+  FindRulesRequest,
   FindRulesResponse,
+  ListRuleChangeHistoryRequest,
+  ListRuleChangeHistoryResponse,
+  RuleChangeHistoryDetail,
   RuleResponse,
 } from '@kbn/alerting-v2-schemas';
 import { COMMON_HEADERS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS, RULE_API_PATH } from '../constants';
@@ -24,16 +29,31 @@ export interface WaitForEnabledStateParams {
   enabled: boolean;
 }
 
+export interface RuleApiSpaceOptions {
+  spaceId?: string;
+}
+
 export interface RulesApiService {
-  create: (data: CreateRuleData) => Promise<RuleResponse>;
+  create: (data: CreateRuleData, options?: RuleApiSpaceOptions) => Promise<RuleResponse>;
   upsert: (id: string, data: CreateRuleData) => Promise<RuleResponse>;
   get: (id: string) => Promise<RuleResponse>;
-  find: (query?: FindRulesParams) => Promise<FindRulesResponse>;
+  find: (query?: FindRulesRequest) => Promise<FindRulesResponse>;
   delete: (id: string) => Promise<void>;
-  bulkDelete: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
-  bulkDisable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
-  bulkEnable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
+  enable: (id: string) => Promise<RuleResponse>;
+  disable: (id: string) => Promise<RuleResponse>;
+  bulkDelete: (params: BulkByIdsParams) => Promise<BulkResponse>;
+  bulkDisable: (params: BulkByIdsParams) => Promise<BulkResponse>;
+  bulkEnable: (params: BulkByIdsParams) => Promise<BulkResponse>;
+  bulkUpdateApiKey: (params: BulkByIdsParams) => Promise<BulkResponse>;
+  deleteByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
+  enableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
+  disableByQuery: (params: BulkByQueryParams) => Promise<BulkByQueryResult>;
   bulkGet: (id: string[]) => Promise<BulkGetRulesResponse>;
+  listChangeHistory: (
+    id: string,
+    query?: Partial<ListRuleChangeHistoryRequest>
+  ) => Promise<ListRuleChangeHistoryResponse>;
+  getChangeHistoryEvent: (id: string, eventId: string) => Promise<RuleChangeHistoryDetail>;
   waitForEnabledState: (params: WaitForEnabledStateParams) => Promise<void>;
   cleanUp: () => Promise<void>;
 }
@@ -43,6 +63,9 @@ const stripUndefined = <T extends Record<string, unknown>>(query: T): Partial<T>
     Object.entries(query).filter(([, value]) => value !== undefined)
   ) as Partial<T>;
 
+const withSpace = (path: string, spaceId: string | undefined): string =>
+  spaceId ? `/s/${encodeURIComponent(spaceId)}${path}` : path;
+
 export const getRulesApiService = ({
   log,
   kbnClient,
@@ -50,11 +73,22 @@ export const getRulesApiService = ({
   log: ScoutLogger;
   kbnClient: KbnClient;
 }): RulesApiService => {
-  const bulkDelete = (params: BulkOperationParams) =>
+  const bulkDelete = (params: BulkByIdsParams) =>
     measurePerformanceAsync(log, 'rules.bulkDelete', async () => {
-      const response = await kbnClient.request<BulkOperationResponse>({
+      const response = await kbnClient.request<BulkResponse>({
         method: 'POST',
         path: `${RULE_API_PATH}/_bulk_delete`,
+        headers: COMMON_HEADERS,
+        body: params,
+      });
+      return response.data;
+    });
+
+  const deleteByQuery = (params: BulkByQueryParams) =>
+    measurePerformanceAsync(log, 'rules.deleteByQuery', async () => {
+      const response = await kbnClient.request<BulkByQueryResult>({
+        method: 'POST',
+        path: `${RULE_API_PATH}/_delete_by_query`,
         headers: COMMON_HEADERS,
         body: params,
       });
@@ -71,11 +105,11 @@ export const getRulesApiService = ({
     });
 
   return {
-    create: (data) =>
+    create: (data, options) =>
       measurePerformanceAsync(log, 'rules.create', async () => {
         const response = await kbnClient.request<RuleResponse>({
           method: 'POST',
-          path: RULE_API_PATH,
+          path: withSpace(RULE_API_PATH, options?.spaceId),
           headers: COMMON_HEADERS,
           body: data,
         });
@@ -115,10 +149,28 @@ export const getRulesApiService = ({
           retries: 0,
         });
       }),
+    enable: (id: string) =>
+      measurePerformanceAsync(log, 'rules.enable', async () => {
+        const response = await kbnClient.request<RuleResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/${encodeURIComponent(id)}/_enable`,
+          headers: COMMON_HEADERS,
+        });
+        return response.data;
+      }),
+    disable: (id: string) =>
+      measurePerformanceAsync(log, 'rules.disable', async () => {
+        const response = await kbnClient.request<RuleResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/${encodeURIComponent(id)}/_disable`,
+          headers: COMMON_HEADERS,
+        });
+        return response.data;
+      }),
     bulkDelete,
-    bulkDisable: (params: BulkOperationParams) =>
+    bulkDisable: (params: BulkByIdsParams) =>
       measurePerformanceAsync(log, 'rules.bulkDisable', async () => {
-        const response = await kbnClient.request<BulkOperationResponse>({
+        const response = await kbnClient.request<BulkResponse>({
           method: 'POST',
           path: `${RULE_API_PATH}/_bulk_disable`,
           headers: COMMON_HEADERS,
@@ -126,11 +178,42 @@ export const getRulesApiService = ({
         });
         return response.data;
       }),
-    bulkEnable: (params: BulkOperationParams) =>
+    bulkEnable: (params: BulkByIdsParams) =>
       measurePerformanceAsync(log, 'rules.bulkEnable', async () => {
-        const response = await kbnClient.request<BulkOperationResponse>({
+        const response = await kbnClient.request<BulkResponse>({
           method: 'POST',
           path: `${RULE_API_PATH}/_bulk_enable`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
+    bulkUpdateApiKey: (params: BulkByIdsParams) =>
+      measurePerformanceAsync(log, 'rules.bulkUpdateApiKey', async () => {
+        const response = await kbnClient.request<BulkResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_update_api_key`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
+    deleteByQuery,
+    enableByQuery: (params: BulkByQueryParams) =>
+      measurePerformanceAsync(log, 'rules.enableByQuery', async () => {
+        const response = await kbnClient.request<BulkByQueryResult>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_enable_by_query`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
+    disableByQuery: (params: BulkByQueryParams) =>
+      measurePerformanceAsync(log, 'rules.disableByQuery', async () => {
+        const response = await kbnClient.request<BulkByQueryResult>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_disable_by_query`,
           headers: COMMON_HEADERS,
           body: params,
         });
@@ -155,9 +238,26 @@ export const getRulesApiService = ({
         });
         return response.data;
       }),
+    listChangeHistory: (id, query = {}) =>
+      measurePerformanceAsync(log, 'rules.listChangeHistory', async () => {
+        const response = await kbnClient.request<ListRuleChangeHistoryResponse>({
+          method: 'GET',
+          path: `${RULE_API_PATH}/${encodeURIComponent(id)}/history`,
+          query: stripUndefined(query),
+        });
+        return response.data;
+      }),
+    getChangeHistoryEvent: (id, eventId) =>
+      measurePerformanceAsync(log, 'rules.getChangeHistoryEvent', async () => {
+        const response = await kbnClient.request<RuleChangeHistoryDetail>({
+          method: 'GET',
+          path: `${RULE_API_PATH}/${encodeURIComponent(id)}/history/${encodeURIComponent(eventId)}`,
+        });
+        return response.data;
+      }),
     cleanUp: () =>
       measurePerformanceAsync(log, 'rules.cleanUp', async () => {
-        await bulkDelete({ match_all: true });
+        await deleteByQuery({ match_all: true, force: true });
       }),
   };
 };

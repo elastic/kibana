@@ -14,6 +14,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { KueryNode } from '@kbn/es-query';
 import type { AttachmentType } from '../../../common';
 import type {
@@ -21,6 +22,7 @@ import type {
   AttachmentAttributesV2,
   AttachmentPatchAttributesV2,
 } from '../../../common/types/domain';
+import type { CasesAttachmentsV2WriterContract } from '../../cases_analytics_v2';
 import type { AttachmentPersistedAttributes } from '../../common/types/attachments_v1';
 import type { UnifiedAttachmentAttributes } from '../../common/types/attachments_v2';
 import type { PartialField } from '../../types';
@@ -36,6 +38,19 @@ export interface ServiceContext {
   log: Logger;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   config: ConfigType;
+  /**
+   * Cases-analytics v2 attachments writer. Real implementation when v2 is
+   * enabled, `V2_NOOP_ATTACHMENTS_WRITER` otherwise — every call site
+   * stays unconditional (no `if (writer)` guards). Captured at factory
+   * time so the AttachmentService is oblivious to v2's start lifecycle.
+   *
+   * Mirrors writes to `.cases-attachments` post-success on `create`,
+   * `bulkCreate`, `update`, `bulkUpdate`, and `bulkDelete`. Both legacy
+   * `cases-comments` and unified `cases-attachments` SO writes flow
+   * through the same writer; the doc-builder normalizes both shapes
+   * into the unified analytics doc (see security-team#15066).
+   */
+  analyticsV2AttachmentsWriter: CasesAttachmentsV2WriterContract;
 }
 
 export interface AttachedToCaseArgs {
@@ -49,7 +64,9 @@ export interface GetAttachmentArgs {
   mode: AttachmentMode;
 }
 
-export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
+export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'> & {
+  error?: SavedObjectError;
+};
 
 export interface BulkOptionalAttributes<T>
   extends Omit<SavedObjectsBulkResponse<T>, 'saved_objects'> {
@@ -58,7 +75,26 @@ export interface BulkOptionalAttributes<T>
 
 export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs & {
   owner: string;
+  /**
+   * Extra unified attachment `type` values (e.g. `security.entity`) to include in the
+   * query alongside the alert/event types. Used by the "already attached" dedup check so
+   * non-alert unified attachments can participate.
+   */
+  unifiedAttachmentTypes?: string[];
 };
+
+/**
+ * Fetches unified-only attachments (e.g. `security.entity`) by exact `type`, returning full
+ * unified attributes (unlike {@link GetAllAlertsAttachToCaseArgs}).
+ *
+ * `filter` must only reference `cases-attachments` fields — don't pass
+ * {@link getAttachmentAuthorizationFilter}'s combined filter (it also matches `cases-comments`).
+ */
+export interface GetUnifiedAttachmentsByTypesArgs {
+  caseId: string;
+  types: string[];
+  filter?: KueryNode;
+}
 
 export interface AlertIdsAggsResult {
   alertIds: {
@@ -74,15 +110,21 @@ export interface EventIdsAggsResult {
       key: string;
     }>;
   };
-  /** Present only when `cases-attachments` is included in the find `type` list (attachments feature enabled). */
-  unifiedEventIds?: {
+  unifiedEventIds: {
     buckets: Array<{
       key: string;
     }>;
   };
 }
 
-export type AlertsAttachedToCaseArgs = AttachedToCaseArgs;
+export type AlertsAttachedToCaseArgs = AttachedToCaseArgs & {
+  owner: string;
+  /**
+   * Excludes alerts whose index belongs to a linked project
+   * default to true
+   */
+  originOnly?: boolean;
+};
 
 export interface AttachmentsAttachedToCaseArgs extends AttachedToCaseArgs {
   attachmentType: AttachmentType;

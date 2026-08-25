@@ -9,27 +9,28 @@
 
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type {
   ChromeSetup,
   ChromeStart,
-  AppHeaderConfig,
+  ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumbsBadge,
   ChromeNext,
   GlobalHeaderAiButton,
-  ChromeProjectNavigationNode,
-  ChromeSetProjectBreadcrumbsParams,
   ChromeUserBanner,
   GlobalSearchConfig,
-  AppDeepLinkId,
+  NavigationCustomization,
   NavigationTreeDefinition,
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
+  ChromeProjectNavigationNode,
+  ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -44,6 +45,7 @@ export interface InternalChromeStart extends ChromeStart {
   componentDeps: {
     readonly basePath: IBasePath;
     readonly legacyActionMenu$: Observable<MountPoint | undefined>;
+    readonly capabilities: Capabilities;
   };
 
   sideNav: ChromeStart['sideNav'] & {
@@ -93,13 +95,9 @@ export interface InternalChromeStart extends ChromeStart {
     setKibanaName(kibanaName: string): void;
 
     /** Initialise project navigation from a definition tree. */
-    initNavigation<
-      LinkId extends AppDeepLinkId = AppDeepLinkId,
-      Id extends string = string,
-      ChildrenId extends string = Id
-    >(
+    initNavigation<TTree extends NavigationTreeDefinition>(
       id: SolutionId,
-      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>
+      navigationTree$: Observable<TTree>
     ): void;
 
     /** Get an observable of the resolved project navigation tree and active nodes. */
@@ -107,6 +105,14 @@ export interface InternalChromeStart extends ChromeStart {
       solutionId: SolutionId;
       navigationTree: NavigationTreeDefinitionUI;
       activeNodes: ChromeProjectNavigationNode[][];
+      overflowItemIds: string[];
+      /** Default top-level item IDs before any user customization is applied. */
+      defaultItemIds: string[];
+      /**
+       * Top-level body nodes the sidebar will actually render: home node excluded,
+       * hidden nodes removed, and panel-openers with no visible descendants pruned.
+       */
+      renderableNodes: ChromeProjectNavigationNode[];
     }>;
 
     /** Get an observable of the current project breadcrumbs. */
@@ -117,6 +123,9 @@ export interface InternalChromeStart extends ChromeStart {
 
     /**
      * Set project breadcrumbs.
+     * @deprecated Project breadcrumb overrides remain only for compatibility fallback back
+     * navigation. Declare hierarchy in the project navigation tree and pass explicit `back`
+     * configuration to `AppHeader`.
      * @param breadcrumbs - Breadcrumb(s) to set.
      * @param params.absolute If true, replaces defaults; otherwise appends. Defaults to false.
      */
@@ -124,6 +133,18 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+
+    /**
+     * Set navigation customization for live preview.
+     * Pass undefined to clear the customization and revert to the original order.
+     */
+    setNavigationCustomization(customization: NavigationCustomization | undefined): void;
+
+    /** Observable that emits the customize navigation handler when registered by the navigation plugin. */
+    getCustomizeNavigationHandler$(): Observable<(() => void) | null>;
+
+    /** Register the handler that opens the navigation customization modal. Called once by the navigation plugin. */
+    registerCustomizeNavigationHandler(handler: () => void): void;
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */
@@ -138,6 +159,9 @@ export interface InternalChromeNext extends ChromeNext {
   contextSwitcher: ChromeNext['contextSwitcher'] & {
     get$(): Observable<ReactNode>;
   };
+  projectPicker: ChromeNext['projectPicker'] & {
+    get$(): Observable<ReactNode>;
+  };
   globalSearch: ChromeNext['globalSearch'] & {
     get$(): Observable<GlobalSearchConfig | undefined>;
   };
@@ -146,7 +170,7 @@ export interface InternalChromeNext extends ChromeNext {
     set(mounted: boolean): void;
   };
   appHeader: ChromeNext['appHeader'] & {
-    get$(): Observable<AppHeaderConfig | undefined>;
+    get$(): Observable<ChromeAppHeaderConfig | undefined>;
   };
   userMenu: ChromeNext['userMenu'] & {
     get$(): Observable<ReactNode>;

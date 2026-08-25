@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SmlSearchFilters,
-  SmlSearchConstraints,
-} from '@kbn/agent-context-layer-plugin/public';
+import type { SmlSearchFilters, SmlSearchConstraints } from '@kbn/agent-builder-sml-plugin/public';
 
 /**
  * Query keys for react-query
@@ -22,12 +19,14 @@ export const queryKeys = {
   agentProfiles: {
     all: ['agentProfiles'] as const,
     byId: (agentProfileId?: string) => ['agentProfiles', agentProfileId],
-    acl: (agentProfileId: string) => ['agentProfiles', agentProfileId, 'acl'] as const,
+    accessControl: (agentProfileId: string) =>
+      ['agentProfiles', agentProfileId, 'accessControl'] as const,
   },
   security: {
     users: ['security', 'users'] as const,
     suggestUsers: (query: string) => ['security', 'users', 'suggest', query] as const,
     roles: ['security', 'roles'] as const,
+    ownerProfiles: (uids: string[]) => ['security', 'ownerProfiles', uids] as const,
   },
   tools: {
     all: ['tools', 'list'] as const,
@@ -74,8 +73,15 @@ export const queryKeys = {
   connectors: {
     all: ['connectors'] as const,
   },
+  workspaceFiles: {
+    byPath: (conversationId: string, path: string) =>
+      ['workspaceFiles', conversationId, path] as const,
+  },
   oauthClients: {
     all: ['oauthClients', 'list'] as const,
     byId: (clientId: string) => ['oauthClients', clientId] as const,
+  },
+  spaceSettings: {
+    all: ['spaceSettings'] as const,
   },
 };

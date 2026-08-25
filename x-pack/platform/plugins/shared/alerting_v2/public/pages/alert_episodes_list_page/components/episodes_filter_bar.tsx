@@ -8,33 +8,37 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useState,
   type ChangeEvent,
   type SetStateAction,
 } from 'react';
 import {
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFilterGroup,
   EuiFieldSearch,
-  EuiSuperDatePicker,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import type { TimeRange } from '@kbn/es-query';
 import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
+import { AlertEpisodesSeverityFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/severity_filter';
 import { AlertEpisodesRuleFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/rule_filter';
 import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/tag_filter';
 import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/assignee_filter';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type {
+  ApplicationStart,
+  FeatureFlagsStart,
+  IUiSettingsClient,
+  NotificationsStart,
+} from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { AlertingDateRangePicker } from '@kbn/alerting-v2-browser-shared';
 import useDebounce from 'react-use/lib/useDebounce';
-import deepEqual from 'fast-deep-equal';
 import { css } from '@emotion/react';
-import { DEFAULT_EPISODES_LIST_FILTER } from '../utils/episodes_list_url_state';
 import * as i18n from '../translations';
 
 export interface EpisodesFilterBarProps {
@@ -46,7 +50,16 @@ export interface EpisodesFilterBarProps {
   assigneeUids: string[];
   onRefresh?: () => void;
   isLoading?: boolean;
-  services: { http: HttpStart; expressions: ExpressionsStart; spaces: SpacesPluginStart };
+  services: {
+    http: HttpStart;
+    expressions: ExpressionsStart;
+    spaces: SpacesPluginStart;
+    data: DataPublicPluginStart;
+    notifications: NotificationsStart;
+    application: ApplicationStart;
+    uiSettings: IUiSettingsClient;
+    featureFlags: FeatureFlagsStart;
+  };
 }
 
 export const EpisodesFilterBar = ({
@@ -78,9 +91,16 @@ export const EpisodesFilterBar = ({
     [queryStringInput]
   );
 
-  const onStatusChange = useCallback(
-    (status: string | undefined) => {
+  const onStatusesChange = useCallback(
+    (status: string[] | undefined) => {
       onFilterChange((prev) => ({ ...prev, status }));
+    },
+    [onFilterChange]
+  );
+
+  const onSeveritiesChange = useCallback(
+    (severity: string[] | undefined) => {
+      onFilterChange((prev) => ({ ...prev, severity }));
     },
     [onFilterChange]
   );
@@ -110,18 +130,8 @@ export const EpisodesFilterBar = ({
     setQueryStringInput(e.target.value);
   }, []);
 
-  const hasActiveFilters = useMemo(
-    () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER) || queryStringInput.trim() !== '',
-    [filterState, queryStringInput]
-  );
-
-  const onClearFilters = useCallback(() => {
-    setQueryStringInput('');
-    onFilterChange({ ...DEFAULT_EPISODES_LIST_FILTER });
-  }, [onFilterChange]);
-
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       <EuiFlexItem grow>
         <EuiFieldSearch
           fullWidth
@@ -137,15 +147,34 @@ export const EpisodesFilterBar = ({
           `}
         />
       </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
+          <EuiFlexItem grow={false}>
+            <AlertingDateRangePicker
+              from={timeRange.from}
+              to={timeRange.to}
+              onChange={onTimeChange}
+              services={services}
+              onRefresh={onRefresh}
+              isLoading={isLoading}
+              showTimeWindowButtons
+              width="auto"
+              data-test-subj="episodesFilterBar-datePicker"
+            />
+          </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <EuiFilterGroup compressed>
               <AlertEpisodesStatusFilter
-                selectedStatus={filterState.status}
-                onStatusChange={onStatusChange}
+                selectedStatuses={filterState.status}
+                onStatusesChange={onStatusesChange}
                 data-test-subj="episodesFilterBar-status"
+              />
+
+              <AlertEpisodesSeverityFilter
+                selectedSeverities={filterState.severity}
+                onSeveritiesChange={onSeveritiesChange}
+                data-test-subj="episodesFilterBar-severity"
               />
 
               <AlertEpisodesRuleFilter
@@ -173,32 +202,6 @@ export const EpisodesFilterBar = ({
             </EuiFilterGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="cross"
-          disabled={!hasActiveFilters}
-          onClick={onClearFilters}
-          data-test-subj="episodesFilterBar-resetFilters"
-        >
-          {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          compressed
-          start={timeRange.from}
-          end={timeRange.to}
-          onTimeChange={({ start, end }) => onTimeChange({ from: start, to: end })}
-          onRefresh={onRefresh}
-          isLoading={isLoading}
-          showUpdateButton="iconOnly"
-          updateButtonProps={{
-            fill: false,
-          }}
-          width="auto"
-        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

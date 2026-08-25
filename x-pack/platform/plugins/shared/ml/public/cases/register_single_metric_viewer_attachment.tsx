@@ -25,21 +25,21 @@ export function registerSingleMetricViewerCasesAttachment(
   pluginStart: MlStartDependencies,
   usageCollection?: UsageCollectionSetup
 ) {
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
-      icon: PLUGIN_ICON,
-      displayName: i18n.translate('xpack.ml.cases.registerSingleMetricViewer.displayName', {
-        defaultMessage: 'Single metric viewer',
-      }),
-      getAttachmentViewObject: () => ({
+      getIcon: () => PLUGIN_ICON,
+      getLabel: () =>
+        i18n.translate('xpack.ml.cases.singleMetricViewer.displayName', {
+          defaultMessage: 'Single metric viewers',
+        }),
+      getCreationActivity: () => ({
         event: (
           <FormattedMessage
             id="xpack.ml.cases.singleMetricViewer.embeddableAddedEvent"
-            defaultMessage="added single metric viewer"
+            defaultMessage="added a single metric viewer"
           />
         ),
-        timelineAvatar: PLUGIN_ICON,
         children: React.lazy(async () => {
           const [{ initComponent }, mlServices] = await Promise.all([
             import('./single_metric_viewer_attachment'),
@@ -56,6 +56,9 @@ export function registerSingleMetricViewerCasesAttachment(
         }),
       }),
       schema: SingleMetricViewerAttachmentPayloadSchema,
+      // `data.state` is the ML embeddable input bag produced by the single
+      // metric viewer "Add to case" flow — not authorable in YAML.
+      workflowSchema: false,
     })
   );
 }

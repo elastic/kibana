@@ -16,7 +16,7 @@ import {
   AGENT_BUILDER_BUILTIN_TOOLS,
 } from '@kbn/agent-builder-server/allow_lists';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import { createHash } from 'crypto';
+import { toHashedId } from '@kbn/agent-builder-server';
 
 const BUILTIN_AGENT_IDS = new Set([agentBuilderDefaultAgentId, ...AGENT_BUILDER_BUILTIN_AGENTS]);
 const BUILTIN_TOOL_IDS = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
@@ -24,18 +24,12 @@ const BUILTIN_TOOL_IDS = new Set(AGENT_BUILDER_BUILTIN_TOOLS);
 const CUSTOM = 'custom';
 const CUSTOM_HASH_PREFIX = `${CUSTOM}-`;
 const PLUGIN_HASH_PREFIX = 'plugin-';
-const CUSTOM_HASH_HEX_LENGTH = 16;
-
-function sha256Hex(value: string): string {
-  return createHash('sha256').update(value).digest('hex');
-}
-
-function toCustomHashedId(value: string): string {
-  return `${CUSTOM_HASH_PREFIX}${sha256Hex(value).slice(0, CUSTOM_HASH_HEX_LENGTH)}`;
+export function toCustomHashedId(value: string): string {
+  return `${CUSTOM_HASH_PREFIX}${toHashedId(value)}`;
 }
 
 function toPluginHashedId(value: string): string {
-  return `${PLUGIN_HASH_PREFIX}${sha256Hex(value).slice(0, CUSTOM_HASH_HEX_LENGTH)}`;
+  return `${PLUGIN_HASH_PREFIX}${toHashedId(value)}`;
 }
 
 /**
@@ -92,7 +86,7 @@ export function normalizeSkillIdForTelemetry(skill: {
   }
   if (skill.plugin_id) {
     const pluginHash = toPluginHashedId(skill.plugin_id);
-    const skillHash = sha256Hex(skill.id).slice(0, CUSTOM_HASH_HEX_LENGTH);
+    const skillHash = toHashedId(skill.id);
     return `${pluginHash}-${skillHash}`;
   }
   return toCustomHashedId(skill.id);
@@ -105,8 +99,9 @@ export function normalizeSkillIdForTelemetry(skill: {
  *   it's a read-only built-in skill, otherwise `custom`.
  * - `solution_area`: derived from `basePath` for built-ins
  *   (`skills/security/...` → `security`, `skills/observability/...` →
- *   `observability`, `skills/search/...` → `search`, `skills/platform/...` →
- *   `platform`); literal `custom` for user-created; `plugin` for plugin-backed.
+ *   `observability`, `skills/ml/...` → `ml`, `skills/search/...` → `search`,
+ *   `skills/platform/...` → `platform`); literal `custom` for user-created;
+ *   `plugin` for plugin-backed.
  */
 export function classifySkill(
   skill: Pick<InternalSkillDefinition, 'readonly' | 'plugin_id' | 'basePath'>
@@ -130,6 +125,9 @@ function solutionAreaFromBasePath(basePath: string): SkillSolutionArea {
   }
   if (normalized.startsWith('skills/observability')) {
     return 'observability';
+  }
+  if (normalized.startsWith('skills/ml')) {
+    return 'ml';
   }
   if (normalized.startsWith('skills/search')) {
     return 'search';

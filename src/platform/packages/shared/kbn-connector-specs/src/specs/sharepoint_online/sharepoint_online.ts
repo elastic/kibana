@@ -59,11 +59,51 @@ export const SharepointOnline: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
+      {
+        type: 'ears',
+        isRecommended: true,
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'microsoft',
+          scope: 'Sites.Selected Files.Read.All offline_access',
+        },
+      },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          scope: 'Sites.Selected Files.Read.All offline_access',
+        },
+        overrides: {
+          meta: {
+            authorizationUrl: {
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.authorizationUrl.helpText',
+                {
+                  defaultMessage: "Replace '{tenant-id}' with your Azure AD tenant ID.",
+                }
+              ),
+            },
+            tokenUrl: {
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.tokenUrl.helpText',
+                {
+                  defaultMessage: "Replace '{tenant-id}' with your Azure AD tenant ID.",
+                }
+              ),
+            },
+            scope: { hidden: true },
+          },
+        },
+      },
       {
         type: 'oauth_client_credentials',
         defaults: {
@@ -150,45 +190,6 @@ export const SharepointOnline: ConnectorSpec = {
               ),
             },
           },
-        },
-      },
-      {
-        type: 'oauth_authorization_code',
-        defaults: {
-          scope: 'Sites.Selected Files.Read.All offline_access',
-        },
-        overrides: {
-          meta: {
-            authorizationUrl: {
-              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.authorizationUrl.helpText',
-                {
-                  defaultMessage: "Replace '{tenant-id}' with your Azure AD tenant ID.",
-                }
-              ),
-            },
-            tokenUrl: {
-              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
-              helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.tokenUrl.helpText',
-                {
-                  defaultMessage: "Replace '{tenant-id}' with your Azure AD tenant ID.",
-                }
-              ),
-            },
-            scope: { hidden: true },
-          },
-        },
-      },
-      {
-        type: 'ears',
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'microsoft',
-          scope: 'Sites.Selected Files.Read.All offline_access',
         },
       },
     ],
@@ -647,6 +648,7 @@ export const SharepointOnline: ConnectorSpec = {
 
     callGraphAPI: {
       isTool: true,
+      scope: 'destroy',
       description: 'Call a Microsoft Graph v1.0 endpoint by path only (e.g., /v1.0/me).',
       input: lazySchema(() =>
         z.object({
@@ -779,19 +781,10 @@ export const SharepointOnline: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('SharePoint Online test handler');
-
-      try {
-        const response = await ctx.client.get('https://graph.microsoft.com/v1.0/');
-        const siteName = response.data.displayName || 'Unknown';
-        return {
-          ok: true,
-          message: `Successfully connected to SharePoint Online: ${siteName}`,
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
-      }
+      await ctx.client.get('https://graph.microsoft.com/v1.0/');
+      return {};
     },
+    enabled: true,
   },
 
   skill: [

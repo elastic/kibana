@@ -21,7 +21,7 @@ import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { fromStoredDataView, toStoredDataView } from '@kbn/as-code-data-views-transforms';
 import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { DataGridDensity } from '@kbn/discover-utils';
+import { isLegacySort, type SortOrder } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   isDiscoverSessionEmbeddableByReferenceState,
@@ -82,14 +82,16 @@ export function fromStoredSearchEmbeddableByRef(
     headerRowHeight,
     density,
     grid,
-    savedObjectId,
     selectedTabId,
+    savedObjectId,
     ...otherAttrs
   } = {
-    savedObjectId: references.find(
-      (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
-    )?.id,
     ...storedState,
+    savedObjectId:
+      references.find(
+        (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
+      )?.id ??
+      ('savedObjectId' in storedState && storedState.savedObjectId),
   };
   if (!savedObjectId) throw new Error(`Missing reference of type "${SavedSearchType}"`);
   return {
@@ -194,16 +196,12 @@ export function fromStoredTab(
     sort,
     sampleSize,
     rowsPerPage,
-    headerRowHeight,
-    density,
     viewMode,
     kibanaSavedObjectMeta: { searchSourceJSON },
   } = tab;
   const apiTab = {
     ...toDiscoverSessionPanelOverrides(tab),
     sort: fromStoredSort(sort),
-    header_row_height: fromStoredHeight(headerRowHeight),
-    density: density ?? DataGridDensity.COMPACT,
   };
   const searchSourceValues = parseSearchSourceJSON(searchSourceJSON);
   const { index, query, filter } = injectReferences(searchSourceValues, references);
@@ -226,7 +224,10 @@ export function fromStoredTab(
       };
 }
 
-export function toStoredTab(apiTab: DiscoverSessionTab): {
+export function toStoredTab(
+  apiTab: DiscoverSessionTab,
+  options?: { refNamePrefix?: string }
+): {
   state: DiscoverSessionTabAttributes;
   references: SavedObjectReference[];
 } {
@@ -239,7 +240,7 @@ export function toStoredTab(apiTab: DiscoverSessionTab): {
     ...('filters' in apiTab && { filter: toStoredFilters(apiTab.filters) }),
     ...(!isDiscoverSessionEsqlTab(apiTab) && { index: toStoredDataView(apiTab.data_source) }),
   };
-  const [searchSourceFields, references] = extractReferences(searchSourceValues);
+  const [searchSourceFields, references] = extractReferences(searchSourceValues, options);
   const state: DiscoverSessionTabAttributes = {
     ...fromDiscoverSessionPanelOverrides(apiTab),
     sort: toStoredSort(sort),
@@ -264,10 +265,10 @@ export function toDiscoverSessionPanelOverrides(
     ...(columns && { column_order: columns }),
     ...(grid &&
       Object.keys(grid?.columns ?? {}).length && { column_settings: fromStoredGrid(grid) }),
-    ...(rowHeight && { row_height: fromStoredHeight(rowHeight) }),
+    ...(rowHeight && { row_height: fromStoredRowHeight(rowHeight) }),
     ...(sampleSize && { sample_size: sampleSize }),
     ...(rowsPerPage && { rows_per_page: rowsPerPage }),
-    ...(headerRowHeight && { header_row_height: fromStoredHeight(headerRowHeight) }),
+    ...(headerRowHeight && { header_row_height: fromStoredRowHeight(headerRowHeight) }),
     ...(density && { density }),
   };
 }
@@ -312,7 +313,10 @@ export function toStoredGrid(
 export function fromStoredSort(
   sort: DiscoverSessionTabAttributes['sort']
 ): DiscoverSessionTab['sort'] {
-  return sort.map((s) => {
+  const sortInput = sort as SortOrder | SortOrder[];
+  const normalizedSort: SortOrder[] = isLegacySort(sortInput) ? [sortInput] : sortInput;
+
+  return normalizedSort.map((s) => {
     const [name, dir] = Array.isArray(s) ? s : [s, 'desc'];
     const direction = dir === 'asc' || dir === 'desc' ? dir : 'desc';
     return { name, direction };
@@ -325,7 +329,7 @@ export function toStoredSort(
   return sort.map((s) => [s.name, s.direction]);
 }
 
-export function fromStoredHeight(height: number = 3): DiscoverSessionTab['row_height'] {
+export function fromStoredRowHeight(height: number) {
   return height === -1 ? 'auto' : height;
 }
 

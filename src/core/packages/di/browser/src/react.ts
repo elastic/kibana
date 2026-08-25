@@ -27,12 +27,29 @@ export const useContainer = () => useContext(Context);
 
 /**
  * The `useService` hook is used to retrieve a service from the dependency injection container.
- * @see {@link Container.get}
+ * The service is resolved asynchronously, which is required for asynchronous bindings.
+ * @see {@link Container.getAsync}
  * @param service The service identifier to resolve.
- * @param options InverisfyJS options to pass to the `get` method.
+ * @param options InverisfyJS options to pass to the `getAsync` method.
  * @public
  */
-export function useService<T>(service: ServiceIdentifier<T>, options?: GetOptions): T;
+export function useService<T>(
+  service: ServiceIdentifier<T>,
+  options: OptionalGetOptions & { async: true }
+): Promise<T | undefined>;
+
+/**
+ * The `useService` hook is used to retrieve a service from the dependency injection container.
+ * The service is resolved asynchronously, which is required for asynchronous bindings.
+ * @see {@link Container.getAsync}
+ * @param service The service identifier to resolve.
+ * @param options InverisfyJS options to pass to the `getAsync` method.
+ * @public
+ */
+export function useService<T>(
+  service: ServiceIdentifier<T>,
+  options: GetOptions & { async: true }
+): Promise<T>;
 
 /**
  * The `useService` hook is used to retrieve a service from the dependency injection container.
@@ -46,13 +63,30 @@ export function useService<T>(
   options: OptionalGetOptions
 ): T | undefined;
 
+/**
+ * The `useService` hook is used to retrieve a service from the dependency injection container.
+ * @see {@link Container.get}
+ * @param service The service identifier to resolve.
+ * @param options InverisfyJS options to pass to the `get` method.
+ * @public
+ */
+export function useService<T>(service: ServiceIdentifier<T>, options?: GetOptions): T;
+
 /** @internal */
-export function useService<T>(...params: Parameters<Container['get']>): T {
+export function useService<T>(
+  service: ServiceIdentifier<T>,
+  options?: GetOptions & { async?: boolean }
+): T | undefined | Promise<T | undefined> {
   const container = useContainer();
   if (!container) {
     throw new Error('The dependency injection container is not provided in the context.');
   }
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => container.get<T>(...params), [container, ...params]);
+  return useMemo(
+    () =>
+      options?.async
+        ? (container.getAsync(service, options) as T)
+        : (container.get(service, options) as T),
+    [container, service, options]
+  );
 }

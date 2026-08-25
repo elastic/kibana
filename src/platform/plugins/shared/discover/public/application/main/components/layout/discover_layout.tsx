@@ -15,6 +15,8 @@ import {
   EuiProgress,
   EuiDelayRender,
   useEuiBreakpoint,
+  useEuiTheme,
+  mathWithUnits,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -29,13 +31,15 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
-import { useColumns } from '@kbn/unified-data-table';
+import { SOURCE_COLUMN, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
+import { TABS_BAR_HEIGHT } from '@kbn/unified-tabs';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { useDiscoverCustomizationContext } from '../../../../customizations';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -55,6 +59,7 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useRegisterDiscoverEsqlFeedback } from '../../hooks/use_register_discover_esql_feedback';
 import {
   internalStateActions,
   useCurrentDataView,
@@ -67,6 +72,7 @@ import {
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
+import { useIsChromeNextProjectHeader } from '../chrome_app_header';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -94,12 +100,16 @@ export function DiscoverLayout() {
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
   } = useDiscoverServices();
+  const customizationContext = useDiscoverCustomizationContext();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const styles = useMemoCss(componentStyles);
+  const { euiTheme } = useEuiTheme();
   const globalQueryState = data.query.getState();
   const dataStateContainer = useCurrentTabDataStateContainer();
+  const isChromeNextProjectHeader = useIsChromeNextProjectHeader();
+
   const { main$ } = dataStateContainer.data$;
   const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
     state.query,
@@ -109,6 +119,7 @@ export function DiscoverLayout() {
     state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
+  useRegisterDiscoverEsqlFeedback();
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
@@ -164,6 +175,11 @@ export function DiscoverLayout() {
     sort,
     settings: grid,
   });
+
+  const sidebarColumns = useMemo(
+    () => currentColumns.filter((column) => column !== SOURCE_COLUMN),
+    [currentColumns]
+  );
 
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
@@ -300,7 +316,6 @@ export function DiscoverLayout() {
           onAddFilter={onAddFilter}
           onFieldEdited={onFieldEdited}
           onDropFieldToTable={onDropFieldToTable}
-          sidebarToggleState$={sidebarToggleState$}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -313,7 +328,6 @@ export function DiscoverLayout() {
     onAddFilter,
     onFieldEdited,
     onDropFieldToTable,
-    sidebarToggleState$,
     dataStateContainer,
   ]);
 
@@ -354,6 +368,15 @@ export function DiscoverLayout() {
     [dispatch, onDataViewCreatedAction]
   );
 
+  const fullBodyHeightOffset = useMemo(() => {
+    const isStandalone = customizationContext.displayMode === 'standalone';
+    if (isChromeNextProjectHeader && isStandalone) {
+      return mathWithUnits(euiTheme.size.xxl, (x) => x * 3);
+    }
+
+    return `${TABS_BAR_HEIGHT + 1}px`;
+  }, [customizationContext.displayMode, euiTheme.size.xxl, isChromeNextProjectHeader]);
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -364,7 +387,7 @@ export function DiscoverLayout() {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss('40px')}
+            ${kbnFullBodyHeightCss(fullBodyHeightOffset)}
           }
         `,
       ]}
@@ -393,7 +416,7 @@ export function DiscoverLayout() {
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
-                columns={currentColumns}
+                columns={sidebarColumns}
                 documents$={dataStateContainer.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
@@ -412,12 +435,7 @@ export function DiscoverLayout() {
                 {resultState === 'none' ? (
                   <>
                     <div css={styles.mainPanel}>
-                      <PanelsToggle
-                        sidebarToggleState$={sidebarToggleState$}
-                        omitChartButton
-                        omitTableButton
-                        dataTestSubjSuffix="InPage"
-                      />
+                      <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
                     </div>
                     {dataState.error ? (
                       <ErrorCallout

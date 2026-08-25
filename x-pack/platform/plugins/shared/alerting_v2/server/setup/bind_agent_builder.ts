@@ -6,11 +6,12 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { Logger, OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
+import { OnSetup, OnStart, PluginSetup } from '@kbn/core-di';
 import { CoreStart } from '@kbn/core-di-server';
+import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import type { Container, ContainerModuleLoadOptions } from 'inversify';
-import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/advanced_settings';
 import { createActionPolicyAttachmentType } from '../agent_builder/attachments/action_policy_attachment_type';
+import { createEpisodeAttachmentType } from '../agent_builder/attachments/episode_attachment_type';
 import { createRuleAttachmentType } from '../agent_builder/attachments/rule_attachment_type';
 import { resolveRequestScoped } from '../agent_builder/resolve_request_scoped';
 import { registerSkills } from '../agent_builder/skills/register_skills';
@@ -19,8 +20,15 @@ import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { AttachmentTypeToken } from '../agent_builder/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
+import { EpisodesClient } from '../lib/episodes_client';
+import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
 import { RulesClient } from '../lib/rules_client';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../lib/services/logger_service/logger_service';
+import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
 import type { AlertingServerSetupDependencies } from '../types';
 
 type AgentBuilderSetup = NonNullable<AlertingServerSetupDependencies['agentBuilder']>;
@@ -40,31 +48,42 @@ function getAgentBuilder(container: Container): AgentBuilderSetup | undefined {
  *
  * - SML types are registered during setup (synchronously) so the agent context
  *   layer can schedule their crawler tasks during its own start phase. Gated on
- *   the optional `agentContextLayer` plugin.
+ *   the optional `agentBuilderSml` plugin.
  * - Attachment types are bound to {@link AttachmentTypeToken} (deps resolved via
- *   DI) and registered during start, gated on the experimental features advanced
- *   setting. Skills are registered alongside them.
+ *   DI) and registered during start. Skills are registered alongside them.
  *
  * Both resolve request-scoped clients on demand via {@link resolveRequestScoped},
  * since they run outside the HTTP route scope.
  */
 export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
   bind(AttachmentTypeToken).toResolvedValue(
-    (logger, injection) =>
+    (loggerService: LoggerServiceContract, injection) =>
       createRuleAttachmentType({
-        logger,
+        logger: loggerService.forSubsystem('agentBuilder'),
         getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
       }) as AttachmentTypeDefinition,
-    [Logger, CoreStart('injection')]
+    [LoggerServiceToken, CoreStart('injection')]
   );
   bind(AttachmentTypeToken).toResolvedValue(
-    (logger, injection) =>
+    (loggerService: LoggerServiceContract, injection) =>
       createActionPolicyAttachmentType({
-        logger,
+        logger: loggerService.forSubsystem('agentBuilder'),
         getActionPolicyClient: (context) =>
           resolveRequestScoped(injection, context.request, ActionPolicyClient),
       }) as AttachmentTypeDefinition,
-    [Logger, CoreStart('injection')]
+    [LoggerServiceToken, CoreStart('injection')]
+  );
+  bind(AttachmentTypeToken).toResolvedValue(
+    (loggerService: LoggerServiceContract, injection) =>
+      createEpisodeAttachmentType({
+        logger: loggerService.forSubsystem('agentBuilder'),
+        getEpisodesClient: (context) =>
+          resolveRequestScoped(injection, context.request, EpisodesClient),
+        getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
+      }) as AttachmentTypeDefinition,
+    [LoggerServiceToken, CoreStart('injection')]
   );
 
   bind(OnSetup).toConstantValue((container) => {
@@ -72,21 +91,27 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       return;
     }
 
-    const agentContextLayerToken =
-      PluginSetup<NonNullable<AlertingServerSetupDependencies['agentContextLayer']>>(
-        'agentContextLayer'
+    const agentBuilderSmlToken =
+      PluginSetup<NonNullable<AlertingServerSetupDependencies['agentBuilderSml']>>(
+        'agentBuilderSml'
       );
-    if (!container.isBound(agentContextLayerToken)) {
+    if (!container.isBound(agentBuilderSmlToken)) {
       return;
     }
 
-    const agentContextLayer = container.get(agentContextLayerToken);
+    const agentBuilderSml = container.get(agentBuilderSmlToken);
+
+    // Resolved lazily at crawl time (start phase) so the SML hooks reflect the
+    // current value of the `alerting:v2:enabled` global advanced setting on
+    // every crawl, rather than a value captured once at setup.
+    const getIsAlertingV2Enabled = () =>
+      container.get(SettingsServiceToken).get(ALERTING_V2_ENABLED_SETTING_ID);
 
     // SML types are registered inline (not via a token registry like attachments):
     // registration happens at setup, but their clients/repositories must be
     // resolved lazily at crawl time (start phase), so deps cannot be eagerly
     // injected at bind/resolution time.
-    agentContextLayer.registerType(
+    agentBuilderSml.registerType(
       createRuleSmlType({
         getScopedRulesClient: (request) =>
           resolveRequestScoped(container.get(CoreStart('injection')), request, RulesClient),
@@ -94,9 +119,10 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
           container
             .get(CoreStart('savedObjects'))
             .createInternalRepository([RULE_SAVED_OBJECT_TYPE]),
+        getIsAlertingV2Enabled,
       })
     );
-    agentContextLayer.registerType(
+    agentBuilderSml.registerType(
       createActionPolicySmlType({
         getScopedActionPolicyClient: (request) =>
           resolveRequestScoped(container.get(CoreStart('injection')), request, ActionPolicyClient),
@@ -104,49 +130,27 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
           container
             .get(CoreStart('savedObjects'))
             .createInternalRepository([ACTION_POLICY_SAVED_OBJECT_TYPE]),
+        getIsAlertingV2Enabled,
       })
     );
   });
 
-  bind(OnStart).toConstantValue(async (container) => {
+  bind(OnStart).toConstantValue((container) => {
     const agentBuilder = getAgentBuilder(container);
     if (!agentBuilder) {
       return;
     }
 
-    const logger = container.get(Logger);
-
-    try {
-      const soClient = container.get(CoreStart('savedObjects')).createInternalRepository();
-      const uiSettingsClient = container
-        .get(CoreStart('uiSettings'))
-        .globalAsScopedToClient(soClient);
-      const enabled = await uiSettingsClient.get<boolean>(
-        ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID
-      );
-
-      if (!enabled) {
-        return;
-      }
-
-      for (const attachmentType of container.getAll(AttachmentTypeToken)) {
-        agentBuilder.attachments.registerType(attachmentType);
-      }
-
-      const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
-      registerSkills(agentBuilder, {
-        getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
-        getAvailableConnectors: (sid, req) =>
-          workflowsManagementApi.getAvailableConnectors(sid, req),
-      });
-
-      logger.info(
-        'Rule management skill and attachments registered (experimental features enabled)'
-      );
-    } catch (err) {
-      logger.warn(
-        `Failed to read alerting V2 experimental features setting; rule management skill not registered: ${err}`
-      );
+    for (const attachmentType of container.getAll(AttachmentTypeToken)) {
+      agentBuilder.attachments.registerType(attachmentType);
     }
+
+    const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
+    const agentBuilderLogger = container.get(LoggerServiceToken).forSubsystem('agentBuilder');
+    registerSkills(agentBuilder, {
+      logger: agentBuilderLogger,
+      getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
+      getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
+    });
   });
 }

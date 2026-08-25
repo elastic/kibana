@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/277283
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: "Fix Osquery missing agents with version-suffixed policy IDs"
+description: "Osquery agent selection, policy grouping, and live queries include agents whose Fleet `policy_id` has a version suffix such as `policyId#9.5`."

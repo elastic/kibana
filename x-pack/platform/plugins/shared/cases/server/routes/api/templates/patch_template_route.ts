@@ -6,16 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import yaml from 'js-yaml';
-import {
-  PatchTemplateInputSchema,
-  ParsedTemplateDefinitionSchema,
-} from '../../../../common/types/domain/template/v1';
+import { isBoom } from '@hapi/boom';
+import { PatchTemplateInputSchema } from '../../../../common/types/domain/template/v1';
 import { INTERNAL_TEMPLATE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { parseTemplate } from './parse_template';
+import { validateTemplateStructure } from './validate_template_input';
 
 /**
  * PATCH /internal/cases/templates/{template_id}
@@ -40,7 +38,15 @@ export const patchTemplateRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
 
       const { template_id: templateId } = request.params;
-      const input = PatchTemplateInputSchema.parse(request.body);
+      const inputResult = PatchTemplateInputSchema.safeParse(request.body);
+      if (!inputResult.success) {
+        return response.badRequest({
+          body: {
+            message: `Invalid template input: ${JSON.stringify(inputResult.error.issues)}`,
+          },
+        });
+      }
+      const input = inputResult.data;
 
       const existingTemplate = await casesClient.templates.getTemplate(templateId);
 
@@ -50,33 +56,22 @@ export const patchTemplateRoute = createCasesRoute({
         });
       }
 
-      // Validate YAML definition if provided
+      // Validate YAML definition if provided — structural check only. The authoring-charset check
+      // runs inside `updateTemplate`, which (unlike this route) has the existing template needed
+      // to grandfather field names that predate the rule. See `validateTemplateStructure`'s doc.
       if (input.definition) {
-        let parsedYaml: unknown;
-        try {
-          parsedYaml = yaml.load(input.definition);
-        } catch (yamlError) {
-          return response.badRequest({
-            body: { message: `Invalid YAML definition: ${yamlError}` },
-          });
-        }
-
-        // Validate parsed definition against the field schema
-        const definitionResult = ParsedTemplateDefinitionSchema.safeParse(parsedYaml);
-        if (!definitionResult.success) {
-          return response.badRequest({
-            body: {
-              message: `Invalid template definition: ${JSON.stringify(
-                definitionResult.error.issues
-              )}`,
-            },
-          });
+        const definitionValidation = validateTemplateStructure(input.definition);
+        if (!definitionValidation.valid) {
+          return response.badRequest({ body: { message: definitionValidation.message } });
         }
       }
 
       const updatedTemplate = await casesClient.templates.updateTemplate(templateId, {
+        name: input.name ?? existingTemplate.attributes.name,
         owner: input.owner ?? existingTemplate.attributes.owner,
         definition: input.definition ?? existingTemplate.attributes.definition,
+        description: input.description ?? existingTemplate.attributes.description,
+        tags: input.tags ?? existingTemplate.attributes.tags,
         isEnabled: input.isEnabled ?? existingTemplate.attributes.isEnabled,
       });
 
@@ -86,6 +81,12 @@ export const patchTemplateRoute = createCasesRoute({
         body: parsedTemplate,
       });
     } catch (error) {
+      if (isBoom(error) && error.output.statusCode === 409) {
+        return response.conflict({
+          body: { message: error.message },
+        });
+      }
+
       throw createCaseError({
         message: `Failed to patch template: ${error}`,
         error,

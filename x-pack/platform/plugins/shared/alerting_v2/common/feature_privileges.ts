@@ -10,34 +10,40 @@ import type {
   SubFeatureConfig,
   SubFeaturePrivilegeConfig,
 } from '@kbn/features-plugin/common';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from './saved_object_types';
+import {
+  ALERTING_V2_ACTION_POLICIES_APP_ID,
+  ALERTING_V2_EPISODES_APP_ID,
+  ALERTING_V2_EXECUTION_HISTORY_APP_ID,
+  ALERTING_V2_RULE_LIBRARY_APP_ID,
+  ALERTING_V2_RULES_APP_ID,
+} from '@kbn/alerting-v2-constants';
+import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import {
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+} from './saved_object_types';
 
 type ValueOf<T> = T[keyof T];
 type NestedValueOf<T extends Record<string, Record<string, string>>> = ValueOf<{
   [K in keyof T]: ValueOf<T[K]>;
 }>;
 
-/**
- * Single source of truth for alerting_v2 feature ids, API privilege strings,
- * UI capability keys, and future sub-feature definitions.
- *
- * Add all new alerting_v2 privilege strings here and derive from this file.
- */
 export const ALERTING_V2_API_PRIVILEGES = {
   rules: {
-    read: 'read-alerting-v2-rules',
-    write: 'write-alerting-v2-rules',
+    read: 'read_alerting-v2-rules',
+    write: 'manage_alerting-v2-rules',
   },
   alerts: {
-    read: 'read-alerting-v2-alerts',
-    write: 'write-alerting-v2-alerts',
+    read: 'read_alerting-v2-alerts',
+    write: 'manage_alerting-v2-alerts',
   },
   actionPolicies: {
-    read: 'read-alerting-v2-action-policies',
-    write: 'write-alerting-v2-action-policies',
+    read: 'read_alerting-v2-action-policies',
+    write: 'manage_alerting-v2-action-policies',
   },
   executionHistory: {
-    read: 'read-alerting-v2-execution-history',
+    read: 'read_alerting-v2-execution-history',
   },
 } as const;
 
@@ -85,7 +91,10 @@ type AlertingV2SubFeatureUICapability = NestedValueOf<
 >;
 type AlertingV2UICapability = AlertingV2TopLevelUICapability | AlertingV2SubFeatureUICapability;
 
-type AlertingV2FeaturePrivilege = Pick<FeatureKibanaPrivileges, 'api' | 'ui' | 'savedObject'> & {
+type AlertingV2FeaturePrivilege = Pick<
+  FeatureKibanaPrivileges,
+  'api' | 'ui' | 'savedObject' | 'alerts' | 'aiIndex'
+> & {
   readonly api: readonly AlertingV2ApiPrivilege[];
   readonly ui: readonly AlertingV2TopLevelUICapability[];
   readonly savedObject: {
@@ -116,6 +125,12 @@ type AlertingV2SubFeature = Omit<SubFeatureConfig, 'privilegeGroups'> & {
 export interface AlertingV2FeatureDefinition {
   readonly id: string;
   readonly name: string;
+  readonly managementApp: string;
+  /**
+   * Extra management apps granted by this feature. Used when a feature owns
+   * more than one Stack Management page (e.g. Rules also owns Rule library).
+   */
+  readonly additionalManagementApps?: readonly string[];
   readonly privileges: {
     readonly all: AlertingV2FeaturePrivilege;
     readonly read: AlertingV2FeaturePrivilege;
@@ -123,25 +138,35 @@ export interface AlertingV2FeatureDefinition {
   readonly subFeatures: readonly AlertingV2SubFeature[];
 }
 
+export const getFeatureManagementApps = (
+  feature: AlertingV2FeatureDefinition
+): readonly string[] => [feature.managementApp, ...(feature.additionalManagementApps ?? [])];
+
 export const ALERTING_V2_FEATURES = {
   rules: {
     id: 'alerting_v2_rules',
     name: 'Rules',
+    managementApp: ALERTING_V2_RULES_APP_ID,
+    additionalManagementApps: [ALERTING_V2_RULE_LIBRARY_APP_ID],
     privileges: {
       all: {
+        aiIndex: { read: [RULE_KI_TYPE] },
         api: [ALERTING_V2_API_PRIVILEGES.rules.read, ALERTING_V2_API_PRIVILEGES.rules.write],
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.all, ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
+          // Templates are Fleet-installed catalog objects — grant read only so
+          // rules.all cannot mutate them through the SO client.
           all: [RULE_SAVED_OBJECT_TYPE],
-          read: [],
+          read: [RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         },
       },
       read: {
+        aiIndex: { read: [RULE_KI_TYPE] },
         api: [ALERTING_V2_API_PRIVILEGES.rules.read],
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
           all: [],
-          read: [RULE_SAVED_OBJECT_TYPE],
+          read: [RULE_SAVED_OBJECT_TYPE, RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         },
       },
     },
@@ -150,8 +175,10 @@ export const ALERTING_V2_FEATURES = {
   alerts: {
     id: 'alerting_v2_alerts',
     name: 'Alerts',
+    managementApp: ALERTING_V2_EPISODES_APP_ID,
     privileges: {
       all: {
+        alerts: { read: true },
         api: [ALERTING_V2_API_PRIVILEGES.alerts.read, ALERTING_V2_API_PRIVILEGES.alerts.write],
         ui: [ALERTING_V2_UI_CAPABILITIES.alerts.all, ALERTING_V2_UI_CAPABILITIES.alerts.read],
         savedObject: {
@@ -160,6 +187,7 @@ export const ALERTING_V2_FEATURES = {
         },
       },
       read: {
+        alerts: { read: true },
         api: [ALERTING_V2_API_PRIVILEGES.alerts.read],
         ui: [ALERTING_V2_UI_CAPABILITIES.alerts.read],
         savedObject: {
@@ -173,8 +201,10 @@ export const ALERTING_V2_FEATURES = {
   actionPolicies: {
     id: 'alerting_v2_action_policies',
     name: 'Action Policies',
+    managementApp: ALERTING_V2_ACTION_POLICIES_APP_ID,
     privileges: {
       all: {
+        aiIndex: { read: [ACTION_POLICY_KI_TYPE] },
         api: [
           ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
           ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
@@ -189,6 +219,7 @@ export const ALERTING_V2_FEATURES = {
         },
       },
       read: {
+        aiIndex: { read: [ACTION_POLICY_KI_TYPE] },
         api: [ALERTING_V2_API_PRIVILEGES.actionPolicies.read],
         ui: [ALERTING_V2_UI_CAPABILITIES.actionPolicies.read],
         savedObject: {
@@ -202,6 +233,7 @@ export const ALERTING_V2_FEATURES = {
   executionHistory: {
     id: 'alerting_v2_execution_history',
     name: 'Execution history',
+    managementApp: ALERTING_V2_EXECUTION_HISTORY_APP_ID,
     privileges: {
       all: {
         api: [ALERTING_V2_API_PRIVILEGES.executionHistory.read],
@@ -226,6 +258,12 @@ export const ALERTING_V2_FEATURES = {
 
 export type AlertingV2Feature = keyof typeof ALERTING_V2_FEATURES;
 
+export type WritableAlertingV2Feature = {
+  [K in AlertingV2Feature]: 'write' extends keyof (typeof ALERTING_V2_API_PRIVILEGES)[K]
+    ? K
+    : never;
+}[AlertingV2Feature];
+
 type TopLevelUiOf<F extends AlertingV2Feature> =
   | (typeof ALERTING_V2_FEATURES)[F]['privileges']['all']['ui'][number]
   | (typeof ALERTING_V2_FEATURES)[F]['privileges']['read']['ui'][number];
@@ -236,3 +274,12 @@ type SubFeatureUiOf<F extends AlertingV2Feature> =
 export type AlertingV2UICapabilityFor<F extends AlertingV2Feature> =
   | TopLevelUiOf<F>
   | SubFeatureUiOf<F>;
+
+export const getAlertingPrivilegeDisplayName = (
+  feature: AlertingV2Feature,
+  level: 'read' | 'all'
+): string => {
+  const { name } = ALERTING_V2_FEATURES[feature];
+  const levelLabel = level === 'all' ? 'All' : 'Read';
+  return `${name}: ${levelLabel}`;
+};

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SavedObject } from '@kbn/core/server';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { createSavedObjectsSerializerMock } from '../../../client/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
@@ -28,6 +29,7 @@ import {
   getBuiltUserActions,
   getTagsAddedRemovedUserActions,
   patchAddRemoveAssigneesCasesRequest,
+  patchAddAssigneeWithEnrichedOriginalRequest,
   patchAssigneesCasesRequest,
   patchCasesRequest,
   patchAddCustomFieldsToOriginalCasesRequest,
@@ -45,18 +47,29 @@ import {
   getBothSettingsUserActions,
   patchExtendedFieldsCasesRequest,
   patchUpdateExtendedFieldsCasesRequest,
+  patchPairedFieldsCasesRequest,
+  patchPairedClearCasesRequest,
   getExtendedFieldsUserActions,
   patchTemplateCasesRequest,
   patchRemoveTemplateCasesRequest,
   getTemplateUserActions,
 } from '../mocks';
-import { AttachmentType, UserActionTypes } from '../../../../common/types/domain';
+import { AttachmentType, CustomFieldTypes, UserActionTypes } from '../../../../common/types/domain';
 
 describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
   const auditMockLocker = auditLoggerMock.create();
   const savedObjectsSerializer = createSavedObjectsSerializerMock();
+  // Spy-able activity writer so the `.cases-activity` mirror assertions
+  // below can inspect the fire-and-forget dispatches. `jest.resetAllMocks`
+  // in `beforeEach` clears call state between tests.
+  const analyticsV2ActivityWriter = {
+    upsertAction: jest.fn(),
+    bulkUpsertActions: jest.fn(),
+    bulkDeleteActionsByCaseIds: jest.fn(),
+    bulkUpsertActionsAwait: jest.fn().mockResolvedValue(undefined),
+  };
 
   let persister: UserActionPersister;
 
@@ -72,6 +85,7 @@ describe('UserActionPersister', () => {
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       auditLogger: auditMockLocker,
+      analyticsV2ActivityWriter,
     });
   });
 
@@ -106,6 +120,71 @@ describe('UserActionPersister', () => {
   });
 
   const testUser = { full_name: 'Elastic User', username: 'elastic', email: 'elastic@elastic.co' };
+
+  describe('cases-analytics v2 activity mirror', () => {
+    it('mirrors a single created user action to the activity writer', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValue({
+        attributes: createUserActionSO(),
+        id: 'ua-1',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+        references: [],
+      });
+
+      await persister.createUserAction(getRequest());
+
+      expect(analyticsV2ActivityWriter.upsertAction).toHaveBeenCalledTimes(1);
+      expect(analyticsV2ActivityWriter.upsertAction).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'ua-1' })
+      );
+    });
+
+    it('mirrors only the successfully-persisted entries on bulk create', async () => {
+      // One success, one per-item failure (409). The failed entry must be
+      // excluded so we never mirror a doc that wasn't actually persisted —
+      // reconciliation can't repair that (a never-persisted user action has
+      // no SO to walk).
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: createUserActionSO(),
+            id: 'ua-ok',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            references: [],
+          },
+          // A per-item failure has `error` and no `attributes`/`references`;
+          // cast to the response element type since the SO API's typed
+          // shape doesn't model the error variant inline.
+          {
+            id: 'ua-bad',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          } as unknown as SavedObject<UserActionPersistedAttributes>,
+        ],
+      });
+
+      await persister.bulkCreateUserAction({ userActions: [getRequest().userAction] });
+
+      expect(analyticsV2ActivityWriter.bulkUpsertActions).toHaveBeenCalledTimes(1);
+      const mirrored = analyticsV2ActivityWriter.bulkUpsertActions.mock.calls[0][0];
+      expect(mirrored.map((so: { id: string }) => so.id)).toEqual(['ua-ok']);
+    });
+
+    it('does not dispatch to the activity writer when every bulk entry errored', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'ua-bad',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+          } as unknown as SavedObject<UserActionPersistedAttributes>,
+        ],
+      });
+
+      await persister.bulkCreateUserAction({ userActions: [getRequest().userAction] });
+
+      expect(analyticsV2ActivityWriter.bulkUpsertActions).not.toHaveBeenCalled();
+    });
+  });
 
   describe('Decoding requests', () => {
     describe('createUserAction', () => {
@@ -278,6 +357,52 @@ describe('UserActionPersister', () => {
       );
     });
 
+    it('diffs assignees by uid when the original has assigneeIdentity fields', () => {
+      // Without uid-only normalization, deep equality treats the retained enriched
+      // assignee as deleted and re-added alongside the newly assigned uid.
+      expect(
+        persister.buildUserActions({
+          updatedCases: patchAddAssigneeWithEnrichedOriginalRequest,
+          user: testUser,
+        })
+      ).toEqual({
+        '1': [
+          {
+            eventDetails: {
+              action: 'add',
+              descriptiveAction: 'case_user_action_add_case_assignees',
+              getMessage: expect.any(Function),
+              savedObjectId: '1',
+              savedObjectType: 'cases',
+            },
+            parameters: {
+              attributes: {
+                action: 'add',
+                created_at: '2022-01-09T22:00:00.000Z',
+                created_by: {
+                  email: 'elastic@elastic.co',
+                  full_name: 'Elastic User',
+                  username: 'elastic',
+                },
+                owner: 'securitySolution',
+                payload: {
+                  assignees: [{ uid: '2' }],
+                },
+                type: 'assignees',
+              },
+              references: [
+                {
+                  id: '1',
+                  name: 'associated-cases',
+                  type: 'cases',
+                },
+              ],
+            },
+          },
+        ],
+      });
+    });
+
     it('creates the correct user actions when tags are added and removed', async () => {
       expect(
         persister.buildUserActions({
@@ -355,6 +480,115 @@ describe('UserActionPersister', () => {
       });
     });
 
+    describe('paired-field duplicate suppression (#282474)', () => {
+      it('suppresses the duplicate customFields action when the canonical extended_fields action records the same edit', () => {
+        const result = persister.buildUserActions({
+          updatedCases: patchPairedFieldsCasesRequest,
+          user: testUser,
+        });
+
+        expect(result['1']).toHaveLength(1);
+        expect(result['1'][0].parameters.attributes.type).toBe(UserActionTypes.extended_fields);
+        expect(result['1'][0].parameters.attributes.payload).toEqual({
+          extended_fields: { priority_as_keyword: 'high' },
+        });
+      });
+
+      it('keeps both actions when the update carries no paired keys', () => {
+        const unpaired = {
+          cases: [
+            {
+              ...patchPairedFieldsCasesRequest.cases[0],
+              pairedCustomFieldStorageKeys: undefined,
+            },
+          ],
+        };
+
+        const result = persister.buildUserActions({ updatedCases: unpaired, user: testUser });
+        const types = result['1'].map((ua) => ua.parameters.attributes.type);
+
+        expect(types).toContain(UserActionTypes.customFields);
+        expect(types).toContain(UserActionTypes.extended_fields);
+      });
+
+      it('keeps the customFields action for a paired clear (extended_fields does not record deletions)', () => {
+        const result = persister.buildUserActions({
+          updatedCases: patchPairedClearCasesRequest,
+          user: testUser,
+        });
+
+        expect(result['1']).toHaveLength(1);
+        expect(result['1'][0].parameters.attributes.type).toBe(UserActionTypes.customFields);
+      });
+
+      it('suppresses only the paired keys, keeping actions for unpaired customFields in the same update', () => {
+        const mixed = {
+          cases: [
+            {
+              ...patchPairedFieldsCasesRequest.cases[0],
+              updatedAttributes: {
+                customFields: [
+                  { key: 'priority', type: 'text', value: 'high' },
+                  { key: 'unpaired_key', type: 'text', value: 'standalone' },
+                ],
+                extended_fields: { priority_as_keyword: 'high' },
+              },
+            },
+          ],
+        } as typeof patchPairedFieldsCasesRequest;
+
+        const result = persister.buildUserActions({ updatedCases: mixed, user: testUser });
+        const customFieldActions = result['1'].filter(
+          (ua) => ua.parameters.attributes.type === UserActionTypes.customFields
+        );
+
+        expect(customFieldActions).toHaveLength(1);
+        expect(customFieldActions[0].parameters.attributes.payload).toEqual({
+          customFields: [{ key: 'unpaired_key', type: 'text', value: 'standalone' }],
+        });
+      });
+    });
+
+    it('suppresses the customFields user action when templates v2 mirrors the edit into extended_fields', () => {
+      // Reproduces the reported bug: replace_custom_field.ts / bulk_update.ts write customFields
+      // and its mirrored extended_fields value in the same patch when templates are enabled.
+      // Both keys land in updatedAttributes, but only one activity-log entry should surface —
+      // extended_fields is what templates v2 renders and already reflects the customFields value.
+      const combinedRequest = {
+        cases: [
+          {
+            ...patchUpdateCustomFieldsCasesRequest.cases[0],
+            updatedAttributes: {
+              customFields: [
+                { key: 'risk_score', type: CustomFieldTypes.TEXT as const, value: 'high' },
+              ],
+              extended_fields: { risk_score: 'high' },
+            },
+            pairedCustomFieldStorageKeys: { risk_score: 'risk_score' },
+          },
+        ],
+      };
+
+      expect(
+        persister.buildUserActions({
+          updatedCases: combinedRequest,
+          user: testUser,
+        })
+      ).toEqual(getExtendedFieldsUserActions({ isMock: false, payload: { risk_score: 'high' } }));
+    });
+
+    it('still creates the customFields user action when extended_fields did not also change', () => {
+      // customFields-only updates (templates disabled, or a field with no migrated global-field
+      // counterpart) must be unaffected — extended_fields is absent from the patch in that case.
+      const result = persister.buildUserActions({
+        updatedCases: patchUpdateCustomFieldsCasesRequest,
+        user: testUser,
+      });
+
+      expect(result['1']).toHaveLength(1);
+      expect(result['1'][0].parameters.attributes.type).toBe('customFields');
+    });
+
     describe('template', () => {
       it('creates a user action when a template is applied', () => {
         expect(
@@ -372,6 +606,33 @@ describe('UserActionPersister', () => {
             user: testUser,
           })
         ).toEqual(getTemplateUserActions({ isMock: false, payload: null }));
+      });
+
+      it('records the resolved template name on the applied-template user action', () => {
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchTemplateCasesRequest,
+            user: testUser,
+            templateNamesByKey: new Map([['tmpl-1@3', 'My Template']]),
+          })
+        ).toEqual(
+          getTemplateUserActions({
+            isMock: false,
+            payload: { id: 'tmpl-1', version: 3, name: 'My Template' },
+          })
+        );
+      });
+
+      it('does not record a name when only a different version of the template id is resolved', () => {
+        // The applied version is 3; a name keyed to another version must not leak in, since names
+        // can change across versions and the payload must snapshot the applied version's name.
+        expect(
+          persister.buildUserActions({
+            updatedCases: patchTemplateCasesRequest,
+            user: testUser,
+            templateNamesByKey: new Map([['tmpl-1@2', 'Old Name']]),
+          })
+        ).toEqual(getTemplateUserActions({ isMock: false, payload: { id: 'tmpl-1', version: 3 } }));
       });
     });
 

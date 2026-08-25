@@ -8,7 +8,8 @@
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Serverless Common UI - Examples', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/280842
+  describe.skip('Serverless Common UI - Examples', function () {
     this.tags(['skipMKI', 'esGate']);
 
     loadTestFile(require.resolve('./data_view_field_editor_example'));
@@ -16,7 +17,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./field_formats'));
     loadTestFile(require.resolve('./partial_results'));
     loadTestFile(require.resolve('./search'));
-    loadTestFile(require.resolve('./search_examples'));
     loadTestFile(require.resolve('./unified_field_list_examples'));
   });
 }

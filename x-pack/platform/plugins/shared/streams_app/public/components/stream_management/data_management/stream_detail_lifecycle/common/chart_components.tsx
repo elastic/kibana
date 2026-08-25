@@ -14,9 +14,11 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   formatNumber,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { TimeState } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -144,12 +146,22 @@ export function ChartBarSeriesBase({
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
+  const maxY = Math.max(0, ...(ingestionRate?.buckets ?? []).map((b) => b.value));
+  const hasData = maxY > 0;
+  const yDomain = { min: 0, max: hasData ? maxY : 1 };
+
   return ingestionRateError ? (
     'Failed to load ingestion rate'
   ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
-    <div style={{ height: '100%', minHeight: '200px', width: '100%' }}>
+    <div
+      css={css`
+        height: 100%;
+        min-height: 200px;
+        width: 100%;
+      `}
+    >
       <Chart size={{ height: '100%', width: '100%' }}>
         <Settings showLegend={false} baseTheme={chartBaseTheme} />
 
@@ -175,7 +187,14 @@ export function ChartBarSeriesBase({
         <Axis
           id="left-axis"
           position="left"
-          tickFormat={(value) => (formatAsBytes ? formatBytes(value) : formatNumber(value, '0,0'))}
+          domain={yDomain}
+          tickFormat={(value) =>
+            !hasData && value !== 0
+              ? ''
+              : formatAsBytes
+              ? formatBytes(value)
+              : formatNumber(value, '0,0')
+          }
           gridLine={{ visible: true }}
         />
       </Chart>
@@ -209,12 +228,29 @@ function ChartBarPhasesSeriesBase({
     }, {} as IlmPolicyPhases);
   }, [ingestionRate]);
 
+  const totalsByKey = new Map<number, number>();
+  for (const buckets of Object.values(ingestionRate?.buckets ?? {})) {
+    for (const { key, value } of buckets) {
+      totalsByKey.set(key, (totalsByKey.get(key) ?? 0) + value);
+    }
+  }
+  const maxY = Math.max(0, ...totalsByKey.values());
+
+  const hasData = maxY > 0;
+  const yDomain = { min: 0, max: hasData ? maxY : 1 };
+
   return ingestionRateError ? (
     'Failed to load ingestion rate'
   ) : !ingestionRate && (isLoadingStats || isLoadingIngestionRate || !ingestionRate) ? (
     <EuiLoadingChart />
   ) : (
-    <div style={{ width: '100%', height: '100%', minHeight: '200px' }}>
+    <div
+      css={css`
+        width: 100%;
+        height: 100%;
+        min-height: 200px;
+      `}
+    >
       <EuiFlexGroup
         justifyContent="spaceBetween"
         css={{ width: '100%', height: '100%' }}
@@ -247,8 +283,13 @@ function ChartBarPhasesSeriesBase({
             <Axis
               id="left-axis"
               position="left"
+              domain={yDomain}
               tickFormat={(value) =>
-                formatAsBytes ? formatBytes(value) : formatNumber(value, '0,0')
+                !hasData && value !== 0
+                  ? ''
+                  : formatAsBytes
+                  ? formatBytes(value)
+                  : formatNumber(value, '0,0')
               }
             />
           </Chart>
@@ -319,13 +360,13 @@ export function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
-      <EuiText>
+      <EuiTitle size="xxxs">
         <h5>
           {i18n.translate('xpack.streams.streamDetailLifecycle.dataTiers', {
             defaultMessage: 'Data Tiers',
           })}
         </h5>
-      </EuiText>
+      </EuiTitle>
       <EuiSpacer size="s" />
       {availablePhases.map((phase) => (
         <React.Fragment key={phase.name}>
@@ -346,7 +387,9 @@ export function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
               )}
             </EuiFlexItem>
 
-            <EuiFlexItem grow={2}>{capitalize(phase.name)}</EuiFlexItem>
+            <EuiFlexItem grow={2}>
+              <EuiText size="xs">{capitalize(phase.name)}</EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
         </React.Fragment>
