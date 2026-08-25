@@ -1,0 +1,7 @@
+type: object
+properties:
+  configurations:
+    type: array
+    description: Agent configuration
+    items:
+      $ref: 'agent_configuration_object.yaml'

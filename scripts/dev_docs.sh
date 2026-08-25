@@ -75,7 +75,8 @@ module.exports = {
     "sources": [
       {
         "type": "file",
-        "location": "$KIBANA_DIR"
+        "location": "$KIBANA_DIR",
+        "subdirs": ["api_docs", "docs", "dev_docs", "src", "x-pack"]
       },
       {
         "type": "file",
@@ -88,9 +89,12 @@ module.exports = {
     ],
     "nav": {
       "structure": [
-        "nav-elastic-developer-guide",
-        "nav-kibana-team",
-        "nav-kibana-dev"
+        {
+          collection: 'Elastic Developer Guide',
+          navs: ['nav-elastic-developer-guide'],
+        },
+        { collection: 'Kibana Team', navs: ['nav-kibana-team'] },
+        { collection: 'Kibana Developer Guide', navs: ['nav-kibana-dev'] },
       ],
       "default": "nav-kibana-dev"
     }

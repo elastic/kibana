@@ -1,0 +1,162 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { estypes } from '@elastic/elasticsearch';
+import type {
+  EndpointActionResponse,
+  LogsEndpointActionResponse,
+  EndpointActionResponseDataOutput,
+} from '../../../../../common/endpoint/types';
+import { ACTIONS_SEARCH_PAGE_SIZE } from '../constants';
+import { catchAndWrapError } from '../../../utils';
+import { ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN } from '../../../../../common/endpoint/constants';
+import { prefixIndexPatternsWithCcs } from '../../../utils/ccs_utils';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../endpoint_app_context_services';
+
+/** @internal */
+const buildSearchQuery = (
+  actionIds: string[] = [],
+  agentIds: string[] = []
+): estypes.QueryDslQueryContainer => {
+  const filter: estypes.QueryDslQueryContainer[] = [];
+  const query: estypes.QueryDslQueryContainer = { bool: { filter } };
+
+  if (agentIds?.length) {
+    filter.push({ terms: { agent_id: agentIds } });
+  }
+  if (actionIds?.length) {
+    filter.push({ terms: { action_id: actionIds } });
+  }
+
+  return query;
+};
+
+interface FetchActionResponsesOptions {
+  esClient: ElasticsearchClient;
+  endpointService: EndpointAppContextService;
+  /** Required for the Endpoint index read to fan out under CPS. The Fleet index read never fans out */
+  scoped?: ScopedEndpointServices;
+  /** List of specific action ids to filter for */
+  actionIds?: string[];
+  /** List of specific agent ids to filter for */
+  agentIds?: string[];
+}
+
+export interface FetchActionResponsesResult<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TResponseMeta extends {} = {}
+> {
+  /** Response (aka: the `ack`) sent to the fleet index */
+  fleetResponses: EndpointActionResponse[];
+  /** Responses sent by Endpoint directly to the endpoint index */
+  endpointResponses: Array<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>;
+}
+
+/**
+ * Fetch Response Action responses from both the Endpoint and the Fleet indexes
+ */
+export const fetchActionResponses = async <
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TResponseMeta extends {} = {}
+>(
+  options: FetchActionResponsesOptions
+): Promise<FetchActionResponsesResult<TOutputContent, TResponseMeta>> => {
+  const [fleetResponses, endpointResponses] = await Promise.all([
+    fetchFleetActionResponses(options),
+    fetchEndpointActionResponses<TOutputContent, TResponseMeta>(options),
+  ]);
+
+  return { fleetResponses, endpointResponses };
+};
+
+/**
+ * Fetch Response Action response documents from the Endpoint index
+ *
+ * Safe to fan out with no space filter: the read is bounded by action ids, and no result reaches the
+ * caller unless the matching action request passes its own space check. On the details path that
+ * check runs in parallel with this read rather than before it, so ids can reach the fanned-out index
+ * ahead of validation, but a failure there discards this result too. These documents carry no space
+ * field of their own anyway.
+ *
+ * @param esClient
+ * @param actionIds
+ * @param agentIds
+ */
+export const fetchEndpointActionResponses = async <
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TResponseMeta extends {} = {}
+>({
+  esClient,
+  endpointService,
+  scoped,
+  actionIds,
+  agentIds,
+}: FetchActionResponsesOptions): Promise<
+  Array<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>
+> => {
+  const ccsEnabled = await endpointService.isCcsEnabled();
+  const cpsRead = scoped?.isCpsRead() ?? false;
+  const readEsClient = cpsRead && scoped ? scoped.getEsClient() : esClient;
+  const searchResponse = await readEsClient
+    .search<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>(
+      {
+        // CCS is suppressed once this read fans out, for the reason given in the search strategy
+        index: prefixIndexPatternsWithCcs(
+          ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+          ccsEnabled && !cpsRead
+        ),
+        size: ACTIONS_SEARCH_PAGE_SIZE,
+        query: buildSearchQuery(actionIds, agentIds),
+      },
+      { ignore: [404] }
+    )
+    .catch(catchAndWrapError);
+
+  return (searchResponse?.hits?.hits ?? []).map((esHit) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return esHit._source!;
+  });
+};
+
+/**
+ * Fetch Response Action response documents from the Fleet index
+ *
+ * Stays on the internal client under CPS: `.fleet-*` is excluded from project routing, so third party
+ * agent responses, which land here rather than in the Endpoint index, cannot be read across projects.
+ *
+ * @param esClient
+ * @param actionIds
+ * @param agentIds
+ */
+export const fetchFleetActionResponses = async ({
+  esClient,
+  endpointService,
+  actionIds,
+  agentIds,
+}: FetchActionResponsesOptions): Promise<EndpointActionResponse[]> => {
+  const ccsEnabled = await endpointService.isCcsEnabled();
+  const searchResponse = await esClient
+    .search<EndpointActionResponse>(
+      {
+        index: prefixIndexPatternsWithCcs(AGENT_ACTIONS_RESULTS_INDEX, ccsEnabled),
+        size: ACTIONS_SEARCH_PAGE_SIZE,
+        query: buildSearchQuery(actionIds, agentIds),
+      },
+      { ignore: [404] }
+    )
+    .catch(catchAndWrapError);
+
+  return (searchResponse?.hits?.hits ?? []).map((esHit) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return esHit._source!;
+  });
+};

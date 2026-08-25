@@ -1,0 +1,12 @@
+summary: A new xMatters connector.
+value:
+  id: 4d2d8da0-4d1f-11ee-9367-577408be4681
+  name: my-xmatters-connector
+  config:
+    usesBasic: false
+    configUrl: null
+  connector_type_id: .xmatters
+  is_preconfigured: false
+  is_deprecated: false
+  is_missing_secrets: false
+  is_system_action: false

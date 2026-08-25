@@ -1,0 +1,13 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": ["src/**/*", "storybook/**/*", "index.*"],
+  "kbn_references": [
+    "@kbn/shared-ux-storybook-mock",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

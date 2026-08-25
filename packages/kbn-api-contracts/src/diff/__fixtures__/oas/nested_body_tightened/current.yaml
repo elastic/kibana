@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  title: nested_body_tightened
+  version: '1'
+paths:
+  /api/test:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nested:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    x:
+                      type: string
+      responses:
+        '200':
+          description: ok

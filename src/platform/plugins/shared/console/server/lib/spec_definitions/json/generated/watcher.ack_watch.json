@@ -1,0 +1,23 @@
+{
+  "watcher.ack_watch": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_watcher/watch/{watch_id}/_ack",
+      "_watcher/watch/{watch_id}/_ack/{action_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-watcher-ack-watch",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import dedent from 'dedent';
@@ -32,8 +33,13 @@ export function assertLicensesValid({
 }: Options) {
   const invalidMsgs = packages.reduce((acc, pkg) => {
     const isValidLicense = (license: string) => validLicenses.includes(license);
-    const isValidLicenseForPackage = (license: string) =>
-      (perPackageOverrides[`${pkg.name}@${pkg.version}`] || []).includes(license);
+    const isValidLicenseForPackage = (license: string) => {
+      const perPackageOverride =
+        perPackageOverrides[`${pkg.name}@${pkg.version}`] || // Pinned version
+        (pkg.name.startsWith('@elastic/') && perPackageOverrides[`${pkg.name}`]) || // Any version for @elastic scoped packages
+        [];
+      return perPackageOverride.includes(license);
+    };
 
     const invalidLicenses = pkg.licenses.filter(
       (license) => !isValidLicense(license) && !isValidLicenseForPackage(license)

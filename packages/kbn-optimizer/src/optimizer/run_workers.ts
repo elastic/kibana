@@ -1,19 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap, toArray } from 'rxjs/operators';
+import { mergeMap, toArray } from 'rxjs';
 
 import { maybeMap } from '../common';
 
-import { OptimizerConfig } from './optimizer_config';
-import { BundleCacheEvent } from './bundle_cache';
-import { ChangeEvent } from './watcher';
+import type { OptimizerConfig } from './optimizer_config';
+import type { BundleCacheEvent } from './bundle_cache';
+import type { ChangeEvent } from './watcher';
 import { assignBundlesToWorkers } from './assign_bundles_to_workers';
 import { observeWorker } from './observe_worker';
 

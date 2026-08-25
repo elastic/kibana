@@ -1,0 +1,7 @@
+in: query
+name: compatibilityMode
+schema:
+  type: boolean
+required: false
+description: |
+  Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with imported saved objects. NOTE: This option cannot be used with the `createNewCopies` option.

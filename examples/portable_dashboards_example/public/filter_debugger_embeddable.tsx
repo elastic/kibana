@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { css } from '@emotion/react';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { EuiCodeBlock, EuiPanel, EuiTitle } from '@elastic/eui';
+import { of } from 'rxjs';
+import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
+
+export type Api = DefaultEmbeddableApi<{}>;
+
+export const factory: EmbeddablePublicDefinition<{}, Api> = {
+  type: FILTER_DEBUGGER_EMBEDDABLE_ID,
+  getPlacementHints: () => {
+    return { width: 48, height: 12 };
+  },
+  buildEmbeddable: async ({ finalizeApi, parentApi }) => {
+    const api = finalizeApi({
+      anyStateChange$: of(),
+      serializeState: () => ({}),
+      applySerializedState: () => undefined,
+    });
+
+    return {
+      api,
+      Component: () => {
+        const filters = useStateFromPublishingSubject(
+          (parentApi as PublishesUnifiedSearch)?.filters$
+        );
+
+        return (
+          <EuiPanel
+            css={css`
+              width: 100% !important;
+              height: 100% !important;
+            `}
+            className="eui-yScrollWithShadows"
+            hasShadow={false}
+          >
+            <EuiTitle>
+              <h2>Filters</h2>
+            </EuiTitle>
+            <EuiCodeBlock language="JSON">{JSON.stringify(filters, undefined, 1)}</EuiCodeBlock>
+          </EuiPanel>
+        );
+      },
+    };
+  },
+};

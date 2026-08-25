@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
-import { CliArgs, Env, RawConfigAdapter } from '@kbn/config';
+import type { CliArgs, RawConfigAdapter } from '@kbn/config';
+import { Env } from '@kbn/config';
 import { CliDevMode } from './cli_dev_mode';
 import { CliLog } from './log';
 import { convertToLogger } from './log_adapter';
@@ -22,6 +24,15 @@ interface BootstrapArgs {
 
 export async function bootstrapDevMode({ configs, cliArgs, applyConfigOverrides }: BootstrapArgs) {
   const log = new CliLog(!!cliArgs.silent);
+
+  // When --eis is set, discover EIS inference endpoints from the running ES
+  // and pass them to the Kibana child process as preconfigured connectors via
+  // an environment variable (the child reads it in serve.js).
+  if (cliArgs.eis) {
+    const { discoverEisConnectors } = await import('./eis_dev_orchestrator');
+    const result = await discoverEisConnectors(log);
+    process.env.KBN_EIS_CONNECTORS = JSON.stringify(result.preconfiguredConnectors);
+  }
 
   const env = Env.createDefault(REPO_ROOT, {
     configs,

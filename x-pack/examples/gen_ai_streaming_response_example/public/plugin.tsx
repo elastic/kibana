@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppMountParameters, AppNavLinkStatus } from '@kbn/core/public';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import {
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
 export interface GenAiStreamingResponseExamplePublicSetupDeps {
   alerting: AlertingSetup;
@@ -37,8 +37,8 @@ export class GenAiStreamingResponseExamplePlugin
   ) {
     core.application.register({
       id: 'GenAiStreamingResponseExample',
-      title: 'Generative AI Streaming Response Example',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      title: 'OpenAI Streaming Response Example',
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
@@ -48,9 +48,8 @@ export class GenAiStreamingResponseExamplePlugin
 
     developerExamples.register({
       appId: 'GenAiStreamingResponseExample',
-      title: 'Generative AI Streaming Response Example',
-      description:
-        'This example demonstrates how to stream a response from a Generative AI connector',
+      title: 'OpenAI Streaming Response Example',
+      description: 'This example demonstrates how to stream a response from an OpenAI connector',
     });
   }
 

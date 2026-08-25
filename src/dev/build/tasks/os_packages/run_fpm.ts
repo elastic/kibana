@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve } from 'path';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { exec, Config, Build } from '../../lib';
+import type { Config, Build } from '../../lib';
+import { exec } from '../../lib';
 
 export async function runFpm(
   config: Config,
@@ -86,6 +88,8 @@ export async function runFpm(
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
     `/etc/kibana`,
+    '--config-files',
+    `/etc/${envFolder}/kibana`,
 
     // define template values that will be injected into the install/uninstall
     // scripts, also causes scripts to be processed with erb
@@ -147,5 +151,6 @@ export async function runFpm(
   await exec(log, 'fpm', args, {
     cwd: config.resolveFromRepo('.'),
     level: 'info',
+    build,
   });
 }

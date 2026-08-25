@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Agent } from './agent';
+import type { Agent } from './agent';
 
 export type JobState =
   | 'pending'
@@ -35,11 +36,21 @@ export interface Job {
   id: string;
   type: string;
   name: string;
-  step_key: string;
+  step_key: string | null;
+  /**
+   * A job is an execution of a step. When a step is run with `parallelism`,
+   * multiple jobs will share the same `step.id`.
+   *
+   * This is present in the Buildkite Builds API response for jobs.
+   */
+  step?: {
+    id: string;
+    signature?: string | null;
+  };
   state: JobState;
   logs_url: string;
   raw_log_url: string;
-  command: string;
+  command: string | null;
   exit_status: null | number;
   artifact_paths: string;
   artifacts_url: string;

@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplorerChartLabelBadge renders the chart label in one line 1`] = `
+<span>
+  <span>
+    high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
+     – 
+  </span>
+  <span>
+    <span
+      class="euiBadge emotion-euiBadge-hollow-resetFontWeightCss"
+      title="nginx.access.remote_ip 72.57.0.53"
+    >
+      <span
+        class="euiBadge__content emotion-euiBadge__content"
+      >
+        <span
+          class="euiBadge__text emotion-euiBadge__text"
+        >
+          nginx.access.remote_ip
+           
+          <strong>
+            72.57.0.53
+          </strong>
+        </span>
+      </span>
+    </span>
+  </span>
+   
+   
+  <span>
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id-wrapper"
+    >
+      <span
+        data-euiicon-type="question"
+        tabindex="0"
+      >
+        Info
+      </span>
+    </span>
+  </span>
+</span>
+`;
+
+exports[`ExplorerChartLabelBadge renders the chart label in two lines 1`] = `
+<span>
+  <span>
+    high_sum(nginx.access.body_sent.bytes) over nginx.access.remote_ip (population-03)
+     
+  </span>
+  <span>
+    <span
+      class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+      id="generated-id-wrapper"
+    >
+      <span
+        data-euiicon-type="question"
+        tabindex="0"
+      >
+        Info
+      </span>
+    </span>
+  </span>
+</span>
+`;

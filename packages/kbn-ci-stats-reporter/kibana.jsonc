@@ -1,6 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/ci-stats-reporter",
-  "devOnly": true,
-  "owner": "@elastic/kibana-operations"
-}

@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/custom-icons",
+  "owner": [
+    "@elastic/obs-signals-traces-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

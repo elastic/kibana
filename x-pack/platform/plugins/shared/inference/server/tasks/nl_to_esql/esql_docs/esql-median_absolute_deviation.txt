@@ -1,0 +1,34 @@
+# MEDIAN_ABSOLUTE_DEVIATION
+
+The MEDIAN_ABSOLUTE_DEVIATION function calculates the median absolute deviation, which is a robust measure of variability. It is particularly useful for describing data with outliers or data that is not normally distributed, and can be more informative than standard deviation in such cases. The value is computed as the median of the absolute differences between each data point and the median of the entire sample.
+
+## Syntax
+
+`MEDIAN_ABSOLUTE_DEVIATION(number)`
+
+### Parameters
+
+#### number
+
+The column or expression containing numeric values for which the median absolute deviation will be calculated.
+
+## Examples
+
+Calculate the median and median absolute deviation of employee salaries:
+
+```esql
+FROM employees
+| STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
+```
+
+Calculate the median absolute deviation of the maximum salary change per employee:
+
+```esql
+FROM employees
+| STATS m_a_d_max_salary_change = MEDIAN_ABSOLUTE_DEVIATION(MV_MAX(salary_change))
+```
+
+## Limitations
+
+- The result of MEDIAN_ABSOLUTE_DEVIATION is usually approximate.
+- The function is non-deterministic, so you may get slightly different results when running the same query on the same data.

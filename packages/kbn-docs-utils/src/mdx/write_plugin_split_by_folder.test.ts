@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Project } from 'ts-morph';
@@ -11,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { splitApisByFolder } from './write_plugin_split_by_folder';
 import { getPluginApi } from '../get_plugin_api';
 import { getKibanaPlatformPlugin } from '../integration_tests/kibana_platform_plugin_mock';
-import { PluginOrPackage } from '../types';
+import type { PluginOrPackage } from '../types';
 
 const log = new ToolingLog({
   level: 'debug',
@@ -55,7 +56,7 @@ export interface Zed = { zed: string }`
     },
   ];
 
-  const doc = getPluginApi(project, plugins[0], plugins, log, false);
+  const { pluginApi: doc } = getPluginApi(project, plugins[0], plugins, log, false);
   const docs = splitApisByFolder(doc);
 
   // The api at the main level, and one on a service level.

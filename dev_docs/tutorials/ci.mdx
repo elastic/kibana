@@ -3,54 +3,15 @@ id: kibDevTutorialCI
 slug: /kibana-dev-docs/tutorials/ci
 title: CI
 description: CI
-date: 2022-02-03
+date: 2023-11-08
 tags: ['kibana', 'onboarding', 'dev', 'ci']
+redirect_url: https://www.elastic.co/docs/extend/kibana/contributing/ci-and-build/ci
 ---
 
-## CI
+{/* REDIRECT_NOTICE_START */}
 
-Kibana uses BuildKite to run a series of checks against each pull requests and tracked branch.  Results are posted in pull requests as comments and from the BuildKite UI
+<DocCallOut color="danger">
+**!!! THIS PAGE HAS MOVED:** [https://www.elastic.co/docs/extend/kibana/contributing/ci-and-build/ci](https://www.elastic.co/docs/extend/kibana/contributing/ci-and-build/ci)
+</DocCallOut>
 
-### Comments
-
-Comments in pull requests can be used to trigger CI operations.
-
-#### `buildkite test this`
-
-Run test suites and checks.
-
-#### `@elasticmachine merge upstream`
-
-Merge in the most recent changes from upstream.
-
-#### `@elasticmachine run elasticsearch-ci/docs`
-
-Build documentation from the root `docs` folder.
-
-### Labels
-
-Labels can be added to a pull request to run conditional pipelines.
-
-#### `ci:cloud-deploy`
-
-Create or update a deployment on Elastic Cloud.
-
-#### `ci:cloud-redeploy`
-
-Create a new deployment on Elastic Cloud.  Previous deployments linked to a pull request will be shutdown and data will not be preserved.
-
-#### `ci:build-all-platforms`
-
-Build Windows, macOS, and Linux archives.  Artifacts will be available on the "Artifacts" tab of the "Build Kibana Distribution and Plugins" step.
-
-#### `ci:build-os-packages`
-
-Build Docker images, and Debian and RPM packages.  Artifacts will be available on the "Artifacts" tab of the "Build Kibana Distribution and Plugins" step.
-
-#### `ci:build-cloud-image`
-
-Build Docker images that can be used for testing deployments on Elastic Cloud in the CFT region (gcp-us-west2).  Artifacts will be available on the "Artifacts" tab of the "Build Kibana Distribution and Plugins" step.
-
-#### `ci:all-cypress-suites`
-
-By default, Cypress test suites are only run when code changes are made in certain files, typically files with overlapping test coverage.  Adding this label will cause all Cypress tests to run.
+{/* REDIRECT_NOTICE_END */}

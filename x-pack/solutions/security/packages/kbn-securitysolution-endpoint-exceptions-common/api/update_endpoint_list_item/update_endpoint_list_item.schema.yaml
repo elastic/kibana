@@ -1,0 +1,162 @@
+openapi: 3.0.0
+info:
+  title: Update endpoint list item API endpoint
+  version: '2023-10-31'
+paths:
+  /api/endpoint_list/items:
+    put:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: UpdateEndpointListItem
+      summary: Update an Elastic Endpoint rule exception list item
+      description: Update an Elastic Endpoint exception list item, specified by the `id` or `item_id` field.
+      requestBody:
+        description: Exception list item's properties
+        required: true
+        content:
+          application/json:
+            examples:
+              updateName:
+                summary: Update an endpoint exception list item
+                value:
+                  item_id: "block-malicious-file"
+                  type: "simple"
+                  name: "Block malicious file (updated)"
+                  description: "Updated description for the exception"
+                  entries:
+                    - type: "match"
+                      field: "file.hash.sha256"
+                      value: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                      operator: "included"
+                  os_types:
+                    - "windows"
+                    - "linux"
+            schema:
+              type: object
+              properties:
+                id:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemId'
+                  description: Either `id` or `item_id` must be specified
+                item_id:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemHumanId'
+                  description: Either `id` or `item_id` must be specified
+                type:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemType'
+                name:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemName'
+                description:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemDescription'
+                entries:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+                os_types:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemOsTypeArray'
+                  default: []
+                tags:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
+                meta:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
+                comments:
+                  $ref: '../../../kbn-securitysolution-exceptions-common/api/model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemCommentArray'
+                  default: []
+                _version:
+                  type: string
+                  description: The version id, normally returned by the API when the item is retrieved. Use it ensure updates are made against the latest version.
+              required:
+                - type
+                - name
+                - description
+                - entries
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../model/endpoint_list_common.schema.yaml#/components/schemas/EndpointListItem'
+              examples:
+                updated:
+                  summary: Endpoint exception list item updated
+                  value:
+                    id: "d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e"
+                    item_id: "block-malicious-file"
+                    list_id: "endpoint_list"
+                    type: "simple"
+                    name: "Block malicious file (updated)"
+                    description: "Updated description for the exception"
+                    entries:
+                      - type: "match"
+                        field: "file.hash.sha256"
+                        value: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                        operator: "included"
+                    namespace_type: "agnostic"
+                    os_types:
+                      - "windows"
+                      - "linux"
+                    tags:
+                      - "policy:all"
+                    comments: []
+                    tie_breaker_id: "f1e2d3c4-b5a6-7890-abcd-ef1234567890"
+                    created_at: "2025-01-01T12:00:00.000Z"
+                    created_by: "elastic"
+                    updated_at: "2025-01-15T09:30:00.000Z"
+                    updated_by: "elastic"
+        400:
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request body]: name: Required'
+        401:
+          description: Unsuccessful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+        403:
+          description: Insufficient privileges
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [PUT /api/endpoint_list/items] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
+        404:
+          description: Endpoint list item not found
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    status_code: 404
+                    message: 'list item item_id: "block-malicious-file" not found'
+        500:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    status_code: 500
+                    message: Internal Server Error

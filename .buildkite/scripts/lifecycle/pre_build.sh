@@ -4,12 +4,10 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-if [[ "${GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
+if [[ "${KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]] && [[ "${ELASTIC_GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
   "$(dirname "${0}")/commit_status_start.sh"
 fi
 
-export CI_STATS_TOKEN="$(retry 5 5 vault read -field=api_token secret/kibana-issues/dev/kibana_ci_stats)"
-export CI_STATS_HOST="$(retry 5 5 vault read -field=api_host secret/kibana-issues/dev/kibana_ci_stats)"
 
 ts-node "$(dirname "${0}")/ci_stats_start.ts"
 
@@ -27,4 +25,14 @@ if [[ "${KIBANA_BUILD_ID:-}" && "${KIBANA_REUSABLE_BUILD_JOB_URL:-}" ]]; then
 
   See job here: $KIBANA_REUSABLE_BUILD_JOB_URL
 EOF
+fi
+
+# Annotate ingestable meta-data (prefixed with 'ingest:')
+if [[ "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" != "" ]]; then # if we're in a PR build
+  # GITHUB_PR_DRAFT is set by our pr build trigger bot
+  buildkite-agent meta-data set "ingest:is_draft_pr" "${GITHUB_PR_DRAFT:-false}"
+  # GITHUB_PR_LABELS is set by our pr build trigger bot, and is a comma-separated list of labels on the PR
+  if [[ "${GITHUB_PR_LABELS:-}" =~ [^[:space:]] ]]; then
+    buildkite-agent meta-data set "ingest:pr_labels" "$GITHUB_PR_LABELS"
+  fi
 fi

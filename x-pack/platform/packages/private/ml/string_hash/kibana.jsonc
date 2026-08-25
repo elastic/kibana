@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-string-hash",
+  "owner": [
+    "@elastic/search-ml-ux"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

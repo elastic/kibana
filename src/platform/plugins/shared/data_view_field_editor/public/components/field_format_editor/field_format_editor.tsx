@@ -1,0 +1,165 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
+import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type {
+  FieldFormatInstanceType,
+  FieldFormatParams,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { PureComponent } from 'react';
+import type { FormatEditorServiceStart } from '../../service';
+import { FormatEditor } from './format_editor';
+
+export interface FormatSelectEditorProps {
+  esTypes: ES_FIELD_TYPES[];
+  fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
+  fieldFormats: FieldFormatsStart;
+  uiSettings: CoreStart['uiSettings'];
+  onChange: (change?: SerializedFieldFormat) => void;
+  onError: (error?: string) => void;
+  value?: SerializedFieldFormat;
+  disabled?: boolean;
+}
+
+interface FieldTypeFormat {
+  id: string;
+  title: string;
+}
+
+export interface FormatSelectEditorState {
+  fieldTypeFormats: FieldTypeFormat[];
+  fieldFormatId?: string;
+  kbnType: KBN_FIELD_TYPES;
+}
+
+interface InitialFieldTypeFormat extends FieldTypeFormat {
+  defaultFieldFormat: FieldFormatInstanceType;
+}
+
+const getFieldTypeFormatsList = (
+  fieldType: KBN_FIELD_TYPES,
+  defaultFieldFormat: FieldFormatInstanceType,
+  fieldFormats: FieldFormatsStart
+) => {
+  const formatsByType = fieldFormats.getByFieldType(fieldType).map(({ id, title }) => ({
+    id,
+    title,
+  }));
+
+  return [
+    {
+      id: '',
+      defaultFieldFormat,
+      title: i18n.translate('indexPatternFieldEditor.defaultFormatDropDown', {
+        defaultMessage: '- Default -',
+      }),
+    },
+    ...formatsByType,
+  ];
+};
+
+export class FormatSelectEditor extends PureComponent<
+  FormatSelectEditorProps,
+  FormatSelectEditorState
+> {
+  constructor(props: FormatSelectEditorProps) {
+    super(props);
+    const { fieldFormats, esTypes } = props;
+    const kbnType = castEsToKbnFieldTypeName(esTypes[0] || 'keyword');
+
+    this.state = {
+      fieldTypeFormats: getFieldTypeFormatsList(
+        kbnType,
+        fieldFormats.getDefaultType(kbnType, esTypes) as FieldFormatInstanceType,
+        fieldFormats
+      ),
+      kbnType,
+    };
+  }
+  onFormatChange = (formatId: string, params?: FieldFormatParams) =>
+    this.props.onChange(
+      formatId
+        ? {
+            id: formatId,
+            params: params || {},
+          }
+        : undefined
+    );
+
+  onFormatParamsChange = (newParams: FieldFormatParams) => {
+    const { fieldFormatId } = this.state;
+    this.onFormatChange(fieldFormatId as string, newParams);
+  };
+
+  render() {
+    const { fieldFormatEditors, onError, value, fieldFormats, esTypes, disabled } = this.props;
+    const fieldFormatId = value?.id;
+    const { kbnType } = this.state;
+
+    const { fieldTypeFormats } = this.state;
+
+    const defaultFormat = (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.title;
+
+    // get current formatter for field, provides default if none exists
+    const format = value?.id
+      ? fieldFormats.getInstance(value?.id, value?.params)
+      : fieldFormats.getDefaultInstance(kbnType, esTypes);
+
+    const fieldFormatParams = format.params();
+
+    const label = defaultFormat ? (
+      <FormattedMessage
+        id="indexPatternFieldEditor.defaultFormatHeader"
+        defaultMessage="Format (Default: {defaultFormat})"
+        values={{
+          defaultFormat: <EuiCode>{defaultFormat}</EuiCode>,
+        }}
+      />
+    ) : (
+      <FormattedMessage id="indexPatternFieldEditor.formatHeader" defaultMessage="Format" />
+    );
+    return (
+      <>
+        <EuiFormRow label={label}>
+          <EuiSelect
+            value={fieldFormatId || ''}
+            options={fieldTypeFormats.map((fmt) => {
+              return { value: fmt.id || '', text: fmt.title };
+            })}
+            data-test-subj="editorSelectedFormatId"
+            onChange={(e) => {
+              this.onFormatChange(e.target.value);
+            }}
+            disabled={disabled}
+          />
+        </EuiFormRow>
+        {fieldFormatId ? (
+          <FormatEditor
+            fieldType={kbnType}
+            fieldFormat={format}
+            fieldFormatId={fieldFormatId}
+            fieldFormatParams={fieldFormatParams}
+            fieldFormatEditors={fieldFormatEditors}
+            onChange={(params) => {
+              this.onFormatChange(fieldFormatId, params);
+            }}
+            onError={onError}
+          />
+        ) : null}
+      </>
+    );
+  }
+}

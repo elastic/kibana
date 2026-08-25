@@ -1,0 +1,284 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "action:uuid-actionId",
+    "source": {
+      "type": "action",
+      "action": {
+        "actionTypeId": "test.not-enabled",
+        "name": "an action created before test.not-enabled was disabled",
+        "config": {}
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:791a2ab1-784a-46ea-aa68-04c837e5da2d",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "action": {
+        "actionTypeId": ".jira",
+        "config": {
+          "apiUrl": "http://elastic:changeme@localhost:5620/api/_actions-FTS-external-service-simulators/jira",
+          "casesConfiguration": {
+            "mapping": [
+              {
+                "actionType": "overwrite",
+                "source": "title",
+                "target": "summary"
+              },
+              {
+                "actionType": "overwrite",
+                "source": "description",
+                "target": "description"
+              },
+              {
+                "actionType": "append",
+                "source": "comments",
+                "target": "comments"
+              }
+            ]
+          },
+          "projectKey": "CK"
+        },
+        "name": "A jira action",
+        "secrets": "gUYVHxyvkY6I6rZrST16PzSBjwuPLzWYIm9Ow6qjJXiCimA1wHGgH1BR5nO/xZJjv9QqIGO3eKDSYsn7K9m39UJv83+oi5P4ZgtFktsFq0Jv6XEFQPFkuVY5sWno7w89CxgxlsTQFpYAJb0Hl0qf/6p6bKKaje48YRqNS5roebNAAribh9AWu80uxIJFWNo="
+      },
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2020-09-24T08:08:23.715Z"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:949f909b-20a0-46e3-aadb-6a4d117bb592",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "action": {
+        "actionTypeId": ".webhook",
+        "config": {
+          "headers": null,
+          "method": "post",
+          "url": "http://localhost"
+        },
+        "name": "A webhook with auth",
+        "secrets": "LUqlrITACjqPmcWGlbl+H4RsGGOlw8LM0Urq8r7y6jNT7Igv3J7FjKJ2NXfNTaghVBO7e9x3wZOtiycwyoAdviTyYm1pspni24vH+OT70xaSuXcDoxfGwiLEcaG04INDnUJX4dtmRerxqR9ChktC70LNtOU3sqjYI2tWt2vOqGeq"
+      },
+      "references": [
+      ],
+      "typeMigrationVersion": "7.10.0",
+      "type": "action",
+      "updated_at": "2020-10-26T21:29:47.380Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:7434121e-045a-47d6-a0a6-0b6da752397a",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "action": {
+        "actionTypeId": ".webhook",
+        "config": {
+          "headers": null,
+          "method": "post",
+          "url": "http://localhost"
+        },
+        "name": "A webhook with no auth",
+        "secrets": "tOwFq20hbUrcp3FX7stKB5aJaQQdLNQwomSNym8BgnFaBBafPOASv5T0tGdGsTr/CA7VK+N/wYBHQPzt0apF8Z/UYl63ZXqck5tSoFDnQW77zv1VVQ5wEwN1qkAQQcfrXTXU2wYVAYZNSuHkbeRjcasfG0ty1K+J7A=="
+      },
+      "references": [
+      ],
+      "typeMigrationVersion": "7.10.0",
+      "type": "action",
+      "updated_at": "2020-10-26T21:30:35.146Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7c",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "action": {
+        "actionTypeId" : ".email",
+        "name" : "test email connector with auth",
+        "isMissingSecrets" : false,
+        "config" : {
+          "hasAuth" : true,
+          "from" : "me@me.com",
+          "host" : "smtp.myhost.com",
+          "port" : 25,
+          "service" : "someservice",
+          "secure" : null
+        },
+        "secrets" : "V2EJEtTv3yTFi1kdglhNahnKYWCS+J7aWCJQU+eEqGPZEz6n7G1NsBWoh7IY0FteLTilTteQXyY/Eg3k/7bb0G8Mz+WBZ1mRvUggGTFqgoOptyUsvHoBhv0R/1bCTCabN3Pe88AfnC+VDXqwuMifpmgKEEsKF3H8VONv7TYO02FW"
+      },
+      "typeMigrationVersion": "7.14.0",
+      "coreMigrationVersion" : "7.15.0",
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2021-08-31T12:43:37.117Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:1e0824a0-0a59-11ec-9a7c-fd0c2b83ff7c",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "action": {
+        "actionTypeId" : ".email",
+        "name" : "test email connector no auth",
+        "isMissingSecrets" : false,
+        "config" : {
+          "hasAuth" : false,
+          "from" : "you@you.com",
+          "host" : "smtp.you.com",
+          "port" : 485,
+          "secure" : true,
+          "service" : null
+        },
+        "secrets" : "iw/bRTXZQXOV0ODocb6FQnHR6AyeVyD91We03llNStyTNFwuHVWdFl6ZdiEEeDOadBMeJomvp/dAfQevGpbwWdclcu9F87x3CfeGqV9DtBy0dXRbx9PzKBwgJdK3ucHQDFAs8ZXQbefvCOFjCHGAsJDPhTKj5rTUyg=="
+      },
+      "typeMigrationVersion": "7.14.0",
+      "coreMigrationVersion" : "7.15.0",
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2021-08-31T12:44:01.396Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7d",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "action": {
+        "actionTypeId" : ".email",
+        "name" : "test email connector cant decrypt",
+        "isMissingSecrets" : false,
+        "config" : {
+          "hasAuth" : true,
+          "from" : "me@test.com",
+          "host" : "some.non.existent.com",
+          "port" : 465,
+          "service" : "other",
+          "secure" : true
+        },
+        "secrets" : "V2EJEtTv3yTFi1kdglhNahasdfnKYWCS+J7aWCJQU+eEqGPZEz6n7G1NsBWoh7IY0FteLTilTteQXyY/Eg3k/7bb0G8Mz+WBZ1mRvUggGTFqgoOptyUsvHoBhv0R/1bCTCabN3Pe88AfnC+VDXqwuMifpmgKEEsKF3H8VONv7TYO02FW"
+      },
+      "typeMigrationVersion": "7.14.0",
+      "coreMigrationVersion" : "7.15.0",
+      "references": [
+      ],
+      "type": "action",
+      "updated_at": "2021-08-31T12:43:37.117Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:7d04bc30-c4c0-11ec-ae29-917aa31a5b75",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "action": {
+        "actionTypeId" : ".servicenow-sir",
+        "name" : "test servicenow SecOps",
+        "isMissingSecrets" : false,
+        "config" : {
+          "apiUrl": "https://devtestsecops.service-now.com",
+          "usesTableApi": false
+        },
+        "secrets" : "kPp4tl4ueQ2ZNWSfATR3dFrbxd+NNBo4MY8izS6GJf358Lmeg/YaYjb2rIymrbPktR6HnPBRaVyXWlRTvBGstRicJc0LJHZbx3wNJlTRIj4UFlVqZLGQWQ/GcSqFLSZ1JQbKwgAvyfLtF6BhjAhGYEovK3/OLUNzGc3gvUOOHBiPWjiAY8A="
+      },
+      "typeMigrationVersion": "8.0.0",
+      "coreMigrationVersion" : "8.2.0",
+      "references": [
+      ],
+      "namespaces": [
+        "default"
+      ],
+      "type": "action",
+      "updated_at": "2022-04-25T17:52:35.201Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:8a9331b0-c4c0-11ec-ae29-917aa31a5b75",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "action": {
+        "actionTypeId" : ".servicenow-itom",
+        "name" : "test servicenow ITOM",
+        "isMissingSecrets" : false,
+        "config" : {
+          "apiUrl": "https://devtestsecops.service-now.com"
+        },
+        "secrets" : "yYThM4vbrSTIg5IjKWE+eMDrxzL7UO0JQIyh6FvEMgqoNREUxRrIavSo25v+DXQIX1DyfsvjjKg97pNPlZhvS3siCwDZZafSFrwkCKDl+S4KHORgIMX+slilcQeuEnzwit7bFxcY7Y/AcNF8Ks6jO0Gs1UR58ibSPUALXoK2VOlJnHSgtvE="
+      },
+      "typeMigrationVersion": "8.0.0",
+      "coreMigrationVersion" : "8.2.0",
+      "references": [
+      ],
+      "namespaces": [
+        "default"
+      ],
+      "type": "action",
+      "updated_at": "2022-04-25T17:52:35.201Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "action:6d3a1250-c4c0-11ec-ae29-917aa31a5b75",
+    "index": ".kibana_alerting_cases",
+    "source": {
+      "action": {
+        "actionTypeId" : ".servicenow",
+        "name" : "test servicenow ITSM",
+        "isMissingSecrets" : false,
+        "config" : {
+          "usesTableApi": false,
+          "apiUrl": "https://devtestsecops.service-now.com"
+        },
+        "secrets" : "zfXUDtG0CyJkJUKnQ8rSqo75hb6ZhbRUWkV1NiFEjApM87b72Rcqz3Fv+sbm8eBDOO1Fdd9CVyK+Bfly4ZwVCgL2lR0qIbPzz34q36r267dnGVsaERyJIVv2WPy+EGdiRZKgfpy4XFbMNT1R3gyIsUkd4TT+McqGfVTont2XTFIpMW2A9y8="
+      },
+      "typeMigrationVersion": "8.0.0",
+      "coreMigrationVersion" : "8.2.0",
+      "references": [
+      ],
+      "namespaces": [
+        "default"
+      ],
+      "type": "action",
+      "updated_at": "2022-04-25T17:52:35.201Z"
+    }
+  }
+}

@@ -1,44 +1,39 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useEffect, useState } from 'react';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
-import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
-import { FILTER_DEBUGGER_EMBEDDABLE } from '@kbn/embeddable-examples-plugin/public';
-import {
-  AwaitingDashboardAPI,
-  DashboardRenderer,
-  DashboardCreationOptions,
-} from '@kbn/dashboard-plugin/public';
+import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
+import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
-  const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
+  const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
 
   // add a filter debugger panel as soon as the dashboard becomes available
   useEffect(() => {
     if (!dashboard) return;
-    (async () => {
-      const embeddable = await dashboard.addNewEmbeddable(FILTER_DEBUGGER_EMBEDDABLE, {});
-      const prevPanelState = dashboard.getExplicitInput().panels[embeddable.id];
-      // resize the new panel so that it fills up the entire width of the dashboard
-      dashboard.updateInput({
-        panels: {
-          [embeddable.id]: {
-            ...prevPanelState,
-            gridData: { i: embeddable.id, x: 0, y: 0, w: 48, h: 12 },
-          },
+    dashboard
+      .addNewPanel(
+        {
+          panelType: FILTER_DEBUGGER_EMBEDDABLE_ID,
         },
+        {
+          displaySuccessMessage: true,
+        }
+      )
+      .catch(() => {
+        // ignore error - its an example
       });
-    })();
   }, [dashboard]);
 
   return (
@@ -53,33 +48,42 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
       <EuiPanel hasBorder={true}>
         <DashboardRenderer
           getCreationOptions={async (): Promise<DashboardCreationOptions> => {
-            const builder = controlGroupInputBuilder;
-            const controlGroupInput = getDefaultControlGroupInput();
-            await builder.addDataControlFromField(controlGroupInput, {
-              dataViewId: dataView.id ?? '',
-              title: 'Destintion country',
-              fieldName: 'geo.dest',
-              width: 'medium',
-              grow: false,
-            });
-            await builder.addDataControlFromField(controlGroupInput, {
-              dataViewId: dataView.id ?? '',
-              fieldName: 'bytes',
-              width: 'medium',
-              grow: true,
-              title: 'Bytes',
-            });
+            const dataViewId = dataView.id ?? '';
+            // Construct pinned panels in dashboard as-code shape (avoids control-group builder typing).
+            const pinnedPanels = [
+              {
+                id: 'destination-country',
+                type: 'options_list_control',
+                width: 'medium' as const,
+                grow: false,
+                config: {
+                  data_view_id: dataViewId,
+                  field_name: 'geo.dest',
+                  title: 'Destination country',
+                },
+              },
+              {
+                id: 'bytes',
+                type: 'range_slider_control',
+                width: 'medium' as const,
+                grow: true,
+                config: {
+                  data_view_id: dataViewId,
+                  field_name: 'bytes',
+                  title: 'Bytes',
+                },
+              },
+            ] as DashboardState['pinned_panels'];
 
             return {
-              useControlGroupIntegration: true,
               getInitialInput: () => ({
-                timeRange: { from: 'now-30d', to: 'now' },
-                viewMode: ViewMode.VIEW,
-                controlGroupInput,
+                time_range: { from: 'now-30d', to: 'now' },
+                viewMode: 'view',
+                pinned_panels: pinnedPanels,
               }),
             };
           }}
-          ref={setDashboard}
+          onApiAvailable={setDashboard}
         />
       </EuiPanel>
     </>

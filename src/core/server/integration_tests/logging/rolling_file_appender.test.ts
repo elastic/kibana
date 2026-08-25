@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { setTimeout as timer } from 'timers/promises';
 import { join } from 'path';
 import { rm, mkdtemp, readFile, readdir } from 'fs/promises';
 import moment from 'moment-timezone';
 import { getNextRollingTime } from '@kbn/core-logging-server-internal';
 import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
 
-const flushDelay = 250;
-const delay = (waitInMs: number) => new Promise((resolve) => setTimeout(resolve, waitInMs));
-const flush = async () => delay(flushDelay);
+const flushDelay = 2000;
+const flush = async () => timer(flushDelay);
 
 function createRoot(appenderConfig: any) {
   return createkbnTestServerRoot({
@@ -30,6 +31,7 @@ function createRoot(appenderConfig: any) {
         },
       ],
     },
+    server: { restrictInternalApis: false },
   });
 }
 
@@ -60,7 +62,7 @@ describe('RollingFileAppender', () => {
   const expectedFileContent = (indices: number[]) => indices.map(message).join('\n') + '\n';
 
   describe('`size-limit` policy with `numeric` strategy', () => {
-    it('rolls the log file in the correct order', async () => {
+    it('supports the deprecated `strategy.max` field', async () => {
       root = createRoot({
         type: 'rolling-file',
         fileName: logFile,
@@ -106,7 +108,7 @@ describe('RollingFileAppender', () => {
       expect(await getFileContent('kibana.2.log')).toEqual(expectedFileContent([1, 2, 3]));
     });
 
-    it('only keep the correct number of files', async () => {
+    it('maxFile retention: only keep the correct number of files', async () => {
       root = createRoot({
         type: 'rolling-file',
         fileName: logFile,
@@ -120,8 +122,10 @@ describe('RollingFileAppender', () => {
         },
         strategy: {
           type: 'numeric',
-          max: 2,
           pattern: '-%i',
+        },
+        retention: {
+          maxFiles: 2,
         },
       });
       await root.preboot();
@@ -153,6 +157,107 @@ describe('RollingFileAppender', () => {
       expect(await getFileContent('kibana-1.log')).toEqual(expectedFileContent([5, 6]));
       expect(await getFileContent('kibana-2.log')).toEqual(expectedFileContent([3, 4]));
     });
+
+    it('maxAccumulatedFileSize retention: only keep the correct number of files', async () => {
+      root = createRoot({
+        type: 'rolling-file',
+        fileName: logFile,
+        layout: {
+          type: 'pattern',
+          pattern: '%message',
+        },
+        policy: {
+          type: 'size-limit',
+          size: '60b',
+        },
+        strategy: {
+          type: 'numeric',
+          pattern: '-%i',
+        },
+        retention: {
+          maxAccumulatedFileSize: '100b',
+        },
+      });
+      await root.preboot();
+      await root.setup();
+
+      const logger = root.logger.get('test.rolling.file');
+
+      // size = 60b, message.length ~= 40b, should roll every 2 message
+
+      // last file - 'kibana-3.log' (which will be removed during rolling)
+      logger.info(message(1));
+      logger.info(message(2));
+      // roll - 'kibana-2.log' (which will be removed during rolling)
+      logger.info(message(3));
+      logger.info(message(4));
+      // roll - 'kibana-1.log'
+      logger.info(message(5));
+      logger.info(message(6));
+      // roll - 'kibana.log'
+      logger.info(message(7));
+      logger.info(message(8));
+
+      await flush();
+
+      const files = await readdir(testDir);
+
+      expect(files.sort()).toEqual(['kibana-1.log', 'kibana.log']);
+      expect(await getFileContent('kibana.log')).toEqual(expectedFileContent([7, 8]));
+      expect(await getFileContent('kibana-1.log')).toEqual(expectedFileContent([5, 6]));
+    });
+
+    it('removeOlderThan retention: only keep the correct files', async () => {
+      root = createRoot({
+        type: 'rolling-file',
+        fileName: logFile,
+        layout: {
+          type: 'pattern',
+          pattern: '%message',
+        },
+        policy: {
+          type: 'size-limit',
+          size: '60b',
+        },
+        strategy: {
+          type: 'numeric',
+          pattern: '-%i',
+        },
+        retention: {
+          removeOlderThan: '2s',
+        },
+      });
+      await root.preboot();
+      await root.setup();
+
+      const logger = root.logger.get('test.rolling.file');
+
+      // size = 60b, message.length ~= 40b, should roll every 2 message
+
+      // last file - 'kibana-3.log' (which will be removed during rolling)
+      logger.info(message(1));
+      logger.info(message(2));
+      // roll - 'kibana-2.log' (which will be removed during rolling)
+      logger.info(message(3));
+      logger.info(message(4));
+
+      await timer(2500);
+
+      // roll - 'kibana-1.log'
+      logger.info(message(5));
+      logger.info(message(6));
+      // roll - 'kibana.log'
+      logger.info(message(7));
+      logger.info(message(8));
+
+      await flush();
+
+      const files = await readdir(testDir);
+
+      expect(files.sort()).toEqual(['kibana-1.log', 'kibana.log']);
+      expect(await getFileContent('kibana.log')).toEqual(expectedFileContent([7, 8]));
+      expect(await getFileContent('kibana-1.log')).toEqual(expectedFileContent([5, 6]));
+    });
   });
 
   describe('`time-interval` policy with `numeric` strategy', () => {
@@ -183,7 +288,7 @@ describe('RollingFileAppender', () => {
       const waitForNextRollingTime = () => {
         const now = Date.now();
         const nextRolling = getNextRollingTime(now, moment.duration(1, 'second'), true);
-        return delay(nextRolling - now + 1);
+        return timer(nextRolling - now + 1);
       };
 
       // wait for a rolling time boundary to minimize the risk to have logs emitted in different intervals
@@ -198,13 +303,34 @@ describe('RollingFileAppender', () => {
       logger.info(message(3));
       logger.info(message(4));
 
+      await waitForNextRollingTime();
+
+      logger.info(message(5));
+      logger.info(message(6));
+
+      await waitForNextRollingTime();
+
       await flush();
 
       const files = await readdir(testDir);
 
-      expect(files.sort()).toEqual(['kibana-1.log', 'kibana.log']);
-      expect(await getFileContent('kibana.log')).toEqual(expectedFileContent([3, 4]));
-      expect(await getFileContent('kibana-1.log')).toEqual(expectedFileContent([1, 2]));
+      // ['kibana.log', ['kibana-3.log', 'kibana-2.log',] 'kibana-1.log']
+      const sortedLogFiles = files.sort().reverse();
+      expect(sortedLogFiles).toContain('kibana.log');
+      // there could be a kibana-2.log and kibana-3.log already, but we cannot guarantee it
+      expect(sortedLogFiles).toContain('kibana-1.log');
+
+      // kibana.log contains the newest entries, so it must go in the end
+      const kibanaLog = sortedLogFiles.shift()!;
+      sortedLogFiles.push(kibanaLog);
+
+      // the "rolling time sync" mechanism above is not perfect, so the test is going to guarantee:
+      // A) that no log entries have been lost
+      const allEntries = await Promise.all(sortedLogFiles.map(getFileContent));
+      expect(allEntries.join('')).toEqual(expectedFileContent([1, 2, 3, 4, 5, 6]));
+
+      // B) that something has been rolled over
+      expect(allEntries.slice(-2).join('').length).toBeGreaterThan(40);
     });
   });
 });

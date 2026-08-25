@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexItem, EuiFormRow, EuiLink, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LoadConnectorResult } from '../gen_ai_streaming_response_example';
+import type { LoadConnectorResult } from '../gen_ai_streaming_response_example';
 
 export interface ListConnectorsProps {
   connectors: LoadConnectorResult[];
@@ -52,7 +52,7 @@ export const ListConnectors = ({
           label={i18n.translate(
             'genAiStreamingResponseExample.app.component.selectConnectorLabel',
             {
-              defaultMessage: 'Select a Generative AI Connector',
+              defaultMessage: 'Select an OpenAI Connector',
             }
           )}
           labelAppend={

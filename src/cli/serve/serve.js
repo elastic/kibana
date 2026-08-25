@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
@@ -12,12 +13,16 @@ import { resolve } from 'path';
 import url from 'url';
 
 import { isKibanaDistributable } from '@kbn/repo-info';
-import { readKeystore } from '../keystore/read_keystore';
+import { readKeystore } from '../keystore/lib/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
+const DEV_UTILS_PATH = '@kbn/dev-utils';
+const DEV_UTILS_SUPPORTED = canRequire(DEV_UTILS_PATH);
+const MOCK_IDP_PLUGIN_PATH = '@kbn/mock-idp-plugin/common';
+const MOCK_IDP_PLUGIN_SUPPORTED = canRequire(MOCK_IDP_PLUGIN_PATH);
 
 function canRequire(path) {
   try {
@@ -44,6 +49,45 @@ const getBootstrapScript = (isDev) => {
   }
 };
 
+const setServerlessKibanaDevServiceAccountIfPossible = (get, set, opts) => {
+  const esHosts = [].concat(
+    get('elasticsearch.hosts', []),
+    opts.elasticsearch ? opts.elasticsearch.split(',') : []
+  );
+
+  /*
+   * We only handle the service token if serverless ES is running locally.
+   * Example would be if the user is running SES in the cloud and KBN serverless
+   * locally, they would be expected to handle auth on their own and this token
+   * is likely invalid anyways.
+   */
+  const isESlocalhost = esHosts.length
+    ? esHosts.some((hostUrl) => {
+        const parsedUrl = url.parse(hostUrl);
+        return (
+          parsedUrl.hostname === 'localhost' ||
+          parsedUrl.hostname === '127.0.0.1' ||
+          parsedUrl.hostname === 'host.docker.internal'
+        );
+      })
+    : true; // default is localhost:9200
+
+  if (!opts.dev || !opts.serverless || !isESlocalhost) {
+    return;
+  }
+
+  const DEV_UTILS_PATH = '@kbn/dev-utils';
+
+  if (!canRequire(DEV_UTILS_PATH)) {
+    return;
+  }
+
+  // need dynamic require to exclude it from production build
+  // eslint-disable-next-line import/no-dynamic-require
+  const { kibanaDevServiceAccount } = require(DEV_UTILS_PATH);
+  set('elasticsearch.serviceAccountToken', kibanaDevServiceAccount.token);
+};
+
 function pathCollector() {
   const paths = [];
   return function (path) {
@@ -55,11 +99,17 @@ function pathCollector() {
 const configPathCollector = pathCollector();
 const pluginPathCollector = pathCollector();
 
-function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
+export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreConfig) {
   const set = _.partial(lodashSet, rawConfig);
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
-  const merge = _.partial(_.merge, rawConfig);
+
+  function ensureNotDefined(path, command = '--ssl') {
+    if (has(path)) {
+      throw new Error(`Can't use ${command} when "${path}" configuration is already defined.`);
+    }
+  }
+
   if (opts.oss) {
     delete rawConfig.xpack;
   }
@@ -67,7 +117,19 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   // only used to set cliArgs.envName, we don't want to inject that into the config
   delete extraCliOptions.env;
 
+  let isServerlessSamlSupported = false;
   if (opts.dev) {
+    if (opts.serverless) {
+      setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
+      isServerlessSamlSupported = tryConfigureServerlessSamlProvider(
+        rawConfig,
+        opts,
+        extraCliOptions
+      );
+    } else {
+      tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions);
+    }
+
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
       if (!has('elasticsearch.username')) {
         set('elasticsearch.username', 'kibana_system');
@@ -78,48 +140,57 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       }
     }
 
-    if (opts.ssl) {
+    if (opts.http2) {
+      set('server.protocol', 'http2');
+    }
+
+    // HTTP TLS configuration
+    if (opts.ssl || opts.http2) {
       // @kbn/dev-utils is part of devDependencies
       // eslint-disable-next-line import/no-extraneous-dependencies
       const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
-      const customElasticsearchHosts = opts.elasticsearch
-        ? opts.elasticsearch.split(',')
-        : [].concat(get('elasticsearch.hosts') || []);
-
-      function ensureNotDefined(path) {
-        if (has(path)) {
-          throw new Error(`Can't use --ssl when "${path}" configuration is already defined.`);
-        }
-      }
 
       ensureNotDefined('server.ssl.certificate');
       ensureNotDefined('server.ssl.key');
       ensureNotDefined('server.ssl.keystore.path');
       ensureNotDefined('server.ssl.truststore.path');
       ensureNotDefined('server.ssl.certificateAuthorities');
-      ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
-
-      const elasticsearchHosts = (
-        (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
-          'https://localhost:9200',
-        ]
-      ).map((hostUrl) => {
-        const parsedUrl = url.parse(hostUrl);
-        if (parsedUrl.hostname !== 'localhost') {
-          throw new Error(
-            `Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`
-          );
-        }
-        return `https://localhost:${parsedUrl.port}`;
-      });
 
       set('server.ssl.enabled', true);
       set('server.ssl.certificate', KBN_CERT_PATH);
       set('server.ssl.key', KBN_KEY_PATH);
       set('server.ssl.certificateAuthorities', CA_CERT_PATH);
-      set('elasticsearch.hosts', elasticsearchHosts);
-      set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }
+  }
+
+  // Kib/ES encryption
+  if (opts.ssl || isServerlessSamlSupported) {
+    // @kbn/dev-utils is part of devDependencies
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { CA_CERT_PATH } = require('@kbn/dev-utils');
+
+    const customElasticsearchHosts = opts.elasticsearch
+      ? opts.elasticsearch.split(',')
+      : [].concat(get('elasticsearch.hosts') || []);
+
+    ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
+
+    const elasticsearchHosts = (
+      (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
+        'https://localhost:9200',
+      ]
+    ).map((hostUrl) => {
+      const parsedUrl = url.parse(hostUrl);
+      if (parsedUrl.hostname !== 'localhost') {
+        throw new Error(
+          `Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`
+        );
+      }
+      return `https://localhost:${parsedUrl.port}`;
+    });
+
+    set('elasticsearch.hosts', elasticsearchHosts);
+    set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
   }
 
   if (opts.elasticsearch) set('elasticsearch.hosts', opts.elasticsearch.split(','));
@@ -135,8 +206,29 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
 
   set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
-  merge(extraCliOptions);
-  merge(readKeystore());
+  // Inject EIS connectors discovered by bootstrap.ts (--eis flag) into the
+  // Kibana config as preconfigured action connectors.
+  const eisConnectorsJson = process.env.KBN_EIS_CONNECTORS;
+  if (opts.eis && eisConnectorsJson) {
+    try {
+      const eisConnectors = JSON.parse(eisConnectorsJson);
+      if (eisConnectors && typeof eisConnectors === 'object' && !Array.isArray(eisConnectors)) {
+        const existing = get('xpack.actions.preconfigured', {});
+        set('xpack.actions.preconfigured', { ...existing, ...eisConnectors });
+      } else {
+        console.warn(
+          `Ignoring KBN_EIS_CONNECTORS: expected a plain object, got ${
+            Array.isArray(eisConnectors) ? 'array' : typeof eisConnectors
+          }.`
+        );
+      }
+    } catch (error) {
+      console.warn(`Failed to parse KBN_EIS_CONNECTORS env var: ${error.message}`);
+    }
+  }
+
+  _.mergeWith(rawConfig, extraCliOptions, mergeAndReplaceArrays);
+  _.merge(rawConfig, keystoreConfig);
 
   return rawConfig;
 }
@@ -169,6 +261,7 @@ export default function (program) {
       pluginPathCollector,
       []
     )
+    .option('--allow-root', 'Required if Kibana is ran as root')
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (!isKibanaDistributable()) {
@@ -179,7 +272,7 @@ export default function (program) {
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
       )
       .option(
-        '--serverless [oblt|security|es]',
+        '--serverless [oblt|security|es|workplaceai|vectordb]',
         'Start Kibana in a specific serverless project mode. ' +
           'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );
@@ -189,6 +282,8 @@ export default function (program) {
     command
       .option('--dev', 'Run the server with development mode defaults')
       .option('--ssl', 'Run the dev server using HTTPS')
+      .option('--no-ssl', 'Run the server without HTTPS')
+      .option('--http2', 'Run the dev server using HTTP2 with TLS')
       .option('--dist', 'Use production assets from kbn/optimizer')
       .option(
         '--no-base-path',
@@ -201,6 +296,19 @@ export default function (program) {
       .option(
         '--no-dev-credentials',
         'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
+      )
+      .option(
+        '--extended-stack-trace',
+        'Collect more complete stack traces. See src/cli/dev.js for explanation.'
+      )
+      .option(
+        '--no-uiam',
+        'Prevents configuring Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
+      )
+      .option(
+        '--eis',
+        'Auto-discover EIS inference endpoints and configure preconfigured connectors (requires ES running with --eis). ' +
+          'Override ES credentials via KBN_EIS_ES_USERNAME (default: elastic) and KBN_EIS_ES_PASSWORD (default: changeme).'
       );
   }
 
@@ -211,15 +319,17 @@ export default function (program) {
       devConfig: opts.devConfig,
       dev: opts.dev,
       serverless: opts.serverless || unknownOptions.serverless,
+      unknownOptions,
     });
 
-    const configsEvaluted = getConfigFromFiles(configs);
+    const configsEvaluated = getConfigFromFiles(configs);
     const isServerlessMode = !!(
-      configsEvaluted.serverless ||
+      configsEvaluated.serverless ||
       opts.serverless ||
       unknownOptions.serverless
     );
 
+    const isServerlessSamlSupported = isServerlessMode && opts.ssl !== false;
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,
@@ -232,13 +342,17 @@ export default function (program) {
       // We can tell users they only have to run with `yarn start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.
-      basePath: opts.runExamples ? false : !!opts.basePath,
+      // Serverless Kibana does not support a custom `server.basePath`, so we also disable the
+      // dev proxy's randomized base path in serverless mode.
+      basePath: opts.runExamples || isServerlessMode ? false : !!opts.basePath,
       optimize: !!opts.optimize,
       disableOptimizer: !opts.optimizer,
       oss: !!opts.oss,
       cache: !!opts.cache,
       dist: !!opts.dist,
       serverless: isServerlessMode,
+      uiam: isServerlessSamlSupported && opts.uiam !== false,
+      eis: !!opts.eis,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
@@ -249,11 +363,269 @@ export default function (program) {
     // Kibana server process, and will be using core's bootstrap script
     // to effectively start Kibana.
     const bootstrapScript = getBootstrapScript(cliArgs.dev);
-
+    const keystoreConfig = await readKeystore();
     await bootstrapScript({
       configs,
       cliArgs,
-      applyConfigOverrides: (rawConfig) => applyConfigOverrides(rawConfig, opts, unknownOptions),
+      applyConfigOverrides: (rawConfig) =>
+        applyConfigOverrides(rawConfig, opts, unknownOptions, keystoreConfig),
     });
   });
+}
+
+function mergeAndReplaceArrays(objValue, srcValue) {
+  if (typeof srcValue === 'undefined') {
+    return objValue;
+  } else if (Array.isArray(srcValue)) {
+    // do not merge arrays, use new value instead
+    return srcValue;
+  } else {
+    // default to default merging
+    return undefined;
+  }
+}
+
+/**
+ * Inspects the configured authentication providers across rawConfig and extraCliOptions to detect
+ * whether the SAML Mock IdP provider can be safely added. Returns either a conflict (with reason
+ * already logged) or the result indicating whether basic/token is already configured.
+ *
+ * @param rawConfig Full configuration object.
+ * @param extraCliOptions Extra CLI options.
+ * @param mockIdpRealmName The realm name reserved for the SAML Mock IdP.
+ * @param providerLabel Human-readable label used in conflict warnings (e.g. "serverless SAML" or "SAML").
+ * @returns {{conflict: boolean, hasBasicOrTokenProviderConfigured: boolean}}
+ */
+function checkSamlProviderConflicts(rawConfig, extraCliOptions, mockIdpRealmName, providerLabel) {
+  let hasBasicOrTokenProviderConfigured = false;
+  for (const configSource of [rawConfig, extraCliOptions]) {
+    const providersConfig = _.get(configSource, 'xpack.security.authc.providers', {});
+    for (const [providerType, providers] of Object.entries(providersConfig)) {
+      if (providerType === 'basic' || providerType === 'token') {
+        hasBasicOrTokenProviderConfigured = true;
+      }
+
+      for (const [providerName, provider] of Object.entries(providers)) {
+        if (provider.order === 0) {
+          console.warn(
+            `The ${providerLabel} authentication provider won't be configured because the order "0" is already used by the custom authentication provider "${providerType}/${providerName}". ` +
+              `Please update the custom provider to use a different order or remove it to allow the ${providerLabel} provider to be configured.`
+          );
+          return { conflict: true, hasBasicOrTokenProviderConfigured };
+        }
+
+        if (providerType === 'saml' && providerName === mockIdpRealmName) {
+          console.warn(
+            `The ${providerLabel} authentication provider won't be configured because the SAML provider with "${mockIdpRealmName}" name is already configured.`
+          );
+          return { conflict: true, hasBasicOrTokenProviderConfigured };
+        }
+      }
+    }
+  }
+  return { conflict: false, hasBasicOrTokenProviderConfigured };
+}
+
+/**
+ * Returns true if the user has explicitly disabled the Mock IdP plugin via config or CLI overrides.
+ * When disabled, the SAML auto-configuration in `serve` is skipped so Kibana can be run against an
+ * Elasticsearch cluster without the SAML realm (e.g. with a `basic` license).
+ */
+function isMockIdpExplicitlyDisabled(rawConfig, extraCliOptions) {
+  for (const configSource of [rawConfig, extraCliOptions]) {
+    if (_.get(configSource, 'mockIdpPlugin.enabled') === false) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Tries to configure SAML provider in serverless mode and applies the necessary configuration.
+ * @param rawConfig Full configuration object.
+ * @param opts CLI options.
+ * @param extraCliOptions Extra CLI options.
+ * @returns {boolean} True if SAML provider was successfully configured.
+ */
+function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
+  if (!MOCK_IDP_PLUGIN_SUPPORTED || opts.ssl === false) {
+    return false;
+  }
+
+  if (isMockIdpExplicitlyDisabled(rawConfig, extraCliOptions)) {
+    console.info(
+      'Skipping SAML Mock IdP auto-configuration because `mockIdpPlugin.enabled` is set to `false`.'
+    );
+    return false;
+  }
+
+  // Ensure the plugin is loaded in dynamically to exclude from production build
+  const {
+    MOCK_IDP_REALM_NAME,
+    MOCK_IDP_UIAM_OAUTH_BASE_URL,
+    MOCK_IDP_UIAM_SERVICE_URL,
+    MOCK_IDP_UIAM_SHARED_SECRET,
+    MOCK_IDP_UIAM_ORGANIZATION_ID,
+    MOCK_IDP_UIAM_PROJECT_ID, // eslint-disable-next-line import/no-dynamic-require
+  } = require(MOCK_IDP_PLUGIN_PATH);
+
+  // Check if there are any custom authentication providers already configured with the order `0` reserved for the
+  // Serverless SAML provider or if there is an existing SAML provider with the name MOCK_IDP_REALM_NAME. We check
+  // both rawConfig and extraCliOptions because the latter can be used to override the former.
+  const { conflict, hasBasicOrTokenProviderConfigured } = checkSamlProviderConflicts(
+    rawConfig,
+    extraCliOptions,
+    MOCK_IDP_REALM_NAME,
+    'serverless SAML'
+  );
+  if (conflict) {
+    return false;
+  }
+
+  // Make SAML provider the first in the provider chain
+  lodashSet(rawConfig, `xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
+    order: 0,
+    realm: MOCK_IDP_REALM_NAME,
+    icon: 'user',
+    description: 'Continue as Test User',
+    hint: 'Allows testing serverless user roles',
+  });
+
+  // Disable login selector to automatically trigger SAML authentication, unless it's explicitly enabled.
+  if (!_.has(rawConfig, 'xpack.security.authc.selector.enabled')) {
+    lodashSet(rawConfig, 'xpack.security.authc.selector.enabled', false);
+  }
+
+  // Since we explicitly configured SAML authentication provider, default Basic provider won't be automatically
+  // configured, and we have to do it manually instead unless other Basic or Token provider was already configured.
+  if (!hasBasicOrTokenProviderConfigured) {
+    lodashSet(rawConfig, 'xpack.security.authc.providers.basic.basic', {
+      order: Number.MAX_SAFE_INTEGER,
+    });
+  }
+
+  if (opts.uiam !== false && DEV_UTILS_SUPPORTED) {
+    // Ensure the key/cert pair is loaded dynamically to exclude it from the production build.
+    // eslint-disable-next-line import/no-dynamic-require
+    const { KBN_CERT_PATH, KBN_KEY_PATH } = require(DEV_UTILS_PATH);
+
+    console.info('Kibana will be configured to support UIAM.');
+    lodashSet(rawConfig, 'xpack.security.uiam.enabled', true);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.certificate', KBN_CERT_PATH);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.key', KBN_KEY_PATH);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.verificationMode', 'none');
+    lodashSet(rawConfig, 'mockIdpPlugin.uiam.enabled', true);
+
+    // SAML POST binding submits the response cross-origin to UIAM's ACS endpoint, so the
+    // enforced `form-action` directive (default `'self'`) needs to allow the UIAM origin.
+    const uiamOAuthOrigin = new url.URL(MOCK_IDP_UIAM_OAUTH_BASE_URL).origin;
+    const existingFormAction = _.get(rawConfig, 'csp.form_action', []);
+    if (!existingFormAction.includes(uiamOAuthOrigin)) {
+      lodashSet(rawConfig, 'csp.form_action', [...existingFormAction, uiamOAuthOrigin]);
+    }
+
+    if (!_.has(rawConfig, 'xpack.security.uiam.url')) {
+      lodashSet(rawConfig, 'xpack.security.uiam.url', MOCK_IDP_UIAM_SERVICE_URL);
+    }
+
+    if (!_.has(rawConfig, 'xpack.security.uiam.sharedSecret')) {
+      lodashSet(rawConfig, 'xpack.security.uiam.sharedSecret', MOCK_IDP_UIAM_SHARED_SECRET);
+    }
+
+    if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {
+      lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
+    }
+
+    if (!_.has(rawConfig, 'xpack.cloud.serverless.project_id')) {
+      lodashSet(rawConfig, 'xpack.cloud.serverless.project_id', MOCK_IDP_UIAM_PROJECT_ID);
+    }
+
+    // By default, projects URL is used as the logout destination, but for local development it's inconvenient.
+    if (!_.has(rawConfig, 'xpack.cloud.projects_url')) {
+      lodashSet(rawConfig, 'xpack.cloud.projects_url', '');
+    }
+
+    // The UIAM service needs a network-accessible ES URL to validate API keys during conversion.
+    // The security plugin decodes cloud.id to obtain this URL. In the local Docker setup,
+    // the UIAM container reaches ES via host.docker.internal on the host network.
+    if (!_.has(rawConfig, 'xpack.cloud.id')) {
+      lodashSet(
+        rawConfig,
+        'xpack.cloud.id',
+        // Decodes to: docker.internal:9200$host:9200$kibana:9200
+        // Producing ES URL: https://host.docker.internal:9200
+        'local-dev:ZG9ja2VyLmludGVybmFsOjkyMDAkaG9zdDo5MjAwJGtpYmFuYTo5MjAw'
+      );
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Tries to configure SAML provider in stateful (traditional) mode and applies the necessary configuration.
+ * @param rawConfig Full configuration object.
+ * @param opts CLI options.
+ * @param extraCliOptions Extra CLI options.
+ * @returns {boolean} True if SAML provider was successfully configured.
+ */
+function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
+  if (!MOCK_IDP_PLUGIN_SUPPORTED) {
+    return false;
+  }
+
+  if (isMockIdpExplicitlyDisabled(rawConfig, extraCliOptions)) {
+    console.info(
+      'Skipping SAML Mock IdP auto-configuration because `mockIdpPlugin.enabled` is set to `false`. ' +
+        'Use this when running Kibana against a `basic` license cluster or any setup without the SAML realm.'
+    );
+    return false;
+  }
+
+  // Ensure the plugin is loaded in dynamically to exclude from production build
+  const {
+    MOCK_IDP_REALM_NAME, // eslint-disable-next-line import/no-dynamic-require
+  } = require(MOCK_IDP_PLUGIN_PATH);
+
+  // Check if there are any custom authentication providers already configured with the order `0` reserved for the
+  // SAML provider or if there is an existing SAML provider with the name MOCK_IDP_REALM_NAME. We check
+  // both rawConfig and extraCliOptions because the latter can be used to override the former.
+  const { conflict, hasBasicOrTokenProviderConfigured } = checkSamlProviderConflicts(
+    rawConfig,
+    extraCliOptions,
+    MOCK_IDP_REALM_NAME,
+    'SAML'
+  );
+  if (conflict) {
+    return false;
+  }
+
+  console.info(
+    'Kibana will be configured with SAML Mock IdP for stateful development. ' +
+      'Make sure Elasticsearch is started with SAML realm configured.'
+  );
+
+  // Make SAML provider the first in the provider chain
+  lodashSet(rawConfig, `xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
+    order: 0,
+    realm: MOCK_IDP_REALM_NAME,
+    icon: 'user',
+    description: 'Continue as Test User',
+    hint: 'Allows testing stateful user roles',
+  });
+
+  // Disable login selector to automatically trigger SAML authentication, unless it's explicitly enabled.
+  if (!_.has(rawConfig, 'xpack.security.authc.selector.enabled')) {
+    lodashSet(rawConfig, 'xpack.security.authc.selector.enabled', false);
+  }
+
+  // Since we explicitly configured SAML authentication provider, default Basic provider won't be automatically
+  // configured, and we have to do it manually instead unless other Basic or Token provider was already configured.
+  if (!hasBasicOrTokenProviderConfigured) {
+    lodashSet(rawConfig, 'xpack.security.authc.providers.basic.basic', {
+      order: Number.MAX_SAFE_INTEGER,
+    });
+  }
+
+  return true;
 }

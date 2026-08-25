@@ -1,0 +1,185 @@
+{
+  "@timestamp": "2024-07-09T12:07:22.061Z",
+  "kibana.alert.ancestors": [
+    {
+      "id": "yEVhkpABheYIwp45uyhA",
+      "type": "event",
+      "index": ".ds-logs-endpoint.alerts-default-2024.07.08-000001",
+      "depth": 0
+    }
+  ],
+  "kibana.alert.depth": 1,
+  "kibana.alert.original_event.action": "rule_detection",
+  "kibana.alert.original_event.category": "behavior",
+  "kibana.alert.original_event.dataset": "endpoint.diagnostic.collection",
+  "kibana.alert.original_event.kind": "alert",
+  "kibana.alert.original_event.module": "endpoint",
+  "kibana.alert.original_event.type": "info",
+  "kibana.alert.original_time": "2024-07-08T12:46:42.856Z",
+  "kibana.alert.risk_score": 47,
+  "kibana.alert.rule.actions": [],
+  "kibana.alert.rule.category": "Custom Query Rule",
+  "kibana.alert.rule.consumer": "siem",
+  "kibana.alert.rule.created_at": "2024-07-08T12:00:22.100Z",
+  "kibana.alert.rule.enabled": true,
+  "kibana.alert.rule.exceptions_list": [
+    {
+      "id": "endpoint_list",
+      "list_id": "endpoint_list",
+      "type": "endpoint",
+      "namespace_type": "agnostic"
+    }
+  ],
+  "kibana.alert.rule.execution.uuid": "740f5acd-6dfa-4b71-878a-2dcbf615f0d2",
+  "kibana.alert.rule.false_positives": [],
+  "kibana.alert.rule.from": "now-10m",
+  "kibana.alert.rule.immutable": true,
+  "kibana.alert.rule.interval": "5m",
+  "kibana.alert.rule.name": "Endpoint Security",
+  "kibana.alert.rule.producer": "siem",
+  "kibana.alert.rule.references": [],
+  "kibana.alert.rule.risk_score_mapping": [
+    {
+      "field": "event.risk_score",
+      "operator": "equals",
+      "value": ""
+    }
+  ],
+  "kibana.alert.rule.rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+  "kibana.alert.rule.rule_type_id": "siem.queryRule",
+  "kibana.alert.rule.severity": "medium",
+  "kibana.alert.rule.severity_mapping": [
+    {
+      "field": "event.severity",
+      "operator": "equals",
+      "severity": "low",
+      "value": "21"
+    },
+    {
+      "field": "event.severity",
+      "operator": "equals",
+      "severity": "medium",
+      "value": "47"
+    },
+    {
+      "field": "event.severity",
+      "operator": "equals",
+      "severity": "high",
+      "value": "73"
+    },
+    {
+      "field": "event.severity",
+      "operator": "equals",
+      "severity": "critical",
+      "value": "99"
+    }
+  ],
+  "kibana.alert.rule.tags": ["Data Source: Elastic Defend"],
+  "kibana.alert.rule.threat": [],
+  "kibana.alert.rule.timestamp_override": "event.ingested",
+  "kibana.alert.rule.type": "query",
+  "kibana.alert.rule.updated_at": "2024-07-08T12:00:22.100Z",
+  "kibana.alert.rule.uuid": "5623aff4-d3f2-41c8-9542-ef7e6515ce40",
+  "kibana.alert.rule.version": 103,
+  "kibana.alert.severity": "medium",
+  "kibana.alert.status": "active",
+  "kibana.alert.uuid": "76713cff0f7c8e81bd7462f94c5fc6df4d3b52d9737ccc35a38c5efa42f47c26",
+  "kibana.alert.workflow_status": "open",
+  "kibana.space_ids": ["default"],
+  "kibana.version": "8.14.2",
+  "event.ingested": "2024-07-08T12:46:36Z",
+  "event.kind": "signal",
+  "event.action": "rule_detection",
+  "event.id": "87f78f3b-5f84-434a-ac37-6c9e414c4df9",
+  "event.type": "info",
+  "event.category": "behavior",
+  "event.dataset": "endpoint.diagnostic.collection",
+  "event.module": "endpoint",
+  "agent": {
+    "id": "9e6f8f6a-6913-47a1-8a38-2a9ba87f8894"
+  },
+  "destination": {
+    "port": 443,
+    "ip": "10.102.118.219"
+  },
+  "dll": [
+    {
+      "code_signature": {
+        "subject_name": "Cybereason Inc",
+        "trusted": true
+      },
+      "path": "",
+      "hash": {
+        "sha256": "8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2"
+      }
+    }
+  ],
+  "host": {
+    "os": {
+      "Ext": {
+        "variant": "Windows Server Release 2"
+      },
+      "name": "Windows",
+      "family": "windows",
+      "version": "6.3",
+      "platform": "Windows",
+      "full": "Windows Server 2012R2"
+    }
+  },
+  "network": {
+    "transport": "tcp",
+    "type": "ipv4",
+    "direction": "outgoing"
+  },
+  "process": {
+    "code_signature": {
+      "status": "trusted",
+      "subject_name": "Microsoft Windows"
+    },
+    "entity_id": "5hdvz461o6",
+    "entry_leader": {
+      "name": "fake entry",
+      "pid": 376,
+      "entity_id": "jpd1z6lsu6"
+    },
+    "executable": "C:/fake_behavior/notepad.exe",
+    "Ext": {
+      "token": {
+        "integrity_level_name": "high"
+      }
+    },
+    "name": "notepad.exe",
+    "parent": {
+      "entity_id": "iv54turo1i",
+      "pid": 1
+    },
+    "pid": 2,
+    "session_leader": {
+      "name": "fake session",
+      "pid": 891,
+      "entity_id": "jpd1z6lsu6"
+    }
+  },
+  "registry": {
+    "data": {
+      "strings": "C:/fake_behavior/notepad.exe"
+    },
+    "path": "",
+    "value": "notepad.exe"
+  },
+  "source": {
+    "port": 59406,
+    "ip": "10.43.68.40"
+  },
+  "user": {
+    "domain": "qbf98z0au1"
+  },
+  "file": {
+    "name": "fake_behavior.exe",
+    "path": "C:/fake_behavior.exe"
+  },
+  "licence_id": "b7d16098-16fc-42fb-ab0f-40e2394c2375",
+  "cluster_uuid": "BldID7FMTb66oQgpvC5Uyg",
+  "cluster_name": "es-test-cluster",
+  "task_version": "1.2.0"
+}

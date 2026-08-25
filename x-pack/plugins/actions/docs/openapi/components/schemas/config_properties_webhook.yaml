@@ -1,5 +1,0 @@
-title: Connector request properties for a Webhook connector
-description: Defines properties for connectors when type is `.webhook`.
-type: object
-additionalProperties: true
-# TO-DO: Add the properties for this connector.

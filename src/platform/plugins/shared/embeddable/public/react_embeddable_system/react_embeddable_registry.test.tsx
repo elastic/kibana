@@ -1,0 +1,32 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import {
+  registerEmbeddablePublicDefinition,
+  getEmbeddableDefinition,
+} from './react_embeddable_registry';
+import type { EmbeddablePublicDefinition } from './types';
+
+describe('embeddable registry', () => {
+  const getTestEmbeddableFactory = () =>
+    Promise.resolve({
+      type: 'test',
+      buildEmbeddable: jest.fn(),
+    } as EmbeddablePublicDefinition);
+
+  it('throws an error if type is not lower case', () => {
+    expect(() => registerEmbeddablePublicDefinition('FOO_BAR', getTestEmbeddableFactory)).toThrow();
+  });
+
+  it('can register and get an embeddable factory', () => {
+    const returnedFactory = getTestEmbeddableFactory();
+    registerEmbeddablePublicDefinition('test', getTestEmbeddableFactory);
+    expect(getEmbeddableDefinition('test')).toEqual(returnedFactory);
+  });
+});

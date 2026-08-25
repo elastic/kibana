@@ -1,21 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Fs from 'fs';
 import { promisify } from 'util';
 
 import xml2js from 'xml2js';
-
 const readAsync = promisify(Fs.readFile);
 
 export type TestReport =
   | {
       testsuites: {
+        /* attributes on the root <testsuites> element, e.g. name="ftr" | "jest" */
+        $?: {
+          name?: string;
+        };
         testsuite: TestSuite[];
       };
     }
@@ -25,6 +29,10 @@ export type TestReport =
 
 export interface TestSuite {
   $: {
+    /* name of the suite; Jest uses the repository-relative test file path */
+    name?: string;
+    /* absolute test file path, when provided by the reporter */
+    file?: string;
     /* ISO8601 timetamp when test suite ran */
     timestamp: string;
     /* number of second this tests suite took */
@@ -37,6 +45,10 @@ export interface TestSuite {
     skipped: string;
     /* optional JSON encoded metadata */
     'metadata-json'?: string;
+    /* the command that ran this suite */
+    'command-line'?: string;
+    /* the codeowners of the file */
+    owners?: string;
   };
   testcase?: TestCase[];
 }
@@ -51,6 +63,12 @@ export interface TestCase {
     time: string;
     /* optional JSON encoded metadata */
     'metadata-json'?: string;
+    /* the command that ran this suite */
+    'command-line'?: string;
+    /* the codeowners of the file */
+    owners?: string;
+    /* "true" when this failure only happened because an earlier Mocha timeout aborted the run */
+    'cascading-failure'?: string;
   };
   /* contents of system-out elements */
   'system-out'?: Array<string | { _: string }>;
@@ -75,24 +93,36 @@ export async function readTestReport(testReportPath: string) {
   return await parseTestReport(await readAsync(testReportPath, 'utf8'));
 }
 
-export function* makeTestCaseIter(report: TestReport) {
+export function* makeTestCaseWithSuiteIter(report: TestReport) {
   // Reporters may report multiple testsuites in a single file.
   const testSuites = 'testsuites' in report ? report.testsuites.testsuite : [report.testsuite];
 
   for (const testSuite of testSuites) {
     for (const testCase of testSuite.testcase || []) {
-      yield testCase;
+      yield { testCase, testSuite };
     }
   }
 }
 
-export function* makeFailedTestCaseIter(report: TestReport) {
-  for (const testCase of makeTestCaseIter(report)) {
+export function* makeTestCaseIter(report: TestReport) {
+  for (const { testCase } of makeTestCaseWithSuiteIter(report)) {
+    yield testCase;
+  }
+}
+
+export function* makeFailedTestCaseWithSuiteIter(report: TestReport) {
+  for (const { testCase, testSuite } of makeTestCaseWithSuiteIter(report)) {
     if (!testCase.failure) {
       continue;
     }
 
-    yield testCase as FailedTestCase;
+    yield { testCase: testCase as FailedTestCase, testSuite };
+  }
+}
+
+export function* makeFailedTestCaseIter(report: TestReport) {
+  for (const { testCase } of makeFailedTestCaseWithSuiteIter(report)) {
+    yield testCase;
   }
 }
 

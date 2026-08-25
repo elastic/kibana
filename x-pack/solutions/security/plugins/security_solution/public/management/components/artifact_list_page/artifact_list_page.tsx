@@ -1,0 +1,523 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import { css } from '@emotion/react';
+
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
+import type {
+  BulkErrorSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import type { EuiFlyoutSize } from '@elastic/eui/src/components/flyout/flyout';
+import { useLocation } from 'react-router-dom';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { HeaderMenu } from '@kbn/securitysolution-exception-list-components';
+import { useApi } from '@kbn/securitysolution-list-hooks';
+import type { Action } from '@kbn/securitysolution-exception-list-components';
+import { AutoDownload } from '../../../common/components/auto_download/auto_download';
+import type { ServerApiError } from '../../../common/types';
+import { AdministrationListPage } from '../administration_list_page';
+
+import type { PaginatedContentProps } from '../paginated_content';
+import { PaginatedContent } from '../paginated_content';
+
+import type { ArtifactEntryCardDecoratorProps } from '../artifact_entry_card';
+import { ArtifactEntryCard } from '../artifact_entry_card';
+
+import type { ArtifactListPageLabels } from './translations';
+import { artifactListPageLabels } from './translations';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { ManagementPageLoader } from '../management_page_loader';
+import type { SearchExceptionsProps } from '../search_exceptions';
+import { SearchExceptions } from '../search_exceptions';
+import type { UseArtifactCardPropsProviderProps } from './hooks/use_artifact_card_props_provider';
+import { useArtifactCardPropsProvider } from './hooks/use_artifact_card_props_provider';
+import { NoDataEmptyState } from './components/no_data_empty_state';
+import type { ArtifactFlyoutProps } from './components/artifact_flyout';
+import { ArtifactFlyout } from './components/artifact_flyout';
+import { useIsFlyoutOpened } from './hooks/use_is_flyout_opened';
+import { useSetUrlParams } from './hooks/use_set_url_params';
+import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
+import type { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
+import type { ArtifactListPageUrlParams } from './types';
+import { useUrlParams } from '../../hooks/use_url_params';
+import type { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
+import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
+import { ArtifactDeleteModal } from './components/artifact_delete_modal';
+import { useKibana, useToasts } from '../../../common/lib/kibana';
+import { useMemoizedRouteState } from '../../common/hooks';
+import { BackToExternalAppLink } from '../back_to_external_app_link';
+import { BackToExternalAppButton } from '../back_to_external_app_button';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { ArtifactImportFlyout } from './components/artifact_import_flyout';
+import { useIsImportFlyoutOpened } from './hooks/use_is_import_flyout_opened';
+import { ArtifactImportErrorsModal } from './components/artifact_import_errors_modal';
+
+type ArtifactEntryCardType = typeof ArtifactEntryCard;
+
+type ArtifactListPagePaginatedContentComponent = PaginatedContentProps<
+  ExceptionListItemSchema,
+  ArtifactEntryCardType
+>;
+
+export interface ArtifactListPageProps {
+  apiClient: ExceptionsListApiClient;
+  /** The artifact Component that will be displayed in the Flyout for Create and Edit flows */
+  ArtifactFormComponent: ArtifactFlyoutProps['FormComponent'];
+  /** A list of labels for the given artifact page. Not all have to be defined, only those that should override the defaults */
+  labels: ArtifactListPageLabels;
+  /**
+   * Define a callback to handle the submission of the form data instead of the internal one in
+   * `ArtifactListPage` being used.
+   * @param item
+   * @param mode
+   */
+  onFormSubmit?: Required<ArtifactFlyoutProps>['submitHandler'];
+  /** A list of fields that will be used by the search functionality when a user enters a value in the searchbar */
+  searchableFields?: MaybeImmutable<string[]>;
+  flyoutSize?: EuiFlyoutSize;
+  'data-test-subj'?: string;
+  allowCardEditAction?: boolean;
+  allowCardDeleteAction?: boolean;
+  allowCardCreateAction?: boolean;
+  secondaryPageInfo?: React.ReactNode;
+  callout?: React.ReactNode;
+  CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
+  additionalActions?: Action[];
+}
+
+export const ArtifactListPage = memo<ArtifactListPageProps>(
+  ({
+    apiClient,
+    ArtifactFormComponent,
+    searchableFields = DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS,
+    labels: _labels = {},
+    secondaryPageInfo,
+    callout,
+    onFormSubmit,
+    flyoutSize,
+    'data-test-subj': dataTestSubj,
+    allowCardEditAction = true,
+    allowCardCreateAction = true,
+    allowCardDeleteAction = true,
+    CardDecorator,
+    additionalActions,
+  }) => {
+    const areEndpointExceptionsMovedUnderManagementFFEnabled = useIsExperimentalFeatureEnabled(
+      'endpointExceptionsMovedUnderManagement'
+    );
+    const { services } = useKibana();
+    const { http } = services;
+    const { state: routeState } = useLocation<ListPageRouteState | undefined>();
+    const getTestId = useTestIdGenerator(dataTestSubj);
+    const toasts = useToasts();
+    const isMounted = useIsMounted();
+
+    const isFlyoutOpened = useIsFlyoutOpened(allowCardEditAction, allowCardCreateAction);
+    const isImportFlyoutOpened =
+      useIsImportFlyoutOpened(allowCardCreateAction) &&
+      areEndpointExceptionsMovedUnderManagementFFEnabled;
+
+    const [importErrors, setImportErrors] = useState<BulkErrorSchema[] | undefined>(undefined);
+
+    const setUrlParams = useSetUrlParams();
+    const {
+      urlParams: { filter, includedPolicies },
+    } = useUrlParams<ArtifactListPageUrlParams>();
+    const { exportExceptionList } = useApi(http);
+
+    const {
+      isPageInitializing,
+      isFetching: isLoading,
+      data: listDataResponse,
+      uiPagination,
+      doesDataExist,
+      error,
+      refetch: refetchListData,
+      dataUpdatedAt,
+    } = useWithArtifactListData(apiClient, searchableFields);
+
+    useEffect(() => {
+      if (!isLoading && error) {
+        toasts.addDanger((error?.body as ServerApiError)?.message || error.message);
+      }
+    }, [error, toasts, isLoading]);
+
+    const items = useMemo(() => {
+      return listDataResponse?.data ?? [];
+    }, [listDataResponse?.data]);
+
+    const [selectedItemForDelete, setSelectedItemForDelete] = useState<
+      undefined | ExceptionListItemSchema
+    >(undefined);
+
+    const [selectedItemForEdit, setSelectedItemForEdit] = useState<
+      undefined | ExceptionListItemSchema
+    >(undefined);
+
+    const [exportedData, setExportedData] = useState<Blob>();
+
+    const labels = useMemo<typeof artifactListPageLabels>(() => {
+      return {
+        ...artifactListPageLabels,
+        ..._labels,
+      };
+    }, [_labels]);
+
+    const handleOnCardActionClick = useCallback<UseArtifactCardPropsProviderProps['onAction']>(
+      ({ type, item }) => {
+        switch (type) {
+          case 'edit':
+            setSelectedItemForEdit(item);
+            setUrlParams({ show: 'edit', itemId: item.item_id });
+            break;
+
+          case 'delete':
+            setSelectedItemForDelete(item);
+            break;
+        }
+      },
+      [setUrlParams]
+    );
+
+    const handleCardProps = useArtifactCardPropsProvider({
+      items,
+      onAction: handleOnCardActionClick,
+      cardActionDeleteLabel: labels.cardActionDeleteLabel,
+      cardActionEditLabel: labels.cardActionEditLabel,
+      dataTestSubj: getTestId('card'),
+      allowCardDeleteAction,
+      allowCardEditAction,
+    });
+
+    const memoizedRouteState = useMemoizedRouteState(routeState);
+
+    const backLinkComponent = useMemo(() => {
+      if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+        return <BackToExternalAppLink {...memoizedRouteState} />;
+      }
+    }, [memoizedRouteState]);
+
+    const backButtonHeaderComponent = useMemo(() => {
+      if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+        return <BackToExternalAppButton {...memoizedRouteState} />;
+      }
+    }, [memoizedRouteState]);
+
+    const handleOpenCreateFlyoutClick = useCallback(() => {
+      setUrlParams({ show: 'create' });
+    }, [setUrlParams]);
+
+    const handlePaginationChange: ArtifactListPagePaginatedContentComponent['onChange'] =
+      useCallback(
+        ({ pageIndex, pageSize }) => {
+          setUrlParams({
+            page: pageIndex + 1,
+            pageSize,
+          });
+
+          // Scroll to the top to ensure that when new set of data is received and list updated,
+          // the user is back at the top of the list
+          window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        },
+        [setUrlParams]
+      );
+
+    const handleOnSearch = useCallback<SearchExceptionsProps['onSearch']>(
+      (filterValue: string, selectedPolicies: string, doHardRefresh) => {
+        const didFilterChange =
+          filterValue !== (filter ?? '') || selectedPolicies !== (includedPolicies ?? '');
+
+        setUrlParams({
+          // `undefined` will drop the param from the url
+          filter: filterValue.trim() === '' ? undefined : filterValue,
+          includedPolicies: selectedPolicies.trim() === '' ? undefined : selectedPolicies,
+        });
+
+        // We don't want to trigger a refresh of the list twice because the URL above was already
+        // updated, so if the user explicitly clicked the `Refresh` button and nothing has changed
+        // in the filter, then trigger a refresh (since the url update did not actually trigger one)
+        if (doHardRefresh && !didFilterChange) {
+          refetchListData();
+        }
+      },
+      [filter, includedPolicies, refetchListData, setUrlParams]
+    );
+
+    const handleArtifactDeleteModalOnSuccess = useCallback(() => {
+      if (isMounted()) {
+        setSelectedItemForDelete(undefined);
+        refetchListData();
+      }
+    }, [isMounted, refetchListData]);
+
+    const handleArtifactDeleteModalOnCancel = useCallback(() => {
+      setSelectedItemForDelete(undefined);
+    }, []);
+
+    const handleArtifactFlyoutOnSuccess = useCallback(() => {
+      setSelectedItemForEdit(undefined);
+      refetchListData();
+    }, [refetchListData]);
+
+    const handleArtifactFlyoutOnClose = useCallback(() => {
+      setSelectedItemForEdit(undefined);
+    }, []);
+
+    const handleExport = useCallback(
+      () =>
+        exportExceptionList({
+          id: apiClient.listId,
+          listId: apiClient.listId,
+          includeExpiredExceptions: true,
+          namespaceType: 'agnostic',
+
+          onError: (exportError: Error) =>
+            toasts?.addError(exportError, { title: labels.pageExportErrorToastTitle }),
+
+          onSuccess: (blob) => {
+            setExportedData(blob);
+            toasts?.addSuccess(labels.pageExportSuccessToastTitle);
+          },
+        }),
+      [
+        exportExceptionList,
+        apiClient.listId,
+        toasts,
+        labels.pageExportErrorToastTitle,
+        labels.pageExportSuccessToastTitle,
+      ]
+    );
+
+    const handleOnDownload = useCallback(() => setExportedData(undefined), []);
+
+    const handleImport = useCallback(() => setUrlParams({ show: 'import' }), [setUrlParams]);
+
+    const closeImportFlyout = useCallback(() => setUrlParams({ show: undefined }), [setUrlParams]);
+
+    const handleImportFlyoutOnSuccess = useCallback(() => {
+      closeImportFlyout();
+      refetchListData();
+    }, [closeImportFlyout, refetchListData]);
+
+    const handleImportFlyoutOnShowErrors = useCallback((errors: BulkErrorSchema[]) => {
+      setImportErrors(errors);
+    }, []);
+
+    const handleCloseImportErrorsModal = useCallback(() => setImportErrors(undefined), []);
+
+    const description = useMemo(() => {
+      const subtitleText = labels.pageAboutInfo ? (
+        <span data-test-subj="header-panel-subtitle">{labels.pageAboutInfo}</span>
+      ) : undefined;
+      const detailedPageInfoElement = secondaryPageInfo ? (
+        <>
+          <EuiSpacer size="m" />
+          {secondaryPageInfo}
+        </>
+      ) : undefined;
+      return (
+        <EuiTextColor color="subdued">
+          {subtitleText}
+          {detailedPageInfoElement}
+        </EuiTextColor>
+      );
+    }, [labels.pageAboutInfo, secondaryPageInfo]);
+
+    const actionsToDisplay: Action[] = useMemo(
+      () => [
+        ...(areEndpointExceptionsMovedUnderManagementFFEnabled
+          ? [
+              {
+                key: 'ImportButton',
+                icon: 'download',
+                label: labels.pageImportButtonTitle,
+                onClick: handleImport,
+                disabled: !allowCardCreateAction,
+              },
+              {
+                key: 'ExportButton',
+                icon: 'upload',
+                label: labels.pageExportButtonTitle,
+                onClick: handleExport,
+              },
+            ]
+          : []),
+
+        ...(additionalActions ?? []),
+      ],
+      [
+        additionalActions,
+        allowCardCreateAction,
+        areEndpointExceptionsMovedUnderManagementFFEnabled,
+        handleExport,
+        handleImport,
+        labels.pageExportButtonTitle,
+        labels.pageImportButtonTitle,
+      ]
+    );
+
+    if (isPageInitializing) {
+      return <ManagementPageLoader data-test-subj={getTestId('pageLoader')} />;
+    }
+
+    return (
+      <AdministrationListPage
+        headerBackComponent={backButtonHeaderComponent}
+        hideHeader={true}
+        title={labels.pageTitle}
+        data-test-subj={getTestId('container')}
+      >
+        <AutoDownload
+          blob={exportedData}
+          name={`${apiClient.listId}.ndjson`}
+          onDownload={handleOnDownload}
+        />
+
+        {isFlyoutOpened && (
+          <ArtifactFlyout
+            apiClient={apiClient}
+            item={selectedItemForEdit}
+            onSuccess={handleArtifactFlyoutOnSuccess}
+            onClose={handleArtifactFlyoutOnClose}
+            FormComponent={ArtifactFormComponent}
+            labels={labels}
+            size={flyoutSize}
+            submitHandler={onFormSubmit}
+            data-test-subj={getTestId('flyout')}
+          />
+        )}
+
+        {isImportFlyoutOpened && (
+          <ArtifactImportFlyout
+            onCancel={closeImportFlyout}
+            onSuccess={handleImportFlyoutOnSuccess}
+            onShowErrors={handleImportFlyoutOnShowErrors}
+            apiClient={apiClient}
+            labels={labels}
+          />
+        )}
+
+        {importErrors && (
+          <ArtifactImportErrorsModal errors={importErrors} onClose={handleCloseImportErrorsModal} />
+        )}
+
+        {selectedItemForDelete && (
+          <ArtifactDeleteModal
+            apiClient={apiClient}
+            item={selectedItemForDelete}
+            labels={labels}
+            data-test-subj={getTestId('deleteModal')}
+            onSuccess={handleArtifactDeleteModalOnSuccess}
+            onCancel={handleArtifactDeleteModalOnCancel}
+          />
+        )}
+
+        {!doesDataExist ? (
+          <div
+            css={css`
+              > * {
+                justify-content: flex-start;
+                padding-top: calc((100vh - 140px) / 6);
+                box-sizing: border-box;
+              }
+            `}
+          >
+            <NoDataEmptyState
+              onAdd={handleOpenCreateFlyoutClick}
+              onImport={handleImport}
+              titleNoEntriesLabel={labels.emptyStateTitleNoEntries}
+              titleLabel={labels.emptyStateTitle}
+              aboutInfo={labels.emptyStateInfo}
+              primaryButtonLabel={labels.emptyStatePrimaryButtonLabel}
+              importButtonLabel={labels.emptyStateImportButtonLabel}
+              backComponent={backLinkComponent}
+              data-test-subj={getTestId('emptyState')}
+              secondaryAboutInfo={secondaryPageInfo}
+              canCreateItems={allowCardCreateAction}
+              isAddDisabled={isFlyoutOpened || isImportFlyoutOpened}
+            />
+          </div>
+        ) : (
+          <>
+            {backButtonHeaderComponent}
+            {description}
+            <EuiSpacer size="m" />
+            {callout}
+            <EuiSpacer size="m" />
+            <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
+              <EuiFlexItem grow={true}>
+                <SearchExceptions
+                  defaultValue={filter}
+                  onSearch={handleOnSearch}
+                  placeholder={labels.searchPlaceholderInfo}
+                  hasPolicyFilter
+                  defaultIncludedPolicies={includedPolicies}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  {allowCardCreateAction && (
+                    <EuiButton
+                      fill
+                      iconType="plusCircle"
+                      isDisabled={isFlyoutOpened}
+                      onClick={handleOpenCreateFlyoutClick}
+                      data-test-subj={getTestId('pageAddButton')}
+                    >
+                      {labels.pageAddButtonTitle}
+                    </EuiButton>
+                  )}
+
+                  {actionsToDisplay.length > 0 && (
+                    <HeaderMenu
+                      iconType="boxesVertical"
+                      dataTestSubj={getTestId('overflowMenu')}
+                      actions={actionsToDisplay}
+                      disableActions={isLoading}
+                    />
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+
+            <EuiText color="subdued" size="xs" data-test-subj={getTestId('showCount')}>
+              {labels.getShowingCountLabel(uiPagination.totalItemCount)}
+            </EuiText>
+
+            <EuiSpacer size="s" />
+
+            <PaginatedContent<ExceptionListItemSchema, ArtifactEntryCardType>
+              items={items}
+              ItemComponent={ArtifactEntryCard}
+              itemComponentProps={handleCardProps}
+              onChange={handlePaginationChange}
+              error={error as React.ReactNode}
+              loading={isLoading}
+              pagination={uiPagination}
+              contentClassName="card-container"
+              data-test-subj={getTestId('list')}
+              CardDecorator={CardDecorator}
+              dataUpdatedAt={dataUpdatedAt}
+            />
+          </>
+        )}
+      </AdministrationListPage>
+    );
+  }
+);
+ArtifactListPage.displayName = 'ArtifactListPage';

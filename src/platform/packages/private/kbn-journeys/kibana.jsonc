@@ -1,0 +1,11 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/journeys",
+  "owner": [
+    "@elastic/kibana-operations",
+    "@elastic/appex-qa"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}

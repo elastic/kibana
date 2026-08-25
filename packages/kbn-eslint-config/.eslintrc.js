@@ -1,13 +1,83 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
+const USES_ELASTIC_APM_AGENT = [
+  // Core platform APM integration & agent infrastructure
+  /src[\/\\]core[\/\\]/,
+  /kbn-apm-config-loader[\/\\]/,
+  /kbn-apm-utils[\/\\]/,
+
+  // Test & dev tooling
+  /kbn-test[\/\\]src[\/\\]/,
+  /kbn-journeys[\/\\]/,
+  /kbn-cli-dev-mode[\/\\]/,
+  /kbn-docs-utils[\/\\]/,
+  /src[\/\\]platform[\/\\]test[\/\\]/,
+  /x-pack[\/\\]platform[\/\\]test[\/\\]/,
+
+  // Shared packages with APM tracing
+  /kbn-langchain[\/\\]server[\/\\]tracers[\/\\]/,
+  /kbn-reporting[\/\\]export_types[\/\\]/,
+
+  // Plugins with legacy APM custom spans (pending OTel migration)
+  /workflows_execution_engine[\/\\]server[\/\\]/,
+  /task_manager[\/\\]server[\/\\]/,
+  /fleet[\/\\]server[\/\\]/,
+  /alerting[\/\\]server[\/\\]/,
+  /screenshotting[\/\\]server[\/\\]/,
+  /reporting[\/\\]server[\/\\]/,
+  /intercepts[\/\\]server[\/\\]/,
+  /data_usage[\/\\]server[\/\\]/,
+  /encrypted_saved_objects[\/\\]server[\/\\]/,
+  /plugins[\/\\]shared[\/\\]data[\/\\]server[\/\\]search[\/\\]/,
+  /telemetry[\/\\]server[\/\\]/,
+  /telemetry_collection_manager[\/\\]server[\/\\]/,
+  /security_solution[\/\\]server[\/\\]/,
+  /lists[\/\\]server[\/\\]/,
+  /elastic_assistant[\/\\]server[\/\\]/,
+  /plugins[\/\\]apm[\/\\]/,
+  /synthetics[\/\\]server[\/\\]/,
+  /feature-flags[\/\\]server-internal[\/\\]/,
+  /plugins[\/\\]slo[\/\\]server[\/\\]/,
+];
+
 module.exports = {
-  extends: ['./javascript.js', './typescript.js', './jest.js', './react.js'],
+  extends: [
+    './javascript.js',
+    './typescript.js',
+    './jest.js',
+    './react.js',
+    'plugin:@elastic/eui/recommended',
+  ],
 
   plugins: [
     '@kbn/eslint-plugin-disable',
     '@kbn/eslint-plugin-eslint',
     '@kbn/eslint-plugin-imports',
     '@kbn/eslint-plugin-telemetry',
+    '@kbn/eslint-plugin-i18n',
+    '@kbn/eslint-plugin-alerting-v2',
+    '@kbn/eslint-plugin-kbn-ui',
+    '@elastic/eui',
+    'eslint-plugin-depend',
     'prettier',
   ],
 
@@ -20,6 +90,19 @@ module.exports = {
   },
 
   rules: {
+    // Suggests better replacements for packages: https://github.com/es-tooling/module-replacements/tree/main/docs/modules
+    'depend/ban-dependencies': [
+      'error',
+      {
+        allowed: [
+          '^@kbn/*', // internal packages
+          'lodash', // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/lodash-underscore.md
+          'moment', // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/momentjs.md
+          'jquery', // https://github.com/es-tooling/module-replacements/blob/main/docs/modules/jquery.md
+        ],
+      },
+    ],
+
     'prettier/prettier': [
       'error',
       {
@@ -79,6 +162,13 @@ module.exports = {
           from: 'react-intl',
           to: '@kbn/i18n-react',
           disallowedMessage: `import from @kbn/i18n-react instead`,
+          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-i18n-react/],
+        },
+        {
+          from: 'zod',
+          to: '@kbn/zod',
+          disallowedMessage: `import from @kbn/zod instead`,
+          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-zod[\/\\]/],
         },
         {
           from: 'styled-components',
@@ -86,13 +176,6 @@ module.exports = {
           exclude: USES_STYLED_COMPONENTS,
           disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`,
         },
-        ...['@elastic/eui/dist/eui_theme_light.json', '@elastic/eui/dist/eui_theme_dark.json'].map(
-          (from) => ({
-            from,
-            to: false,
-            disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`,
-          })
-        ),
         {
           from: '@kbn/test/jest',
           to: '@kbn/test-jest-helpers',
@@ -124,11 +207,30 @@ module.exports = {
         },
         {
           from: '@elastic/apm-synthtrace',
-          to: '@kbn/apm-synthtrace',
+          to: '@kbn/synthtrace',
         },
         {
           from: 'rison-node',
           to: '@kbn/rison',
+        },
+        {
+          from: '@tanstack/react-query',
+          to: '@kbn/react-query',
+          exact: true,
+          disallowedMessage:
+            'Use `@kbn/react-query` instead of `@tanstack/react-query`, as it defaults to networkMode="always"',
+        },
+        {
+          from: 'elastic-apm-node',
+          to: false,
+          exclude: USES_ELASTIC_APM_AGENT,
+          disallowedMessage: `Do not use 'elastic-apm-node' for new instrumentation. Use withActiveSpan from @kbn/tracing-utils instead.`,
+        },
+        {
+          from: 'js-yaml',
+          to: false,
+          disallowedMessage:
+            "Use the `yaml` package instead of js-yaml (e.g. `import yaml from 'yaml'`).",
         },
       ],
     ],
@@ -269,12 +371,123 @@ module.exports = {
     '@kbn/disable/no_naked_eslint_disable': 'error',
     '@kbn/eslint/no_async_promise_body': 'error',
     '@kbn/eslint/no_async_foreach': 'error',
+    '@kbn/eslint/require_kibana_feature_privileges_naming': 'warn',
     '@kbn/eslint/no_trailing_import_slash': 'error',
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
+    '@kbn/eslint/no_conditional_saved_object_type_registration': 'error',
+    '@kbn/eslint/no_unsafe_console': 'error',
+    '@kbn/eslint/no_unsafe_hash': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
     '@kbn/imports/no_boundary_crossing': 'error',
+    '@kbn/imports/no_group_crossing_manifests': 'error',
+    '@kbn/imports/no_group_crossing_imports': 'error',
+    '@kbn/imports/no_direct_handlebars_import': 'error',
+    '@kbn/imports/no_direct_monaco_import': 'warn',
+    '@kbn/imports/no_undeclared_plugin_target': 'error',
+    'no-new-func': 'error',
+    'no-implied-eval': 'error',
+    'no-prototype-builtins': 'error',
+
+    /**
+     * kbn-ui rules
+     */
+    '@kbn/kbn-ui/prefer_toast_action_props': 'warn',
+    '@kbn/kbn-ui/prefer_kbn_ui_callout': 'warn',
+    '@kbn/kbn-ui/no_restricted_package_imports': 'error',
+
+    /**
+     * EUI Team rules
+     */
+
+    '@elastic/eui/callout-prefer-props-for-content': [
+      'warn',
+      {
+        components: [
+          'EuiCallOut',
+          'KbnInfoCallout',
+          'KbnSuccessCallout',
+          'KbnWarningCallout',
+          'KbnDangerCallout',
+        ],
+      },
+    ],
+    '@elastic/eui/no-restricted-eui-imports': [
+      'warn',
+      {
+        patterns: ['@kbn/ui-theme'],
+        message: 'For client-side, please use `useEuiTheme` instead.',
+      },
+    ],
+
+    /**
+     * a11y-related rules:
+     * all existing violations were fixed; keep this as error to prevent new ones.
+     */
+    '@elastic/eui/callout-announce-on-mount': 'error',
+    '@elastic/eui/prefer-eui-icon-tip': 'error',
+    '@elastic/eui/sr-output-disabled-tooltip': 'error',
+    '@elastic/eui/badge-accessibility-rules': 'error',
+    '@elastic/eui/no-unnamed-interactive-element': 'error',
+    '@elastic/eui/consistent-is-invalid-props': 'error',
+    '@elastic/eui/tooltip-no-interactive-content': 'error',
+    '@elastic/eui/require-table-caption': 'error',
+    '@elastic/eui/accessible-interactive-element': 'error',
+    '@elastic/eui/icon-accessibility-rules': 'error',
+    '@elastic/eui/tooltip-button-icon-wrap': 'error',
+    '@elastic/eui/tooltip-focusable-anchor': 'error',
+    '@elastic/eui/no-unnamed-radio-group': 'error',
+    '@elastic/eui/require-aria-label-for-modals': 'error',
   },
+
+  overrides: [
+    {
+      files: [
+        'src/platform/plugins/private/event_annotation/**/*',
+        'src/platform/plugins/private/event_annotation_listing/**/*',
+        'src/platform/plugins/private/vis_default_editor/**/*',
+        'src/platform/plugins/private/vis_types/**/*',
+        'src/platform/plugins/shared/chart_expressions/**/*',
+        'src/platform/plugins/shared/charts/**/*',
+        'src/platform/plugins/shared/expressions/**/*',
+        'src/platform/plugins/shared/vis_types/**/*',
+        'src/platform/plugins/shared/visualization_listing/**/*',
+        'src/platform/plugins/shared/visualizations/**/*',
+        'x-pack/platform/plugins/shared/lens/**/*',
+        'x-pack/platform/plugins/private/graph/**/*',
+        'src/platform/packages/private/kbn-lens-formula-docs/**/*',
+        'src/platform/packages/shared/kbn-lens-common/**/*',
+        'src/platform/packages/shared/kbn-lens-common-2/**/*',
+        'src/platform/packages/shared/kbn-coloring/**/*',
+        'src/platform/packages/shared/kbn-chart-icons/**/*',
+        'src/platform/packages/shared/kbn-event-annotation-common/**/*',
+        'src/platform/packages/shared/kbn-event-annotation-components/**/*',
+      ],
+      rules: {
+        '@kbn/eslint/no_viz_naming': 'error',
+      },
+    },
+    {
+      files: [
+        'src/platform/plugins/**/server/index.ts',
+        'x-pack/platform/plugins/**/server/index.ts',
+        'x-pack/solutions/**/plugins/**/server/index.ts',
+        'examples/**/server/index.ts',
+        'packages/kbn-mock-idp-plugin/server/index.ts',
+      ],
+      excludedFiles: ['**/test/**'],
+      rules: {
+        /**
+         * Plugin server entry should not load ./plugin until the plugin is enabled.
+         * @see https://github.com/elastic/kibana/pull/170856
+         * @see https://github.com/elastic/kibana/issues/171080
+         *
+         * Enforced in CI; violation count should fall as lazy-load `server/index.ts` migrations land.
+         */
+        '@kbn/eslint/no_sync_import_from_plugin': 'error',
+      },
+    },
+  ],
 };

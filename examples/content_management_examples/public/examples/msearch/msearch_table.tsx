@@ -1,17 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 import { useContentClient } from '@kbn/content-management-plugin/public';
+import { TableListView } from '@kbn/content-management-table-list-view';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-server';
 import React from 'react';
-import { SavedObjectsFindOptionsReference } from '@kbn/core-saved-objects-api-browser';
-
-const LISTING_LIMIT = 1000;
 
 export const MSearchTable = () => {
   const contentClient = useContentClient();
@@ -33,7 +33,6 @@ export const MSearchTable = () => {
       },
       contentTypes: [
         { contentTypeId: 'map' },
-        { contentTypeId: 'dashboard' },
         { contentTypeId: 'visualization' },
         { contentTypeId: 'lens' },
         { contentTypeId: 'search' },
@@ -53,14 +52,13 @@ export const MSearchTable = () => {
       id="cm-msearch-table"
       headingId="cm-msearch-table-heading"
       findItems={findItems}
-      listingLimit={LISTING_LIMIT}
       initialPageSize={50}
       entityName={`ContentItem`}
       entityNamePlural={`ContentItems`}
       title={`MSearch Demo`}
       urlStateEnabled={false}
       emptyPrompt={<>No data found. Try to install some sample data first.</>}
-      onClickTitle={(item) => {
+      getOnClickTitle={(item) => () => {
         alert(`Clicked item ${item.attributes.title} (${item.id})`);
       }}
     />

@@ -1,11 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCheckbox,
@@ -20,34 +23,35 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiTabbedContent,
-  EuiTabbedContentTab,
   EuiText,
   EuiTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
-import { IInspectorInfo } from '@kbn/data-plugin/common';
-import {
-  DataPublicPluginStart,
-  IKibanaSearchResponse,
-  isCompleteResponse,
-  isErrorResponse,
-} from '@kbn/data-plugin/public';
-import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import type { CoreStart } from '@kbn/core/public';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { IInspectorInfo } from '@kbn/data-plugin/common';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CreateAggConfigParams } from '@kbn/data-plugin/common';
 import React, { useEffect, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
-import { IMyStrategyResponse } from '../../common/types';
+import type { IMyStrategyResponse } from '../../common/types';
 
-interface SearchExamplesAppDeps {
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
+interface SearchExamplesAppDeps
+  extends Pick<
+    CoreStart,
+    'notifications' | 'http' | 'analytics' | 'i18n' | 'theme' | 'userProfile'
+  > {
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -87,6 +91,7 @@ export const SearchExamplesApp = ({
   navigation,
   data,
   unifiedSearch,
+  ...startServices
 }: SearchExamplesAppDeps) => {
   const { IndexPatternSelect } = unifiedSearch.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
@@ -109,6 +114,7 @@ export const SearchExamplesApp = ({
   const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
   const [warningContents, setWarningContents] = useState<SearchResponseWarning[]>([]);
   const [selectedTab, setSelectedTab] = useState(0);
+  const styles = useMemoCss(componentStyles);
 
   function setResponse(response: IKibanaSearchResponse) {
     setWarningContents([]);
@@ -181,13 +187,15 @@ export const SearchExamplesApp = ({
     const aggs = [{ type: metricAggType, params: { field: selectedNumericField!.name } }];
     const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl();
 
+    const body = {
+      aggs: aggsDsl,
+      query,
+    };
+
     const req = {
       params: {
         index: dataView.title,
-        body: {
-          aggs: aggsDsl,
-          query,
-        },
+        ...body,
       },
       // Add a custom request parameter to be consumed by `MyStrategy`.
       ...(strategy ? { get_cool: getCool } : {}),
@@ -197,10 +205,23 @@ export const SearchExamplesApp = ({
     setAbortController(abortController);
 
     // Submit the search request using the `data.search` service.
-    setRequest(req.params.body);
+    setRequest(body);
     setRawResponse({});
     setWarningContents([]);
     setIsLoading(true);
+
+    const result = await data.search.dslPaginated({
+      index: dataView,
+      query,
+      size: 100,
+      sort: [{ '@timestamp': 'desc' }],
+    });
+
+    // Fetch next page
+    if (result.pagination.hasNextPage) {
+      const nextPage = await result.pagination.nextPage();
+      void nextPage;
+    }
 
     data.search
       .search(req, {
@@ -210,7 +231,7 @@ export const SearchExamplesApp = ({
       })
       .subscribe({
         next: (res) => {
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             setResponse(res);
             const aggResult: number | undefined = res.rawResponse.aggregations
@@ -221,7 +242,7 @@ export const SearchExamplesApp = ({
             const executedAt = (res as IMyStrategyResponse).executed_at;
             const message = (
               <EuiText>
-                Searched {res.rawResponse.hits.total} documents. <br />
+                Searched {res.rawResponse.hits.total as number} documents. <br />
                 The ${metricAggType} of {selectedNumericField!.name} is{' '}
                 {aggResult ? Math.floor(aggResult) : 0}.
                 <br />
@@ -233,23 +254,15 @@ export const SearchExamplesApp = ({
               </EuiText>
             );
             notifications.toasts.addSuccess(
-              {
-                title: 'Query result',
-                text: toMountPoint(message),
-              },
-              {
-                toastLifeTimeMs: 300000,
-              }
+              { title: 'Query result', text: toMountPoint(message, startServices) },
+              { toastLifeTimeMs: 300000 }
             );
             if (res.warning) {
               notifications.toasts.addWarning({
                 title: 'Warning',
-                text: toMountPoint(res.warning),
+                text: toMountPoint(res.warning, startServices),
               });
             }
-          } else if (isErrorResponse(res)) {
-            // TODO: Make response error status clearer
-            notifications.toasts.addDanger('An error has occurred');
           }
         },
         error: (e) => {
@@ -283,7 +296,7 @@ export const SearchExamplesApp = ({
         .setField('size', selectedFields.length ? 100 : 0)
         .setField('trackTotalHits', 100);
 
-      const aggDef = [];
+      const aggDef: CreateAggConfigParams[] = [];
       if (selectedBucketField) {
         aggDef.push({
           type: bucketAggType,
@@ -315,17 +328,15 @@ export const SearchExamplesApp = ({
       const result = await lastValueFrom(
         searchSource.fetch$({
           abortSignal: abortController.signal,
-          disableShardFailureWarning: !showWarningToastNotifications,
+          disableWarningToasts: !showWarningToastNotifications,
           inspector,
         })
       );
       setRawResponse(result.rawResponse);
 
-      /* Here is an example of using showWarnings on the search service, using an optional callback to
-       * intercept the warnings before notification warnings are shown.
-       *
-       * Suppressing the shard failure warning notification from appearing by default requires setting
-       * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
+      /*
+       * Set disableWarningToasts to true to disable warning toasts and customize warning display.
+       * Then use showWarnings to customize warning notification.
        */
       if (showWarningToastNotifications) {
         setWarningContents([]);
@@ -339,11 +350,13 @@ export const SearchExamplesApp = ({
         setWarningContents(warnings);
       }
 
-      const message = <EuiText>Searched {result.rawResponse.hits.total} documents.</EuiText>;
+      const message = (
+        <EuiText>Searched {result.rawResponse.hits.total as number} documents.</EuiText>
+      );
       notifications.toasts.addSuccess(
         {
           title: 'Query result',
-          text: toMountPoint(message),
+          text: toMountPoint(message, startServices),
         },
         {
           toastLifeTimeMs: 300000,
@@ -395,16 +408,12 @@ export const SearchExamplesApp = ({
       .subscribe({
         next: (res) => {
           setResponse(res);
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             notifications.toasts.addSuccess({
               title: 'Query result',
               text: 'Query finished',
             });
-          } else if (isErrorResponse(res)) {
-            setIsLoading(false);
-            // TODO: Make response error status clearer
-            notifications.toasts.addWarning('An error has occurred');
           }
         },
         error: (e) => {
@@ -506,7 +515,7 @@ export const SearchExamplesApp = ({
             {' '}
             <FormattedMessage
               id="searchExamples.warningsObject"
-              defaultMessage="Timeout and shard failure warnings for high-level search may be handled in a callback to the showWarnings method on the search service."
+              defaultMessage="Search warnings may optionally be handed with search service showWarnings method."
             />{' '}
           </EuiText>{' '}
           <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />{' '}
@@ -562,8 +571,9 @@ export const SearchExamplesApp = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormLabel>Field (using {bucketAggType} buckets)</EuiFormLabel>
+            <EuiFormLabel id="bucketFieldLabel">Field (using {bucketAggType} buckets)</EuiFormLabel>
             <EuiComboBox
+              aria-labelledby="bucketFieldLabel"
               options={formatFieldsToComboBox(getAggregatableStrings(fields))}
               selectedOptions={formatFieldToComboBox(selectedBucketField)}
               singleSelection={true}
@@ -580,8 +590,11 @@ export const SearchExamplesApp = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormLabel>Numeric Field (using {metricAggType} metrics)</EuiFormLabel>
+            <EuiFormLabel id="metricFieldLabel">
+              Numeric Field (using {metricAggType} metrics)
+            </EuiFormLabel>
             <EuiComboBox
+              aria-labelledby="metricFieldLabel"
               options={formatFieldsToComboBox(getNumeric(fields))}
               selectedOptions={formatFieldToComboBox(selectedNumericField)}
               singleSelection={true}
@@ -598,8 +611,9 @@ export const SearchExamplesApp = ({
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormLabel>Fields to queryString</EuiFormLabel>
+            <EuiFormLabel id="queryStringFieldsLabel">Fields to queryString</EuiFormLabel>
             <EuiComboBox
+              aria-labelledby="queryStringFieldsLabel"
               options={formatFieldsToComboBox(fields)}
               selectedOptions={formatFieldsToComboBox(selectedFields)}
               singleSelection={false}
@@ -634,7 +648,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from low-level client (data.search.search)."
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={styles.stepDsc}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Metrics aggregation with raw documents in response."
@@ -651,7 +665,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from high-level client (data.search.searchSource)"
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={styles.stepDsc}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Bucket and metrics aggregations, with other bucket and default warnings."
@@ -668,7 +682,7 @@ export const SearchExamplesApp = ({
                   defaultMessage="Request from high-level client (data.search.searchSource)"
                 />
               </EuiButtonEmpty>
-              <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
+              <EuiText size="xs" color="subdued" css={styles.stepDsc}>
                 <FormattedMessage
                   id="searchExamples.buttonText"
                   defaultMessage="Bucket and metrics aggregations, without other bucket and with custom logic to handle warnings."
@@ -825,7 +839,7 @@ export const SearchExamplesApp = ({
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem style={{ width: '60%' }}>
+          <EuiFlexItem css={styles.tabbedContentContainer}>
             <EuiTabbedContent
               tabs={reqTabs}
               selectedTab={reqTabs[selectedTab]}
@@ -845,4 +859,15 @@ export const SearchExamplesApp = ({
       </EuiPageTemplate.Section>
     </>
   );
+};
+
+const componentStyles = {
+  stepDsc: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      paddingLeft: euiTheme.size.xl,
+      fontStyle: 'italic',
+    }),
+  tabbedContentContainer: css({
+    width: '60%',
+  }),
 };

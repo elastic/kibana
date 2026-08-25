@@ -1,21 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useMemo } from 'react';
-import { DragDrop, DropOverlayWrapper, DropType, useDragDropContext } from '@kbn/dom-drag-drop';
+import type { DropType } from '@kbn/dom-drag-drop';
+import { DropOverlayWrapper, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
 const DROP_PROPS = {
@@ -48,8 +42,7 @@ export const ExampleDropZone: React.FC<ExampleDropZoneProps> = ({ onDropField })
   const isDropAllowed = Boolean(onDroppingField);
 
   return (
-    <DragDrop
-      draggable={false}
+    <Droppable
       dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
       value={DROP_PROPS.value}
       order={DROP_PROPS.order}
@@ -58,7 +51,7 @@ export const ExampleDropZone: React.FC<ExampleDropZoneProps> = ({ onDropField })
       <DropOverlayWrapper isVisible={isDropAllowed}>
         <EuiPanel hasShadow={false} paddingSize="l" className="eui-fullHeight">
           <EuiEmptyPrompt
-            iconType="beaker"
+            iconType="flask"
             title={<h3>Example drop zone</h3>}
             body={
               <p>
@@ -68,6 +61,6 @@ export const ExampleDropZone: React.FC<ExampleDropZoneProps> = ({ onDropField })
           />
         </EuiPanel>
       </DropOverlayWrapper>
-    </DragDrop>
+    </Droppable>
   );
 };

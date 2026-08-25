@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/router-utils",
+  "owner": [
+    "@elastic/obs-signals-traces-team",
+    "@elastic/obs-signals-metrics-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

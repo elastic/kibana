@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
-import { createSession, Session } from '../lib/session';
+import type { Logger, IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
+import type { Session } from '../lib/session';
+import { createSession } from '../lib/session';
 import { createDeferred } from '../lib/deferred';
 
 type StopProfilingFn = () => Promise<any>;

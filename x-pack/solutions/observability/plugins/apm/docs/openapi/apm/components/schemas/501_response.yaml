@@ -1,0 +1,14 @@
+type: object
+properties:
+  statusCode:
+    type: number
+    example: 501
+    description: Error status code
+  error:
+    type: string
+    example: Not Implemented
+    description: Error type
+  message:
+    type: string
+    example: Not Implemented
+    description: Error message

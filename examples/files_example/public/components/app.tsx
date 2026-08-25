@@ -1,27 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FilesClientResponses } from '@kbn/files-plugin/public';
 
+import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
+  EuiProvider,
   EuiPageTemplate,
   EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiButton,
   EuiIcon,
   EuiButtonIcon,
   EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { MyFilePicker } from './file_picker';
 import type { MyImageMetadata } from '../../common';
 import type { FileClients } from '../types';
@@ -59,7 +62,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
       <EuiButton
         onClick={() => setShowUploadModal(true)}
         isDisabled={isLoading || isDeletingFile}
-        iconType="exportAction"
+        iconType="upload"
       >
         Upload image
       </EuiButton>,
@@ -83,11 +86,11 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
       name: 'Status',
       render: (status: FileJSON['status']) =>
         status === 'READY' ? (
-          <EuiIcon color="success" type="checkInCircleFilled" aria-label={status} />
+          <EuiIcon color="success" type="checkCircleFill" aria-label={status} />
         ) : status === 'AWAITING_UPLOAD' ? (
           <EuiIcon type="clock" aria-label={status} />
         ) : (
-          <EuiIcon color="danger" type="warning" arial-label={status} />
+          <EuiIcon color="danger" type="warning" aria-label={status} />
         ),
     },
     {
@@ -98,12 +101,14 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           description: 'View file',
           isPrimary: true,
           render: (item) => (
-            <EuiButtonIcon
-              disabled={isDeletingFile}
-              aria-label="View file details"
-              iconType="eye"
-              onClick={() => setSelectedItem(item)}
-            />
+            <EuiToolTip content="View file details" disableScreenReaderOutput>
+              <EuiButtonIcon
+                disabled={isDeletingFile}
+                aria-label="View file details"
+                iconType="eye"
+                onClick={() => setSelectedItem(item)}
+              />
+            </EuiToolTip>
           ),
         },
         {
@@ -131,11 +136,12 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
   ];
 
   return (
-    <>
+    <EuiProvider highContrastMode={false}>
       <EuiPageTemplate restrictWidth>
         <EuiPageTemplate.Header pageTitle="Files example" />
         <EuiPageTemplate.Section>
           <EuiInMemoryTable
+            tableCaption="Files example"
             columns={columns}
             items={items}
             itemId="id"
@@ -185,6 +191,6 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           }}
         />
       )}
-    </>
+    </EuiProvider>
   );
 };

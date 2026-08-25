@@ -1,0 +1,13 @@
+openapi: 3.0.0
+info:
+  title: Sorting Schema
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    SortOrder:
+      type: string
+      enum:
+        - asc
+        - desc

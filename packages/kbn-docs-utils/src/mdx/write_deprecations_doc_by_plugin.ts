@@ -1,17 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import moment from 'moment';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
 import Fsp from 'fs/promises';
 import Path from 'path';
-import { ApiDeclaration, ApiReference, ReferencedDeprecationsByPlugin } from '../types';
+import type { ApiDeclaration, ApiReference, ReferencedDeprecationsByPlugin } from '../types';
 import { AUTO_GENERATED_WARNING } from '../auto_generated_warning';
 import { getPluginApiDocId } from '../utils';
 
@@ -47,7 +48,8 @@ export async function writeDeprecationDocByPlugin(
           api.parentPluginId
         )}" section="${api.id}" text="${api.label}"/>`;
 
-        const firstTen = refs.splice(0, 10);
+        const firstTen = refs.slice(0, 10);
+        const remainingCount = refs.length - 10;
         const referencedLocations =
           firstTen
             .map(
@@ -58,7 +60,7 @@ export async function writeDeprecationDocByPlugin(
                   ref.path
                 }#:~:text=${encodeURIComponent(api.label)})`
             )
-            .join(', ') + (refs.length > 0 ? `+ ${refs.length} more` : '');
+            .join(', ') + (remainingCount > 0 ? `+ ${remainingCount} more` : '');
 
         const removeBy = api.removeBy ? api.removeBy : '-';
 

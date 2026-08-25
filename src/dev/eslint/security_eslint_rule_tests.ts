@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as a from 'lodash'; // eslint-disable-line no-restricted-imports
@@ -49,6 +50,16 @@ require('lodash/fp/assoc'); // eslint-disable-line no-restricted-modules
 require('lodash/fp/assocPath'); // eslint-disable-line no-restricted-modules
 require('lodash/fp/template'); // eslint-disable-line no-restricted-modules
 
+// Adding some additional tests for Handlebars here, for more tests, see packages/kbn-eslint-plugin-imports/src/rules/no_direct_handlebars_import.test.ts
+import * as hb from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+import Handlebars from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+import { compile as hc } from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+import { precompile as hp } from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+import { template as ht } from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+import { SafeString as hs } from 'handlebars'; // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+
+require('handlebars'); // eslint-disable-line @kbn/imports/no_direct_handlebars_import
+
 const lodash = {
   set() {},
   setWith() {},
@@ -70,4 +81,4 @@ _.assocPath(); // eslint-disable-line no-restricted-properties
 _.template(); // eslint-disable-line no-restricted-properties
 
 // hack to ensure all imported variables are used
-module.exports = [a, b, c, d, e, f, g, h, i, j];
+module.exports = [a, b, c, d, e, f, g, h, i, j, hb, Handlebars, hc, hp, ht, hs];

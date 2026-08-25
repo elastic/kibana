@@ -1,0 +1,21 @@
+# TO_DATEPERIOD
+
+The TO_DATEPERIOD function converts an input value into a `date_period` value.
+
+## Syntax
+
+`TO_DATEPERIOD(field)`
+
+### Parameters
+
+#### field
+
+Input value. The input must be a valid constant date period expression.
+
+## Examples
+
+Adds and subtracts a date period of 3 days to and from a datetime value.
+```esql
+ROW x = "2024-01-01"::datetime
+| EVAL y = x + "3 DAYS"::date_period, z = x - TO_DATEPERIOD("3 days");
+```

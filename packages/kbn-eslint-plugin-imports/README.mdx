@@ -29,7 +29,7 @@ If a valid import request can't be resolved for some reason please reach out to 
 
 ## `@kbn/imports/uniform_imports`
 
-This rule validates that every import request in the repsitory follows a standard set of formatting rules. See the rule implemeation for a full breakdown but here is a breif summary:
+This rule validates that every import request in the repository follows a standard set of formatting rules. See the rule implementation for a full breakdown but here is a brief summary:
 
  - imports within a single package must use relative paths
  - imports across packages must reference the other package using it's module id
@@ -38,6 +38,10 @@ This rule validates that every import request in the repsitory follows a standar
  - unless this is a `require.resolve()`, the imports should not mention file extensions. `require.resolve()` calls will retain the extension if added manually
 
 This rule is not configurable, should never be skipped, and is auto-fixable.
+
+## `@kbn/imports/require_import`
+
+This rule validates that specific imports are present in a file. This allows you to e.g. require Mocha globals in test files automatically. Currently the only supported import type is a TypeScript reference type. This rule is auto-fixable.
 
 ## `@kbn/imports/exports_moved_packages`
 

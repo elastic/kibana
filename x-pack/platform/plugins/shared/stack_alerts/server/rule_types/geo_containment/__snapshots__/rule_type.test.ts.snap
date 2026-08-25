@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ruleType alert type creation structure is the expected value 1`] = `
+Object {
+  "context": Array [
+    Object {
+      "description": "The entity ID of the document that triggered the alert",
+      "name": "entityId",
+    },
+    Object {
+      "description": "The date the entity was recorded in the boundary",
+      "name": "entityDateTime",
+    },
+    Object {
+      "description": "The ID of the contained entity document",
+      "name": "entityDocumentId",
+    },
+    Object {
+      "description": "The end of the check interval when the alert occurred",
+      "name": "detectionDateTime",
+    },
+    Object {
+      "description": "The location of the entity",
+      "name": "entityLocation",
+    },
+    Object {
+      "description": "The ID of the boundary containing the entity. Value not set for recovered alerts",
+      "name": "containingBoundaryId",
+    },
+    Object {
+      "description": "The name of the boundary containing the entity. Value not set for recovered alerts",
+      "name": "containingBoundaryName",
+    },
+  ],
+}
+`;

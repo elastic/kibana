@@ -1,0 +1,16 @@
+title: Forbidden
+type: object
+required:
+  - statusCode
+  - error
+  - message
+properties:
+  statusCode:
+    type: number
+    example: 403
+  error:
+    type: string
+    example: Forbidden
+  message:
+    type: string
+    example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: action [slo_write] is unauthorized for user [limited_user] for REST request [/api/observability/slos]]: action [slo_write] is unauthorized for user [limited_user]"

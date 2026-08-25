@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-trained-models-utils",
+  "owner": [
+    "@elastic/search-ml-ux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

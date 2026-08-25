@@ -1,0 +1,3 @@
+{"attributes":{"fieldAttrs":"{\"message\":{\"count\":1}}","fieldFormatMap":"{}","fields":"[]","name":"MongoDB Logs","runtimeFieldMap":"{}","sourceFilters":"[]","timeFieldName":"@timestamp","title":"kbn-data-forge-fake_stack.mongodb-*","typeMeta":"{}"},"coreMigrationVersion":"8.8.0","created_at":"2023-05-04T17:25:28.125Z","id":"ab1c55e6-5258-41ab-bcb9-810260c1a957","managed":false,"references":[],"type":"index-pattern","typeMigrationVersion":"8.0.0","updated_at":"2023-05-04T17:25:47.092Z","version":"WzMxNSwxXQ=="}
+{"excludedObjects":[],"excludedObjectsCount":0,"exportedCount":1,"missingRefCount":0,"missingReferences":[]}
+

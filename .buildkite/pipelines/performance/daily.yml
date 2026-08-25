@@ -2,14 +2,20 @@ steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
 
   - wait
 
-  - label: '🧑‍🏭 Build Kibana Distribution and Plugins'
+  - label: '🧑‍🏭 Build Kibana Distribution'
     command: .buildkite/scripts/steps/build_kibana.sh
     agents:
-      queue: c2-16
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
@@ -17,22 +23,22 @@ steps:
     command: .buildkite/scripts/steps/functional/performance_playwright.sh
     env:
       PERFORMANCE_ENABLE_TELEMETRY: true
+      JOURNEYS_GROUP: daily
     agents:
       queue: kb-static-ubuntu
     depends_on: build
     key: tests
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '*'
-          limit: 1
+    timeout_in_minutes: 120
 
   - label: '📈 Report performance metrics to ci-stats'
     command: .buildkite/scripts/steps/functional/report_performance_metrics.sh
     agents:
-      queue: n2-2
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      localSsds: 1
+      localSsdInterface: nvme
+      machineType: n2-standard-2
     depends_on: tests
 
   - wait: ~
@@ -41,4 +47,7 @@ steps:
   - label: '🦸 Post-Build'
     command: .buildkite/scripts/lifecycle/post_build.sh
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2

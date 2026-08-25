@@ -1,12 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IRouter, RouteConfigOptions, HttpAuth } from '@kbn/core-http-server';
+import type { IRouter, HttpAuth } from '@kbn/core-http-server';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 describe('http auth', () => {
@@ -16,6 +17,7 @@ describe('http auth', () => {
     root = createRoot({
       plugins: { initialize: false },
       elasticsearch: { skipStartupConnectionCheck: true },
+      server: { restrictInternalApis: false },
     });
     await root.preboot();
   });
@@ -24,18 +26,21 @@ describe('http auth', () => {
     await root.shutdown();
   });
 
-  const registerRoute = (
-    router: IRouter,
-    auth: HttpAuth,
-    authRequired: RouteConfigOptions<'get'>['authRequired']
-  ) => {
+  const testRouteAuthz = {
+    enabled: false as const,
+    reason: 'This route is part of an HTTP integration test and does not require authorization.',
+  };
+
+  const registerRoute = (router: IRouter, auth: HttpAuth, authcEnabled: boolean | 'optional') => {
+    const security =
+      authcEnabled === true
+        ? { authz: testRouteAuthz }
+        : { authc: { enabled: authcEnabled, reason: '' }, authz: testRouteAuthz };
     router.get(
       {
         path: '/route',
+        security,
         validate: false,
-        options: {
-          authRequired,
-        },
       },
       (context, req, res) => res.ok({ body: { authenticated: auth.isAuthenticated(req) } })
     );

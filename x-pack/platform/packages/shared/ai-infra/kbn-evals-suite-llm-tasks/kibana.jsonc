@@ -1,0 +1,8 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-llm-tasks",
+  "owner": "@elastic/search-ml-ux",
+  "group": "platform",
+  "visibility": "shared"
+}
+

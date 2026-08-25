@@ -1,0 +1,25 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "kbn_references": [
+    "@kbn/datemath",
+    "@kbn/es-query",
+    "@kbn/i18n",
+    "@kbn/securitysolution-io-ts-list-types",
+    "@kbn/securitysolution-list-hooks",
+    "@kbn/securitysolution-list-utils",
+    "@kbn/securitysolution-utils",
+    "@kbn/kql",
+    "@kbn/kibana-react-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+}

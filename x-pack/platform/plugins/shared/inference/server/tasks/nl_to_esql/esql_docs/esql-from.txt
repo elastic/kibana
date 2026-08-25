@@ -1,0 +1,53 @@
+# FROM
+
+The FROM command returns a table containing data from a data stream, index, or alias. Each row in the resulting table represents a document, and each column corresponds to a field that can be accessed by its name. By default, queries without an explicit LIMIT use an implicit limit of 1000 rows.
+
+## Syntax
+
+`FROM index_pattern [METADATA fields]`
+
+### Parameters
+
+#### index_pattern
+
+A list of indices, data streams, or aliases. Wildcards and date math are supported.
+
+#### fields
+
+A comma-separated list of metadata fields to retrieve. This parameter is optional.
+
+## Examples
+
+Returns all documents from the `employees` index.
+```esql
+FROM employees
+```
+
+Retrieves documents from today's index using date math in the index name.
+```esql
+FROM <logs-{now/d}>
+```
+
+Fetches documents from multiple data streams, indices, or aliases using a comma-separated list or wildcards.
+```esql
+FROM employees-00001,other-employees-*
+```
+
+Queries data streams and indices located on remote clusters using the specified cluster and target format.
+```esql
+FROM cluster_one:employees-00001,cluster_two:other-employees-*
+```
+
+Retrieves documents from the `employees` index and includes the `_id` metadata field.
+```esql
+FROM employees METADATA _id
+```
+
+Accesses indices with special characters in their names by escaping them with double or triple double quotes.
+```esql
+FROM "this=that", """this[that"""
+```
+
+## Limitations
+
+By default, a query without an explicit LIMIT uses an implicit limit of 1000 rows. For example, `FROM employees` is executed as `FROM employees | LIMIT 1000`.

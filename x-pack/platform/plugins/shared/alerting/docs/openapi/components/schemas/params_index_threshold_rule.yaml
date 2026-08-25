@@ -1,0 +1,40 @@
+title: Index threshold rule params
+description: >-
+  An index threshold rule runs an Elasticsearch query, aggregates field values from documents, compares them to threshold values, and schedules actions to run when the thresholds are met. These parameters are appropriate when `rule_type_id` is `.index-threshold`.
+type: object
+required:
+  - index 
+  - threshold
+  - thresholdComparator
+  - timeField
+  - timeWindowSize
+  - timeWindowUnit
+properties:
+  aggField:
+    $ref: 'aggfield.yaml'
+  aggType:
+    $ref: 'aggtype.yaml'
+  filterKuery:
+    description: A KQL expression thats limits the scope of alerts.
+    type: string
+  groupBy:
+    $ref: 'groupby.yaml'
+  index:
+    description: The indices to query.
+    type: array
+    items:
+      type: string
+  termField:
+    $ref: 'termfield.yaml'
+  termSize:
+    $ref: 'termsize.yaml'
+  threshold:
+    $ref: 'threshold.yaml'
+  thresholdComparator:
+    $ref: 'thresholdcomparator.yaml'
+  timeField:
+    $ref: 'timefield.yaml'
+  timeWindowSize:
+    $ref: 'timewindowsize.yaml'
+  timeWindowUnit:
+    $ref: 'timewindowunit.yaml'

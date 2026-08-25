@@ -1,8 +1,10 @@
 {
   "type": "plugin",
   "id": "@kbn/locator-explorer-plugin",
-  "owner": "@elastic/kibana-app-services",
+  "owner": "@elastic/appex-sharedux",
   "description": "Example app that shows how to use custom URL locators",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "locatorExplorer",
     "server": false,

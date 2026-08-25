@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/user-profiles-consumer-plugin",
+  "owner": "@elastic/kibana-security",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "userProfilesConsumerPlugin",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "security",
+      "spaces",
+      "features"
+    ]
+  }
+}

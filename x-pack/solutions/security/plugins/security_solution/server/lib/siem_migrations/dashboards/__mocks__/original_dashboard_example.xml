@@ -1,0 +1,53 @@
+<dashboard version="1.1" theme="light">
+    <label>Dashboard example</label>
+    <row>
+        <panel>
+            <title>Number of dashboards by user | Search app only</title>
+            <chart>
+                <search>
+                    <query>| rest /servicesNS/-/-/data/ui/views
+                        | search eai:acl.app = "search" ```eai:acl.owner!="nobody"```
+                        | stats count by eai:acl.owner</query>
+                    <earliest>-24h@h</earliest>
+                    <latest>now</latest>
+                </search>
+                <option name="charting.chart">pie</option>
+                <option name="charting.drilldown">none</option>
+                <option name="height">309</option>
+            </chart>
+        </panel>
+        <panel>
+            <title>Number of custom dashboards in Search app</title>
+            <single>
+                <search>
+                    <query>| rest /servicesNS/-/-/data/ui/views
+                        | search eai:acl.app = "search" eai:acl.owner!="nobody"
+                        | stats count</query>
+                    <earliest>-24h@h</earliest>
+                    <latest>now</latest>
+                </search>
+                <option name="drilldown">none</option>
+                <option name="height">310</option>
+            </single>
+        </panel>
+    </row>
+    <row>
+        <panel>
+            <title>Number of dashboards by app</title>
+            <chart>
+                <search>
+                    <query>| rest /servicesNS/-/-/data/ui/views
+                        ```| search eai:acl.app = "search" ```
+                        | stats count by eai:acl.app | sort - count</query>
+                    <earliest>-24h@h</earliest>
+                    <latest>now</latest>
+                </search>
+                <option name="charting.axisLabelsX.majorLabelStyle.rotation">-45</option>
+                <option name="charting.chart">column</option>
+                <option name="charting.drilldown">none</option>
+                <option name="height">379</option>
+                <option name="refresh.display">progressbar</option>
+            </chart>
+        </panel>
+    </row>
+</dashboard>

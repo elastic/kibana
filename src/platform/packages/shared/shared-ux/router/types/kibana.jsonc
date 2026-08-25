@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-router-types",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "shared"
+}

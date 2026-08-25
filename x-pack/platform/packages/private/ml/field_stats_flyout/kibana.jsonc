@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/ml-field-stats-flyout",
+  "owner": [
+    "@elastic/search-ml-ux"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

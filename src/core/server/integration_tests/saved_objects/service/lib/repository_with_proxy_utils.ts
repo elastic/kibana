@@ -1,12 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import Hapi from '@hapi/hapi';
-import { IncomingMessage } from 'http';
+
+import type Hapi from '@hapi/hapi';
+import type { IncomingMessage } from 'http';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  type ISavedObjectTypeRegistry,
+  MAIN_SAVED_OBJECT_INDEX,
+} from '@kbn/core-saved-objects-server';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 // proxy setup
 const defaultProxyOptions = (hostname: string, port: string) => ({
@@ -15,6 +23,24 @@ const defaultProxyOptions = (hostname: string, port: string) => ({
   protocol: 'http' as 'http',
   passThrough: true,
 });
+
+// Netty 4.1.133+ strictly rejects HTTP/1.1 requests carrying both `Content-Length`
+// and `Transfer-Encoding` per RFC 9112 (CVE-2026-42585). Two sources combine to
+// produce such requests through the h2o2 proxy:
+//   1. `passThrough: true` forwards any inbound `Transfer-Encoding: chunked` header,
+//      while Wreck also adds `Content-Length` based on the buffered payload.
+//   2. h2o2 unconditionally adds `Transfer-Encoding: chunked` for DELETE requests
+//      whenever `request.payload` is truthy (the empty Buffer Hapi produces for a
+//      bodyless DELETE counts), then Wreck adds `Content-Length: 0`.
+// Normalize before proxying: drop any inbound `Transfer-Encoding` and clear empty
+// buffered payloads so h2o2 does not synthesize a chunked encoding.
+// See https://github.com/elastic/kibana/issues/141398.
+const normalizeRequestForProxy = (request: Hapi.Request) => {
+  delete request.headers['transfer-encoding'];
+  if (Buffer.isBuffer(request.payload) && request.payload.length === 0) {
+    (request as { payload: unknown }).payload = null;
+  }
+};
 
 let proxyInterrupt: string | null | undefined = null;
 
@@ -27,15 +53,29 @@ export const setProxyInterrupt = (
     | 'openPit'
     | 'deleteByNamespace'
     | 'internalBulkResolve'
+    | 'update'
+    | 'updatePreflight'
     | null
 ) => (proxyInterrupt = testArg);
 
 // passes the req/response directly as is
-const relayHandler = (h: Hapi.ResponseToolkit, hostname: string, port: string) => {
+const relayHandler = (
+  request: Hapi.Request,
+  h: Hapi.ResponseToolkit,
+  hostname: string,
+  port: string
+) => {
+  normalizeRequestForProxy(request);
   return h.proxy(defaultProxyOptions(hostname, port));
 };
 
-const proxyResponseHandler = (h: Hapi.ResponseToolkit, hostname: string, port: string) => {
+const proxyResponseHandler = (
+  request: Hapi.Request,
+  h: Hapi.ResponseToolkit,
+  hostname: string,
+  port: string
+) => {
+  normalizeRequestForProxy(request);
   return h.proxy({
     ...defaultProxyOptions(hostname, port),
     // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -63,10 +103,14 @@ export const declareGetRoute = (
     path: `/${kbnIndex}/_doc/{type*}`,
     options: {
       handler: (req, h) => {
-        if (req.params.type === 'my_type:myTypeId1' || req.params.type === 'my_type:myType_123') {
-          return proxyResponseHandler(h, hostname, port);
+        if (
+          req.params.type === 'my_type:myTypeId1' ||
+          req.params.type === 'my_type:myType_123' ||
+          proxyInterrupt === 'updatePreflight'
+        ) {
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -88,9 +132,9 @@ export const declareDeleteRoute = (
       },
       handler: (req, h) => {
         if (req.params._id === 'my_type:myTypeId1') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -108,9 +152,9 @@ export const declarePostBulkRoute = (hapiServer: Hapi.Server, hostname: string, 
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'bulkCreate') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -132,9 +176,9 @@ export const declarePostMgetRoute = (hapiServer: Hapi.Server, hostname: string, 
           proxyInterrupt === 'internalBulkResolve' ||
           proxyInterrupt === 'bulkDeleteMyDocs'
         ) {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -153,9 +197,9 @@ export const declareGetSearchRoute = (
       handler: (req, h) => {
         const payload = req.payload;
         if (!payload) {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -177,9 +221,9 @@ export const declarePostSearchRoute = (
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'find') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -201,9 +245,9 @@ export const declarePostUpdateRoute = (
       },
       handler: (req, h) => {
         if (req.params._id === 'my_type:myTypeToUpdate') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -225,9 +269,9 @@ export const declarePostPitRoute = (
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'openPit') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -249,9 +293,34 @@ export const declarePostUpdateByQueryRoute = (
       },
       handler: (req, h) => {
         if (proxyInterrupt === 'deleteByNamespace') {
-          return proxyResponseHandler(h, hostname, port);
+          return proxyResponseHandler(req, h, hostname, port);
         } else {
-          return relayHandler(h, hostname, port);
+          return relayHandler(req, h, hostname, port);
+        }
+      },
+    },
+  });
+
+// PUT _doc
+export const declareIndexRoute = (
+  hapiServer: Hapi.Server,
+  hostname: string,
+  port: string,
+  kbnIndex: string
+) =>
+  hapiServer.route({
+    method: ['PUT', 'POST'],
+    path: `/${kbnIndex}/_doc/{_id?}`,
+    options: {
+      payload: {
+        output: 'data',
+        parse: false,
+      },
+      handler: (req, h) => {
+        if (proxyInterrupt === 'update') {
+          return proxyResponseHandler(req, h, hostname, port);
+        } else {
+          return relayHandler(req, h, hostname, port);
         }
       },
     },
@@ -268,26 +337,37 @@ export const declarePassthroughRoute = (hapiServer: Hapi.Server, hostname: strin
         parse: false,
       },
       handler: (req, h) => {
-        return relayHandler(h, hostname, port);
+        return relayHandler(req, h, hostname, port);
       },
     },
   });
 
-export function allCombinationsPermutations<T>(collection: T[]): T[][] {
-  const recur = (subcollection: T[], size: number): T[][] => {
-    if (size <= 0) {
-      return [[]];
-    }
-    const permutations: T[][] = [];
-    subcollection.forEach((value, index, array) => {
-      array = array.slice();
-      array.splice(index, 1);
-      recur(array, size - 1).forEach((permutation) => {
-        permutation.unshift(value);
-        permutations.push(permutation);
-      });
-    });
-    return permutations;
-  };
-  return collection.map((_, n) => recur(collection, n + 1)).flat();
-}
+/**
+ * Obtain the versioned Kibana index, tipically used by the Elasticsearch client
+ * e.g. .kibana_8.15.0
+ * @returns string
+ */
+export const getVersionedKibanaIndex = (): string => {
+  return `${MAIN_SAVED_OBJECT_INDEX}_${pkg.version}`;
+};
+
+/**
+ * Obtain a comma separated list of all SO indices that contain namespace-aware SO types
+ * inspired on delete_by_namespace.ts
+ *
+ * @param registry The SO type registry to query registered types
+ * @returns string
+ */
+export const getIndicesWithNamespaceAwareTypes = (registry: ISavedObjectTypeRegistry): string => {
+  const allTypes = registry.getAllTypes();
+  const unique = (array: string[]) => [...new Set(array)];
+
+  return unique(
+    [
+      ...allTypes
+        .filter((type) => !registry.isNamespaceAgnostic(type.name))
+        .map(({ name }) => name),
+      LEGACY_URL_ALIAS_TYPE,
+    ].map((type) => `${registry.getIndex(type) || MAIN_SAVED_OBJECT_INDEX}_${pkg.version}`)
+  ).join(',');
+};

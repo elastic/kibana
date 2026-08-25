@@ -1,0 +1,19 @@
+# PI
+
+Returns Pi, the ratio of a circle’s circumference to its diameter.
+
+## Syntax
+
+`PI()`
+
+### Parameters
+
+This function does not take any parameters.
+
+## Examples
+
+Returns a single row containing the value of Pi.
+
+```esql
+ROW PI()
+```

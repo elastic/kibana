@@ -1,22 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React, { useContext, useEffect, useState } from 'react';
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import {
+  EuiProvider,
   EuiBasicTable,
-  EuiCallOut,
   EuiCodeBlock,
   EuiPageTemplate,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 import { ExpressionsContext } from './expressions_context';
 
 const expression = `getEvents
@@ -40,35 +43,37 @@ export function App() {
   }, [expressions]);
 
   return (
-    <EuiPageTemplate offset={0}>
-      <EuiPageTemplate.Header pageTitle="Partial Results Demo" />
-      <EuiPageTemplate.Section>
-        <EuiText data-test-subj="example-help">
-          <p>
-            This example listens for the window events and adds them to the table along with a
-            trigger counter.
-          </p>
-        </EuiText>
-        <EuiSpacer size={'m'} />
-        <EuiCodeBlock>{expression}</EuiCodeBlock>
-        <EuiSpacer size={'m'} />
-        {datatable ? (
-          <EuiBasicTable
-            textOnly={true}
-            data-test-subj={'example-table'}
-            columns={datatable.columns?.map(({ id: field, name }) => ({
-              field,
-              name,
-              'data-test-subj': `example-column-${field.toLowerCase()}`,
-            }))}
-            items={datatable.rows ?? []}
-          />
-        ) : (
-          <EuiCallOut color="success">
-            <p>Click or press any key.</p>
-          </EuiCallOut>
-        )}
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
+    <EuiProvider highContrastMode={false}>
+      <EuiPageTemplate offset={0}>
+        <EuiPageTemplate.Header pageTitle="Partial Results Demo" />
+        <EuiPageTemplate.Section>
+          <EuiText data-test-subj="example-help">
+            <p>
+              This example listens for the window events and adds them to the table along with a
+              trigger counter.
+            </p>
+          </EuiText>
+          <EuiSpacer size={'m'} />
+          <EuiCodeBlock>{expression}</EuiCodeBlock>
+          <EuiSpacer size={'m'} />
+          {datatable ? (
+            <EuiBasicTable
+              tableCaption={i18n.translate('partialResultsDemo.tableCaption', {
+                defaultMessage: 'Partial expression results',
+              })}
+              data-test-subj={'example-table'}
+              columns={datatable.columns?.map(({ id: field, name }) => ({
+                field,
+                name,
+                'data-test-subj': `example-column-${field.toLowerCase()}`,
+              }))}
+              items={datatable.rows ?? []}
+            />
+          ) : (
+            <KbnSuccessCallout announceOnMount={false} title="Click or press any key." />
+          )}
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    </EuiProvider>
   );
 }

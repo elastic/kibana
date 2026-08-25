@@ -5,10 +5,21 @@ set -euo pipefail
 source .buildkite/scripts/steps/functional/common.sh
 
 export JOB=kibana-fleet-cypress
+export KIBANA_INSTALL_DIR=${KIBANA_BUILD_LOCATION}
 
-echo "--- Fleet Cypress tests"
+echo "--- Fleet Cypress tests (Chrome)"
 
-node scripts/functional_tests \
-  --debug --bail \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
-  --config x-pack/test/fleet_cypress/cli_config.ts
+cd x-pack/platform/plugins/shared/fleet
+
+set +e
+yarn cypress:ci:run; status=$?; yarn cypress_space_awareness:ci:run; space_status=$?; yarn junit:merge || :
+
+# Scout reporter
+upload_scout_cypress_events "Fleet Cypress tests"
+
+# Exit with appropriate status
+if [ "$status" -ne 0 ]; then
+  exit $status
+elif [ "$space_status" -ne 0 ]; then
+  exit $space_status
+fi

@@ -1,0 +1,315 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { v4 as uuidv4 } from 'uuid';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+
+import { intersection } from 'lodash';
+
+import { AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
+
+import type { Agent } from '../../types';
+
+import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+
+import { outputType } from '../../../common/constants';
+
+import { invalidateAPIKeys } from '../api_keys';
+
+import { appContextService } from '../app_context';
+import { outputService } from '../output';
+
+import { getCurrentNamespace } from '../spaces/get_current_namespace';
+
+import { ActionRunner } from './action_runner';
+
+import { bulkUpdateAgents } from './crud';
+import {
+  bulkCreateAgentActionResults,
+  createAgentAction,
+  createErrorActionResults,
+  getUnenrollAgentActions,
+} from './actions';
+import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import { BulkActionTaskType } from './bulk_action_types';
+
+export class UnenrollActionRunner extends ActionRunner {
+  protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
+    return await unenrollBatch(this.soClient, this.esClient, agents, this.actionParams!);
+  }
+
+  protected getTaskType() {
+    return BulkActionTaskType.UNENROLL_RETRY;
+  }
+
+  protected getActionType() {
+    return 'UNENROLL';
+  }
+}
+
+export function isAgentUnenrolled(agent: Agent, revoke?: boolean): boolean {
+  return Boolean(
+    (revoke && agent.unenrolled_at) ||
+      (!revoke && (agent.unenrollment_started_at || agent.unenrolled_at))
+  );
+}
+
+export async function unenrollBatch(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  givenAgents: Agent[],
+  options: {
+    force?: boolean;
+    revoke?: boolean;
+    actionId?: string;
+    total?: number;
+    spaceId?: string;
+    startTime?: string;
+    skipActionCreation?: boolean;
+  }
+): Promise<{ actionId: string }> {
+  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+  const outgoingErrors: Record<Agent['id'], Error> = {};
+
+  // And which are allowed to unenroll
+  const agentsToUpdate = options.force
+    ? givenAgents
+    : givenAgents.reduce<Agent[]>((agents, agent) => {
+        if (isAgentUnenrolled(agent, options.revoke)) {
+          outgoingErrors[agent.id] = new FleetError(`Agent ${agent.id} already unenrolled`);
+        } else if (isHostedAgent(hostedPolicies, agent)) {
+          outgoingErrors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
+            `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
+          );
+        } else {
+          agents.push(agent);
+        }
+        return agents;
+      }, []);
+
+  const now = new Date().toISOString();
+  const actionId = options.actionId ?? uuidv4();
+  const total = options.total ?? givenAgents.length;
+  const agentIds = agentsToUpdate.map((agent) => agent.id);
+  const spaceId = options.spaceId;
+  const namespaces = spaceId ? [spaceId] : [];
+
+  // Scheduled unenrollment: create the action with a future start_time but do not
+  // mutate agent state or invalidate API keys yet — the execute phase does that.
+  if (options.startTime) {
+    await createAgentAction(esClient, soClient, {
+      id: actionId,
+      agents: agentIds,
+      created_at: now,
+      start_time: options.startTime,
+      type: 'UNENROLL',
+      total,
+      namespaces,
+    });
+
+    await createErrorActionResults(
+      esClient,
+      actionId,
+      outgoingErrors,
+      'cannot unenroll from a hosted policy or already unenrolled'
+    );
+
+    return { actionId };
+  }
+
+  // Update the necessary agents
+  const updateData = options.revoke
+    ? { unenrolled_at: now, active: false }
+    : { unenrollment_started_at: now };
+
+  await bulkUpdateAgents(
+    esClient,
+    agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData })),
+    outgoingErrors
+  );
+
+  if (options.revoke) {
+    // Get all API keys that need to be invalidated
+    await invalidateAPIKeysForAgents(agentsToUpdate);
+
+    if (!options.skipActionCreation) {
+      await updateActionsForForceUnenroll(esClient, soClient, agentIds, actionId, total);
+    } else {
+      // The scheduled UNENROLL action doc already exists; write results so the action
+      // flips to COMPLETE in the activity flyout instead of staying IN_PROGRESS.
+      await bulkCreateAgentActionResults(
+        esClient,
+        agentIds.map((agentId) => ({ agentId, actionId }))
+      );
+    }
+  } else {
+    // Create unenroll action for each agent
+    await createAgentAction(esClient, soClient, {
+      id: actionId,
+      agents: agentIds,
+      created_at: now,
+      type: 'UNENROLL',
+      total,
+      namespaces,
+    });
+  }
+
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    outgoingErrors,
+    'cannot unenroll from a hosted policy or already unenrolled'
+  );
+
+  return {
+    actionId,
+  };
+}
+
+export async function updateActionsForForceUnenroll(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agentIds: string[],
+  actionId: string,
+  total: number
+) {
+  // creating an action doc so that force unenroll shows up in activity
+  const currentSpaceId = getCurrentNamespace(soClient);
+  await createAgentAction(esClient, soClient, {
+    id: actionId,
+    agents: agentIds,
+    created_at: new Date().toISOString(),
+    type: 'FORCE_UNENROLL',
+    total,
+    namespaces: [currentSpaceId],
+  });
+  await bulkCreateAgentActionResults(
+    esClient,
+    agentIds.map((agentId) => ({
+      agentId,
+      actionId,
+    }))
+  );
+
+  // updating action results for those agents that are there in a pending unenroll action
+  const unenrollActions = await getUnenrollAgentActions(esClient);
+  for (const action of unenrollActions) {
+    const commonAgents = intersection(action.agents, agentIds);
+    if (commonAgents.length > 0) {
+      // filtering out agents with action results
+      const agentsToUpdate = await getAgentsWithoutActionResults(
+        esClient,
+        action.action_id!,
+        commonAgents
+      );
+      if (agentsToUpdate.length > 0) {
+        await bulkCreateAgentActionResults(
+          esClient,
+          agentsToUpdate.map((agentId) => ({
+            agentId,
+            actionId: action.action_id!,
+          }))
+        );
+      }
+    }
+  }
+}
+
+async function getAgentsWithoutActionResults(
+  esClient: ElasticsearchClient,
+  actionId: string,
+  commonAgents: string[]
+): Promise<string[]> {
+  try {
+    const res = await esClient.search({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      query: {
+        bool: {
+          must: [{ term: { action_id: actionId } }, { terms: { agent_id: commonAgents } }],
+        },
+      },
+      size: commonAgents.length,
+    });
+    const agentsToUpdate = commonAgents.filter(
+      (agentId) => !res.hits.hits.find((hit) => (hit._source as any)?.agent_id === agentId)
+    );
+    return agentsToUpdate;
+  } catch (err) {
+    if (err.statusCode === 404) {
+      // .fleet-actions-results does not yet exist
+      appContextService.getLogger().debug(err);
+    } else {
+      throw err;
+    }
+  }
+  return commonAgents;
+}
+
+export async function invalidateAPIKeysForAgents(agents: Agent[]) {
+  // Identify which output IDs are remote ES so their keys are not sent to the
+  // local cluster's invalidation API.
+  // Remote output keys are handled by Fleet Server using its own service-account
+  // credentials. Kibana cannot do this directly because the service token is
+  // stored in Fleet secrets, readable only by Fleet Server.
+  const allOutputIds = new Set<string>();
+  for (const agent of agents) {
+    if (agent.outputs) {
+      for (const outputId of Object.keys(agent.outputs)) {
+        allOutputIds.add(outputId);
+      }
+    }
+  }
+
+  const remoteOutputIds = new Set<string>();
+  await Promise.all(
+    [...allOutputIds].map(async (outputId) => {
+      try {
+        const output = await outputService.get(outputId);
+        if (output.type === outputType.RemoteElasticsearch) {
+          remoteOutputIds.add(outputId);
+        }
+      } catch {
+        // Output was deleted or not found, do nothing.
+      }
+    })
+  );
+
+  const localKeys: string[] = [];
+
+  for (const agent of agents) {
+    if (agent.access_api_key_id) {
+      localKeys.push(agent.access_api_key_id);
+    }
+    if (agent.default_api_key_id) {
+      localKeys.push(agent.default_api_key_id);
+    }
+    if (agent.default_api_key_history) {
+      agent.default_api_key_history.forEach((apiKey) => localKeys.push(apiKey.id));
+    }
+    if (agent.outputs) {
+      for (const [outputId, outputEntry] of Object.entries(agent.outputs)) {
+        if (remoteOutputIds.has(outputId)) {
+          appContextService
+            .getLogger()
+            .debug(`Skipping local API key invalidation for remote output ${outputId}`);
+          continue;
+        }
+        if (outputEntry.api_key_id) {
+          localKeys.push(outputEntry.api_key_id);
+        }
+        if (outputEntry.to_retire_api_key_ids) {
+          outputEntry.to_retire_api_key_ids.forEach((apiKey) => {
+            if (apiKey?.id) localKeys.push(apiKey.id);
+          });
+        }
+      }
+    }
+  }
+
+  if (localKeys.length) {
+    await invalidateAPIKeys(localKeys);
+  }
+}

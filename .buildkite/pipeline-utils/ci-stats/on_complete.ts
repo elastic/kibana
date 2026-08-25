@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BuildkiteClient } from '../buildkite';
@@ -11,6 +12,10 @@ import { CiStatsClient } from './client';
 
 const buildkite = new BuildkiteClient();
 const ciStats = new CiStatsClient();
+
+export function isMissingMergeBaseBaselineReport(reportMd: string): boolean {
+  return /ERROR: no builds found for mergeBase sha \[[a-f0-9]{40}\]/i.test(reportMd);
+}
 
 export async function onComplete() {
   if (!process.env.CI_STATS_BUILD_ID) {
@@ -26,15 +31,33 @@ export async function onComplete() {
     return;
   }
 
+  // Opt-out for artifact-reuse pipelines (e.g. kibana-evals-pr-llm-evals) with no bundle metrics,
+  // where the PR report always fails. Build already completed above.
+  if (process.env.CI_STATS_DISABLE_PR_REPORT === 'true') {
+    return;
+  }
+
   const report = await ciStats.getPrReport(process.env.CI_STATS_BUILD_ID);
   if (report?.md) {
-    buildkite.setMetadata('pr_comment:ci_stats_report:body', report.md);
+    // buildkite has a metadata size limit of 100kb, so we only add this, if it's small enough
+    if (new Blob([report.md]).size < 100000) {
+      buildkite.setMetadata('pr_comment:ci_stats_report:body', report.md);
+    } else {
+      buildkite.setMetadata(
+        'pr_comment:ci_stats_report:body',
+        'The CI Stats report is too large to be displayed here, check out the CI build annotation for this information.'
+      );
+    }
 
-    const annotationType = report?.success ? 'info' : 'error';
+    const annotationType = report.success
+      ? 'info'
+      : isMissingMergeBaseBaselineReport(report.md)
+      ? 'warning'
+      : 'error';
     buildkite.setAnnotation('ci-stats-report', annotationType, report.md);
   }
 
-  if (report && !report.success) {
+  if (report && !report.success && !isMissingMergeBaseBaselineReport(report.md)) {
     console.log('+++ CI Stats Report');
     console.error('Failing build due to CI Stats report. See annotation at top of build.');
     process.exit(1);

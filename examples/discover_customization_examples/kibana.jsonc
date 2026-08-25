@@ -2,10 +2,22 @@
   "type": "plugin",
   "id": "@kbn/discover-customization-examples-plugin",
   "owner": "@elastic/kibana-data-discovery",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "discoverCustomizationExamples",
     "server": false,
     "browser": true,
-    "requiredPlugins": ["controls", "developerExamples", "discover", "embeddable", "kibanaUtils"]
+    "requiredPlugins": [
+      "controls",
+      "developerExamples",
+      "discover",
+      "embeddable",
+      "kibanaUtils",
+      "data",
+      "savedSearch",
+      "uiActions"
+    ],
+    "requiredBundles": ["kibanaReact"]
   }
 }

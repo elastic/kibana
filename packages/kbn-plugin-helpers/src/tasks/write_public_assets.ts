@@ -1,17 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
+import Fs from 'fs';
+import Path from 'path';
 
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
 
-import { TaskContext } from '../task_context';
+import type { TaskContext } from '../task_context';
 
 const asyncPipeline = promisify(pipeline);
 
@@ -21,6 +25,9 @@ export async function writePublicAssets({ log, plugin, sourceDir, buildDir }: Ta
   }
 
   log.info('copying assets from `public/assets` to build');
+  if (!Fs.existsSync(Path.join(sourceDir, 'public/assets'))) {
+    return;
+  }
 
   await asyncPipeline(
     vfs.src(['public/assets/**/*'], {
@@ -28,6 +35,7 @@ export async function writePublicAssets({ log, plugin, sourceDir, buildDir }: Ta
       base: sourceDir,
       buffer: true,
       allowEmpty: true,
+      encoding: false,
     }),
     vfs.dest(buildDir)
   );

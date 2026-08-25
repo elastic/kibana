@@ -1,0 +1,7 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/react-field",
+  "owner": ["@elastic/kibana-data-discovery"],
+  "group": "platform",
+  "visibility": "shared"
+}

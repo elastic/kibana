@@ -1,9 +1,0 @@
-summary: A list of connector types
-value:
-  id: df770e30-8b8b-11ed-a780-3b746c987a81
-  name: my_server_log_connector
-  config: {}
-  connector_type_id: .server-log
-  is_preconfigured: false
-  is_deprecated: false
-  is_missing_secrets: false

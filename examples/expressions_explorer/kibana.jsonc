@@ -1,7 +1,9 @@
 {
   "type": "plugin",
   "id": "@kbn/expressions-explorer-plugin",
-  "owner": "@elastic/kibana-app-services",
+  "owner": "@elastic/kibana-visualizations",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "expressionsExplorer",
     "server": false,

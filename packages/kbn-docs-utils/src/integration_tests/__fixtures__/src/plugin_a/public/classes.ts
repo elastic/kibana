@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /* eslint-disable max-classes-per-file */
 
-import { FnTypeWithGeneric, ImAType } from './types';
+import type { FnTypeWithGeneric, ImAType } from './types';
 
 /**
  * @internal
@@ -115,3 +116,54 @@ export interface ExampleInterface extends AnotherInterface<string> {
 export interface IReturnAReactComponent {
   component: React.ComponentType;
 }
+
+// Expected issues:
+//   missing comments (9):
+//     line 32 - t
+//     line 41 - t
+//     line 44 - ExampleClass
+//     line 50 - component
+//     line 52 - Constructor
+//     line 52 - t
+//     line 71 - CrazyClass
+//     line 94 - foo
+//     line 117 - component
+//   param doc mismatches (3):
+//     line 52 - Constructor
+//     line 91 - anOptionalFn
+//     line 101 - fnTypeWithGeneric
+//   missing complex type info (2):
+//     line 50 - component
+//     line 117 - component
+//   missing returns (7):
+//     line 52 - Constructor
+//     line 56 - arrowFn
+//     line 62 - getVar
+//     line 78 - getAPromiseThatResolvesToString
+//     line 91 - anOptionalFn
+//     line 101 - fnTypeWithGeneric
+//     line 107 - fnTypeWithGenericThatIsOptional
+//   no references (23):
+//     line 28 - WithGen
+//     line 32 - t
+//     line 41 - t
+//     line 44 - ExampleClass
+//     line 50 - component
+//     line 52 - Constructor
+//     line 52 - t
+//     line 56 - arrowFn
+//     line 60 - a
+//     line 62 - getVar
+//     line 66 - a
+//     line 71 - CrazyClass
+//     line 73 - ExampleInterface
+//     line 78 - getAPromiseThatResolvesToString
+//     line 83 - aFnWithGen
+//     line 89 - t
+//     line 91 - anOptionalFn
+//     line 94 - foo
+//     line 96 - aFn
+//     line 101 - fnTypeWithGeneric
+//     line 107 - fnTypeWithGenericThatIsOptional
+//     line 113 - IReturnAReactComponent
+//     line 117 - component

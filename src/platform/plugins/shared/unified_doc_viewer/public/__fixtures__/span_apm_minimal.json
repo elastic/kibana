@@ -1,0 +1,11 @@
+{
+  "fields": {
+    "span.id": "051581bf3cb55c13",
+    "trace.id": "5b8aa5a2d2c872e8321cf37308d69df2",
+    "parent.id": "null",
+    "span.name": "Minimal APM span",
+    "span.duration.us": 1,
+    "span.type": "external",
+    "@timestamp": "1970-01-01T00:00:00.000Z"
+  }
+}

@@ -1,13 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
-import { pipeline } from 'stream';
+import { pipeline, Transform } from 'stream';
 import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
@@ -18,7 +19,7 @@ import ejs from 'ejs';
 import { Minimatch } from 'minimatch';
 
 import { snakeCase, camelCase, upperCamelCase } from './casing';
-import { Answers } from './ask_questions';
+import type { Answers } from './ask_questions';
 
 const asyncPipeline = promisify(pipeline);
 
@@ -40,6 +41,36 @@ const excludeFiles = (globs: string[]) => {
 };
 
 /**
+ * vinyl-fs 4 still emits directories (nodir is ignored). transformFileStream
+ * passes them through, and dest would otherwise write empty classic/ and di/.
+ */
+const dropDirectories = () =>
+  new Transform({
+    objectMode: true,
+    transform(file, _, cb) {
+      if (file.isDirectory()) {
+        cb();
+      } else {
+        cb(undefined, file);
+      }
+    },
+  });
+
+/**
+ * Strip the selected template tree (`classic/` or `di/`) so generated plugins
+ * still use `server/` and `public/` at the plugin root.
+ */
+const stripTemplateDir = (templateDir: 'classic' | 'di') =>
+  transformFileStream((file) => {
+    const prefix = `${templateDir}/`;
+    if (!file.relative.startsWith(prefix)) {
+      return;
+    }
+
+    file.path = Path.join(file.base, file.relative.slice(prefix.length));
+  });
+
+/**
  * Stream all the files from the template directory, ignoring
  * certain files based on the answers, process the .ejs templates
  * to the output files they represent, renaming the .ejs files to
@@ -54,12 +85,10 @@ export async function renderTemplates({
   answers: Answers;
 }) {
   const prettierConfig = await prettier.resolveConfig(process.cwd());
+  const useDi = !!answers.di;
 
   const defaultTemplateData = {
     name: answers.name,
-
-    internalPlugin: !!answers.internal,
-    thirdPartyPlugin: !answers.internal,
 
     hasServer: !!answers.server,
     hasUi: !!answers.ui,
@@ -79,17 +108,20 @@ export async function renderTemplates({
       buffer: true,
       nodir: true,
       cwd: Path.resolve(__dirname, '../template'),
+      encoding: false,
     }),
 
-    // exclude files from the template based on selected options, patterns
-    // are matched without the .ejs extension
+    // drop empty classic/ or di/ trees into the generated plugin
+    dropDirectories(),
+
+    // exclude the unused scaffold tree (paths still include classic/ or di/)
+    excludeFiles([useDi ? 'classic/**' : 'di/**']),
+
+    stripTemplateDir(useDi ? 'di' : 'classic'),
+
+    // exclude unused sides; patterns match paths without the .ejs extension
     excludeFiles(
-      ([] as string[]).concat(
-        answers.ui ? [] : 'public/**/*',
-        answers.ui && !answers.internal ? [] : ['translations/**/*', '.i18nrc.json'],
-        answers.server ? [] : 'server/**/*',
-        !answers.internal ? [] : ['.eslintrc.js', 'tsconfig.json', 'package.json', '.gitignore']
-      )
+      ([] as string[]).concat(answers.ui ? [] : 'public/**/*', answers.server ? [] : 'server/**/*')
     ),
 
     // render .ejs templates and rename to not use .ejs extension

@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export { roleDescriptorsFixture } from './roles_descriptors';
+export type { RoleDescriptorsFixture } from './roles_descriptors';
+
+export {
+  getDetectionRuleApiService,
+  getDetectionAlertsApiService,
+  getEntityAnalyticsApiService,
+  getCloudConnectorApiService,
+  getTimelineApiService,
+  getAttackDiscoveryApiService,
+  getCorrelationsApiService,
+  getPrevalenceApiService,
+  getAnalyzerApiService,
+  getNetworkApiService,
+  getHostApiService,
+  getUserApiService,
+} from './apis';
+export type {
+  DetectionRuleApiService,
+  DetectionAlertsApiService,
+  EntityAnalyticsApiService,
+  CloudConnectorApiService,
+  TimelineApiService,
+  AttackDiscoveryApiService,
+  CorrelationsApiService,
+  PrevalenceApiService,
+  AnalyzerApiService,
+  NetworkApiService,
+  HostApiService,
+  UserApiService,
+} from './apis';

@@ -1,0 +1,11 @@
+# overlays.yaml
+overlay: 1.0.0
+info:
+  title: Overlays for the alerting rule examples and parameters
+  version: 0.0.1
+actions:
+  # Fix some optional path parameters
+  - target: "$.paths['/api/alerting/rule/{id}']['post'].parameters[?(@.name=='id')]"
+    description: Remove optional indicator from path parameter
+    update:
+      required: true

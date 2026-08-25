@@ -1,0 +1,56 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiButtonIcon, EuiPopover, EuiToolTip } from '@elastic/eui';
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+
+interface PopoverTooltipProps {
+  ariaLabel?: string;
+  iconType?: string;
+  children: React.ReactNode;
+}
+
+export function PopoverTooltip({
+  ariaLabel,
+  iconType = 'question',
+  children,
+}: PopoverTooltipProps) {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  return (
+    <EuiPopover
+      anchorPosition={'upCenter'}
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      aria-label={
+        ariaLabel ??
+        i18n.translate('xpack.apm.popoverTooltip.ariaLabel', {
+          defaultMessage: 'More information',
+        })
+      }
+      button={
+        <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            data-test-subj="apmPopoverTooltipButton"
+            aria-label={ariaLabel}
+            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+              setIsPopoverOpen(!isPopoverOpen);
+              event.stopPropagation();
+            }}
+            size="xs"
+            color="primary"
+            iconType={iconType}
+            style={{ height: 'auto' }}
+          />
+        </EuiToolTip>
+      }
+    >
+      {children}
+    </EuiPopover>
+  );
+}

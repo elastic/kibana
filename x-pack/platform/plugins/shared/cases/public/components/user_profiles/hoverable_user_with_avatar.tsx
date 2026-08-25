@@ -1,0 +1,40 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { UserToolTip } from './user_tooltip';
+import { CaseUserAvatar } from './user_avatar';
+import type { UsernameProps } from './username';
+import { Username } from './username';
+
+export type HoverableUserWithAvatarProps = UsernameProps;
+
+const HoverableUserWithAvatarComponent: React.FC<HoverableUserWithAvatarProps> = ({
+  userInfo,
+  boldName,
+}) => {
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <CaseUserAvatar size="s" userInfo={userInfo} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction={'column'} gutterSize="none">
+          <EuiFlexItem>
+            <UserToolTip userInfo={userInfo}>
+              <Username userInfo={userInfo} boldName={boldName} />
+            </UserToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+HoverableUserWithAvatarComponent.displayName = 'HoverableUserWithAvatar';
+
+export const HoverableUserWithAvatar = React.memo(HoverableUserWithAvatarComponent);

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { captureErrorMock } from './router.test.mocks';
@@ -12,14 +13,22 @@ import { Stream } from 'stream';
 import Boom from '@hapi/boom';
 import supertest from 'supertest';
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
-import type { HttpService } from '@kbn/core-http-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
+import type { HttpService } from '@kbn/core-http-server-internal';
+import { createInternalHttpService } from '../utilities';
+
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -28,12 +37,16 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+  userActivity: userActivityServiceMock.createInternalSetupContract(),
 };
 
 beforeEach(async () => {
   logger = loggingSystemMock.create();
-  server = createHttpServer({ logger });
-  await server.preboot({ context: contextServiceMock.createPrebootContract() });
+  server = createInternalHttpService({ logger });
+  await server.preboot({
+    context: contextServiceMock.createPrebootContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
+  });
 });
 
 afterEach(async () => {
@@ -49,7 +62,22 @@ describe('Options', () => {
         const router = createRouter('/');
 
         router.get(
-          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          {
+            path: '/',
+            validate: false,
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+          },
           (context, req, res) =>
             res.ok({
               body: {
@@ -79,7 +107,22 @@ describe('Options', () => {
           return toolkit.authenticated();
         });
         router.get(
-          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          {
+            path: '/',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
           (context, req, res) =>
             res.ok({
               body: {
@@ -108,7 +151,22 @@ describe('Options', () => {
         registerAuth((req, res, toolkit) => toolkit.notHandled());
 
         router.get(
-          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          {
+            path: '/',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
           (context, req, res) =>
             res.ok({
               body: {
@@ -137,7 +195,22 @@ describe('Options', () => {
         registerAuth((req, res, toolkit) => res.unauthorized());
 
         router.get(
-          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          {
+            path: '/',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
           (context, req, res) =>
             res.ok({
               body: {
@@ -170,7 +243,22 @@ describe('Options', () => {
         );
 
         router.get(
-          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          {
+            path: '/',
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
           (context, req, res) =>
             res.ok({
               body: {
@@ -194,7 +282,11 @@ describe('Options', () => {
         const router = createRouter('/');
 
         router.get(
-          { path: '/', validate: false, options: { authRequired: true } },
+          {
+            path: '/',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
           (context, req, res) =>
             res.ok({
               body: {
@@ -224,7 +316,11 @@ describe('Options', () => {
           return toolkit.authenticated();
         });
         router.get(
-          { path: '/', validate: false, options: { authRequired: true } },
+          {
+            path: '/',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
           (context, req, res) =>
             res.ok({
               body: {
@@ -247,7 +343,11 @@ describe('Options', () => {
 
         registerAuth((req, res, toolkit) => toolkit.notHandled());
         router.get(
-          { path: '/', validate: false, options: { authRequired: true } },
+          {
+            path: '/',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
           (context, req, res) => res.ok({ body: 'ok' })
         );
         await server.start();
@@ -262,7 +362,11 @@ describe('Options', () => {
         registerAuth((req, res, toolkit) => res.unauthorized());
 
         router.get(
-          { path: '/', validate: false, options: { authRequired: true } },
+          {
+            path: '/',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
           (context, req, res) => res.ok({ body: 'ok' })
         );
         await server.start();
@@ -282,7 +386,11 @@ describe('Options', () => {
         );
 
         router.get(
-          { path: '/', validate: false, options: { authRequired: true } },
+          {
+            path: '/',
+            security: { authz: { enabled: false, reason: '' } },
+            validate: false,
+          },
           (context, req, res) => res.ok({ body: 'ok' })
         );
         await server.start();
@@ -306,7 +414,22 @@ describe('Options', () => {
         const authHook = jest.fn();
         registerAuth(authHook);
         router.get(
-          { path: '/', validate: false, options: { authRequired: false } },
+          {
+            path: '/',
+            security: {
+              authc: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+            validate: false,
+          },
           (context, req, res) =>
             res.ok({
               body: {
@@ -333,15 +456,15 @@ describe('Options', () => {
         let i = 0;
         const intervalId = setInterval(() => {
           if (i < body.length) {
-            request.write(body[i++]);
+            void request.write(body[i++]);
           } else {
             clearInterval(intervalId);
-            request.end((err, res) => {
+            void request.end((err, res) => {
               resolve(res);
             });
           }
         }, interval);
-        request.on('error', (err) => {
+        void request.on('error', (err) => {
           clearInterval(intervalId);
           reject(err);
         });
@@ -363,6 +486,7 @@ describe('Options', () => {
             },
             path: '/a',
             validate: false,
+            security: { authz: { enabled: false, reason: '' } },
           },
           async (context, req, res) => {
             return res.ok({});
@@ -388,6 +512,7 @@ describe('Options', () => {
         router.post(
           {
             path: '/a',
+            security: { authz: { enabled: false, reason: '' } },
             validate: false,
             options: { body: { accepts: 'application/json' }, timeout: { payload: 10000 } },
           },
@@ -408,19 +533,20 @@ describe('Options', () => {
     });
 
     describe('idleSocket', () => {
-      it.skip('should timeout if payload sending has too long of an idle period', async () => {
+      it('should timeout if payload sending has too long of an idle period', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
         router.post(
           {
             path: '/a',
+            security: { authz: { enabled: false, reason: '' } },
             validate: false,
             options: {
               body: {
                 accepts: ['application/json'],
               },
-              timeout: { idleSocket: 10 },
+              timeout: { idleSocket: 5 },
             },
           },
           async (context, req, res) => {
@@ -448,6 +574,7 @@ describe('Options', () => {
         router.post(
           {
             path: '/a',
+            security: { authz: { enabled: false, reason: '' } },
             validate: false,
             options: {
               body: {
@@ -481,6 +608,7 @@ describe('Options', () => {
         router.post(
           {
             path: '/a',
+            security: { authz: { enabled: false, reason: '' } },
             validate: false,
             options: {
               body: {
@@ -506,6 +634,7 @@ describe('Options', () => {
         router.post(
           {
             path: '/a',
+            security: { authz: { enabled: false, reason: '' } },
             validate: false,
             options: {
               body: {
@@ -535,7 +664,15 @@ describe('Cache-Control', () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false, options: {} }, (context, req, res) => res.ok());
+    router.get(
+      {
+        path: '/',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: false,
+        options: {},
+      },
+      (context, req, res) => res.ok()
+    );
     await server.start();
 
     await supertest(innerServer.listener)
@@ -547,12 +684,19 @@ describe('Cache-Control', () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false, options: {} }, (context, req, res) =>
-      res.ok({
-        headers: {
-          'Cache-Control': 'public, max-age=1200',
-        },
-      })
+    router.get(
+      {
+        path: '/',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: false,
+        options: {},
+      },
+      (context, req, res) =>
+        res.ok({
+          headers: {
+            'Cache-Control': 'public, max-age=1200',
+          },
+        })
     );
     await server.start();
 
@@ -565,9 +709,13 @@ describe('Handler', () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => {
-      throw new Error('unexpected error');
-    });
+    router.get(
+      { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+      (context, req, res) => {
+        throw new Error('unexpected error');
+      }
+    );
+
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -575,13 +723,9 @@ describe('Handler', () => {
     expect(result.body.message).toBe(
       'An internal server error occurred. Check Kibana server logs for details.'
     );
-    expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            [Error: unexpected error],
-          ],
-        ]
-    `);
+
+    const [message] = loggingSystemMock.collect(logger).error[0];
+    expect(message).toEqual('500 Server Error');
   });
 
   it('captures the error if handler throws', async () => {
@@ -589,9 +733,12 @@ describe('Handler', () => {
     const router = createRouter('/');
 
     const error = new Error(`some error`);
-    router.get({ path: '/', validate: false }, (context, req, res) => {
-      throw error;
-    });
+    router.get(
+      { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+      (context, req, res) => {
+        throw error;
+      }
+    );
     await server.start();
 
     await supertest(innerServer.listener).get('/').expect(500);
@@ -604,12 +751,15 @@ describe('Handler', () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => {
-      throw Boom.unauthorized();
-    });
+    router.get(
+      { security: { authz: { enabled: false, reason: '' } }, path: '/{query}', validate: false },
+      (context, req, res) => {
+        throw Boom.unauthorized();
+      }
+    );
     await server.start();
 
-    const result = await supertest(innerServer.listener).get('/').expect(500);
+    const result = await supertest(innerServer.listener).get('/some-data').expect(500);
 
     expect(result.body.message).toBe(
       'An internal server error occurred. Check Kibana server logs for details.'
@@ -617,7 +767,21 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unauthorized],
+          "500 Server Error",
+          Object {
+            "error": Object {
+              "message": "Unauthorized",
+            },
+            "http": Object {
+              "request": Object {
+                "method": "get",
+                "path": "/{query}",
+              },
+              "response": Object {
+                "status_code": 500,
+              },
+            },
+          },
         ],
       ]
     `);
@@ -628,7 +792,10 @@ describe('Handler', () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
     const router = createRouter('/');
-    router.get({ path: '/', validate: false }, (context, req, res) => 'ok' as any);
+    router.get(
+      { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+      (context, req, res) => 'ok' as any
+    );
     await server.start();
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
@@ -639,38 +806,138 @@ describe('Handler', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
       Array [
         Array [
-          [Error: Unexpected result from Route Handler. Expected KibanaResponse, but given: string.],
+          "500 Server Error",
+          Object {
+            "error": Object {
+              "message": "Unexpected result from Route Handler. Expected KibanaResponse, but given: string.",
+            },
+            "http": Object {
+              "request": Object {
+                "method": "get",
+                "path": "/",
+              },
+              "response": Object {
+                "status_code": 500,
+              },
+            },
+          },
         ],
       ]
     `);
   });
 
-  it('returns 400 Bad request if request validation failed', async () => {
-    const { server: innerServer, createRouter } = await server.setup(setupDeps);
-    const router = createRouter('/');
+  describe('returns 400 Bad request if request validation failed', () => {
+    it('@kbn/config-schema', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
 
-    router.get(
-      {
-        path: '/',
-        validate: {
-          query: schema.object({
-            page: schema.number(),
-          }),
+      router.get(
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: {
+            query: schema.object({
+              page: schema.number(),
+            }),
+          },
         },
-      },
-      (context, req, res) => res.noContent()
-    );
-    await server.start();
+        (context, req, res) => res.noContent()
+      );
+      await server.start();
 
-    const result = await supertest(innerServer.listener)
-      .get('/')
-      .query({ page: 'one' })
-      .expect(400);
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .query({ page: 'one' })
+        .expect(400);
 
-    expect(result.body).toEqual({
-      error: 'Bad Request',
-      message: '[request query.page]: expected value of type [number] but got [string]',
-      statusCode: 400,
+      expect(result.body).toEqual({
+        error: 'Bad Request',
+        message: '[request query.page]: expected value of type [number] but got [string]',
+        statusCode: 400,
+      });
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+              Array [
+                Array [
+                  "400 Bad Request",
+                  Object {
+                    "error": Object {
+                      "message": "[request query.page]: expected value of type [number] but got [string]",
+                    },
+                    "http": Object {
+                      "request": Object {
+                        "method": "get",
+                        "path": "/",
+                      },
+                      "response": Object {
+                        "status_code": 400,
+                      },
+                    },
+                  },
+                ],
+              ]
+          `);
+    });
+
+    it('@kbn/zod', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/');
+
+      router.get(
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: {
+            query: z.object({
+              page: z.number(),
+            }),
+          },
+        },
+        (context, req, res) => res.noContent()
+      );
+      await server.start();
+
+      const result = await supertest(innerServer.listener)
+        .get('/')
+        .query({ page: 'one' })
+        .expect(400);
+
+      expect(result.body).toEqual({
+        error: 'Bad Request',
+        message: expect.stringMatching(/Invalid input: expected number, received string/),
+        statusCode: 400,
+      });
+
+      expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
+        Array [
+          Array [
+            "400 Bad Request",
+            Object {
+              "error": Object {
+                "message": "[
+          {
+            \\"expected\\": \\"number\\",
+            \\"code\\": \\"invalid_type\\",
+            \\"path\\": [
+              \\"page\\"
+            ],
+            \\"message\\": \\"Invalid input: expected number, received string\\"
+          }
+        ]",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 400,
+                },
+              },
+            },
+          ],
+        ]
+      `);
     });
   });
 
@@ -682,6 +949,7 @@ describe('Handler', () => {
     router.post(
       {
         path: '/',
+        security: { authz: { enabled: false, reason: '' } },
         validate: {
           body: schema.arrayOf(schema.object({ foo: schema.string() })),
         },
@@ -709,6 +977,7 @@ describe('Handler', () => {
     router.post(
       {
         path: '/',
+        security: { authz: { enabled: false, reason: '' } },
         validate: {
           body: schema.number(),
         },
@@ -724,6 +993,84 @@ describe('Handler', () => {
 
     expect(body).toEqual(12);
   });
+
+  it('adds versioned header v2023-10-31 to public, unversioned routes', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.post(
+      {
+        path: '/public',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: { body: schema.object({ ok: schema.boolean() }) },
+        options: {
+          access: 'public',
+        },
+      },
+      (context, req, res) => {
+        if (req.body.ok) {
+          return res.ok({ body: 'ok', headers: { test: 'this' } });
+        }
+        return res.customError({ statusCode: 499, body: 'custom error' });
+      }
+    );
+    router.post(
+      {
+        path: '/internal',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: { body: schema.object({ ok: schema.boolean() }) },
+      },
+      (context, req, res) => {
+        return res.ok({ body: 'ok', headers: { test: 'this' } });
+      }
+    );
+    await server.start();
+
+    // Includes header if validation fails
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: null })
+        .expect(400);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Includes header if custom error
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: false })
+        .expect(499);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Includes header if OK
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/public')
+        .send({ ok: true })
+        .expect(200);
+      expect(headers).toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Internal unversioned routes do not include the header for OK
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/internal')
+        .send({ ok: true })
+        .expect(200);
+      expect(headers).not.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+
+    // Internal unversioned routes do not include the header for validation failures
+    {
+      const { headers } = await supertest(innerServer.listener)
+        .post('/internal')
+        .send({ ok: null })
+        .expect(400);
+      expect(headers).not.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+    }
+  });
 });
 
 describe('handleLegacyErrors', () => {
@@ -732,7 +1079,8 @@ describe('handleLegacyErrors', () => {
     const router = createRouter('/');
 
     router.get(
-      { path: '/', validate: false },
+      { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+
       router.handleLegacyErrors((context, req, res) => {
         throw Boom.notFound();
       })
@@ -751,6 +1099,7 @@ describe('handleLegacyErrors', () => {
     router.get(
       {
         path: '/',
+        security: { authz: { enabled: false, reason: '' } },
         validate: false,
       },
       router.handleLegacyErrors((context, req, res) => {
@@ -775,9 +1124,12 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok({ body: { key: 'value' } });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({ body: { key: 'value' } });
+        }
+      );
 
       await server.start();
 
@@ -791,9 +1143,12 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok({ body: 'result' });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({ body: 'result' });
+        }
+      );
 
       await server.start();
 
@@ -807,9 +1162,12 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok(undefined);
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok(undefined);
+        }
+      );
 
       await server.start();
 
@@ -820,18 +1178,21 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const stream = new Stream.Readable({
-          read() {
-            this.push('a');
-            this.push('b');
-            this.push('c');
-            this.push(null);
-          },
-        });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const stream = new Stream.Readable({
+            read() {
+              this.push('a');
+              this.push('b');
+              this.push('c');
+              this.push(null);
+            },
+          });
 
-        return res.ok({ body: stream });
-      });
+          return res.ok({ body: stream });
+        }
+      );
 
       await server.start();
 
@@ -846,23 +1207,26 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const stream = new Stream.Readable({
-          read() {
-            this.push('a');
-            this.push('b');
-            this.push('c');
-            this.push(null);
-          },
-        });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const stream = new Stream.Readable({
+            read() {
+              this.push('a');
+              this.push('b');
+              this.push('c');
+              this.push(null);
+            },
+          });
 
-        return res.ok({
-          body: stream,
-          headers: {
-            'Content-Type': 'text/plain',
-          },
-        });
-      });
+          return res.ok({
+            body: stream,
+            headers: {
+              'Content-Type': 'text/plain',
+            },
+          });
+        }
+      );
 
       await server.start();
 
@@ -876,22 +1240,25 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const stream = new Stream.PassThrough();
-        stream.write('a');
-        stream.write('b');
-        setTimeout(function () {
-          stream.write('c');
-          stream.end();
-        }, 100);
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const stream = new Stream.PassThrough();
+          stream.write('a');
+          stream.write('b');
+          setTimeout(function () {
+            stream.write('c');
+            stream.end();
+          }, 100);
 
-        return res.ok({
-          body: stream,
-          headers: {
-            'Content-Type': 'text/plain',
-          },
-        });
-      });
+          return res.ok({
+            body: stream,
+            headers: {
+              'Content-Type': 'text/plain',
+            },
+          });
+        }
+      );
 
       await server.start();
 
@@ -905,16 +1272,19 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const buffer = Buffer.alloc(1028, '.');
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const buffer = Buffer.alloc(1028, '.');
 
-        return res.ok({
-          body: buffer,
-          headers: {
-            'content-encoding': 'binary',
-          },
-        });
-      });
+          return res.ok({
+            body: buffer,
+            headers: {
+              'content-encoding': 'binary',
+            },
+          });
+        }
+      );
 
       await server.start();
 
@@ -929,16 +1299,19 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const buffer = Buffer.from('abc');
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const buffer = Buffer.from('abc');
 
-        return res.ok({
-          body: buffer,
-          headers: {
-            'content-type': 'text/plain',
-          },
-        });
-      });
+          return res.ok({
+            body: buffer,
+            headers: {
+              'content-type': 'text/plain',
+            },
+          });
+        }
+      );
 
       await server.start();
 
@@ -953,14 +1326,17 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok({
-          body: 'value',
-          headers: {
-            age: '42',
-          },
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({
+            body: 'value',
+            headers: {
+              age: '42',
+            },
+          });
+        }
+      );
 
       await server.start();
 
@@ -974,15 +1350,18 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok({
-          body: 'value',
-          headers: {
-            age: '42',
-            'x-kibana': 'key',
-          },
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({
+            body: 'value',
+            headers: {
+              age: '42',
+              'x-kibana': 'key',
+            },
+          });
+        }
+      );
 
       await server.start();
 
@@ -997,14 +1376,17 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok({
-          body: 'value',
-          headers: {
-            AgE: '42',
-          },
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({
+            body: 'value',
+            headers: {
+              AgE: '42',
+            },
+          });
+        }
+      );
 
       await server.start();
 
@@ -1017,14 +1399,17 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok({
-          body: 'value',
-          headers: {
-            'set-cookie': ['foo', 'bar'],
-          },
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({
+            body: 'value',
+            headers: {
+              'set-cookie': ['foo', 'bar'],
+            },
+          });
+        }
+      );
 
       await server.start();
 
@@ -1037,11 +1422,14 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const payload: any = { key: {} };
-        payload.key.payload = payload;
-        return res.ok({ body: payload });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const payload: any = { key: {} };
+          payload.key.payload = payload;
+          return res.ok({ body: payload });
+        }
+      );
 
       await server.start();
 
@@ -1055,9 +1443,12 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok({ body: { key: 'value' } });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.ok({ body: { key: 'value' } });
+        }
+      );
 
       await server.start();
 
@@ -1071,9 +1462,12 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.accepted({ body: { location: 'somewhere' } });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.accepted({ body: { location: 'somewhere' } });
+        }
+      );
 
       await server.start();
 
@@ -1087,9 +1481,12 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.noContent();
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.noContent();
+        }
+      );
 
       await server.start();
 
@@ -1104,15 +1501,18 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.redirected({
-          body: 'The document has moved',
-          headers: {
-            location: '/new-url',
-            'x-kibana': 'tag',
-          },
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.redirected({
+            body: 'The document has moved',
+            headers: {
+              location: '/new-url',
+              'x-kibana': 'tag',
+            },
+          });
+        }
+      );
 
       await server.start();
 
@@ -1127,13 +1527,16 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.redirected({
-          headers: {
-            'x-kibana': 'tag',
-          },
-        } as any); // location headers is required
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.redirected({
+            headers: {
+              'x-kibana': 'tag',
+            },
+          } as any); // location headers is required
+        }
+      );
 
       await server.start();
 
@@ -1145,7 +1548,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected 'location' header to be set],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "expected 'location' header to be set",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1157,10 +1574,13 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('some message');
-        return res.badRequest({ body: error });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = new Error('some message');
+          return res.badRequest({ body: error });
+        }
+      );
 
       await server.start();
 
@@ -1177,9 +1597,12 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.badRequest();
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.badRequest();
+        }
+      );
 
       await server.start();
 
@@ -1196,11 +1619,14 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.badRequest({
-          body: { message: 'some message', attributes: { data: ['good', 'bad'] } },
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.badRequest({
+            body: { message: 'some message', attributes: { data: ['good', 'bad'] } },
+          });
+        }
+      );
 
       await server.start();
 
@@ -1223,6 +1649,7 @@ describe('Response factory', () => {
       router.post(
         {
           path: '/',
+          security: { authz: { enabled: false, reason: '' } },
           validate: {
             body: ({ bar, baz } = {}, { ok, badRequest }) => {
               if (typeof bar === 'string' && typeof baz === 'number') {
@@ -1274,6 +1701,7 @@ describe('Response factory', () => {
       router.post(
         {
           path: '/',
+          security: { authz: { enabled: false, reason: '' } },
           validate: {
             body: schema.object({
               bar: schema.string(),
@@ -1326,19 +1754,91 @@ describe('Response factory', () => {
         });
     });
 
+    it('@kbn/config-schema validation in request.body', async () => {
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
+      const router = createRouter('/foo');
+
+      const runtimeValidation = schema.object({
+        bar: schema.string(),
+        baz: schema.number(),
+      });
+
+      router.post(
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: {
+            request: {
+              body: runtimeValidation,
+            },
+            response: {
+              200: {
+                body: () => runtimeValidation,
+              },
+            },
+          },
+        },
+        (context, req, res) => {
+          return res.ok({ body: req.body });
+        }
+      );
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 123,
+        })
+        .expect(200)
+        .then((res) => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: '123', // Automatic casting happens
+        })
+        .expect(200)
+        .then((res) => {
+          expect(res.body).toEqual({ bar: 'test', baz: 123 });
+        });
+
+      await supertest(innerServer.listener)
+        .post('/foo/')
+        .send({
+          bar: 'test',
+          baz: 'test', // Can't cast it into number
+        })
+        .expect(400)
+        .then((res) => {
+          expect(res.body).toEqual({
+            error: 'Bad Request',
+            message: '[request body.baz]: expected value of type [number] but got [string]',
+            statusCode: 400,
+          });
+        });
+    });
+
     it('401 Unauthorized', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('no access');
-        return res.unauthorized({
-          body: error,
-          headers: {
-            'WWW-Authenticate': 'challenge',
-          },
-        });
-      });
+      router.get(
+        { path: '/', security: { authz: { enabled: false, reason: '' } }, validate: false },
+        (context, req, res) => {
+          const error = new Error('no access');
+          return res.unauthorized({
+            body: error,
+            headers: {
+              'WWW-Authenticate': 'challenge',
+            },
+          });
+        }
+      );
 
       await server.start();
 
@@ -1352,9 +1852,12 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.unauthorized();
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.unauthorized();
+        }
+      );
 
       await server.start();
 
@@ -1367,10 +1870,13 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('reason');
-        return res.forbidden({ body: error });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = new Error('reason');
+          return res.forbidden({ body: error });
+        }
+      );
 
       await server.start();
 
@@ -1383,9 +1889,12 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.forbidden();
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.forbidden();
+        }
+      );
 
       await server.start();
 
@@ -1398,10 +1907,13 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('file is not found');
-        return res.notFound({ body: error });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = new Error('file is not found');
+          return res.notFound({ body: error });
+        }
+      );
 
       await server.start();
 
@@ -1414,9 +1926,12 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.notFound();
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.notFound();
+        }
+      );
 
       await server.start();
 
@@ -1429,10 +1944,13 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('stale version');
-        return res.conflict({ body: error });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = new Error('stale version');
+          return res.conflict({ body: error });
+        }
+      );
 
       await server.start();
 
@@ -1445,9 +1963,12 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.conflict();
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.conflict();
+        }
+      );
 
       await server.start();
 
@@ -1460,13 +1981,16 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
       const router = createRouter('/');
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('some message');
-        return res.customError({
-          body: error,
-          statusCode: 418,
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = new Error('some message');
+          return res.customError({
+            body: error,
+            statusCode: 418,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1483,14 +2007,17 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('some message');
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = new Error('some message');
 
-        return res.customError({
-          body: error,
-          statusCode: 500,
-        });
-      });
+          return res.customError({
+            body: error,
+            statusCode: 500,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1507,14 +2034,17 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('some message');
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = new Error('some message');
 
-        return res.customError({
-          body: Boom.boomify(error),
-          statusCode: 500,
-        });
-      });
+          return res.customError({
+            body: Boom.boomify(error),
+            statusCode: 500,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1531,13 +2061,16 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('some message');
-        return res.customError({
-          body: error,
-          statusCode: 200,
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = new Error('some message');
+          return res.customError({
+            body: error,
+            statusCode: 200,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1551,7 +2084,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: Unexpected Http status code. Expected from 400 to 599, but given: 200],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "Unexpected Http status code. Expected from 400 to 599, but given: 200",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1563,15 +2110,18 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom({
-          body: undefined,
-          statusCode: 201,
-          headers: {
-            location: 'somewhere',
-          },
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.custom({
+            body: undefined,
+            statusCode: 201,
+            headers: {
+              location: 'somewhere',
+            },
+          });
+        }
+      );
 
       await server.start();
 
@@ -1584,15 +2134,18 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom({
-          body: 'The document has moved',
-          headers: {
-            location: '/new-url',
-          },
-          statusCode: 301,
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.custom({
+            body: 'The document has moved',
+            headers: {
+              location: '/new-url',
+            },
+            statusCode: 301,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1605,13 +2158,16 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom({
-          body: 'The document has moved',
-          headers: {},
-          statusCode: 301,
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.custom({
+            body: 'The document has moved',
+            headers: {},
+            statusCode: 301,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1620,7 +2176,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected 'location' header to be set],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "expected 'location' header to be set",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1630,13 +2200,16 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('unauthorized');
-        return res.custom({
-          body: error,
-          statusCode: 401,
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = new Error('unauthorized');
+          return res.custom({
+            body: error,
+            statusCode: 401,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1649,15 +2222,18 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom({
-          body: {
-            message: 'unauthorized',
-            attributes: { errorCode: 'K401' },
-          },
-          statusCode: 401,
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.custom({
+            body: {
+              message: 'unauthorized',
+              attributes: { errorCode: 'K401' },
+            },
+            statusCode: 401,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1675,15 +2251,18 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom({
-          body: {
-            message: new Error('unauthorized'),
-            attributes: { errorCode: 'K401' },
-          },
-          statusCode: 401,
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.custom({
+            body: {
+              message: new Error('unauthorized'),
+              attributes: { errorCode: 'K401' },
+            },
+            statusCode: 401,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1701,13 +2280,16 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = Boom.unauthorized();
-        return res.custom({
-          body: error,
-          statusCode: 401,
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = Boom.unauthorized();
+          return res.custom({
+            body: error,
+            statusCode: 401,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1720,12 +2302,15 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom({
-          body: 'reason',
-          statusCode: 500,
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.custom({
+            body: 'reason',
+            statusCode: 500,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1743,12 +2328,15 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom({
-          body: { error: 'error-message' },
-          statusCode: 401,
-        });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.custom({
+            body: { error: 'error-message' },
+            statusCode: 401,
+          });
+        }
+      );
 
       await server.start();
 
@@ -1760,7 +2348,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected error message to be provided],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "expected error message to be provided",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1770,11 +2372,14 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom({
-          statusCode: 401,
-        } as any); // requires error message
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          return res.custom({
+            statusCode: 401,
+          } as any); // requires error message
+        }
+      );
 
       await server.start();
 
@@ -1786,7 +2391,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: expected error message to be provided],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "expected error message to be provided",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1796,10 +2415,13 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('error message');
-        return res.custom({ body: error } as any); // options.statusCode is required
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = new Error('error message');
+          return res.custom({ body: error } as any); // options.statusCode is required
+        }
+      );
 
       await server.start();
 
@@ -1811,7 +2433,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: options.statusCode is expected to be set. given options: undefined],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "options.statusCode is expected to be set. given options: undefined",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1821,10 +2457,13 @@ describe('Response factory', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
-      router.get({ path: '/', validate: false }, (context, req, res) => {
-        const error = new Error('error message');
-        return res.custom({ body: error, statusCode: 20 });
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        (context, req, res) => {
+          const error = new Error('error message');
+          return res.custom({ body: error, statusCode: 20 });
+        }
+      );
 
       await server.start();
 
@@ -1836,7 +2475,21 @@ describe('Response factory', () => {
       expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
         Array [
           Array [
-            [Error: Unexpected Http status code. Expected from 100 to 599, but given: 20.],
+            "500 Server Error",
+            Object {
+              "error": Object {
+                "message": "Unexpected Http status code. Expected from 100 to 599, but given: 20.",
+              },
+              "http": Object {
+                "request": Object {
+                  "method": "get",
+                  "path": "/",
+                },
+                "response": Object {
+                  "status_code": 500,
+                },
+              },
+            },
           ],
         ]
       `);
@@ -1852,6 +2505,7 @@ describe('ETag', () => {
     router.get(
       {
         path: '/route',
+        security: { authz: { enabled: false, reason: '' } },
         validate: false,
       },
       (context, req, res) =>
@@ -1878,6 +2532,7 @@ describe('ETag', () => {
       {
         path: '/route',
         validate: false,
+        security: { authz: { enabled: false, reason: '' } },
       },
       (context, req, res) =>
         res.ok({
@@ -1905,19 +2560,31 @@ describe('registerRouterAfterListening', () => {
     } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => {
-      return res.ok({ body: 'hello' });
-    });
+    router.get(
+      { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => {
+        return res.ok({ body: 'hello' });
+      }
+    );
 
     const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
     const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
-      isDev: false,
-      versionedRouteResolution: 'oldest',
+      env,
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
     });
-    otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
-      return res.ok({ body: 'hello from other router' });
-    });
+    otherRouter.get(
+      {
+        path: '/afterListening',
+        validate: false,
+        security: { authz: { enabled: false, reason: '' } },
+      },
+      (context, req, res) => {
+        return res.ok({ body: 'hello from other router' });
+      }
+    );
 
     registerRouterAfterListening(otherRouter);
 
@@ -1935,9 +2602,12 @@ describe('registerRouterAfterListening', () => {
     } = await server.setup(setupDeps);
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => {
-      return res.ok({ body: 'hello' });
-    });
+    router.get(
+      { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+      (context, req, res) => {
+        return res.ok({ body: 'hello' });
+      }
+    );
 
     await server.start();
 
@@ -1947,12 +2617,21 @@ describe('registerRouterAfterListening', () => {
     const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
     const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
-      isDev: false,
-      versionedRouteResolution: 'oldest',
+      env,
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
     });
-    otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
-      return res.ok({ body: 'hello from other router' });
-    });
+    otherRouter.get(
+      {
+        path: '/afterListening',
+        validate: false,
+        security: { authz: { enabled: false, reason: '' } },
+      },
+      (context, req, res) => {
+        return res.ok({ body: 'hello from other router' });
+      }
+    );
 
     registerRouterAfterListening(otherRouter);
 

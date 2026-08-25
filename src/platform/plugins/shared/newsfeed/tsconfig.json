@@ -1,0 +1,18 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": ["public/**/*", "server/**/*", "common/*", "../../../../../typings/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/screenshot-mode-plugin",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -18,11 +18,11 @@
     "@kbn/core",
     "@kbn/files-plugin",
     "@kbn/shared-ux-file-types",
-    "@kbn/core-application-browser",
     "@kbn/shared-ux-file-context",
     "@kbn/shared-ux-file-image",
     "@kbn/shared-ux-file-upload",
     "@kbn/shared-ux-file-picker",
     "@kbn/developer-examples-plugin",
+    "@kbn/react-query",
   ]
 }

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { T } from './babel';
@@ -14,6 +15,13 @@ import { snip } from './snip';
 
 const PROP = 'kbn_references';
 
+/**
+ * Adds package IDs to the `kbn_references` array in a JSONC source string.
+ * If the `kbn_references` property does not exist, it is created.
+ * @param source - The JSONC source text to modify.
+ * @param refsToAdd - The package IDs to add.
+ * @returns The modified JSONC source text.
+ */
 export function addReferences(source: string, refsToAdd: string[]) {
   const ast = getAst(source);
 
@@ -56,6 +64,12 @@ export function addReferences(source: string, refsToAdd: string[]) {
   return source.slice(0, start) + refsSrc + source.slice(end);
 }
 
+/**
+ * Removes the entire `kbn_references` property from a JSONC source string.
+ * If the property does not exist, the source is returned unchanged.
+ * @param source - The JSONC source text to modify.
+ * @returns The modified JSONC source text.
+ */
 export function removeAllReferences(source: string) {
   const ast = getAst(source);
   const existing = getProp(ast, PROP);
@@ -65,6 +79,13 @@ export function removeAllReferences(source: string) {
   return snip(source, [getExpandedEnds(source, existing)]);
 }
 
+/**
+ * Removes specific entries from the `kbn_references` array in a JSONC source string.
+ * Throws if the property does not exist or any of the specified refs are not found.
+ * @param source - The JSONC source text to modify.
+ * @param refs - The package IDs to remove.
+ * @returns The modified JSONC source text.
+ */
 export function removeReferences(source: string, refs: string[]) {
   const ast = getAst(source);
 
@@ -87,6 +108,14 @@ export function removeReferences(source: string, refs: string[]) {
   );
 }
 
+/**
+ * Replaces object-style reference entries (those with a `path` property) in
+ * `kbn_references` with plain package ID strings.
+ * @param source - The JSONC source text to modify.
+ * @param replacements - Tuples of `[path, pkgId]` where `path` identifies the
+ * existing object entry to replace and `pkgId` is the string to replace it with.
+ * @returns The modified JSONC source text.
+ */
 export function replaceReferences(
   source: string,
   replacements: Array<[path: string, pkgId: string]>

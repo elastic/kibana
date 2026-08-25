@@ -1,0 +1,6 @@
+{
+  "name": "@kbn/shared-ux-label-formatter",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0"
+}

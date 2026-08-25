@@ -1,20 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { SetMap } from '@kbn/set-map';
-import { RepoPath } from '@kbn/repo-path';
+import type { RepoPath } from '@kbn/repo-path';
 import { makeMatcher } from '@kbn/picomatcher';
-import { TsProject } from '@kbn/ts-projects';
+import type { TsProject } from '@kbn/ts-projects';
 
-import { PackageFileMap } from './package_file_map';
+import type { PackageFileMap } from './package_file_map';
 
 export class TsProjectFileMap {
   private readonly filesByTsProject = new SetMap<TsProject, RepoPath>();

@@ -1,0 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { lazy } from 'react';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { InputControlVisDependencies } from '../../plugin';
+import type { InputControlVisParams } from '../../types';
+
+const ControlsTab = lazy(() => import('./controls_tab'));
+const OptionsTab = lazy(() => import('./options_tab'));
+
+export const getControlsTab =
+  (deps: InputControlVisDependencies) => (props: VisEditorOptionsProps<InputControlVisParams>) =>
+    <ControlsTab {...props} deps={deps} />;
+
+export const OptionsTabLazy = (props: VisEditorOptionsProps<InputControlVisParams>) => (
+  <OptionsTab {...props} />
+);

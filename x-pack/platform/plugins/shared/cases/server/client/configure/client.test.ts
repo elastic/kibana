@@ -1,0 +1,2078 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+
+import type { CasesClientArgs } from '../types';
+
+import { getConnectors, get, update, create } from './client';
+import { createCasesClientInternalMock, createCasesClientMockArgs } from '../mocks';
+import {
+  MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_SUPPORTED_CONNECTORS_RETURNED,
+  MAX_TEMPLATES_LENGTH,
+  OBSERVABLE_TYPE_IPV4,
+} from '../../../common/constants';
+import { ConnectorTypes } from '../../../common';
+import type { TemplatesConfiguration } from '../../../common/types/domain';
+import { CustomFieldTypes } from '../../../common/types/domain';
+import type { ConfigurationRequest } from '../../../common/types/api';
+import {
+  createMockConnectorType,
+  createMockConnectorFindResult,
+} from '@kbn/actions-plugin/server/application/connector/mocks';
+import { ConfigSchema } from '../../config';
+
+describe('client', () => {
+  const clientArgs = createCasesClientMockArgs();
+  const casesClientInternal = createCasesClientInternalMock();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('getConnectors', () => {
+    const logger = loggingSystemMock.createLogger();
+    const actionsClient = actionsClientMock.create();
+
+    const args = { actionsClient, logger } as unknown as CasesClientArgs;
+
+    const actionTypes = [
+      createMockConnectorType({
+        id: '.jira',
+        name: '1',
+        supportedFeatureIds: ['alerting', 'cases'],
+      }),
+      createMockConnectorType({
+        id: '.servicenow',
+        name: '2',
+        supportedFeatureIds: ['alerting', 'cases'],
+      }),
+      createMockConnectorType({
+        id: '.unsupported',
+        name: '3',
+        supportedFeatureIds: ['alerting'],
+      }),
+      createMockConnectorType({
+        id: '.swimlane',
+        name: 'swimlane',
+        enabledInLicense: false,
+        supportedFeatureIds: ['alerting', 'cases'],
+      }),
+    ];
+
+    const connectors = [
+      createMockConnectorFindResult({
+        id: '1',
+        actionTypeId: '.jira',
+        name: '1',
+        config: {},
+        referencedByCount: 1,
+      }),
+      createMockConnectorFindResult({
+        id: '2',
+        actionTypeId: '.servicenow',
+        name: '2',
+        config: {},
+        referencedByCount: 1,
+      }),
+      createMockConnectorFindResult({
+        id: '3',
+        actionTypeId: '.unsupported',
+        name: '3',
+        referencedByCount: 1,
+      }),
+    ];
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('remove unsupported connectors', async () => {
+      actionsClient.listTypes.mockImplementation(async () => actionTypes);
+      actionsClient.getAll.mockImplementation(async () => connectors);
+
+      expect(await getConnectors(args)).toEqual([
+        {
+          id: '1',
+          actionTypeId: '.jira',
+          name: '1',
+          config: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+          referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
+        },
+        {
+          id: '2',
+          actionTypeId: '.servicenow',
+          name: '2',
+          config: {},
+          isPreconfigured: false,
+          isSystemAction: false,
+          isDeprecated: false,
+          referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
+        },
+      ]);
+    });
+
+    it('returns preconfigured connectors', async () => {
+      actionsClient.listTypes.mockImplementation(async () => actionTypes);
+      actionsClient.getAll.mockImplementation(async () => [
+        ...connectors,
+        {
+          id: '4',
+          actionTypeId: '.servicenow',
+          name: 'sn-preconfigured',
+          config: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+          isSystemAction: false,
+          referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
+        },
+      ]);
+
+      expect(await getConnectors(args)).toEqual([
+        {
+          id: '1',
+          actionTypeId: '.jira',
+          name: '1',
+          config: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+          referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
+        },
+        {
+          id: '2',
+          actionTypeId: '.servicenow',
+          name: '2',
+          config: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+          referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
+        },
+        {
+          id: '4',
+          actionTypeId: '.servicenow',
+          name: 'sn-preconfigured',
+          config: {},
+          isPreconfigured: true,
+          isSystemAction: false,
+          isDeprecated: false,
+          referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
+        },
+      ]);
+    });
+
+    it('filter out connectors that are unsupported by the current license', async () => {
+      actionsClient.listTypes.mockImplementation(async () => actionTypes);
+      actionsClient.getAll.mockImplementation(async () => [
+        ...connectors,
+        {
+          id: '4',
+          actionTypeId: '.swimlane',
+          name: 'swimlane',
+          config: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+          referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
+        },
+      ]);
+
+      expect(await getConnectors(args)).toEqual([
+        {
+          id: '1',
+          actionTypeId: '.jira',
+          name: '1',
+          config: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+          referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
+        },
+        {
+          id: '2',
+          actionTypeId: '.servicenow',
+          name: '2',
+          config: {},
+          isPreconfigured: false,
+          isDeprecated: false,
+          isSystemAction: false,
+          referencedByCount: 1,
+          isConnectorTypeDeprecated: false,
+        },
+      ]);
+    });
+
+    it('limits connectors returned to 1000', async () => {
+      actionsClient.listTypes.mockImplementation(async () => actionTypes.slice(0, 1));
+      actionsClient.getAll.mockImplementation(async () =>
+        Array(MAX_SUPPORTED_CONNECTORS_RETURNED + 1).fill(connectors[0])
+      );
+
+      expect((await getConnectors(args)).length).toEqual(MAX_SUPPORTED_CONNECTORS_RETURNED);
+    });
+  });
+
+  describe('get', () => {
+    it('throws with excess fields', async () => {
+      await expect(
+        // @ts-expect-error: excess attribute
+        get({ owner: 'cases', foo: 'bar' }, clientArgs, casesClientInternal)
+      ).rejects.toThrow('invalid keys "foo"');
+    });
+  });
+
+  describe('update', () => {
+    it('throws with excess fields', async () => {
+      await expect(
+        // @ts-expect-error: excess attribute
+        update('test-id', { version: 'test-version', foo: 'bar' }, clientArgs, casesClientInternal)
+      ).rejects.toThrow('invalid keys "foo"');
+    });
+
+    it(`throws when trying to update more than ${MAX_CUSTOM_FIELDS_PER_CASE} custom fields`, async () => {
+      await expect(
+        update(
+          'test-id',
+          {
+            version: 'test-version',
+            customFields: new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
+              key: 'foobar',
+              label: 'text',
+              type: CustomFieldTypes.TEXT,
+              required: false,
+            }),
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        `Failed to get patch configure in route: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      );
+    });
+
+    it('throws when there are duplicated custom field keys in the request', async () => {
+      await expect(
+        update(
+          'test-id',
+          {
+            version: 'test-version',
+            customFields: [
+              {
+                key: 'duplicated_key',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+              {
+                key: 'duplicated_key',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        'Failed to get patch configure in route: Error: Invalid duplicated customFields keys in request: duplicated_key'
+      );
+    });
+
+    it('throws when trying to updated the type of a custom field', async () => {
+      clientArgs.services.caseConfigureService.get.mockResolvedValue({
+        // @ts-ignore: these are all the attributes needed for the test
+        attributes: {
+          customFields: [
+            {
+              key: 'wrong_type_key',
+              label: 'text',
+              type: CustomFieldTypes.TOGGLE,
+              required: false,
+            },
+          ],
+        },
+      });
+
+      await expect(
+        update(
+          'test-id',
+          {
+            version: 'test-version',
+            customFields: [
+              {
+                key: 'wrong_type_key',
+                label: 'text label',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        'Failed to get patch configure in route: Error: Invalid custom field types in request for the following labels: "text label"'
+      );
+    });
+
+    describe('templates', () => {
+      it(`does not throw error when trying to update templates`, async () => {
+        clientArgs.services.caseConfigureService.get.mockResolvedValue({
+          // @ts-ignore: these are all the attributes needed for the test
+          attributes: {
+            customFields: [],
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            closure_type: 'close-by-user',
+            owner: 'cases',
+            templates: [],
+          },
+          version: 'test-version',
+        });
+
+        clientArgs.services.caseConfigureService.patch.mockResolvedValue({
+          id: 'test-id',
+          type: 'cases-configure',
+          version: 'test-version',
+          namespaces: ['default'],
+          references: [],
+          attributes: {
+            templates: [
+              {
+                key: 'template_1',
+                name: 'template 1',
+                description: 'test',
+                tags: ['foo', 'bar'],
+                caseFields: {
+                  title: 'Case title',
+                  description: 'This is test desc',
+                  tags: ['sample-1'],
+                  assignees: [],
+                  customFields: [],
+                  category: null,
+                },
+              },
+            ],
+            created_at: '2019-11-25T21:54:48.952Z',
+            created_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+            updated_at: '2019-11-25T21:54:48.952Z',
+            updated_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+            observableTypes: [],
+          },
+        });
+
+        await expect(
+          update(
+            'test-id',
+            {
+              version: 'test-version',
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'test',
+                  tags: ['foo', 'bar'],
+                  caseFields: {
+                    title: 'Case title',
+                    description: 'This is test desc',
+                    tags: ['sample-1'],
+                    assignees: [],
+                    customFields: [],
+                    category: null,
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).resolves.not.toThrow();
+      });
+
+      it(`does not throw error when trying to update to empty templates`, async () => {
+        clientArgs.services.caseConfigureService.get.mockResolvedValue({
+          // @ts-ignore: these are all the attributes needed for the test
+          attributes: {
+            customFields: [],
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            closure_type: 'close-by-user',
+            owner: 'cases',
+            templates: [
+              {
+                key: 'template_1',
+                name: 'template 1',
+                description: 'test',
+                tags: ['foo', 'bar'],
+                caseFields: {
+                  title: 'Case title',
+                  description: 'This is test desc',
+                  tags: ['sample-1'],
+                  assignees: [],
+                  customFields: [],
+                  category: null,
+                },
+              },
+            ],
+            observableTypes: [],
+          },
+          version: 'test-version',
+        });
+
+        clientArgs.services.caseConfigureService.patch.mockResolvedValue({
+          id: 'test-id',
+          type: 'cases-configure',
+          version: 'test-version',
+          namespaces: ['default'],
+          references: [],
+          attributes: {
+            observableTypes: [],
+            templates: [],
+            created_at: '2019-11-25T21:54:48.952Z',
+            created_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+            updated_at: '2019-11-25T21:54:48.952Z',
+            updated_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+          },
+        });
+
+        await expect(
+          update(
+            'test-id',
+            {
+              version: 'test-version',
+              templates: [],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).resolves.not.toThrow();
+      });
+
+      it(`throws when trying to update more than ${MAX_TEMPLATES_LENGTH} templates`, async () => {
+        await expect(
+          update(
+            'test-id',
+            {
+              version: 'test-version',
+              templates: new Array(MAX_TEMPLATES_LENGTH + 1).fill({
+                key: 'template_1',
+                name: 'template 1',
+                caseFields: null,
+              }),
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          `Failed to get patch configure in route: Error: The length of the field templates is too long. Array must be of length <= ${MAX_TEMPLATES_LENGTH}.`
+        );
+      });
+
+      it('throws when there are duplicated template keys in the request', async () => {
+        await expect(
+          update(
+            'test-id',
+            {
+              version: 'test-version',
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'test',
+                  tags: ['foo', 'bar'],
+                  caseFields: null,
+                },
+                {
+                  key: 'template_1',
+                  name: 'template 2',
+                  tags: [],
+                  caseFields: {
+                    title: 'Case title',
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          'Failed to get patch configure in route: Error: Invalid duplicated templates keys in request: template_1'
+        );
+      });
+
+      describe('customFields', () => {
+        it('throws when template has duplicated custom field keys in the request', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          });
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    label: 'text label',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'test',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 1',
+                        },
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 2',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            `Failed to get patch configure in route: Error: Invalid duplicated templates[0]'s customFields keys in request: custom_field_key_1`
+          );
+        });
+
+        it('throws when template has customField with invalid type in the request', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          });
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    label: 'text label',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TOGGLE,
+                          value: true,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: The following custom fields have the wrong type in the request: "text label"'
+          );
+        });
+
+        it('adds new custom field to template when configuration custom fields have new custom field', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+              customFields: [],
+              templates: [],
+              closure_type: 'close-by-user',
+              owner: 'cases',
+            },
+            id: 'test-id',
+            version: 'test-version',
+          });
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                  defaultValue: 'custom field 1 default value 1',
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: null,
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith({
+            configurationId: 'test-id',
+            originalConfiguration: {
+              attributes: {
+                closure_type: 'close-by-user',
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+                customFields: [],
+                owner: 'cases',
+                templates: [],
+              },
+              id: 'test-id',
+              version: 'test-version',
+            },
+            unsecuredSavedObjectsClient: expect.anything(),
+            updatedAttributes: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                  defaultValue: 'custom field 1 default value 1',
+                },
+              ],
+              templates: [
+                {
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field 1 default value 1',
+                      },
+                    ],
+                  },
+                  description: 'this is test description',
+                  key: 'template_1',
+                  name: 'template 1',
+                },
+              ],
+              updated_at: expect.anything(),
+              updated_by: expect.anything(),
+            },
+          });
+        });
+
+        it('updates default value of existing custom fields in the configuration correctly', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                  defaultValue: 'custom field 1 default value 1',
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field 1 default value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+              closure_type: 'close-by-user',
+              owner: 'cases',
+            },
+            id: 'test-id',
+            version: 'test-version',
+          });
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                  defaultValue: 'updated default value!!',
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field 1 default value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith({
+            configurationId: 'test-id',
+            originalConfiguration: {
+              attributes: {
+                closure_type: 'close-by-user',
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+                owner: 'cases',
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    label: 'text label',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                    defaultValue: 'custom field 1 default value 1',
+                  },
+                ],
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field 1 default value 1',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              id: 'test-id',
+              version: 'test-version',
+            },
+            unsecuredSavedObjectsClient: expect.anything(),
+            updatedAttributes: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                  defaultValue: 'updated default value!!',
+                },
+              ],
+              templates: [
+                {
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field 1 default value 1',
+                      },
+                    ],
+                  },
+                  description: 'this is test description',
+                  key: 'template_1',
+                  name: 'template 1',
+                },
+              ],
+              updated_at: expect.anything(),
+              updated_by: expect.anything(),
+            },
+          });
+        });
+
+        it('removes custom field from template when there are no customFields in the request', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+              customFields: [],
+              templates: [],
+              closure_type: 'close-by-user',
+              owner: 'cases',
+            },
+            id: 'test-id',
+            version: 'test-version',
+          });
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith({
+            configurationId: 'test-id',
+            originalConfiguration: {
+              attributes: {
+                closure_type: 'close-by-user',
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+                customFields: [],
+                owner: 'cases',
+                templates: [],
+              },
+              id: 'test-id',
+              version: 'test-version',
+            },
+            unsecuredSavedObjectsClient: expect.anything(),
+            updatedAttributes: {
+              customFields: [],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [],
+                  },
+                },
+              ],
+              updated_at: expect.anything(),
+              updated_by: expect.anything(),
+            },
+          });
+        });
+
+        it('removes deleted custom field from template correctly', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+              closure_type: 'close-by-user',
+              owner: 'cases',
+              observableTypes: [],
+            },
+            id: 'test-id',
+            version: 'test-version',
+          });
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'updated value',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith({
+            configurationId: 'test-id',
+            originalConfiguration: {
+              attributes: {
+                closure_type: 'close-by-user',
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    label: 'text label',
+                    required: false,
+                    type: 'text',
+                  },
+                ],
+                owner: 'cases',
+                templates: [
+                  {
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: 'text',
+                          value: 'custom field value 1',
+                        },
+                      ],
+                    },
+                    description: 'this is test description',
+                    key: 'template_1',
+                    name: 'template 1',
+                  },
+                ],
+                observableTypes: [],
+              },
+              id: 'test-id',
+              version: 'test-version',
+            },
+            unsecuredSavedObjectsClient: expect.anything(),
+            updatedAttributes: {
+              customFields: [],
+              templates: [
+                {
+                  caseFields: {
+                    customFields: [],
+                  },
+                  description: 'this is test description',
+                  key: 'template_1',
+                  name: 'template 1',
+                },
+              ],
+              updated_at: expect.anything(),
+              updated_by: expect.anything(),
+            },
+          });
+        });
+      });
+
+      describe('assignees', () => {
+        it('throws if the user does not have the correct license while adding assignees in template ', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  tags: ['foo', 'bar'],
+                  caseFields: null,
+                },
+              ],
+            },
+          });
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    tags: ['foo', 'bar'],
+                    caseFields: {
+                      assignees: [{ uid: '1' }],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+          );
+        });
+      });
+
+      describe('observableTypes', () => {
+        it('throws when trying to set duplicate observableTypes', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                observableTypes: [
+                  {
+                    key: 'e638af17-ebb6-4678-a937-b734bffee36a',
+                    label: OBSERVABLE_TYPE_IPV4.label,
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to get patch configure in route: Error: Invalid duplicated observable types in request: ipv4'
+          );
+        });
+      });
+
+      describe('global field definitions', () => {
+        beforeEach(() => {
+          // Reset config so mutations in one test don't leak into the next.
+          clientArgs.config = ConfigSchema.validate({});
+          // clearAllMocks does not drop implementations — reset the ones this
+          // block overrides so mockResolvedValue calls don't leak across tests.
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects
+            .mockReset()
+            .mockResolvedValue([]);
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockReset();
+        });
+
+        const baseGetResult = {
+          // @ts-ignore: these are all the attributes needed for the test
+          attributes: {
+            customFields: [],
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            closure_type: 'close-by-user',
+            owner: 'securitySolutionFixture',
+            templates: [],
+          },
+          version: 'test-version',
+        };
+
+        const basePatchResult = {
+          id: 'test-id',
+          type: 'cases-configure',
+          version: 'test-version',
+          namespaces: ['default'],
+          references: [],
+          attributes: {
+            customFields: [
+              {
+                key: 'my_text',
+                label: 'My Text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+            ],
+            templates: [],
+            created_at: '2019-11-25T21:54:48.952Z',
+            created_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+            updated_at: '2019-11-25T21:54:48.952Z',
+            updated_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+            observableTypes: [],
+          },
+        };
+
+        it('ensures linked definitions even when the templates flag is disabled (live sync decoupled)', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects
+          ).toHaveBeenCalledWith('securitySolutionFixture');
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).toHaveBeenCalled();
+        });
+
+        it('creates a linked global field definition (friendly name, deterministic id, legacyKey) before persisting', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).toHaveBeenCalledWith(
+            expect.objectContaining({
+              name: 'my_text',
+              owner: 'securitySolutionFixture',
+              isGlobal: true,
+            }),
+            expect.objectContaining({
+              id: expect.any(String),
+              legacyKey: 'my_text',
+            })
+          );
+        });
+
+        it('does not create a field definition when a def with the same name already exists', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue(
+            [
+              {
+                id: 'fd-1',
+                type: 'cases-field-definition',
+                references: [],
+                attributes: {
+                  fieldDefinitionId: 'fd-1',
+                  name: 'my_text',
+                  owner: 'securitySolutionFixture',
+                  definition: 'name: my_text\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+                  isGlobal: true,
+                  legacyKey: 'my_text',
+                },
+              },
+            ] as never
+          );
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).not.toHaveBeenCalled();
+        });
+
+        it('skips linkage validation entirely when the patch omits customFields (e.g. a connector-only edit)', async () => {
+          // A patch that never touches customFields must not re-validate the pre-existing set —
+          // otherwise an unrelated edit (connector-only here) would fail if an existing v1 field's
+          // linkage had since gone stale, blocking the operator's most natural repair path.
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            ...baseGetResult,
+            attributes: {
+              ...baseGetResult.attributes,
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+          } as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects
+          ).not.toHaveBeenCalled();
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).not.toHaveBeenCalled();
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalled();
+        });
+
+        it('fails the configuration update when createFieldDefinition fails (definition-before-config)', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockRejectedValueOnce(
+            new Error('SO write error')
+          );
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                customFields: [
+                  {
+                    key: 'my_text',
+                    label: 'My Text',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow('SO write error');
+
+          // The configuration must never be persisted without its linked definitions.
+          expect(clientArgs.services.caseConfigureService.patch).not.toHaveBeenCalled();
+        });
+      });
+    });
+  });
+
+  describe('create', () => {
+    const baseRequest = {
+      connector: {
+        id: 'none',
+        name: 'none',
+        type: ConnectorTypes.none,
+        fields: null,
+      },
+      closure_type: 'close-by-user',
+      owner: 'securitySolutionFixture',
+    } as ConfigurationRequest;
+
+    it(`throws when trying to create more than ${MAX_CUSTOM_FIELDS_PER_CASE} custom fields`, async () => {
+      await expect(
+        create(
+          {
+            ...baseRequest,
+            customFields: new Array(MAX_CUSTOM_FIELDS_PER_CASE + 1).fill({
+              key: 'foobar',
+              label: 'text',
+              type: CustomFieldTypes.TEXT,
+              required: false,
+            }),
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        `Failed to create case configuration: Error: The length of the field customFields is too long. Array must be of length <= ${MAX_CUSTOM_FIELDS_PER_CASE}.`
+      );
+    });
+
+    it('throws when there are duplicated keys in the request', async () => {
+      await expect(
+        create(
+          {
+            ...baseRequest,
+            customFields: [
+              {
+                key: 'duplicated_key',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+              {
+                key: 'duplicated_key',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        )
+      ).rejects.toThrow(
+        'Failed to create case configuration: Error: Invalid duplicated customFields keys in request: duplicated_key'
+      );
+    });
+
+    describe('templates', () => {
+      it(`throws when trying to create more than ${MAX_TEMPLATES_LENGTH} templates`, async () => {
+        await expect(
+          create(
+            {
+              ...baseRequest,
+              templates: new Array(MAX_TEMPLATES_LENGTH + 1).fill({
+                key: 'template_1',
+                name: 'template 1',
+                description: 'test',
+                caseFields: null,
+              }),
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          `Failed to create case configuration: Error: The length of the field templates is too long. Array must be of length <= ${MAX_TEMPLATES_LENGTH}.`
+        );
+      });
+
+      it('throws when there are duplicated template keys in the request', async () => {
+        await expect(
+          create(
+            {
+              ...baseRequest,
+              templates: [
+                {
+                  key: 'duplicated_key',
+                  name: 'template 1',
+                  description: 'test',
+                  caseFields: null,
+                },
+                {
+                  key: 'duplicated_key',
+                  name: 'template 2',
+                  description: 'test',
+                  tags: [],
+                  caseFields: {
+                    title: 'Case title',
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow(
+          'Failed to create case configuration: Error: Invalid duplicated templates keys in request: duplicated_key'
+        );
+      });
+
+      describe('customFields', () => {
+        it('does not throw error when creating template with correct custom fields', async () => {
+          const customFields = [
+            {
+              key: 'custom_field_key_1',
+              type: CustomFieldTypes.TEXT,
+              label: 'custom field 1',
+              required: true,
+            },
+          ];
+          const templates: TemplatesConfiguration = [
+            {
+              key: 'template_1',
+              name: 'template 1',
+              description: 'test',
+              tags: ['foo', 'bar'],
+              caseFields: {
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    type: CustomFieldTypes.TEXT,
+                    value: 'custom field value 1',
+                  },
+                ],
+              },
+            },
+          ];
+
+          clientArgs.services.caseConfigureService.find.mockResolvedValueOnce({
+            page: 1,
+            per_page: 20,
+            total: 1,
+            saved_objects: [
+              {
+                id: 'test-id',
+                type: 'cases-configure',
+                version: 'test-version',
+                namespaces: ['default'],
+                references: [],
+                attributes: {
+                  ...baseRequest,
+                  customFields,
+                  templates,
+                  created_at: '2019-11-25T21:54:48.952Z',
+                  created_by: {
+                    full_name: 'elastic',
+                    email: 'testemail@elastic.co',
+                    username: 'elastic',
+                  },
+                  updated_at: null,
+                  updated_by: null,
+                  observableTypes: [],
+                },
+                score: 0,
+              },
+            ],
+            pit_id: undefined,
+          });
+
+          clientArgs.services.caseConfigureService.post.mockResolvedValue({
+            id: 'test-id',
+            type: 'cases-configure',
+            version: 'test-version',
+            namespaces: ['default'],
+            references: [],
+            attributes: {
+              ...baseRequest,
+              customFields,
+              templates,
+              created_at: '2019-11-25T21:54:48.952Z',
+              created_by: {
+                full_name: 'elastic',
+                email: 'testemail@elastic.co',
+                username: 'elastic',
+              },
+              updated_at: null,
+              updated_by: null,
+              observableTypes: [],
+            },
+          });
+
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                customFields,
+                templates,
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).resolves.not.toThrow();
+        });
+
+        it('throws error when there are no customFields but template has custom fields in the request', async () => {
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    tags: ['foo', 'bar'],
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 1',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: No custom fields configured.'
+          );
+        });
+
+        it('throws when template has duplicated custom field keys in the request', async () => {
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    type: CustomFieldTypes.TEXT,
+                    label: 'custom field 1',
+                    required: true,
+                  },
+                ],
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'test',
+                    tags: ['foo', 'bar'],
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 1',
+                        },
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TEXT,
+                          value: 'custom field value 2',
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            `Failed to create case configuration: Error: Invalid duplicated templates[0]'s customFields keys in request: custom_field_key_1`
+          );
+        });
+
+        it('throw error when there are new customFields in the request but template does not have custom fields', async () => {
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    type: CustomFieldTypes.TEXT,
+                    label: 'custom field 1',
+                    required: true,
+                  },
+                ],
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: null,
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: No custom fields added to template.'
+          );
+        });
+
+        it('throws when template has customField with invalid type in the request', async () => {
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    type: CustomFieldTypes.TEXT,
+                    label: 'custom field 1',
+                    required: true,
+                  },
+                ],
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    caseFields: {
+                      customFields: [
+                        {
+                          key: 'custom_field_key_1',
+                          type: CustomFieldTypes.TOGGLE,
+                          value: true,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: The following custom fields have the wrong type in the request: "custom field 1"'
+          );
+        });
+      });
+
+      describe('assignees', () => {
+        it('throws if the user does not have the correct license while adding assignees in template ', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
+
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                templates: [
+                  {
+                    key: 'template_1',
+                    name: 'template 1',
+                    description: 'this is test description',
+                    tags: [],
+                    caseFields: {
+                      assignees: [{ uid: '1' }],
+                    },
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+          );
+        });
+      });
+
+      describe('observableTypes', () => {
+        it('throws when trying to set duplicate observableTypes', async () => {
+          clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(true);
+
+          await expect(
+            create(
+              {
+                ...baseRequest,
+                observableTypes: [
+                  {
+                    key: 'e638af17-ebb6-4678-a937-b734bffee36a',
+                    label: OBSERVABLE_TYPE_IPV4.label,
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow(
+            'Failed to create case configuration: Error: Invalid duplicated observable types in request: ipv4'
+          );
+        });
+      });
+    });
+
+    describe('global field definitions', () => {
+      beforeEach(() => {
+        // Reset config so mutations in one test don't leak into the next.
+        clientArgs.config = ConfigSchema.validate({});
+        // clearAllMocks does not drop implementations — reset the ones this
+        // block overrides so mockResolvedValue calls don't leak across tests.
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects
+          .mockReset()
+          .mockResolvedValue([]);
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockReset();
+      });
+
+      const validPostResult = {
+        id: 'test-id',
+        type: 'cases-configure',
+        version: 'test-version',
+        attributes: {
+          connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+          closure_type: 'close-by-user',
+          owner: 'securitySolutionFixture',
+          customFields: [
+            { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+          ],
+          templates: [],
+          observableTypes: [],
+          created_at: '2019-11-25T21:54:48.952Z',
+          created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
+          updated_at: null,
+          updated_by: null,
+        },
+      };
+
+      beforeEach(() => {
+        clientArgs.services.caseConfigureService.find.mockResolvedValue({
+          saved_objects: [],
+        } as never);
+        // @ts-ignore: partial SO shape is sufficient for the test
+        clientArgs.services.caseConfigureService.post.mockResolvedValue(validPostResult as never);
+      });
+
+      it('ensures linked definitions even when the templates flag is disabled (live sync decoupled)', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects
+        ).toHaveBeenCalledWith('securitySolutionFixture');
+        expect(
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition
+        ).toHaveBeenCalled();
+      });
+
+      it('creates a linked global field definition (friendly name, deterministic id, legacyKey) before persisting', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'my_text',
+            owner: 'securitySolutionFixture',
+            isGlobal: true,
+          }),
+          expect.objectContaining({
+            id: expect.any(String),
+            legacyKey: 'my_text',
+          })
+        );
+      });
+
+      it('does not create a field definition when one with the same name already exists', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue(
+          [
+            {
+              id: 'fd-1',
+              type: 'cases-field-definition',
+              references: [],
+              attributes: {
+                fieldDefinitionId: 'fd-1',
+                name: 'my_text',
+                owner: 'securitySolutionFixture',
+                definition: 'name: my_text\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+                isGlobal: true,
+                legacyKey: 'my_text',
+              },
+            },
+          ] as never
+        );
+
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition
+        ).not.toHaveBeenCalled();
+      });
+
+      it('fails the configuration create when createFieldDefinition fails (definition-before-config)', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockRejectedValueOnce(
+          new Error('SO write error')
+        );
+
+        await expect(
+          create(
+            {
+              ...baseRequest,
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow('SO write error');
+
+        // The configuration must never be persisted without its linked definitions.
+        expect(clientArgs.services.caseConfigureService.post).not.toHaveBeenCalled();
+      });
+
+      it('leaves an existing configuration untouched when the linked-definition ensure fails (no delete-before-validate)', async () => {
+        // REGRESSION (the bug this guards): create used to delete the existing configuration
+        // BEFORE running the fatal ensureGlobalFieldDefinitions check. A definition-cap,
+        // malformed-link, or definition-write failure then left the caller with no
+        // configuration at all.
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.caseConfigureService.find.mockResolvedValue({
+          saved_objects: [
+            { id: 'existing-config-id', attributes: { owner: 'securitySolutionFixture' } },
+          ],
+        } as never);
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockRejectedValueOnce(
+          new Error('definition limit reached')
+        );
+
+        await expect(
+          create(
+            {
+              ...baseRequest,
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow('definition limit reached');
+
+        // The pre-existing configuration must survive the failed replacement.
+        expect(clientArgs.services.caseConfigureService.delete).not.toHaveBeenCalled();
+        expect(clientArgs.services.caseConfigureService.post).not.toHaveBeenCalled();
+      });
+
+      it('replaces an existing configuration only after the linked-definition ensure succeeds (ensure → delete → post)', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.caseConfigureService.find.mockResolvedValue({
+          saved_objects: [
+            { id: 'existing-config-id', attributes: { owner: 'securitySolutionFixture' } },
+          ],
+        } as never);
+
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        // Successful replacement still deletes the old configuration and posts the new one…
+        expect(clientArgs.services.caseConfigureService.delete).toHaveBeenCalledWith(
+          expect.objectContaining({ configurationId: 'existing-config-id' })
+        );
+        expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalled();
+
+        // …and the ensure ran strictly before the destructive delete.
+        const ensureOrder =
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition.mock
+            .invocationCallOrder[0];
+        const deleteOrder =
+          clientArgs.services.caseConfigureService.delete.mock.invocationCallOrder[0];
+        expect(ensureOrder).toBeLessThan(deleteOrder);
+      });
+    });
+  });
+});

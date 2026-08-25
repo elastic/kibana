@@ -1,0 +1,405 @@
+[
+  {
+    "hits" : {
+      "hits": [
+        {
+          "_index": ".monitoring-logstash-7-2021.02.01",
+          "_type": "_doc",
+          "_id": "6DN5X3cB1VO1nvgvb4Ft",
+          "_score": null,
+          "_source": {
+            "agent" : {
+              "type" : "metricbeat"
+            },
+            "logstash": {
+              "cluster": {
+                "id": "1n1p"
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "1n1p"
+                }
+              },
+              "node": {
+                "stats": {
+                  "logstash": {
+                    "version": "7.10.0",
+                    "snapshot": false,
+                    "status": "green"
+                  },
+                  "pipelines": [
+                    {
+                      "id": "main",
+                      "ephemeral_id": "cf37c6fa-2f1a-41e2-9a89-36b420a8b9a5",
+                      "queue": {
+                        "max_queue_size_in_bytes": 0,
+                        "type": "memory"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "metricset": {
+              "period": 10000,
+              "name": "node_stats"
+            }
+          },
+          "fields": {
+            "logstash.node.stats.logstash.uuid": [
+              "12a3b26f-9b8c-4d38-b4d0-54649c1dd244"
+            ]
+          },
+          "sort": [
+            1612214529897
+          ]
+        },
+        {
+          "_index" : ".monitoring-logstash-7-mb-2021.01.28",
+          "_type" : "_doc",
+          "_id" : "rC2jSncB1VO1nvgvsKx6",
+          "_score" : null,
+          "_source" : {
+            "logstash": {
+              "cluster": {
+                "id": "1nmp"
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "1nmp"
+                }
+              },
+              "node": {
+                "stats": {
+                  "logstash" : {
+                    "version" : "7.8.0",
+                    "snapshot" : false,
+                    "status" : "green"
+                  },
+                  "pipelines" : [
+                    {
+                      "id" : "test2",
+                      "ephemeral_id" : "47a70feb-3cb5-4618-8670-2c0bada61acd",
+                      "queue" : {
+                        "max_queue_size_in_bytes" : 0,
+                        "type" : "memory"
+                      }
+                    },
+                    {
+                      "id" : "main",
+                      "ephemeral_id" : "5a65d966-0330-4bd7-82f2-ee81040c13cf",
+                      "queue" : {
+                        "max_queue_size_in_bytes" : 0,
+                        "type" : "memory"
+                      }
+                    },
+                    {
+                      "id" : "main2",
+                      "ephemeral_id" : "8d33fe25-a2c0-4c54-9ecf-d218cb8dbfe4",
+                      "queue" : {
+                        "max_queue_size_in_bytes" : 0,
+                        "type" : "memory"
+                      }
+                    },
+                    {
+                      "id" : "main3",
+                      "ephemeral_id" : "f4167a94-20a8-43e7-828e-4cf38d906187",
+                      "queue" : {
+                        "max_queue_size_in_bytes" : 1.19185342464E11,
+                        "type" : "persisted"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "metricset": {
+              "period": 10000,
+              "name": "node_stats"
+            },
+            "agent" : {
+              "type" : "metricbeat"
+            }
+          },
+          "fields" : {
+            "logstash.node.stats.logstash.uuid" : [
+              "1232122-f2b6-4b6c-8cea-22661f9c4134"
+            ]
+          },
+          "sort" : [
+            1611864976527
+          ]
+        },
+        {
+          "_index": ".monitoring-logstash-7-2021.02.01",
+          "_type": "_doc",
+          "_id": "JzNyX3cB1VO1nvgvDXi5",
+          "_score": null,
+          "_source": {
+            "logstash": {
+              "cluster": {
+                "id": "mnmp"
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "stats": {
+                  "logstash": {
+                    "version": "7.9.2",
+                    "snapshot": false,
+                    "status": "green"
+                  },
+                  "pipelines": [
+                    {
+                      "id": "t2",
+                      "ephemeral_id": "2fcd4161-e08f-4eea-818b-703ea3ec6389",
+                      "queue": {
+                        "max_queue_size_in_bytes": 0,
+                        "type": "memory"
+                      }
+                    },
+                    {
+                      "id": "aggregate-test",
+                      "ephemeral_id": "c6785d63-6e5f-42c2-839d-5edf139b7c19",
+                      "queue": {
+                        "max_queue_size_in_bytes": 0,
+                        "type": "memory"
+                      }
+                    },
+                    {
+                      "id": "t1",
+                      "ephemeral_id": "bc6ef6f2-ecce-4328-96a2-002de41a144d",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "metricset": {
+              "period": 10000,
+              "name": "node_stats"
+            },
+            "agent" : {
+              "type" : "metricbeat"
+            }
+          },
+          "fields": {
+            "logstash.node.stats.logstash.uuid": [
+              "701ce2f6-4e6a-426b-a959-80e7cdd608aa"
+            ]
+          },
+          "sort": [
+            1612214046021
+          ]
+        },
+        {
+          "_index": ".monitoring-logstash-7-2021.02.01",
+          "_type": "_doc",
+          "_id": "sTNuX3cB1VO1nvgvtXN6",
+          "_score": null,
+          "_source": {
+            "logstash": {
+              "cluster": {
+                "id": "mnmp"
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "stats": {
+                  "logstash": {
+                    "version": "7.9.1",
+                    "snapshot": false,
+                    "status": "green"
+                  },
+                  "pipelines": [
+                    {
+                      "id": "t9",
+                      "ephemeral_id": "72058ad1-68a1-45f6-a8e8-10621ffc7288",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t7",
+                      "ephemeral_id": "18593052-c021-4158-860d-d8122981a0ac",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t11",
+                      "ephemeral_id": "4207025c-9b00-4bea-a36c-6fbf2d3c215e",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t5",
+                      "ephemeral_id": "0ec4702d-b5e5-4c60-91e9-6fa6a836f0d1",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t12",
+                      "ephemeral_id": "41258219-b129-4fad-a629-f244826281f8",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t3",
+                      "ephemeral_id": "e73bc63d-561a-4acd-a0c4-d5f70c4603df",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t2",
+                      "ephemeral_id": "ddf882b7-be26-4a93-8144-0aeb35122651",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t6",
+                      "ephemeral_id": "602936f5-98a3-4f8c-9471-cf389a519f4b",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t10",
+                      "ephemeral_id": "8b300988-62cc-4bc6-9ee0-9194f3f78e27",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t4",
+                      "ephemeral_id": "6ab60531-fb6f-478c-9063-82f2b0af2bed",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t8",
+                      "ephemeral_id": "802a5994-a03c-44b8-a650-47c0f71c2e48",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t13",
+                      "ephemeral_id": "6070b400-5c10-4c5e-b5c5-a5bd9be6d321",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    },
+                    {
+                      "id": "t1",
+                      "ephemeral_id": "3193df5f-2a34-4fe3-816e-6b05999aa5ce",
+                      "queue": {
+                        "max_queue_size_in_bytes": 1073741824,
+                        "type": "persisted"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "metricset": {
+              "period": 10000,
+              "name": "node_stats"
+            },
+            "agent" : {
+              "type" : "metricbeat"
+            }
+          },
+          "fields": {
+            "logstash.node.stats.logstash.uuid": [
+              "255eab6a-e15c-4e21-8d81-a9474eadb3eb"
+            ]
+          },
+          "sort": [
+            1612213826805
+          ]
+        },
+        {
+          "_index": ".monitoring-logstash-7-2021.02.01",
+          "_type": "_doc",
+          "_id": "FDNkX3cB1VO1nvgvZWaA",
+          "_score": null,
+          "_source": {
+            "logstash": {
+              "cluster": {
+                "id": "mnmp"
+              },
+              "elasticsearch": {
+                "cluster": {
+                  "id": "mnmp"
+                }
+              },
+              "node": {
+                "stats": {
+                  "logstash": {
+                    "version": "7.10.0",
+                    "snapshot": false,
+                    "status": "green"
+                  },
+                  "pipelines": [
+                    {
+                      "id": "main",
+                      "ephemeral_id": "994e68cd-d607-40e6-a54c-02a51caa17e0",
+                      "queue": {
+                        "max_queue_size_in_bytes": 0,
+                        "type": "memory"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "metricset": {
+              "period": 10000,
+              "name": "node_stats"
+            },
+            "agent" : {
+              "type" : "metricbeat"
+            }
+          },
+          "fields": {
+            "logstash.node.stats.logstash.uuid": [
+              "beb45ee3-ad5f-4895-87f0-97625a6e5295"
+            ]
+          },
+          "sort": [
+            1612213150986
+          ]
+        }
+      ]
+    }
+  }
+]
+

@@ -1,16 +1,18 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
-import globby from 'globby';
+import { globby } from 'globby';
 import { ImportResolver } from '@kbn/import-resolver';
 import { ImportLocator } from '@kbn/import-locator';
-import { readPackageMap, Package, PluginPackage } from '@kbn/repo-packages';
+import type { PluginPackage } from '@kbn/repo-packages';
+import { readPackageMap, Package } from '@kbn/repo-packages';
 import { findUsedNodeModules } from '@kbn/find-used-node-modules';
 
 export async function findUsedDependencies(
@@ -37,8 +39,6 @@ export async function findUsedDependencies(
   // Get the dependencies found searching through the server
   // side code entries that were provided
   const usedDeps = [
-    // TODO: remove this once we get rid off @kbn/ui-framework, for now it isn't detectable as "used" so we hard code it
-    '@kbn/ui-framework',
     // find all the node modules we actually use on the server, including the peerDependencies of our used node_modules which are used within those deps
     ...(await findUsedNodeModules({
       resolver,
@@ -53,11 +53,12 @@ export async function findUsedDependencies(
         ...(await globby(
           [
             // main code entries
+            'src/cli/*/dist.js',
             'src/cli*/dist.js',
             // core entry
             'src/core/server/index.js',
             // entries that are loaded into the server with dynamic require() calls
-            'src/plugins/vis_types/timelion/server/**/*.js',
+            'src/platform/plugins/private/vis_types/timelion/server/**/*.js',
           ],
           {
             cwd: repoRoot,

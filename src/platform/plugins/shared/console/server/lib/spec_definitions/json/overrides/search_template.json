@@ -1,0 +1,9 @@
+{
+  "search_template": {
+    "data_autocomplete_rules": {
+      "source": {},
+      "explain": false,
+      "profile": false
+    }
+  }
+}

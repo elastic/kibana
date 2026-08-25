@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <circle cx="8" cy="8" r="6" fill="#0066CC" stroke="#004499" stroke-width="1"/>
+  <text x="8" y="12" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="8">KB</text>
+</svg>

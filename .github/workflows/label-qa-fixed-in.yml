@@ -1,11 +1,11 @@
-name: Add QA labels to Fleet issues
+name: Add QA labels to Streams UI issues
 on:
   # pull_request_target allows running actions on PRs from forks with a read/write GITHUB_TOKEN, but it will not allow
   # running workflows defined in the PRs itself, only workflows already merged into the target branch. This avoids
   # potential vulnerabilities that could allow someone to open a PR and retrieve secrets.
   # It's important that this workflow never runs any checkout actions which could be used to circumvent this protection.
   # See these links for more information:
-  # - https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/ 
+  # - https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/
   # - https://nathandavison.com/blog/github-actions-and-the-threat-of-malicious-pull-requests
   pull_request_target:
     types:
@@ -14,15 +14,15 @@ on:
 jobs:
   fetch_issues_to_label:
     runs-on: ubuntu-latest
-    # Only run on PRs that were merged for the Fleet team
+    # Only run on PRs that were merged for the Streams UI team
     if: |
       github.event.pull_request.merged_at &&
-      contains(github.event.pull_request.labels.*.name, 'Team:Fleet')
+      contains(github.event.pull_request.labels.*.name, 'Team:streams-ui')
     outputs:
       issue_ids: ${{ steps.issues_to_label.outputs.value }}
       label_ids: ${{ steps.label_ids.outputs.value }}
     steps:
-      - uses: octokit/graphql-action@v2.x
+      - uses: octokit/graphql-action@ddde8ebb2493e79f390e6449c725c21663a67505 # v3.0.2
         id: closing_issues
         with:
           query: |
@@ -46,7 +46,7 @@ jobs:
           prnumber: ${{ github.event.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: sergeysova/jq-action@v2
+      - uses: sergeysova/jq-action@a3f0d4ff59cc1dddf023fc0b325dd75b10deec58 # v2.3.0
         id: issues_to_label
         with:
           # Map to the issues' node id
@@ -54,7 +54,7 @@ jobs:
           multiline: true
         env:
           CLOSING_ISSUES: ${{ steps.closing_issues.outputs.data }}
-      - uses: sergeysova/jq-action@v2
+      - uses: sergeysova/jq-action@a3f0d4ff59cc1dddf023fc0b325dd75b10deec58 # v2.3.0
         id: label_ids
         with:
           # Get list of version labels on pull request and map to label's node id, append 'QA:Ready For Testing' id ("MDU6TGFiZWwyNTQ1NjcwOTI4")
@@ -78,7 +78,7 @@ jobs:
 
     name: Label issue ${{ matrix.issueId }} with ${{ matrix.labelId }}
     steps:
-      - uses: octokit/graphql-action@v2.x
+      - uses: octokit/graphql-action@ddde8ebb2493e79f390e6449c725c21663a67505 # v3.0.2
         id: add_labels_to_closed_issue
         with:
           query: |

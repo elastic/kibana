@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { useHistory } from 'react-router-dom';
 import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
+import type { ScopedHistory } from '@kbn/core/public';
 
-export const Sidebar = () => {
-  const history = useHistory();
+export const Sidebar = ({ history }: { history: ScopedHistory }) => {
   return (
     <EuiPageSidebar>
       <EuiSideNav
@@ -50,6 +49,11 @@ export const Sidebar = () => {
                 onClick: () => history.push(`/rule_event_log_list`),
               },
               {
+                id: 'global_rule_event_log_list',
+                name: 'Global Run History List',
+                onClick: () => history.push(`/global_rule_event_log_list`),
+              },
+              {
                 id: 'rule_status_dropdown',
                 name: 'Rule Status Dropdown',
                 onClick: () => history.push(`/rule_status_dropdown`),
@@ -60,14 +64,41 @@ export const Sidebar = () => {
                 onClick: () => history.push(`/rule_status_filter`),
               },
               {
-                id: 'alerts table',
+                id: 'alerts_table',
                 name: 'Alert Table',
                 onClick: () => history.push('/alerts_table'),
               },
               {
-                id: 'rules settings link',
+                id: 'rules_settings_link',
                 name: 'Rules Settings Link',
                 onClick: () => history.push('/rules_settings_link'),
+              },
+            ],
+          },
+          {
+            name: 'Rule Form Components',
+            id: 'rule-form-components',
+            items: [
+              {
+                id: 'rule-create',
+                name: 'Rule Create',
+                onClick: () => history.push('/rule/create/.es-query'),
+              },
+              {
+                id: 'rule-edit',
+                name: 'Rule Edit',
+                onClick: () => history.push('/rule/edit/test'),
+              },
+            ],
+          },
+          {
+            name: 'Task Manager with API key',
+            id: 'task-manager-with-api-key',
+            items: [
+              {
+                id: 'task-manager-with-api-key-page',
+                name: 'Task Manager with API Key',
+                onClick: () => history.push('/task_manager_with_api_key'),
               },
             ],
           },

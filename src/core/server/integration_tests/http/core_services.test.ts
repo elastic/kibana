@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { MockElasticsearchClient } from './core_service.test.mocks';
@@ -37,6 +38,7 @@ describe('http service', () => {
       root = createRoot({
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
+        server: { restrictInternalApis: false },
       });
       await root.preboot();
     });
@@ -52,8 +54,13 @@ describe('http service', () => {
         registerAuth((req, res, toolkit) => toolkit.authenticated());
 
         const router = createRouter('');
-        router.get({ path: '/is-auth', validate: false }, (context, req, res) =>
-          res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
+        router.get(
+          {
+            path: '/is-auth',
+            validate: false,
+            security: { authz: { enabled: false, reason: '' } },
+          },
+          (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
 
         await root.start();
@@ -68,7 +75,22 @@ describe('http service', () => {
 
         const router = createRouter('');
         router.get(
-          { path: '/is-auth', validate: false, options: { authRequired: false } },
+          {
+            path: '/is-auth',
+            validate: false,
+            security: {
+              authc: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+          },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
 
@@ -82,7 +104,22 @@ describe('http service', () => {
 
         const router = createRouter('');
         router.get(
-          { path: '/is-auth', validate: false, options: { authRequired: false } },
+          {
+            path: '/is-auth',
+            validate: false,
+            security: {
+              authc: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+          },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
 
@@ -97,7 +134,22 @@ describe('http service', () => {
         registerAuth((req, res, toolkit) => toolkit.authenticated());
         const router = createRouter('');
         router.get(
-          { path: '/is-auth', validate: false, options: { authRequired: 'optional' } },
+          {
+            path: '/is-auth',
+            validate: false,
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+          },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
 
@@ -113,7 +165,22 @@ describe('http service', () => {
 
         const router = createRouter('');
         router.get(
-          { path: '/is-auth', validate: false, options: { authRequired: 'optional' } },
+          {
+            path: '/is-auth',
+            validate: false,
+            security: {
+              authc: {
+                enabled: 'optional',
+                reason:
+                  'This route is part of an HTTP integration test and supports optional authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+          },
           (context, req, res) => res.ok({ body: { isAuthenticated: auth.isAuthenticated(req) } })
         );
 
@@ -134,8 +201,13 @@ describe('http service', () => {
         });
 
         const router = createRouter('');
-        router.get({ path: '/get-auth', validate: false }, (context, req, res) =>
-          res.ok({ body: auth.get<{ id: string }>(req) })
+        router.get(
+          {
+            path: '/get-auth',
+            validate: false,
+            security: { authz: { enabled: false, reason: '' } },
+          },
+          (context, req, res) => res.ok({ body: auth.get<{ id: string }>(req) })
         );
 
         await root.start();
@@ -148,8 +220,13 @@ describe('http service', () => {
         const { createRouter, auth } = http;
 
         const router = createRouter('');
-        router.get({ path: '/get-auth', validate: false }, (context, req, res) =>
-          res.ok({ body: auth.get(req) })
+        router.get(
+          {
+            path: '/get-auth',
+            validate: false,
+            security: { authz: { enabled: false, reason: '' } },
+          },
+          (context, req, res) => res.ok({ body: auth.get(req) })
         );
 
         await root.start();
@@ -164,7 +241,22 @@ describe('http service', () => {
         registerAuth(authenticate);
         const router = createRouter('');
         router.get(
-          { path: '/get-auth', validate: false, options: { authRequired: false } },
+          {
+            path: '/get-auth',
+            validate: false,
+            security: {
+              authc: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authentication.',
+              },
+              authz: {
+                enabled: false,
+                reason:
+                  'This route is part of an HTTP integration test and does not require authorization.',
+              },
+            },
+          },
           (context, req, res) => res.ok({ body: auth.get(req) })
         );
 
@@ -184,6 +276,7 @@ describe('http service', () => {
       root = createRoot({
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
+        server: { restrictInternalApis: false },
       });
       await root.preboot();
     });
@@ -218,10 +311,13 @@ describe('http service', () => {
       );
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        await elasticsearch.client.asScoped(req).asInternalUser.ping();
-        return res.ok();
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        async (context, req, res) => {
+          await elasticsearch.client.asScoped(req).asInternalUser.ping();
+          return res.ok();
+        }
+      );
 
       const coreStart = await root.start();
       elasticsearch = coreStart.elasticsearch;
@@ -254,10 +350,13 @@ describe('http service', () => {
       );
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        await elasticsearch.client.asScoped(req).asInternalUser.ping();
-        return res.ok();
-      });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        async (context, req, res) => {
+          await elasticsearch.client.asScoped(req).asInternalUser.ping();
+          return res.ok();
+        }
+      );
 
       const coreStart = await root.start();
       elasticsearch = coreStart.elasticsearch;
@@ -291,20 +390,23 @@ describe('http service', () => {
       );
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        try {
-          const result = await elasticsearch.client
-            .asScoped(req)
-            .asInternalUser.ping({}, { meta: true });
-          return res.ok({
-            body: result,
-          });
-        } catch (e) {
-          return res.badRequest({
-            body: e,
-          });
+      router.get(
+        { path: '/', validate: false, security: { authz: { enabled: false, reason: '' } } },
+        async (context, req, res) => {
+          try {
+            const result = await elasticsearch.client
+              .asScoped(req)
+              .asInternalUser.ping({}, { meta: true });
+            return res.ok({
+              body: result,
+            });
+          } catch (e) {
+            return res.badRequest({
+              body: e,
+            });
+          }
         }
-      });
+      );
 
       const coreStart = await root.start();
       elasticsearch = coreStart.elasticsearch;

@@ -1,5 +1,0 @@
-title: Connector request properties for an email connector
-description: Defines properties for connectors when type is `.email`.
-type: object
-additionalProperties: true
-# TO-DO: Add the properties for this connector.

@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/grokdebugger-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "grokdebugger",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "grokdebugger"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "home",
+      "devTools"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}

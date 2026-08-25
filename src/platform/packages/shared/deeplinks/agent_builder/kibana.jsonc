@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/deeplinks-agent-builder",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "shared"
+}

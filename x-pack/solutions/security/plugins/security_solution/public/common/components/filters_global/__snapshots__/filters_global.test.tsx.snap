@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rendering renders correctly 1`] = `
+<InPortal
+  node={
+    Object {
+      "element": <div />,
+      "elementType": "html",
+      "getInitialPortalProps": [Function],
+      "mount": [Function],
+      "setPortalProps": [Function],
+      "unmount": [Function],
+    }
+  }
+>
+  <EuiPanel
+    borderRadius="none"
+    color="subdued"
+    paddingSize="none"
+  >
+    <header
+      css="unknown styles"
+      data-test-subj="filters-global-container"
+    >
+      <p>
+        Additional filters here.
+      </p>
+    </header>
+  </EuiPanel>
+</InPortal>
+`;
