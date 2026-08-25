@@ -204,6 +204,14 @@
       "reason": "OAS accuracy fix: the Zod converter now collapses .nullable() to `nullable: true` instead of leaving a half-converted `anyOf: [T, { nullable: true }]` wrapper. Same set of accepted values, canonical OAS 3.0 spelling. No runtime behavior change.",
       "approvedBy": "@elastic/security-entity-analytics",
       "oasdiffId": "request-property-any-of-removed"
+    },
+    {
+      "path": "/api/detection_engine/rules/preview",
+      "method": "post",
+      "reason": "False-positive: the request body's `anyOf` members are untitled, so oasdiff identifies them by resolved content rather than by name. All 8 members embed `MaxSignals` via the shared `BaseCreateProps`, so removing its `default: 100` changes every member's resolved shape and oasdiff reports the whole list as removed and re-added. The `anyOf` list itself is byte-identical to the base spec and no subschema was removed. The underlying change stops Zod v4 from materializing `max_signals` on PATCH; rule creation still defaults to 100 via RULE_DEFAULTS, so no request payload that validated before is rejected now.",
+      "approvedBy": "@elastic/security-detection-engineering",
+      "oasdiffId": "request-body-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/286518"
     }
   ]
 }
