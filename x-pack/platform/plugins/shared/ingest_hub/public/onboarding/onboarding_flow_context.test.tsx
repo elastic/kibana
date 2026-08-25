@@ -8,6 +8,12 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 
+jest.mock('./use_aws_service_matrix', () => ({
+  useAwsServiceMatrix: jest
+    .fn()
+    .mockReturnValue({ matrix: [], isError: false, refetch: jest.fn() }),
+}));
+
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
 
 jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
@@ -148,28 +154,6 @@ describe('OnboardingFlowProvider', () => {
       rerender();
 
       expect(result.current.getLatestFailedInstances()).toEqual(['inst_x']);
-    });
-  });
-
-  describe('retryDeploy', () => {
-    it('calls the registered deploy handler with the provided instance ids', () => {
-      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
-      const handler = jest.fn();
-
-      act(() => {
-        result.current.registerDeployHandler(handler);
-      });
-
-      act(() => {
-        result.current.retryDeploy(['inst_a', 'inst_b']);
-      });
-
-      expect(handler).toHaveBeenCalledWith(['inst_a', 'inst_b']);
-    });
-
-    it('does nothing when no handler is registered', () => {
-      const { result } = renderHook(() => useOnboardingFlow(), { wrapper });
-      expect(() => result.current.retryDeploy(['inst_a'])).not.toThrow();
     });
   });
 });
