@@ -536,9 +536,7 @@ export function initializeLayoutManager(
       gridLayout$,
       childrenLoading$,
       reset: resetLayout,
-      serializeLayout: () => {
-        return serializeLayout(layout$.value, currentChildState);
-      },
+      serializeLayout: () => serializeLayout(layout$.value, currentChildState),
 
       startComparing: (
         lastSavedState$: BehaviorSubject<DashboardState>

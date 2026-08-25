@@ -353,7 +353,6 @@ export function getDashboardApi({
     ...unifiedSearchManager.internalApi,
     ...unsavedChangesManager.internalApi,
     ...esqlVariablesManager.api,
-    ...unsavedChangesManager.internalApi,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),
   };

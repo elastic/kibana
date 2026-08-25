@@ -244,17 +244,6 @@ export function initializeReduxSync({
         openTOCDetails: openTOCDetails$.value,
       };
     },
-    reinitializeState: (
-      nextState: Pick<
-        MapEmbeddableState,
-        'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'mapBuffer' | 'openTOCDetails'
-      >
-    ) => {
-      if (nextState.hiddenLayers !== undefined) hiddenLayers$.next(nextState.hiddenLayers);
-      if (nextState.isLayerTOCOpen !== undefined) isLayerTOCOpen$.next(nextState.isLayerTOCOpen);
-      if (nextState.mapCenter !== undefined) mapCenterAndZoom$.next(nextState.mapCenter);
-      if (nextState.openTOCDetails !== undefined) openTOCDetails$.next(nextState.openTOCDetails);
-    },
   };
 }
 
