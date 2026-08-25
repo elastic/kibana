@@ -14,9 +14,7 @@ import { CONTEXT_ENGINE_EVENT_TYPES, contextEngineServerEbtEvents } from './even
 const CLUSTER_UUID = 'cluster-uuid-1';
 
 const hashed = (aiIndexId: string) =>
-  createHash('sha256')
-    .update(aiIndexId + CLUSTER_UUID)
-    .digest('hex');
+  createHash('sha256').update(`${aiIndexId}\0${CLUSTER_UUID}`).digest('hex');
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 

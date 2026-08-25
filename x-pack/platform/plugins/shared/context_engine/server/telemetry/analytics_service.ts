@@ -118,8 +118,6 @@ export class ContextEngineAnalyticsService {
     if (!this.clusterUuid) {
       return 'unknown';
     }
-    return createHash('sha256')
-      .update(aiIndexId + this.clusterUuid)
-      .digest('hex');
+    return createHash('sha256').update(`${aiIndexId}\0${this.clusterUuid}`).digest('hex');
   }
 }
