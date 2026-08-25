@@ -23,15 +23,23 @@ export const PatchTimelineRequestBody = lazySchema(() =>
     /**
      * The `savedObjectId` of the Timeline or Timeline template that you’re updating.
      */
-    timelineId: z.string().nullable(),
+    timelineId: z
+      .string()
+      .nullable()
+      .describe('The `savedObjectId` of the Timeline or Timeline template that you’re updating.'),
     /**
      * The version of the Timeline or Timeline template that you’re updating.
      */
-    version: z.string().nullable(),
+    version: z
+      .string()
+      .nullable()
+      .describe('The version of the Timeline or Timeline template that you’re updating.'),
     /**
      * The timeline object of the Timeline or Timeline template that you’re updating.
      */
-    timeline: SavedTimeline,
+    timeline: SavedTimeline.describe(
+      'The timeline object of the Timeline or Timeline template that you’re updating.'
+    ),
   })
 );
 export type PatchTimelineRequestBody = z.infer<typeof PatchTimelineRequestBody>;

@@ -29,11 +29,20 @@ export const EndpointRunScriptParameters = lazySchema(() =>
     /**
      * The script ID from the scripts library that will be executed.
      */
-    scriptId: z.string().min(1).max(256),
+    scriptId: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe('The script ID from the scripts library that will be executed.'),
     /**
      * The input parameter arguments (if any) for the script that will be executed.
      */
-    scriptInput: z.string().min(1).max(8192).optional(),
+    scriptInput: z
+      .string()
+      .min(1)
+      .max(8192)
+      .optional()
+      .describe('The input parameter arguments (if any) for the script that will be executed.'),
   })
 );
 export type EndpointRunScriptParameters = z.infer<typeof EndpointRunScriptParameters>;
@@ -43,15 +52,15 @@ export const RawScriptParameters = lazySchema(() =>
     /**
      * Raw script content.
      */
-    raw: z.string().min(1).max(65536),
+    raw: z.string().min(1).max(65536).describe('Raw script content.'),
     /**
      * Command line arguments.
      */
-    commandLine: z.string().min(1).max(8192).optional(),
+    commandLine: z.string().min(1).max(8192).optional().describe('Command line arguments.'),
     /**
      * Timeout in seconds.
      */
-    timeout: z.number().int().min(1).optional(),
+    timeout: z.number().int().min(1).optional().describe('Timeout in seconds.'),
   })
 );
 export type RawScriptParameters = z.infer<typeof RawScriptParameters>;
@@ -61,15 +70,19 @@ export const HostPathScriptParameters = lazySchema(() =>
     /**
      * Absolute or relative path of script on host machine.
      */
-    hostPath: z.string().min(1).max(4096),
+    hostPath: z
+      .string()
+      .min(1)
+      .max(4096)
+      .describe('Absolute or relative path of script on host machine.'),
     /**
      * Command line arguments.
      */
-    commandLine: z.string().min(1).max(8192).optional(),
+    commandLine: z.string().min(1).max(8192).optional().describe('Command line arguments.'),
     /**
      * Timeout in seconds.
      */
-    timeout: z.number().int().min(1).optional(),
+    timeout: z.number().int().min(1).optional().describe('Timeout in seconds.'),
   })
 );
 export type HostPathScriptParameters = z.infer<typeof HostPathScriptParameters>;
@@ -79,15 +92,15 @@ export const CloudFileScriptParameters = lazySchema(() =>
     /**
      * Script name in cloud storage.
      */
-    cloudFile: z.string().min(1).max(4096),
+    cloudFile: z.string().min(1).max(4096).describe('Script name in cloud storage.'),
     /**
      * Command line arguments.
      */
-    commandLine: z.string().min(1).max(8192).optional(),
+    commandLine: z.string().min(1).max(8192).optional().describe('Command line arguments.'),
     /**
      * Timeout in seconds.
      */
-    timeout: z.number().int().min(1).optional(),
+    timeout: z.number().int().min(1).optional().describe('Timeout in seconds.'),
   })
 );
 export type CloudFileScriptParameters = z.infer<typeof CloudFileScriptParameters>;
@@ -100,11 +113,20 @@ export const SentinelOneRunScriptParameters = lazySchema(() =>
     /**
      * The script ID from SentinelOne scripts library that will be executed.
      */
-    scriptId: z.string().min(1).max(256),
+    scriptId: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe('The script ID from SentinelOne scripts library that will be executed.'),
     /**
      * The input parameter arguments for the script that was selected.
      */
-    scriptInput: z.string().min(1).max(8192).optional(),
+    scriptInput: z
+      .string()
+      .min(1)
+      .max(8192)
+      .optional()
+      .describe('The input parameter arguments for the script that was selected.'),
   })
 );
 export type SentinelOneRunScriptParameters = z.infer<typeof SentinelOneRunScriptParameters>;
@@ -117,11 +139,20 @@ export const MDERunScriptParameters = lazySchema(() =>
     /**
      * The name of the script to execute from the cloud storage.
      */
-    scriptName: z.string().min(1).max(256),
+    scriptName: z
+      .string()
+      .min(1)
+      .max(256)
+      .describe('The name of the script to execute from the cloud storage.'),
     /**
      * Optional command line arguments for the script.
      */
-    args: z.string().min(1).max(8192).optional(),
+    args: z
+      .string()
+      .min(1)
+      .max(8192)
+      .optional()
+      .describe('Optional command line arguments for the script.'),
   })
 );
 export type MDERunScriptParameters = z.infer<typeof MDERunScriptParameters>;
@@ -133,14 +164,18 @@ export const RunScriptRouteRequestBody = lazySchema(() =>
       * One of the following set of parameters must be provided for the `agentType` that is specified.
 
       */
-      parameters: z.union([
-        EndpointRunScriptParameters,
-        RawScriptParameters,
-        HostPathScriptParameters,
-        CloudFileScriptParameters,
-        SentinelOneRunScriptParameters,
-        MDERunScriptParameters,
-      ]),
+      parameters: z
+        .union([
+          EndpointRunScriptParameters,
+          RawScriptParameters,
+          HostPathScriptParameters,
+          CloudFileScriptParameters,
+          SentinelOneRunScriptParameters,
+          MDERunScriptParameters,
+        ])
+        .describe(
+          'One of the following set of parameters must be provided for the `agentType` that is specified.\n'
+        ),
     })
   )
 );

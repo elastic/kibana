@@ -14,79 +14,85 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 /**
  * A string that does not contain only whitespace characters.
  */
+export const NonEmptyString = lazySchema(() =>
+  z.string().min(1).max(1024).superRefine(isNonEmptyString)
+);
 export type NonEmptyString = z.infer<typeof NonEmptyString>;
-export const NonEmptyString = z.string().min(1).max(1024).superRefine(isNonEmptyString);
 
 /**
  * A string that represents a timestamp in ISO 8601 format and does not contain only whitespace characters.
  */
+export const NonEmptyTimestamp = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type NonEmptyTimestamp = z.infer<typeof NonEmptyTimestamp>;
-export const NonEmptyTimestamp = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * A universally unique identifier.
  */
+export const UUID = lazySchema(() => z.string().uuid());
 export type UUID = z.infer<typeof UUID>;
-export const UUID = z.string().uuid();
 
 /**
  * Could be any string, not necessarily a UUID.
  */
+export const User = lazySchema(() =>
+  z.object({
+    /**
+     * User id.
+     */
+    id: z.string().optional().describe('User id.'),
+    /**
+     * User name.
+     */
+    name: z.string().optional().describe('User name.'),
+  })
+);
 export type User = z.infer<typeof User>;
-export const User = z.object({
-  /**
-   * User id.
-   */
-  id: z.string().optional(),
-  /**
-   * User name.
-   */
-  name: z.string().optional(),
-});
 
 /**
  * Map of anonymized values to original values
  */
+export const Replacements = lazySchema(() => z.object({}).catchall(z.string()));
 export type Replacements = z.infer<typeof Replacements>;
-export const Replacements = z.object({}).catchall(z.string());
 
 /**
  * LLM Provider
  */
+export const Provider = lazySchema(() => z.enum(['OpenAI', 'Azure OpenAI', 'Other']));
 export type Provider = z.infer<typeof Provider>;
-export const Provider = z.enum(['OpenAI', 'Azure OpenAI', 'Other']);
 export type ProviderEnum = typeof Provider.enum;
 export const ProviderEnum = Provider.enum;
 
 /**
  * LLM API configuration
  */
+export const ApiConfig = lazySchema(() =>
+  z.object({
+    /**
+     * Connector ID
+     */
+    connector_id: z.string().max(1024).describe('Connector ID'),
+    /**
+     * Action type ID
+     */
+    action_type_id: z.string().max(1024).optional().describe('Action type ID'),
+    /**
+     * Default system prompt ID
+     */
+    default_system_prompt_id: z.string().max(1024).optional().describe('Default system prompt ID'),
+    /**
+     * Provider
+     */
+    provider: Provider.optional().describe('Provider'),
+    /**
+     * Model
+     */
+    model: z.string().max(1024).optional().describe('Model'),
+  })
+);
 export type ApiConfig = z.infer<typeof ApiConfig>;
-export const ApiConfig = z.object({
-  /**
-   * Connector ID
-   */
-  connector_id: z.string().max(1024),
-  /**
-   * Action type ID
-   */
-  action_type_id: z.string().max(1024).optional(),
-  /**
-   * Default system prompt ID
-   */
-  default_system_prompt_id: z.string().max(1024).optional(),
-  /**
-   * Provider
-   */
-  provider: Provider.optional(),
-  /**
-   * Model
-   */
-  model: z.string().max(1024).optional(),
-});

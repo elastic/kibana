@@ -22,7 +22,10 @@ export const ActionStateSuccessResponse = lazySchema(() =>
       /**
        * Whether the Kibana instance has encryption enabled for response actions.
        */
-      canEncrypt: z.boolean().optional(),
+      canEncrypt: z
+        .boolean()
+        .optional()
+        .describe('Whether the Kibana instance has encryption enabled for response actions.'),
     }),
   })
 );

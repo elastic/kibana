@@ -24,7 +24,7 @@ export const ReadListRequestQuery = lazySchema(() =>
     /**
      * Value list identifier (`id`) returned when the list was created.
      */
-    id: ListId,
+    id: ListId.describe('Value list identifier (`id`) returned when the list was created.'),
   })
 );
 export type ReadListRequestQuery = z.infer<typeof ReadListRequestQuery>;

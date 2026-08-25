@@ -28,12 +28,16 @@ export const UploadRouteRequestBody = lazySchema(() =>
         /**
          * Overwrite the file on the host if it already exists.
          */
-        overwrite: z.boolean().optional().default(false),
+        overwrite: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe('Overwrite the file on the host if it already exists.'),
       }),
       /**
        * The binary content of the file.
        */
-      file: z.string(),
+      file: z.string().describe('The binary content of the file.'),
     })
   )
 );

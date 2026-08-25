@@ -69,7 +69,7 @@ export const CreateRuleExceptionListItemsRequestParams = lazySchema(() =>
     /**
      * Detection rule's identifier
      */
-    id: RuleId,
+    id: RuleId.describe("Detection rule's identifier"),
   })
 );
 export type CreateRuleExceptionListItemsRequestParams = z.infer<

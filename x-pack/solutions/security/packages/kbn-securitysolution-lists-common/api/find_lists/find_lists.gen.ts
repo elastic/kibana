@@ -30,29 +30,45 @@ export const FindListsRequestQuery = lazySchema(() =>
     /**
      * The page number to return.
      */
-    page: z.coerce.number().int().optional(),
+    page: z.coerce.number().int().optional().describe('The page number to return.'),
     /**
      * The number of value lists to return per page.
      */
-    per_page: z.coerce.number().int().optional(),
+    per_page: z.coerce
+      .number()
+      .int()
+      .optional()
+      .describe('The number of value lists to return per page.'),
     /**
      * Determines which field is used to sort the results.
      */
-    sort_field: z.string().min(1).superRefine(isNonEmptyString).optional(),
+    sort_field: z
+      .string()
+      .min(1)
+      .superRefine(isNonEmptyString)
+      .optional()
+      .describe('Determines which field is used to sort the results.'),
     /**
      * Determines the sort order, which can be `desc` or `asc`
      */
-    sort_order: z.enum(['desc', 'asc']).optional(),
+    sort_order: z
+      .enum(['desc', 'asc'])
+      .optional()
+      .describe('Determines the sort order, which can be `desc` or `asc`'),
     /**
      * Returns the lists that come after the last lists returned in the previous call (use the `cursor` value returned in the previous call). This parameter uses the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
      */
-    cursor: FindListsCursor.optional(),
+    cursor: FindListsCursor.optional().describe(
+      'Returns the lists that come after the last lists returned in the previous call (use the `cursor` value returned in the previous call). This parameter uses the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.'
+    ),
     /**
       * Filters the returned results according to the value of the specified field,
 using the <field name>:<field value> syntax.
 
       */
-    filter: FindListsFilter.optional(),
+    filter: FindListsFilter.optional().describe(
+      'Filters the returned results according to the value of the specified field,\nusing the <field name>:<field value> syntax.\n'
+    ),
   })
 );
 export type FindListsRequestQuery = z.infer<typeof FindListsRequestQuery>;

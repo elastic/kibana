@@ -40,19 +40,23 @@ export const DashboardMigrationData = lazySchema(() =>
     /**
      * The dashboard migration name
      */
-    name: NonEmptyString,
+    name: NonEmptyString.describe('The dashboard migration name'),
     /**
      * The user profile ID of the user who created the migration.
      */
-    created_by: NonEmptyString,
+    created_by: NonEmptyString.describe(
+      'The user profile ID of the user who created the migration.'
+    ),
     /**
      * The moment migration was created
      */
-    created_at: NonEmptyString,
+    created_at: NonEmptyString.describe('The moment migration was created'),
     /**
      * The last execution of the dashboard migration task.
      */
-    last_execution: MigrationLastExecution.optional(),
+    last_execution: MigrationLastExecution.optional().describe(
+      'The last execution of the dashboard migration task.'
+    ),
   })
 );
 export type DashboardMigrationData = z.infer<typeof DashboardMigrationData>;
@@ -66,7 +70,7 @@ export const DashboardMigration = lazySchema(() =>
       /**
        * The dashboard migration id
        */
-      id: NonEmptyString,
+      id: NonEmptyString.describe('The dashboard migration id'),
     })
     .merge(DashboardMigrationData)
 );
@@ -80,50 +84,73 @@ export const DashboardMigrationTranslationStats = lazySchema(() =>
     /**
      * The migration id
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe('The migration id'),
     /**
      * The dashboards migration translation stats.
      */
-    dashboards: z.object({
-      /**
-       * The total number of dashboards in the migration.
-       */
-      total: z.number().int(),
-      /**
-       * The number of dashboards that have been successfully translated.
-       */
-      success: z.object({
+    dashboards: z
+      .object({
         /**
-         * The total number of dashboards that have been successfully translated.
+         * The total number of dashboards in the migration.
          */
-        total: z.number().int(),
+        total: z.number().int().describe('The total number of dashboards in the migration.'),
         /**
-         * The translation results
+         * The number of dashboards that have been successfully translated.
          */
-        result: z.object({
-          /**
-           * The number of dashboards that have been fully translated.
-           */
-          full: z.number().int(),
-          /**
-           * The number of dashboards that have been partially translated.
-           */
-          partial: z.number().int(),
-          /**
-           * The number of dashboards that could not be translated.
-           */
-          untranslatable: z.number().int(),
-        }),
+        success: z
+          .object({
+            /**
+             * The total number of dashboards that have been successfully translated.
+             */
+            total: z
+              .number()
+              .int()
+              .describe('The total number of dashboards that have been successfully translated.'),
+            /**
+             * The translation results
+             */
+            result: z
+              .object({
+                /**
+                 * The number of dashboards that have been fully translated.
+                 */
+                full: z
+                  .number()
+                  .int()
+                  .describe('The number of dashboards that have been fully translated.'),
+                /**
+                 * The number of dashboards that have been partially translated.
+                 */
+                partial: z
+                  .number()
+                  .int()
+                  .describe('The number of dashboards that have been partially translated.'),
+                /**
+                 * The number of dashboards that could not be translated.
+                 */
+                untranslatable: z
+                  .number()
+                  .int()
+                  .describe('The number of dashboards that could not be translated.'),
+              })
+              .describe('The translation results'),
+            /**
+             * The number of dashboards that have been successfully translated and can be installed.
+             */
+            installable: z
+              .number()
+              .int()
+              .describe(
+                'The number of dashboards that have been successfully translated and can be installed.'
+              ),
+          })
+          .describe('The number of dashboards that have been successfully translated.'),
         /**
-         * The number of dashboards that have been successfully translated and can be installed.
+         * The number of dashboards that have failed translation.
          */
-        installable: z.number().int(),
-      }),
-      /**
-       * The number of dashboards that have failed translation.
-       */
-      failed: z.number().int(),
-    }),
+        failed: z.number().int().describe('The number of dashboards that have failed translation.'),
+      })
+      .describe('The dashboards migration translation stats.'),
   })
 );
 export type DashboardMigrationTranslationStats = z.infer<typeof DashboardMigrationTranslationStats>;
@@ -136,35 +163,37 @@ export const OriginalDashboard = lazySchema(() =>
     /**
      * The unique identifier for the dashboard
      */
-    id: z.string(),
+    id: z.string().describe('The unique identifier for the dashboard'),
     /**
      * The original dashboard vendor identifier.
      */
-    vendor: OriginalDashboardVendor,
+    vendor: OriginalDashboardVendor.describe('The original dashboard vendor identifier.'),
     /**
      * The title of the dashboard
      */
-    title: z.string(),
+    title: z.string().describe('The title of the dashboard'),
     /**
      * The description of the dashboard
      */
-    description: z.string(),
+    description: z.string().describe('The description of the dashboard'),
     /**
      * The data of the dashboard in the specified format
      */
-    data: z.string(),
+    data: z.string().describe('The data of the dashboard in the specified format'),
     /**
      * The last updated timestamp of the dashboard
      */
-    last_updated: z.string().optional(),
+    last_updated: z.string().optional().describe('The last updated timestamp of the dashboard'),
     /**
      * The format of the dashboard data (e.g., 'json', 'xml')
      */
-    format: z.string(),
+    format: z.string().describe("The format of the dashboard data (e.g., 'json', 'xml')"),
     /**
      * Additional properties specific to the splunk
      */
-    splunk_properties: SplunkOriginalDashboardProperties.optional(),
+    splunk_properties: SplunkOriginalDashboardProperties.optional().describe(
+      'Additional properties specific to the splunk'
+    ),
   })
 );
 export type OriginalDashboard = z.infer<typeof OriginalDashboard>;
@@ -177,19 +206,25 @@ export const ElasticDashboard = lazySchema(() =>
     /**
      * The unique identifier for the dashboard installed Saved Object
      */
-    id: z.string().optional(),
+    id: z
+      .string()
+      .optional()
+      .describe('The unique identifier for the dashboard installed Saved Object'),
     /**
      * The title of the dashboard
      */
-    title: z.string(),
+    title: z.string().describe('The title of the dashboard'),
     /**
      * The description of the dashboard
      */
-    description: z.string().optional(),
+    description: z.string().optional().describe('The description of the dashboard'),
     /**
      * The data of the dashboard, format could depend on the vendor
      */
-    data: z.string().optional(),
+    data: z
+      .string()
+      .optional()
+      .describe('The data of the dashboard, format could depend on the vendor'),
   })
 );
 export type ElasticDashboard = z.infer<typeof ElasticDashboard>;
@@ -202,43 +237,51 @@ export const DashboardMigrationDashboardData = lazySchema(() =>
     /**
      * The moment of creation
      */
-    '@timestamp': z.string(),
+    '@timestamp': z.string().describe('The moment of creation'),
     /**
      * The migration id.
      */
-    migration_id: NonEmptyString,
+    migration_id: NonEmptyString.describe('The migration id.'),
     /**
      * The user profile ID of the user who created the migration.
      */
-    created_by: NonEmptyString,
+    created_by: NonEmptyString.describe(
+      'The user profile ID of the user who created the migration.'
+    ),
     /**
      * The original dashboard to migrate.
      */
-    original_dashboard: OriginalDashboard,
+    original_dashboard: OriginalDashboard.describe('The original dashboard to migrate.'),
     /**
      * The translated elastic dashboard.
      */
-    elastic_dashboard: ElasticDashboard.optional(),
+    elastic_dashboard: ElasticDashboard.optional().describe('The translated elastic dashboard.'),
     /**
      * The rule translation result.
      */
-    translation_result: MigrationTranslationResult.optional(),
+    translation_result: MigrationTranslationResult.optional().describe(
+      'The rule translation result.'
+    ),
     /**
      * The status of the dashboard migration process.
      */
-    status: MigrationStatus.default('pending'),
+    status: MigrationStatus.default('pending').describe(
+      'The status of the dashboard migration process.'
+    ),
     /**
      * The comments for the migration including a summary from the LLM in markdown.
      */
-    comments: MigrationComments.optional(),
+    comments: MigrationComments.optional().describe(
+      'The comments for the migration including a summary from the LLM in markdown.'
+    ),
     /**
      * The moment of the last update
      */
-    updated_at: z.string().optional(),
+    updated_at: z.string().optional().describe('The moment of the last update'),
     /**
      * The user who last updated the migration
      */
-    updated_by: z.string().optional(),
+    updated_by: z.string().optional().describe('The user who last updated the migration'),
   })
 );
 export type DashboardMigrationDashboardData = z.infer<typeof DashboardMigrationDashboardData>;
@@ -252,7 +295,7 @@ export const DashboardMigrationDashboard = lazySchema(() =>
       /**
        * The dashboard migration id
        */
-      id: NonEmptyString,
+      id: NonEmptyString.describe('The dashboard migration id'),
     })
     .merge(DashboardMigrationDashboardData)
 );
@@ -272,15 +315,19 @@ export const UpdateMigrationDashboard = lazySchema(() =>
     /**
      * The dashboard migration id
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe('The dashboard migration id'),
     /**
      * The migrated elastic dashboard attributes to update.
      */
-    elastic_dashboard: ElasticDashboardPartial.optional(),
+    elastic_dashboard: ElasticDashboardPartial.optional().describe(
+      'The migrated elastic dashboard attributes to update.'
+    ),
     /**
      * The comments for the migration including a summary from the LLM in markdown.
      */
-    comments: MigrationComments.optional(),
+    comments: MigrationComments.optional().describe(
+      'The comments for the migration including a summary from the LLM in markdown.'
+    ),
   })
 );
 export type UpdateMigrationDashboard = z.infer<typeof UpdateMigrationDashboard>;
@@ -299,7 +346,7 @@ export const DashboardMigrationTaskExecutionSettings = lazySchema(() =>
     /**
      * The connector ID used in the last execution.
      */
-    connector_id: z.string(),
+    connector_id: z.string().describe('The connector ID used in the last execution.'),
   })
 );
 export type DashboardMigrationTaskExecutionSettings = z.infer<

@@ -21,7 +21,7 @@ export const ScheduleMonitoringEngineResponse = lazySchema(() =>
     /**
      * Indicates the scheduling was successful
      */
-    success: z.boolean().optional(),
+    success: z.boolean().optional().describe('Indicates the scheduling was successful'),
   })
 );
 export type ScheduleMonitoringEngineResponse = z.infer<typeof ScheduleMonitoringEngineResponse>;

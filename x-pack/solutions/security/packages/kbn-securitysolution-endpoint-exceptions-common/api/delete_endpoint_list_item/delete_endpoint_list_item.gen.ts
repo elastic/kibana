@@ -27,11 +27,13 @@ export const DeleteEndpointListItemRequestQuery = lazySchema(() =>
     /**
      * Either `id` or `item_id` must be specified
      */
-    id: ExceptionListItemId.optional(),
+    id: ExceptionListItemId.optional().describe('Either `id` or `item_id` must be specified'),
     /**
      * Either `id` or `item_id` must be specified
      */
-    item_id: ExceptionListItemHumanId.optional(),
+    item_id: ExceptionListItemHumanId.optional().describe(
+      'Either `id` or `item_id` must be specified'
+    ),
   })
 );
 export type DeleteEndpointListItemRequestQuery = z.infer<typeof DeleteEndpointListItemRequestQuery>;

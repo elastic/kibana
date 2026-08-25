@@ -34,7 +34,12 @@ export const SetAlertsStatusByIdsBase = lazySchema(() =>
     /**
      * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
      */
-    signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
+    signal_ids: z
+      .array(z.string().min(1).superRefine(isNonEmptyString))
+      .min(1)
+      .describe(
+        'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
+      ),
     status: AlertStatusExceptClosed,
   })
 );
@@ -45,7 +50,12 @@ export const CloseAlertsByIds = lazySchema(() =>
     /**
      * List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.
      */
-    signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
+    signal_ids: z
+      .array(z.string().min(1).superRefine(isNonEmptyString))
+      .min(1)
+      .describe(
+        'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
+      ),
     status: z.literal('closed'),
     reason: Reason.optional(),
   })
@@ -65,7 +75,13 @@ export const SetAlertsStatusByQueryBase = lazySchema(() =>
     /**
      * Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the Elastic Common Schema (ECS) of the alerts index mapping, for example, custom fields that the rule's source index defined when the alerts were created.
      */
-    runtime_fields: z.object({}).catchall(RuntimeFieldType).optional(),
+    runtime_fields: z
+      .object({})
+      .catchall(RuntimeFieldType)
+      .optional()
+      .describe(
+        "Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the Elastic Common Schema (ECS) of the alerts index mapping, for example, custom fields that the rule's source index defined when the alerts were created."
+      ),
   })
 );
 export type SetAlertsStatusByQueryBase = z.infer<typeof SetAlertsStatusByQueryBase>;
@@ -79,7 +95,13 @@ export const CloseAlertsByQuery = lazySchema(() =>
     /**
      * Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created. Limited to 100 entries per request; larger maps are rejected.
      */
-    runtime_fields: z.object({}).catchall(RuntimeFieldType).optional(),
+    runtime_fields: z
+      .object({})
+      .catchall(RuntimeFieldType)
+      .optional()
+      .describe(
+        "Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created. Limited to 100 entries per request; larger maps are rejected."
+      ),
   })
 );
 export type CloseAlertsByQuery = z.infer<typeof CloseAlertsByQuery>;

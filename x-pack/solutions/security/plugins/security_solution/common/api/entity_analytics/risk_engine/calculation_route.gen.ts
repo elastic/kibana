@@ -23,37 +23,48 @@ export const RiskScoresCalculationResponse = lazySchema(() =>
     /**
      * Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.
      */
-    after_keys: AfterKeys,
+    after_keys: AfterKeys.describe(
+      'Used to obtain the next "page" of risk scores. See also the `after_keys` key in a risk scores request. If this key is empty, the calculation is complete.'
+    ),
     /**
      * A list of errors encountered during the calculation.
      */
-    errors: z.array(z.string()),
+    errors: z.array(z.string()).describe('A list of errors encountered during the calculation.'),
     /**
      * The number of risk scores persisted to elasticsearch.
      */
-    scores_written: z.number(),
+    scores_written: z.number().describe('The number of risk scores persisted to elasticsearch.'),
     scores: z
       .object({
         /**
          * A list of host risk scores
          */
-        host: z.array(EntityRiskScoreRecord).optional(),
+        host: z.array(EntityRiskScoreRecord).optional().describe('A list of host risk scores'),
         /**
          * A list of user risk scores
          */
-        user: z.array(EntityRiskScoreRecord).optional(),
+        user: z.array(EntityRiskScoreRecord).optional().describe('A list of user risk scores'),
         /**
          * A list of service risk scores
          */
-        service: z.array(EntityRiskScoreRecord).optional(),
+        service: z
+          .array(EntityRiskScoreRecord)
+          .optional()
+          .describe('A list of service risk scores'),
         /**
          * A list of generic risk scores
          */
-        generic: z.array(EntityRiskScoreRecord).optional(),
+        generic: z
+          .array(EntityRiskScoreRecord)
+          .optional()
+          .describe('A list of generic risk scores'),
         /**
          * If 'wait_for' the request will wait for the index refresh.
          */
-        refresh: z.literal('wait_for').optional(),
+        refresh: z
+          .literal('wait_for')
+          .optional()
+          .describe("If 'wait_for' the request will wait for the index refresh."),
       })
       .optional(),
   })

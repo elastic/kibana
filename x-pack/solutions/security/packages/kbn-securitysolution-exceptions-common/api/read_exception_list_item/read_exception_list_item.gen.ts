@@ -28,17 +28,25 @@ export const ReadExceptionListItemRequestQuery = lazySchema(() =>
     /**
      * Exception list item's identifier. Either `id` or `item_id` must be specified.
      */
-    id: ExceptionListItemId.optional(),
+    id: ExceptionListItemId.optional().describe(
+      "Exception list item's identifier. Either `id` or `item_id` must be specified."
+    ),
     /**
      * Human readable exception item string identifier, e.g. `trusted-linux-processes`. Either `id` or `item_id` must be specified.
      */
-    item_id: ExceptionListItemHumanId.optional(),
+    item_id: ExceptionListItemHumanId.optional().describe(
+      'Human readable exception item string identifier, e.g. `trusted-linux-processes`. Either `id` or `item_id` must be specified.'
+    ),
     /**
       * `single` fetches the item in the current space; `agnostic` fetches a global (space-agnostic) item. Must
 match how the list was created.
 
       */
-    namespace_type: ExceptionNamespaceType.optional().default('single'),
+    namespace_type: ExceptionNamespaceType.optional()
+      .default('single')
+      .describe(
+        '`single` fetches the item in the current space; `agnostic` fetches a global (space-agnostic) item. Must\nmatch how the list was created.\n'
+      ),
   })
 );
 export type ReadExceptionListItemRequestQuery = z.infer<typeof ReadExceptionListItemRequestQuery>;

@@ -28,7 +28,10 @@ export const CreateListItemRequestBody = lazySchema(() =>
     /**
      * Determines when changes made by the request are made visible to search.
      */
-    refresh: z.enum(['true', 'false', 'wait_for']).optional(),
+    refresh: z
+      .enum(['true', 'false', 'wait_for'])
+      .optional()
+      .describe('Determines when changes made by the request are made visible to search.'),
   })
 );
 export type CreateListItemRequestBody = z.infer<typeof CreateListItemRequestBody>;

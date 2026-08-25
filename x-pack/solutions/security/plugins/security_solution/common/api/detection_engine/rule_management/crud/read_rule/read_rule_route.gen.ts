@@ -24,11 +24,11 @@ export const ReadRuleRequestQuery = lazySchema(() =>
     /**
      * The rule's `id` value.
      */
-    id: RuleObjectId.optional(),
+    id: RuleObjectId.optional().describe("The rule's `id` value."),
     /**
      * The rule's `rule_id` value.
      */
-    rule_id: RuleSignatureId.optional(),
+    rule_id: RuleSignatureId.optional().describe("The rule's `rule_id` value."),
   })
 );
 export type ReadRuleRequestQuery = z.infer<typeof ReadRuleRequestQuery>;

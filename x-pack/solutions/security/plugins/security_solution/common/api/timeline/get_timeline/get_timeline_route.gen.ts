@@ -23,11 +23,14 @@ export const GetTimelineRequestQuery = lazySchema(() =>
     /**
      * The `savedObjectId` of the Timeline template to retrieve.
      */
-    template_timeline_id: z.string().optional(),
+    template_timeline_id: z
+      .string()
+      .optional()
+      .describe('The `savedObjectId` of the Timeline template to retrieve.'),
     /**
      * The `savedObjectId` of the Timeline to retrieve.
      */
-    id: z.string().optional(),
+    id: z.string().optional().describe('The `savedObjectId` of the Timeline to retrieve.'),
   })
 );
 export type GetTimelineRequestQuery = z.infer<typeof GetTimelineRequestQuery>;

@@ -46,11 +46,11 @@ export const PrebuiltRuleAssetsSortItem = lazySchema(() =>
       /**
        * Field to sort by.
        */
-      field: PrebuiltRuleAssetsSortField,
+      field: PrebuiltRuleAssetsSortField.describe('Field to sort by.'),
       /**
        * Sort order.
        */
-      order: SortOrder,
+      order: SortOrder.describe('Sort order.'),
     })
     .strict()
 );
@@ -82,7 +82,10 @@ export const PrebuiltRuleAssetsAggregations = lazySchema(() =>
       /**
        * Facet categories for which to compute counts over the filtered + searched set.
        */
-      counts: z.array(PrebuiltRuleAssetsFacetCategory).optional(),
+      counts: z
+        .array(PrebuiltRuleAssetsFacetCategory)
+        .optional()
+        .describe('Facet categories for which to compute counts over the filtered + searched set.'),
     })
     .strict()
 );
@@ -97,11 +100,15 @@ export const RuleInstallationStatsForReview = lazySchema(() =>
       /**
        * Number of prebuilt rules available for installation (before applying filters).
        */
-      num_rules_to_install: z.number().int().min(0),
+      num_rules_to_install: z
+        .number()
+        .int()
+        .min(0)
+        .describe('Number of prebuilt rules available for installation (before applying filters).'),
       /**
        * A union of all tags of all rules available for installation.
        */
-      tags: RuleTagArray,
+      tags: RuleTagArray.describe('A union of all tags of all rules available for installation.'),
     })
     .strict()
 );
@@ -113,28 +120,33 @@ export const ReviewRuleInstallationResponseBody = lazySchema(() =>
       /**
        * Current page number.
        */
-      page: z.number().int(),
+      page: z.number().int().describe('Current page number.'),
       /**
        * Rules per page.
        */
-      per_page: z.number().int(),
+      per_page: z.number().int().describe('Rules per page.'),
       /**
        * The total number of rules available for installation.
        */
-      total: z.number().int(),
+      total: z.number().int().describe('The total number of rules available for installation.'),
       stats: RuleInstallationStatsForReview,
       /**
        * Individual rules available for installation.
        */
-      rules: z.array(RuleResponse),
+      rules: z.array(RuleResponse).describe('Individual rules available for installation.'),
       /**
        * Facet counts per category requested in `aggregations.counts`.
        */
-      counts: FacetCounts.optional(),
+      counts: FacetCounts.optional().describe(
+        'Facet counts per category requested in `aggregations.counts`.'
+      ),
       /**
        * Warnings produced while serving the request.
        */
-      warnings: z.array(WarningSchema).optional(),
+      warnings: z
+        .array(WarningSchema)
+        .optional()
+        .describe('Warnings produced while serving the request.'),
     })
     .strict()
 );
@@ -146,35 +158,44 @@ export const ReviewRuleInstallationRequestBody = lazySchema(() =>
       /**
        * Page number starting from 1.
        */
-      page: z.number().int().min(1).optional().default(1),
+      page: z.number().int().min(1).optional().default(1).describe('Page number starting from 1.'),
       /**
        * Rules per page.
        */
-      per_page: z.number().int().min(1).max(500).optional().default(20),
+      per_page: z.number().int().min(1).max(500).optional().default(20).describe('Rules per page.'),
       /**
        * Filter applied to prebuilt rule assets.
        */
-      filter: GranularRulesFilter.optional(),
+      filter: GranularRulesFilter.optional().describe('Filter applied to prebuilt rule assets.'),
       /**
        * Free-text search.
        */
-      search: GranularRulesSearch.optional(),
+      search: GranularRulesSearch.optional().describe('Free-text search.'),
       /**
       * Aggregation options computed over the filtered set of
 installable rules.
 
       */
-      aggregations: PrebuiltRuleAssetsAggregations.optional(),
+      aggregations: PrebuiltRuleAssetsAggregations.optional().describe(
+        'Aggregation options computed over the filtered set of\ninstallable rules.\n'
+      ),
       /**
       * Ordered sort criteria (only `name`, `risk_score`, and `severity` as `field` values).
 
       */
-      sort: PrebuiltRuleAssetsSort.optional(),
+      sort: PrebuiltRuleAssetsSort.optional().describe(
+        'Ordered sort criteria (only `name`, `risk_score`, and `severity` as `field` values).\n'
+      ),
       /**
       * Subset of top-level `RuleResponse` keys used to narrow rule response payloads.
 
       */
-      fields: z.array(z.string().max(256)).optional(),
+      fields: z
+        .array(z.string().max(256))
+        .optional()
+        .describe(
+          'Subset of top-level `RuleResponse` keys used to narrow rule response payloads.\n'
+        ),
     })
     .strict()
 );
