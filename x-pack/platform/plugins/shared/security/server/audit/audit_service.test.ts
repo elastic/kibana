@@ -247,6 +247,7 @@ describe('#asScoped', () => {
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser: getCurrentUserWithEmail,
       getSpaceId,

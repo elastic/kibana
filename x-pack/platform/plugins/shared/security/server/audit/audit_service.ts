@@ -208,8 +208,13 @@ export const createLoggingConfig =
   (config: ConfigType['audit'], isServerless = false, writeAccess?: AuditLogWriteAccess) =>
   (features: Pick<SecurityLicenseFeatures, 'allowAuditLogging'>): LoggerContextConfigInput => {
     if (writeAccess && !writeAccess.granted) {
+      // Audit events are dropped rather than redirected to stdout on purpose: they carry usernames,
+      // IPs and session ids that the audit sink is held to different access and retention rules for,
+      // and at one record per authenticated request they would flood the main log.
       return {
         appenders: {
+          // Core rejects a logger referencing an appender that is not in the map, so the key has to
+          // exist even though the logger is `off`. Console is the filler that writes nothing.
           auditTrailAppender: { type: 'console' as const, layout: { type: 'json' as const } },
         },
         loggers: [{ name: 'audit.ecs', level: 'off' as const, appenders: ['auditTrailAppender'] }],
