@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
-  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
   EuiComboBox,
@@ -358,11 +358,10 @@ const ConversationSharePopover: React.FC<{
   return (
     <EuiPopover
       button={
-        <EuiButton
+        <EuiButtonEmpty
           size="s"
           color="text"
           iconType="users"
-          minWidth={false}
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
           data-test-subj="agentBuilderConversationInviteButton"
           {...getEbtProps({
@@ -372,7 +371,7 @@ const ConversationSharePopover: React.FC<{
           })}
         >
           {labels.invite}
-        </EuiButton>
+        </EuiButtonEmpty>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
