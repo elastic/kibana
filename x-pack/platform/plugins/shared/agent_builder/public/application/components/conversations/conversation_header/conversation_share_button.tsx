@@ -162,25 +162,6 @@ const UserAccessRow: React.FC<{
   </EuiFlexGroup>
 );
 
-const OwnerRow: React.FC<{
-  profile: UserProfileWithAvatar;
-}> = ({ profile }) => (
-  <UserAccessRow profile={profile} badge={labels.author} />
-);
-
-const MemberRow: React.FC<{
-  profile: UserProfileWithAvatar;
-  onRemove: () => void;
-  isDisabled: boolean;
-}> = ({ profile, onRemove, isDisabled }) => (
-  <UserAccessRow
-    profile={profile}
-    badge={labels.member}
-    onRemove={onRemove}
-    isDisabled={isDisabled}
-  />
-);
-
 export const ConversationShareButton: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
@@ -442,7 +423,7 @@ export const ConversationShareButton: React.FC = () => {
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             {ownerProfile ? (
               <EuiFlexItem>
-                <OwnerRow profile={ownerProfile} />
+                <UserAccessRow profile={ownerProfile} badge={labels.author} />
               </EuiFlexItem>
             ) : null}
 
@@ -455,8 +436,9 @@ export const ConversationShareButton: React.FC = () => {
 
               return (
                 <EuiFlexItem key={memberId}>
-                  <MemberRow
+                  <UserAccessRow
                     profile={memberProfile}
+                    badge={labels.member}
                     isDisabled={isSaving}
                     onRemove={() => onRemoveUser(memberId)}
                   />
