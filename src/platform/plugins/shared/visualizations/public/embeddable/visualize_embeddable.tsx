@@ -499,6 +499,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       api,
       Component: () => {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
+        const abortController = useStateFromPublishingSubject(expressionAbortController$);
         const renderCount = useStateFromPublishingSubject(renderCount$);
         const hasRendered = useStateFromPublishingSubject(hasRendered$);
         const [hideTitle, title, defaultTitle] = useBatchedPublishingSubjects(
@@ -507,7 +508,10 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           api.defaultTitle$
         );
         const domNode = useRef<HTMLDivElement>(null);
-        const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
+        const { error, isLoading } = useExpressionRenderer(domNode, {
+          ...expressionParams,
+          abortController,
+        });
         const errorTextStyle = useErrorTextStyle();
 
         const dataTitle = useMemo(() => {
