@@ -14,7 +14,10 @@ import type {
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
+import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
+import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
 import type {
@@ -56,6 +59,10 @@ export class NightshiftInvestigationsPlugin
         spaceId
       );
 
+    plugins.workflowsExtensions?.registerManagedWorkflowOwner(
+      NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
+    );
+
     if (plugins.workflowsManagement) {
       if (plugins.workflowsExtensions) {
         plugins.workflowsExtensions.registerStepDefinition(
@@ -83,6 +90,14 @@ export class NightshiftInvestigationsPlugin
   ): NightshiftInvestigationsServerStart {
     this.spaces = plugins.spaces;
 
+    if (plugins.workflowsExtensions) {
+      this.installManagedWorkflows(plugins.workflowsExtensions).catch((err) => {
+        this.logger.error(
+          `Failed to install nightshift investigations managed workflows: ${err.message}`
+        );
+      });
+    }
+
     return {
       getInvestigationsClient: (request) =>
         new NightshiftInvestigationsClient(
@@ -92,5 +107,19 @@ export class NightshiftInvestigationsPlugin
           this.logger
         ),
     };
+  }
+
+  /**
+   * Installs the static managed workflows this plugin owns and signals readiness so the
+   * platform can reconcile (prune orphans / apply upgrades) for this plugin's workflows.
+   */
+  private async installManagedWorkflows(
+    workflowsExtensions: WorkflowsExtensionsServerPluginStart
+  ): Promise<void> {
+    const client = await workflowsExtensions.initManagedWorkflowsClient(
+      NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
+    );
+    await installInvestigationWorkflow({ client });
+    await client.ready();
   }
 }
