@@ -295,9 +295,9 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
       // the match prompt is the only message injected on an evaluation turn with candidates
       const matchMessage = invokedMessages.at(-1);
       // generic (qradar/sentinel) prompt uses broader threat-category criteria; splunk uses "almost identical"
-      expect(
-        String(matchMessage.content).includes('threat category or security objective')
-      ).toBe(shouldUseGenericBullets);
+      expect(String(matchMessage.content).includes('threat category or security objective')).toBe(
+        shouldUseGenericBullets
+      );
     }
   );
 });
