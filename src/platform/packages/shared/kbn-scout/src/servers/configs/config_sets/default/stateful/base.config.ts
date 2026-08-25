@@ -194,6 +194,8 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.ruleRegistry.write.cache.enabled=false',
       '--monitoring_collection.opentelemetry.metrics.prometheus.enabled=true',
       '--xpack.profiling.enabled=true',
+      // nightshift_investigations routes are gated off by default
+      '--xpack.nightshift_investigations.enabled=true',
       // Fleet configuration
       `--xpack.fleet.fleetServerHosts=${JSON.stringify([
         {
