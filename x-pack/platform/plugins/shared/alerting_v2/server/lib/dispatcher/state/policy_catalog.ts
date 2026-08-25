@@ -5,12 +5,17 @@
  * 2.0.
  */
 
+import { DEFAULT_GROUPING_MODE } from '../constants';
 import type { ActionPolicy, ActionPolicyId } from '../types';
+
+const NO_POLICIES: readonly ActionPolicy[] = [];
 
 /** Enabled action policies loaded for this tick, keyed by policy id (FetchPoliciesStep). */
 export class PolicyCatalog {
+  private static readonly EMPTY = new PolicyCatalog(new Map(), new Map());
+
   private constructor(
-    public readonly byId: ReadonlyMap<ActionPolicyId, ActionPolicy>,
+    private readonly byId: ReadonlyMap<ActionPolicyId, ActionPolicy>,
     private readonly bySpace: ReadonlyMap<string, ActionPolicy[]>
   ) {}
 
@@ -22,7 +27,11 @@ export class PolicyCatalog {
   }
 
   public static empty(): PolicyCatalog {
-    return PolicyCatalog.of(new Map());
+    return PolicyCatalog.EMPTY;
+  }
+
+  public get size(): number {
+    return this.byId.size;
   }
 
   public get(id: ActionPolicyId): ActionPolicy | undefined {
@@ -30,12 +39,12 @@ export class PolicyCatalog {
   }
 
   public inSpace(spaceId: string): readonly ActionPolicy[] {
-    return this.bySpace.get(spaceId) ?? [];
+    return this.bySpace.get(spaceId) ?? NO_POLICIES;
   }
 
-  /** Grouping mode of the policy; absent policy or mode falls back to `per_episode`. */
-  public groupingModeOf(id: ActionPolicyId): NonNullable<ActionPolicy['groupingMode']> {
-    return this.byId.get(id)?.groupingMode ?? 'per_episode';
+  /** Grouping mode of the policy; a policy missing from the catalog falls back to the default. */
+  public groupingModeOf(id: ActionPolicyId): ActionPolicy['groupingMode'] {
+    return this.byId.get(id)?.groupingMode ?? DEFAULT_GROUPING_MODE;
   }
 
   public apiKeyOf(id: ActionPolicyId): string | undefined {

@@ -16,7 +16,6 @@ describe('EpisodeScan', () => {
       expect(scan.episodes).toHaveLength(0);
       expect(scan.truncated).toBe(false);
       expect(scan.isEmpty()).toBe(true);
-      expect(scan.count).toBe(0);
     });
   });
 
@@ -28,7 +27,10 @@ describe('EpisodeScan', () => {
       expect(scan.episodes).toBe(episodes);
       expect(scan.truncated).toBe(true);
       expect(scan.isEmpty()).toBe(false);
-      expect(scan.count).toBe(1);
+    });
+
+    it('defaults truncated to false', () => {
+      expect(EpisodeScan.of({ episodes: [createAlertEpisode()] }).truncated).toBe(false);
     });
   });
 

@@ -93,8 +93,8 @@ export interface ActionPolicy {
   groupBy: string[];
   /** User-defined tags for organizing and filtering policies */
   tags: string[];
-  /** How episodes are grouped into action group payloads */
-  groupingMode?: 'per_episode' | 'all' | 'per_field';
+  /** How episodes are grouped into action group payloads. Defaulted at hydration (DEFAULT_GROUPING_MODE). */
+  groupingMode: 'per_episode' | 'all' | 'per_field';
   /** Throttle configuration controlling action frequency */
   throttle?: {
     strategy?: 'on_status_change' | 'per_status_interval' | 'time_interval' | 'every_time';

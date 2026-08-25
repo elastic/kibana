@@ -46,7 +46,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
 
     const { dispatch, throttled } = applyThrottling(
       groups,
-      policies.byId,
+      policies,
       lastNotifiedMap,
       input.startedAt,
       logger
@@ -82,7 +82,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
 
 export function applyThrottling(
   groups: readonly ActionGroup[],
-  policies: ReadonlyMap<string, ActionPolicy>,
+  policies: PolicyCatalog,
   lastNotifiedMap: ReadonlyMap<ActionGroupId, LastNotifiedInfo>,
   now: Date,
   logger?: LoggerServiceContract
@@ -141,7 +141,7 @@ function shouldDispatch(
 ): boolean {
   if (!lastRecord) return true;
 
-  const groupingMode = policy.groupingMode ?? 'per_episode';
+  const { groupingMode } = policy;
   const strategy =
     policy.throttle?.strategy ??
     (groupingMode === 'per_episode' ? 'on_status_change' : 'time_interval');

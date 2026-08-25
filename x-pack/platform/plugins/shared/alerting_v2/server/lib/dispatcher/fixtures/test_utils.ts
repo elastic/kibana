@@ -8,6 +8,7 @@
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { EpisodeScan, PolicyCatalog, RuleCatalog } from '../state';
+import { DEFAULT_GROUPING_MODE } from '../constants';
 import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 import type {
   ActionGroup,
@@ -46,15 +47,14 @@ export function createDispatcherPipelineInput(
 }
 
 /**
- * Flat overrides for building a pipeline state: value-object fields may be
- * given either directly (`scan`) or through their pre-VO source fields
- * (`episodes`, `truncated`), which are folded into the VO here.
+ * Flat overrides for building a pipeline state: value-object fields are given
+ * through their raw source data (`episodes`, `rules`, `policies`) and folded
+ * into the value objects here.
  */
 export interface DispatcherPipelineStateOverrides
-  extends Omit<Partial<DispatcherPipelineState>, 'input' | 'rules' | 'policies'> {
+  extends Omit<Partial<DispatcherPipelineState>, 'input' | 'scan' | 'rules' | 'policies'> {
   input?: DispatcherPipelineInput;
   episodes?: AlertEpisode[];
-  truncated?: boolean;
   rules?: Map<RuleId, Rule>;
   policies?: Map<ActionPolicyId, ActionPolicy>;
 }
@@ -62,29 +62,14 @@ export interface DispatcherPipelineStateOverrides
 export function createDispatcherPipelineState(
   state: DispatcherPipelineStateOverrides = {}
 ): DispatcherPipelineState {
-  const { episodes, truncated, scan, rules, policies, input, ...rest } = state;
-  const resolvedScan =
-    scan ??
-    (episodes !== undefined || truncated !== undefined
-      ? createEpisodeScan({ episodes, truncated })
-      : undefined);
+  const { episodes, rules, policies, input, ...rest } = state;
   return {
     ...rest,
-    ...(resolvedScan ? { scan: resolvedScan } : {}),
+    ...(episodes ? { scan: EpisodeScan.of({ episodes }) } : {}),
     ...(rules ? { rules: RuleCatalog.of(rules) } : {}),
     ...(policies ? { policies: PolicyCatalog.of(policies) } : {}),
     input: input ?? createDispatcherPipelineInput(),
   };
-}
-
-export function createEpisodeScan({
-  episodes = [],
-  truncated = false,
-}: {
-  episodes?: AlertEpisode[];
-  truncated?: boolean;
-} = {}): EpisodeScan {
-  return EpisodeScan.of({ episodes, truncated });
 }
 
 export function createAlertEpisode(overrides: Partial<AlertEpisode> = {}): AlertEpisode {
@@ -133,6 +118,7 @@ export function createActionPolicy(overrides: Partial<ActionPolicy> = {}): Actio
     destinations: [{ type: 'workflow' as const, id: 'workflow-1' }],
     groupBy: [],
     tags: [],
+    groupingMode: DEFAULT_GROUPING_MODE,
     ...overrides,
   };
 }

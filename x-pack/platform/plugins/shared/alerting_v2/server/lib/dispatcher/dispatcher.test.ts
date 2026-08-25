@@ -45,7 +45,8 @@ import {
   createEpisodeDataResponse,
   createLastNotifiedTimestampsResponse,
 } from './fixtures/dispatcher';
-import { createAlertEpisode, createEpisodeScan } from './fixtures/test_utils';
+import { createAlertEpisode } from './fixtures/test_utils';
+import { EpisodeScan } from './state';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
   ApplyMaintenanceWindowStep,
@@ -993,7 +994,7 @@ describe('DispatcherService', () => {
           completed: true,
           finalState: {
             input: mockInput,
-            scan: createEpisodeScan({ episodes, truncated: true }),
+            scan: EpisodeScan.of({ episodes, truncated: true }),
             recordedEpisodes: 2,
           },
         }),
@@ -1059,7 +1060,7 @@ describe('DispatcherService', () => {
           completed: true,
           finalState: {
             input: tick2MockInput,
-            scan: createEpisodeScan(),
+            scan: EpisodeScan.empty(),
             recordedEpisodes: 0,
           },
         }),
@@ -1233,7 +1234,7 @@ describe('DispatcherService', () => {
                 haltReason: 'aborted',
                 finalState: {
                   input,
-                  scan: createEpisodeScan({ episodes }),
+                  scan: EpisodeScan.of({ episodes }),
                   // recordedEpisodes absent → computeNextWatermark returns input.eventWatermark
                 },
               });

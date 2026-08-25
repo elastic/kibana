@@ -12,6 +12,8 @@ import type { AlertEpisode } from '../types';
  * rows plus whether the scan hit EPISODE_QUERY_LIMIT and deferred a tail.
  */
 export class EpisodeScan {
+  private static readonly EMPTY = new EpisodeScan([], false);
+
   private constructor(
     public readonly episodes: readonly AlertEpisode[],
     /** True when the scan reached EPISODE_QUERY_LIMIT and a tail was deferred. */
@@ -20,20 +22,16 @@ export class EpisodeScan {
 
   public static of({
     episodes,
-    truncated,
+    truncated = false,
   }: {
     episodes: readonly AlertEpisode[];
-    truncated: boolean;
+    truncated?: boolean;
   }): EpisodeScan {
     return new EpisodeScan(episodes, truncated);
   }
 
   public static empty(): EpisodeScan {
-    return new EpisodeScan([], false);
-  }
-
-  public get count(): number {
-    return this.episodes.length;
+    return EpisodeScan.EMPTY;
   }
 
   public isEmpty(): boolean {
@@ -41,9 +39,10 @@ export class EpisodeScan {
   }
 
   /**
-   * Timestamp of the last fetched episode — rows arrive sorted ascending, so this
-   * is the truncation edge the watermark advances to on a truncated tick. A corrupt
-   * timestamp yields an Invalid Date on purpose: the watermark NaN clamp handles it.
+   * Timestamp of the last fetched episode — rows arrive sorted ascending, so
+   * this is the truncation edge the watermark advances to on a truncated tick.
+   * A corrupt timestamp yields an Invalid Date rather than throwing; callers
+   * must clamp or guard against it.
    */
   public truncationEdge(): Date | undefined {
     const lastEpisode = this.episodes[this.episodes.length - 1];

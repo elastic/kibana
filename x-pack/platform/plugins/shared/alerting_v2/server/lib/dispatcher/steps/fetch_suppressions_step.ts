@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { getAlertEpisodeSuppressionsQueries } from '../queries';
+import { EpisodeScan } from '../state';
 import type {
   AlertEpisodeSuppression,
   DispatcherPipelineState,
@@ -29,8 +30,8 @@ export class FetchSuppressionsStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { scan } = state;
-    if (!scan || scan.isEmpty()) {
+    const { scan = EpisodeScan.empty() } = state;
+    if (scan.isEmpty()) {
       return { type: 'continue', data: { suppressions: [] } };
     }
 

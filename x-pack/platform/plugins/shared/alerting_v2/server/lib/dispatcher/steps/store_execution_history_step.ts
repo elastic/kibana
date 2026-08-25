@@ -12,7 +12,7 @@ import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../.
 import type { EventLogServiceContract } from '../../services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../../services/event_log_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
-import type { RuleCatalog } from '../state';
+import { RuleCatalog } from '../state';
 import type {
   ActionGroup,
   ActionGroupId,
@@ -111,7 +111,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       dispatchable = [],
       dispatchedExecutions,
       dispatchFailures = [],
-      rules,
+      rules = RuleCatalog.empty(),
       input,
     } = state;
 
@@ -181,7 +181,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     executionUuid: string;
     summary: PolicySummary;
     action: ActionPolicyEventAction;
-    rules: RuleCatalog | undefined;
+    rules: RuleCatalog;
   }): void {
     const ruleIds = Array.from(summary.ruleIds);
     const { refs, spillOver } = buildPolicyAndRuleRefs(
@@ -247,7 +247,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     timestamp: string;
     executionUuid: string;
     failure: DispatchFailure;
-    rules: RuleCatalog | undefined;
+    rules: RuleCatalog;
   }): void {
     const ruleIdSet = new Set<string>();
     const episodeIdSet = new Set<string>();
@@ -351,13 +351,13 @@ function buildPolicyAndRuleRefs(
   policyId: ActionPolicyId,
   spaceId: string,
   ruleIds: string[],
-  rules: RuleCatalog | undefined
+  rules: RuleCatalog
 ): { refs: SavedObjectRef[]; spillOver: string[] } {
   const capped = ruleIds.slice(0, RULE_REF_CAP);
   const spillOver = ruleIds.slice(RULE_REF_CAP);
   const refs: SavedObjectRef[] = [
     policyRef({ id: policyId, spaceId }),
-    ...capped.map((id) => ruleRef({ id, spaceId: rules?.spaceIdOf(id) ?? spaceId })),
+    ...capped.map((id) => ruleRef({ id, spaceId: rules.spaceIdOf(id) ?? spaceId })),
   ];
   return { refs, spillOver };
 }

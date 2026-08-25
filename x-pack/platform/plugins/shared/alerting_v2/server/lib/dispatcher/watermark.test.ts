@@ -6,11 +6,8 @@
  */
 
 import { computeNextWatermark } from './watermark';
-import {
-  createAlertEpisode,
-  createDispatcherPipelineInput,
-  createEpisodeScan,
-} from './fixtures/test_utils';
+import { createAlertEpisode, createDispatcherPipelineInput } from './fixtures/test_utils';
+import { EpisodeScan } from './state';
 import type { DispatcherPipelineResult } from './types';
 
 const BASE_INPUT = createDispatcherPipelineInput({
@@ -48,7 +45,7 @@ describe('computeNextWatermark', () => {
           haltReason: 'aborted',
           finalState: {
             input: BASE_INPUT,
-            scan: createEpisodeScan({
+            scan: EpisodeScan.of({
               episodes: [createAlertEpisode({ last_event_timestamp: '2026-01-22T07:34:00.000Z' })],
             }),
             // recordedEpisodes still undefined — StoreActionsStep not reached
@@ -109,7 +106,7 @@ describe('computeNextWatermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
-          finalState: { input: BASE_INPUT, scan: createEpisodeScan({ episodes, truncated: true }) },
+          finalState: { input: BASE_INPUT, scan: EpisodeScan.of({ episodes, truncated: true }) },
         }),
       });
 
@@ -122,7 +119,7 @@ describe('computeNextWatermark', () => {
         result: makeResult({
           finalState: {
             input: BASE_INPUT,
-            scan: createEpisodeScan({ episodes: [], truncated: true }),
+            scan: EpisodeScan.of({ episodes: [], truncated: true }),
           },
         }),
       });
@@ -140,7 +137,7 @@ describe('computeNextWatermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
-          finalState: { input: BASE_INPUT, scan: createEpisodeScan({ episodes, truncated: true }) },
+          finalState: { input: BASE_INPUT, scan: EpisodeScan.of({ episodes, truncated: true }) },
         }),
       });
 
@@ -156,7 +153,7 @@ describe('computeNextWatermark', () => {
           completed: true,
           finalState: {
             input: BASE_INPUT,
-            scan: createEpisodeScan({ episodes: [createAlertEpisode()] }),
+            scan: EpisodeScan.of({ episodes: [createAlertEpisode()] }),
             recordedEpisodes: 1,
           },
         }),

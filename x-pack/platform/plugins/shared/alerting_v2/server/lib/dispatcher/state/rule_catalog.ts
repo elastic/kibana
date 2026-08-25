@@ -9,14 +9,20 @@ import type { AlertEpisode, Rule, RuleId } from '../types';
 
 /** Rule metadata fetched for the dispatchable episodes, keyed by rule id (FetchRulesStep). */
 export class RuleCatalog {
-  private constructor(public readonly byId: ReadonlyMap<RuleId, Rule>) {}
+  private static readonly EMPTY = new RuleCatalog(new Map());
+
+  private constructor(private readonly byId: ReadonlyMap<RuleId, Rule>) {}
 
   public static of(rules: ReadonlyMap<RuleId, Rule>): RuleCatalog {
     return new RuleCatalog(rules);
   }
 
   public static empty(): RuleCatalog {
-    return new RuleCatalog(new Map());
+    return RuleCatalog.EMPTY;
+  }
+
+  public get size(): number {
+    return this.byId.size;
   }
 
   public get(id: RuleId): Rule | undefined {
