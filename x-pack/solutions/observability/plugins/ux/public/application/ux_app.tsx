@@ -25,7 +25,6 @@ import { InspectorContextProvider, useBreadcrumbs } from '@kbn/observability-sha
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
 import { DASHBOARD_LABEL, RumHome } from '../components/app/rum_dashboard/rum_home';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
-import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { createStaticDataView } from '../services/rest/data_view';
@@ -71,7 +70,7 @@ function UxApp() {
 
   return (
     <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome />
+      <RumHome/>
     </div>
   );
 }
@@ -147,6 +146,7 @@ export function UXAppRoot({
                   exploratoryView,
                   observabilityShared,
                   spaceId,
+                  isDev,
                 }}
               >
                 <RouterProvider history={history} router={uxRouter}>
@@ -154,9 +154,8 @@ export function UXAppRoot({
                     <InspectorContextProvider>
                       <UrlParamsProvider>
                         <CsmSharedContextProvider>
-                          <UxApp />
+                          <UxApp/>
                         </CsmSharedContextProvider>
-                        <UXActionMenu appMountParameters={appMountParameters} isDev={isDev} />
                       </UrlParamsProvider>
                     </InspectorContextProvider>
                   </DatePickerContextProvider>
