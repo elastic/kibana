@@ -75,18 +75,6 @@ export const queryHasTsSourceCommand = (esqlQuery: string): boolean => {
   return root.commands.some((command) => command.name === 'ts');
 };
 
-/**
- * Checks whether a BY option already contains a BUCKET() call on the given time field.
- */
-const hasBucketForField = (byOption: ESQLCommandOption, timeField: string): boolean =>
-  byOption.args.some((arg) => {
-    if (!isFunctionExpression(arg) || arg.name !== 'bucket' || arg.args.length === 0) {
-      return false;
-    }
-    const firstArg = arg.args[0];
-    return !Array.isArray(firstArg) && firstArg.type === 'column' && firstArg.name === timeField;
-  });
-
 const findFirstStatsAfterTs = (commands: ESQLCommand[]): ESQLCommand<'stats'> | undefined => {
   const tsIndex = commands.findIndex((command) => command.name === 'ts');
   if (tsIndex === -1) return;
@@ -127,13 +115,47 @@ const getTbucketResultColumn = (statsCommand: ESQLCommand): string | undefined =
 
 const buildTrendlineTbucketExpression = (): string => `TBUCKET(${AUTO_TARGET_NUMBER_OF_BUCKETS})`;
 
-const preserveTimeFieldInKeepCommands = (commands: ESQLCommand[], timeField: string): void => {
+/**
+ * Returns the result column of a BUCKET grouping on the given time field:
+ * the alias when assigned, otherwise the printed BUCKET expression.
+ */
+const getBucketResultColumnForField = (
+  statsCommand: ESQLCommand,
+  timeField: string
+): string | undefined => {
+  const byOption = statsCommand.args.find(isOptionNode);
+  if (!byOption) return;
+
+  const isBucketOnField = (node: unknown): boolean => {
+    if (!node || Array.isArray(node)) return false;
+    const expression = node as Parameters<typeof isFunctionExpression>[0];
+    if (!isFunctionExpression(expression) || expression.name !== 'bucket') return false;
+    const firstArg = expression.args[0];
+    return !Array.isArray(firstArg) && isColumn(firstArg) && firstArg.name === timeField;
+  };
+
+  for (const expression of byOption.args) {
+    if (isBucketOnField(expression) && isFunctionExpression(expression)) {
+      return BasicPrettyPrinter.expression(expression);
+    }
+    if (isAssignment(expression) && isColumn(expression.args[0])) {
+      const assignmentValue = Array.isArray(expression.args[1])
+        ? expression.args[1][0]
+        : expression.args[1];
+      if (isBucketOnField(assignmentValue)) {
+        return expression.args[0].name;
+      }
+    }
+  }
+};
+
+const preserveColumnInKeepCommands = (commands: ESQLCommand[], columnName: string): void => {
   for (const command of commands) {
     if (
       command.name === 'keep' &&
-      !command.args.some((arg) => isColumn(arg) && arg.name === timeField)
+      !command.args.some((arg) => isColumn(arg) && arg.name === columnName)
     ) {
-      command.args.push(Builder.expression.column(timeField));
+      command.args.push(Builder.expression.column(columnName));
     }
   }
 };
@@ -202,14 +224,12 @@ export const appendTimeBucketToEsqlQuery = (
     return BasicPrettyPrinter.print(root);
   }
 
-  preserveTimeFieldInKeepCommands(root.commands, timeField);
-
   const statsCmd = root.commands.findLast((c): c is ESQLCommand<'stats'> => c.name === 'stats');
 
   if (statsCmd) {
     const byOption = statsCmd.args.find(isOptionNode);
 
-    if (byOption && !hasBucketForField(byOption, timeField)) {
+    if (byOption && !getBucketResultColumnForField(statsCmd, timeField)) {
       // STATS ... BY ... → append to existing BY
       byOption.args.push(bucketNode);
     } else if (!byOption) {
@@ -218,7 +238,15 @@ export const appendTimeBucketToEsqlQuery = (
       const byNode = findByOption(findStatsCommand(byHelper.commands));
       statsCmd.args.push(byNode);
     }
+
+    // KEEP commands before STATS need the raw time field (input to BUCKET);
+    // KEEP commands after STATS only see the BUCKET result column.
+    const statsIndex = root.commands.indexOf(statsCmd);
+    const timeResultColumn = getBucketResultColumnForField(statsCmd, timeField) ?? bucketExpr;
+    preserveColumnInKeepCommands(root.commands.slice(0, statsIndex), timeField);
+    preserveColumnInKeepCommands(root.commands.slice(statsIndex + 1), timeResultColumn);
   } else {
+    preserveColumnInKeepCommands(root.commands, timeField);
     // No STATS → append full STATS <agg> BY BUCKET(...) command.
     // Use AVG(<field>) for each provided metric field, or COUNT(*) as fallback.
     const statsExprs =
@@ -258,6 +286,9 @@ export const buildTrendlineQueryWithMetricFieldMap = (
   const { root } = Parser.parse(esqlQuery);
   const tbucketStatsCommand = findStatsWithTbucket(root.commands);
   const tsStatsCommand = findFirstStatsAfterTs(root.commands);
+  const statsCommand = root.commands.findLast(
+    (command): command is ESQLCommand<'stats'> => command.name === 'stats'
+  );
 
   if (!sourceQueryHasStats) {
     metricFields.forEach((field) => metricFieldMap.set(field, `AVG(${esql.col(field)})`));
@@ -274,6 +305,7 @@ export const buildTrendlineQueryWithMetricFieldMap = (
     timeField: tsStatsCommand
       ? getTbucketResultColumn(tsStatsCommand) ?? buildTrendlineTbucketExpression()
       : (tbucketStatsCommand && getTbucketResultColumn(tbucketStatsCommand)) ??
+        (statsCommand && getBucketResultColumnForField(statsCommand, timeField)) ??
         buildTrendlineBucketExpression(timeField),
   };
 };

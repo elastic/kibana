@@ -189,6 +189,36 @@ describe('appendTimeBucketToEsqlQuery', () => {
     expect(result).not.toContain('BUCKET(@timestamp');
   });
 
+  it('keeps the BUCKET result column in a KEEP after STATS instead of the raw time field', () => {
+    const result = appendTimeBucketToEsqlQuery(
+      'FROM kibana_sample_data_logstsdb | STATS avg_bytes = AVG(bytes) | KEEP avg_bytes',
+      '@timestamp'
+    );
+    expect(result).toBe(
+      'FROM kibana_sample_data_logstsdb | STATS avg_bytes = AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend) | KEEP avg_bytes, `BUCKET(@timestamp, 75, ?_tstart, ?_tend)`'
+    );
+  });
+
+  it('keeps the raw time field in a KEEP before STATS', () => {
+    const result = appendTimeBucketToEsqlQuery(
+      'FROM index | KEEP bytes | STATS AVG(bytes)',
+      '@timestamp'
+    );
+    expect(result).toBe(
+      'FROM index | KEEP bytes, @timestamp | STATS AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)'
+    );
+  });
+
+  it('preserves an aliased BUCKET on the time field and keeps its alias after STATS', () => {
+    const result = appendTimeBucketToEsqlQuery(
+      'FROM index | STATS a = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | KEEP a',
+      '@timestamp'
+    );
+    expect(result).toBe(
+      'FROM index | STATS a = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | KEEP a, b'
+    );
+  });
+
   it('preserves an existing TBUCKET in a FROM query without adding a regular BUCKET', () => {
     const query = 'FROM kibana_sample_data_logstsdb | STATS AVG(bytes) BY TBUCKET(100)';
     const result = appendTimeBucketToEsqlQuery(query, '@timestamp');
@@ -302,5 +332,17 @@ describe('buildTrendlineQueryWithMetricFieldMap', () => {
 
     expect(result.query).toBe(query);
     expect(result.timeField).toBe('TBUCKET(100)');
+  });
+
+  it('returns the user-defined BUCKET alias as the time result column for a FROM query', () => {
+    const result = buildTrendlineQueryWithMetricFieldMap(
+      'FROM index | STATS a = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour)',
+      '@timestamp'
+    );
+
+    expect(result.query).toBe(
+      'FROM index | STATS a = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour)'
+    );
+    expect(result.timeField).toBe('b');
   });
 });
