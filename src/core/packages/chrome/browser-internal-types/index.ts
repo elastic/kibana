@@ -31,6 +31,7 @@ import type {
   SolutionId,
   ChromeProjectNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
+  ProjectNavigationContent,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -145,6 +146,15 @@ export interface InternalChromeStart extends ChromeStart {
 
     /** Register the handler that opens the navigation customization modal. Called once by the navigation plugin. */
     registerCustomizeNavigationHandler(handler: () => void): void;
+
+    /**
+     * Attach typed content to an existing project-nav deep link.
+     * Does not require project chrome style; unused until project nav renders.
+     */
+    registerNavigationContent(content: ProjectNavigationContent): void;
+
+    /** Registered navigation content. Live updates. */
+    getRegisteredNavigationContent$(): Observable<readonly ProjectNavigationContent[]>;
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */

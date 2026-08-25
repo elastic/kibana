@@ -82,6 +82,9 @@ export type {
   NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
+  ProjectNavigationLinkItem,
+  ProjectNavigationLinkListContent,
+  ProjectNavigationContent,
 } from './project_navigation';
 
 export type {

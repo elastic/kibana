@@ -301,6 +301,26 @@ export interface NavigationTreeDefinitionUI {
   footer?: Array<ChromeProjectNavigationNode>;
 }
 
+/** Chrome-owned popover row. Not a re-export of SecondaryMenuItem. */
+export interface ProjectNavigationLinkItem {
+  id: string;
+  href: string;
+  label: string;
+  badgeType?: BadgeType;
+  isExternal?: boolean;
+}
+
+/** Popover-only list attached to an existing deep link. */
+export interface ProjectNavigationLinkListContent {
+  kind: 'linkList';
+  id: string;
+  target: AppDeepLinkId;
+  title: string;
+  items$: Observable<readonly ProjectNavigationLinkItem[]>;
+}
+
+export type ProjectNavigationContent = ProjectNavigationLinkListContent;
+
 /**
  * @public
  *

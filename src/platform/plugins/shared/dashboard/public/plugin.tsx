@@ -83,6 +83,7 @@ import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
 import type { DashboardApi } from './dashboard_api/types';
+import { getDashboardRecentlyAccessedService } from './services/dashboard_recently_accessed_service';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -339,6 +340,26 @@ export class DashboardPlugin
     setKibanaServices(core, plugins);
 
     registerActions(plugins);
+
+    plugins.navigation.registerNavigationContent({
+      kind: 'linkList',
+      id: 'dashboardRecentlyViewed',
+      target: 'dashboards',
+      title: i18n.translate('dashboard.navigation.recentlyViewedTitle', {
+        defaultMessage: 'Recently viewed',
+      }),
+      items$: getDashboardRecentlyAccessedService()
+        .get$()
+        .pipe(
+          map((items) =>
+            items.map((item) => ({
+              id: item.id,
+              href: core.http.basePath.prepend(item.link),
+              label: item.label,
+            }))
+          )
+        ),
+    });
 
     plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {
       const { searchAction } = await import('./dashboard_client');

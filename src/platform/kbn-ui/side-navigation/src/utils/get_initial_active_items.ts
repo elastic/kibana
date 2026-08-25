@@ -8,6 +8,7 @@
  */
 
 import type { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
+import { getPopoverSections } from './get_has_submenu';
 
 export interface ActiveItemsState {
   primaryItem: MenuItem | null;
@@ -31,9 +32,10 @@ export const getActiveItems = (
 
   // Search the secondary menu items using their IDs (prioritize children over parents)
   for (const primary of [...items.primaryItems, ...(items.overflowItems ?? [])]) {
-    if (!primary.sections) continue;
+    const sections = getPopoverSections(primary);
+    if (!sections) continue;
 
-    for (const section of primary.sections) {
+    for (const section of sections) {
       const secondaryItem = section.items.find((item) => item.id === activeItemId);
       if (secondaryItem) {
         return { primaryItem: primary, secondaryItem };
@@ -43,9 +45,10 @@ export const getActiveItems = (
 
   // Search the secondary items of footer items
   for (const footer of items.footerItems) {
-    if (!footer.sections) continue;
+    const sections = getPopoverSections(footer);
+    if (!sections) continue;
 
-    for (const section of footer.sections) {
+    for (const section of sections) {
       const secondaryItem = section.items.find((item) => item.id === activeItemId);
       if (secondaryItem) {
         return { primaryItem: footer, secondaryItem };
