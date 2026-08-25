@@ -30,11 +30,7 @@ import {
   isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import type {
-  ConversationTemplate,
-  SerializedMetadataValue,
-  MetadataFieldValue,
-} from '@kbn/agent-builder-common';
+import type { SerializedMetadataValue, MetadataFieldValue } from '@kbn/agent-builder-common';
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
@@ -56,6 +52,7 @@ import type {
   ConversationUpdatableFields,
   ConversationUpdateRequest,
   ConversationListOptions,
+  NormalizedConversation,
   UpsertRoundRequest,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
@@ -64,72 +61,25 @@ import type { ConversationStorage } from './storage';
 import { createStorage, conversationIndexName } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
-import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
+import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
+import { updateReadBy } from './read_by';
 import {
   fromEs,
   fromEsWithoutRounds,
   toEs,
+  toConversationResponse,
+  toConversationResponseFromDocument,
   createRequestToEs,
+  isConversationDocument,
+  toResponseConversation,
+  toResponseConversationWithoutRounds,
   updateConversation,
-  withPermissions,
   type Document,
 } from './converters';
-import { roundsToEvents } from './rounds_to_events';
-import { eventsToRounds } from './events_to_rounds';
 import type { ConversationMetadataPatchedPayload } from '../../../workflows/triggers/conversation_event_bus';
 export type { ConversationMetadataPatchedPayload };
-
-/** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
-const withDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
-  conversation: T
-): T => {
-  if (!conversation.template_id || !conversation.metadata) return conversation;
-  const template = getTemplate(conversation.template_id);
-  if (!template) return conversation;
-  return {
-    ...conversation,
-    metadata: deserializeMetadata(
-      conversation.metadata as Record<string, SerializedMetadataValue>,
-      template
-    ),
-  };
-};
-
-const buildMetadataFromTemplate = (
-  template: ConversationTemplate
-): Record<string, SerializedMetadataValue> =>
-  Object.entries(template.fields).reduce<Record<string, SerializedMetadataValue>>(
-    (acc, [fieldName, def]) => {
-      if (def.default_value !== undefined) {
-        acc[fieldName] = serializeMetadataValue(def.default_value, def.input_type);
-      }
-      return acc;
-    },
-    {}
-  );
-
-/**
- * Read-path round-trip verification. When on, a conversation's rounds are replaced by
- * `eventsToRounds(roundsToEvents(...))` so every test suite that reads a conversation asserts the
- * rounds<->events conversion is an identity — a fidelity regression fails CI. Applied at the
- * response boundary only (never `fromEs`, which also feeds the OCC write path), so writes always
- * persist the real rounds.
- *
- * On automatically in CI (every suite that reads a conversation exercises it), and opt-in locally
- * via `CI=true`. Always OFF in production: a deployed Kibana never sets
- * `CI`, so real reads return the stored rounds untouched.
- */
-const shouldVerifyRoundTrip = process.env.CI === 'true';
-
-const verifyRoundTrip = (conversation: Conversation): Conversation =>
-  shouldVerifyRoundTrip
-    ? {
-        ...conversation,
-        rounds: eventsToRounds(roundsToEvents(conversation)),
-      }
-    : conversation;
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
@@ -148,6 +98,7 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  markRead(conversationId: string, read: boolean): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
@@ -257,6 +208,7 @@ class ConversationClientImpl implements ConversationClient {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
+      seq_no_primary_term: true,
       _source: [
         'agent_id',
         'user_id',
@@ -266,6 +218,7 @@ class ConversationClientImpl implements ConversationClient {
         'updated_at',
         'status',
         'read',
+        'read_by',
         'pinned',
         'read_only',
         'access_control',
@@ -287,15 +240,27 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return response.hits.hits.map((hit) =>
-      this.toResponseConversationWithoutRounds(hit as Document)
-    );
+    return response.hits.hits.map((hit) => {
+      if (!isConversationDocument(hit)) {
+        throw createInternalError('Conversation list search returned an incomplete hit');
+      }
+
+      return toResponseConversationWithoutRounds({
+        document: hit,
+        user: this.user,
+        resolveTemplate: getTemplate,
+      });
+    });
   }
 
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    return this.toResponseConversation(document);
+    return toResponseConversation({
+      document,
+      user: this.user,
+      resolveTemplate: getTemplate,
+    });
   }
 
   async exists(conversationId: string): Promise<boolean> {
@@ -309,6 +274,7 @@ class ConversationClientImpl implements ConversationClient {
       track_total_hits: false,
       size: 1,
       terminate_after: 1,
+      seq_no_primary_term: true,
       query: {
         bool: {
           filter: [
@@ -319,18 +285,27 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    const hit = response.hits.hits[0] as Document | undefined;
+    const hit = response.hits.hits[0];
 
-    if (!hit || !hit._id) {
+    if (!hit) {
       return undefined;
     }
 
+    if (!isConversationDocument(hit)) {
+      throw createInternalError('Conversation origin search returned an incomplete hit');
+    }
+
     try {
-      return withDeserializedMetadata(
-        verifyRoundTrip(
-          fromEs(await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' }))
-        )
-      );
+      const document = await this.getDocumentWithAccess({
+        conversationId: hit._id,
+        access: 'converse',
+      });
+
+      return toConversationResponseFromDocument({
+        document,
+        user: this.user,
+        resolveTemplate: getTemplate,
+      });
     } catch (error) {
       if (isConversationNotFoundError(error)) {
         return undefined;
@@ -434,7 +409,7 @@ class ConversationClientImpl implements ConversationClient {
       fields: () => withBoundedTitle(fields),
     });
 
-    return withDeserializedMetadata(result);
+    return result;
   }
 
   async addAttachmentsToLastRound(
@@ -465,7 +440,7 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
-    return withDeserializedMetadata(result);
+    return result;
   }
 
   async upsertRound(
@@ -492,10 +467,25 @@ class ConversationClientImpl implements ConversationClient {
             }
           : {}),
         ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+        read_by: [],
         read: false,
       }),
     });
-    return withDeserializedMetadata(result);
+    return result;
+  }
+
+  async markRead(conversationId: string, read: boolean): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access: 'converse',
+      fields: (current) =>
+        updateReadBy({
+          userId: this.user.id,
+          readBy: current.read_by,
+          currentRead: current.read ?? false,
+          nextRead: read,
+        }),
+    });
   }
 
   async delete(conversationId: string): Promise<boolean> {
@@ -593,7 +583,7 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return withDeserializedMetadata(result);
+    return result;
   }
 
   async patchMetadata(
@@ -647,7 +637,7 @@ class ConversationClientImpl implements ConversationClient {
       });
     }
 
-    return { conversation: withDeserializedMetadata(result), changedFields };
+    return { conversation: result, changedFields };
   }
 
   async unsafeMergeMetadata(
@@ -687,20 +677,6 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  private toResponseConversation(document: Document): ConversationWithPermissions {
-    return withDeserializedMetadata(
-      withPermissions({ conversation: verifyRoundTrip(fromEs(document)), user: this.user })
-    );
-  }
-
-  private toResponseConversationWithoutRounds(
-    document: Document
-  ): ConversationWithoutRoundsWithPermissions {
-    return withDeserializedMetadata(
-      withPermissions({ conversation: fromEsWithoutRounds(document), user: this.user })
-    );
-  }
-
   private async getDocument(conversationId: string): Promise<Document | undefined> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
@@ -720,11 +696,11 @@ class ConversationClientImpl implements ConversationClient {
       return undefined;
     }
 
-    if (hit._seq_no === undefined || hit._primary_term === undefined) {
+    if (!isConversationDocument(hit)) {
       throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
     }
 
-    return hit as Document;
+    return hit;
   }
 
   private async findChildConversationIds(parentId: string): Promise<string[]> {
@@ -783,7 +759,7 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     let allowed = false;
-    const conversation = fromEsWithoutRounds(document);
+    const conversation = fromEsWithoutRounds(document, this.user);
 
     switch (access) {
       case 'converse':
@@ -850,7 +826,7 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     conversationId: string;
     access: ConversationAccess;
-    fields: (current: Conversation) => Omit<ConversationUpdatableFields, 'id'>;
+    fields: (current: NormalizedConversation) => Omit<ConversationUpdatableFields, 'id'>;
     maxRetries?: number;
   }): Promise<Conversation> {
     const writer = this.createWriter({ access, maxRetries });
@@ -867,7 +843,7 @@ class ConversationClientImpl implements ConversationClient {
           }),
       });
 
-      return document;
+      return toConversationResponse({ conversation: document, resolveTemplate: getTemplate });
     } catch (error) {
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
@@ -888,14 +864,14 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     access: ConversationAccess;
     maxRetries: number;
-  }): OccWriter<Conversation> {
-    return new OccWriter<Conversation>({
+  }): OccWriter<NormalizedConversation> {
+    return new OccWriter<NormalizedConversation>({
       get: async (id) => {
         const document = await this.getDocumentWithAccess({ conversationId: id, access });
 
         return {
           id,
-          source: fromEs(document),
+          source: fromEs(document, this.user),
           occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
         };
       },

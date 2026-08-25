@@ -64,6 +64,7 @@ import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
+import { roundsForContext } from '../../conversation';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -181,11 +182,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
   toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
+  const previousRounds = conversation ? roundsForContext(conversation) : [];
+
   // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
+    previousRounds,
     nextInputAuthor: pendingRound?.author ?? author,
-    previousRounds: conversation?.rounds ?? [],
     context,
     action,
     metadata: conversation?.metadata,
