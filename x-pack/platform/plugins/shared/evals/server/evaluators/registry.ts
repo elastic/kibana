@@ -6,6 +6,7 @@
  */
 
 import semverCompare from 'semver/functions/compare';
+import type { EvaluatorDefinitionClient } from '../storage/evaluators/evaluator_definition_client';
 import { groundednessEvaluator } from './groundedness';
 import { correctnessEvaluator } from './correctness';
 import {
@@ -14,45 +15,82 @@ import {
   outputTokensEvaluatorDef,
   toolCallsEvaluatorDef,
 } from './trace_metrics';
-import type { EvaluatorDefinition, EvaluatorRegistry } from './types';
+import { compileUserDefinedEvaluator } from './user_defined/compile';
+import type { EvaluatorDefinition, EvaluatorRegistry, ScopedEvaluatorRegistry } from './types';
 
-export const createEvaluatorRegistry = (): EvaluatorRegistry => {
-  const evaluators = new Map<string, Map<string, EvaluatorDefinition>>();
+const BUILT_IN_EVALUATORS: readonly EvaluatorDefinition[] = [
+  groundednessEvaluator,
+  correctnessEvaluator,
+  latencyEvaluatorDef,
+  inputTokensEvaluatorDef,
+  outputTokensEvaluatorDef,
+  toolCallsEvaluatorDef,
+];
 
-  const register = (definition: EvaluatorDefinition) => {
-    const versionsForName =
-      evaluators.get(definition.name) ?? new Map<string, EvaluatorDefinition>();
+const latestOf = (versions: Map<string, EvaluatorDefinition>): EvaluatorDefinition | undefined => {
+  const latestVersion = [...versions.keys()].sort((a, b) => semverCompare(b, a))[0];
+  return latestVersion ? versions.get(latestVersion) : undefined;
+};
+
+/** Resolves built-in and persisted evaluators, with built-ins winning name collisions. */
+export const createEvaluatorRegistry = ({
+  getDefinitionClient,
+}: {
+  getDefinitionClient?: (options: { spaceId: string }) => EvaluatorDefinitionClient | undefined;
+} = {}): EvaluatorRegistry => {
+  const builtIns = new Map<string, Map<string, EvaluatorDefinition>>();
+
+  for (const definition of BUILT_IN_EVALUATORS) {
+    const versionsForName = builtIns.get(definition.name) ?? new Map<string, EvaluatorDefinition>();
     versionsForName.set(definition.version, definition);
-    evaluators.set(definition.name, versionsForName);
+    builtIns.set(definition.name, versionsForName);
+  }
+
+  const getBuiltIn = (name: string, version?: string): EvaluatorDefinition | undefined => {
+    const versionsForName = builtIns.get(name);
+    if (!versionsForName) {
+      return undefined;
+    }
+
+    return version ? versionsForName.get(version) : latestOf(versionsForName);
   };
 
-  register(groundednessEvaluator);
-  register(correctnessEvaluator);
-  register(latencyEvaluatorDef);
-  register(inputTokensEvaluatorDef);
-  register(outputTokensEvaluatorDef);
-  register(toolCallsEvaluatorDef);
+  const listBuiltIns = (): EvaluatorDefinition[] =>
+    [...builtIns.values()]
+      .map(latestOf)
+      .filter((definition): definition is EvaluatorDefinition => definition !== undefined);
+
+  const asScoped = ({ spaceId }: { spaceId: string }): ScopedEvaluatorRegistry => {
+    const definitionClient = getDefinitionClient?.({ spaceId });
+
+    return {
+      async list() {
+        if (!definitionClient) {
+          return listBuiltIns();
+        }
+
+        const persisted = await definitionClient.listLatest();
+        const visiblePersisted = persisted.filter((document) => !builtIns.has(document.name));
+
+        return [...listBuiltIns(), ...visiblePersisted.map(compileUserDefinedEvaluator)];
+      },
+      async get(name, version) {
+        const builtIn = getBuiltIn(name, version);
+        if (builtIn || builtIns.has(name) || !definitionClient) {
+          return builtIn;
+        }
+
+        const document = version
+          ? await definitionClient.getVersion(name, version)
+          : await definitionClient.getLatest(name);
+
+        return document ? compileUserDefinedEvaluator(document) : undefined;
+      },
+    };
+  };
 
   return {
-    list: () =>
-      [...evaluators.values()]
-        .map((versionsForName) => {
-          const latestVersion = [...versionsForName.keys()].sort((a, b) => semverCompare(b, a))[0];
-          return latestVersion ? versionsForName.get(latestVersion) : undefined;
-        })
-        .filter((definition): definition is EvaluatorDefinition => definition !== undefined),
-    get: (name, version) => {
-      const versionsForName = evaluators.get(name);
-      if (!versionsForName) {
-        return undefined;
-      }
-
-      if (version) {
-        return versionsForName.get(version);
-      }
-
-      const latestVersion = [...versionsForName.keys()].sort((a, b) => semverCompare(b, a))[0];
-      return latestVersion ? versionsForName.get(latestVersion) : undefined;
-    },
+    isBuiltIn: (name) => builtIns.has(name),
+    asScoped,
   };
 };
