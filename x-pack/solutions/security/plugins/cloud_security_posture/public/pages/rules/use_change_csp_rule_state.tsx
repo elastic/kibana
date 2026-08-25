@@ -57,7 +57,6 @@ const showChangeBenchmarkRuleStatesSuccessToast = (
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
     color: 'success',
-    iconType: '',
     'data-test-subj': 'csp:toast-success-rule-state-change',
     title: toMountPoint(
       <EuiText size="m">

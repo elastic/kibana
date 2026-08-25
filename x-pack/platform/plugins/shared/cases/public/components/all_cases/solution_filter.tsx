@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption, IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
 import { OWNER_INFO } from '../../../common/constants';
@@ -30,7 +30,7 @@ const mapToReadableSolutionName = (solution: string): Solution => {
     return OWNER_INFO[solution];
   }
 
-  return { id: solution, label: solution, iconType: '' };
+  return { id: solution, label: solution, iconType: 'empty' };
 };
 
 export const SolutionFilterComponent = ({
@@ -48,7 +48,7 @@ export const SolutionFilterComponent = ({
     return (
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon size="m" type={solution.iconType} title={solution.label} />
+          <EuiIcon size="m" type={solution.iconType as IconType} title={solution.label} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{solution.label}</EuiFlexItem>
       </EuiFlexGroup>

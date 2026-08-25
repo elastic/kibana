@@ -161,7 +161,6 @@ export const showCreateDetectionRuleSuccessToast = (
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
     color: 'success',
-    iconType: '',
     'data-test-subj': 'csp:toast-success',
     title: toMountPoint(
       <div>
