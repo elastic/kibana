@@ -59,6 +59,8 @@ const BLOCK_EDITOR_WRAPPER_STYLES: React.CSSProperties = {
 
 const LOCKED_BASE_EDITOR_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions = {
   ...ESQL_CODE_EDITOR_OPTIONS,
+  // Drop bottom padding so the locked base sits flush against the block editor below.
+  padding: { top: ESQL_CODE_EDITOR_OPTIONS.padding?.top, bottom: 0 },
   readOnly: true,
   domReadOnly: true,
   scrollbar: { vertical: 'hidden', horizontal: 'hidden' },
@@ -95,6 +97,8 @@ interface BlockEditorProps {
   lineNumberOffset: number;
   onEditorMount?: (editor: IStandaloneCodeEditor) => void;
   readOnly?: boolean;
+  /** Drop top padding so this editor sits flush against the locked base above. */
+  flushTop?: boolean;
 }
 
 const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -103,6 +107,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   lineNumberOffset,
   onEditorMount,
   readOnly = false,
+  flushTop = false,
 }) => {
   const options = useMemo(
     (): monaco.editor.IStandaloneEditorConstructionOptions => ({
@@ -110,8 +115,11 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
       readOnly,
       domReadOnly: readOnly,
       lineNumbers: lineNumberOffset > 0 ? (n: number) => String(n + lineNumberOffset) : 'on',
+      ...(flushTop
+        ? { padding: { top: 0, bottom: ESQL_CODE_EDITOR_OPTIONS.padding?.bottom } }
+        : {}),
     }),
-    [lineNumberOffset, readOnly]
+    [lineNumberOffset, readOnly, flushTop]
   );
 
   return (
@@ -296,6 +304,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
                 lineNumberOffset={baseLineCount}
                 onEditorMount={onAlertEditorMount}
                 readOnly={readOnly}
+                flushTop={Boolean(baseQuery)}
               />
             </div>
           </div>
@@ -311,6 +320,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
                 lineNumberOffset={baseLineCount}
                 onEditorMount={onRecoveryEditorMount}
                 readOnly={readOnly}
+                flushTop={Boolean(baseQuery)}
               />
             </div>
           </div>
