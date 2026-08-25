@@ -140,10 +140,7 @@ describe('buildFanoutMatrix - weekly per-spec filter loop', () => {
     const rows = buildFanoutMatrix({
       connectors: CONNECTORS,
       suiteInfo: {
-        specModelGroups: [
-          { files: [GROK, DISSECT], models: ['eis/a'] },
-          { files: [PARTITIONING], models: ['eis/a', 'eis/b'] },
-        ],
+        specModelGroups: [{ files: [GROK, DISSECT], models: ['eis/a'] }, { files: [PARTITIONING] }],
         weeklyEisModelGroups: ['eis/a', 'eis/b'],
       },
       requestedModelGroups: ['eis/a', 'eis/b'],

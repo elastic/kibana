@@ -152,9 +152,7 @@ function buildFanoutMatrix({
           {
             id: '',
             specFiles: specModelGroups.flatMap((spec) =>
-              Array.isArray(spec?.files) && Array.isArray(spec?.models) && spec.models.length > 0
-                ? spec.files
-                : []
+              Array.isArray(spec?.files) ? spec.files : []
             ),
           },
         ];
