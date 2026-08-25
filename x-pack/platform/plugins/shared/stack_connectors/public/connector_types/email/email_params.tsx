@@ -92,6 +92,7 @@ export const EmailParamsFields = ({
     [boolean, string | undefined]
   >([false, defaultMessage]);
   useEffect(() => {
+    if (isTestMode) return;
     if (
       useDefaultMessage ||
       !actionParams?.message ||
@@ -103,7 +104,7 @@ export const EmailParamsFields = ({
       editAction('message', defaultMessage, index);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultMessage]);
+  }, [defaultMessage, isTestMode]);
   const isToInvalid: boolean =
     to !== undefined && errors.to !== undefined && Number(errors.to.length) > 0;
   const isSubjectInvalid: boolean =

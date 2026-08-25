@@ -448,10 +448,12 @@ async function executor(
   }
 
   const isSourceHttp = source?.type === ActionExecutionSourceType.HTTP_REQUEST;
+  const isJSONService = config.service === JSON_TRANSPORT_SERVICE;
   let actualMessage: string | null | undefined = params.message;
   let actualHTMLMessage: string | null | undefined = params.messageHTML;
 
-  if (isSourceHttp) {
+  // use HTTP sourced, except when the service is JSON (for testing)
+  if (isSourceHttp && !isJSONService) {
     actualMessage = TEST_MESSAGE;
     actualHTMLMessage = TEST_MESSAGE;
   }
@@ -480,11 +482,12 @@ async function executor(
     actualMessage = `${actualMessage}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
   }
 
-  // use TEST_MESSAGE for cloud trials and HTTP sourced
+  // use TEST_MESSAGE for cloud trials and HTTP sourced, except when
+  // the service is JSON (for testing)
   const subject =
     config.service === AdditionalEmailServices.ELASTIC_CLOUD && (await isElasticCloudTrial?.())
       ? prefixTrialSubject(TEST_MESSAGE)
-      : isSourceHttp
+      : isSourceHttp && !isJSONService
       ? TEST_MESSAGE
       : params.subject;
 
