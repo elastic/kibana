@@ -27,7 +27,7 @@ export const WATCHES_HEADER_MENU_ITEMS: NonNullable<AppHeaderMenu['items']> = [
   {
     id: 'pndGiveFeedback',
     label: i18n.HEADER_MENU_GIVE_FEEDBACK,
-    iconType: 'discuss',
+    iconType: 'comment',
     overflow: true,
     run: noop,
     testId: 'pndHeaderMenuGiveFeedback',

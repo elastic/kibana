@@ -92,7 +92,7 @@ export const useAnomalyDetectionJobsMenu = ({
                 label: i18n.translate('xpack.ml.importExport.exportButton', {
                   defaultMessage: 'Export jobs',
                 }),
-                iconType: 'exportAction' as const,
+                iconType: 'upload' as const,
                 run: onOpenExportFlyout,
                 testId: 'mlJobsExportButton',
                 disableButton: !canCreateJob,
@@ -103,7 +103,7 @@ export const useAnomalyDetectionJobsMenu = ({
                 label: i18n.translate('xpack.ml.importExport.importButton', {
                   defaultMessage: 'Import jobs',
                 }),
-                iconType: 'importAction' as const,
+                iconType: 'download' as const,
                 run: onOpenImportFlyout,
                 testId: 'mlJobsImportButton',
                 disableButton: !canCreateJob,
