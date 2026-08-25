@@ -60,7 +60,7 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       | 'template_id'
       | 'template_version'
     >
-  >;
+  > & { read_by?: ConversationReadByEntry[] };
 
 export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
@@ -169,3 +169,17 @@ export type PersistentConversationRound = Omit<ConversationRound, 'steps'> &
   LegacyRoundFields & {
     steps: PersistentConversationRoundStep[];
   };
+
+/**
+ * One user who has read a conversation. An entry object rather than a bare id string
+ * so fields such as `read_at` can be added later without another shape migration.
+ */
+export interface ConversationReadByEntry {
+  userId: string;
+}
+
+/**
+ * Server-internal persistence shape of a conversation, carrying the per-user
+ * `read_by` list that backs the public `Conversation.read` boolean.
+ */
+export type NormalizedConversation = Conversation & { read_by?: ConversationReadByEntry[] };

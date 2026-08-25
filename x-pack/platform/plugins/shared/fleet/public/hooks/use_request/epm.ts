@@ -45,6 +45,7 @@ import type {
   RollbackAvailableCheckResponse,
   BulkRollbackAvailableCheckResponse,
   GetIlmPoliciesResponse,
+  SimpleSOAssetType,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -606,8 +607,10 @@ export const sendUpdatePackage = (
   });
 };
 
-export const sendGetBulkAssets = (body: GetBulkAssetsRequest['body']) => {
-  return sendRequest<GetBulkAssetsResponse>({
+export const sendGetBulkAssets = <TAsset extends SimpleSOAssetType = SimpleSOAssetType>(
+  body: GetBulkAssetsRequest['body']
+) => {
+  return sendRequest<GetBulkAssetsResponse<TAsset>>({
     path: epmRouteService.getBulkAssetsPath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
