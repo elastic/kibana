@@ -14,6 +14,7 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import { AGENT_MEMORY_INDEX } from '../common';
 import type { AgentMemoryConfig } from './config';
 import { AgentMemoryPlugin } from './plugin';
+import { rememberInputSchema } from './schemas';
 import { MEMORY_SKILL_ID } from './skills/memory_skill';
 import type { AgentMemorySetupDependencies, GetMemoryStorage } from './types';
 import { MEMORY_RECALL_STEP_ID } from './workflow_steps';
@@ -78,6 +79,21 @@ describe('AgentMemoryPlugin', () => {
     for (const [tool] of agentBuilder.tools.register.mock.calls) {
       expect(tool).toEqual(expect.objectContaining({ handler: expect.any(Function) }));
     }
+    const rememberInput = {
+      title: 'Recover the memory index',
+      description: 'Use the verified recovery sequence.',
+    };
+    expect(rememberInputSchema.safeParse(rememberInput).success).toBe(false);
+    expect(
+      rememberInputSchema.parse({
+        ...rememberInput,
+        category: 'procedures',
+        type: 'procedural',
+      })
+    ).toEqual({
+      ...rememberInput,
+      category: 'procedures',
+    });
 
     const registeredSkill = agentBuilder.skills.register.mock.calls[0]?.[0];
     expect(registeredSkill).toEqual(
@@ -116,6 +132,18 @@ describe('AgentMemoryPlugin', () => {
     );
     expect(registeredSkill?.content).toContain(
       '`trajectories` — Goals, plans, deadlines, progress changes, and milestones.'
+    );
+    expect(registeredSkill?.content).toContain(
+      '`procedures` — Verified reusable methods, successful tool sequences, corrections, and known pitfalls.'
+    );
+    expect(registeredSkill?.content).toContain(
+      'Save a procedure only after an explicit correction or a verified successful resolution.'
+    );
+    expect(registeredSkill?.content).toMatch(
+      /Record when it applies, the pitfall,\s+the corrected method, and the verification signal\./
+    );
+    expect(registeredSkill?.content).toContain(
+      'Before similar work, recall the `procedures` category'
     );
     expect(registeredSkill?.content).not.toContain(
       'Information the user has not consented to storing'

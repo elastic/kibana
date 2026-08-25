@@ -60,10 +60,9 @@ export const memoryStorageSettings = {
       // ── Memory payload ─────────────────────────────────────────────────────
       memory: types.object({
         properties: {
-          // Type dimensions (two orthogonal axes)
-          /** Episodic / semantic / procedural — PDF / D2 axis. */
+          /** Legacy type metadata remains mapped so existing documents stay queryable. */
           type: types.keyword({}),
-          /** Profile / preferences / events / trajectories — #15403 G2 axis. */
+          /** Closed category used by new writes and recall filtering. */
           category: types.keyword({}),
 
           // Revision / content addressing

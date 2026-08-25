@@ -83,7 +83,7 @@ On success returns { id, revision, action } where action is 'created' or 'update
     idempotentHint: false,
     openWorldHint: false,
   },
-  handler: async ({ title, description, category, type, tags, expires_at }, context) => {
+  handler: async ({ title, description, category, tags, expires_at }, context) => {
     const identity = resolveIdentity({
       request: context.request,
       security: getCoreSecurity(),
@@ -111,7 +111,6 @@ On success returns { id, revision, action } where action is 'created' or 'update
         title,
         description,
         category,
-        type,
         tags,
         expires_at,
         call_source: context.callContext.callSource,

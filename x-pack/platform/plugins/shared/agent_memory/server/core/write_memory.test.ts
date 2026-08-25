@@ -208,6 +208,40 @@ describe('writeMemory', () => {
     expect(created.id).toBe(expectedId);
   });
 
+  it('ignores retired type input on new writes and preserves legacy type on updates', async () => {
+    const harness = createHarness();
+    const created = await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: {
+        ...createParams({ category: 'events' }),
+        type: 'procedural',
+      } as WriteMemoryParams & { type: 'procedural' },
+    });
+    const stored = harness.documents.get(created.id)!;
+
+    expect(stored.source.memory.type).toBeUndefined();
+
+    harness.documents.set(created.id, {
+      ...stored,
+      source: {
+        ...stored.source,
+        memory: {
+          ...stored.source.memory,
+          type: 'semantic',
+        },
+      },
+    });
+
+    await writeMemory({
+      storage: harness.storage,
+      esClient: harness.esClient,
+      params: createParams({ category: 'events' }),
+    });
+
+    expect(harness.documents.get(created.id)!.source.memory.type).toBe('semantic');
+  });
+
   it('updates the deterministic document while preserving creation and creator metadata', async () => {
     const harness = createHarness();
     const created = await writeMemory({

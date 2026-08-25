@@ -58,6 +58,7 @@ describe('createRememberTool', () => {
       toolParams: {
         title: 'Preferred editor',
         description: 'The user prefers Vim.',
+        category: 'preferences',
       },
       context: mockContext,
     });
@@ -70,7 +71,11 @@ describe('createRememberTool', () => {
     });
 
     const result = await tool.handler(
-      { title: "User's name is Susah", description: "The user's name is Susah." },
+      {
+        title: "User's name is Susah",
+        description: "The user's name is Susah.",
+        category: 'profile',
+      },
       mockContext
     );
 
@@ -84,6 +89,7 @@ describe('createRememberTool', () => {
       expect.objectContaining({
         storage: mockStorage,
         esClient: asCurrentUser,
+        params: expect.objectContaining({ category: 'profile' }),
       })
     );
     expect(result).toEqual({
@@ -102,7 +108,11 @@ describe('createRememberTool', () => {
 
     await expect(
       tool.handler(
-        { title: "User's name is Susah", description: "The user's name is Susah." },
+        {
+          title: "User's name is Susah",
+          description: "The user's name is Susah.",
+          category: 'profile',
+        },
         mockContext
       )
     ).resolves.toEqual({

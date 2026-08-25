@@ -120,7 +120,7 @@ export const registerMemoryWorkflowSteps = (
       inputSchema: rememberInputSchema,
       outputSchema: RememberOutputSchema,
       handler: async (context) => {
-        const { title, description, category, type, tags, expires_at } = context.input;
+        const { title, description, category, tags, expires_at } = context.input;
         const request = context.contextManager.getFakeRequest();
         const spaceId = context.contextManager.getContext().workflow.spaceId;
         const identity = resolveIdentity({
@@ -140,7 +140,6 @@ export const registerMemoryWorkflowSteps = (
             title,
             description,
             category,
-            type,
             tags,
             expires_at,
             call_source: 'workflow',

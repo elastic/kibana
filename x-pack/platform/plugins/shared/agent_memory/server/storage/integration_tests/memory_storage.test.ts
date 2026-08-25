@@ -77,7 +77,6 @@ describe('Agent Memory AI Index integration', () => {
       params: {
         title,
         description,
-        type: 'semantic',
         category: 'preferences',
         tags: ['incident-response'],
         call_source: 'user',

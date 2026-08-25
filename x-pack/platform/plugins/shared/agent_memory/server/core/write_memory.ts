@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { isOccConflictError, OccWriter, type OccMetadata } from '@kbn/occ';
 import { AGENT_MEMORY_INDEX } from '../../common';
-import type { CallSource, MemoryCategory, MemoryType } from '../storage/memory_storage';
+import type { CallSource, MemoryCategory } from '../storage/memory_storage';
 import type { MemoryDocument, MemoryStorage } from '../storage/memory_storage';
 import type { ResolvedIdentity } from './resolve_identity';
 
@@ -20,7 +20,6 @@ export interface WriteMemoryParams {
   /** Full content of the memory. SHA-256 of the normalised form drives dedup. */
   description: string;
   category?: MemoryCategory;
-  type?: MemoryType;
   tags?: string[];
   /** ISO timestamp; optional per-record soft expiry (D5). */
   expires_at?: string;
@@ -82,7 +81,7 @@ export const writeMemory = async ({
   esClient: ElasticsearchClient;
   params: WriteMemoryParams;
 }): Promise<WriteMemoryResult> => {
-  const { title, description, category, type, tags, expires_at, call_source, space_id, identity } =
+  const { title, description, category, tags, expires_at, call_source, space_id, identity } =
     params;
   const scopeKind = 'user' as const;
   const scopeId = identity.author;
@@ -141,7 +140,6 @@ export const writeMemory = async ({
     created_at: now,
     space_id,
     memory: {
-      type,
       category,
       revision: 1,
       content_hash: hash,
@@ -182,7 +180,7 @@ export const writeMemory = async ({
         memory: {
           scope_kind: scopeKind,
           scope_id: scopeId,
-          type: type ?? previous.memory.type,
+          type: previous.memory.type,
           category: category ?? previous.memory.category,
           revision: previous.memory.revision + 1,
           content_hash: hash,

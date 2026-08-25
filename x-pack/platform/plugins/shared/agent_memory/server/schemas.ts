@@ -7,9 +7,13 @@
 
 import { z } from '@kbn/zod/v4';
 
-export const memoryCategorySchema = z.enum(['profile', 'preferences', 'events', 'trajectories']);
-
-export const memoryTypeSchema = z.enum(['episodic', 'semantic', 'procedural']);
+export const memoryCategorySchema = z.enum([
+  'profile',
+  'preferences',
+  'events',
+  'trajectories',
+  'procedures',
+]);
 
 export const recallInputSchema = z.object({
   query: z.string().max(2000).describe('The query text used to retrieve relevant memories.'),
@@ -33,8 +37,7 @@ export const rememberInputSchema = z.object({
     .string()
     .max(10000)
     .describe('Full content of the memory. Write in clear, complete sentences.'),
-  category: memoryCategorySchema.optional().describe('Memory category.'),
-  type: memoryTypeSchema.optional().describe('Memory type.'),
+  category: memoryCategorySchema.describe('Memory category.'),
   tags: z.array(z.string().max(100)).max(20).optional().describe('Optional classification tags.'),
   expires_at: z
     .string()

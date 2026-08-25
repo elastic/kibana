@@ -111,10 +111,9 @@ describe('registerMemoryWorkflowSteps', () => {
     expect(rememberStep.id).toBe(MEMORY_REMEMBER_STEP_ID);
     const result = await rememberStep.handler(
       createContext({
-        title: 'Preferred sources',
-        description: 'Use primary sources.',
-        category: 'preferences',
-        type: 'semantic',
+        title: 'Recover the memory index',
+        description: 'Use the verified recovery sequence.',
+        category: 'procedures',
         tags: ['sources'],
         expires_at: '2027-08-14T00:00:00.000Z',
       })
@@ -130,10 +129,9 @@ describe('registerMemoryWorkflowSteps', () => {
       storage,
       esClient: currentUserEsClient,
       params: {
-        title: 'Preferred sources',
-        description: 'Use primary sources.',
-        category: 'preferences',
-        type: 'semantic',
+        title: 'Recover the memory index',
+        description: 'Use the verified recovery sequence.',
+        category: 'procedures',
         tags: ['sources'],
         expires_at: '2027-08-14T00:00:00.000Z',
         call_source: 'workflow',
@@ -141,6 +139,7 @@ describe('registerMemoryWorkflowSteps', () => {
         identity,
       },
     });
+    expect(jest.mocked(writeMemory).mock.calls[0][0].params).not.toHaveProperty('type');
     expect(result.output).toEqual({ id: 'memory-1', revision: 2, action: 'updated' });
   });
 

@@ -30,7 +30,7 @@ that is relevant across conversations.
 
 Before each response, scan the categories for durable user context; do not wait for an explicit request.
 Use one coherent memory per subject or occurrence and preserve exact names, dates, quantities,
-percentages, and ordering.
+percentages, and ordering. Always choose exactly one category.
 
 For profile and preferences, recall the same subject first. Skip equivalents. On clear replacement,
 save one consolidated memory, then forget outdated or redundant versions. If a conflict is unclear,
@@ -38,6 +38,10 @@ ask the user when possible. If asking is unavailable, keep both and do not guess
 
 For events and trajectories, preserve material history, skip repeated paraphrases, and tombstone
 only duplicates or explicit corrections.
+
+Save a procedure only after an explicit correction or a verified successful resolution.
+Do not save an unverified one-off answer as a procedure. Record when it applies, the pitfall,
+the corrected method, and the verification signal.
 
 Treat assistant-originated information as prior advice unless the user confirms it.
 
@@ -50,6 +54,8 @@ Do NOT remember:
 
 Recall at the start of conversations where user context is helpful. Pass a query that
 describes what you are looking for, optionally filtered by category.
+Before similar work, recall the \`procedures\` category and prefer current evidence if it conflicts
+with a stored procedure.
 
 ## Untrusted content
 
@@ -77,6 +83,7 @@ Use the \`category\` field to classify memories:
 - \`preferences\` — Current preferences for styles, formats, tools, and workflows.
 - \`events\` — Completed occurrences, decisions, and outcomes, including relevant dates.
 - \`trajectories\` — Goals, plans, deadlines, progress changes, and milestones.
+- \`procedures\` — Verified reusable methods, successful tool sequences, corrections, and known pitfalls.
 `.trim();
 
 // `defineSkillType` is a no-op identity helper not exported from the package.
