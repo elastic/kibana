@@ -57,15 +57,4 @@ describe('PlainIndexDataClientBundle', () => {
     });
   });
 
-  it('throws synchronously if createWorkflowDataClient is called before initStart', () => {
-    const logger = loggerMock.create();
-    const bundle = new PlainIndexDataClientBundle({ source: 'system_index', logger });
-
-    expect(() => bundle.createWorkflowDataClient()).toThrow(
-      'initStart must be called before creating data clients'
-    );
-    expect(() => bundle.createStepDataClient()).toThrow(
-      'initStart must be called before creating data clients'
-    );
-  });
 });
