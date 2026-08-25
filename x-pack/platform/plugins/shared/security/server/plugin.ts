@@ -104,7 +104,15 @@ export interface PluginStartDependencies {
 }
 
 /** Builds the server base URL, bracketing bare IPv6 hostnames so the result is a valid URL. */
-const buildServerBaseUrl = ({ protocol, hostname, port }: { protocol: string; hostname: string; port: number }) => {
+const buildServerBaseUrl = ({
+  protocol,
+  hostname,
+  port,
+}: {
+  protocol: string;
+  hostname: string;
+  port: number;
+}) => {
   const host = hostname.includes(':') && !hostname.startsWith('[') ? `[${hostname}]` : hostname;
   return `${protocol}://${host}:${port}`;
 };

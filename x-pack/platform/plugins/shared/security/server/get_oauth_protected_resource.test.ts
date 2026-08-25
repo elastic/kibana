@@ -58,9 +58,7 @@ describe('getOAuthProtectedResource', () => {
   });
 
   it('returns unparseable input verbatim when WHATWG URL throws (e.g. unbracketed IPv6)', () => {
-    expect(getOAuthProtectedResource({ serverBaseUrl: 'http://::1:5601' })).toBe(
-      'http://::1:5601'
-    );
+    expect(getOAuthProtectedResource({ serverBaseUrl: 'http://::1:5601' })).toBe('http://::1:5601');
   });
 
   it('normalizes a bracketed IPv6 origin to canonical form', () => {
