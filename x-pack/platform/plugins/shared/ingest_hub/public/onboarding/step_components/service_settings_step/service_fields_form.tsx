@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -316,6 +317,7 @@ export function ServiceFieldsForm({
   onFieldChange,
   onInputToggle,
 }: ServiceFieldsFormProps) {
+  const { euiTheme } = useEuiTheme();
   const dataStreams = service.dataStreams ?? [];
   const multiDs = dataStreams.length > 1;
 
@@ -344,7 +346,7 @@ export function ServiceFieldsForm({
               {isEnabled && (
                 <>
                   <EuiSpacer size="m" />
-                  <div style={{ paddingLeft: 24 }}>
+                  <div style={{ paddingLeft: euiTheme.size.xl }}>
                     <InputVarFields
                       service={dsView}
                       activeInput={input}
@@ -393,7 +395,7 @@ export function ServiceFieldsForm({
             {isInputEnabled && (
               <>
                 <EuiSpacer size="m" />
-                <div style={{ paddingLeft: 24 }}>
+                <div style={{ paddingLeft: euiTheme.size.xl }}>
                   <InputVarFields
                     service={dsView}
                     activeInput={input}

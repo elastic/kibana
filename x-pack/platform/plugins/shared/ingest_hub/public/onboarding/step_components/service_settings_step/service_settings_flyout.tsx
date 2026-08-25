@@ -20,10 +20,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DataStreamInfo } from '../../aws_service_matrix';
 import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
 import { ServiceFieldsForm } from './service_fields_form';
 import { SignalTypeBadge } from '../services_step/signal_type_badge';
+
+function getDefaultDsInputs(dsInfo: DataStreamInfo | undefined, isSingleDs: boolean): string[] {
+  return isSingleDs ? dsInfo?.inputs ?? [] : dsInfo?.defaultEnabledInputs ?? [];
+}
 
 interface ServiceSettingsFlyoutProps {
   service: AwsServiceMatrixEntry;
@@ -52,12 +56,10 @@ export function ServiceSettingsFlyout({
   }));
 
   const handleApply = () => {
-    const singleDs = isSingleDs;
     const enabledDataStreams = service.dataStreams.filter((dsId) => {
       const dsVars = draftByDs[dsId];
       if (dsVars) return dsVars.enabledInputs.length > 0;
-      if (singleDs) return true;
-      return (service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs?.length ?? 0) > 0;
+      return getDefaultDsInputs(service.varDefsByDataStream?.[dsId], isSingleDs).length > 0;
     });
     onApply(draftByDs, enabledDataStreams);
   };
@@ -90,10 +92,10 @@ export function ServiceSettingsFlyout({
           onFieldChange={(dsId, input, fieldName, value) =>
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
-              const defaultInputs = isSingleDs
-                ? dsInfo?.inputs ?? []
-                : dsInfo?.defaultEnabledInputs ?? [];
-              const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
+              const existing = prev[dsId] ?? {
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs),
+                varsByInput: {},
+              };
               return {
                 ...prev,
                 [dsId]: {
@@ -109,10 +111,10 @@ export function ServiceSettingsFlyout({
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
-              const defaultInputs = isSingleDs
-                ? dsInfo?.inputs ?? []
-                : dsInfo?.defaultEnabledInputs ?? [];
-              const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
+              const existing = prev[dsId] ?? {
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs),
+                varsByInput: {},
+              };
               return {
                 ...prev,
                 [dsId]: {
