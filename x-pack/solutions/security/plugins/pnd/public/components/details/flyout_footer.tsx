@@ -9,16 +9,18 @@ import React, { memo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
 import { BaseActions, type CardActionType } from '../actions';
+import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { DETAILS_FLYOUT_LABELS as i18n } from './translations';
 
 export interface ConversationDetailsFlyoutFooterProps {
   investigation: Investigation;
   onClickAction: (action: CardActionType, recordId: Investigation['recordId']) => void;
+  onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   onOpenChat: () => void;
 }
 
 export const ConversationDetailsFlyoutFooter = memo<ConversationDetailsFlyoutFooterProps>(
-  ({ investigation, onClickAction, onOpenChat }) => {
+  ({ investigation, onClickAction, onClickRecommendedAction, onOpenChat }) => {
     return (
       <EuiFlyoutFooter>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexEnd">
@@ -32,6 +34,7 @@ export const ConversationDetailsFlyoutFooter = memo<ConversationDetailsFlyoutFoo
               investigation={investigation}
               isFlyout={true}
               onClickAction={onClickAction}
+              onClickRecommendedAction={onClickRecommendedAction}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

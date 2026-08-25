@@ -7,6 +7,8 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
+  type IconColor,
+  type IconType,
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -15,12 +17,15 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { type Investigation } from '@kbn/pnd-common';
+import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { ActionButton } from './action_button';
 import { ACTIONS_TRANSLATIONS } from './translations';
+import { getActionButtonIconProps } from '../helpers';
 
 interface ActionConfig {
   key: string;
-  icon: string;
+  icon: IconType;
+  color?: IconColor;
   name: string;
   onClick: () => void;
   /** Inserts a horizontal rule before this item */
@@ -34,7 +39,7 @@ const useContextMenuItems = (
   const { euiTheme } = useEuiTheme();
   return useMemo(
     () =>
-      actions.flatMap(({ key, icon, name, onClick, separator }) => {
+      actions.flatMap(({ key, icon, color = 'text', name, onClick, separator }) => {
         const item = (
           <EuiContextMenuItem
             style={{
@@ -42,6 +47,7 @@ const useContextMenuItems = (
             }}
             key={key}
             icon={icon}
+            color={color as IconColor}
             onClick={(ev) => {
               ev.stopPropagation();
               onClose();
@@ -64,7 +70,7 @@ export interface BaseActionsProps {
   investigation: Investigation;
   isFlyout?: boolean;
   onClickAction: (action: CardActionType, conversationId: Investigation['recordId']) => void;
-  showProposedAction?: boolean;
+  onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
   'data-test-subj'?: string;
 }
 
@@ -73,7 +79,7 @@ export const BaseActions = memo<BaseActionsProps>(
     investigation,
     isFlyout = false,
     onClickAction,
-    showProposedAction,
+    onClickRecommendedAction,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -104,13 +110,18 @@ export const BaseActions = memo<BaseActionsProps>(
 
     const actionConfigs = useMemo<ActionConfig[]>(
       () => [
-        ...(showProposedAction
+        ...(onClickRecommendedAction
           ? [
               {
                 key: 'proposedAction',
-                icon: 'lightbulb',
-                name: ACTIONS_TRANSLATIONS.buttons.proposedAction,
-                onClick: () => onClickAction('proposedAction', investigation.recordId),
+                icon: getActionButtonIconProps(investigation).type,
+                color: getActionButtonIconProps(investigation).color,
+                name: investigation.primaryActionLabel ?? '',
+                onClick: () =>
+                  onClickRecommendedAction({
+                    recordId: investigation.recordId,
+                    recommendedAction: investigation.recommendedAction,
+                  }),
               },
             ]
           : []),
@@ -136,7 +147,7 @@ export const BaseActions = memo<BaseActionsProps>(
           onClick: () => onClickAction('dismiss', investigation.recordId),
         },
       ],
-      [investigation.recordId, onClickAction]
+      [onClickRecommendedAction, investigation, onClickAction]
     );
 
     const items = useContextMenuItems(actionConfigs, handleClose);

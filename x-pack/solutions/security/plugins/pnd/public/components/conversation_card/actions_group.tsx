@@ -8,34 +8,10 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { type Investigation, type RecommendedAction } from '@kbn/pnd-common';
+import { type Investigation } from '@kbn/pnd-common';
+import { getActionButtonIconProps } from '../helpers';
 import { CONVERSATION_CARD_ACTIONS } from './translations';
 import { ActionButton, BaseActions, type BaseActionsProps } from '../actions';
-
-const ACTION_ICONS_MAP: Record<RecommendedAction, 'gear' | 'lock' | 'flag' | 'external'> = {
-  contain: 'lock',
-  investigate: 'external',
-  tune: 'gear',
-  escalate: 'lock',
-};
-
-const getActionButtonIconProps = (
-  investigation: Investigation
-): {
-  type: 'flag' | 'gear' | 'lock' | 'external' | 'cross';
-  color: 'primary' | 'danger' | 'warning';
-} => {
-  if (!investigation.recommendedAction) {
-    return { type: 'flag', color: 'warning' };
-  }
-  if (investigation.recommendedAction === 'contain' && investigation.severity === 'high') {
-    return { type: 'cross', color: 'danger' };
-  }
-  return {
-    type: ACTION_ICONS_MAP[investigation.recommendedAction],
-    color: ['investigate', 'tune'].includes(investigation.recommendedAction) ? 'primary' : 'danger',
-  };
-};
 
 export interface ConversationsActionsGroupProps {
   investigation: Investigation;

@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
 import type { CardActionType } from '../actions/base_actions';
+import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { ConversationDetailsFlyoutHeader } from './flyout_header';
 import { ConversationDetailsFlyoutBody } from './flyout_body';
 import { ConversationDetailsFlyoutFooter } from './flyout_footer';
@@ -18,11 +19,12 @@ export interface ConversationDetailsFlyoutProps {
   investigation: Investigation;
   onClose: () => void;
   onClickAction: (action: CardActionType, recordId: Investigation['recordId']) => void;
+  onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   onOpenChat: () => void;
 }
 
 export const ConversationDetailsFlyout = memo<ConversationDetailsFlyoutProps>(
-  ({ investigation, onClose, onClickAction, onOpenChat }) => {
+  ({ investigation, onClose, onClickAction, onClickRecommendedAction, onOpenChat }) => {
     return (
       <EuiFlyout
         aria-label={i18n.ariaLabel}
@@ -50,6 +52,7 @@ export const ConversationDetailsFlyout = memo<ConversationDetailsFlyoutProps>(
         <ConversationDetailsFlyoutFooter
           investigation={investigation}
           onClickAction={onClickAction}
+          onClickRecommendedAction={onClickRecommendedAction}
           onOpenChat={onOpenChat}
         />
       </EuiFlyout>
