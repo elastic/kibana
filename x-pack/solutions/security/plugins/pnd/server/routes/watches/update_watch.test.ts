@@ -45,4 +45,18 @@ describe('update watch route', () => {
 
     expect(response[responseMethod]).toHaveBeenCalled();
   });
+
+  it('maps a failed confirmation to 500', async () => {
+    const { handler, update } = registerHandler();
+    update.mockResolvedValue({ outcome: 'failed' });
+    const request = httpServerMock.createKibanaRequest({
+      params: { watchId: 'system-security-watch-floor' },
+      body: { autonomyLevel: 'assisted', settingsRevision: null },
+    });
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(createContext(), request, response);
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+  });
 });

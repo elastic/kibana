@@ -355,7 +355,7 @@ describe('WatchesService', () => {
       });
     });
 
-    it('reports unavailable when a best-effort install skips an existing document update', async () => {
+    it('reports failed when a best-effort install skips an existing document update', async () => {
       const harness = createPersistentHarness();
       const service = harness.createService();
       const first = await service.update(
@@ -374,7 +374,31 @@ describe('WatchesService', () => {
           SPACE,
           request
         )
-      ).resolves.toEqual({ outcome: 'unavailable' });
+      ).resolves.toEqual({ outcome: 'failed' });
+    });
+
+    it('confirms a settings write when stored template values use a different key order', async () => {
+      const harness = createPersistentHarness();
+      jest
+        .mocked(harness.managedWorkflows.getInstalledWorkflowState)
+        .mockImplementation(async (id, spaceId) => {
+          const document = harness.documents.get(id);
+          if (!document?.values) return null;
+          const { settingsVersion, autonomyLevel } = document.values;
+          return {
+            workflowId: id,
+            spaceId,
+            definitionId: FLOOR,
+            templateValues: { autonomyLevel, settingsVersion },
+            documentVersion: document.version,
+          };
+        });
+
+      await expect(
+        harness
+          .createService()
+          .update(FLOOR, { autonomyLevel: 'assisted', settingsRevision: null }, SPACE, request)
+      ).resolves.toEqual(expect.objectContaining({ outcome: 'updated' }));
     });
 
     it('installs on enable and leaves the per-space document in place on disable', async () => {

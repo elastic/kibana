@@ -94,7 +94,9 @@ const projectNotInstalledWatch = (watch: Watch): Watch => ({
 const templateValuesEqual = (
   left: Record<string, unknown> | null,
   right: Record<string, unknown>
-): boolean => JSON.stringify(left) === JSON.stringify(right);
+): boolean =>
+  left != null &&
+  Object.keys(right).every((key) => Object.hasOwn(left, key) && left[key] === right[key]);
 
 export interface WatchTriggersPatch {
   scheduleId?: string;
@@ -131,7 +133,8 @@ export type WatchUpdateResult =
   | { outcome: 'not-found' }
   | { outcome: 'rejected'; what: string }
   | { outcome: 'conflict' }
-  | { outcome: 'unavailable' };
+  | { outcome: 'unavailable' }
+  | { outcome: 'failed' };
 
 export class WatchesService {
   constructor(
@@ -535,7 +538,10 @@ export class WatchesService {
         spaceId
       );
       if (!persisted || !templateValuesEqual(persisted.templateValues, applied.values)) {
-        return { outcome: 'unavailable' };
+        this.logger.error(
+          `Watch "${registration.id}" settings write could not be confirmed after save`
+        );
+        return { outcome: 'failed' };
       }
     }
 

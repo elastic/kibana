@@ -91,6 +91,15 @@ export const registerUpdateWatchRoute = ({
               });
             case 'unavailable':
               return storeUnavailableResponse(response);
+            case 'failed':
+              return response.customError({
+                statusCode: 500,
+                body: {
+                  message: i18n.translate('xpack.pnd.watchSettingsUnconfirmedErrorMessage', {
+                    defaultMessage: 'Watch settings could not be confirmed after save',
+                  }),
+                },
+              });
           }
         } catch (error) {
           logger.error(`Failed to update watch: ${error}`);
