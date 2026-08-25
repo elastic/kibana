@@ -8,7 +8,7 @@
  */
 
 import { pick } from 'lodash';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 
 import {
   ControlValuesSource,
@@ -116,7 +116,8 @@ describe('layout manager', () => {
       undefined,
       [panel1],
       [],
-      trackPanelMock
+      trackPanelMock,
+      new Subject<void>()
     );
     layoutManager.api.registerChildApi(panel1Api);
     expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBe(panel1Api);
@@ -128,7 +129,8 @@ describe('layout manager', () => {
       undefined,
       [panel1],
       [],
-      trackPanelMock
+      trackPanelMock,
+      new Subject<void>()
     );
     const applySerializedState = jest.fn().mockResolvedValue(undefined);
 
@@ -154,7 +156,8 @@ describe('layout manager', () => {
       undefined,
       [panel1],
       [],
-      trackPanelMock
+      trackPanelMock,
+      new Subject<void>()
     );
     layoutManager.api.registerChildApi({
       ...panel1Api,
@@ -201,7 +204,8 @@ describe('layout manager', () => {
       incomingEmbeddables,
       [panel1],
       [],
-      trackPanelMock
+      trackPanelMock,
+      new Subject<void>()
     );
 
     const layout = layoutManager.api.layout$.value;
@@ -243,7 +247,8 @@ describe('layout manager', () => {
         undefined,
         [panel1],
         [],
-        trackPanelMock
+        trackPanelMock,
+        new Subject<void>()
       );
 
       layoutManager.api.registerChildApi(panel1Api);
@@ -273,7 +278,8 @@ describe('layout manager', () => {
         undefined,
         [panel1],
         [],
-        trackPanelMock
+        trackPanelMock,
+        new Subject<void>()
       );
       layoutManager.api.registerChildApi({
         ...panel1Api,
@@ -302,7 +308,8 @@ describe('layout manager', () => {
         undefined,
         [panel1],
         [],
-        trackPanelMock
+        trackPanelMock,
+        new Subject<void>()
       );
       const titleManagerOfClone = initializeTitleManager({ title: 'Panel One (copy)' });
       layoutManager.api.registerChildApi({
@@ -322,18 +329,32 @@ describe('layout manager', () => {
 
   describe('canRemovePanels', () => {
     test('allows removing panels when there is no expanded panel', () => {
-      const layoutManager = initializeLayoutManager(viewModeManagerMock, undefined, [panel1], [], {
-        ...trackPanelMock,
-        expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-      });
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        undefined,
+        [panel1],
+        [],
+        {
+          ...trackPanelMock,
+          expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
+        },
+        new Subject<void>()
+      );
       expect(layoutManager.api.canRemovePanels()).toBe(true);
     });
 
     test('does not allow removing panels when there is an expanded panel', () => {
-      const layoutManager = initializeLayoutManager(viewModeManagerMock, undefined, [panel1], [], {
-        ...trackPanelMock,
-        expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
-      });
+      const layoutManager = initializeLayoutManager(
+        viewModeManagerMock,
+        undefined,
+        [panel1],
+        [],
+        {
+          ...trackPanelMock,
+          expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
+        },
+        new Subject<void>()
+      );
       expect(layoutManager.api.canRemovePanels()).toBe(false);
     });
   });
@@ -345,7 +366,8 @@ describe('layout manager', () => {
         undefined,
         [panel1],
         [],
-        trackPanelMock
+        trackPanelMock,
+        new Subject<void>()
       );
 
       layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
@@ -367,7 +389,8 @@ describe('layout manager', () => {
           },
         ],
         [],
-        trackPanelMock
+        trackPanelMock,
+        new Subject<void>()
       );
 
       layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
@@ -389,7 +412,8 @@ describe('layout manager', () => {
           },
         ],
         [],
-        trackPanelMock
+        trackPanelMock,
+        new Subject<void>()
       );
 
       layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
@@ -420,7 +444,8 @@ describe('layout manager', () => {
         {
           ...trackPanelMock,
           expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-        }
+        },
+        new Subject<void>()
       );
 
       layoutManager.api.pinPanel('control3');
@@ -454,7 +479,8 @@ describe('layout manager', () => {
         {
           ...trackPanelMock,
           expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-        }
+        },
+        new Subject<void>()
       );
       expect(layoutManager.api.layout$.getValue().pinnedPanels).toEqual({
         ['control1']: {
@@ -503,7 +529,8 @@ describe('layout manager', () => {
         {
           ...trackPanelMock,
           expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
-        }
+        },
+        new Subject<void>()
       );
       expect(layoutManager.api.panelIsPinned('control1')).toBe(true);
       expect(layoutManager.api.panelIsPinned('control2')).toBe(false);
@@ -518,7 +545,8 @@ describe('layout manager', () => {
         undefined,
         [panel1],
         pinnedControls,
-        trackPanelMock
+        trackPanelMock,
+        new Subject<void>()
       );
       layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
         loadingStates.push(loading);
@@ -546,7 +574,8 @@ describe('layout manager', () => {
         undefined,
         [section1],
         pinnedControls,
-        trackPanelMock
+        trackPanelMock,
+        new Subject<void>()
       );
       layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
         loadingStates.push(loading);
@@ -576,7 +605,8 @@ describe('layout manager', () => {
         undefined,
         [panel2, { ...section1, collapsed: true }],
         pinnedControls,
-        trackPanelMock
+        trackPanelMock,
+        new Subject<void>()
       );
       layoutManager.internalApi.childrenLoading$.subscribe((loading) => {
         loadingStates.push(loading);
@@ -619,7 +649,8 @@ describe('layout manager', () => {
         undefined,
         [panel2, section1],
         [],
-        trackPanelMock
+        trackPanelMock,
+        new Subject<void>()
       );
 
       layoutManager.internalApi.childrenLoading$.subscribe((loading) => {

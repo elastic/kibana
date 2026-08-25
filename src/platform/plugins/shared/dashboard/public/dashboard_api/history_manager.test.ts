@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, firstValueFrom, skip } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, skip, Subject } from 'rxjs';
 import { initializeHistoryManager } from './history_manager';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
@@ -37,6 +37,7 @@ const makeSetup = async () => {
     setState,
     getState,
     dataLoading$,
+    historyUpdated$: new Subject<void>(),
   });
 
   anyStateChange$.next(undefined); // initial state update
