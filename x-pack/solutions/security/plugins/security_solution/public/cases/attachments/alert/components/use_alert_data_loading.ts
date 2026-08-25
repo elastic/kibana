@@ -43,6 +43,8 @@ export const useAlertDataLoading = ({
   const hasRetried = useRef(false);
 
   const needsLiveFetch = !hasRuleIdFromMetadata;
+  const waitingForPrivileges = needsLiveFetch && loadingPrivileges;
+  const waitingForFirstFetch = needsLiveFetch && hasAlertsRead && refetchAlertData === null;
 
   const firstFetchReturnedNoData =
     needsLiveFetch &&
@@ -61,9 +63,6 @@ export const useAlertDataLoading = ({
   }, [firstFetchReturnedNoData, refetchAlertData]);
 
   return (
-    loadingAlertData ||
-    (needsLiveFetch && loadingPrivileges) ||
-    (needsLiveFetch && hasAlertsRead && refetchAlertData === null) ||
-    firstFetchReturnedNoData
+    loadingAlertData || waitingForPrivileges || waitingForFirstFetch || firstFetchReturnedNoData
   );
 };
