@@ -39,7 +39,6 @@ export class LensEditorApp extends LensApp {
    * (geo, extra drop types, reorder, keyboard DnD, data-panel switch).
    */
   public readonly dragDrop: LensDragDrop;
-  private readonly addToLibraryCheckbox;
   private readonly newDashboardOption;
   private readonly existingDashboardOption;
   private readonly openDashboardPicker;
@@ -71,7 +70,6 @@ export class LensEditorApp extends LensApp {
       html5DragAndDrop: (from: string, to: string) => this.html5DragAndDrop(from, to),
       waitForVisualization: (chartTestSubj: string) => this.waitForVisualization(chartTestSubj),
     });
-    this.addToLibraryCheckbox = this.page.locator('input#add-to-library-checkbox');
     this.newDashboardOption = this.page.locator('#new-dashboard-option');
     this.existingDashboardOption = this.page.locator('#existing-dashboard-option');
     this.openDashboardPicker = this.page.testSubj.locator('open-dashboard-picker');

@@ -14,6 +14,7 @@ import {
   spaceTest,
 } from '../../fixtures';
 
+// RBAC (role-based access control) verifies that Lens capabilities reflect each user's privileges.
 const createRbacLensVisualization = async (
   kbnClient: KbnClient,
   spaceId: string,
@@ -117,7 +118,6 @@ spaceTest.describe('Lens add to dashboard capabilities', { tag: '@local-stateful
       }
     );
 
-    // FTR tagged this case skipFIPS; Scout's local stateful lane does not run in FIPS mode.
     spaceTest(
       `${scenario.name} hides add-to-dashboard save options`,
       async ({ browserAuth, page, pageObjects }) => {
