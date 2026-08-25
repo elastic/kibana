@@ -41,6 +41,7 @@ export const routeDefinitionParamsMock = {
     return {
       router: httpServiceMock.createRouter(),
       basePath: httpServiceMock.createBasePath(),
+      serverBaseUrl: 'http://localhost:5601',
       csp: httpServiceMock.createSetupContract().csp,
       logger: loggingSystemMock.create().get(),
       config,

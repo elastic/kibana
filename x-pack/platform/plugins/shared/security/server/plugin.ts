@@ -47,6 +47,7 @@ import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
 import { getPrivilegeDeprecationsService, registerKibanaUserRoleDeprecation } from './deprecations';
 import { ElasticsearchService } from './elasticsearch';
+import { getOAuthProtectedResource } from './get_oauth_protected_resource';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
 import { securityFeatures } from './features';
@@ -348,9 +349,13 @@ export class SecurityPlugin
       })
     );
 
+    const { protocol, hostname, port } = core.http.getServerInfo();
+    const serverBaseUrl = `${protocol}://${hostname}:${port}`;
+
     defineRoutes({
       router: core.http.createRouter(),
       basePath: core.http.basePath,
+      serverBaseUrl,
       httpResources: core.http.resources,
       logger: this.initializerContext.logger.get('routes'),
       config,
@@ -436,8 +441,11 @@ export class SecurityPlugin
     const { protocol, hostname, port } = core.http.getServerInfo();
     const serverBaseUrl = `${protocol}://${hostname}:${port}`;
 
-    const kibanaServerResourceURL =
-      config.mcp?.oauth2?.metadata?.resource ?? core.http.basePath.publicBaseUrl ?? serverBaseUrl;
+    const kibanaServerResourceURL = getOAuthProtectedResource({
+      configuredResource: config.mcp?.oauth2?.metadata?.resource,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
+      serverBaseUrl,
+    });
 
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,

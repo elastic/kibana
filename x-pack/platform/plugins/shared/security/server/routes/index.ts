@@ -53,6 +53,7 @@ import type { UserProfileServiceStartInternal } from '../user_profile';
 export interface RouteDefinitionParams {
   router: SecurityRouter;
   basePath: IBasePath;
+  serverBaseUrl: string;
   httpResources: HttpResources;
   logger: Logger;
   config: ConfigType;
