@@ -11,7 +11,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import { ConversationIdSchema, ConversationSchema } from './conversation_schemas';
 
-export const ConversationGetStepTypeId = 'conversations.get';
+export const ConversationGetStepTypeId = 'ai.conversations.get';
 
 const InputSchema = z.object({
   conversation_id: ConversationIdSchema,
@@ -65,6 +65,7 @@ export const conversationGetStepCommonDefinition: CommonStepDefinition<
 \`\`\``,
     ],
   },
+  stability: 'tech_preview',
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
 };

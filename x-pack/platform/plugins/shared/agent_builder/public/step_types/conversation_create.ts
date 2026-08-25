@@ -24,7 +24,7 @@ export const createConversationCreateStepDefinition = (core: CoreSetup) => {
   return createPublicStepDefinition({
     ...conversationCreateStepCommonDefinition,
     icon: React.lazy(() =>
-      import('@elastic/eui/es/components/icon/assets/plus').then(({ icon }) => ({
+      import('@elastic/eui/es/components/icon/assets/comment').then(({ icon }) => ({
         default: icon,
       }))
     ),

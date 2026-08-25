@@ -11,7 +11,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import { ConversationSummarySchema } from './conversation_schemas';
 
-export const ConversationListStepTypeId = 'conversations.list';
+export const ConversationListStepTypeId = 'ai.conversations.list';
 
 const InputSchema = z.object({
   agent_id: z
@@ -58,12 +58,13 @@ export const conversationListStepCommonDefinition: CommonStepDefinition<
     agent_id: "my-custom-agent"
 
 - name: read_latest
-  type: conversations.get
+  type: ai.conversations.get
   with:
     conversation_id: "{{ steps.list_conversations.output.0.id }}"
 \`\`\``,
     ],
   },
+  stability: 'tech_preview',
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
 };

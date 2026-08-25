@@ -11,7 +11,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 import { ConversationIdSchema } from './conversation_schemas';
 
-export const ConversationDeleteStepTypeId = 'conversations.delete';
+export const ConversationDeleteStepTypeId = 'ai.conversations.delete';
 
 const InputSchema = z.object({
   conversation_id: ConversationIdSchema,
@@ -51,6 +51,7 @@ export const conversationDeleteStepCommonDefinition: CommonStepDefinition<
 \`\`\``,
     ],
   },
+  stability: 'tech_preview',
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
 };

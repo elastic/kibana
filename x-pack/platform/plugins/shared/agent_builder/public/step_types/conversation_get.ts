@@ -12,7 +12,7 @@ import { conversationGetStepCommonDefinition } from '../../common/step_types/con
 export const conversationGetStepDefinition = createPublicStepDefinition({
   ...conversationGetStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/document').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/comment').then(({ icon }) => ({
       default: icon,
     }))
   ),

@@ -12,7 +12,7 @@ import { conversationUpdateStepCommonDefinition } from '../../common/step_types/
 export const conversationUpdateStepDefinition = createPublicStepDefinition({
   ...conversationUpdateStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/pencil').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/comment').then(({ icon }) => ({
       default: icon,
     }))
   ),

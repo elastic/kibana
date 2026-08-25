@@ -12,7 +12,7 @@ import { conversationDeleteStepCommonDefinition } from '../../common/step_types/
 export const conversationDeleteStepDefinition = createPublicStepDefinition({
   ...conversationDeleteStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/trash').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/comment').then(({ icon }) => ({
       default: icon,
     }))
   ),

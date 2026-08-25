@@ -50,7 +50,7 @@ describe('conversation workflow steps (Agent Builder)', () => {
       logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
       abortSignal: new AbortController().signal,
       stepId: 'test-step',
-      stepType: 'conversations.test',
+      stepType: 'ai.conversations.test',
       ...overrides,
     } as StepHandlerContext);
 

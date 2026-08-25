@@ -14,11 +14,6 @@ import {
   TimelineEventType,
 } from '@kbn/agent-builder-common';
 
-/**
- * Namespace shared by every conversation step id.
- */
-export const ConversationStepNamespace = 'conversations';
-
 export const ConversationIdSchema = z
   .string()
   .min(1)

@@ -16,7 +16,7 @@ import {
   ConversationSchema,
 } from './conversation_schemas';
 
-export const ConversationUpdateStepTypeId = 'conversations.update';
+export const ConversationUpdateStepTypeId = 'ai.conversations.update';
 
 const InputSchema = z.object({
   conversation_id: ConversationIdSchema,
@@ -72,6 +72,7 @@ export const conversationUpdateStepCommonDefinition: CommonStepDefinition<
 \`\`\``,
     ],
   },
+  stability: 'tech_preview',
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
 };
