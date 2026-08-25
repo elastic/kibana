@@ -166,7 +166,11 @@ export class AgentStatusChangeTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
     try {
-      const processed = await this.persistAgentStatusChanges(esClient, soClient, abortController.signal);
+      const processed = await this.persistAgentStatusChanges(
+        esClient,
+        soClient,
+        abortController.signal
+      );
 
       this.logger.debug(`[AgentStatusChangeTask] processed ${processed} agents`);
       this.endRun('success');
