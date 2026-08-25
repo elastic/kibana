@@ -102,6 +102,12 @@ steps:
         threshold). Read them before concluding that a spike is anomalous — a short window or a
         tight threshold can fire on normal variation, and "the rule is too sensitive" is a
         legitimate conclusion supported by the data.
+
+        Where the rule's own query is given, treat it as the authoritative statement of what the
+        rule measured, and build your first queries by adapting it rather than composing
+        something new from the reason text. Widening its time window or removing one of its
+        filters is usually the fastest way to establish whether the change is new, localised, or
+        part of a longer trend.
         {% elsif inputs.context %}
         Additional context: {{ inputs.context | json }}
         {% endif %}

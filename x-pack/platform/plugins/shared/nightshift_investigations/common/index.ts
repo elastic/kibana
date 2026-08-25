@@ -70,6 +70,30 @@ export interface AlertSnapshot {
    * populate it. Deriving it per rule type from `rule_parameters` is separate work.
    */
   index_pattern?: string;
+  /**
+   * The query the rule ran to produce this alert. Shaped to match the response of
+   * `GET /api/alerting/rule/{id}/query_inspector?alert_id=<id>`, so a caller can forward that
+   * result straight through.
+   *
+   * Optional, and absent for most rule types today: the query is only recoverable where the
+   * rule type registers a `queryInspector`, and `observability.rules.custom_threshold` is
+   * currently the only one that does. For rule types like APM's, the executable query is built
+   * in the executor at run time and never persisted, so `rule_parameters` is the only
+   * description of the condition available.
+   */
+  queries?: AlertSnapshotQuery[];
+}
+
+/** One query a rule ran, as reported by the alerting query inspector. */
+export interface AlertSnapshotQuery {
+  /** Index or index pattern the query ran against. */
+  index: string;
+  /** The Elasticsearch request body. */
+  request: Record<string, unknown>;
+  /** The response, when the caller asked the inspector to execute the query. */
+  response?: Record<string, unknown>;
+  /** Human-readable name, when a rule runs more than one query. */
+  label?: string;
 }
 
 export interface AlertSnapshotGroup {

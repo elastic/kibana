@@ -96,6 +96,52 @@ describe('buildInvestigationMessage', () => {
     expect(message).not.toContain('index pattern');
     expect(message).not.toContain('Rule tags');
     expect(message).not.toContain('flapping');
+    expect(message).not.toContain('Rule query');
+  });
+
+  it('states the rule query when the caller supplied one', () => {
+    const message = buildInvestigationMessage(alertSubject, {
+      alerts: [
+        alert({
+          queries: [{ index: 'metrics-apm*', request: { size: 0, query: { match_all: {} } } }],
+        }),
+      ],
+    });
+
+    expect(message).toContain(
+      'Rule query against metrics-apm*: {"size":0,"query":{"match_all":{}}}'
+    );
+    expect(message).not.toContain('That query returned');
+  });
+
+  it('includes the query response when the inspector executed it', () => {
+    const message = buildInvestigationMessage(alertSubject, {
+      alerts: [
+        alert({
+          queries: [
+            { index: 'metrics-apm*', request: { size: 0 }, response: { hits: { total: 5 } } },
+          ],
+        }),
+      ],
+    });
+
+    expect(message).toContain('That query returned: {"hits":{"total":5}}');
+  });
+
+  it('labels each query when a rule ran more than one', () => {
+    const message = buildInvestigationMessage(alertSubject, {
+      alerts: [
+        alert({
+          queries: [
+            { index: 'metrics-apm*', request: { size: 0 }, label: 'current window' },
+            { index: 'metrics-apm*', request: { size: 1 }, label: 'baseline window' },
+          ],
+        }),
+      ],
+    });
+
+    expect(message).toContain('Rule query "current window" against metrics-apm*');
+    expect(message).toContain('Rule query "baseline window" against metrics-apm*');
   });
 
   it('calls out flapping only when the alert is flapping', () => {
