@@ -21,42 +21,42 @@ export function getStackTracesTabs({
 }): AppHeaderTab[] {
   return [
     {
-      id: 'executables',
+      id: TopNType.Executables,
       label: i18n.translate('xpack.profiling.stackTracesView.executablesTabLabel', {
         defaultMessage: 'Executables',
       }),
       topNType: TopNType.Executables,
     },
     {
-      id: 'threads',
+      id: TopNType.Threads,
       label: i18n.translate('xpack.profiling.stackTracesView.threadsTabLabel', {
         defaultMessage: 'Threads',
       }),
       topNType: TopNType.Threads,
     },
     {
-      id: 'traces',
+      id: TopNType.Traces,
       label: i18n.translate('xpack.profiling.stackTracesView.tracesTabLabel', {
         defaultMessage: 'Traces',
       }),
       topNType: TopNType.Traces,
     },
     {
-      id: 'hosts',
+      id: TopNType.Hosts,
       label: i18n.translate('xpack.profiling.stackTracesView.hostsTabLabel', {
         defaultMessage: 'Hosts',
       }),
       topNType: TopNType.Hosts,
     },
     {
-      id: 'deployments',
+      id: TopNType.Deployments,
       label: i18n.translate('xpack.profiling.stackTracesView.deploymentsTabLabel', {
         defaultMessage: 'Deployments',
       }),
       topNType: TopNType.Deployments,
     },
     {
-      id: 'containers',
+      id: TopNType.Containers,
       label: i18n.translate('xpack.profiling.stackTracesView.containersTabLabel', {
         defaultMessage: 'Containers',
       }),

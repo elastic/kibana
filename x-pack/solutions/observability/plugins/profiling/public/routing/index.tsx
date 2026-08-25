@@ -23,7 +23,7 @@ import {
 } from '../../common/storage_explorer';
 import { ComparisonMode, NormalizationMode } from '../components/normalization_menu';
 import { RedirectTo } from '../components/redirect_to';
-import { AddDataTabs, AddDataView } from '../views/add_data_view';
+import { AddDataView } from '../views/add_data_view';
 import { DeleteDataView } from '../views/delete_data_view';
 import { FlameGraphsView } from '../views/flamegraphs';
 import { DifferentialFlameGraphsView } from '../views/flamegraphs/differential_flamegraphs';
@@ -36,6 +36,7 @@ import { Settings } from '../views/settings';
 import { StackTracesView, StackTracesViewWrapper } from '../views/stack_traces_view';
 import { StorageExplorerView } from '../views/storage_explorer';
 import { RouteBreadcrumb } from './route_breadcrumb';
+import { AddDataTabs } from '../views/add_data_view/types';
 
 const routes = {
   '/': {
