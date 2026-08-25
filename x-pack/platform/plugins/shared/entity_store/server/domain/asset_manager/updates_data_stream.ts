@@ -28,6 +28,10 @@ export const getLegacySecurityUpdatesEntitiesDataStreamName = (namespace: string
     namespace,
   });
 
+/** @deprecated Neutral updates index template created by pre-PR installs; used only for uninstall cleanup. */
+export const getUpdatesIndexTemplateId = (namespace: string) =>
+  `.${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_UPDATES}_${namespace}_index_template` as const;
+
 /** @deprecated Legacy Security-scoped index template; used only for uninstall cleanup. */
 export const getLegacySecurityUpdatesIndexTemplateId = (namespace: string) =>
   `.${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V2}_${ENTITY_UPDATES}_security_${namespace}_index_template` as const;

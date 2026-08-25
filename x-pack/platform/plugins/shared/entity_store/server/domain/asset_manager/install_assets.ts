@@ -38,6 +38,7 @@ import {
   getUpdatesEntitiesDataStreamName,
   getLegacySecurityUpdatesEntitiesDataStreamName,
   getLegacySecurityUpdatesIndexTemplateId,
+  getUpdatesIndexTemplateId,
 } from './updates_data_stream';
 import { installLatestIndexIngestPipeline } from './latest_index_ingest_pipeline';
 import { getMetadataComponentTemplate } from './metadata_component_templates';
@@ -254,10 +255,11 @@ async function uninstallIndicesAndDataStreams(
         await deleteDataStream(esClient, getLegacySecurityUpdatesEntitiesDataStreamName(namespace));
       }
       logger.debug(`deleted entity updates data stream`);
-    })(),
-    (async () => {
-      await deleteIndexTemplate(esClient, getLegacySecurityUpdatesIndexTemplateId(namespace));
-      logger.debug(`deleted entity updates index template`);
+      await Promise.all([
+        deleteIndexTemplate(esClient, getUpdatesIndexTemplateId(namespace)),
+        deleteIndexTemplate(esClient, getLegacySecurityUpdatesIndexTemplateId(namespace)),
+      ]);
+      logger.debug(`deleted entity updates index templates`);
     })(),
     ...ALL_ENTITY_TYPES.map((type) =>
       (async () => {
