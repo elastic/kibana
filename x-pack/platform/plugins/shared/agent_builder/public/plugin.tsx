@@ -193,9 +193,12 @@ export class AgentBuilderPlugin
         window?.localStorage?.setItem(storageKey, JSON.stringify(conversationId));
       }
 
-      // If already open, update props instead of creating new
+      // If already open, update props instead of creating new.
+      // When a conversationId is provided, merge it into the config so the sidebar
+      // switches to the requested conversation (without it, the sidebar keeps whatever
+      // conversation it already has open because conversationId is not in `config`).
       if (this.activeSidebarRef && this.sidebarCallbacks) {
-        this.sidebarCallbacks.updateProps(config);
+        this.sidebarCallbacks.updateProps(conversationId ? { ...config, conversationId } : config);
         return { chatRef: this.activeSidebarRef };
       }
 

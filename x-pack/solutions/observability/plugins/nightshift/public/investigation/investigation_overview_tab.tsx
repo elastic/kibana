@@ -218,6 +218,17 @@ export const InvestigationOverviewTab: React.FC<ConversationTemplateTabRenderPro
                 {severity}
               </EuiBadge>
             )}
+            {/* Show a hint when the investigation is still running — the agent may not
+                have called set_conversation_metadata yet to reflect its latest findings.
+                The prompt now instructs the agent to update metadata whenever it revises
+                its conclusion, so this note should only appear transiently. */}
+            {status && status !== 'resolved' && status !== 'false_positive' && (
+              <EuiBadge color="hollow" iconType="clock">
+                {i18n.translate('xpack.nightshift.investigation.overview.metadataInProgress', {
+                  defaultMessage: 'in progress',
+                })}
+              </EuiBadge>
+            )}
           </EuiBadgeGroup>
         </EuiFlexItem>
       )}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
+import React, { useEffect, useRef, useState } from 'react';
+import { EuiFlyoutBody, EuiFlyoutHeader, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
@@ -21,16 +21,33 @@ import { EmbeddableAccessBoundary } from './embeddable_access_boundary';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useConversation } from '../application/hooks/use_conversation';
 
+// Below this sidebar width (px) the side-by-side layout is too cramped; collapse to tabs.
+const SIDE_BY_SIDE_MIN_WIDTH = 750;
+
 /**
  * Renders the body section of the sidebar. When the conversation's template has registered
- * UI tabs, shows a side-by-side layout: chat on the left, the first tab's content on the
- * right. When there are no tabs, renders only the chat (original behaviour).
+ * UI tabs, shows either a side-by-side layout (wide) or a tabbed layout (narrow).
+ * In the tabbed layout the overview tab is selected by default.
  * Must live inside EmbeddableConversationsProvider so it can read conversation + services.
  */
 function TemplateAwareBody(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { conversationTemplatesService } = useAgentBuilderServices();
   const { conversation } = useConversation();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'chat'>('overview');
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const uiDef = conversation?.template_id
     ? conversationTemplatesService.getTemplateUIDefinition(conversation.template_id)
@@ -74,41 +91,82 @@ function TemplateAwareBody(): React.ReactElement {
   }
 
   const FirstTabContent = resolvedTabs[0].def.content;
+  const isNarrow = containerWidth !== null && containerWidth < SIDE_BY_SIDE_MIN_WIDTH;
 
   return (
     <div
+      ref={containerRef}
       css={css`
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         flex: 1;
         min-height: 0;
         overflow: hidden;
       `}
     >
-      <div
-        css={css`
-          flex: 3;
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-        `}
-      >
-        <EuiFlyoutBody css={bodyStyles}>
-          <Conversation />
-        </EuiFlyoutBody>
-      </div>
-      <div
-        css={css`
-          flex: 2;
-          min-width: 0;
-          overflow-y: auto;
-          border-left: 1px solid ${euiTheme.border.color};
-          padding: ${euiTheme.size.base};
-        `}
-      >
-        {conversation && <FirstTabContent conversation={conversation} />}
-      </div>
+      {isNarrow ? (
+        <>
+          <EuiTabs size="s" css={css`flex-shrink: 0; padding: 0 ${euiTheme.size.base};`}>
+            <EuiTab isSelected={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>
+              Overview
+            </EuiTab>
+            <EuiTab isSelected={activeTab === 'chat'} onClick={() => setActiveTab('chat')}>
+              Chat
+            </EuiTab>
+          </EuiTabs>
+          {activeTab === 'overview' ? (
+            <div
+              css={css`
+                flex: 1;
+                min-height: 0;
+                overflow-y: auto;
+                padding: ${euiTheme.size.base};
+              `}
+            >
+              {conversation && <FirstTabContent conversation={conversation} />}
+            </div>
+          ) : (
+            <EuiFlyoutBody css={bodyStyles}>
+              <Conversation />
+            </EuiFlyoutBody>
+          )}
+        </>
+      ) : (
+        <div
+          css={css`
+            display: flex;
+            flex-direction: row;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+          `}
+        >
+          <div
+            css={css`
+              flex: 3;
+              min-width: 0;
+              display: flex;
+              flex-direction: column;
+              overflow: hidden;
+            `}
+          >
+            <EuiFlyoutBody css={bodyStyles}>
+              <Conversation />
+            </EuiFlyoutBody>
+          </div>
+          <div
+            css={css`
+              flex: 2;
+              min-width: 0;
+              overflow-y: auto;
+              border-left: 1px solid ${euiTheme.border.color};
+              padding: ${euiTheme.size.base};
+            `}
+          >
+            {conversation && <FirstTabContent conversation={conversation} />}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

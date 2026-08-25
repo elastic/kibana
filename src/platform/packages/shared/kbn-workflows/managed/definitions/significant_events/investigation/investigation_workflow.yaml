@@ -95,7 +95,7 @@ steps:
         As you work, use the set_conversation_metadata tool to record structured findings:
         - At the start: set status = "in_progress" and an initial severity ("critical", "high", "medium", or "low") based on the signal.
         - As you identify affected services: set affected_services as an array of service names.
-        - When you reach a conclusion, call set_conversation_metadata with all of the following at once:
+        - When you reach a conclusion (and again if you revise it), call set_conversation_metadata with all of the following at once:
           • summary: one concise paragraph describing what happened
           • conclusion: the mechanism/root-cause narrative as plain prose
           • hypotheses: the full hypotheses array (each entry has candidate, confidence, status, and optionally reason and evidence)
@@ -106,7 +106,7 @@ steps:
         - At the end: set status = "resolved" if the issue has a clear fix or is self-correcting, or "false_positive" if the signal is not a real problem.
         Only set severity = "critical" or "high" if there is active user impact or confirmed data exposure.
 
-        When you have completed the investigation, write a concise markdown summary (2-4 sentences) covering the root cause, key findings, and your top recommendation. All detailed structured data has already been recorded via set_conversation_metadata.
+        When you have completed the investigation, reply with exactly: "Investigation completed. Any followup questions?" All detailed structured data has already been recorded via set_conversation_metadata.
     on-failure:
       continue: true
 
