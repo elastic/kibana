@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import type { Locator, ScoutPage } from '@kbn/scout';
 import path from 'path';
 
@@ -47,6 +47,7 @@ export class IngestPipelinesPage {
   private readonly deletePipelineButton: Locator;
   private readonly manageProcessorsLink: Locator;
   private readonly manageProcessorsTitle: Locator;
+  private readonly appMenuOverflowButton: Locator;
   private readonly addGeoipDatabaseButton: Locator;
   private readonly databaseTypeSelect: Locator;
   private readonly databaseNameSelect: Locator;
@@ -88,6 +89,7 @@ export class IngestPipelinesPage {
     this.deletePipelineButton = this.page.testSubj.locator('deletePipelineButton');
     this.manageProcessorsLink = this.page.testSubj.locator('manageProcessorsLink');
     this.manageProcessorsTitle = this.page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
+    this.appMenuOverflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
     this.addGeoipDatabaseButton = this.page.testSubj.locator('addGeoipDatabaseButton');
     this.databaseTypeSelect = this.page.testSubj.locator('databaseTypeSelect');
     this.databaseNameSelect = this.page.testSubj.locator('databaseNameSelect');
@@ -207,10 +209,7 @@ export class IngestPipelinesPage {
   }
 
   async navigateToManageProcessorsPage() {
-    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
-    if (await overflowButton.isVisible()) {
-      await overflowButton.click();
-    }
+    await this.appMenuOverflowButton.click();
     await this.manageProcessorsLink.click();
     await this.manageProcessorsTitle.filter({ hasText: 'Manage Processors' }).waitFor();
   }
