@@ -327,10 +327,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
     id: 'idp-iam-azure-null-kind-email',
     query: {
       bool: {
-        must: [
-          { term: { 'user.name': 'larry.black' } },
-          { term: { 'host.id': 'host-606' } },
-        ],
+        must: [{ term: { 'user.name': 'larry.black' } }, { term: { 'host.id': 'host-606' } }],
       },
     },
     dslFilterSource: {
