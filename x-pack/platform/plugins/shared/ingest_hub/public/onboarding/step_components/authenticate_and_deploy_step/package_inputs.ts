@@ -102,7 +102,7 @@ export function buildPackageInputs(
       const activeInputs = dsVars.enabledInputs.length
         ? dsVars.enabledInputs
         : isSingleDs
-        ? (dsInfo?.inputs ?? service.inputs ?? [])
+        ? dsInfo?.inputs ?? service.inputs ?? []
         : dsInfo?.defaultEnabledInputs?.length
         ? dsInfo.defaultEnabledInputs
         : dsInfo?.inputs?.length

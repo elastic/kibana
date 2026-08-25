@@ -84,7 +84,7 @@ export function DuplicateServiceModal({
     const activeInputs = dsVars.enabledInputs.length
       ? dsVars.enabledInputs
       : singleDs
-      ? (dsInfo?.inputs ?? [])
+      ? dsInfo?.inputs ?? []
       : dsInfo?.defaultEnabledInputs?.length
       ? dsInfo.defaultEnabledInputs
       : dsInfo?.inputs?.slice(0, 1) ?? [];
@@ -184,8 +184,8 @@ export function DuplicateServiceModal({
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
               const defaultInputs = singleDs
-                ? (dsInfo?.inputs ?? [])
-                : (dsInfo?.defaultEnabledInputs ?? []);
+                ? dsInfo?.inputs ?? []
+                : dsInfo?.defaultEnabledInputs ?? [];
               const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
               return {
                 ...prev,
@@ -203,8 +203,8 @@ export function DuplicateServiceModal({
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];
               const defaultInputs = singleDs
-                ? (dsInfo?.inputs ?? [])
-                : (dsInfo?.defaultEnabledInputs ?? []);
+                ? dsInfo?.inputs ?? []
+                : dsInfo?.defaultEnabledInputs ?? [];
               const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
               return {
                 ...prev,

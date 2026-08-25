@@ -279,7 +279,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
           const activeInputs = dsVars.enabledInputs.length
             ? dsVars.enabledInputs
             : isSingleDs
-            ? (dsInfo?.inputs ?? [])
+            ? dsInfo?.inputs ?? []
             : dsInfo?.defaultEnabledInputs?.length
             ? dsInfo.defaultEnabledInputs
             : dsInfo?.inputs?.slice(0, 1) ?? [];
