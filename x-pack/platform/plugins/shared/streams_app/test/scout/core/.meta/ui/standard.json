@@ -1,5 +1,5 @@
 {
-  "sha1": "e5cf9dfdb3f95de95befc6764dfacab1e872f274",
+  "sha1": "609d87674806fe1522edda90ae4a6532ee9cb1f0",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -103,8 +103,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 70,
-        "column": 10
+        "line": 74,
+        "column": 7
       }
     },
     {
@@ -119,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 77,
-        "column": 13
+        "line": 82,
+        "column": 30
       }
     },
     {
@@ -135,8 +135,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 85,
-        "column": 7
+        "line": 90,
+        "column": 13
       }
     },
     {
@@ -151,8 +151,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 96,
-        "column": 7
+        "line": 101,
+        "column": 21
       }
     },
     {
@@ -167,8 +167,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 103,
-        "column": 13
+        "line": 108,
+        "column": 7
       }
     },
     {
@@ -183,13 +183,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 121,
-        "column": 13
+        "line": 131,
+        "column": 24
       }
     },
     {
-      "id": "63983bc249d77f4-0b811fdb96ea78f",
-      "title": "Stream canvas - classic source to destination nodes shows the processing glyph only on destinations with processing",
+      "id": "63983bc249d77f4-af2f473ed3e97ca",
+      "title": "Stream canvas - classic source to destination nodes shows the processing button only on destinations with processing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -199,8 +199,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 140,
+        "column": 13
+      }
+    },
+    {
+      "id": "63983bc249d77f4-a197aeba921176d",
+      "title": "Stream canvas - classic source to destination nodes opens the processing tab when the processing button is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
+        "line": 146,
+        "column": 26
       }
     },
     {
@@ -215,8 +231,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 142,
-        "column": 24
+        "line": 153,
+        "column": 21
       }
     },
     {
@@ -231,8 +247,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 153,
-        "column": 91
+        "line": 164,
+        "column": 7
       }
     },
     {

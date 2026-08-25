@@ -16,13 +16,14 @@ import { VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import type { VegaByValueState } from '../../server';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID } from '../constants';
 import { getDefaultSpec } from '../default_spec';
+import { VegaPanelIcon } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 
 export const getAddVegaEmbeddableAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_VEGA_EMBEDDABLE_ACTION_ID,
   grouping: [ADD_PANEL_VISUALIZATION_GROUP],
   order: 0,
-  getIconType: () => 'visVega',
+  getIconType: () => VegaPanelIcon,
   getDisplayName: () => 'Vega',
   getDisplayNameTooltip: () =>
     i18n.translate('visTypeVega.dashboard.addPanelActionDescription', {

@@ -279,7 +279,7 @@ describe('step validation', () => {
     });
 
     it('delegates to methods.trigger with notifications', async () => {
-      const state = createState({ mode: 'create' });
+      const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(true),
       } as unknown as UseFormReturn<FormValues>;
@@ -291,7 +291,7 @@ describe('step validation', () => {
     });
 
     it('returns false when trigger rejects notifications validation', async () => {
-      const state = createState({ mode: 'create' });
+      const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(false),
       } as unknown as UseFormReturn<FormValues>;
@@ -365,10 +365,10 @@ describe('shell shared fields', () => {
     );
   };
 
-  it('renders ScheduleField and LookbackWindowField on alert condition step without mode or alert delay', () => {
+  it('renders ScheduleField and LookbackWindowField on alert condition step without kind or alert delay', () => {
     renderShell({ step: 0 }, { kind: 'alert' });
 
-    expect(screen.queryByTestId('composeDiscoverModeSelect')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverKindSelect')).not.toBeInTheDocument();
     expect(screen.queryByText('Alert conditions')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
     expect(screen.getByText('Rule execution')).toBeInTheDocument();
@@ -376,23 +376,23 @@ describe('shell shared fields', () => {
     expect(screen.getByText('Lookback Window')).toBeInTheDocument();
   });
 
-  it('renders Outcome mode cards, AlertDelayField, and Recovery for alert kind', () => {
+  it('renders Outcome kind cards, AlertDelayField, and Recovery for alert kind', () => {
     renderShell({ step: 1 }, { kind: 'alert' });
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverKindSelect')).toBeInTheDocument();
     expect(screen.getByText('Alert conditions')).toBeInTheDocument();
     expect(screen.getByTestId('alertDelayFormRow')).toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverRecoveryType')).toBeInTheDocument();
     expect(screen.queryByText('Rule execution')).not.toBeInTheDocument();
   });
 
-  it('renders Outcome mode cards without alert-only fields for signal kind', () => {
+  it('renders Outcome kind cards without alert-only fields for signal kind', () => {
     renderShell(
       { step: 1 },
       { kind: 'signal', query: { format: 'standalone', breach: { query: 'FROM logs-*' } } }
     );
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverKindSelect')).toBeInTheDocument();
     expect(screen.queryByText('Alert conditions')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
     expect(screen.queryByTestId('composeDiscoverRecoveryType')).not.toBeInTheDocument();
@@ -423,35 +423,49 @@ describe('shell shared fields', () => {
     // step 2 = 'details' (alertCondition -> outcome -> details)
     renderShell({ step: 2 });
 
-    expect(screen.queryByTestId('composeDiscoverModeSelect')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverKindSelect')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
     expect(screen.queryByText('Schedule')).not.toBeInTheDocument();
     expect(screen.queryByText('Lookback Window')).not.toBeInTheDocument();
   });
 
-  it('renders ModeSelect as read-only in edit mode on Outcome', () => {
+  it('renders KindSelect as read-only in edit mode on Outcome', () => {
     renderShell({ step: 1, queryCommitted: true, childOpen: false }, { kind: 'alert' }, true);
 
-    expect(screen.getByTestId('composeDiscoverModeSelect-alert')).toBeInTheDocument();
-    expect(screen.queryByTestId('composeDiscoverModeSelect-signal')).not.toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverKindSelect-alert')).toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverKindSelect-signal')).not.toBeInTheDocument();
     expect(
-      screen.getByTestId('composeDiscoverModeSelect-alert').querySelector('input')
+      screen.getByTestId('composeDiscoverKindSelect-alert').querySelector('input')
     ).toBeDisabled();
   });
 
-  it('enables ModeSelect in create mode on Outcome when sandbox is closed', () => {
+  it('shows the read-only outcome info tooltip in edit mode', () => {
+    renderShell({ step: 1, queryCommitted: true, childOpen: false }, { kind: 'alert' }, true);
+
+    expect(screen.getByTestId('composeDiscoverKindSelect-readOnlyTooltip')).toBeInTheDocument();
+  });
+
+  it('enables KindSelect in create mode on Outcome when sandbox is closed', () => {
     renderShell({ step: 1, queryCommitted: true, childOpen: false });
 
     expect(
-      screen.getByTestId('composeDiscoverModeSelect-alert').querySelector('input')
+      screen.getByTestId('composeDiscoverKindSelect-alert').querySelector('input')
     ).not.toBeDisabled();
   });
 
-  it('disables ModeSelect when sandbox is open on Outcome', () => {
+  it('does not show the read-only outcome info tooltip in create mode', () => {
+    renderShell({ step: 1, queryCommitted: true, childOpen: false });
+
+    expect(
+      screen.queryByTestId('composeDiscoverKindSelect-readOnlyTooltip')
+    ).not.toBeInTheDocument();
+  });
+
+  it('disables KindSelect when sandbox is open on Outcome', () => {
     renderShell({ step: 1, queryCommitted: true, childOpen: true });
 
     expect(
-      screen.getByTestId('composeDiscoverModeSelect-alert').querySelector('input')
+      screen.getByTestId('composeDiscoverKindSelect-alert').querySelector('input')
     ).toBeDisabled();
   });
 });

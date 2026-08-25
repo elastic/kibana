@@ -13,6 +13,39 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('react-use/lib/useSessionStorage');
 
+// Provide a minimal matrix so OnboardingShell renders without a real QueryClient
+// or live Fleet package manifests.
+jest.mock('./use_aws_service_matrix', () => {
+  const matrix = [
+    {
+      id: 'cloudtrail',
+      name: 'AWS CloudTrail',
+      category: 'management_governance',
+      signalTypes: ['logs'],
+      dataStreams: [],
+      deploymentMethods: [{ method: 'ecf', preferred: true }],
+      packageName: 'aws',
+      defaultEnabled: true,
+      showInUI: true,
+    },
+    {
+      id: 'ec2',
+      name: 'Amazon EC2',
+      category: 'compute',
+      signalTypes: ['logs', 'metrics'],
+      dataStreams: [],
+      deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+      packageName: 'aws',
+      defaultEnabled: true,
+      showInUI: true,
+    },
+  ];
+  return {
+    useAwsServiceMatrix: jest.fn().mockReturnValue({ matrix, isError: false, refetch: jest.fn() }),
+    useAwsServicesMap: jest.fn().mockReturnValue(new Map(matrix.map((s) => [s.id, s]))),
+  };
+});
+
 // Stub heavy step components — we only care about shell-level stepper and navigation.
 jest.mock('./step_components', () => ({
   ServicesStep: ({ onContinue }: { onContinue: () => void }) => (
@@ -25,8 +58,8 @@ jest.mock('./step_components', () => ({
       Continue
     </button>
   ),
-  DeploySettingsStep: ({ onContinue }: { onContinue: () => void }) => (
-    <button data-test-subj="deploySettingsStep-continue" onClick={onContinue}>
+  AuthenticateAndDeployStep: ({ onContinue }: { onContinue: () => void }) => (
+    <button data-test-subj="authenticateAndDeployStep-continue" onClick={onContinue}>
       Continue
     </button>
   ),
@@ -44,10 +77,8 @@ beforeEach(() => {
   mockUseSessionStorage.mockImplementation((_key, initial) => React.useState(initial));
 });
 
-// apigateway_logs  → cloud_forwarder (non-agentless): needsDeploySettingsStep = false
-// apigateway_metrics → agentless: needsDeploySettingsStep = true
-const NON_AGENTLESS_ID = 'apigateway_logs';
-const AGENTLESS_ID = 'apigateway_metrics';
+const NON_AGENTLESS_ID = 'cloudtrail';
+const AGENTLESS_ID = 'ec2';
 
 function stepIndicatorStatus(stepId: string): string | null {
   return screen.getByTestId(`onboardingStepIndicator-${stepId}`).getAttribute('data-step-status');
@@ -87,18 +118,15 @@ describe('OnboardingShell — downstream step invalidation', () => {
   /**
    * Path 1: stepper-skip via indicator.
    *
-   * When both agentless and non-agentless services are selected, Continue from
+   * When both managed_integration and ecf services are selected, Continue from
    * services goes to service-settings (not skipped). After completing it and
-   * going back to services, removing the non-agentless service changes the
-   * selection and must mark service-settings incomplete again so the indicator
-   * is no longer clickable.
+   * going back to services, changing the selection must mark service-settings
+   * incomplete again so the indicator is no longer clickable.
    */
   describe('path 1: stepper skip via indicator', () => {
     it('marks service-settings incomplete after the service selection changes', async () => {
       const { history, setIds } = renderShell('#services');
 
-      // Select an agentless service so needsDeploySettingsStep = true
-      // and Continue goes to service-settings (not skipped).
       await setIds([AGENTLESS_ID]);
 
       // Continue from services → service-settings
@@ -107,7 +135,7 @@ describe('OnboardingShell — downstream step invalidation', () => {
 
       // Complete service-settings → now marked complete in the stepper
       act(() => screen.getByTestId('serviceSettingsStep-continue').click());
-      expect(history.location.hash).toBe('#deploy-settings');
+      expect(history.location.hash).toBe('#authenticate-and-deploy');
 
       // Go back to services
       act(() => history.push('/aws#services'));
@@ -117,38 +145,6 @@ describe('OnboardingShell — downstream step invalidation', () => {
       await setIds([AGENTLESS_ID, NON_AGENTLESS_ID]);
 
       expect(stepIndicatorStatus('service-settings')).toBe('incomplete');
-    });
-  });
-
-  /**
-   * Path 2: deploy-settings auto-complete / agentless flip.
-   *
-   * With only non-agentless services selected, Continue from services
-   * auto-marks deploy-settings complete and skips it. Adding an agentless
-   * service (which requires deploy-settings) must invalidate that stale
-   * complete flag so the credentials step can no longer be skipped.
-   */
-  describe('path 2: agentless flip — deploy-settings wrongly skipped', () => {
-    it('marks deploy-settings incomplete when selection switches to include an agentless service', async () => {
-      const { history, setIds } = renderShell('#services');
-
-      // Select only a non-agentless service: needsDeploySettingsStep = false.
-      await setIds([NON_AGENTLESS_ID]);
-
-      // Continue from services — deploy-settings is auto-marked complete and
-      // the flow jumps past it to deploy-and-detect.
-      act(() => screen.getByTestId('servicesStep-continue').click());
-      expect(history.location.hash).toBe('#deploy-and-detect');
-      expect(stepIndicatorStatus('deploy-settings')).toBe('complete');
-
-      // Go back to services
-      act(() => history.push('/aws#services'));
-
-      // Add an agentless service — now needsDeploySettingsStep = true.
-      // The previously auto-completed deploy-settings must be invalidated.
-      await setIds([NON_AGENTLESS_ID, AGENTLESS_ID]);
-
-      expect(stepIndicatorStatus('deploy-settings')).toBe('incomplete');
     });
   });
 });
