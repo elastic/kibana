@@ -10,7 +10,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { PLUGIN_ID, PLUGIN_NAME, APP_PATH, EVALS_UI_PRIVILEGES } from '../common';
+import { PLUGIN_ID, APP_PATH, EVALS_UI_PRIVILEGES } from '../common';
 import type {
   AddToDatasetAction,
   AddToDatasetActionConfig,
@@ -21,6 +21,7 @@ import type {
   EvalsStartDependencies,
 } from './types';
 import { registerEvalsPublicWorkflowSteps } from './workflows';
+import { APP_TITLE } from './translations';
 
 const MANAGEMENT_KEYWORDS = ['evals', 'evaluations', 'ai', 'llm', 'trace', 'tracing'] as const;
 
@@ -53,9 +54,7 @@ export class EvalsPublicPlugin
 
     coreSetup.application.register({
       id: PLUGIN_ID,
-      title: i18n.translate('xpack.evals.app.title', {
-        defaultMessage: PLUGIN_NAME,
-      }),
+      title: APP_TITLE,
       appRoute: APP_PATH,
       euiIconType: 'flask',
       category: DEFAULT_APP_CATEGORIES.kibana,
@@ -72,7 +71,7 @@ export class EvalsPublicPlugin
       management.sections.section.ai.registerApp({
         id: PLUGIN_ID,
         title: i18n.translate('xpack.evals.stackManagement.aiNavTitle', {
-          defaultMessage: PLUGIN_NAME,
+          defaultMessage: 'Evaluations',
         }),
         order: 2,
         keywords: [...MANAGEMENT_KEYWORDS],
