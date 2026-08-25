@@ -615,7 +615,6 @@ export function initializeLayoutManager(
         layout$.next(layout);
       },
       registerChildApi: (api: DefaultEmbeddableApi) => {
-        console.log('REGISTER API');
         children$.next({
           ...children$.value,
           [api.uuid]: api,
