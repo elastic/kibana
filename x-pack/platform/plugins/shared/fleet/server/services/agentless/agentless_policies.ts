@@ -442,13 +442,24 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     const existingPackagePolicy = await this.getExistingAgentlessPackagePolicy(policyId);
     // Fall back to policyId only if policy_ids is somehow empty (corrupt SO) to preserve
     // the prior behaviour for well-formed new policies where the IDs are equal.
-    const agentPolicyId = existingPackagePolicy.policy_ids[0] ?? policyId;
-    if (!existingPackagePolicy.policy_ids[0]) {
+    const resolvedAgentPolicyId = existingPackagePolicy.policy_ids[0];
+    const agentPolicyId = resolvedAgentPolicyId ?? policyId;
+    if (!resolvedAgentPolicyId) {
       this.logger.warn(
         `Agentless package policy ${policyId} has no policy_ids entry; falling back to package policy ID as agent policy ID`
       );
     }
-    const existingAgentPolicy = await this.getExistingAgentlessAgentPolicy(agentPolicyId);
+    // Re-raise not-found with policyId so the caller sees the ID they sent, not the internal
+    // agent policy ID they've never seen.
+    let existingAgentPolicy: AgentPolicy;
+    try {
+      existingAgentPolicy = await this.getExistingAgentlessAgentPolicy(agentPolicyId);
+    } catch (error) {
+      if (error instanceof FleetNotFoundError) {
+        throw new FleetNotFoundError(`Agentless policy ${policyId} not found`);
+      }
+      throw error;
+    }
 
     const pkg = data.package;
     // `package` is accepted (full-replace, symmetric with POST). The package name is
@@ -630,15 +641,17 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
       ? appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined
       : undefined;
 
-    // Resolve the true agent policy ID from the package policy: legacy policies (created before
-    // the same-ID invariant) may have a different agent policy ID stored in policy_ids[0].
-    let agentPolicyId = policyId;
-    try {
-      const packagePolicy = await this.packagePolicyService.get(this.soClient, policyId);
-      agentPolicyId = packagePolicy?.policy_ids[0] ?? policyId;
-    } catch (e) {
-      // If the package policy is missing, proceed with policyId — deleteOrphanedAgentlessResources
-      // will clean up whatever is left.
+    // Resolve the true agent policy ID from the package policy. Using getExistingAgentlessPackagePolicy
+    // ensures a non-agentless package policy ID returns a 404 rather than resolving its real agent
+    // policy and operating on it. Legacy policies (created before the same-ID invariant) may have a
+    // different agent policy ID stored in policy_ids[0].
+    const existingPackagePolicy = await this.getExistingAgentlessPackagePolicy(policyId);
+    const resolvedAgentPolicyId = existingPackagePolicy.policy_ids[0];
+    const agentPolicyId = resolvedAgentPolicyId ?? policyId;
+    if (!resolvedAgentPolicyId) {
+      this.logger.warn(
+        `Agentless package policy ${policyId} has no policy_ids entry; falling back to package policy ID as agent policy ID`
+      );
     }
 
     let agentPolicy;
@@ -647,7 +660,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     } catch (e) {
       if (e instanceof FleetNotFoundError || SavedObjectsErrorHelpers.isNotFoundError(e)) {
         this.logger.warn(`Agent policy ${agentPolicyId} not found, cleaning up orphaned resources`);
-        await this.deleteOrphanedAgentlessResources(policyId, user);
+        await this.deleteOrphanedAgentlessResources(agentPolicyId, user);
         return;
       }
       throw e;
