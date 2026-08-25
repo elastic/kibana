@@ -24,7 +24,7 @@ export const DefendInsightGetRequestParams = lazySchema(() =>
     /**
      * The Defend insight id.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe('The Defend insight id.'),
   })
 );
 export type DefendInsightGetRequestParams = z.infer<typeof DefendInsightGetRequestParams>;

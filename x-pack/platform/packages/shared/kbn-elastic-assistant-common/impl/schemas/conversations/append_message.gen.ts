@@ -24,7 +24,9 @@ export const AppendConversationMessageRequestParams = lazySchema(() =>
     /**
      * The unique identifier (`id`) of the conversation to which the message will be appended.
      */
-    id: NonEmptyString,
+    id: NonEmptyString.describe(
+      'The unique identifier (`id`) of the conversation to which the message will be appended.'
+    ),
   })
 );
 export type AppendConversationMessageRequestParams = z.infer<
