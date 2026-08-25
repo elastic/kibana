@@ -64,11 +64,11 @@ export const DATA_QUALITY_POOR_LABEL = i18n.translate(
 
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.streams.destinationsTable.searchPlaceholder',
-  { defaultMessage: 'Search destinations' }
+  { defaultMessage: 'Search destination — e.g. metrics, tag:tag2, tag:managed' }
 );
 
 export const SEARCH_ARIA_LABEL = i18n.translate('xpack.streams.destinationsTable.searchAriaLabel', {
-  defaultMessage: 'Search destinations by name',
+  defaultMessage: 'Search destinations by name or tag',
 });
 
 export const TABLE_CAPTION = i18n.translate('xpack.streams.destinationsTable.tableCaption', {

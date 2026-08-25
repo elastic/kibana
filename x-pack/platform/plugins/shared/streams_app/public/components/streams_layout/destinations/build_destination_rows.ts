@@ -8,6 +8,34 @@
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import type { Destination, DestinationRow } from './types';
 
+const TAG_QUERY_PREFIX = 'tag:';
+
+export const matchesDestinationQuery = (destination: Destination, query: string): boolean => {
+  if (!query) {
+    return true;
+  }
+
+  const tokens = query.split(/\s+/).filter(Boolean);
+  return tokens.every((token) => {
+    if (token.startsWith(TAG_QUERY_PREFIX)) {
+      const tag = token.slice(TAG_QUERY_PREFIX.length);
+      if (tag === 'managed') {
+        return destination.isManaged;
+      }
+      if (tag === 'internal') {
+        return destination.isInternal;
+      }
+      return destination.tags.some((value) => value.toLowerCase() === tag);
+    }
+
+    return (
+      destination.name.toLowerCase().includes(token) ||
+      destination.description.toLowerCase().includes(token) ||
+      destination.tags.some((value) => value.toLowerCase().includes(token))
+    );
+  });
+};
+
 export const buildDestinationRows = ({
   destinations,
   searchText,
@@ -28,7 +56,7 @@ export const buildDestinationRows = ({
   const query = searchText.trim().toLowerCase();
 
   return destinations
-    .filter((destination) => !query || destination.name.toLowerCase().includes(query))
+    .filter((destination) => matchesDestinationQuery(destination, query))
     .map((destination) => ({
       ...destination,
       documentsCount: docsByStream[destination.name] ?? 0,
