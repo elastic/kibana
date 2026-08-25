@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
+import { ID_MAX_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
@@ -238,6 +238,16 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     const response = await apiClient.put(getActionPolicyUrl('upsert-name-too-long'), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
       body: buildCreateActionPolicyData({ name: 'a'.repeat(MAX_NAME_LENGTH + 1) }),
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
+  apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
+    const response = await apiClient.put(getActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
+      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+      body: buildCreateActionPolicyData(),
     });
 
     expect(response).toHaveStatusCode(400);
