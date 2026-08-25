@@ -152,7 +152,7 @@ describe('useInstalledIntegrationsActions', () => {
 
       expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledTimes(1);
       expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledWith({
-        packages: [{ name: 'test' }],
+        packages: [{ name: 'test', version: '1.2.0' }],
         upgrade_package_policies: false,
       });
     });
@@ -182,7 +182,7 @@ describe('useInstalledIntegrationsActions', () => {
 
       expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledTimes(1);
       expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledWith({
-        packages: [{ name: 'test' }],
+        packages: [{ name: 'test', version: '1.2.0' }],
         upgrade_package_policies: true,
       });
     });
@@ -217,7 +217,10 @@ describe('useInstalledIntegrationsActions', () => {
 
       expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledTimes(1);
       expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledWith({
-        packages: [{ name: 'test' }, { name: 'test2' }],
+        packages: [
+          { name: 'test', version: '1.2.0' },
+          { name: 'test2', version: '1.2.0' },
+        ],
         upgrade_package_policies: false,
       });
     });

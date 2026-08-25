@@ -19,6 +19,8 @@ export interface Answers {
   internalLocation: string;
   ui: boolean;
   server: boolean;
+  /** When true, generate a DI-based plugin (`module` export). When false, classic `plugin()` scaffold. */
+  di: boolean;
   githubTeam?: string;
   ownerName: string;
   description?: string;
@@ -78,8 +80,16 @@ export const QUESTIONS = [
   {
     name: 'ownerName',
     message: 'Who is developing and maintaining this plugin?',
-    default: undefined,
+    // Required by the external-plugin kibana.json manifest parser; --yes must not leave this empty.
+    default: 'Plugin Author',
+    validate: (ownerName: string) => (!ownerName ? 'owner is required' : true),
     when: ({ internal }: Answers) => !internal,
+  },
+  {
+    name: 'di',
+    type: 'confirm',
+    message: 'Use dependency injection?',
+    default: false,
   },
   {
     name: 'ui',

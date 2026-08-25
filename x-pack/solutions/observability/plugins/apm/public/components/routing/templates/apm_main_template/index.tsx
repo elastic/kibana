@@ -31,6 +31,7 @@ import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmAppMenuConfig } from '../../app_root/apm_app_menu/apm_app_menu_context';
 import { ServiceGroupSaveButton } from '../../../app/service_groups';
 import { ActionsMenu } from './actions_menu';
+import { mergeAppMenuConfigs } from './merge_app_menu_configs';
 import { getNoDataConfig } from '../no_data_config';
 
 // Paths that must skip the no data screen
@@ -162,10 +163,12 @@ export function ApmMainTemplate({
   if (header) {
     // Always put the global menu on inline AppHeader (classic + solution). Do not also
     // call chrome.setAppMenu here — ClassicHeader would duplicate the same actions
-    // next to breadcrumbs (kibana-team#3549).
+    // next to breadcrumbs (kibana-team#3549). Page-local `header.menu` is merged so
+    // page items compose with the registered APM menu; page `primaryActionItem` wins
+    // the primary slot (e.g. Edit service group) and demotes the global primary.
     const resolvedHeader: ApmMainTemplateHeaderProps = {
       ...header,
-      menu: header.menu ?? registeredAppMenu,
+      menu: mergeAppMenuConfigs(registeredAppMenu, header.menu),
     };
 
     return (

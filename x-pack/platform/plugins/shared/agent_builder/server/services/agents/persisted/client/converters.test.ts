@@ -19,6 +19,7 @@ import {
   createRequestToEs,
   fromEs,
   updateRequestToEs,
+  withPermissions,
 } from './converters';
 
 const creationDate = '2024-09-04T06:44:17.944Z';
@@ -277,6 +278,59 @@ describe('fromEs', () => {
   });
 });
 
+describe('withPermissions', () => {
+  const aliceEntry = { type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor };
+  const bobEntry = { type: 'user' as const, name: 'bob', role: AgentAccessControlRole.User };
+
+  const getDocument = (): Required<Document> => ({
+    _id: 'agent-1',
+    _source: {
+      id: 'agent-1',
+      name: 'Agent 1',
+      type: AgentType.chat,
+      space: 'default',
+      description: 'description',
+      access_control: {
+        access_mode: AgentAccessControlMode.Private,
+        entries: [aliceEntry, bobEntry],
+      },
+      created_by_id: 'owner-id',
+      created_by_name: 'owner',
+      config: {
+        tools: [],
+      },
+      created_at: creationDate,
+      updated_at: updateDate,
+    },
+  });
+
+  it('adds permissions from the CurrentUser admin state', () => {
+    const definition = withPermissions({
+      document: getDocument(),
+      user: { id: 'admin-id', username: 'admin', isAdmin: true },
+    });
+
+    expect(definition.permissions).toEqual({
+      update_agent: true,
+      update_access_control: true,
+    });
+    expect(definition.access_control?.entries).toEqual([aliceEntry, bobEntry]);
+  });
+
+  it("keeps only the caller's entry when the caller cannot manage access control", () => {
+    const definition = withPermissions({
+      document: getDocument(),
+      user: { id: 'bob-id', username: 'bob', isAdmin: false },
+    });
+
+    expect(definition.permissions).toEqual({
+      update_agent: false,
+      update_access_control: false,
+    });
+    expect(definition.access_control?.entries).toEqual([bobEntry]);
+  });
+});
+
 describe('createRequestToEs', () => {
   it('converts a request to the document format using new config field', () => {
     const createRequest: AgentCreateRequest = {
@@ -322,7 +376,7 @@ describe('createRequestToEs', () => {
       labels: ['foo', 'bar'],
       avatar_color: 'green',
       avatar_symbol: 'circle',
-      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
       created_by_id: 'user-id',
       created_by_name: 'test-user',
       updated_by_id: 'user-id',
@@ -403,7 +457,31 @@ describe('createRequestToEs', () => {
       id: 'id',
       name: 'name',
       description: 'description',
-      access_control: { access_mode: AgentAccessControlMode.Private },
+      access_control: { access_mode: AgentAccessControlMode.Shared },
+      configuration: {
+        instructions: 'instructions',
+        tools: [],
+      },
+    };
+
+    const docProperties = createRequestToEs({
+      profile: createRequest,
+      user: { id: 'user-id', username: 'test-user' },
+      space: 'space',
+      creationDate: new Date(),
+    });
+
+    expect(docProperties.access_control).toEqual({
+      access_mode: AgentAccessControlMode.Shared,
+      entries: [],
+    });
+  });
+
+  it('defaults access control to private when the create request omits it', () => {
+    const createRequest: AgentCreateRequest = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
       configuration: {
         instructions: 'instructions',
         tools: [],
