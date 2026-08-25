@@ -179,8 +179,6 @@ function formatDateInstant(
     );
   }
 
-  // Rounding plus a further offset has no natural-language form — keep the
-  // shorthand as-is rather than resolving it to an absolute date.
   if (isChainedDateMath(dateString)) {
     return dateString;
   }
@@ -194,10 +192,7 @@ function formatDateInstant(
   return dateString;
 }
 
-/**
- * True for chained date math (`now/y+3M`, `now-3M/y+3M`). Simple
- * `now±Nunit[/unit]` and rounding-only `now/unit` return false.
- */
+/** True for chained date math like `now/y+3M`; not simple offsets or `now/d`. */
 function isChainedDateMath(value: string): boolean {
   if (!value.startsWith('now') || !CHAINED_DATE_MATH_RE.test(value)) return false;
   if (dateMathToRelativeParts(value)) return false;

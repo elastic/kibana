@@ -285,13 +285,7 @@ function applyRelativeRounding(
 }
 
 /**
- * Parses chained Elasticsearch date math — rounding combined with further
- * offsets, e.g. `now/y+3M`, `now-3M/y+3M`, `-1y/y+3M`.
- *
- * Simple one-offset forms (`now-7d`, `now-7d/d`) are handled by the shorthand
- * regex; this catches the remainder, including rounding-only `now/d`. Bare
- * expressions without `now` are canonicalized (`-1y/y+3M` → `now-1y/y+3M`).
- * Returns `null` when the text is not chained date math or does not parse.
+ * Parses chained Elasticsearch date math (e.g. `now/y+3M`, `-1y/y+3M`).
  */
 function parseChainedDateMath(text: string): DateString | null {
   const match = text.match(CHAINED_DATE_MATH_RE);
@@ -342,9 +336,7 @@ function instantToDateString(
   const unixDate = unixTimestampToDate(trimmed);
   if (unixDate) return unixDate.toISOString();
 
-  // Chained date math (e.g. "now/y+3M", "now-3M/y+3M", "-1y/y+3M") and
-  // rounding-only ("now/d"). Must run before the vocabulary guard: unit
-  // letters in these expressions (`y`, `M`) are also grammar words.
+  // Before the vocabulary guard: unit letters in these expressions are also grammar words.
   const chained = parseChainedDateMath(trimmed);
   if (chained) return chained;
 
