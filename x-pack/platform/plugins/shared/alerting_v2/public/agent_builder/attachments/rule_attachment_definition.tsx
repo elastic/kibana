@@ -6,12 +6,17 @@
  */
 
 import React from 'react';
+import { toAlertingRuleViewSpec } from '@kbn/adaptive-ui-adapters';
 import {
   ActionButtonType,
   type AttachmentUIDefinition,
 } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { RULE_ATTACHMENT_TYPE, type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import {
+  getBreachEsqlQuery,
+  RULE_ATTACHMENT_TYPE,
+  type RuleAttachmentData,
+} from '@kbn/alerting-v2-schemas';
 
 export { RULE_ATTACHMENT_TYPE };
 import { Context } from '@kbn/core-di-browser';
@@ -33,6 +38,21 @@ export const createRuleAttachmentDefinition = ({
   getIcon: () => 'watchesApp',
 
   canvasWidth: '40vw',
+
+  getViewSpec: ({ data }) =>
+    toAlertingRuleViewSpec({
+      metadata: {
+        name: data.metadata.name,
+        description: data.metadata.description,
+        tags: data.metadata.tags,
+        builder_type: data.metadata.builder_type ?? undefined,
+      },
+      kind: data.kind,
+      time_field: data.time_field,
+      schedule: { interval: data.schedule?.every },
+      query: data.query ? getBreachEsqlQuery(data.query) : undefined,
+      enabled: data.enabled,
+    }),
 
   renderInlineContent: (props) => <RuleInlineContent {...props} />,
 

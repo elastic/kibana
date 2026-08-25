@@ -106,6 +106,7 @@
     "@kbn/workflows-extensions",
     "@kbn/workflows",
     "@kbn/workflows-management-plugin",
+    "@kbn/adaptive-ui-adapters",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",

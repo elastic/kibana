@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock } from '@elastic/eui';
+import { toEsqlViewSpec } from '@kbn/adaptive-ui-adapters';
 import type { EsqlAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 import {
@@ -57,6 +58,7 @@ export const createEsqlAttachmentDefinition = ({
         defaultMessage: 'ES|QL query',
       }),
     getIcon: () => 'code',
+    getViewSpec: ({ data }) => toEsqlViewSpec(data),
     renderInlineContent: (props) => <EsqlInlineContent {...props} />,
     renderCanvasContent: undefined,
     getActionButtons: ({ attachment }) => [

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toEntityAnalyticsDashboardViewSpec } from '@kbn/adaptive-ui-adapters';
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -545,6 +546,28 @@ export const createEntityAnalyticsDashboardAttachmentDefinition = ({
       }),
     getIcon: () => 'dashboardApp',
     canvasWidth: EA_DASHBOARD_CANVAS_WIDTH,
+    getViewSpec: ({ data }) =>
+      toEntityAnalyticsDashboardViewSpec({
+        summary: data.summary,
+        severity_count: data.severity_count
+          ? {
+              critical: data.severity_count.Critical,
+              high: data.severity_count.High,
+              medium: data.severity_count.Moderate,
+              low: data.severity_count.Low,
+            }
+          : undefined,
+        entities: data.entities.map((row) => ({
+          name: row.entity_name ?? row.entity_id,
+          type: row.entity_type,
+          risk_score: row.risk_score_norm ?? 0,
+          risk_level: row.risk_level,
+        })),
+        anomaly_highlights: data.anomaly_highlights?.map((highlight) => ({
+          title: highlight.title,
+          description: highlight.body,
+        })),
+      }),
     renderInlineContent: (props) => <EntityAnalyticsDashboardInlineContent {...props} />,
     renderCanvasContent: (props, { closeCanvas }) => (
       <EntityAnalyticsAgentNavigationProvider

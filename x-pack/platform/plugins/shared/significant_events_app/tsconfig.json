@@ -13,6 +13,7 @@
   ],
   "kbn_references": [
     "@kbn/agent-builder-browser",
+    "@kbn/adaptive-ui-adapters",
     "@kbn/agent-builder-common",
     "@kbn/app-header",
     "@kbn/calculate-auto",

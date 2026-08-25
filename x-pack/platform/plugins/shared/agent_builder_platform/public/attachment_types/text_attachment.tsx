@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { toTextViewSpec } from '@kbn/adaptive-ui-adapters';
 import type { TextAttachment } from '@kbn/agent-builder-common/attachments';
 import {
   ActionButtonType,
@@ -38,6 +39,7 @@ export const textAttachmentDefinition: AttachmentUIDefinition<TextAttachment> = 
       defaultMessage: 'Text',
     }),
   getIcon: () => 'document',
+  getViewSpec: ({ data }) => toTextViewSpec(data),
   renderInlineContent: (props) => <TextInlineContent {...props} />,
   getActionButtons: ({ attachment }) => [
     {

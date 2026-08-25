@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toSecurityRuleViewSpec } from '@kbn/adaptive-ui-adapters';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -72,6 +73,7 @@ export const createRuleAttachmentDefinition = ({
         defaultMessage: 'Security Rule',
       }),
     getIcon: () => 'securityApp',
+    getViewSpec: ({ data }) => toSecurityRuleViewSpec(data),
     renderInlineContent: (props) => (
       <UserPrivilegesContext.Provider value={privileges}>
         <RuleInlineContent {...props} aiRuleCreation={aiRuleCreation} />
