@@ -329,9 +329,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       // a schedule here would convert this one-shot task into a recurring one
       expect(result.schedule).toBeUndefined();
       expect(result.state.privateLocationId).toBeUndefined();
-    }, 30_000);
+    });
 
-    it('should schedule a per-location sync after cleanup and mark cleanup done', async () => {
+    it('should schedule a per-location sync after cleanup', async () => {
       const taskInstance = getMockTaskInstance();
       jest.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
         performCleanupSync: true,
@@ -359,7 +359,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         })
       );
       expect(result.error).toBeUndefined();
-      expect(result.state.hasAlreadyDoneCleanup).toBe(true);
     });
 
     it('should schedule a sync task for each private location after cleanup', async () => {
@@ -398,10 +397,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         })
       );
       expect(result.error).toBeUndefined();
-      expect(result.state.hasAlreadyDoneCleanup).toBe(true);
     });
 
-    it('should still mark cleanup done if scheduling post-cleanup sync fails', async () => {
+    it('should leave cleanup pending so a failed scheduling is retried next run', async () => {
       const taskInstance = getMockTaskInstance();
       jest.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
         performCleanupSync: true,
@@ -419,7 +417,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.error).toBeDefined();
-      expect(result.state.hasAlreadyDoneCleanup).toBe(true);
+      expect(result.state.hasAlreadyDoneCleanup).toBe(false);
     });
 
     it('should mark cleanup done when there are no private locations to sync', async () => {
@@ -682,6 +680,55 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.cleanUpDuplicatedPackagePolicies(mockSoClient as any, state as any);
       expect(result.performCleanupSync).toBe(true);
       expect(state.hasAlreadyDoneCleanup).toBe(false);
+      // spends a retry so a permanently failing recreate eventually stops
+      expect(state.maxCleanUpRetries).toBe(2);
+    });
+
+    it('should stop re-attempting the follow-up sync once retries are exhausted', async () => {
+      // the shared mockFinder is single-use, so hand out a fresh one per call
+      mockSoClient.createPointInTimeFinder = jest.fn().mockImplementation(() => ({
+        async *find() {
+          yield {
+            saved_objects: [
+              {
+                id: 'monitor1',
+                attributes: {
+                  origin: 'ui',
+                  locations: [{ id: 'loc1', isServiceManaged: false }],
+                  id: 'monitor1',
+                },
+                namespaces: ['space1'],
+              },
+            ],
+          };
+        },
+        close: jest.fn().mockResolvedValue(undefined),
+      }));
+      mockFleet.packagePolicyService.fetchAllItemIds.mockImplementation(async () =>
+        (async function* () {
+          yield [];
+        })()
+      );
+      const state = { hasAlreadyDoneCleanup: false, maxCleanUpRetries: 3 };
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const result = await task.cleanUpDuplicatedPackagePolicies(
+          mockSoClient as any,
+          state as any
+        );
+        expect(result.performCleanupSync).toBe(true);
+        expect(state.hasAlreadyDoneCleanup).toBe(false);
+      }
+      expect(state.maxCleanUpRetries).toBe(0);
+
+      const exhausted = await task.cleanUpDuplicatedPackagePolicies(
+        mockSoClient as any,
+        state as any
+      );
+
+      expect(exhausted.performCleanupSync).toBe(false);
+      expect(state.hasAlreadyDoneCleanup).toBe(true);
+      expect(state.maxCleanUpRetries).toBe(3);
     });
 
     it('should set performCleanupSync true if expected policies are missing', async () => {

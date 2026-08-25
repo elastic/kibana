@@ -112,26 +112,20 @@ export class SyncPrivateLocationMonitorsTask {
       const { privateLocationId } = taskInstance.state;
       if (privateLocationId) {
         // This instance is one-shot, so never return a schedule: task manager
-        // would turn a failed run into a recurring task.
+        // would turn a failed run into a recurring task. A failed recreate is
+        // re-attempted by the next cleanup run, bounded by maxCleanUpRetries.
         const state = {
           ...taskInstance.state,
           privateLocationId: undefined,
         } as SyncTaskState;
 
         try {
-          // Recreating missing policies can race Fleet/ESO; retry in-process
-          // because this task is maxAttempts: 1 and the next schedule is minutes out.
-          await pRetry(
-            async () => {
-              await this.deployPackagePolicies.syncAllPackagePolicies({
-                allPrivateLocations,
-                encryptedSavedObjects,
-                privateLocationId,
-                soClient: savedObjects.createInternalRepository(),
-              });
-            },
-            { retries: 3, minTimeout: 1000, factor: 2, randomize: false }
-          );
+          await this.deployPackagePolicies.syncAllPackagePolicies({
+            allPrivateLocations,
+            encryptedSavedObjects,
+            privateLocationId,
+            soClient: savedObjects.createInternalRepository(),
+          });
         } catch (error) {
           logger.error(
             `Sync of private location monitors failed for location ${privateLocationId}: ${error.message}`
@@ -163,10 +157,6 @@ export class SyncPrivateLocationMonitorsTask {
             `locations count: ${allPrivateLocations.length}`
         );
 
-        // Mark done before scheduling so a failed recreate cannot reschedule
-        // cleanup forever. The per-location tasks retry in-process.
-        taskState.hasAlreadyDoneCleanup = true;
-        taskState.maxCleanUpRetries = 3;
         for (const location of allPrivateLocations) {
           await runTaskPerPrivateLocation({
             server: this.serverSetup,
