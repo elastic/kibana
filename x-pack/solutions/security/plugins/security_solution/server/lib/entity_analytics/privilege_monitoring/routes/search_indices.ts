@@ -23,7 +23,9 @@ const LIMIT = 20;
 
 export const searchPrivilegeMonitoringIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .get({
@@ -43,6 +45,17 @@ export const searchPrivilegeMonitoringIndicesRoute = (
             query: buildRouteValidationWithZod(SearchPrivilegesIndicesRequestQuery),
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       withMinimumLicense(async (context, request, response): Promise<IKibanaResponse<{}>> => {
         const secSol = await context.securitySolution;

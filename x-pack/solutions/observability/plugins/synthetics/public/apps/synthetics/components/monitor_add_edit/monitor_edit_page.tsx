@@ -40,7 +40,6 @@ export const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
   const { monitorId } = useParams<{ monitorId: string }>();
   const { spaceId } = useGetUrlParams();
-  useMonitorAddEditBreadcrumbs(true);
   const dispatch = useDispatch();
   const { locationsLoaded, error: locationsError } = useSelector(selectServiceLocationsState);
 
@@ -59,6 +58,8 @@ export const MonitorEditPage: React.FC = () => {
   }, [dispatch, monitorId, spaceId]);
 
   const monitorNotFoundError = useMonitorNotFound(error, data?.id);
+
+  useMonitorAddEditBreadcrumbs(true, { monitorNotFound: Boolean(monitorNotFoundError) });
 
   const canUsePublicLocations = useCanUsePublicLocations(data?.[ConfigKey.LOCATIONS]);
 

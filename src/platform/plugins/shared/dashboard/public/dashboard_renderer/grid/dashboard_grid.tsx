@@ -204,7 +204,8 @@ export const DashboardGrid = () => {
   return (
     <div
       ref={layoutRef}
-      className={classNames(viewMode === 'edit' ? 'dshLayout--editing' : 'dshLayout--viewing', {
+      className={classNames({
+        'dshLayout--editing': viewMode === 'edit',
         'dshLayout-withoutMargins': !useMargins,
         'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
       })}

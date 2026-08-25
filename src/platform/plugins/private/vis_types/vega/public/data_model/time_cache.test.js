@@ -20,6 +20,10 @@ describe(`TimeCache`, () => {
       this._accessCount = 0;
     }
 
+    getTime() {
+      return this.time;
+    }
+
     setTime(min, max) {
       this._min = min;
       this._max = max;
@@ -84,5 +88,16 @@ describe(`TimeCache`, () => {
     expect(tc.getTimeBounds()).toEqual({ min: 20220, max: 30220 });
     expect(time._accessCount).toBe(++timeAccess);
     expect(timefilter._accessCount).toBe(++filterAccess);
+  });
+
+  it('falls back to timefilter.getTime when time range is undefined', () => {
+    const timefilter = new FauxTimefilter(10, 20);
+    timefilter.getTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
+
+    const tc = new TimeCache(timefilter, 0);
+    tc.setTimeRange(undefined);
+
+    expect(tc.getTimeBounds()).toEqual({ min: 10, max: 20 });
+    expect(timefilter.getTime).toHaveBeenCalled();
   });
 });

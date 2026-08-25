@@ -20,6 +20,7 @@ interface CreateAlertEventLogRecordParams {
   spaceId?: string;
   consumer?: string;
   ruleName?: string;
+  ruleTags?: string[];
   instanceId?: string;
   message?: string;
   state?: AlertInstanceState;
@@ -73,6 +74,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     alertSummary,
     maintenanceWindowIds,
     ruleRevision,
+    ruleTags,
     gap,
   } = params;
   const alerting =
@@ -95,6 +97,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       : undefined;
   const event: Event = {
     ...(params.timestamp ? { '@timestamp': params.timestamp } : {}),
+    ...(ruleTags && ruleTags.length > 0 ? { tags: ruleTags } : {}),
     event: {
       action,
       kind: 'alert',

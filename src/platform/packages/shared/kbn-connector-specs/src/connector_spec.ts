@@ -26,6 +26,8 @@ import type { Logger } from '@kbn/logging';
 import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
+import type { ConnectorSpecEvents } from './connector_spec_events';
+import type { ClientRegistry, ClientTypeId } from './lib/clients';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -137,6 +139,7 @@ export interface AuthTypeDefinition {
 
 export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
+  getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
@@ -214,6 +217,19 @@ export interface ConnectorPolicies {
 // ACTIONS
 // ============================================================================
 
+/**
+ * Scope of a connector action's side effects. Advisory signal for the LLM and
+ * any orchestration layer — does not enforce access control at runtime.
+ *
+ * - `read`    The action only reads data; no external state is modified. Default
+ *             when omitted.
+ * - `write`   The action creates or appends data but does not overwrite or delete
+ *             existing state (e.g. send a message, create a resource).
+ * - `destroy` The action may overwrite, update, or delete existing data
+ *             (e.g. resolve an issue, delete a resource, patch a record).
+ */
+export type ActionScope = 'read' | 'write' | 'destroy';
+
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   isTool?: boolean;
   input: z.ZodSchema<TInput>;
@@ -229,10 +245,23 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
    * response-size limit is exceeded. Defaults to `content-length`.
    */
   responseSizeHeader?: string;
+  /** Advisory scope hint for the LLM. Omit for read-only actions. See {@link ActionScope}. */
+  scope?: ActionScope;
 }
 
 export interface ActionContext {
   client: AxiosInstance;
+  /**
+   * Leases a pooled, ready-to-use client by id. The connection is built on the
+   * first request for a given connector and reused across calls. Building is an
+   * async, side-effecting operation, so this is an explicit call (not a property)
+   * and only the client types a handler actually asks for are ever built.
+   *
+   * Lifetime is governed by the actions plugin's client lease pool, not by the action
+   * stack frame. No client types are registered yet, so `ClientTypeId` currently
+   * resolves to `never`.
+   */
+  getClient: <K extends ClientTypeId>(id: K) => Promise<ClientRegistry[K]>;
   config?: Record<string, unknown>;
   connectorUsageCollector?: unknown;
   log: Logger;
@@ -323,6 +352,11 @@ export interface ConnectorSpec {
   actions: Record<string, ActionDefinition<any, any, any>>;
 
   test: ConnectorTest;
+
+  // Optional inbound events (`handleEvents` + definitions).
+  // Omit when the connector has no inbound surface. A connector may declare both
+  // `actions` and `events`. Only allowlisted specs may set this (see contract tests).
+  events?: ConnectorSpecEvents;
 
   transformations?: Transformations;
 

@@ -10,9 +10,6 @@ import type { FunctionRegistrationParameters } from '.';
 
 function registerFunction(
   overrides: {
-    requestUrl?: URL;
-    rewrittenUrl?: URL;
-    basePath?: string;
     headers?: Record<string, string | string[]>;
     fetchError?: Error;
   } = {}
@@ -39,11 +36,8 @@ function registerFunction(
 
   const resources = {
     request: {
-      url:
-        overrides.requestUrl ??
-        new URL('https://source.example/internal/observability_ai_assistant/chat/complete'),
-      basePath: overrides.basePath ?? '',
-      rewrittenUrl: overrides.rewrittenUrl,
+      url: new URL('https://source.example/internal/observability_ai_assistant/chat/complete'),
+      basePath: '',
       headers: overrides.headers ?? {
         'content-type': 'application/json',
         host: 'attacker.example',
@@ -74,7 +68,7 @@ describe('kibana tool', () => {
     jest.clearAllMocks();
   });
 
-  it('calls Kibana through the Core scoped self client', async () => {
+  it('calls Kibana through the Core scoped self client with internal access', async () => {
     const { handler, coreStart, fetch, resources } = registerFunction();
     const signal = new AbortController().signal;
 
@@ -82,84 +76,50 @@ describe('kibana tool', () => {
       {
         arguments: {
           method: 'POST',
-          pathname: '/api/apm/agent_keys',
-          query: { type: 'dashboard' },
-          body: { foo: 'bar' },
+          pathname: '/api/apm/agent_keys/private-target-id',
+          query: { type: 'private-query-value' },
+          body: { sensitive: 'private-body-value' },
         },
       },
       signal
     );
 
     expect(coreStart.http.selfClient.asScoped).toHaveBeenCalledWith(resources.request);
-    expect(fetch).toHaveBeenCalledWith('/api/apm/agent_keys', {
+    expect(fetch).toHaveBeenCalledWith('/api/apm/agent_keys/private-target-id', {
       method: 'POST',
-      query: { type: 'dashboard' },
-      body: { foo: 'bar' },
+      query: { type: 'private-query-value' },
+      body: { sensitive: 'private-body-value' },
       signal,
       forwardRequestHeaders: true,
-      access: 'public',
+      access: 'internal',
       asResponse: true,
     });
     expect(result).toEqual({ content: { ok: true } });
+    expect(resources.logger.info).not.toHaveBeenCalled();
+    expect(resources.logger.error).not.toHaveBeenCalled();
   });
 
-  it('logs the source request and resolved target url', async () => {
-    const { handler, fetch, resources } = registerFunction({ basePath: '/s/my-space' });
-
-    await handler({
-      arguments: {
-        method: 'GET',
-        pathname: '/api/saved_objects/_find',
-        query: { type: 'dashboard' },
-      },
-    });
-
-    expect(resources.logger.info).toHaveBeenCalledWith(
-      expect.stringContaining('GET https://target.example/base/api/saved_objects/_find')
-    );
-    expect(fetch).toHaveBeenCalledWith(
-      '/api/saved_objects/_find',
-      expect.objectContaining({
-        method: 'GET',
-        query: { type: 'dashboard' },
-      })
-    );
-  });
-
-  it('logs the resolved target URL when the self call fails', async () => {
-    const error = Object.assign(new Error('Not found'), {
-      request: { url: 'https://target.example/base/api/missing' },
-    });
-    const { handler, resources } = registerFunction({ fetchError: error });
+  it('propagates self-call errors unchanged without plugin logging', async () => {
+    const error = new Error('self-call failed');
+    const { handler, fetch, resources } = registerFunction({ fetchError: error });
 
     await expect(
       handler({
         arguments: {
           method: 'GET',
-          pathname: '/api/missing',
+          pathname: '/api/private-target/private-id',
         },
       })
-    ).rejects.toThrow('Not found');
+    ).rejects.toBe(error);
 
-    expect(resources.logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('GET https://target.example/base/api/missing')
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/private-target/private-id',
+      expect.objectContaining({ access: 'internal' })
     );
-  });
-
-  it('uses the rewritten url in logs when present', async () => {
-    const rewrittenUrl = new URL('https://source.example/s/space/original');
-    const { handler, resources } = registerFunction({ rewrittenUrl });
-
-    await handler({
-      arguments: {
-        method: 'GET',
-        pathname: '/api/status',
-      },
-    });
-
-    expect(resources.logger.info).toHaveBeenCalledWith(
-      expect.stringContaining(String(rewrittenUrl))
-    );
+    expect(resources.logger.info).not.toHaveBeenCalled();
+    expect(resources.logger.debug).not.toHaveBeenCalled();
+    expect(resources.logger.warn).not.toHaveBeenCalled();
+    expect(resources.logger.error).not.toHaveBeenCalled();
   });
 
   it('opts into Core safe request header forwarding for self calls', async () => {
@@ -191,23 +151,6 @@ describe('kibana tool', () => {
       '/api/status',
       expect.objectContaining({
         forwardRequestHeaders: true,
-      })
-    );
-  });
-
-  it('requests internal access for internal Kibana APIs', async () => {
-    const { handler, fetch } = registerFunction();
-
-    await handler({
-      arguments: {
-        method: 'GET',
-        pathname: '/internal/search',
-      },
-    });
-
-    expect(fetch).toHaveBeenCalledWith(
-      '/internal/search',
-      expect.objectContaining({
         access: 'internal',
       })
     );

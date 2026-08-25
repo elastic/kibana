@@ -24,7 +24,7 @@ import type { VegaInspectorAdapters } from './vega_inspector';
 interface VegaRequestHandlerParams {
   query: Query;
   filters: Filter[];
-  timeRange: TimeRange;
+  timeRange: TimeRange | undefined;
   visParams: VisParams;
   searchSessionId?: string;
   executionContext?: KibanaExecutionContext;

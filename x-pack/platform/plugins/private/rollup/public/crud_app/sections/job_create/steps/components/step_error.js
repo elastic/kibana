@@ -9,7 +9,8 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 export function StepError({
   title = (
@@ -22,12 +23,7 @@ export function StepError({
   return (
     <Fragment>
       <EuiSpacer size="m" />
-      <EuiCallOut
-        title={title}
-        color="danger"
-        iconType="cross"
-        data-test-subj="rollupJobCreateStepError"
-      />
+      <KbnDangerCallout title={title} data-test-subj="rollupJobCreateStepError" />
     </Fragment>
   );
 }

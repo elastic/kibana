@@ -226,7 +226,6 @@ describe('GCPReusableConnectorForm', () => {
         cloudProvider: 'gcp',
         accountType: undefined,
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
 
@@ -237,7 +236,6 @@ describe('GCPReusableConnectorForm', () => {
         cloudProvider: 'gcp',
         accountType: 'single-account',
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
 
@@ -250,7 +248,6 @@ describe('GCPReusableConnectorForm', () => {
         cloudProvider: 'gcp',
         accountType: 'organization-account',
         packageName: undefined,
-        policyTemplate: undefined,
       });
     });
 
