@@ -1209,9 +1209,11 @@ describe('execute()', () => {
 
     await connectorType.executor(executorOptionsWithHTTP);
     const emailSent = sendEmailMock.mock.calls[0][1];
-    expect(emailSent.content.subject).toBe('this is a test email from Kibana');
-    expect(emailSent.content.message).toBe('this is a test email from Kibana');
-    expect(emailSent.content.messageHTML).toBe('this is a test email from Kibana');
+    expect(emailSent.content.subject).toBe('This is a test email from Kibana');
+    expect(emailSent.content.message).toBe(
+      'This is a test email from Kibana\n\n---\n\nThis message was sent by Elastic.'
+    );
+    expect(emailSent.content.messageHTML).toBe('This is a test email from Kibana');
   });
 
   test('ensure parameters are as expected with HTML message from trusted notifications source', async () => {
@@ -2345,7 +2347,7 @@ describe('execute() Elastic Cloud trial subject prefix', () => {
     await trialConnectorType.executor(buildExecutorOptions(elasticCloudConfig));
 
     expect(sendEmailMock.mock.calls[0][1].content.subject).toBe(
-      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} the subject`
+      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} This is a test email from Kibana`
     );
   });
 
@@ -2390,7 +2392,7 @@ describe('execute() Elastic Cloud trial subject prefix', () => {
     });
 
     expect(sendEmailMock.mock.calls[0][1].content.subject).toBe(
-      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} the subject`
+      `${ELASTIC_CLOUD_TRIAL_SUBJECT_PREFIX} This is a test email from Kibana`
     );
   });
 });

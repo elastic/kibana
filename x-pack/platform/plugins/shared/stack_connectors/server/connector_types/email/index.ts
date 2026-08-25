@@ -28,6 +28,7 @@ import {
   ConfigSchema,
   SecretsSchema,
   ParamsSchema,
+  TEST_MESSAGE,
 } from '@kbn/connector-schemas/email';
 import {
   AlertingConnectorFeatureId,
@@ -446,8 +447,14 @@ async function executor(
     transport.service = config.service;
   }
 
+  const isSourceHttp = source?.type === ActionExecutionSourceType.HTTP_REQUEST;
   let actualMessage: string | null | undefined = params.message;
   let actualHTMLMessage: string | null | undefined = params.messageHTML;
+
+  if (isSourceHttp) {
+    actualMessage = TEST_MESSAGE;
+    actualHTMLMessage = TEST_MESSAGE;
+  }
 
   actualMessage = trimMessageIfRequired(
     actionId,
@@ -473,22 +480,13 @@ async function executor(
     actualMessage = `${actualMessage}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
   }
 
-  // Trial deployments (ECH and Serverless) route through the shared Elastic SMTP relay
-  // (the `elastic_cloud` service), so their subjects are prefixed to identify trial traffic.
-  // `&&` short-circuits, so the trial lookup only runs for the `elastic_cloud` service.
-  const isSourceHttp = source?.type === ActionExecutionSourceType.HTTP_REQUEST;
-
+  // use TEST_MESSAGE for cloud trials and HTTP sourced
   const subject =
     config.service === AdditionalEmailServices.ELASTIC_CLOUD && (await isElasticCloudTrial?.())
-      ? prefixTrialSubject(params.subject)
+      ? prefixTrialSubject(TEST_MESSAGE)
       : isSourceHttp
-      ? 'this is a test email from Kibana'
+      ? TEST_MESSAGE
       : params.subject;
-
-  if (isSourceHttp) {
-    actualMessage = 'this is a test email from Kibana';
-    actualHTMLMessage = 'this is a test email from Kibana';
-  }
 
   const sendEmailOptions: SendEmailOptions = {
     connectorId: actionId,

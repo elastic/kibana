@@ -17,6 +17,8 @@ export const defaultFooterText = i18n.translate('connectors.email.kibanaFooterLi
   defaultMessage: 'Go to Elastic',
 });
 
+export const TEST_MESSAGE = 'This is a test email from Kibana';
+
 export const serviceParamValueToKbnSettingMap = {
   gmail: 'google-mail',
   outlook365: 'microsoft-outlook',
