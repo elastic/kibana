@@ -163,6 +163,30 @@ const UserAccessRow: React.FC<{
   </EuiFlexGroup>
 );
 
+const UserSearchOption: React.FC<{
+  profile: UserProfileWithAvatar;
+}> = ({ profile }) => {
+  const displayName = getUserDisplayName(profile.user);
+  const secondary = profile.user.email ?? profile.user.username;
+  const showSecondary = secondary && secondary !== displayName;
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow>
+        <EuiText size="s">{displayName}</EuiText>
+        {showSecondary ? (
+          <EuiText size="xs" color="subdued">
+            {secondary}
+          </EuiText>
+        ) : null}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
 export const ConversationShareButton: React.FC = () => {
   const hasPersistedConversation = useHasPersistedConversation();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
@@ -284,33 +308,6 @@ const ConversationSharePopover: React.FC<{
     saveAccessControl(accessMode, nextMemberIds);
   };
 
-  const renderOption = (option: EuiComboBoxOptionOption<string>) => {
-    const profile = option.value ? suggestedProfileByUid.get(option.value) : undefined;
-    if (!profile) {
-      return option.label;
-    }
-
-    const displayName = getUserDisplayName(profile.user);
-    const secondary = profile.user.email ?? profile.user.username;
-    const showSecondary = secondary && secondary !== displayName;
-
-    return (
-      <EuiFlexGroup key={option.key ?? option.value} gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiText size="s">{displayName}</EuiText>
-          {showSecondary ? (
-            <EuiText size="xs" color="subdued">
-              {secondary}
-            </EuiText>
-          ) : null}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-
   const isPublic = accessMode === ConversationAccessControlMode.Public;
   const ownerProfile = ownerId ? profileByUid.get(ownerId) : undefined;
 
@@ -419,7 +416,15 @@ const ConversationSharePopover: React.FC<{
               isDisabled={isSaving || isPublic}
               isClearable={false}
               singleSelection={{ asPlainText: true }}
-              renderOption={renderOption}
+              renderOption={(option) => {
+                const profile = option.value ? suggestedProfileByUid.get(option.value) : undefined;
+
+                if (!profile) {
+                  return null;
+                }
+
+                return <UserSearchOption key={option.key ?? option.value} profile={profile} />;
+              }}
               rowHeight={48}
               data-test-subj="agentBuilderConversationSharingUserSearch"
             />
