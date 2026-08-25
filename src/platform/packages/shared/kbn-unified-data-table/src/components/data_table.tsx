@@ -108,6 +108,7 @@ import {
   toolbarVisibility as toolbarVisibilityDefaults,
   DataGridDensity,
   DEFAULT_PAGINATION_MODE,
+  VIRTUALIZED_SELECTOR,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
@@ -125,6 +126,7 @@ import {
   type ColorIndicatorControlColumnParams,
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
+import { useScrollToExpandedDoc } from '../hooks/use_scroll_to_expanded_doc';
 import { withRestorableState, useRestorableState, useRestorableRef } from '../restorable_state';
 import { ColumnControlWithSummary } from './column_control_with_summary';
 
@@ -986,6 +988,18 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
+    useScrollToExpandedDoc({
+      expandedDoc,
+      displayedRows,
+      paginationMode,
+      isPaginationEnabled,
+      pageIndex: currentPageIndex,
+      pageSize: currentPageSize,
+      onChangePageIndex: changeCurrentPageIndex,
+      dataGridRef,
+      dataGridWrapper,
+    });
+
     const inTableSearchLatestStateRef = useRestorableRef('inTableSearch', undefined);
     const onInTableSearchInitialStateChange = useCallback(
       (newState: InTableSearchRestorableState) => {
@@ -1448,13 +1462,15 @@ const InternalUnifiedDataTable = React.forwardRef<
     const toolbarVisibility = useMemo(
       () => ({
         ...toolbarVisibilityDefaults,
-        showSortSelector: isSortEnabled,
+        showSortSelector: isSortEnabled && !isJsonSourceMode,
+        showColumnSelector: isJsonSourceMode ? false : toolbarVisibilityDefaults.showColumnSelector,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,
         showFullScreenSelector: showFullScreenButton,
       }),
       [
+        isJsonSourceMode,
         isSortEnabled,
         additionalControls,
         showDisplaySelector,
@@ -1477,7 +1493,7 @@ const InternalUnifiedDataTable = React.forwardRef<
 
           // We need to manually query the react-window wrapper since EUI doesn't
           // expose outerRef in virtualizationOptions, but we should request it
-          const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
+          const outerRef = dataGridWrapper?.querySelector<HTMLElement>(VIRTUALIZED_SELECTOR);
 
           if (!outerRef) {
             return prevHasScrolledToBottom;

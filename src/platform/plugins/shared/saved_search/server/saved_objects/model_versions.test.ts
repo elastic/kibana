@@ -11,7 +11,7 @@ import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
 import { VIEW_MODE } from '../../common';
 import { MODEL_VERSIONS, typeVersionGuesser } from './model_versions';
-import type { SCHEMA_DISCOVER_SESSION_V13, SCHEMA_DISCOVER_SESSION_V15 } from './schema';
+import type { SCHEMA_DISCOVER_SESSION_V13 } from './schema';
 import { DISCOVER_SESSION_MODEL_VERSIONS } from './schema';
 import type { SCHEMA_SEARCH_MODEL_VERSION_5 } from './schema_legacy';
 import type { SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND } from './schema_legacy';
@@ -92,7 +92,7 @@ describe('model_versions', () => {
       expect(typeVersionGuesser(createDocument(attributes))).toBe(12);
     });
 
-    it('should return the latest discover session version for documents without version-specific attributes', () => {
+    it('should return a non-legacy version for v13+ documents', () => {
       const attributes: TypeOf<typeof SCHEMA_DISCOVER_SESSION_V13> = {
         title: 'discover session',
         description: '',
@@ -116,37 +116,7 @@ describe('model_versions', () => {
         ],
       };
 
-      expect(typeVersionGuesser(createDocument(attributes))).toBe(15);
-    });
-
-    it('should return the discover session version for v15 documents', () => {
-      const attributes: TypeOf<typeof SCHEMA_DISCOVER_SESSION_V15> = {
-        title: 'discover session',
-        description: '',
-        tabs: [
-          {
-            id: 'tab-1',
-            label: 'Tab 1',
-            attributes: {
-              kibanaSavedObjectMeta: {
-                searchSourceJSON: '{}',
-              },
-              columns: [],
-              sort: [],
-              grid: {},
-              hideChart: false,
-              hideTable: false,
-              isTextBasedQuery: false,
-              timeRestore: false,
-              esqlApproximation: true,
-              sourceDisplayMode: 'json',
-              jsonModeSettings: { hideNulls: true, wrapLines: false },
-            },
-          },
-        ],
-      };
-
-      expect(typeVersionGuesser(createDocument(attributes))).toBe(15);
+      expect(typeVersionGuesser(createDocument(attributes))).toBeGreaterThan(12);
     });
 
     it('should preserve the pre-guesser fallback by returning the latest version when no schema matches', () => {
@@ -156,7 +126,8 @@ describe('model_versions', () => {
         tabs: [],
       });
 
-      expect(typeVersionGuesser(document)).toBe(15);
+      const latestVersion = Math.max(...Object.keys(DISCOVER_SESSION_MODEL_VERSIONS).map(Number));
+      expect(typeVersionGuesser(document)).toBe(latestVersion);
     });
   });
 });

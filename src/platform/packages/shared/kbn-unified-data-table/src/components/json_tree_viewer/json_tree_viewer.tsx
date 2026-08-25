@@ -28,6 +28,7 @@ import {
 import {
   ClosingBracketRow,
   CopyAllButton,
+  EmptyRootPlaceholder,
   NodeRowView,
   PagerRowView,
   treeStyles,
@@ -169,47 +170,51 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
           })}
           data-test-subj="jsonTreeViewer"
         >
-          {rows.map((row) => {
-            if (row.kind === 'closing') {
-              return <ClosingBracketRow key={row.id} row={row} />;
-            }
-            if (row.kind === 'pager') {
+          {rows.length === 0 ? (
+            <EmptyRootPlaceholder collectionType={rootType} />
+          ) : (
+            rows.map((row) => {
+              if (row.kind === 'closing') {
+                return <ClosingBracketRow key={row.id} row={row} />;
+              }
+              if (row.kind === 'pager') {
+                return (
+                  <PagerRowView
+                    key={row.id}
+                    row={row}
+                    isActive={row.id === activeRowId}
+                    rowRef={registerRow(row.id)}
+                    onShowMore={() => revealMore(row.collectionId)}
+                    onShowFewer={() => showFewer(row.collectionId)}
+                    onFocus={() => setActive(row.id)}
+                    onKeyDown={(event) => onRowKeyDown(event, row)}
+                  />
+                );
+              }
               return (
-                <PagerRowView
-                  key={row.id}
+                <NodeRowView
+                  key={row.node.id}
                   row={row}
-                  isActive={row.id === activeRowId}
-                  rowRef={registerRow(row.id)}
-                  onShowMore={() => revealMore(row.collectionId)}
-                  onShowFewer={() => showFewer(row.collectionId)}
-                  onFocus={() => setActive(row.id)}
+                  isActive={row.node.id === activeRowId}
+                  rowRef={registerRow(row.node.id)}
+                  onActivate={(event) => {
+                    if (!row.hasChildren) return;
+                    // Cmd/Ctrl-click expands the whole subtree, budgeted so a deep subtree can't
+                    // explode the DOM.
+                    if (event.metaKey || event.ctrlKey) {
+                      expandIds(collectExpandableIds([row.node]));
+                    } else {
+                      toggle(row.node.id);
+                    }
+                  }}
+                  onFocus={() => setActive(row.node.id)}
                   onKeyDown={(event) => onRowKeyDown(event, row)}
+                  formatValue={formatValue}
+                  getLeafActions={getLeafActions}
                 />
               );
-            }
-            return (
-              <NodeRowView
-                key={row.node.id}
-                row={row}
-                isActive={row.node.id === activeRowId}
-                rowRef={registerRow(row.node.id)}
-                onActivate={(event) => {
-                  if (!row.hasChildren) return;
-                  // Cmd/Ctrl-click expands the whole subtree, budgeted so a deep subtree can't
-                  // explode the DOM.
-                  if (event.metaKey || event.ctrlKey) {
-                    expandIds(collectExpandableIds([row.node]));
-                  } else {
-                    toggle(row.node.id);
-                  }
-                }}
-                onFocus={() => setActive(row.node.id)}
-                onKeyDown={(event) => onRowKeyDown(event, row)}
-                formatValue={formatValue}
-                getLeafActions={getLeafActions}
-              />
-            );
-          })}
+            })
+          )}
         </div>
       </div>
     </>
