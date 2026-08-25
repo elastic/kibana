@@ -7,8 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import d3 from 'd3';
 import type {
   FeatureImportance,
@@ -60,18 +60,16 @@ export const RegressionDecisionPath: FC<RegressionDecisionPathProps> = ({
   return (
     <>
       {baseline === undefined && (
-        <EuiCallOut
+        <KbnWarningCallout
           announceOnMount={false}
-          size={'s'}
-          heading={'p'}
+          heading="p"
+          size="s"
           title={
             <FormattedMessage
               id="xpack.ml.dataframe.analytics.explorationResults.missingBaselineCallout"
               defaultMessage="Unable to calculate baseline value, which might result in a shifted decision path."
             />
           }
-          color="warning"
-          iconType="warning"
         />
       )}
       <DecisionPathChart

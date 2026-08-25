@@ -296,13 +296,15 @@ export function ComposeDiscoverFlyout({
     [initialQuery, inlineResult.query]
   );
 
-  const isDiscoverQueryComplete = Boolean(discoverComposedQuery?.breach.segment.trim());
+  const isDiscoverQueryPopulated = Boolean(
+    discoverComposedQuery && getBreachQuery(discoverComposedQuery).trim()
+  );
 
   const [uiState, rawDispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType,
-    isQueryPrePopulated: isDiscoverQueryComplete,
+    isQueryPrePopulated: isDiscoverQueryPopulated,
     forceYamlMode,
   });
 
@@ -558,7 +560,7 @@ export function ComposeDiscoverFlyout({
     methods.reset({ ...methods.getValues(), query: composedQuery });
     setSandboxQuery(composedQuery);
     dispatch({
-      type: composedQuery.breach.segment.trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY',
+      type: getBreachQuery(composedQuery).trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY',
     });
   }, [
     initialQuery,
@@ -870,7 +872,7 @@ export function ComposeDiscoverFlyout({
     }
     /*
      * Manual split with an empty alert condition stays composed + empty segment —
-     * the schema rejects that at save; do not coerce to standalone.
+     * the request mapper omits the breach block at save; do not coerce to standalone.
      */
     setSandboxQuery(queryToCommit);
 
@@ -1033,7 +1035,6 @@ export function ComposeDiscoverFlyout({
       return getSandboxTabs(isAlert, {
         step: uiState.step,
         recoveryType: uiState.recoveryType,
-        mode: uiState.mode,
         manualSplitEnabled: uiState.manualSplitEnabled,
       });
     }
@@ -1048,7 +1049,6 @@ export function ComposeDiscoverFlyout({
     uiState.yamlMode,
     uiState.recoveryType,
     uiState.step,
-    uiState.mode,
     uiState.manualSplitEnabled,
     sandboxQuery.format,
     isAlert,

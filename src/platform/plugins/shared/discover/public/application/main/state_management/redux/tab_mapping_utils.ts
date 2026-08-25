@@ -48,6 +48,7 @@ export const fromSavedObjectTabToAppState = ({
       breakdownField: tab.breakdownField,
       interval: tab.chartInterval,
       density: tab.density,
+      esqlApproximation: tab.esqlApproximation,
     },
     isUndefined
   );
@@ -175,6 +176,8 @@ export const fromTabStateToSavedObjectTab = ({
 
   const usesAdHocDataView = isObject(serializedSearchSource.index);
 
+  const isTextBasedQuery = isOfAggregateQueryType(tab.appState.query);
+
   return {
     id: tab.id,
     label: tab.label,
@@ -183,13 +186,14 @@ export const fromTabStateToSavedObjectTab = ({
     grid: tab.appState.grid ?? {},
     hideChart: tab.appState.hideChart ?? false,
     hideTable: tab.appState.hideTable ?? false,
-    isTextBasedQuery: isOfAggregateQueryType(tab.appState.query),
+    isTextBasedQuery,
     usesAdHocDataView,
     serializedSearchSource,
     viewMode: tab.appState.viewMode,
     hideAggregatedPreview: tab.appState.hideAggregatedPreview,
     rowHeight: tab.appState.rowHeight,
     headerRowHeight: tab.appState.headerRowHeight,
+    esqlApproximation: isTextBasedQuery ? tab.appState.esqlApproximation : undefined,
     timeRestore,
     timeRange: timeRestore ? tab.globalState.timeRange : undefined,
     refreshInterval: timeRestore ? tab.globalState.refreshInterval : undefined,

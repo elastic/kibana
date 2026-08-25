@@ -1091,6 +1091,21 @@ describe('Agent policy', () => {
         })
       );
     });
+
+    it('should not fetch full package policies when deploying asynchronously', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+        asyncDeploy: true,
+      });
+
+      // computeMinAgentVersionData always fetches package policies once, but `_update`'s eager
+      // full fetch (for the deploy event it never triggers on this branch) should now be skipped,
+      // so the total should stay at 1 instead of the 2 it would be if `_update` also fetched.
+      expect(mockedPackagePolicyService.findAllForAgentPolicy).toHaveBeenCalledTimes(1);
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('bumpAllAgentPoliciesForOutput', () => {
@@ -3613,6 +3628,34 @@ describe('Agent policy', () => {
       });
     });
 
+    it('should omit credentials_external_id when the AWS connector has no external_id', async () => {
+      const connectorWithoutExternalId = {
+        ...baseConnector,
+        attributes: {
+          ...baseConnector.attributes,
+          vars: {
+            role_arn: { type: 'text' as const, value: 'arn:aws:iam::123456:role/test' },
+          },
+        },
+      };
+
+      await agentPolicyService.createVerifierPolicy(
+        soClient,
+        esClient,
+        connectorWithoutExternalId as any,
+        baseVerificationInfo
+      );
+
+      const { streams: awsStreams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
+      const vars = awsStreams[0].vars!;
+
+      expect(vars.credentials_role_arn).toEqual({
+        type: 'text',
+        value: 'arn:aws:iam::123456:role/test',
+      });
+      expect(vars.credentials_external_id).toBeUndefined();
+    });
+
     it('should include Azure credential vars for azure provider', async () => {
       const azureConnector = {
         ...baseConnector,
@@ -3917,6 +3960,87 @@ describe('Agent policy', () => {
           query: { terms: { policy_id: ['policy1', 'policy2', 'policy3'] } },
         })
       );
+    });
+  });
+
+  describe('getFleetServerPolicy', () => {
+    const makeEsHit = (policyId: string, revision: number = 5) => ({
+      _source: { policy_id: policyId, revision_idx: revision },
+    });
+
+    const makeSearchResponse = (hits: Array<{ _source: object }>, total: number = hits.length) => ({
+      hits: { total, hits },
+    });
+
+    it('returns the exact match when policy_id exists', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search
+        .mockResolvedValueOnce(makeSearchResponse([makeEsHit('base-policy')]) as any)
+        .mockResolvedValueOnce(makeSearchResponse([]) as any);
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy', 5);
+      expect(result).toEqual({ policy_id: 'base-policy', revision_idx: 5 });
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns the exact variant when a suffixed id matches', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search.mockResolvedValueOnce(
+        makeSearchResponse([makeEsHit('base-policy#9.2')]) as any
+      );
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy#9.2', 5);
+      expect(result).toEqual({ policy_id: 'base-policy#9.2', revision_idx: 5 });
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns null for a specific variant id that does not exist (no fallback)', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search.mockResolvedValueOnce(makeSearchResponse([]) as any);
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy#9.2', 5);
+      expect(result).toBeNull();
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to highest-semver variant when base id has no base doc at the revision', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search
+        .mockResolvedValueOnce(makeSearchResponse([], 0) as any)
+        .mockResolvedValueOnce(
+          makeSearchResponse(
+            [makeEsHit('base-policy#9.2'), makeEsHit('base-policy#9.10')],
+            2
+          ) as any
+        );
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy', 5);
+      // 9.10 > 9.2 in semver — must not use lexicographic ordering
+      expect(result).toEqual({ policy_id: 'base-policy#9.10', revision_idx: 5 });
+    });
+
+    it('correctly orders #9.10 before #9.2 (semver, not lexicographic)', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search.mockResolvedValueOnce(makeSearchResponse([], 0) as any).mockResolvedValueOnce(
+        makeSearchResponse(
+          // Deliberately supply 9.10 last to confirm sort is not insertion-order
+          [makeEsHit('base-policy#9.2'), makeEsHit('base-policy#9.10')],
+          2
+        ) as any
+      );
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy', 5);
+      expect((result as any)?.policy_id).toBe('base-policy#9.10');
+    });
+
+    it('returns null when base id has no docs at all at the revision', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search
+        .mockResolvedValueOnce(makeSearchResponse([], 0) as any)
+        .mockResolvedValueOnce(makeSearchResponse([], 0) as any);
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy', 5);
+      expect(result).toBeNull();
     });
   });
 });

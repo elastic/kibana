@@ -3,7 +3,7 @@
 # Orchestrates the full KI onboarding pipeline for a stream:
 #   1. Features recency check (auto-skips identification if features are recent)
 #   2. Features identification (optional, skippable)
-#   3. Queries generation (optional, skippable — persistence handled by the child workflow)
+#   3. Queries generation (conditional — skipped when no new features were found)
 
 version: "1"
 name: "KI Onboarding"
@@ -94,6 +94,7 @@ steps:
       generatedQueries: []
       persistedQueries: []
       skipFeatures: "${{ inputs.skipFeatures }}"
+      skipQueries: "${{ inputs.skipQueries }}"
       featuresTokensUsed: {}
       queriesTokensUsed: {}
       featuresConnectorUsed: ""
@@ -158,11 +159,24 @@ steps:
           featuresConnectorUsed: "${{ steps.identify_features.output.connectorId }}"
 
   # -----------------------------------------------------------------------
-  # Step 3: Queries generation (unless skipped)
+  # Step 3: Skip queries when no features were discovered this cycle.
+  #         inputs.skipFeatures == true (queries-only run) bypasses this gate.
+  # -----------------------------------------------------------------------
+  - name: check_should_generate_queries
+    type: if
+    condition: "${{ inputs.skipFeatures == false and variables.discoveredFeatures.size == 0 }}"
+    steps:
+      - name: set_skip_queries
+        type: data.set
+        with:
+          skipQueries: true
+
+  # -----------------------------------------------------------------------
+  # Step 4: Queries generation (unless skipped)
   # -----------------------------------------------------------------------
   - name: run_queries
     type: if
-    condition: "${{ inputs.skipQueries == false }}"
+    condition: "${{ variables.skipQueries == false }}"
     steps:
       - name: generate_queries
         type: workflow.execute
@@ -181,7 +195,7 @@ steps:
           queriesConnectorUsed: "${{ steps.generate_queries.output.connectorId }}"
 
   # -----------------------------------------------------------------------
-  # Step 4: Keep-alive — re-stamp persistent KIs (durable ones, plus excluded
+  # Step 5: Keep-alive — re-stamp persistent KIs (durable ones, plus excluded
   #         features whose exclusion must be remembered) not refreshed this
   #         cycle so DSL retention does not physically delete them.
   # -----------------------------------------------------------------------
@@ -196,7 +210,7 @@ steps:
         lastRefreshedBefore: "${{ variables.cycleStartedAt }}"
 
   # -----------------------------------------------------------------------
-  # Step 5: Output summary
+  # Step 6: Output summary
   # -----------------------------------------------------------------------
   - name: output_result
     type: workflow.output
@@ -206,7 +220,7 @@ steps:
       featuresConnectorUsed: "${{ variables.featuresConnectorUsed }}"
       discoveredFeatures: "${{ variables.discoveredFeatures }}"
       featuresTokensUsed: "${{ variables.featuresTokensUsed }}"
-      queriesSkipped: "${{ inputs.skipQueries }}"
+      queriesSkipped: "${{ variables.skipQueries }}"
       queriesConnectorUsed: "${{ variables.queriesConnectorUsed }}"
       persistedQueries: "${{ variables.persistedQueries }}"
       queriesTokensUsed: "${{ variables.queriesTokensUsed }}"

@@ -19,7 +19,7 @@
 - [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 - [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.
 - [GitHub](/reference/connectors-kibana/github-action-type.md): Search code, issues, and pull requests, and access repository contents and metadata from GitHub.
-- [Gmail](/reference/connectors-kibana/gmail-action-type.md): Search and read emails from Gmail.
+- [Gmail](/reference/connectors-kibana/gmail-action-type.md): Search, read, label, quarantine, and send emails in Gmail.
 - [Google Calendar](/reference/connectors-kibana/google-calendar-action-type.md): Search and access events and calendars in Google Calendar.
 - [Google Cloud Monitoring](/reference/connectors-kibana/google-cloud-monitoring-action-type.md): Find, silence, and snooze GCP alerting policies, and enrich alerts with metric, uptime, and SLO data.
 - [Google Cloud Storage](/reference/connectors-kibana/google-cloud-storage-action-type.md): Search and access objects in Google Cloud Storage buckets.
@@ -38,7 +38,7 @@
 - [OneDrive](/reference/connectors-kibana/one-drive-action-type.md): Search files and folders, browse drives, read file content, and list files shared with you in Microsoft OneDrive.
 - [OpenSearch](/reference/connectors-kibana/opensearch-aws-opensearch-service-action-type.md): Acknowledge and search alerts, run and manage monitors, handle Security Analytics detector alerts, and search and index documents.
 - [Outlook](/reference/connectors-kibana/outlook-action-type.md): Search emails, list folders, and read messages and attachments in Microsoft Outlook.
-- [PagerDuty (MCP)](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
+- [PagerDuty](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access and manage incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
 - [PostHog](/reference/connectors-kibana/posthog-action-type.md): Triage error-tracking issues, run HogQL queries, and control feature flags.
 - [Prometheus](/reference/connectors-kibana/prometheus-action-type.md): Run PromQL queries, and read, silence, and manage alerts and alert groups in Alertmanager.
 - [Rootly](/reference/connectors-kibana/rootly-action-type.md): Declare and drive incidents through their lifecycle.
@@ -75,5 +75,6 @@
 - [Censys](/reference/connectors-kibana/censys-action-type.md): Enrich hosts, web properties, and certificates, submit assets for rescanning, and run CensEye threat-hunting jobs.
 - [GreyNoise](/reference/connectors-kibana/greynoise-action-type.md): Detect and classify Internet scanning noise.
 - [Shodan](/reference/connectors-kibana/shodan-action-type.md): Perform Internet-wide asset discovery and vulnerability scanning.
+- [URLScan.io](/reference/connectors-kibana/urlscan-io-action-type.md): Search historical URL scans, detonate a URL in a sandboxed browser, and retrieve verdicts, screenshots, and page content.
 - [URLVoid](/reference/connectors-kibana/urlvoid-action-type.md): Check domain and URL reputation using multi-engine scanning.
 - [VirusTotal](/reference/connectors-kibana/virustotal-action-type.md): Perform file scanning, URL and domain analysis, result retrieval, and threat intelligence lookups.

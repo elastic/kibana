@@ -514,7 +514,7 @@ export class DataGrid {
     await expandButton.waitFor({ state: 'visible' });
     await expandButton.scrollIntoViewIfNeeded();
     await expandButton.hover();
-    await expandButton.click({ delay: 50 });
+    await expandButton.click();
   }
 
   async openGridDisplaySettings() {
@@ -600,8 +600,6 @@ export class DataGrid {
 
   async waitForDocTableRendered() {
     const table = this.page.testSubj.locator('discoverDocTable');
-    const minDurationMs = 2_000;
-    const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
 
     // Gate on the data fetch first so the visibility budget below isn't spent
@@ -610,31 +608,9 @@ export class DataGrid {
 
     await table.waitFor({ state: 'visible', timeout: totalTimeoutMs });
 
-    let stableSince: number | null = null;
-
-    await expect
-      .poll(
-        async () => {
-          const attr = await table.getAttribute('data-render-complete');
-          const now = Date.now();
-
-          if (attr === 'true') {
-            if (!stableSince) {
-              stableSince = now;
-            }
-            return now - stableSince >= minDurationMs;
-          }
-
-          stableSince = null;
-          return false;
-        },
-        {
-          message: `data-render-complete did not stay 'true' for ${minDurationMs}ms`,
-          timeout: totalTimeoutMs,
-          intervals: [pollIntervalMs],
-        }
-      )
-      .toBe(true);
+    await expect(table).toHaveAttribute('data-render-complete', 'true', {
+      timeout: totalTimeoutMs,
+    });
   }
 
   async getRowActions(): Promise<Locator[]> {
@@ -656,5 +632,16 @@ export class DataGrid {
       state: 'hidden',
       timeout: 30_000,
     });
+  }
+
+  /**
+   * Sorts a column via its header menu. The direction is carried entirely by
+   * `sortOption`, which is the menu entry's label and varies by field type:
+   * `Sort A-Z` / `Sort Z-A` for strings, `Sort Old-New` / `Sort New-Old` for
+   * dates, `Sort Low-High` / `Sort High-Low` for numbers.
+   */
+  async sortColumn(field: string, sortOption: string) {
+    await this.openColumnMenuByField(field);
+    await this.page.getByRole('button', { name: sortOption }).click();
   }
 }

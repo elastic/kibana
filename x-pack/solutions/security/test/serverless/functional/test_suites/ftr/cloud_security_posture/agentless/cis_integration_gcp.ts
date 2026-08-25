@@ -94,8 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // credentials_json field component changed, getFieldAttributeValue returns [object Object]
-    describe.skip('Serverless - Agentless CIS_GCP edit flow', () => {
+    describe('Serverless - Agentless CIS_GCP edit flow', () => {
       it(`user should save and edit agentless integration policy`, async () => {
         const newCredentialsJSON = 'newJson';
         await cisIntegration.createAgentlessIntegration({
@@ -106,19 +105,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           newCredentialsJSON
         );
 
-        // assert the form values are saved
+        // Project ID is frozen on edit. Credentials JSON is a secret, so after save the
+        // plaintext is hidden and a Replace button is shown instead of the field value.
         expect(
           await cisIntegration.getFieldAttributeValue(
             GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID,
             'disabled'
           )
         ).to.be('true');
-        expect(
-          await cisIntegration.getFieldAttributeValue(
-            GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON,
-            'value'
-          )
-        ).to.be(newCredentialsJSON);
+        expect(await cisIntegration.showCredentialJsonSecretPanel()).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('credentials-json')).to.not.be(null);
+        expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
       });
     });
   });
