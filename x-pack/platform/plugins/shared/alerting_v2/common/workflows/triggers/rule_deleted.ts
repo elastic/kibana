@@ -54,5 +54,5 @@ triggers:
       ),
     ],
   },
-  snippets: { condition: 'event.rule.tags: "critical"' },
+  snippets: { condition: 'event.rule.tags: "my-tag"' },
 };
