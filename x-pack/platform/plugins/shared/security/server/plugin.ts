@@ -103,6 +103,12 @@ export interface PluginStartDependencies {
   spaces?: SpacesPluginStart;
 }
 
+/** Builds the server base URL, bracketing bare IPv6 hostnames so the result is a valid URL. */
+const buildServerBaseUrl = ({ protocol, hostname, port }: { protocol: string; hostname: string; port: number }) => {
+  const host = hostname.includes(':') && !hostname.startsWith('[') ? `[${hostname}]` : hostname;
+  return `${protocol}://${host}:${port}`;
+};
+
 /**
  * Represents Security Plugin instance that will be managed by the Kibana plugin system.
  */
@@ -349,8 +355,7 @@ export class SecurityPlugin
       })
     );
 
-    const { protocol, hostname, port } = core.http.getServerInfo();
-    const serverBaseUrl = `${protocol}://${hostname}:${port}`;
+    const serverBaseUrl = buildServerBaseUrl(core.http.getServerInfo());
 
     defineRoutes({
       router: core.http.createRouter(),
@@ -438,8 +443,7 @@ export class SecurityPlugin
 
     const config = this.getConfig();
 
-    const { protocol, hostname, port } = core.http.getServerInfo();
-    const serverBaseUrl = `${protocol}://${hostname}:${port}`;
+    const serverBaseUrl = buildServerBaseUrl(core.http.getServerInfo());
 
     const kibanaServerResourceURL = getOAuthProtectedResource({
       configuredResource: config.mcp?.oauth2?.metadata?.resource,

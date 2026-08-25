@@ -18,7 +18,7 @@ describe('getOAuthProtectedResource', () => {
     ).toBe('https://kibana.example.com/api/agent_builder/mcp');
   });
 
-  it('falls back to the public base URL when no resource is configured', () => {
+  it('falls back to the public base URL when no resource is configured, normalizing origin to canonical form', () => {
     expect(
       getOAuthProtectedResource({
         publicBaseUrl: 'https://kibana.example.com',
@@ -31,15 +31,6 @@ describe('getOAuthProtectedResource', () => {
     expect(getOAuthProtectedResource({ serverBaseUrl: 'http://localhost:5601' })).toBe(
       'http://localhost:5601/'
     );
-  });
-
-  it('normalizes origin-only URL without trailing slash to canonical form (gains slash)', () => {
-    expect(
-      getOAuthProtectedResource({
-        publicBaseUrl: 'https://kibana.example.com',
-        serverBaseUrl: 'http://localhost:5601',
-      })
-    ).toBe('https://kibana.example.com/');
   });
 
   it('normalizes origin-only URL already with trailing slash — unchanged', () => {
@@ -60,9 +51,21 @@ describe('getOAuthProtectedResource', () => {
     ).toBe('https://kibana.example.com/api/agent_builder/mcp');
   });
 
-  it('normalizes server base URL to canonical form', () => {
+  it('normalizes a non-canonical server base URL (trailing slash present) to canonical form', () => {
     expect(getOAuthProtectedResource({ serverBaseUrl: 'http://localhost:5601/' })).toBe(
       'http://localhost:5601/'
+    );
+  });
+
+  it('returns unparseable input verbatim when WHATWG URL throws (e.g. unbracketed IPv6)', () => {
+    expect(getOAuthProtectedResource({ serverBaseUrl: 'http://::1:5601' })).toBe(
+      'http://::1:5601'
+    );
+  });
+
+  it('normalizes a bracketed IPv6 origin to canonical form', () => {
+    expect(getOAuthProtectedResource({ serverBaseUrl: 'http://[::1]:5601' })).toBe(
+      'http://[::1]:5601/'
     );
   });
 });

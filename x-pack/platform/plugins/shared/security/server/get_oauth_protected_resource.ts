@@ -23,5 +23,11 @@ export function getOAuthProtectedResource({
   serverBaseUrl: string;
 }): string {
   const resource = configuredResource ?? publicBaseUrl ?? serverBaseUrl;
-  return new URL(resource).href;
+  try {
+    return new URL(resource).href;
+  } catch {
+    // Schema-validated-but-WHATWG-unparseable values (e.g. unbracketed IPv6) must not crash startup;
+    // return the un-normalized string to preserve old behavior.
+    return resource;
+  }
 }

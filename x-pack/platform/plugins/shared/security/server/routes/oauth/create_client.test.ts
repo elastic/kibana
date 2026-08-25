@@ -322,7 +322,7 @@ describe('Create OAuth Client route', () => {
     expect(oauthMock.createClient).not.toHaveBeenCalled();
   });
 
-  it('falls back to the server base URL as resource when mcp resource config is absent', async () => {
+  it('falls back to the public base URL as resource when mcp resource config is absent', async () => {
     ({ routeHandler, oauthMock } = setup({
       mcp: {
         oauth2: {
