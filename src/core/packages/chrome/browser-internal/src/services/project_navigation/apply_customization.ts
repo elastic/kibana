@@ -18,7 +18,12 @@ import type {
 } from '@kbn/core-chrome-browser';
 import { replayMoves } from '@kbn/core-chrome-navigation-customization';
 import { i18n } from '@kbn/i18n';
-import { flattenNav, getRenderableNodes, parseNavigationTree } from './utils';
+import {
+  flattenNav,
+  getRenderableNodes,
+  parseNavigationTree,
+  type ParsedNavigationNode,
+} from './utils';
 
 const HOME_TITLE = i18n.translate('core.ui.chrome.sideNavigation.homeItemTitle', {
   defaultMessage: 'Home',
@@ -28,7 +33,7 @@ export interface ParsedNavigation {
   id: SolutionId;
   tree: ChromeProjectNavigationNode[];
   treeUI: NavigationTreeDefinitionUI;
-  flattened: Record<string, ChromeProjectNavigationNode>;
+  flattened: Record<string, ParsedNavigationNode>;
   overflowItemIds: string[];
   defaultItemIds: string[];
   /**

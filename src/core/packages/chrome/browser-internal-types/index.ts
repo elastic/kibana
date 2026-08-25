@@ -29,7 +29,11 @@ import type {
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
+  NavExtensionRegistryEntryMap,
+  NavExtensionRuntimeDefinitionMap,
+  NavExtensionSlotData,
   ChromeProjectNavigationNode,
+  ChromeExtensionPointNavigationNode,
   ChromeSetProjectBreadcrumbsParams,
 } from '@kbn/core-chrome-browser';
 
@@ -104,7 +108,7 @@ export interface InternalChromeStart extends ChromeStart {
     getNavigation$(): Observable<{
       solutionId: SolutionId;
       navigationTree: NavigationTreeDefinitionUI;
-      activeNodes: ChromeProjectNavigationNode[][];
+      activeNodes: Array<Array<ChromeProjectNavigationNode | ChromeExtensionPointNavigationNode>>;
       overflowItemIds: string[];
       /** Default top-level item IDs before any user customization is applied. */
       defaultItemIds: string[];
@@ -145,6 +149,18 @@ export interface InternalChromeStart extends ChromeStart {
 
     /** Register the handler that opens the navigation customization modal. Called once by the navigation plugin. */
     registerCustomizeNavigationHandler(handler: () => void): void;
+
+    /** Push the global extension registry (template definitions + data factories), keyed by `extensionId`. */
+    setExtensionRegistry(registry: NavExtensionRegistryEntryMap): void;
+
+    /** Get the global extension template-definition registry (without data factories). */
+    getExtensionRegistry$(): Observable<NavExtensionRuntimeDefinitionMap>;
+
+    /**
+     * Lazily materialize and return the shared data stream for an extension.
+     * Returns undefined when the extension is unknown or has no `createData$`.
+     */
+    getExtensionData$(extensionId: string): Observable<NavExtensionSlotData> | undefined;
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */

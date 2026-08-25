@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/deeplinks-context-engine'
   - '@kbn/ui-side-navigation'
   - '@kbn/core-chrome-sidebar'
+  - '@kbn/utility-types'
 tags:
   - shared-browser
   - package

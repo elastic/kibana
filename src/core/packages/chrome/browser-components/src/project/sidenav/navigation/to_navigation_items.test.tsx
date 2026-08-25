@@ -12,6 +12,7 @@ import { toNavigationItems } from './to_navigation_items';
 import { PanelStateManager } from './panel_state_manager';
 import type {
   ChromeProjectNavigationNode,
+  ChromeExtensionPointNavigationNode,
   NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 
@@ -27,7 +28,7 @@ const mockPanelStateManager = new PanelStateManager();
 // Utility function to simplify toNavigationItems calls in tests
 const createNavigationItems = (
   tree: NavigationTreeDefinitionUI = navigationTree,
-  activeNodes: ChromeProjectNavigationNode[][] = []
+  activeNodes: Array<Array<ChromeProjectNavigationNode | ChromeExtensionPointNavigationNode>> = []
 ) => {
   return toNavigationItems(tree, activeNodes, [], mockPanelStateManager);
 };
@@ -77,6 +78,17 @@ describe('toNavigationItems', () => {
       • Secondary menu item node \\"fleet\\" has a href \\"/jom/app/fleet\\", but it should not. We're using it as a section title that doesn't have a link.
       • ID \\"endpoints\\" is used 2 times in navigation items. Each navigation item must have a unique ID."
     `);
+  });
+
+  it('moves overflow ids out of primaryItems', () => {
+    const { navItems } = createNavigationItems(navigationTree);
+    const overflowId = navItems.primaryItems[0]!.id;
+    const withOverflow = toNavigationItems(navigationTree, [], [overflowId], mockPanelStateManager);
+
+    expect(
+      withOverflow.navItems.primaryItems.find((item) => item.id === overflowId)
+    ).toBeUndefined();
+    expect(withOverflow.navItems.overflowItems?.[0]?.id).toBe(overflowId);
   });
 });
 
@@ -294,7 +306,7 @@ describe('hidden panel link', () => {
 describe('Chrome Next mode (isNextChrome)', () => {
   const createChromeNextNavigationItems = (
     tree: NavigationTreeDefinitionUI = navigationTree,
-    activeNodes: ChromeProjectNavigationNode[][] = []
+    activeNodes: Array<Array<ChromeProjectNavigationNode | ChromeExtensionPointNavigationNode>> = []
   ) => {
     return toNavigationItems(tree, activeNodes, [], mockPanelStateManager, true);
   };
@@ -318,5 +330,402 @@ describe('Chrome Next mode (isNextChrome)', () => {
     expect(homeItem).toBeDefined();
     expect(homeItem?.label).toBe('Security');
     expect(homeItem?.iconType).toBe('logoSecurity');
+  });
+});
+
+describe('extension point sections', () => {
+  it('maps extension point nodes to secondary menu sections', () => {
+    const panelOpener: ChromeProjectNavigationNode = {
+      id: 'dashboards',
+      title: 'Dashboards',
+      icon: 'dashboardApp',
+      renderAs: 'panelOpener',
+      path: 'dashboards',
+      children: [
+        {
+          id: 'recent-dashboards',
+          title: 'Recently viewed',
+          renderAs: 'extension',
+          extensionId: 'recentlyAccessedDashboards',
+          popoverOnly: true,
+          path: 'dashboards.recent-dashboards',
+        },
+        {
+          id: 'dashboards-section',
+          title: 'Dashboards',
+          path: 'dashboards.dashboards-section',
+          children: [
+            {
+              id: 'all-dashboards',
+              title: 'All dashboards',
+              href: '/app/security/dashboards',
+              path: 'dashboards.dashboards-section.all-dashboards',
+            },
+          ],
+        },
+      ],
+    };
+
+    const tree: NavigationTreeDefinitionUI = {
+      id: 'security',
+      body: [
+        {
+          id: 'home',
+          title: 'Security',
+          renderAs: 'home',
+          href: '/app/security/get_started',
+          path: 'home',
+        },
+        panelOpener,
+      ],
+    };
+
+    const { navItems } = createNavigationItems(tree);
+    const dashboardsItem = navItems.primaryItems.find((item) => item.id === 'dashboards');
+
+    expect(dashboardsItem?.sections).toEqual([
+      {
+        id: 'recent-dashboards',
+        label: 'Recently viewed',
+        slotId: 'recent-dashboards',
+        extensionId: 'recentlyAccessedDashboards',
+        popoverOnly: true,
+      },
+      {
+        id: 'dashboards-section',
+        label: 'Dashboards',
+        items: [
+          expect.objectContaining({
+            id: 'all-dashboards',
+            href: '/app/security/dashboards',
+          }),
+        ],
+      },
+    ]);
+  });
+
+  it('collects hideWhenEmptyExtensionIds for opt-in extension nodes without changing sections', () => {
+    const panelOpener: ChromeProjectNavigationNode = {
+      id: 'dashboards',
+      title: 'Dashboards',
+      icon: 'dashboardApp',
+      renderAs: 'panelOpener',
+      path: 'dashboards',
+      children: [
+        {
+          id: 'recent-dashboards',
+          title: 'Recently viewed',
+          renderAs: 'extension',
+          extensionId: 'recentlyAccessedDashboards',
+          popoverOnly: true,
+          hideWhenEmpty: true,
+          path: 'dashboards.recent-dashboards',
+        },
+        {
+          id: 'other-extension',
+          title: 'Other extension',
+          renderAs: 'extension',
+          extensionId: 'otherExtension',
+          path: 'dashboards.other-extension',
+        },
+      ],
+    };
+
+    const tree: NavigationTreeDefinitionUI = {
+      id: 'security',
+      body: [
+        {
+          id: 'home',
+          title: 'Security',
+          renderAs: 'home',
+          href: '/app/security/get_started',
+          path: 'home',
+        },
+        panelOpener,
+      ],
+    };
+
+    const { navItems, hideWhenEmptyExtensionIds } = createNavigationItems(tree);
+    const dashboardsItem = navItems.primaryItems.find((item) => item.id === 'dashboards');
+
+    expect(hideWhenEmptyExtensionIds).toEqual(new Set(['recentlyAccessedDashboards']));
+    expect(dashboardsItem?.sections).toEqual([
+      {
+        id: 'recent-dashboards',
+        label: 'Recently viewed',
+        slotId: 'recent-dashboards',
+        extensionId: 'recentlyAccessedDashboards',
+        popoverOnly: true,
+      },
+      {
+        id: 'other-extension',
+        label: 'Other extension',
+        slotId: 'other-extension',
+        extensionId: 'otherExtension',
+      },
+    ]);
+  });
+
+  it('preserves extension order when interleaved with direct links', () => {
+    const panelOpener: ChromeProjectNavigationNode = {
+      id: 'dashboards',
+      title: 'Dashboards',
+      icon: 'dashboardApp',
+      renderAs: 'panelOpener',
+      path: 'dashboards',
+      children: [
+        {
+          id: 'recent-dashboards',
+          title: 'Recently viewed',
+          renderAs: 'extension',
+          extensionId: 'recentlyAccessedDashboards',
+          path: 'dashboards.recent-dashboards',
+        },
+        {
+          id: 'all-dashboards',
+          title: 'All dashboards',
+          href: '/app/security/dashboards',
+          path: 'dashboards.all-dashboards',
+        },
+        {
+          id: 'pinned-dashboards',
+          title: 'Pinned',
+          renderAs: 'extension',
+          extensionId: 'recentlyAccessedDashboards',
+          path: 'dashboards.pinned-dashboards',
+        },
+      ],
+    };
+
+    const tree: NavigationTreeDefinitionUI = {
+      id: 'security',
+      body: [
+        {
+          id: 'home',
+          title: 'Security',
+          renderAs: 'home',
+          href: '/app/security/get_started',
+          path: 'home',
+        },
+        panelOpener,
+      ],
+    };
+
+    const { navItems } = createNavigationItems(tree);
+    const dashboardsItem = navItems.primaryItems.find((item) => item.id === 'dashboards');
+
+    expect(dashboardsItem?.sections?.map((section) => section.id)).toEqual([
+      'recent-dashboards',
+      'dashboards-section',
+      'pinned-dashboards',
+    ]);
+  });
+
+  it('preserves extension order when a direct link precedes an extension', () => {
+    const panelOpener: ChromeProjectNavigationNode = {
+      id: 'dashboards',
+      title: 'Dashboards',
+      icon: 'dashboardApp',
+      renderAs: 'panelOpener',
+      path: 'dashboards',
+      children: [
+        {
+          id: 'all-dashboards',
+          title: 'All dashboards',
+          href: '/app/security/dashboards',
+          path: 'dashboards.all-dashboards',
+        },
+        {
+          id: 'recent-dashboards',
+          title: 'Recently viewed',
+          renderAs: 'extension',
+          extensionId: 'recentlyAccessedDashboards',
+          path: 'dashboards.recent-dashboards',
+        },
+      ],
+    };
+
+    const tree: NavigationTreeDefinitionUI = {
+      id: 'security',
+      body: [
+        {
+          id: 'home',
+          title: 'Security',
+          renderAs: 'home',
+          href: '/app/security/get_started',
+          path: 'home',
+        },
+        panelOpener,
+      ],
+    };
+
+    const { navItems } = createNavigationItems(tree);
+    const dashboardsItem = navItems.primaryItems.find((item) => item.id === 'dashboards');
+
+    expect(dashboardsItem?.sections?.map((section) => section.id)).toEqual([
+      'dashboards-section',
+      'recent-dashboards',
+    ]);
+  });
+
+  it('preserves extension order between named sections', () => {
+    const panelOpener: ChromeProjectNavigationNode = {
+      id: 'dashboards',
+      title: 'Dashboards',
+      icon: 'dashboardApp',
+      renderAs: 'panelOpener',
+      path: 'dashboards',
+      children: [
+        {
+          id: 'recent-dashboards',
+          title: 'Recently viewed',
+          renderAs: 'extension',
+          extensionId: 'recentlyAccessedDashboards',
+          path: 'dashboards.recent-dashboards',
+        },
+        {
+          id: 'dashboards-section',
+          title: 'Dashboards',
+          path: 'dashboards.dashboards-section',
+          children: [
+            {
+              id: 'all-dashboards',
+              title: 'All dashboards',
+              href: '/app/security/dashboards',
+              path: 'dashboards.dashboards-section.all-dashboards',
+            },
+          ],
+        },
+        {
+          id: 'pinned-dashboards',
+          title: 'Pinned',
+          renderAs: 'extension',
+          extensionId: 'recentlyAccessedDashboards',
+          path: 'dashboards.pinned-dashboards',
+        },
+      ],
+    };
+
+    const tree: NavigationTreeDefinitionUI = {
+      id: 'security',
+      body: [
+        {
+          id: 'home',
+          title: 'Security',
+          renderAs: 'home',
+          href: '/app/security/get_started',
+          path: 'home',
+        },
+        panelOpener,
+      ],
+    };
+
+    const { navItems } = createNavigationItems(tree);
+    const dashboardsItem = navItems.primaryItems.find((item) => item.id === 'dashboards');
+
+    expect(dashboardsItem?.sections?.map((section) => section.id)).toEqual([
+      'recent-dashboards',
+      'dashboards-section',
+      'pinned-dashboards',
+    ]);
+  });
+
+  it('skips hidden extensions without shifting visible sibling order', () => {
+    const panelOpener: ChromeProjectNavigationNode = {
+      id: 'dashboards',
+      title: 'Dashboards',
+      icon: 'dashboardApp',
+      renderAs: 'panelOpener',
+      path: 'dashboards',
+      children: [
+        {
+          id: 'recent-dashboards',
+          title: 'Recently viewed',
+          renderAs: 'extension',
+          extensionId: 'recentlyAccessedDashboards',
+          path: 'dashboards.recent-dashboards',
+        },
+        {
+          id: 'hidden-extension',
+          title: 'Hidden',
+          renderAs: 'extension',
+          extensionId: 'recentlyAccessedDashboards',
+          sideNavStatus: 'hidden',
+          path: 'dashboards.hidden-extension',
+        },
+        {
+          id: 'all-dashboards',
+          title: 'All dashboards',
+          href: '/app/security/dashboards',
+          path: 'dashboards.all-dashboards',
+        },
+      ],
+    };
+
+    const tree: NavigationTreeDefinitionUI = {
+      id: 'security',
+      body: [
+        {
+          id: 'home',
+          title: 'Security',
+          renderAs: 'home',
+          href: '/app/security/get_started',
+          path: 'home',
+        },
+        panelOpener,
+      ],
+    };
+
+    const { navItems } = createNavigationItems(tree);
+    const dashboardsItem = navItems.primaryItems.find((item) => item.id === 'dashboards');
+
+    expect(dashboardsItem?.sections?.map((section) => section.id)).toEqual([
+      'recent-dashboards',
+      'dashboards-section',
+    ]);
+  });
+
+  it('skips extension nodes missing extensionId', async () => {
+    const panelOpener: ChromeProjectNavigationNode = {
+      id: 'dashboards',
+      title: 'Dashboards',
+      icon: 'dashboardApp',
+      renderAs: 'panelOpener',
+      path: 'dashboards',
+      children: [
+        {
+          id: 'invalid-extension',
+          title: 'Invalid',
+          renderAs: 'extension',
+          extensionId: '',
+          path: 'dashboards.invalid-extension',
+        },
+      ],
+    };
+
+    const tree: NavigationTreeDefinitionUI = {
+      id: 'security',
+      body: [
+        {
+          id: 'home',
+          title: 'Security',
+          renderAs: 'home',
+          href: '/app/security/get_started',
+          path: 'home',
+        },
+        panelOpener,
+      ],
+    };
+
+    const { navItems } = createNavigationItems(tree);
+
+    expect(navItems.primaryItems.find((item) => item.id === 'dashboards')).toBeUndefined();
+
+    await waitFor(() => {
+      expect(consoleWarnSpy).toHaveBeenCalled();
+    });
+    expect(consoleWarnSpy.mock.calls[0][0]).toContain(
+      'Extension node "invalid-extension" is missing extensionId'
+    );
   });
 });
