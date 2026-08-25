@@ -8,65 +8,9 @@
  */
 
 import { runComparator } from '@kbn/presentation-publishing';
-import {
-  getDiscoverSessionEmbeddableComparators,
-  getSearchEmbeddableComparators,
-} from './get_search_embeddable_comparators';
+import { getDiscoverSessionEmbeddableComparators } from './get_search_embeddable_comparators';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-
-const sharedSavedSearchComparators = {
-  sort: 'deepEquality',
-  columns: 'deepEquality',
-  rowHeight: 'referenceEquality',
-  sampleSize: 'referenceEquality',
-  rowsPerPage: 'referenceEquality',
-  headerRowHeight: 'referenceEquality',
-  density: 'referenceEquality',
-  grid: 'deepEquality',
-} as const;
-
-describe('getSearchEmbeddableComparators', () => {
-  it('returns shared attribute comparators for by-value panels', () => {
-    const c = getSearchEmbeddableComparators(true, false);
-    expect(c).toMatchObject(sharedSavedSearchComparators);
-    expect('attributes' in c && c.attributes).toBe('skip');
-    expect(c).not.toHaveProperty('selectedTabId');
-    expect(c).not.toHaveProperty('savedObjectId');
-  });
-
-  it('uses referenceEquality for selectedTabId when by-reference and tab comparators are active', () => {
-    const c = getSearchEmbeddableComparators(false, false);
-    expect(c).toMatchObject(sharedSavedSearchComparators);
-    expect('selectedTabId' in c && c.selectedTabId).toBe('referenceEquality');
-    expect('savedObjectId' in c && c.savedObjectId).toBe('skip');
-    expect(c).not.toHaveProperty('attributes');
-  });
-
-  it('skips selectedTabId when by-reference and tab comparators should be skipped', () => {
-    const c = getSearchEmbeddableComparators(false, true);
-    expect(c).toMatchObject(sharedSavedSearchComparators);
-    expect('selectedTabId' in c && c.selectedTabId).toBe('skip');
-    expect('savedObjectId' in c && c.savedObjectId).toBe('skip');
-  });
-
-  it('treats selectedTabId as always equal when skipped (deleted tab / inline edit)', () => {
-    const c = getSearchEmbeddableComparators(false, true);
-    expect(
-      'selectedTabId' in c && runComparator(c.selectedTabId, undefined, undefined, 'tab-a', 'tab-b')
-    ).toBe(true);
-  });
-
-  it('compares selectedTabId by reference when not skipped', () => {
-    const c = getSearchEmbeddableComparators(false, false);
-    expect(
-      'selectedTabId' in c && runComparator(c.selectedTabId, undefined, undefined, 'a', 'a')
-    ).toBe(true);
-    expect(
-      'selectedTabId' in c && runComparator(c.selectedTabId, undefined, undefined, 'a', 'b')
-    ).toBe(false);
-  });
-});
 
 describe('getDiscoverSessionEmbeddableComparators', () => {
   const language = 'kql' as const;

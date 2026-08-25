@@ -8,12 +8,18 @@
  */
 
 import type { ScoutPage } from '..';
+import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
 /**
  * Default timeout for `page.waitForFunction` readiness waits.
  */
 const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
+
+interface ChartSwitchPopoverOptions {
+  search?: string;
+  visType?: string;
+}
 
 export class LensApp {
   readonly lensApp;
@@ -22,6 +28,7 @@ export class LensApp {
   readonly saveModal;
   readonly savedObjectTitleInput;
   readonly confirmSaveButton;
+  readonly addToLibraryCheckbox;
   /**
    * Needed by the Lens plugin's `openDimensionEditor` / `secondaryFlyoutBackButton` alias
    * as well as `closeDimensionEditor` here.
@@ -48,6 +55,7 @@ export class LensApp {
     this.saveModal = this.page.testSubj.locator('savedObjectSaveModal');
     this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
     this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
+    this.addToLibraryCheckbox = this.page.locator('#add-to-library-checkbox');
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
@@ -70,28 +78,72 @@ export class LensApp {
    * @param options.search Optional filter text when the target chart is easier to find by label.
    */
   async switchToVisualization(visType: string, options?: { search?: string }) {
-    await this.openChartSwitchPopover();
-    if (options?.search) {
-      const searchInput = this.page.testSubj.locator('lnsChartSwitchSearch');
-      await searchInput.waitFor({ state: 'visible' });
-      await searchInput.fill(options.search);
-    }
-    const option = this.chartSwitchList.getByTestId(`lnsChartSwitchPopover_${visType}`);
-    await option.waitFor({ state: 'visible' });
-    await option.click();
-    // Popover should close after selection; waiting avoids racing with subsequent assertions.
-    await this.chartSwitchList.waitFor({ state: 'hidden' });
+    await this.openChartSwitchPopover({ ...options, visType });
+    await this.selectChartSwitchOption(visType);
   }
 
-  private async openChartSwitchPopover() {
-    await this.chartSwitchPopover.click();
-    await this.chartSwitchList.waitFor({ state: 'visible' });
+  /**
+   * Opens the chart switcher popover, optionally filtering its list.
+   * Prefer `switchToVisualization` to switch; open the popover directly only to assert on
+   * its contents (e.g. the warning badge of a chart type), then close it or pick an option.
+   *
+   * @param options.visType Chart switcher test-subj suffix to wait for after filtering.
+   * @param options.search Filter text, needed when the target chart is not rendered by the
+   * virtualized list until it is filtered.
+   */
+  async openChartSwitchPopover(options?: ChartSwitchPopoverOptions) {
+    await expect(async () => {
+      if (await this.chartSwitchList.isVisible()) {
+        return;
+      }
+
+      await this.chartSwitchPopover.click({ timeout: 5_000 });
+      await this.chartSwitchList.waitFor({ state: 'visible', timeout: 5_000 });
+    }).toPass({ timeout: 15_000 });
+
+    if (options?.visType) {
+      await this.filterChartSwitchOptions(options.visType, options.search);
+    }
+  }
+
+  /** Locator for a chart type's row in the open chart switcher popover. */
+  getChartSwitchOption(visType: string) {
+    return this.chartSwitchList.getByTestId(`lnsChartSwitchPopover_${visType}`);
+  }
+
+  /**
+   * Locator for the badge warning that switching to this chart type would change the current
+   * configuration. Resolves only while the popover is open and the option is rendered, so
+   * assert the option itself is visible before asserting the badge is absent.
+   */
+  getChartSwitchWarning(visType: string) {
+    return this.getChartSwitchOption(visType).getByTestId(`lnsChartSwitchPopoverAlert_${visType}`);
+  }
+
+  /** Picks a chart type from the open chart switcher popover. */
+  async selectChartSwitchOption(visType: string) {
+    const option = this.getChartSwitchOption(visType);
+    await option.waitFor({ state: 'visible', timeout: 15_000 });
+    // The virtualized list re-renders while filtered; dispatchEvent bypasses mouse actionability checks.
+    await option.dispatchEvent('click');
+    // Popover should close after selection; waiting avoids racing with subsequent assertions.
+    await this.chartSwitchList.waitFor({ state: 'hidden', timeout: 15_000 });
   }
 
   /** Returns the chart type label shown in the chart switcher popover. */
   async getChartSwitchType(): Promise<string> {
     await this.chartSwitchPopover.waitFor({ state: 'visible' });
     return (await this.chartSwitchPopover.innerText()).trim();
+  }
+
+  private async filterChartSwitchOptions(visType: string, search?: string) {
+    const query = search ?? visType.substring(visType.length - 3);
+    const searchInput = this.page.testSubj.locator('lnsChartSwitchSearch');
+
+    await searchInput.waitFor({ state: 'visible' });
+    await searchInput.fill(query);
+    await expect(searchInput).toHaveValue(query, { timeout: 10_000 });
+    await this.getChartSwitchOption(visType).waitFor({ state: 'visible', timeout: 15_000 });
   }
 
   /**
@@ -118,6 +170,8 @@ export class LensApp {
         }
       | {
           addToDashboard: 'new';
+          saveAsNew?: boolean;
+          saveToLibrary?: boolean;
         }
       | {
           addToDashboard: 'none';
@@ -127,16 +181,27 @@ export class LensApp {
     await this.saveModal.waitFor({ state: 'visible' });
     await this.savedObjectTitleInput.fill(title);
 
+    // Prefer checking the radio input — label clicks race save-modal remounts.
     if (options?.addToDashboard === 'existing') {
-      await this.page.locator('label[for="existing-dashboard-option"]').click();
+      await this.page.locator('#existing-dashboard-option').check();
       await this.page.testSubj.locator('open-dashboard-picker').click();
       await this.page.testSubj
         .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
         .click();
     } else if (options?.addToDashboard === 'new') {
-      await this.page.locator('label[for="new-dashboard-option"]').click();
+      if (options.saveAsNew !== undefined) {
+        await this.setEuiSwitch('saveAsNewCheckbox', options.saveAsNew);
+      }
+      await this.page.locator('#new-dashboard-option').check();
+      if (options.saveToLibrary !== undefined) {
+        if (options.saveToLibrary) {
+          await this.addToLibraryCheckbox.check();
+        } else {
+          await this.addToLibraryCheckbox.uncheck();
+        }
+      }
     } else if (options?.addToDashboard === 'none') {
-      await this.page.locator('label[for="add-to-library-option"]').click();
+      await this.page.locator('#add-to-library-option').check();
     }
 
     await this.confirmSaveButton.click();
@@ -245,7 +310,11 @@ export class LensApp {
   }
 
   private async selectField(field: string) {
-    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
+    await this.page.components
+      .comboBox('indexPattern-dimension-field')
+      .setSelectedOptions([field], {
+        timeout: 10_000,
+      });
   }
 
   /**

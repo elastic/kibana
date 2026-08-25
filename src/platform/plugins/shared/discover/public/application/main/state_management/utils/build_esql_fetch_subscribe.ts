@@ -73,9 +73,9 @@ export const buildEsqlFetchSubscribe = ({
       return;
     }
 
-    // We need to mark profile state fields to reset on index pattern changes
-    // when loading starts to ensure the correct pre fetch state is available
-    // before data fetching is triggered
+    // We need to mark profile app state default fields to reset on index pattern
+    // changes when loading starts to ensure the correct pre fetch state is
+    // available before data fetching is triggered
     if (next.fetchStatus === FetchStatus.LOADING) {
       // We have to grab the current query from appState
       // here since nextQuery has not been updated yet
@@ -90,10 +90,10 @@ export const buildEsqlFetchSubscribe = ({
           getIndexPatternFromESQLQuery(appStateQuery.esql) !==
           getIndexPatternFromESQLQuery(prevEsqlData.query);
 
-        // Mark all profile state fields to reset when the index pattern changes
+        // Mark all profile app state default fields to reset when the index pattern changes
         if (indexPatternChanged) {
           internalState.dispatch(
-            injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+            injectCurrentTab(internalStateActions.setProfileAppStateDefaultFieldsToReset)({
               fieldsToReset: 'all',
             })
           );

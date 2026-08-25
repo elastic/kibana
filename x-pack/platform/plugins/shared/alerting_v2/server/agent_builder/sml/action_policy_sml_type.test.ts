@@ -10,7 +10,8 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { ACTION_POLICY_ATTACHMENT_TYPE, ACTION_POLICY_SML_TYPE } from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { ACTION_POLICY_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { ActionPolicyClient } from '../../lib/action_policy_client';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -27,7 +28,8 @@ const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
   matcher: 'alert.severity = "critical"',
   groupingMode: 'per_episode',
   tags: ['oncall', 'critical'],
-  auth: { owner: 'elastic', createdByUser: true },
+  apiKeyOwner: 'elastic',
+  apiKeyCreatedByUser: true,
   createdBy: 'elastic',
   updatedBy: 'elastic',
   createdAt: '2026-04-01T00:00:00.000Z',
@@ -76,8 +78,8 @@ describe('createActionPolicySmlType', () => {
     });
 
   describe('id and fetchFrequency', () => {
-    it('uses the shared ACTION_POLICY_SML_TYPE constant', () => {
-      expect(buildDefinition().id).toBe(ACTION_POLICY_SML_TYPE);
+    it('uses the shared ACTION_POLICY_KI_TYPE constant', () => {
+      expect(buildDefinition().id).toBe(ACTION_POLICY_KI_TYPE);
     });
 
     it('returns "1m" as fetch frequency', () => {
@@ -196,7 +198,7 @@ describe('createActionPolicySmlType', () => {
 
       expect(getRepoSo).toHaveBeenCalledWith(ACTION_POLICY_SAVED_OBJECT_TYPE, 'policy-1');
       expect(result).toEqual({
-        type: ACTION_POLICY_SML_TYPE,
+        type: ACTION_POLICY_KI_TYPE,
         title: 'Critical alerts → Slack',
         content: [
           'Critical alerts → Slack',
@@ -275,10 +277,10 @@ describe('createActionPolicySmlType', () => {
       const originId = overrides.origin_id ?? 'policy-1';
       return {
         id: 'sml-1',
-        type: ACTION_POLICY_SML_TYPE,
+        type: ACTION_POLICY_KI_TYPE,
         title: 'Critical alerts → Slack',
         origin_id: originId,
-        origin: { uri: `${ACTION_POLICY_SML_TYPE}://${originId}` },
+        origin: { uri: `${ACTION_POLICY_KI_TYPE}://${originId}` },
         content: '',
         created_at: '2026-04-10T00:00:00.000Z',
         updated_at: '2026-04-10T00:00:00.000Z',

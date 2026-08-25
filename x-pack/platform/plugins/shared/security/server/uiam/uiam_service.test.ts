@@ -476,7 +476,6 @@ describe('UiamService', () => {
           headers: {
             'Content-Type': 'application/json',
             'User-Agent': 'Kibana/9.0.0',
-            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
             Authorization: 'Bearer essu_oauth_access_token',
           },
           dispatcher: AGENT_MOCK,
@@ -504,7 +503,11 @@ describe('UiamService', () => {
       );
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure', errorType: 'KIBANA.AUDIENCE_MISMATCH' }
+        {
+          outcome: 'failure',
+          oauthErrorType: 'KIBANA.AUDIENCE_MISMATCH',
+          oauthErrorCode: undefined,
+        }
       );
     });
 
@@ -519,7 +522,7 @@ describe('UiamService', () => {
       await expect(uiamService.exchangeOAuthToken('essu_invalid_token')).rejects.toThrow();
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure', errorType: 'UNKNOWN' }
+        { outcome: 'failure', oauthErrorType: 'UNKNOWN', oauthErrorCode: undefined }
       );
     });
 
@@ -542,7 +545,7 @@ describe('UiamService', () => {
       await expect(uiamService.exchangeOAuthToken('essu_expired_token')).rejects.toThrow();
       expect(securityTelemetry.recordOAuthTokenExchangeAttempt).toHaveBeenCalledWith(
         expect.any(Number),
-        { outcome: 'failure', errorType: 'AUTHENTICATION.TOKEN' }
+        { outcome: 'failure', oauthErrorType: 'AUTHENTICATION.TOKEN', oauthErrorCode: '0x7E0116' }
       );
     });
   });
@@ -631,6 +634,81 @@ describe('UiamService', () => {
         },
         body: JSON.stringify(expectedRequestBody),
         dispatcher: AGENT_MOCK,
+      });
+    });
+
+    it('withholds both the shared secret and the client certificate when client authentication is not requested', async () => {
+      const mockResponse: GrantUiamApiKeyResponse = {
+        id: 'api-key-id',
+        key: 'essu_api_key_from_grant',
+        description: 'api-key-from-grant',
+      };
+      const mtlsUiamService = new UiamService(
+        loggingSystemMock.createLogger(),
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: {
+                certificateAuthorities: '/some/ca/path',
+                certificate: '/path/to/cert.pem',
+                key: '/path/to/key.pem',
+              },
+            },
+          },
+          { serverless: true }
+        ).uiam,
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
+      );
+      agentSpy.mockClear();
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        mtlsUiamService.grantApiKey(
+          new HTTPAuthorizationHeader('ApiKey', 'essu_api_key'),
+          {
+            name: 'api-key-from-grant',
+          },
+          { includeClientAuthentication: false }
+        )
+      ).resolves.toEqual(mockResponse);
+
+      const expectedRequestBody: GrantUiamApiKeyRequestBody = {
+        description: 'api-key-from-grant',
+        internal: true,
+        role_assignments: {
+          limit: {
+            access: ['application'],
+            resource: ['project'],
+          },
+        },
+      };
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
+          Authorization: 'ApiKey essu_api_key',
+        },
+        body: JSON.stringify(expectedRequestBody),
+        dispatcher: AGENT_MOCK,
+      });
+      // The dispatcher this grant used keeps the CAs and server verification, but presents no
+      // client certificate.
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
       });
     });
 

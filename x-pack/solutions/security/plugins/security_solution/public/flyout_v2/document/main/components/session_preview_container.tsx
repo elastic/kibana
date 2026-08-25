@@ -52,7 +52,7 @@ export const SessionPreviewContainer = ({
   );
   const isNavigationEnabled = !(!isEnabled || disableNavigation);
 
-  const iconType = useMemo(() => (showIcon ? 'arrowStart' : undefined), [showIcon]);
+  const iconType = useMemo(() => (showIcon ? 'chevronLimitLeft' : undefined), [showIcon]);
 
   return (
     <ExpandablePanel
