@@ -724,10 +724,6 @@ class OutputService {
       data.hosts = data.hosts.map(normalizeHostsForAgents);
     }
 
-    if (options?.id) {
-      data.output_id = options?.id;
-    }
-
     if (isBeatsOutput(output) && isBeatsSOOutput(data)) {
       if (output.ssl) {
         data.ssl = JSON.stringify(output.ssl);
@@ -1113,7 +1109,7 @@ class OutputService {
       throw new OutputInvalidError('OTLP output type is not enabled');
     }
 
-    const typedFullUpdateData = { type: mergedType, ...data } as UpdateTypedOutput;
+    const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await this._validateOutputServerless(typedFullUpdateData, id, originalOutput);
     if (isBeatsOutput(typedFullUpdateData)) {
       this._validateOutputSslPaths(typedFullUpdateData);
