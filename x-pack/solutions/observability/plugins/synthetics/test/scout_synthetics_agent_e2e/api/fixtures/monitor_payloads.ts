@@ -10,6 +10,10 @@ import type { AgentStack } from './agent_stack';
 
 const schedule = { number: '1', unit: 'm' } as const;
 
+export const BROWSER_STEP_NAME = 'visit target';
+
+export const FAIL_PATH = '/fail';
+
 export const buildMonitorPayload = (
   type: SyntheticsMonitorType,
   { privateLocation, target }: AgentStack
@@ -20,6 +24,7 @@ export const buildMonitorPayload = (
     locations: [privateLocation],
     schedule,
     retest_on_failure: false,
+    max_attempts: 1,
   };
 
   switch (type) {
@@ -28,12 +33,19 @@ export const buildMonitorPayload = (
     case 'tcp':
       return { ...shared, type: 'tcp', host: target.host };
     case 'icmp':
-      return { ...shared, type: 'icmp', host: '127.0.0.1' };
+      // Ping the Docker host, not loopback inside the agent container.
+      return { ...shared, type: 'icmp', host: 'host.docker.internal' };
     case 'browser':
       return {
         ...shared,
         type: 'browser',
-        inline_script: `step("visit target", async () => { const response = await page.goto('${target.url}'); if (!response || response.status() >= 400) { throw new Error('unexpected status ' + response?.status()); } });`,
+        inline_script: `step("${BROWSER_STEP_NAME}", async () => { const response = await page.goto('${target.url}'); if (!response || response.status() >= 400) { throw new Error('unexpected status ' + response?.status()); } });`,
       };
   }
 };
+
+export const buildDownHttpMonitorPayload = (stack: AgentStack): Record<string, unknown> => ({
+  ...buildMonitorPayload('http', stack),
+  name: 'agent-e2e-http-down',
+  url: `${stack.target.url}${FAIL_PATH}`,
+});

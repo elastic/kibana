@@ -15,7 +15,12 @@ export interface TargetServer {
 }
 
 export async function startTargetServer(): Promise<TargetServer> {
-  const server = http.createServer((_req, res) => {
+  const server = http.createServer((req, res) => {
+    if (req.url?.startsWith('/fail')) {
+      res.writeHead(500, { 'content-type': 'text/plain; charset=utf-8' });
+      res.end('fail');
+      return;
+    }
     res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     res.end('<html><body><h1>scout-synthetics-agent-e2e</h1></body></html>');
   });

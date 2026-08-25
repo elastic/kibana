@@ -27,7 +27,16 @@ export const apiTest = baseApiTest.extend<{}, AgentE2eWorkerFixtures>({
   ],
 });
 
-export { buildMonitorPayload } from './monitor_payloads';
-export { isCheckUp, waitForSyntheticsCheck } from './wait_for_check';
-export type { SyntheticsMonitorType } from './wait_for_check';
+export {
+  BROWSER_STEP_NAME,
+  buildDownHttpMonitorPayload,
+  buildMonitorPayload,
+} from './monitor_payloads';
+export {
+  isCheckDown,
+  isCheckUp,
+  waitForBrowserStep,
+  waitForSyntheticsCheck,
+} from './wait_for_check';
+export type { SyntheticsCheckDoc, SyntheticsMonitorType } from './wait_for_check';
 export type { AgentStack } from './agent_stack';

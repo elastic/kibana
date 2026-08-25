@@ -17,16 +17,55 @@ export const SYNTHETICS_INDEX_BY_TYPE = {
 
 export type SyntheticsMonitorType = keyof typeof SYNTHETICS_INDEX_BY_TYPE;
 
-interface SyntheticsCheckDoc {
+export interface SyntheticsCheckDoc {
   config_id?: string;
   test_run_id?: string;
-  monitor?: { status?: string };
+  monitor?: { status?: string; type?: string; ip?: string };
   state?: { status?: string };
   summary?: { up?: number; down?: number; final_attempt?: boolean };
+  url?: { full?: string; domain?: string };
+  http?: { response?: { status_code?: number } };
+  resolve?: { ip?: string };
+  synthetics?: {
+    type?: string;
+    step?: { name?: string; status?: string };
+  };
 }
 
 export const isCheckUp = (doc: SyntheticsCheckDoc): boolean =>
   doc.monitor?.status === 'up' || doc.state?.status === 'up' || doc.summary?.up === 1;
+
+export const isCheckDown = (doc: SyntheticsCheckDoc): boolean =>
+  doc.monitor?.status === 'down' || doc.state?.status === 'down' || doc.summary?.down === 1;
+
+const statusMatches = (doc: SyntheticsCheckDoc, expectStatus: 'up' | 'down'): boolean =>
+  expectStatus === 'up' ? isCheckUp(doc) : isCheckDown(doc);
+
+const searchLatest = async (
+  esClient: EsClient,
+  index: string,
+  filters: Array<Record<string, unknown>>,
+  testRunId?: string
+): Promise<SyntheticsCheckDoc | undefined> => {
+  await esClient.indices.refresh({ index, ignore_unavailable: true }).catch(() => undefined);
+
+  const res = await esClient.search<SyntheticsCheckDoc>({
+    index,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    size: 5,
+    sort: [{ '@timestamp': { order: 'desc' } }],
+    query: {
+      bool: {
+        filter: filters,
+        // Prefer the test-now run without requiring the field on every doc.
+        ...(testRunId ? { should: [{ term: { test_run_id: testRunId } }] } : {}),
+      },
+    },
+  });
+
+  return res.hits.hits[0]?._source;
+};
 
 export async function waitForSyntheticsCheck(
   esClient: EsClient,
@@ -34,11 +73,13 @@ export async function waitForSyntheticsCheck(
     type,
     configId,
     testRunId,
+    expectStatus = 'up',
     timeoutMs = 180_000,
   }: {
     type: SyntheticsMonitorType;
     configId: string;
     testRunId?: string;
+    expectStatus?: 'up' | 'down';
     timeoutMs?: number;
   }
 ): Promise<SyntheticsCheckDoc> {
@@ -47,27 +88,73 @@ export async function waitForSyntheticsCheck(
   return tryForTime(
     timeoutMs,
     async () => {
-      await esClient.indices.refresh({ index, ignore_unavailable: true }).catch(() => undefined);
-
-      const res = await esClient.search<SyntheticsCheckDoc>({
+      const source = await searchLatest(
+        esClient,
         index,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        size: 1,
-        sort: [{ '@timestamp': { order: 'desc' } }],
-        query: {
-          bool: {
-            filter: [{ term: { config_id: configId } }],
-            ...(testRunId ? { should: [{ term: { test_run_id: testRunId } }] } : {}),
-          },
-        },
-      });
+        [{ term: { config_id: configId } }, { term: { 'synthetics.type': 'heartbeat/summary' } }],
+        testRunId
+      );
 
-      const source = res.hits.hits[0]?._source;
       if (!source) {
         throw new Error(
-          `No ${type} check document yet in ${index} for config_id=${configId}` +
+          `No ${type} heartbeat/summary yet in ${index} for config_id=${configId}` +
             (testRunId ? ` test_run_id=${testRunId}` : '')
+        );
+      }
+      if (!statusMatches(source, expectStatus)) {
+        throw new Error(
+          `Latest ${type} summary is not ${expectStatus} (monitor.status=${
+            source.monitor?.status
+          }, summary=${JSON.stringify(source.summary)})`
+        );
+      }
+      return source;
+    },
+    { intervalMs: 3_000 }
+  );
+}
+
+export async function waitForBrowserStep(
+  esClient: EsClient,
+  {
+    configId,
+    testRunId,
+    stepName,
+    timeoutMs = 180_000,
+  }: {
+    configId: string;
+    testRunId?: string;
+    stepName: string;
+    timeoutMs?: number;
+  }
+): Promise<SyntheticsCheckDoc> {
+  const index = SYNTHETICS_INDEX_BY_TYPE.browser;
+
+  return tryForTime(
+    timeoutMs,
+    async () => {
+      const source = await searchLatest(
+        esClient,
+        index,
+        [
+          { term: { config_id: configId } },
+          { term: { 'synthetics.type': 'step/end' } },
+          {
+            bool: {
+              should: [
+                { term: { 'synthetics.step.name.keyword': stepName } },
+                { term: { 'synthetics.step.name': stepName } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        testRunId
+      );
+
+      if (!source) {
+        throw new Error(
+          `No browser step/end yet in ${index} for step="${stepName}" config_id=${configId}`
         );
       }
       return source;

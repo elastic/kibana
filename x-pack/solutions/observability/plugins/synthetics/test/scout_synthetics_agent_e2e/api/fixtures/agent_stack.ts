@@ -141,8 +141,9 @@ export async function startAgentStack({
   log.info(`Target HTTP server listening on ${target.url}`);
 
   const version = await kbnClient.version.get();
-  // Source/dev Kibana often reports `build_snapshot: false` even when ES is a
-  // SNAPSHOT — always pull the SNAPSHOT agent images for this local suite.
+  // Image tag follows the Kibana under test (8.19.x on an 8.19 backport, 9.6.0
+  // on main). Source/dev Kibana often reports `build_snapshot: false` even when
+  // ES is a SNAPSHOT — always pull the SNAPSHOT agent images for this suite.
   const imageTag = version.includes('-SNAPSHOT') ? version : `${version}-SNAPSHOT`;
   const fleetServerImage = `docker.elastic.co/elastic-agent/elastic-agent:${imageTag}`;
   const agentImage = `docker.elastic.co/elastic-agent/elastic-agent-complete:${imageTag}`;
