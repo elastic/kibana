@@ -20,8 +20,8 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { DeleteRuleParams } from './types';
 import { deleteRuleParamsSchema } from './schemas';
 import { deleteRuleSo, getDecryptedRuleSo, getRuleSo } from '../../../../data/rule';
+import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
-import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gaps_by_query';
 
 export async function deleteRule(context: RulesClientContext, params: DeleteRuleParams) {
   try {
@@ -119,20 +119,25 @@ async function deleteRuleWithOCC(
     })
   );
 
+  try {
+    const eventLogClient = await context.getEventLogClient();
+
+    await softDeleteGaps({
+      ruleIds: [id],
+      logger: context.logger,
+      eventLogClient,
+      eventLogger: context.eventLogger,
+    });
+  } catch (error) {
+    // Failing to soft delete gaps should not block the rule deletion
+    context.logger.error(`delete(): Failed to soft delete gaps for rule ${id}: ${error.message}`);
+  }
+
   const removeResult = await deleteRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     id,
   });
   const deleteTime = Date.now();
-
-  // Soft-delete gaps only after the rule SO is deleted, so gaps are not lost if deletion fails.
-  try {
-    const eventLogClient = await context.getEventLogClient();
-    await softDeleteGapsByQuery({ ruleIds: [id], eventLogClient, logger: context.logger });
-  } catch (error) {
-    // Failing to soft delete gaps should not block the rule deletion
-    context.logger.error(`delete(): Failed to soft delete gaps for rule ${id}: ${error.message}`);
-  }
 
   await logRuleChanges({
     ruleSOs: [rule],
