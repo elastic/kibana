@@ -361,10 +361,13 @@ interface WorkflowsExecutionEnginePluginStart {
    * index with search_after (fixed internal batch size). Uses cancelWorkflowExecution per id;
    * failures are logged and do not stop the rest. Pagination is not point-in-time: under
    * concurrent index updates, duplicates or gaps across pages are possible.
+   * Optionally supply `onCancelled` to observe each successful id without retaining the full list.
    */
   cancelAllActiveWorkflowExecutions(params: {
     spaceId: string;
     workflowId: string;
+    schedulingRequest: KibanaRequest;
+    onCancelled?: (executionId: string) => void;
   }): Promise<void>;
 }
 
