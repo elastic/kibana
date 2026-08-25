@@ -85,6 +85,12 @@ export const useDiscoverInTimelineActions = (
   const timelineRef = useRef(timeline);
   timelineRef.current = timeline;
 
+  // Set when a timeline is restored while the ES|QL tab is not mounted, so there is no state
+  // container to restore into. The tab reads it on mount to tell "a different timeline was
+  // opened, take its state" from a plain remount of the timeline already on screen, where the
+  // in-session state has to survive.
+  const timelineRestorePending = useRef(false);
+
   const queryClient = useQueryClient();
 
   const { mutateAsync: saveSavedSearch, status: saveSavedSearchStatus } = useMutation({
@@ -132,7 +138,16 @@ export const useDiscoverInTimelineActions = (
    * */
   const resetDiscoverAppState = useCallback(
     async (newSavedSearchId?: string | null) => {
-      if (newSavedSearchId && discoverStateContainer.current) {
+      // The ES|QL tab publishes its state container while it is mounted and releases it when it
+      // is not, so an absent container means the restore has to be deferred to its next mount.
+      timelineRestorePending.current = !discoverStateContainer.current;
+
+      if (newSavedSearchId) {
+        // Applying the default state below would empty the redux copy of the Discover state and
+        // move the timefilter to `now-15m`, even though the caller asked for a session to be
+        // restored. Leave both alone and let the tab restore itself when it mounts.
+        if (!discoverStateContainer.current) return;
+
         let savedSearch;
         try {
           savedSearch = await savedSearchService.get(newSavedSearchId);
@@ -389,6 +404,7 @@ export const useDiscoverInTimelineActions = (
       initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
       defaultDiscoverAppState: defaultDiscoverAppState(),
+      timelineRestorePending,
     }),
     [
       resetDiscoverAppState,

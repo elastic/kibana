@@ -16,6 +16,7 @@ import { useQuery } from '@kbn/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { useDispatch } from 'react-redux-v7';
+import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { updateSavedSearchId } from '../../../../store/actions';
@@ -69,6 +70,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     updateSavedSearch,
     initializeLocalSavedSearch,
     defaultDiscoverAppState,
+    timelineRestorePending,
   } = useDiscoverInTimelineContext();
 
   const { discoverAppState, setDiscoverInternalState, setDiscoverAppState } = useDiscoverState();
@@ -213,15 +215,35 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
           discoverAppState) ??
         defaultDiscoverAppState;
 
-      // The timeline is the source of truth for its own ES|QL tab: a restored timeline gets its
-      // saved session's state, a timeline without one gets the default. This deliberately wins
-      // over leftover Discover URL state, which belongs to the previously opened timeline and
-      // would otherwise be restored in its place — silently, since the two often share a query.
-      await applyTimelineStateToDiscover({
-        stateContainer,
-        appState: finalAppState,
-        timeRange: savedSearchAppState?.savedSearch.timeRange ?? defaultDiscoverTimeRange,
-      });
+      // A different timeline was opened while this tab was unmounted, so it never got the chance
+      // to restore. The timeline is the source of truth for its own ES|QL tab: a restored
+      // timeline gets its saved session's state, a timeline without one gets the default. This
+      // deliberately wins over leftover Discover URL state, which belongs to the previously
+      // opened timeline and would otherwise be restored in its place — silently, since the two
+      // often share a query.
+      const isTimelineRestore = timelineRestorePending.current;
+
+      // Nothing of this timeline's own session is at stake: the URL carries no app state, or the
+      // tab holds no ES|QL query yet. Seeding it from the timeline cannot lose in-session work.
+      const hasNoEsqlStateToPreserve =
+        !stateContainer.stateStorage.get(APP_STATE_URL_KEY) ||
+        !(stateContainer.getCurrentTab().appState.query as { esql?: string })?.esql;
+
+      if (isTimelineRestore || hasNoEsqlStateToPreserve) {
+        timelineRestorePending.current = false;
+        await applyTimelineStateToDiscover({
+          stateContainer,
+          appState: finalAppState,
+          timeRange:
+            savedSearchAppState?.savedSearch.timeRange ??
+            // Only a restore may fall back to the default range. Remounting the same timeline
+            // must keep the range the user is looking at, which lives in the data service the
+            // ES|QL search reads from rather than in the saved session.
+            (isTimelineRestore
+              ? defaultDiscoverTimeRange
+              : discoverDataService.query.timefilter.timefilter.getTime()),
+        });
+      }
 
       const unsubscribeState = stateContainer.createAppStateObservable().subscribe({
         next: setDiscoverAppState,
@@ -252,6 +274,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       defaultDiscoverAppState,
       timelineId,
       initializeLocalSavedSearch,
+      timelineRestorePending,
+      discoverDataService,
     ]
   );
 

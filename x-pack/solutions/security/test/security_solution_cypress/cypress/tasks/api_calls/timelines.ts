@@ -39,23 +39,48 @@ interface FindSavedObjectsResponse {
   }>;
 }
 
+type TimelineDiscoverSession = NonNullable<FindSavedObjectsResponse['saved_objects']>[number];
+
+const SAVED_OBJECTS_PAGE_SIZE = 100;
+
 /**
- * Returns the Discover sessions belonging to timelines, newest page first.
+ * Walks every page of `search` saved objects and keeps the ones the ES|QL timeline tab created.
+ *
+ * A single capped page is not enough: on a stack other specs have already written to, a
+ * just-saved session can fall past the cap, which both hides it from cleanup and flakes the
+ * assertions. `_find`'s `search` is not used to narrow this, because it matches analyzed tokens
+ * rather than the literal title prefix, so a miss would silently look like "no sessions".
+ */
+const findTimelineDiscoverSessions = (
+  page = 1,
+  found: TimelineDiscoverSession[] = []
+): Cypress.Chainable<TimelineDiscoverSession[]> =>
+  rootRequest<FindSavedObjectsResponse>({
+    // No `fields` filter: the tag assertion needs the saved object's references too.
+    method: 'GET',
+    url: `api/saved_objects/_find?type=${SAVED_SEARCH_TYPE}&per_page=${SAVED_OBJECTS_PAGE_SIZE}&page=${page}`,
+    failOnStatusCode: false,
+  }).then(({ body }) => {
+    const savedObjects = body?.saved_objects ?? [];
+    const sessions = found.concat(
+      savedObjects.filter(({ attributes }) =>
+        attributes?.title?.startsWith(TIMELINE_DISCOVER_SESSION_TITLE_PREFIX)
+      )
+    );
+
+    return savedObjects.length < SAVED_OBJECTS_PAGE_SIZE
+      ? cy.wrap(sessions)
+      : findTimelineDiscoverSessions(page + 1, sessions);
+  });
+
+/**
+ * Returns every Discover session belonging to a timeline.
  *
  * Asserting against these directly keeps the Discover-session persistence tests independent of
  * Saved Objects management, whose tag filter is a third-party surface this suite does not own —
  * a duplicate tag option in that dropdown is what got the whole suite skipped in #236526.
  */
-export const getTimelineDiscoverSessions = () =>
-  rootRequest<FindSavedObjectsResponse>({
-    // No `fields` filter: the tag assertion needs the saved object's references too.
-    method: 'GET',
-    url: `api/saved_objects/_find?type=${SAVED_SEARCH_TYPE}&per_page=100`,
-  }).then(({ body }) =>
-    (body?.saved_objects ?? []).filter(({ attributes }) =>
-      attributes?.title?.startsWith(TIMELINE_DISCOVER_SESSION_TITLE_PREFIX)
-    )
-  );
+export const getTimelineDiscoverSessions = () => findTimelineDiscoverSessions();
 
 /** Title the ES|QL timeline tab gives the Discover session of the timeline named `timelineName`. */
 export const getTimelineDiscoverSessionTitle = (timelineName: string) =>
@@ -235,22 +260,14 @@ export const deleteTimelines = () => {
  * pile up across specs and retries and pollute the Saved Objects management table.
  */
 export const deleteTimelineDiscoverSessions = () => {
-  rootRequest<FindSavedObjectsResponse>({
-    method: 'GET',
-    url: `api/saved_objects/_find?type=${SAVED_SEARCH_TYPE}&per_page=100&fields=title`,
-    failOnStatusCode: false,
-  }).then(({ body }) => {
-    (body?.saved_objects ?? [])
-      .filter(({ attributes }) =>
-        attributes?.title?.startsWith(TIMELINE_DISCOVER_SESSION_TITLE_PREFIX)
-      )
-      .forEach(({ id }) => {
-        rootRequest({
-          method: 'DELETE',
-          url: `api/saved_objects/${SAVED_SEARCH_TYPE}/${id}`,
-          failOnStatusCode: false,
-        });
+  findTimelineDiscoverSessions().then((sessions) => {
+    sessions.forEach(({ id }) => {
+      rootRequest({
+        method: 'DELETE',
+        url: `api/saved_objects/${SAVED_SEARCH_TYPE}/${id}`,
+        failOnStatusCode: false,
       });
+    });
   });
 };
 

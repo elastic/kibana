@@ -227,6 +227,28 @@ describe('useDiscoverInTimelineActions', () => {
         startServicesMock.customDataService.query.timefilter.timefilter.setTime
       ).toHaveBeenCalledWith({ from: 'now-15m', to: 'now', mode: 'relative' });
     });
+    it('should not consider a restore pending while the ES|QL tab is mounted', async () => {
+      (startServicesMock.savedSearch.get as jest.Mock).mockResolvedValueOnce(savedSearchMock);
+      const { result } = renderTestHook();
+
+      await result.current.resetDiscoverAppState(savedSearchMock.id);
+
+      expect(result.current.timelineRestorePending.current).toBe(false);
+    });
+    it('should defer the restore to the ES|QL tab when it holds no state container', async () => {
+      // The tab releases its container when it unmounts, so there is nothing to restore into.
+      // Applying the default state here would wipe what the tab falls back on when it mounts.
+      const { result } = renderHook(() => useDiscoverInTimelineActions({ current: undefined }), {
+        wrapper: getTestProviderWithCustomState(),
+      });
+
+      await result.current.resetDiscoverAppState(savedSearchMock.id);
+
+      expect(
+        startServicesMock.customDataService.query.timefilter.timefilter.setTime
+      ).not.toHaveBeenCalled();
+      expect(result.current.timelineRestorePending.current).toBe(true);
+    });
   });
   describe('updateSavedSearch', () => {
     it('should add defaults to the savedSearch before updating saved search', async () => {

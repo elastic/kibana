@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '@kbn/discover-plugin/common';
-import { createDiscoverServicesMock } from '@kbn/discover-plugin/public/__mocks__/services';
-import { getDiscoverInternalStateMock } from '@kbn/discover-plugin/public/__mocks__/discover_state.mock';
-import { getExtendedDiscoverStateContainer } from '@kbn/discover-plugin/public/customizations';
-import {
-  createTabActionInjector,
-  selectTab,
-  type DiscoverAppState,
-} from '@kbn/discover-plugin/public/application/main/state_management/redux';
+import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/redux';
 
+import { createTimelineDiscoverTestState } from './mocks/discover_test_state';
 import { applyTimelineStateToDiscover } from './apply_timeline_state_to_discover';
 
 const RESTORED_TIME_RANGE = {
@@ -32,40 +25,16 @@ const restoredAppState: DiscoverAppState = {
   columns: ['event.category', 'ecs.version'],
 };
 
-const setup = async () => {
-  const services = createDiscoverServicesMock();
-  const toolkit = getDiscoverInternalStateMock({
-    services,
-    persistedDataViews: [dataViewMockWithTimeField],
+// Whatever the previously opened timeline synced into the URL is still there when the ES|QL tab
+// mounts for the next one.
+const setup = () =>
+  createTimelineDiscoverTestState({
+    urlAppState: {
+      query: { esql: 'from auditbeat-* | where ecs.version == "8.0.0"' },
+      columns: ['stale'],
+    },
+    urlTimeRange: PREVIOUS_TIMELINE_TIME_RANGE,
   });
-
-  await toolkit.initializeTabs();
-
-  const tabId = toolkit.internalState.getState().tabs.unsafeCurrentId;
-  const stateContainer = getExtendedDiscoverStateContainer({
-    internalState: toolkit.internalState,
-    injectCurrentTab: createTabActionInjector(tabId),
-    getCurrentTab: () => selectTab(toolkit.internalState.getState(), tabId),
-    runtimeStateManager: toolkit.runtimeStateManager,
-    stateStorage: toolkit.stateStorageContainer,
-    services,
-  });
-
-  // Whatever the previously opened timeline synced into the URL is still there when the ES|QL tab
-  // mounts for the next one.
-  await toolkit.stateStorageContainer.set(
-    GLOBAL_STATE_URL_KEY,
-    { time: PREVIOUS_TIMELINE_TIME_RANGE },
-    { replace: true }
-  );
-  await toolkit.stateStorageContainer.set(
-    APP_STATE_URL_KEY,
-    { query: { esql: 'from auditbeat-* | where ecs.version == "8.0.0"' }, columns: ['stale'] },
-    { replace: true }
-  );
-
-  return { ...toolkit, services, tabId, stateContainer };
-};
 
 describe('applyTimelineStateToDiscover', () => {
   beforeEach(() => {
