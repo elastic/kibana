@@ -46,7 +46,7 @@ export interface AppHeaderBadge {
 
 export interface AppHeaderBadgeItem {
   name: string;
-  icon?: string;
+  icon?: IconType;
   onClick?: () => void;
   items?: AppHeaderBadgeItem[];
   popoverWidth?: number;
@@ -57,7 +57,7 @@ export interface AppHeaderBadgeItem {
 
 export interface AppHeaderTabIconBadge {
   /** EUI icon type rendered in the tab badge. */
-  iconType: string;
+  iconType: IconType;
   /** Optional tooltip shown when hovering the badge icon. */
   tooltip?: string;
 }

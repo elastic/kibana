@@ -8,6 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import type { IconType } from '@elastic/eui';
 import type { AppCategory } from '@kbn/core-application-common';
 import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
 
@@ -54,7 +55,7 @@ export interface ChromeNavLink {
    * A EUI iconType that will be used for the app's icon. This icon
    * takes precedence over the `icon` property.
    */
-  readonly euiIconType?: string;
+  readonly euiIconType?: IconType;
 
   /**
    * A URL to an image file used as an icon. Used as a fallback

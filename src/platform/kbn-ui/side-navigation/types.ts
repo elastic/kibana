@@ -150,7 +150,7 @@ export interface SideNavLogo {
   /**
    * The logo type, e.g. `appObservability`, `appSecurity`, etc.
    */
-  iconType: string;
+  iconType: IconType;
   /**
    * (optional) `data-test-subj` attribute for testing and tracking purposes.
    */

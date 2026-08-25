@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiCollapsibleNavProps, UseEuiTheme } from '@elastic/eui';
+import type { EuiCollapsibleNavProps, IconType, UseEuiTheme } from '@elastic/eui';
 import {
   EuiThemeProvider,
   EuiCollapsibleNav,
@@ -319,7 +319,7 @@ export function CollapsibleNav({
           return (
             <EuiCollapsibleNavGroup
               key={category.id}
-              iconType={category.euiIconType}
+              iconType={category.euiIconType as IconType | undefined}
               iconSize="m"
               buttonElement={overviewLink ? 'div' : 'button'}
               css={styles.navSolutionGroupButton}
