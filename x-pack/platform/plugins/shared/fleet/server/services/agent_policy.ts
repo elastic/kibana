@@ -1982,14 +1982,12 @@ class AgentPolicyService {
             // a policy update always refreshes every variant that serves a real agent — not just
             // the three versions in the default bounded set. This is the Half-B fix for
             // https://github.com/elastic/kibana/issues/283077.
-            const agentVersionsToUse =
-              options?.agentVersions ??
-              [
-                ...new Set([
-                  ...versionSpecificBoundedSet,
-                  ...(agentVersionsByPolicy.get(policy.id) ?? []),
-                ]),
-              ];
+            const agentVersionsToUse = options?.agentVersions ?? [
+              ...new Set([
+                ...versionSpecificBoundedSet,
+                ...(agentVersionsByPolicy.get(policy.id) ?? []),
+              ]),
+            ];
             const versionSpecificPolicies = await getVersionSpecificPolicies(
               soClient,
               fleetServerPolicy,

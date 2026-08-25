@@ -623,7 +623,12 @@ export class VersionSpecificPolicyAssignmentTask {
     }
 
     // Partition buckets into variant vs base, preserving last-written timestamp.
-    type VariantBucket = { policyId: string; baseId: string; version: string; lastWritten: number };
+    interface VariantBucket {
+      policyId: string;
+      baseId: string;
+      version: string;
+      lastWritten: number;
+    }
     const variantBuckets: VariantBucket[] = [];
     const basePolicyIdSet = new Set<string>();
     for (const bucket of buckets) {
@@ -694,7 +699,12 @@ export class VersionSpecificPolicyAssignmentTask {
   private async deleteStaleVariantsForActiveParents(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    variantBuckets: Array<{ policyId: string; baseId: string; version: string; lastWritten: number }>,
+    variantBuckets: Array<{
+      policyId: string;
+      baseId: string;
+      version: string;
+      lastWritten: number;
+    }>,
     deployedThisRun: Set<string>,
     signal: AbortSignal
   ) {
@@ -728,7 +738,9 @@ export class VersionSpecificPolicyAssignmentTask {
     }
 
     this.logger.info(
-      `[VersionSpecificPolicyAssignmentTask] Deleting ${toDelete.length} stale version-specific variant document(s) for active parents: ${toDelete.join(', ')}`
+      `[VersionSpecificPolicyAssignmentTask] Deleting ${
+        toDelete.length
+      } stale version-specific variant document(s) for active parents: ${toDelete.join(', ')}`
     );
 
     throwIfAborted(signal);
@@ -743,7 +755,11 @@ export class VersionSpecificPolicyAssignmentTask {
     const toRedeploy = toDelete.filter((id) => (postDeleteCounts.get(id) ?? 0) > 0);
     if (toRedeploy.length > 0) {
       this.logger.warn(
-        `[VersionSpecificPolicyAssignmentTask] ${toRedeploy.length} deleted variant(s) have agents after deletion (race); redeploying: ${toRedeploy.join(', ')}`
+        `[VersionSpecificPolicyAssignmentTask] ${
+          toRedeploy.length
+        } deleted variant(s) have agents after deletion (race); redeploying: ${toRedeploy.join(
+          ', '
+        )}`
       );
       // Group by base policy id and redeploy the affected versions.
       const byParent = new Map<string, string[]>();
