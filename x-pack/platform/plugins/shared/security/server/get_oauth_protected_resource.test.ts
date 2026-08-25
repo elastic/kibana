@@ -24,45 +24,45 @@ describe('getOAuthProtectedResource', () => {
         publicBaseUrl: 'https://kibana.example.com',
         serverBaseUrl: 'http://localhost:5601',
       })
-    ).toBe('https://kibana.example.com');
+    ).toBe('https://kibana.example.com/');
   });
 
   it('falls back to the server base URL when neither resource nor public base URL is set', () => {
     expect(getOAuthProtectedResource({ serverBaseUrl: 'http://localhost:5601' })).toBe(
-      'http://localhost:5601'
+      'http://localhost:5601/'
     );
   });
 
-  it('strips a single trailing slash for canonical-form interoperability', () => {
+  it('normalizes origin-only URL without trailing slash to canonical form (gains slash)', () => {
+    expect(
+      getOAuthProtectedResource({
+        publicBaseUrl: 'https://kibana.example.com',
+        serverBaseUrl: 'http://localhost:5601',
+      })
+    ).toBe('https://kibana.example.com/');
+  });
+
+  it('normalizes origin-only URL already with trailing slash — unchanged', () => {
     expect(
       getOAuthProtectedResource({
         publicBaseUrl: 'https://kibana.example.com/',
         serverBaseUrl: 'http://localhost:5601',
       })
-    ).toBe('https://kibana.example.com');
+    ).toBe('https://kibana.example.com/');
   });
 
-  it('strips multiple trailing slashes from public base URL', () => {
+  it('passes a pathed configuredResource through unchanged', () => {
     expect(
       getOAuthProtectedResource({
-        publicBaseUrl: 'https://kibana.example.com//',
-        serverBaseUrl: 'http://localhost:5601',
-      })
-    ).toBe('https://kibana.example.com');
-  });
-
-  it('strips trailing slash from configured resource', () => {
-    expect(
-      getOAuthProtectedResource({
-        configuredResource: 'https://kibana.example.com/api/agent_builder/mcp/',
+        configuredResource: 'https://kibana.example.com/api/agent_builder/mcp',
         serverBaseUrl: 'http://localhost:5601',
       })
     ).toBe('https://kibana.example.com/api/agent_builder/mcp');
   });
 
-  it('strips trailing slash from server base URL', () => {
+  it('normalizes server base URL to canonical form', () => {
     expect(getOAuthProtectedResource({ serverBaseUrl: 'http://localhost:5601/' })).toBe(
-      'http://localhost:5601'
+      'http://localhost:5601/'
     );
   });
 });

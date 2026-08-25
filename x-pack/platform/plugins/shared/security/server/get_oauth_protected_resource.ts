@@ -8,8 +8,10 @@
 /**
  * Resolves the OAuth 2.0 protected resource identifier (RFC 8707/RFC 9728) for this Kibana
  * server: an explicitly configured resource wins, otherwise the public base URL, otherwise
- * the internal server base URL. The MCP authorization spec recommends the canonical form
- * without a trailing slash, so one is stripped if present.
+ * the internal server base URL. The value is returned in canonical WHATWG URL form — origin-only
+ * URLs gain a trailing slash (e.g. `https://kibana.example.com` → `https://kibana.example.com/`),
+ * while pathed URLs pass through unchanged. This matches what MCP SDK clients send (they
+ * round-trip the PRM `resource` through `new URL()`) and what UIAM echoes as the token audience.
  */
 export function getOAuthProtectedResource({
   configuredResource,
@@ -21,5 +23,5 @@ export function getOAuthProtectedResource({
   serverBaseUrl: string;
 }): string {
   const resource = configuredResource ?? publicBaseUrl ?? serverBaseUrl;
-  return resource.replace(/\/+$/, '');
+  return new URL(resource).href;
 }

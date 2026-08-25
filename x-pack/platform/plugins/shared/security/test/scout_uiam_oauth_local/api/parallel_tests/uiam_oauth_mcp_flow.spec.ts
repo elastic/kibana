@@ -45,7 +45,7 @@ apiTest.describe(
         projectType: projectType!,
         roles: ['admin'],
         email: 'elastic_admin@elastic.co',
-        audience: kibanaBaseUrl,
+        audience: `${kibanaBaseUrl}/`,
       });
     });
 
@@ -61,8 +61,8 @@ apiTest.describe(
         expect(resourceMetadata.authorization_servers).toBeDefined();
         expect(resourceMetadata.authorization_servers).toContain(MOCK_IDP_UIAM_OAUTH_BASE_URL);
 
-        // The PRM now declares the Kibana base URL as the protected resource.
-        expect(resourceMetadata.resource).toBe(kibanaBaseUrl);
+        // The PRM now declares the Kibana base URL as the protected resource (canonical WHATWG form).
+        expect(resourceMetadata.resource).toBe(`${kibanaBaseUrl}/`);
 
         // MCP SDK clients accept a same-origin parent resource for any endpoint under it,
         // including space-prefixed MCP URLs — the exact logic real clients run.

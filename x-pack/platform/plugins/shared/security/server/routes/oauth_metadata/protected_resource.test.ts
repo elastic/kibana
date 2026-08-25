@@ -136,11 +136,11 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       expect(response.status).toBe(200);
       expect(response.payload).toEqual({
         authorization_servers: ['https://auth.example.com'],
-        resource: 'http://localhost:5601',
+        resource: 'http://localhost:5601/',
       });
     });
 
-    it('prefers the public base URL over the server base URL when resource is not configured', async () => {
+    it('prefers the public base URL over the server base URL and emits canonical form', async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create(
         { mcp: { oauth2: { metadata: { authorization_servers: ['https://auth.example.com'] } } } },
         { serverless: true }
@@ -158,7 +158,7 @@ describe('GET /.well-known/oauth-protected-resource', () => {
       );
       expect(response.payload).toEqual({
         authorization_servers: ['https://auth.example.com'],
-        resource: 'https://kibana.example.com',
+        resource: 'https://kibana.example.com/',
       });
     });
 
