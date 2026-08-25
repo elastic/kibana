@@ -56,5 +56,4 @@ describe('PlainIndexDataClientBundle', () => {
       query: { match_all: {} },
     });
   });
-
 });
