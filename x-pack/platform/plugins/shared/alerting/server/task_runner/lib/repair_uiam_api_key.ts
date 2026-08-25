@@ -10,6 +10,10 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UIAM_LOGS_REPAIR_TAGS } from '../../constants';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { isErrorWithReason } from '../../lib/error_with_reason';
+import {
+  isMissingUiamApiKeyMessage,
+  UIAM_API_KEY_MISSING_CODE,
+} from '../../lib/uiam_api_key_error';
 import type { RuleResultServiceResults } from '../../monitoring/rule_result_service';
 import { API_KEY_PENDING_INVALIDATION_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RawRule } from '../../types';
@@ -22,20 +26,6 @@ export interface RepairUiamApiKeyParams {
   ruleId: string;
   spaceId: string;
 }
-
-/**
- * UIAM's `APIKEY_MISSING`, which Elasticsearch surfaces as `authentication_error_code` on the 401 it
- * returns when UIAM does not know the API key a request presented — the key was deleted, so the only
- * recovery is a new one.
- *
- * The single code is the point: every other API key rejection UIAM reports leaves the key intact or
- * is not understood well enough to act on. `APIKEY_EXPIRED` (`0xE436AE`) is not known to be
- * reachable for keys Kibana grants itself, since a converted key inherits the expiration of the
- * Elasticsearch key behind it; `APIKEY_REVOKED` (`0xD38358`) would mean re-granting over a
- * deliberate revocation; and `APIKEY_CLIENT_AUTH1`/`2` mean the key is valid but Kibana presented
- * the wrong client authentication. A bare 401 says nothing about the key at all.
- */
-const UIAM_API_KEY_MISSING_CODE = '0x28D520';
 
 interface UiamAuthenticationError {
   statusCode?: number;
@@ -77,18 +67,6 @@ export const isMissingUiamApiKeyRunError = (error: unknown): boolean => {
 };
 
 /**
- * Elasticsearch's own wording for {@link UIAM_API_KEY_MISSING_CODE}, matched in full rather than by
- * the bare code.
- *
- * A recorded run error carries nothing but a message: rule types that report a failed run instead of
- * throwing flatten the Elasticsearch error into text, leaving no `statusCode` or
- * `authentication_error_code` to test. Requiring the whole phrase keeps a re-grant from being
- * triggered by a rule whose own error text happens to quote the code — a real possibility for
- * detection rules that search for authentication failures.
- */
-const UIAM_API_KEY_MISSING_MESSAGE = `failed to authenticate cloud API key: [${UIAM_API_KEY_MISSING_CODE}]`;
-
-/**
  * Returns true when a rule reported a failed run because UIAM no longer knows the API key it
  * authenticated with, for rule types that record the failure instead of throwing it — Security
  * Solution's detection rules report through {@link RuleResultService}, so the run never reaches the
@@ -100,9 +78,7 @@ const UIAM_API_KEY_MISSING_MESSAGE = `failed to authenticate cloud API key: [${U
 export const isMissingUiamApiKeyLastRunError = (
   errors: RuleResultServiceResults['errors']
 ): boolean =>
-  errors.some(
-    ({ message, userError }) => !userError && message.includes(UIAM_API_KEY_MISSING_MESSAGE)
-  );
+  errors.some(({ message, userError }) => !userError && isMissingUiamApiKeyMessage(message));
 
 /**
  * Re-grants a rule's unusable UIAM API key by converting its Elasticsearch API key into a fresh

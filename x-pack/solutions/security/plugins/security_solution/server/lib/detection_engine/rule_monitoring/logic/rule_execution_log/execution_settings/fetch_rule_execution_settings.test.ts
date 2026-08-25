@@ -19,8 +19,8 @@ const logger = loggingSystemMock.createLogger();
 const savedObjectsClient = savedObjectsClientMock.create();
 
 // The message shape production actually records for UIAM's APIKEY_MISSING: the stringified
-// Elasticsearch security_exception, with the full phrase the alerting plugin's
-// isMissingUiamApiKeyLastRunError matches on.
+// Elasticsearch security_exception, carrying the phrase the alerting plugin's
+// isMissingUiamApiKeyMessage matches on.
 const UIAM_KEY_MISSING_ERROR = new Error(
   [
     'security_exception',
@@ -95,7 +95,7 @@ describe('fetchRuleExecutionSettings()', () => {
     // Still falls back to defaults: the run itself should proceed as before...
     expect(settings).toEqual(DEFAULT_SETTINGS);
     // ...but the rejection is recorded, so the run fails visibly and the alerting task runner's
-    // UIAM API key repair (isMissingUiamApiKeyLastRunError) can see the full phrase.
+    // UIAM API key repair can see it.
     expect(ruleResultService.addLastRunError).toHaveBeenCalledWith(
       `Error fetching rule execution settings: ${UIAM_KEY_MISSING_ERROR.message}`
     );
