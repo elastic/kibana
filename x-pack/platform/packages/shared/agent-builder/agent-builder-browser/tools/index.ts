@@ -7,6 +7,7 @@
 
 export type {
   ToolServiceStartContract,
+  BrowserToolsServiceStartContract,
   ExecuteToolParams,
   ExecuteToolReturn,
   ListWorkflowsParams,

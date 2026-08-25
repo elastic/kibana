@@ -392,6 +392,14 @@ export const createConversationActions = ({
       }
     },
     onRoundComplete: (round: ConversationRound) => {
+      // Apply the authoritative round status and pending prompts to the cached round.
+      // Browser tool call prompts are deliberately NOT added on `prompt_request` (see
+      // `subscribeToChatEvents`): they auto-execute on mount and must only mount once the
+      // attachments delivered alongside this event are in the cache.
+      setCurrentRound((currentRound) => {
+        currentRound.status = round.status;
+        currentRound.pending_prompts = round.pending_prompts;
+      });
       const conversation = queryClient.getQueryData<Conversation>(queryKey);
       if (conversation?.agent_id) {
         patchConversationList({

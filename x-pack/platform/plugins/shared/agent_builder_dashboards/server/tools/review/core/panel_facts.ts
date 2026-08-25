@@ -46,7 +46,7 @@ export interface PanelFacts {
   config: Record<string, unknown>;
   /** ES|QL query backing the panel, when present. */
   query?: string;
-  execution_status: 'ok' | 'error' | 'no_query';
+  execution_status: 'ok' | 'error' | 'no_query' | 'not_executed';
   error?: string;
   duration_ms?: number;
   row_count?: number;
@@ -257,6 +257,25 @@ export const buildNoQueryPanelFacts = (
   panel_type: panel.type,
   config: sanitizeConfig(panel),
   execution_status: 'no_query',
+});
+
+/**
+ * Build a `PanelFacts` block for a panel whose query was deliberately not
+ * executed — used by screenshot-based reviews, where the judge assesses the
+ * rendered result from the attached image instead of executed data facts.
+ */
+export const buildUnexecutedPanelFacts = (
+  panel: AttachmentPanel,
+  title: string | undefined,
+  query: string | undefined
+): PanelFacts => ({
+  panel_id: panel.id,
+  title,
+  grid: panel.grid,
+  panel_type: panel.type,
+  config: sanitizeConfig(panel),
+  ...(query ? { query } : {}),
+  execution_status: 'not_executed',
 });
 
 /**

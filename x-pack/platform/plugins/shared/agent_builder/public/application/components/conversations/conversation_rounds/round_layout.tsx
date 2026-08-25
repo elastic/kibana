@@ -23,7 +23,13 @@ import { RoundEvents } from './round_events/round_events';
 import { RoundResponse } from './round_response/round_response';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { RoundError } from './round_error/round_error';
-import { AuthorizationPrompt, ConfirmationPrompt, AskUserQuestionPrompt } from './round_prompt';
+import {
+  AuthorizationPrompt,
+  ConfirmationPrompt,
+  AskUserQuestionPrompt,
+  BrowserToolCallPrompt,
+} from './round_prompt';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { TodosStepDisplay } from './todos_step_display';
 
@@ -113,6 +119,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     resumeRound,
     isResuming,
   } = useConversationStream();
+  const { browserApiTools } = useConversationContext();
   const isHitlDisabled = isStreaming && !isResuming;
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
@@ -178,6 +185,11 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     isErrorCurrentRound,
     isAwaitingPrompt,
   ]);
+
+  const browserToolHandlerContext = useMemo(
+    () => ({ conversationId, attachments: conversationAttachments }),
+    [conversationId, conversationAttachments]
+  );
 
   const roundContainerStyles = css`
     ${roundContainerMinHeight > 0 ? `min-height: ${roundContainerMinHeight}px;` : 'flex-grow: 0;'};
@@ -275,6 +287,16 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
                     />
                   </EuiFlexItem>
                 </React.Fragment>
+              );
+            case AgentPromptType.browser_tool_call:
+              return (
+                <BrowserToolCallPrompt
+                  key={prompt.id}
+                  prompt={prompt}
+                  tool={browserApiTools?.find((tool) => tool.id === prompt.tool_id)}
+                  handlerContext={browserToolHandlerContext}
+                  onComplete={(toolResponse) => handlePromptResponse(prompt.id, toolResponse)}
+                />
               );
           }
         })}

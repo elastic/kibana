@@ -91,19 +91,25 @@ ${previews}`;
 
 /**
  * Chart authoring rules scoped to the given panels' chart types and color
- * usage. The framing differs per mode: self-review treats the rules as context
- * for spotting objective defects; audit enforces them fully.
+ * usage. The framing differs per mode: 'context' (self-review) treats the
+ * rules as background for spotting objective defects; 'enforce' (facts-based
+ * audit) enforces them fully against configs and executed results; 'visual'
+ * (screenshot audit) enforces what is verifiable from the rendered image and
+ * omits the config-based palette reference.
  */
 export const buildChartAuthoringRulesSection = (
   panelFacts: PanelFacts[],
-  enforce: boolean
+  mode: 'context' | 'enforce' | 'visual'
 ): string => {
   const chartTypeReviewContent = getChartTypeReviewPromptContent(collectUsedChartTypes(panelFacts));
-  const paletteReference = buildPaletteReferenceSection(panelFacts);
+  const paletteReference = mode === 'visual' ? '' : buildPaletteReferenceSection(panelFacts);
 
-  const framing = enforce
-    ? `Lens panels must follow the rules below. Enforce them fully: any deviation that is verifiable from the config or the executed results is a finding.`
-    : `Lens panels were authored under the rules below. Use them as context for judging whether a panel is genuinely broken or misleading — not as a checklist to enforce. Only report a rule violation when it is objectively verifiable from the config (e.g. a legacy palette id, categorical color mapping on a numeric column, a panel title that duplicates what the chart already displays — such as a title on a metric/gauge panel restating the metric label) or clearly harms readability of the rendered chart.
+  const framing =
+    mode === 'enforce'
+      ? `Lens panels must follow the rules below. Enforce them fully: any deviation that is verifiable from the config or the executed results is a finding.`
+      : mode === 'visual'
+      ? `Lens panels must follow the rules below. Enforce them fully: any deviation that is verifiable from the rendered screenshot is a finding.`
+      : `Lens panels were authored under the rules below. Use them as context for judging whether a panel is genuinely broken or misleading — not as a checklist to enforce. Only report a rule violation when it is objectively verifiable from the information provided (e.g. a legacy palette id, categorical color mapping on a numeric column, a panel title that duplicates what the chart already displays — such as a title on a metric/gauge panel restating the metric label) or clearly harms readability of the rendered chart.
 
 Some rules are conditional on the original user request (e.g. "unless the user asks"). You do not see that request, so a deviation those rules permit on explicit request is NOT a finding — assume it was intentional.`;
 
@@ -193,6 +199,10 @@ const buildPanelFactText = (panel: PanelFacts, indent: string, gridLabel: string
 
   if (panel.execution_status === 'no_query') {
     lines.push(`${detailIndent}Execution: no ES|QL query`);
+  } else if (panel.execution_status === 'not_executed') {
+    lines.push(
+      `${detailIndent}Execution: not executed — judge the rendered result from the attached screenshot`
+    );
   } else if (panel.execution_status === 'error') {
     lines.push(
       `${detailIndent}Execution: ERROR — ${panel.error}${
@@ -233,9 +243,15 @@ const buildPanelFactText = (panel: PanelFacts, indent: string, gridLabel: string
   return lines.join('\n');
 };
 
-const buildPanelFactsText = (
+/**
+ * Walk the dashboard's section/panel structure and render every panel's facts
+ * with the given renderer, preserving section context and appending any panels
+ * that are missing from the layout.
+ */
+const buildPanelBlocksText = (
   dashboardData: DashboardAttachmentData,
-  panelFacts: PanelFacts[]
+  panelFacts: PanelFacts[],
+  renderPanel: (panel: PanelFacts, indent: string, gridLabel: string) => string
 ): string => {
   const factsByPanelId = new Map(panelFacts.map((panel) => [panel.panel_id, panel]));
   const emittedPanelIds = new Set<string>();
@@ -254,7 +270,7 @@ const buildPanelFactsText = (
         const facts = factsByPanelId.get(panel.id);
         if (facts) {
           emittedPanelIds.add(panel.id);
-          lines.push(buildPanelFactText(facts, '    ', 'Grid within section'));
+          lines.push(renderPanel(facts, '    ', 'Grid within section'));
         }
       }
       blocks.push(lines.join('\n'));
@@ -264,7 +280,7 @@ const buildPanelFactsText = (
     const facts = factsByPanelId.get(widget.id);
     if (facts) {
       emittedPanelIds.add(widget.id);
-      blocks.push(`Top-level panel:\n${buildPanelFactText(facts, '  ', 'Dashboard grid')}`);
+      blocks.push(`Top-level panel:\n${renderPanel(facts, '  ', 'Dashboard grid')}`);
     }
   }
 
@@ -272,13 +288,38 @@ const buildPanelFactsText = (
   if (unplacedFacts.length > 0) {
     blocks.push(
       `Unplaced panel facts:\n${unplacedFacts
-        .map((panel) => buildPanelFactText(panel, '  ', 'Grid'))
+        .map((panel) => renderPanel(panel, '  ', 'Grid'))
         .join('\n\n')}`
     );
   }
 
   return blocks.join('\n\n');
 };
+
+const buildPanelFactsText = (
+  dashboardData: DashboardAttachmentData,
+  panelFacts: PanelFacts[]
+): string => buildPanelBlocksText(dashboardData, panelFacts, buildPanelFactText);
+
+/**
+ * Compact map entry for screenshot-based reviews: identity, title, type, and
+ * grid only — no config, query, or execution facts. The judge maps what it
+ * sees in the image to these panel ids.
+ */
+const buildPanelMapEntry = (panel: PanelFacts, indent: string, gridLabel: string): string => {
+  const chartType = (panel.config as { type?: unknown }).type;
+  return [
+    `${indent}Panel id: ${panel.panel_id}`,
+    `${indent}  Title: ${panel.title ?? '(none)'}`,
+    `${indent}  Type: ${panel.panel_type}${typeof chartType === 'string' ? ` (${chartType})` : ''}`,
+    `${indent}  ${gridLabel}: x=${panel.grid.x} y=${panel.grid.y} w=${panel.grid.w} h=${panel.grid.h}`,
+  ].join('\n');
+};
+
+const buildPanelMapText = (
+  dashboardData: DashboardAttachmentData,
+  panelFacts: PanelFacts[]
+): string => buildPanelBlocksText(dashboardData, panelFacts, buildPanelMapEntry);
 
 /** Maximum number of `format` config snippets included per panel digest. */
 const MAX_FORMAT_HINTS = 3;
@@ -330,6 +371,10 @@ const buildPanelDigestText = (panel: PanelFacts, sectionTitle: string | undefine
 
   if (panel.execution_status === 'error') {
     lines.push(`  Execution: ERROR — ${panel.error}`);
+  } else if (panel.execution_status === 'not_executed') {
+    lines.push(
+      `  Execution: not executed — judge the rendered result from the attached screenshot`
+    );
   } else if (panel.execution_status === 'ok') {
     const columns = [
       ...(panel.numeric_columns ?? []).map((col) => `${col.name} (${col.type})`),
@@ -388,9 +433,13 @@ const buildPanelDigestsText = (
   return blocks.join('\n\n');
 };
 
-const nonIssuesSection = `## Non-Issues — never report these
+const buildNonIssuesSection = (hasImage: boolean): string => `## Non-Issues — never report these
 
-- Time filtering with \`?_tstart\`/\`?_tend\`: Kibana ALWAYS applies the dashboard time range to every panel via a Query DSL range filter on the panel's time field, independent of the query text. The \`?_tstart\`/\`?_tend\` named params are an ADDITIONAL, optional mechanism (e.g. to size \`BUCKET()\` extents). A query that omits them, or uses them only inside \`BUCKET()\`, is fully time-filtered. NEVER report a missing, partial, or "inconsistent" use of \`?_tstart\`/\`?_tend\` — in any panel, at any severity. This review executed every query with the same two mechanisms, so the row counts and samples above already reflect correct time filtering.
+- Time filtering with \`?_tstart\`/\`?_tend\`: Kibana ALWAYS applies the dashboard time range to every panel via a Query DSL range filter on the panel's time field, independent of the query text. The \`?_tstart\`/\`?_tend\` named params are an ADDITIONAL, optional mechanism (e.g. to size \`BUCKET()\` extents). A query that omits them, or uses them only inside \`BUCKET()\`, is fully time-filtered. NEVER report a missing, partial, or "inconsistent" use of \`?_tstart\`/\`?_tend\` — in any panel, at any severity.${
+  hasImage
+    ? ''
+    : ' This review executed every query with the same two mechanisms, so the row counts and samples above already reflect correct time filtering.'
+}
 - Absence of an explicit \`WHERE\` clause on the time field — covered by the same range filter.
 - Panels intentionally without a title (metric, gauge, tagcloud, waffle) — per the title rules above.`;
 
@@ -398,6 +447,16 @@ const dataDefectChecklist = `- execution errors, or a query returning 0 rows (th
 - an all-zero metric or all-zero numeric column
 - null or empty-string values in a column used as a category, breakdown, or axis (\`top_values\` containing null, or a high \`null_share\`) — Lens renders these as a "(blank)" bucket; suggest excluding them in the query (e.g. \`WHERE field IS NOT NULL\`) or labelling them via \`COALESCE\` when they carry meaning. When the "(blank)" bucket is the largest or a dominant category, the chart is actively misleading — report it as \`critical\`; otherwise \`warning\`
 - a panel \`title\` that duplicates what the chart already renders inside itself — e.g. a metric/gauge/tagcloud/waffle panel whose title restates the metric label or value column shown by the chart. The title rules say to omit the title on these chart types; report as \`warning\` with the suggestion to remove the title`;
+
+const screenshotDefectChecklist = `- a panel that renders an error, "No results", or an empty chart in the screenshot
+- a metric or chart whose rendered values are all zero
+- a "(blank)" or null category bucket visible in a chart or its legend — suggest excluding nulls in the query (e.g. \`WHERE field IS NOT NULL\`) or labelling them via \`COALESCE\` when they carry meaning. When the "(blank)" bucket is the largest or a dominant category, the chart is actively misleading — report it as \`critical\`; otherwise \`warning\`
+- a panel \`title\` that duplicates what the chart already renders inside itself — e.g. a metric/gauge/tagcloud/waffle panel whose title restates the metric label or value column shown by the chart. The title rules say to omit the title on these chart types; report as \`warning\` with the suggestion to remove the title
+- visual readability defects only pixels reveal: overlapping or truncated labels, an illegible or overcrowded legend, axis scales that hide the signal, panels rendered too small for their content`;
+
+const screenshotSection = `## Rendered Screenshot
+
+A screenshot of the rendered dashboard is attached as an image. Panel queries were NOT re-executed for this review — judge data-dependent defects (empty panels, errors, blank buckets, readability) from the rendered pixels, and use the panel information below to map what you see to the correct panel ids.`;
 
 const auditSeverityGuidance = `Use severity:
 - critical: the dashboard is broken or actively misleading (query error, empty or all-zero results, a chart that misrepresents its data)
@@ -412,7 +471,8 @@ export const buildSinglePassJudgePrompt = (
   dashboardData: DashboardAttachmentData,
   panelFacts: PanelFacts[],
   focus: string | undefined,
-  maxFindings: number
+  maxFindings: number,
+  hasImage: boolean = false
 ): string => `You are a Kibana dashboard quality reviewer. Your job is to evaluate the dashboard below against the rules it was authored with, considering all panels together as a whole.
 
 ${dashboardDesignReviewPrompt}
@@ -427,7 +487,7 @@ ${getChartTypeSelectionPromptContent()}
 
 ---
 
-${buildChartAuthoringRulesSection(panelFacts, false)}
+${buildChartAuthoringRulesSection(panelFacts, 'context')}
 
 ---
 
@@ -435,9 +495,17 @@ ${buildChartAuthoringRulesSection(panelFacts, false)}
 
 ${buildDashboardSummary(dashboardData)}
 
-## Panel Facts
+${
+  hasImage
+    ? `${screenshotSection}
 
-${buildPanelFactsText(dashboardData, panelFacts)}
+## Panel Map
+
+${buildPanelMapText(dashboardData, panelFacts)}`
+    : `## Panel Facts
+
+${buildPanelFactsText(dashboardData, panelFacts)}`
+}
 
 ${focus ? `## Review Focus\n\n${focus}\n\n` : ''}## Instructions
 
@@ -445,10 +513,17 @@ Review the dashboard holistically against the design review criteria above, plus
 
 For each panel consider: does the data make sense for the stated intent, and are the chart type and configuration appropriate for the data shape?
 
-Always check each panel's execution facts for these data defects — they are real findings, not judgment calls:
-${dataDefectChecklist}
+${
+  hasImage
+    ? `Always check each panel's rendered appearance in the attached screenshot for these defects — they are real findings, not judgment calls:
+${screenshotDefectChecklist}`
+    : `Always check each panel's execution facts for these data defects — they are real findings, not judgment calls:
+${dataDefectChecklist}`
+}
 
-Also check — report only when objectively verifiable from the facts above:
+Also check — report only when objectively verifiable from the ${
+  hasImage ? 'screenshot or the panel information' : 'facts'
+} above:
 - near-duplicate panels: queries that are identical or trivially different, or panels answering the same question
 - the same measure or field formatted with different units or number formats across panels
 - time bucketing that yields a single bucket or hundreds of buckets in the executed results
@@ -473,7 +548,7 @@ Report up to ${maxFindings} findings, prioritising by impact. Use severity:
 
 For each finding, provide a concrete suggestion in plain prose describing what to change, and set \`panel_ids\` to the affected panel id(s) for panel-scope findings.
 
-${nonIssuesSection}`;
+${buildNonIssuesSection(hasImage)}`;
 
 /**
  * Per-panel batch prompt for the full-audit fan-out: each panel is judged in
@@ -492,7 +567,7 @@ ${getChartTypeSelectionPromptContent()}
 
 ---
 
-${buildChartAuthoringRulesSection(batch, true)}
+${buildChartAuthoringRulesSection(batch, 'enforce')}
 
 ---
 
@@ -521,7 +596,7 @@ ${auditSeverityGuidance}
 
 Zero findings for a clean panel is expected. Report up to ${maxFindings} findings, prioritising by impact, with a concrete suggestion in plain prose for each.
 
-${nonIssuesSection}`;
+${buildNonIssuesSection(false)}`;
 
 /**
  * Holistic pass for the full-audit fan-out: cross-panel and dashboard-level
@@ -569,3 +644,72 @@ Report up to ${maxFindings} findings, prioritising by impact, with a concrete su
 - Time filtering with \`?_tstart\`/\`?_tend\`: Kibana ALWAYS applies the dashboard time range to every panel via a Query DSL range filter on the panel's time field, independent of the query text. NEVER report a missing, partial, or "inconsistent" use of \`?_tstart\`/\`?_tend\` — in any panel, at any severity.
 - Absence of an explicit \`WHERE\` clause on the time field — covered by the same range filter.
 - Panels without a title where the chart renders its own label (metric, gauge, tagcloud, waffle).`;
+
+/**
+ * Single-call visual audit used for scope "full_audit" when a rendered
+ * screenshot is available: per-panel and cross-panel checks run in one pass,
+ * judging rendered defects from the image instead of executed data facts.
+ */
+export const buildVisualAuditPrompt = (
+  dashboardData: DashboardAttachmentData,
+  panelFacts: PanelFacts[],
+  focus: string | undefined,
+  maxFindings: number
+): string => `You are a Kibana dashboard quality reviewer. The user asked to improve this dashboard, so review it with full enforcement of the design rules: any deviation that is verifiable from the attached screenshot or the panel information below is a finding. The yardstick: would Kibana's dashboard generation flow have produced this dashboard?
+
+${dashboardDesignReviewPrompt}
+
+---
+
+## Chart Type Reference
+
+Each panel's chart type should fit the intent and shape of its data.
+
+${getChartTypeSelectionPromptContent()}
+
+---
+
+${buildChartAuthoringRulesSection(panelFacts, 'visual')}
+
+---
+
+## Dashboard to Review
+
+${buildDashboardSummary(dashboardData)}
+
+${screenshotSection}
+
+## Panel Map
+
+${buildPanelMapText(dashboardData, panelFacts)}
+
+${focus ? `## Review Focus\n\n${focus}\n\n` : ''}## Instructions
+
+Review every panel and the dashboard as a whole in a single pass.
+
+Rendered defects — always findings, not judgment calls:
+${screenshotDefectChecklist}
+
+Per-panel checks against the rules above — judged from the rendered result:
+- chart type fit: is this the right chart type for the intent and the rendered data?
+- time bucketing that renders a single bucket or hundreds of buckets
+- breakdown cardinality too high for the chart type (e.g. a pie or legend with far more categories than fit legibly)
+- titles: missing where the chart type needs one (xy, heatmap, pie, datatable), or contradicting what the chart shows
+- rendered number formats that misstate the data (durations, bytes, percentages)
+
+Cross-panel and dashboard-level checks:
+- near-duplicate panels: panels that visibly show the same data or answer the same question with no added insight
+- the same measure rendered with different units or number formats across panels
+- inconsistent title style across panels (casing, naming pattern)
+- layout defects and composition problems, per the design review criteria above — verify against the screenshot
+- section hygiene: empty or single-panel sections, overview KPIs hidden inside collapsed sections
+- duplicate controls
+- a missing or placeholder dashboard title or description
+
+Group findings by root cause: one finding per cause, listing every affected panel id in \`panel_ids\` (use \`scope\` "dashboard" for findings about the dashboard as a whole).
+
+${auditSeverityGuidance}
+
+Report up to ${maxFindings} findings, prioritising by impact, with a concrete suggestion in plain prose for each. Also provide an \`overall_assessment\` summarising the state of the dashboard in a few sentences.
+
+${buildNonIssuesSection(true)}`;

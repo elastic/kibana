@@ -38,7 +38,8 @@ export class BrowserToolExecutor {
 
       try {
         const validatedParams = tool.schema.parse(call.params);
-        await tool.handler(validatedParams);
+        // Fire-and-forget executions have no per-call context today.
+        await tool.handler(validatedParams, {});
 
         if (this.toasts) {
           this.toasts.addSuccess({

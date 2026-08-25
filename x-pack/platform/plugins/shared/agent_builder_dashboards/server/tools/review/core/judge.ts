@@ -15,6 +15,7 @@ import {
   buildSinglePassJudgePrompt,
   buildPanelBatchPrompt,
   buildHolisticAuditPrompt,
+  buildVisualAuditPrompt,
 } from './judge_prompts';
 
 /**
@@ -102,6 +103,11 @@ const holisticAuditOutputSchema = z.object({
   findings: z.array(findingSchema).max(AUDIT_PASS_MAX_FINDINGS).default([]),
 });
 
+const visualAuditOutputSchema = z.object({
+  overall_assessment: z.string(),
+  findings: z.array(findingSchema).max(FULL_AUDIT_MAX_FINDINGS).default([]),
+});
+
 const toReviewFinding = ({ category, ...finding }: InternalFinding): ReviewFinding => finding;
 
 const SEVERITY_RANK: Record<ReviewFinding['severity'], number> = {
@@ -155,6 +161,8 @@ interface JudgeContext {
   dashboardData: DashboardAttachmentData;
   panelFacts: PanelFacts[];
   focus: string | undefined;
+  /** Rendered dashboard screenshot (data URL) — the judge reviews pixels instead of data facts. */
+  imageDataUrl?: string;
   modelProvider: ModelProvider;
   logger: Logger;
 }
@@ -162,13 +170,20 @@ interface JudgeContext {
 const invokeStructured = async <T extends z.ZodTypeAny>(
   modelProvider: ModelProvider,
   schema: T,
-  prompt: string
+  prompt: string,
+  imageDataUrl?: string
 ): Promise<z.infer<T>> => {
   const defaultModel = await modelProvider.getDefaultModel();
   const model = defaultModel.chatModel.withStructuredOutput(schema, {
     name: 'review_dashboard',
   });
-  const rawResult = await model.invoke([{ role: 'user', content: prompt }]);
+  const content = imageDataUrl
+    ? [
+        { type: 'text' as const, text: prompt },
+        { type: 'image_url' as const, image_url: { url: imageDataUrl } },
+      ]
+    : prompt;
+  const rawResult = await model.invoke([{ role: 'user', content }]);
   // withStructuredOutput only uses the schema for the tool definition and returns
   // the model's arguments unvalidated — enforce the schema (and its defaults) here.
   return schema.parse(rawResult);
@@ -178,6 +193,7 @@ const judgeSinglePass = async ({
   dashboardData,
   panelFacts,
   focus,
+  imageDataUrl,
   modelProvider,
   logger,
 }: JudgeContext): Promise<JudgeResult> => {
@@ -185,11 +201,12 @@ const judgeSinglePass = async ({
     dashboardData,
     panelFacts,
     focus,
-    RECENT_CHANGES_MAX_FINDINGS
+    RECENT_CHANGES_MAX_FINDINGS,
+    imageDataUrl !== undefined
   );
 
   logger.debug(`Invoking dashboard judge for "${dashboardData.title}"`);
-  const result = await invokeStructured(modelProvider, judgeOutputSchema, prompt);
+  const result = await invokeStructured(modelProvider, judgeOutputSchema, prompt, imageDataUrl);
 
   return {
     overall_assessment: result.overall_assessment,
@@ -203,6 +220,36 @@ const judgeSinglePass = async ({
  * checks), merged and deduped in code. Failed batches degrade gracefully and
  * are reported via `unreviewed_panel_ids`.
  */
+/**
+ * Screenshot-based full audit: a single call judging per-panel and cross-panel
+ * checks together from the rendered image — the whole dashboard is one visual
+ * context, so fanning out into batches would only resend the same screenshot.
+ */
+const judgeVisualAudit = async ({
+  dashboardData,
+  panelFacts,
+  focus,
+  imageDataUrl,
+  modelProvider,
+  logger,
+}: JudgeContext): Promise<JudgeResult> => {
+  logger.debug(
+    `Invoking visual full-audit dashboard judge for "${dashboardData.title}" (single pass with screenshot)`
+  );
+
+  const result = await invokeStructured(
+    modelProvider,
+    visualAuditOutputSchema,
+    buildVisualAuditPrompt(dashboardData, panelFacts, focus, FULL_AUDIT_MAX_FINDINGS),
+    imageDataUrl
+  );
+
+  return {
+    overall_assessment: result.overall_assessment,
+    findings: mergeAuditFindings(result.findings, []),
+  };
+};
+
 const judgeFullAudit = async ({
   dashboardData,
   panelFacts,
@@ -277,8 +324,14 @@ export const judgeDashboard = async ({
   scope = 'recent_changes',
   ...context
 }: JudgeContext & { scope?: ReviewScope }): Promise<JudgeResult> => {
+  // With a screenshot the whole dashboard is one visual context, so a
+  // full_audit runs as a single visual pass instead of the batch fan-out.
   const result =
-    scope === 'full_audit' ? await judgeFullAudit(context) : await judgeSinglePass(context);
+    scope === 'full_audit'
+      ? context.imageDataUrl !== undefined
+        ? await judgeVisualAudit(context)
+        : await judgeFullAudit(context)
+      : await judgeSinglePass(context);
 
   context.logger.info(
     `Dashboard judge (${scope}) returned ${result.findings.length} finding(s) for "${context.dashboardData.title}"`

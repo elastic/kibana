@@ -30,6 +30,7 @@ import {
   buildNoQueryPanelFacts,
   buildErrorPanelFacts,
   buildSuccessPanelFacts,
+  buildUnexecutedPanelFacts,
 } from './panel_facts';
 import type { JudgeResult, ReviewScope } from './judge';
 import { judgeDashboard } from './judge';
@@ -130,6 +131,12 @@ export interface ReviewDashboardParams {
   focus: string | undefined;
   /** Review scope — defaults to the high-precision "recent_changes" self-review. */
   scope?: ReviewScope;
+  /**
+   * Data URL of a rendered dashboard screenshot. When provided, panel queries
+   * are NOT re-executed — the judge assesses the rendered image instead of
+   * executed data facts.
+   */
+  imageDataUrl?: string;
   esClient: IScopedClusterClient;
   modelProvider: ModelProvider;
   logger: Logger;
@@ -247,6 +254,7 @@ export const reviewDashboard = async ({
   version,
   focus,
   scope,
+  imageDataUrl,
   esClient,
   modelProvider,
   logger,
@@ -256,29 +264,33 @@ export const reviewDashboard = async ({
   const dashboardQueryContext = getDashboardQueryContext(dashboardData, logger);
 
   logger.info(
-    `Reviewing dashboard "${dashboardData.title}" (${
-      panels.length
-    } panels, time range: ${JSON.stringify(timeRange)})`
+    `Reviewing dashboard "${dashboardData.title}" (${panels.length} panels, ${
+      imageDataUrl ? 'screenshot-based' : `time range: ${JSON.stringify(timeRange)}`
+    })`
   );
 
-  const panelFacts = await Promise.all(
-    panels.map((panel) => {
-      const query = extractPanelQuery(panel);
-      if (!query) {
-        const title = getPanelTitle(panel);
-        return Promise.resolve(buildNoQueryPanelFacts(panel, title));
-      }
-      return executePanel(
-        panel,
-        query,
-        timeRange,
-        esClient,
-        logger,
-        dashboardQueryContext,
-        dashboardData.project_routing
+  const panelFacts = imageDataUrl
+    ? panels.map((panel) =>
+        buildUnexecutedPanelFacts(panel, getPanelTitle(panel), extractPanelQuery(panel))
+      )
+    : await Promise.all(
+        panels.map((panel) => {
+          const query = extractPanelQuery(panel);
+          if (!query) {
+            const title = getPanelTitle(panel);
+            return Promise.resolve(buildNoQueryPanelFacts(panel, title));
+          }
+          return executePanel(
+            panel,
+            query,
+            timeRange,
+            esClient,
+            logger,
+            dashboardQueryContext,
+            dashboardData.project_routing
+          );
+        })
       );
-    })
-  );
 
   const {
     overall_assessment,
@@ -289,6 +301,7 @@ export const reviewDashboard = async ({
     panelFacts,
     focus,
     scope,
+    imageDataUrl,
     modelProvider,
     logger,
   });

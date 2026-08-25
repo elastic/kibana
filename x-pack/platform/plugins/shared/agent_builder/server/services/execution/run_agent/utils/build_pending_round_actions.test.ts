@@ -34,7 +34,7 @@ describe('buildPendingRoundActions', () => {
     multi_select: false,
   };
 
-  it('concatenates roundToActions output and pending ask_user_question actions, and returns consumedPromptIds', () => {
+  it('concatenates roundToActions output and pending ask_user_question actions, and returns consumedPromptIds', async () => {
     const askStep = createAskUserQuestionStep({
       prompt_id: 's1',
       questions: [sampleQuestion],
@@ -52,18 +52,19 @@ describe('buildPendingRoundActions', () => {
       },
     } as any;
 
-    const result = buildPendingRoundActions({
+    const result = await buildPendingRoundActions({
       round,
       promptState,
       toolIdMapping: new Map(),
       eventEmitter: jest.fn(),
+      attachmentStateManager: {} as any,
     });
 
     expect(result.actions.length).toBeGreaterThanOrEqual(2);
     expect(result.consumedPromptIds).toEqual(['s1']);
   });
 
-  it('restores previously answered ask_user_question steps before the current pending answers', () => {
+  it('restores previously answered ask_user_question steps before the current pending answers', async () => {
     const answered = createAskUserQuestionStep({
       prompt_id: 's1',
       questions: [sampleQuestion],
@@ -92,11 +93,12 @@ describe('buildPendingRoundActions', () => {
       },
     } as any;
 
-    const result = buildPendingRoundActions({
+    const result = await buildPendingRoundActions({
       round,
       promptState,
       toolIdMapping: new Map(),
       eventEmitter: jest.fn(),
+      attachmentStateManager: {} as any,
     });
 
     // 2 actions per ask wave (toolCall + executeTool) × 2 waves
@@ -115,7 +117,7 @@ describe('buildPendingRoundActions', () => {
     }
   });
 
-  it('keeps interleaved tool calls and answered asks in step order before the pending prompt', () => {
+  it('keeps interleaved tool calls and answered asks in step order before the pending prompt', async () => {
     const answered = createAskUserQuestionStep({
       prompt_id: 's1',
       questions: [sampleQuestion],
@@ -166,11 +168,12 @@ describe('buildPendingRoundActions', () => {
       },
     } as any;
 
-    const result = buildPendingRoundActions({
+    const result = await buildPendingRoundActions({
       round,
       promptState,
       toolIdMapping: new Map(),
       eventEmitter: jest.fn(),
+      attachmentStateManager: {} as any,
     });
 
     // load_skill pair + answered ask pair + search_rules pair + pending ask pair

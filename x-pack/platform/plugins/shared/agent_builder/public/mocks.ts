@@ -12,6 +12,7 @@ import type {
   ConversationTemplateServiceStartContract,
   RendererServiceStartContract,
   ToolServiceStartContract,
+  BrowserToolsServiceStartContract,
 } from '@kbn/agent-builder-browser';
 import type {
   AgentBuilderPluginSetup,
@@ -30,6 +31,7 @@ export type ConversationTemplateServiceStartContractMock =
   jest.Mocked<ConversationTemplateServiceStartContract>;
 export type RendererServiceStartContractMock = jest.Mocked<RendererServiceStartContract>;
 export type ToolServiceStartContractMock = jest.Mocked<ToolServiceStartContract>;
+export type BrowserToolsServiceStartContractMock = jest.Mocked<BrowserToolsServiceStartContract>;
 
 export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> & {
   agents: AgentsServiceStartContractMock;
@@ -37,6 +39,7 @@ export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> &
   conversationTemplates: ConversationTemplateServiceStartContractMock;
   renderers: RendererServiceStartContractMock;
   tools: ToolServiceStartContractMock;
+  browserTools: BrowserToolsServiceStartContractMock;
 };
 
 const createAgentStartMock = (): AgentsServiceStartContractMock => {
@@ -79,6 +82,12 @@ const createToolStartMock = (): ToolServiceStartContractMock => {
   };
 };
 
+const createBrowserToolsStartMock = (): BrowserToolsServiceStartContractMock => {
+  return {
+    register: jest.fn(),
+  };
+};
+
 const createStartContractMock = (): AgentBuilderPluginStartMock => {
   return {
     agents: createAgentStartMock(),
@@ -86,6 +95,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     conversationTemplates: createConversationTemplatesStartMock(),
     renderers: createRendererStartMock(),
     tools: createToolStartMock(),
+    browserTools: createBrowserToolsStartMock(),
     events: {
       chat$: EMPTY,
       getChatEvents$: jest.fn().mockReturnValue(EMPTY),

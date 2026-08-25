@@ -98,6 +98,58 @@ describe('ToolCallStep', () => {
     });
   });
 
+  describe('image results', () => {
+    const BLUE_PIXEL_PNG =
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+
+    const imageAttachment = {
+      id: 'screenshot:dash-1',
+      type: 'image',
+      active: true,
+      current_version: 1,
+      hidden: true,
+      versions: [
+        {
+          version: 1,
+          data: { content: BLUE_PIXEL_PNG, mime_type: 'image/png', filename: 'dashboard.jpg' },
+          created_at: 'now',
+          content_hash: 'h',
+        },
+      ],
+    } as any;
+
+    const imageRefStep = makeStep([
+      {
+        tool_result_id: 'r1',
+        type: ToolResultType.other,
+        data: { image_attachment_id: 'screenshot:dash-1' },
+      },
+    ]);
+
+    it('renders the referenced image inline when the attachment is available', () => {
+      renderWithProviders(
+        <ToolCallStep step={imageRefStep} conversationAttachments={[imageAttachment]} />
+      );
+      const img = screen.getByTestId('agentBuilderToolResultImage');
+      expect(img).toHaveAttribute('src', BLUE_PIXEL_PNG);
+    });
+
+    it('renders no image when the referenced attachment is not available', () => {
+      renderWithProviders(<ToolCallStep step={imageRefStep} conversationAttachments={[]} />);
+      expect(screen.queryByTestId('agentBuilderToolResultImage')).not.toBeInTheDocument();
+    });
+
+    it('renders no image for results without an image reference', () => {
+      renderWithProviders(
+        <ToolCallStep
+          step={makeStep([otherResult('r1')])}
+          conversationAttachments={[imageAttachment]}
+        />
+      );
+      expect(screen.queryByTestId('agentBuilderToolResultImage')).not.toBeInTheDocument();
+    });
+  });
+
   it('is always clickable for a running sub-agent call', () => {
     const step = createToolCallStep({
       tool_call_id: 'call-1',

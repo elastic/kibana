@@ -17,6 +17,7 @@ export enum AttachmentType {
   text = 'text',
   esql = 'esql',
   connector = 'connector',
+  image = 'image',
 }
 
 interface AttachmentDataMap {
@@ -24,6 +25,7 @@ interface AttachmentDataMap {
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
+  [AttachmentType.image]: ImageAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -124,3 +126,28 @@ export interface ConnectorAttachmentData {
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
+
+export const SUPPORTED_IMAGE_MIME_TYPES = ['image/png', 'image/jpeg'] as const;
+export type SupportedImageMimeType = (typeof SUPPORTED_IMAGE_MIME_TYPES)[number];
+
+const IMAGE_DATA_URL_REGEX = new RegExp(
+  `^data:(${SUPPORTED_IMAGE_MIME_TYPES.map((m) => m.replace('/', '\\/')).join('|')});base64,`
+);
+
+export const imageAttachmentDataSchema = z.object({
+  content: z.string().max(3_000_000).regex(IMAGE_DATA_URL_REGEX),
+  mime_type: z.string(),
+  filename: z.string().optional(),
+});
+
+/**
+ * Data for an image attachment.
+ */
+export interface ImageAttachmentData {
+  /** base64 data URL of the image, e.g. data:image/png;base64,... */
+  content: string;
+  /** MIME type of the image */
+  mime_type: string;
+  /** Optional original filename */
+  filename?: string;
+}

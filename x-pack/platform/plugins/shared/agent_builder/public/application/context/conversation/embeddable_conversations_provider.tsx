@@ -18,6 +18,7 @@ import type {
 import { ConversationContext } from './conversation_context';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { removeAttachmentFromList } from './remove_attachment_from_list';
+import { mergeBrowserApiTools } from './merge_browser_api_tools';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { StreamingProvider } from '../streaming/streaming_context';
 import { useConversationActions } from './use_conversation_actions';
@@ -218,6 +219,16 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps((prev) => ({ ...prev, agentId: id, newConversation: true }));
   }, []);
 
+  // Plugin-registered tools are available in every embedded conversation; host props win on id collision.
+  const browserApiTools = useMemo(
+    () =>
+      mergeBrowserApiTools(
+        services.browserToolsService.getBrowserTools(),
+        currentProps.browserApiTools
+      ),
+    [services.browserToolsService, currentProps.browserApiTools]
+  );
+
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
@@ -229,7 +240,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       greetingMessage: currentProps.greetingMessage,
       resetInitialMessage,
-      browserApiTools: currentProps.browserApiTools,
+      browserApiTools,
       setConversationId,
       setAgentId,
       attachments: currentProps.attachments,
@@ -245,7 +256,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       currentProps.initialMessage,
       currentProps.autoSendInitialMessage,
       currentProps.greetingMessage,
-      currentProps.browserApiTools,
+      browserApiTools,
       currentProps.attachments,
       upsertAttachments,
       resetInitialMessage,
