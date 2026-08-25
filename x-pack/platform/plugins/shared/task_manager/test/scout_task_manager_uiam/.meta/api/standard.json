@@ -1,10 +1,51 @@
 {
-  "sha1": "072fac33b1efa162dc992789b648002f68f0f7de",
+  "sha1": "303262bcf45c7b0c4d15d58d65cdad5d15aee1de",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "12b82be97422403-046d32467ea5d20",
+      "title": "Task Manager bulkSchedule API keys invalidates only the keys granted for a task omitted during local preparation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/bulk_schedule_api_keys.spec.ts",
+        "line": 78,
+        "column": 44
+      }
+    },
+    {
+      "id": "12b82be97422403-c1457589c675a9b",
+      "title": "Task Manager bulkSchedule API keys invalidates every granted key when the bulk contains an unsupported task type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/bulk_schedule_api_keys.spec.ts",
+        "line": 130,
+        "column": 27
+      }
+    },
+    {
+      "id": "5ce936b95a321a4-ee984c13261a09d",
+      "title": "Task Manager ensureScheduled API keys grants a single ES + UIAM pair when called repeatedly for the same task",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/ensure_scheduled_api_keys.spec.ts",
+        "line": 30,
+        "column": 15
+      }
+    },
     {
       "id": "208b6394ca1260b-100a2f007029fdb",
       "title": "Task Manager API Keys scheduled task has both apiKey and uiamApiKey",

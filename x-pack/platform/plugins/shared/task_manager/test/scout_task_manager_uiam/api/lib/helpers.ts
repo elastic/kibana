@@ -75,8 +75,25 @@ export const countActiveTaskManagerEsApiKeys = async (esClient: Client): Promise
 };
 
 /**
+ * Lists the ES API keys Task Manager granted for one task type (names are
+ * `TaskManager: <taskType>[ - <username>]`), including already-invalidated ones so callers can
+ * diff ids across a call and separately check the `invalidated` flag.
+ */
+export const queryTaskManagerEsApiKeysByType = async (
+  esClient: Client,
+  taskType: string
+): Promise<Array<{ id: string; invalidated: boolean }>> => {
+  const { api_keys: apiKeys } = await esClient.security.queryApiKeys({
+    size: 1000,
+    query: { prefix: { name: `TaskManager: ${taskType}` } },
+  });
+  return apiKeys.map(({ id, invalidated }) => ({ id, invalidated }));
+};
+
+/**
  * Reads the key ids of every `api_key_to_invalidate` marker saved object. One granted ES + UIAM
  * key set produces two markers: one carrying the ES key id and one carrying the UIAM key id.
+ * The result is cluster-wide, so assert membership of ids owned by the test, never counts.
  */
 export const readInvalidationMarkerKeyIds = async (esClient: Client): Promise<string[]> => {
   await esClient.indices.refresh({ index: TASK_MANAGER_INDEX }).catch(() => {});

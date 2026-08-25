@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
@@ -12,6 +13,7 @@ import { COMMON_HEADERS, TEST_TASK_TYPE } from '../fixtures/constants';
 import {
   TASK_MANAGER_INDEX,
   deleteTaskManagerTaskSilently,
+  queryTaskManagerEsApiKeysByType,
   readInvalidationMarkerKeyIds,
   readTaskAttributes,
   taskDocId,
@@ -35,32 +37,67 @@ const ALL_TASK_IDS = [
 const OMITTED_TASK_TYPE = 'task_manager:mark_removed_tasks_as_unrecognized';
 const UNSUPPORTED_TASK_TYPE = 'scout_bulk_schedule_unsupported_type';
 
+/**
+ * The keys granted for the tasks under test never land on a task document, so their ids can only
+ * be captured by diffing the type-scoped key listing across the scheduling call.
+ */
+const diffGrantedKeys = (
+  before: Array<{ id: string; invalidated: boolean }>,
+  after: Array<{ id: string; invalidated: boolean }>
+) => {
+  const beforeIds = new Set(before.map(({ id }) => id));
+  return after.filter(({ id }) => !beforeIds.has(id));
+};
+
+/**
+ * The granted key must be queued for invalidation. Right after the scheduling call that is a
+ * marker saved object; if the invalidation task consumed the marker in the meantime, the key
+ * itself must already be revoked.
+ */
+const expectKeyMarkedOrInvalidated = async (
+  esClient: Client,
+  markerKeyIds: string[],
+  taskType: string,
+  keyId: string
+) => {
+  if (markerKeyIds.includes(keyId)) {
+    return;
+  }
+  const keys = await queryTaskManagerEsApiKeysByType(esClient, taskType);
+  expect(keys.find(({ id }) => id === keyId)?.invalidated).toBe(true);
+};
+
 apiTest.describe(
   'Task Manager bulkSchedule API keys',
   { tag: tags.serverless.observability.complete },
   () => {
-    // Defensive cleanup on both sides: a prior crashed run may have left task docs behind, and
-    // deleting a task marks its keys for invalidation, so markers are cleaned after the deletes.
-    apiTest.beforeEach(async ({ apiClient, kbnClient, samlAuth }) => {
+    // Defensive cleanup on both sides: a prior crashed run may have left task docs behind. The
+    // deletes enqueue invalidation markers for the deleted tasks' keys; those are left for the
+    // invalidation task to consume (their designed lifecycle) rather than cleaned type-wide,
+    // which would also wipe markers belonging to other suites on the shared server.
+    apiTest.beforeEach(async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       for (const taskId of ALL_TASK_IDS) {
         await deleteTaskManagerTaskSilently(apiClient, cookieHeader, taskId);
       }
-      await kbnClient.savedObjects.clean({ types: ['api_key_to_invalidate'] });
     });
 
-    apiTest.afterAll(async ({ apiClient, kbnClient, samlAuth }) => {
+    apiTest.afterAll(async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       for (const taskId of ALL_TASK_IDS) {
         await deleteTaskManagerTaskSilently(apiClient, cookieHeader, taskId);
       }
-      await kbnClient.savedObjects.clean({ types: ['api_key_to_invalidate'] });
     });
 
     apiTest(
       'invalidates only the keys granted for a task omitted during local preparation',
       async ({ apiClient, esClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+
+        const omittedTypeKeysBefore = await queryTaskManagerEsApiKeysByType(
+          esClient,
+          OMITTED_TASK_TYPE
+        );
 
         // The second task passes the route schema but fails Task Manager's own interval
         // validation, which happens after its API keys were granted.
@@ -105,13 +142,29 @@ apiTest.describe(
         });
         expect(omittedExists).toBe(false);
 
-        // The omitted task has no entry in the bulk response, but its granted keys must still be
-        // marked: one marker for the ES key and one for the UIAM key. The persisted task's keys
-        // must not be marked.
+        // Exactly one ES key was granted for the omitted task's type during this call.
+        const grantedForOmitted = diffGrantedKeys(
+          omittedTypeKeysBefore,
+          await queryTaskManagerEsApiKeysByType(esClient, OMITTED_TASK_TYPE)
+        );
+        expect(grantedForOmitted).toHaveLength(1);
+
+        // The omitted task has no entry in the bulk response, but its granted key must still be
+        // queued for invalidation, while the persisted task's keys must be left alone.
         const markerKeyIds = await readInvalidationMarkerKeyIds(esClient);
-        expect(markerKeyIds).toHaveLength(2);
+        await expectKeyMarkedOrInvalidated(
+          esClient,
+          markerKeyIds,
+          OMITTED_TASK_TYPE,
+          grantedForOmitted[0].id
+        );
         expect(markerKeyIds).not.toContain(persistedUserScope.apiKeyId);
         expect(markerKeyIds).not.toContain(persistedUserScope.uiamApiKeyId);
+
+        const persistedTypeKeys = await queryTaskManagerEsApiKeysByType(esClient, TEST_TASK_TYPE);
+        expect(
+          persistedTypeKeys.find(({ id }) => id === persistedUserScope.apiKeyId)?.invalidated
+        ).toBe(false);
       }
     );
 
@@ -120,8 +173,17 @@ apiTest.describe(
       async ({ apiClient, esClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
+        const supportedTypeKeysBefore = await queryTaskManagerEsApiKeysByType(
+          esClient,
+          TEST_TASK_TYPE
+        );
+        const unsupportedTypeKeysBefore = await queryTaskManagerEsApiKeysByType(
+          esClient,
+          UNSUPPORTED_TASK_TYPE
+        );
+
         // Keys are granted for both task types before the unsupported type is detected, which
-        // fails the whole call: nothing is written and both key sets must be marked.
+        // fails the whole call: nothing is written and both key sets must be queued.
         const response = await apiClient.post('internal/task_manager/bulk_schedule', {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
           body: {
@@ -156,9 +218,30 @@ apiTest.describe(
           expect(exists).toBe(false);
         }
 
-        // Two granted key sets (one per task type), each producing an ES and a UIAM marker.
+        const grantedForSupported = diffGrantedKeys(
+          supportedTypeKeysBefore,
+          await queryTaskManagerEsApiKeysByType(esClient, TEST_TASK_TYPE)
+        );
+        const grantedForUnsupported = diffGrantedKeys(
+          unsupportedTypeKeysBefore,
+          await queryTaskManagerEsApiKeysByType(esClient, UNSUPPORTED_TASK_TYPE)
+        );
+        expect(grantedForSupported).toHaveLength(1);
+        expect(grantedForUnsupported).toHaveLength(1);
+
         const markerKeyIds = await readInvalidationMarkerKeyIds(esClient);
-        expect(markerKeyIds).toHaveLength(4);
+        await expectKeyMarkedOrInvalidated(
+          esClient,
+          markerKeyIds,
+          TEST_TASK_TYPE,
+          grantedForSupported[0].id
+        );
+        await expectKeyMarkedOrInvalidated(
+          esClient,
+          markerKeyIds,
+          UNSUPPORTED_TASK_TYPE,
+          grantedForUnsupported[0].id
+        );
       }
     );
   }

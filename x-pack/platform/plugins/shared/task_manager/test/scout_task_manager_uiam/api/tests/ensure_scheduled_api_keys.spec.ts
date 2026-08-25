@@ -22,10 +22,18 @@ apiTest.describe(
   'Task Manager ensureScheduled API keys',
   { tag: tags.serverless.observability.complete },
   () => {
-    apiTest.afterAll(async ({ apiClient, kbnClient, samlAuth }) => {
+    // Defensive cleanup on both sides: a stale task from a prior crashed run would make the
+    // first ensureScheduled call skip granting (the behavior under test) and break the key-count
+    // delta. Invalidation markers enqueued by the delete are left for the invalidation task to
+    // consume; a type-wide clean would also wipe markers belonging to other suites.
+    apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       await deleteTaskManagerTaskSilently(apiClient, cookieHeader, TASK_ID);
-      await kbnClient.savedObjects.clean({ types: ['api_key_to_invalidate'] });
+    });
+
+    apiTest.afterAll(async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      await deleteTaskManagerTaskSilently(apiClient, cookieHeader, TASK_ID);
     });
 
     apiTest(
