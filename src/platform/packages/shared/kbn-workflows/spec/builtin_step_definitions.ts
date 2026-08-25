@@ -23,7 +23,12 @@ import {
   WorkflowExecuteStepInputSchema,
 } from './schema';
 import { type BaseStepDefinition, StepCategory } from './step_definition_types';
-import { MAX_HITL_RESPONDED_BY_LENGTH, MAX_HITL_RESPONSE_FIELD_KEY_LENGTH } from '../common/hitl';
+import {
+  MAX_HITL_CHANNEL_LENGTH,
+  MAX_HITL_RESPONDED_AT_LENGTH,
+  MAX_HITL_RESPONDED_BY_LENGTH,
+  MAX_HITL_RESPONSE_FIELD_KEY_LENGTH,
+} from '../common/hitl';
 
 const EmptyObjectSchema = z.object({});
 
@@ -282,6 +287,8 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     outputSchema: z.object({
       response: z.record(z.string().max(MAX_HITL_RESPONSE_FIELD_KEY_LENGTH), z.unknown()),
       respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+      channel: z.string().max(MAX_HITL_CHANNEL_LENGTH).optional(),
+      respondedAt: z.string().max(MAX_HITL_RESPONDED_AT_LENGTH).optional(),
     }),
     documentation: {
       examples: [
@@ -316,6 +323,8 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     outputSchema: z.object({
       response: z.object({ approved: z.boolean() }),
       respondedBy: z.string().max(MAX_HITL_RESPONDED_BY_LENGTH),
+      channel: z.string().max(MAX_HITL_CHANNEL_LENGTH).optional(),
+      respondedAt: z.string().max(MAX_HITL_RESPONDED_AT_LENGTH).optional(),
     }),
     documentation: {
       examples: [
