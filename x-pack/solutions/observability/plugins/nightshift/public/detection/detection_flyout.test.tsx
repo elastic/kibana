@@ -91,6 +91,7 @@ const mockEvent: SignificantEvent = {
   blast_radius: [
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'feat-web-frontend',
       name: 'web-frontend',
       stream_name: 'logs.web-frontend',
@@ -271,22 +272,44 @@ describe('DetectionFlyout', () => {
     expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
   });
 
-  it('names the unreachable streams while keeping the services that did resolve', () => {
+  it('includes resolved services from causal features without failure UI', () => {
+    const paymentsFeature = {
+      ...webFrontendFeature,
+      uuid: 'feat-payments',
+      id: 'payments-api',
+      stream_name: 'logs.payments',
+      title: 'payments-api',
+    };
     mockStreamFeatures.mockReturnValue({
-      features: [webFrontendFeature],
+      features: [webFrontendFeature, paymentsFeature],
       failedStreamNames: ['logs.payments', 'logs.checkout'],
       isInitialLoading: false,
       isFetching: false,
       isError: false,
       refetch: jest.fn(),
     });
-    renderFlyout();
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        causal_features: [
+          {
+            feature_id: 'feat-payments',
+            type: 'entity',
+            subtype: 'service',
+            name: 'payments-api',
+            stream_name: 'logs.payments',
+          },
+        ],
+      },
+    });
 
-    expect(screen.getByText('Some impacted services could not be loaded')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftDetectionFlyoutEntitiesFailedStreams')).toHaveTextContent(
-      'No response from logs.payments, logs.checkout.'
-    );
-    expect(screen.getAllByTestId('nightshiftDetectionFlyoutEntityChip').length).toBeGreaterThan(0);
+    expect(
+      screen
+        .getAllByTestId('nightshiftDetectionFlyoutEntityChip')
+        .map(({ textContent }) => textContent)
+    ).toEqual(['web-frontend', 'payments-api']);
+    expect(screen.queryByText(/could not be loaded/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Retry')).not.toBeInTheDocument();
   });
 
   it('renders the Lens occurrence chart in the trend section', () => {

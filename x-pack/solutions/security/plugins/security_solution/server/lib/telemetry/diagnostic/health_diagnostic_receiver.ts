@@ -44,7 +44,7 @@ import {
   QueryType,
   PermissionError,
   NotAllowedError,
-  type HealthDiagnosticQueryV3,
+  type ApiQuery,
   type IntegrationResolution,
   type ExecutableQuery,
 } from './health_diagnostic_service.types';
@@ -70,7 +70,7 @@ function isPathAllowed(resolvedPath: string, allowlist: Array<{ path: string }>)
 }
 
 function streamApi(
-  query: HealthDiagnosticQueryV3,
+  query: ApiQuery,
   client: ElasticsearchClient,
   allowlist: Array<{ path: string }>,
   signal: AbortSignal
@@ -150,13 +150,13 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
   streamEsql<T>(executableQuery: ExecutableQuery, abortSignal: AbortSignal): Observable<T> {
     const { query } = executableQuery;
 
-    if (query.version === 2 && /^[\s\r\n]*FROM/i.test(query.query)) {
+    if (/^[\s\r\n]*FROM/i.test(query.query)) {
       // never should fail here since we already manage this scenario in the resolver, but just in case, we put this guard to
       // avoid running potentially unsafe queries
       return throwError(
         () =>
           new Error(
-            'v2 ESQL descriptors must not contain a FROM clause; use the integrations field to target indices'
+            'ESQL descriptors must not contain a FROM clause; use the integrations field to target indices'
           )
       );
     }
@@ -322,7 +322,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
 
   /**
    * Returns the list of indices to query based on the provided tiers.
-   * Dispatches on query version: v1 uses `query.index`, v2 uses resolved indices from Fleet.
+   * Uses `query.index` for direct-index queries; falls back to Fleet-resolved indices.
    * When running in serverless or the index is not managed by ILM, returns the base indices as-is.
    */
   async indicesFor(executableQuery: ExecutableQuery): Promise<string[]> {
@@ -330,19 +330,16 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
     const tiers = query.tiers;
 
     let baseIndices: string[];
-    if (query.version === 1) {
+    if (query.index) {
       baseIndices = [query.index];
-      this.logger.debug('Using index from v1 query', { queryName: query.name } as LogMeta);
-    } else if ('index' in query && query.index) {
-      baseIndices = [query.index as string];
-      this.logger.trace('Using index from v2 query', { queryName: query.name } as LogMeta);
+      this.logger.debug('Using direct index', { queryName: query.name } as LogMeta);
     } else {
-      const v2Query = executableQuery as Extract<
+      const withResolution = executableQuery as Extract<
         ExecutableQuery,
         { resolution: IntegrationResolution }
       >;
-      baseIndices = v2Query.resolution.indices;
-      this.logger.debug('Using resolved indices from v2 query', {
+      baseIndices = withResolution.resolution.indices;
+      this.logger.debug('Using Fleet-resolved indices', {
         queryName: query.name,
         count: baseIndices.length,
       } as LogMeta);
@@ -422,16 +419,16 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
   }
 
   // Returns the "pre-ILM" index/datastream patterns used for permission checking only.
-  // v1: the literal `index` field; v2: the Fleet-resolved datastream names.
+  // Direct-index queries use the literal `index` field; integration queries use Fleet-resolved names.
   // Permissions are granted against these names, NOT the backing .ds-* indices.
   private originalIndicesFor(executableQuery: ExecutableQuery): string[] {
-    if (executableQuery.query.version === 1) {
+    if (executableQuery.query.index) {
       return [executableQuery.query.index];
     }
-    if ('index' in executableQuery.query && executableQuery.query.index) {
-      return [executableQuery.query.index as string];
-    }
-    const v2 = executableQuery as Extract<ExecutableQuery, { resolution: IntegrationResolution }>;
-    return v2.resolution.indices;
+    const withResolution = executableQuery as Extract<
+      ExecutableQuery,
+      { resolution: IntegrationResolution }
+    >;
+    return withResolution.resolution.indices;
   }
 }
