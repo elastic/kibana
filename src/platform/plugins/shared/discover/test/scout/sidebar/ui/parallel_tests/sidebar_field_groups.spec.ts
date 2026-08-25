@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KbnClient } from '@kbn/scout';
+import type { BrowserAuthFixture, KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverScoutSpace } from '../fixtures';
+import type { DiscoverPageObjects, DiscoverScoutSpace } from '../fixtures';
 import { spaceTest, tags, testData } from '../fixtures';
 
-// Sets popularity counts on the default data view via the data views fields API so tests
-// don't have to replay UI column toggles (each toggle costs a save + search roundtrip).
-// `null` removes a previously persisted count, keeping retries idempotent.
 const setFieldPopularity = async (
   kbnClient: KbnClient,
   discoverScoutSpace: DiscoverScoutSpace,
@@ -32,6 +29,16 @@ const setFieldPopularity = async (
   });
 };
 
+const loginAndOpenDiscover = async (
+  browserAuth: BrowserAuthFixture,
+  discover: DiscoverPageObjects['discover'],
+  { asAdmin = false }: { asAdmin?: boolean } = {}
+) => {
+  await (asAdmin ? browserAuth.loginAsAdmin() : browserAuth.loginAsPrivilegedUser());
+  await discover.goto({ queryMode: 'classic' });
+  await discover.waitUntilTabIsLoaded();
+};
+
 spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
@@ -46,12 +53,10 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('shows available and meta field groups', async ({ browserAuth, pageObjects }) => {
+  spaceTest('shows available, meta field groups', async ({ browserAuth, pageObjects }) => {
     const { discover, unifiedFieldList } = pageObjects;
 
-    await browserAuth.loginAsPrivilegedUser();
-    await discover.goto({ queryMode: 'classic' });
-    await discover.waitUntilTabIsLoaded();
+    await loginAndOpenDiscover(browserAuth, discover);
 
     expect(await unifiedFieldList.doesSidebarShowFields()).toBe(true);
 
@@ -69,23 +74,6 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
     expect(metaFields).toContain('_id');
     expect(metaFields).toContain('_index');
     expect(metaFields).toContain('_score');
-  });
-
-  spaceTest('passes filters down to field stats', async ({ browserAuth, pageObjects }) => {
-    const { discover, filterBar, unifiedFieldList } = pageObjects;
-
-    await browserAuth.loginAsPrivilegedUser();
-    await discover.goto({ queryMode: 'classic' });
-    await discover.waitUntilTabIsLoaded();
-
-    await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
-    await discover.waitUntilSearchingHasFinished();
-
-    await unifiedFieldList.clickFieldListItem('extension');
-    await unifiedFieldList.waitUntilFieldPopoverIsLoaded();
-    // Unfiltered top values are css/png/gif/php — jpg proves the filter applied.
-    await expect(unifiedFieldList.getFieldStatsTopValues()).toContainText('jpg');
-    await unifiedFieldList.closeFieldPopover();
   });
 
   // The two popularity tests below select columns, which calls popularizeField. That
@@ -107,9 +95,7 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
         bytes: null,
       });
 
-      await browserAuth.loginAsAdmin();
-      await discover.goto({ queryMode: 'classic' });
-      await discover.waitUntilTabIsLoaded();
+      await loginAndOpenDiscover(browserAuth, discover, { asAdmin: true });
 
       // Each column toggle popularizes the field (indexPatterns.save) and retriggers
       // search. Wait between toggles so saves don't 409 and column state can't race.
@@ -179,9 +165,7 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
         clientip: null,
       });
 
-      await browserAuth.loginAsAdmin();
-      await discover.goto({ queryMode: 'classic' });
-      await discover.waitUntilTabIsLoaded();
+      await loginAndOpenDiscover(browserAuth, discover, { asAdmin: true });
 
       await unifiedFieldList.clickFieldListItemAdd('bytes');
       await discover.waitUntilSearchingHasFinished();
@@ -236,4 +220,19 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
       }
     }
   );
+
+  spaceTest('passes filters down to field stats', async ({ browserAuth, pageObjects }) => {
+    const { discover, filterBar, unifiedFieldList } = pageObjects;
+
+    await loginAndOpenDiscover(browserAuth, discover);
+
+    await filterBar.addFilter({ field: 'extension', operator: 'is', value: 'jpg' });
+    await discover.waitUntilSearchingHasFinished();
+
+    await unifiedFieldList.clickFieldListItem('extension');
+    await unifiedFieldList.waitUntilFieldPopoverIsLoaded();
+    // Unfiltered top values are css/png/gif/php — jpg proves the filter applied.
+    await expect(unifiedFieldList.getFieldStatsTopValues()).toContainText('jpg');
+    await unifiedFieldList.closeFieldPopover();
+  });
 });
