@@ -95,6 +95,7 @@
     "**/@hello-pangea/dnd": "18.0.1",
     "**/@langchain/core": "1.2.3",
     "**/@langchain/google-common": "2.2.0",
+    "**/@mswjs/interceptors": "0.41.6",
     "**/@types/node": "24.10.13",
     "**/@types/prop-types": "15.7.5",
     "**/@typescript-eslint/utils": "8.60.0",
