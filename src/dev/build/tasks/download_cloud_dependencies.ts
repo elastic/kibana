@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import del from 'del';
+import { deleteAsync } from 'del';
 import Axios from 'axios';
 import Fsp from 'fs/promises';
 import type { Task } from '../lib';
@@ -78,7 +78,7 @@ export const DownloadCloudDependencies: Task = {
       throw e;
     }
 
-    await del([config.resolveFromRepo('.beats')]);
+    await deleteAsync([config.resolveFromRepo('.beats')]);
 
     if (config.buildOptions.createDockerCloud) {
       await downloadBeat('metricbeat', buildId);

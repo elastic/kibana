@@ -9,7 +9,8 @@
 
 import sinon from 'sinon';
 import fs from 'fs';
-import del from 'del';
+import { deleteSync } from 'del';
+jest.mock('del', () => ({ deleteSync: jest.fn() }));
 
 import { cleanPrevious, cleanArtifacts } from './cleanup';
 import { Logger } from '../../logger';
@@ -36,11 +37,10 @@ describe('kibana cli', function () {
           logger.log.restore();
           logger.error.restore();
           fs.statSync.restore();
-          del.sync.restore();
+          deleteSync.mockReset();
         });
 
         it('should resolve if the working path does not exist', function () {
-          sinon.stub(del, 'sync');
           sinon.stub(fs, 'statSync').callsFake(() => {
             const error = new Error('ENOENT');
             error.code = 'ENOENT';
@@ -55,7 +55,6 @@ describe('kibana cli', function () {
         });
 
         it('should rethrow any exception except ENOENT from fs.statSync', function () {
-          sinon.stub(del, 'sync');
           sinon.stub(fs, 'statSync').throws(new Error('An Unhandled Error'));
 
           errorStub = sinon.stub();
@@ -67,7 +66,6 @@ describe('kibana cli', function () {
         });
 
         it('should log a message if there was a working directory', function () {
-          sinon.stub(del, 'sync');
           sinon.stub(fs, 'statSync');
 
           return cleanPrevious(settings, logger)
@@ -79,9 +77,11 @@ describe('kibana cli', function () {
             });
         });
 
-        it('should rethrow any exception from del.sync', function () {
+        it('should rethrow any exception from deleteSync', function () {
           sinon.stub(fs, 'statSync');
-          sinon.stub(del, 'sync').throws(new Error('I am an error thrown by del'));
+          deleteSync.mockImplementation(() => {
+            throw new Error('I am an error thrown by del');
+          });
 
           errorStub = sinon.stub();
           return cleanPrevious(settings, logger)
@@ -92,7 +92,6 @@ describe('kibana cli', function () {
         });
 
         it('should resolve if the working path is deleted', function () {
-          sinon.stub(del, 'sync');
           sinon.stub(fs, 'statSync');
 
           return cleanPrevious(settings, logger)
@@ -107,18 +106,18 @@ describe('kibana cli', function () {
         beforeEach(function () {});
 
         afterEach(function () {
-          del.sync.restore();
+          deleteSync.mockReset();
         });
 
         it('should attempt to delete the working directory', function () {
-          sinon.stub(del, 'sync');
-
           cleanArtifacts(settings);
-          expect(del.sync.calledWith(settings.workingPath)).toBe(true);
+          expect(deleteSync).toHaveBeenCalledWith(settings.workingPath);
         });
 
-        it('should swallow any errors thrown by del.sync', function () {
-          sinon.stub(del, 'sync').throws(new Error('Something bad happened.'));
+        it('should swallow any errors thrown by deleteSync', function () {
+          deleteSync.mockImplementation(() => {
+            throw new Error('Something bad happened.');
+          });
 
           expect(() => cleanArtifacts(settings)).not.toThrow();
         });

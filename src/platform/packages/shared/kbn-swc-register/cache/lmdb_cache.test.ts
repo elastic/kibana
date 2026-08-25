@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Path from 'path';
 import { Writable } from 'stream';
 
-import del from 'del';
+import { deleteAsync } from 'del';
 import LmdbStore = require('lmdb');
 import type { RootDatabaseOptions } from 'lmdb';
 
@@ -78,10 +78,10 @@ const makeCache = (...options: ConstructorParameters<typeof LmdbCache>) => {
   return cache;
 };
 
-beforeEach(async () => await del(DIR));
+beforeEach(async () => await deleteAsync(DIR));
 afterEach(async () => {
   await Promise.all(caches.splice(0).map((cache) => cache.close()));
-  await del(DIR);
+  await deleteAsync(DIR);
 });
 
 it('returns undefined until values are set', async () => {

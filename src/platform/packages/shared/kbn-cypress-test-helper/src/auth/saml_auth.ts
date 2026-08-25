@@ -11,8 +11,8 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { resolve, join } from 'path';
 import { readFileSync } from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { HostOptions } from '@kbn/test';
-import { SamlSessionManager } from '@kbn/test';
+import type { HostOptions } from '@kbn/test-saml-auth';
+import { SamlSessionManager } from '@kbn/test-saml-auth';
 import type { SecurityRoleName } from './common';
 
 const ES_RESOURCES_DIR = resolve(

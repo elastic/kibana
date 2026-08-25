@@ -10,7 +10,7 @@
 import { resolve } from 'path';
 import { chmodSync, statSync } from 'fs';
 
-import del from 'del';
+import { deleteAsync } from 'del';
 
 import {
   mkdirp,
@@ -51,13 +51,13 @@ beforeAll(async () => {
 
 // clean and recreate TMP directory
 beforeEach(async () => {
-  await del(TMP);
+  await deleteAsync(TMP);
   await mkdirp(TMP);
 });
 
 // cleanup TMP directory
 afterAll(async () => {
-  await del(TMP);
+  await deleteAsync(TMP);
 });
 
 describe('mkdirp()', () => {

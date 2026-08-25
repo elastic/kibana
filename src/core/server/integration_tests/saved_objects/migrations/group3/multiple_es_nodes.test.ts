@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import del from 'del';
+import { deleteAsync } from 'del';
 import { kibanaServerTestUser } from '@kbn/test';
 import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import {
@@ -24,7 +24,7 @@ import type { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-
 const LOG_FILE_PREFIX = 'migration_test_multiple_es_nodes';
 
 async function removeLogFile() {
-  await del([Path.join(__dirname, `${LOG_FILE_PREFIX}_*.log`)], { force: true });
+  await deleteAsync([Path.join(__dirname, `${LOG_FILE_PREFIX}_*.log`)], { force: true });
 }
 
 function extractSortNumberFromId(id: string): number {

@@ -22,7 +22,7 @@
     "@kbn/test-subj-selector",
     "@kbn/cases-plugin",
     "@kbn/kbn-client",
-    "@kbn/test",
+    "@kbn/test-saml-auth",
     "@kbn/repo-info",
     "@kbn/tooling-log",
     "@kbn/security-solution-serverless",
@@ -31,5 +31,6 @@
     "@kbn/test-suites-xpack-security/security_solution_cypress/cypress",
     "@kbn/elastic-assistant-common",
     "@kbn/actions-plugin",
+    "@kbn/test",
   ]
 }

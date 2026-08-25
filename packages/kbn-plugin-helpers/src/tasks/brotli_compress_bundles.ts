@@ -12,7 +12,7 @@ import { pipeline } from 'stream';
 import { promisify } from 'util';
 
 import vfs from 'vinyl-fs';
-import del from 'del';
+import { deleteAsync } from 'del';
 import gulpBrotli from 'gulp-brotli';
 import zlib from 'zlib';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -33,7 +33,7 @@ export async function brotliCompressBundles({ buildDir, log, plugin }: TaskConte
   );
 
   try {
-    await del(['**/*.br'], { cwd: compressDir });
+    await deleteAsync(['**/*.br'], { cwd: compressDir });
     await asyncPipeline(
       vfs.src(['**/*.{js,css}'], { cwd: compressDir, encoding: false }),
       gulpBrotli({
