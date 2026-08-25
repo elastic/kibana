@@ -50,15 +50,16 @@ async function waitFor(
 
 test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
   test.describe('Session expired', () => {
-    test.beforeEach(async ({ esClient }) => {
+    test.beforeEach(async ({ apiClient, config, esClient }) => {
       await esClient.cluster.health({
         index: '.kibana_security_session*',
         wait_for_status: 'green',
         ignore_unavailable: true,
       } as any);
-      await esClient.indices
-        .delete({ index: '.kibana_security_session*', ignore_unavailable: true })
-        .catch(() => {});
+      await waitFor(async () => {
+        await clearAllSessions(apiClient, config);
+        expect(await getSessionCount(esClient)).toBe(0);
+      }, 10000, 500);
     });
 
     test(
@@ -77,14 +78,11 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
         });
         expect(loginResponse).toHaveStatusCode(200);
 
-        await esClient.indices.refresh({
-          index: '.kibana_security_session*',
-          ignore_unavailable: true,
-        } as any);
         const cookie = extractSessionCookie(loginResponse.headers['set-cookie'] as string[]);
 
-        const countBefore = await getSessionCount(esClient);
-        expect(countBefore).toBe(1);
+        await waitFor(async () => {
+          expect(await getSessionCount(esClient)).toBe(1);
+        }, 5000, 200);
 
         const meResponse = await apiClient.get('/internal/security/me', {
           headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
@@ -130,7 +128,7 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
         expect(response).toHaveStatusCode(200);
         expect(typeof response.body.expiresInMs).toBe('number');
         expect(response.body.canBeExtended).toBe(true);
-        expect(response.body.provider).toEqual({ type: 'basic', name: 'basic1' });
+        expect(response.body.provider).toStrictEqual({ type: 'basic', name: 'basic1' });
       });
 
       test('should not extend the session', async ({ apiClient }) => {
@@ -188,13 +186,13 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
         expect(getResponse.body.expiresInMs).toBeLessThan(IDLE_TIMEOUT_MS + 100);
 
         const allCreatedAtAfter = await getSessionsCreatedAt(esClient);
-        expect(allCreatedAtAfter).toEqual(allCreatedAtBefore);
+        expect(allCreatedAtAfter).toStrictEqual(allCreatedAtBefore);
       });
     });
   });
 
   test.describe('Session Idle cleanup', () => {
-    test.beforeEach(async ({ esClient }) => {
+    test.beforeEach(async ({ apiClient, config, esClient }) => {
       await esClient.cluster.health({
         index: '.kibana_security_session*',
         wait_for_status: 'green',
@@ -203,9 +201,10 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
       await esClient.cluster.putSettings({
         body: { persistent: { 'logger.org.elasticsearch.xpack.security.authc': 'debug' } },
       } as any);
-      await esClient.indices
-        .delete({ index: '.kibana_security_session*', ignore_unavailable: true })
-        .catch(() => {});
+      await waitFor(async () => {
+        await clearAllSessions(apiClient, config);
+        expect(await getSessionCount(esClient)).toBe(0);
+      }, 10000, 500);
     });
 
     test(
@@ -229,7 +228,9 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
           headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
         });
         expect(meResponse.body.username).toBe(config.auth.username);
-        expect(await getSessionCount(esClient)).toBe(1);
+        await waitFor(async () => {
+          expect(await getSessionCount(esClient)).toBe(1);
+        }, 5000, 200);
 
         await runCleanupTask(apiClient, config.auth.username, config.auth.password);
 
@@ -271,7 +272,9 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
           headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookie },
         });
         expect(meBasic.body.username).toBe(config.auth.username);
-        expect(await getSessionCount(esClient)).toBe(4);
+        await waitFor(async () => {
+          expect(await getSessionCount(esClient)).toBe(4);
+        }, 5000, 200);
 
         await runCleanupTask(apiClient, config.auth.username, config.auth.password);
 
@@ -295,7 +298,7 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
           headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlOverrideCookie },
         });
         expect(overrideMe).toHaveStatusCode(200);
-        expect(overrideMe.body.authentication_provider).toEqual({
+        expect(overrideMe.body.authentication_provider).toStrictEqual({
           type: 'saml',
           name: 'saml_override',
         });
@@ -304,7 +307,7 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
           headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlDisableCookie },
         });
         expect(disableMe).toHaveStatusCode(200);
-        expect(disableMe.body.authentication_provider).toEqual({
+        expect(disableMe.body.authentication_provider).toStrictEqual({
           type: 'saml',
           name: 'saml_disable',
         });
@@ -332,7 +335,9 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
           headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
         });
         expect(me0.body.username).toBe(config.auth.username);
-        expect(await getSessionCount(esClient)).toBe(1);
+        await waitFor(async () => {
+          expect(await getSessionCount(esClient)).toBe(1);
+        }, 5000, 200);
 
         for (let i = 0; i < 20; i++) {
           await new Promise((r) => setTimeout(r, 3000));
@@ -352,6 +357,21 @@ test.describe('Session Idle', { tag: [...tags.stateful.classic] }, () => {
     );
   });
 });
+
+async function clearAllSessions(
+  apiClient: any,
+  config: { auth: { username: string; password: string } }
+): Promise<void> {
+  const adminBase64 = Buffer.from(`${config.auth.username}:${config.auth.password}`).toString(
+    'base64'
+  );
+  await apiClient
+    .post('/api/security/session/_invalidate', {
+      headers: { 'kbn-xsrf': KBN_XSRF, Authorization: `Basic ${adminBase64}` },
+      body: { match: 'all' },
+    })
+    .catch(() => {});
+}
 
 async function getSessionCount(esClient: any): Promise<number> {
   await esClient.indices

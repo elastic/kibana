@@ -44,7 +44,11 @@ addOrReplaceArg(
   'xpack.security.authc.providers',
   JSON.stringify({
     basic: { basic1: { order: 0 } },
-    saml: { saml1: { order: 1, realm: 'saml1' } },
+    saml: {
+      saml1: { order: 1, realm: 'saml1' },
+      // Required for Scout's preCreateSecurityIndexesViaSamlAuth step
+      'cloud-saml-kibana': { order: 4, realm: 'cloud-saml-kibana' },
+    },
     anonymous: {
       anonymous1: {
         order: 3,

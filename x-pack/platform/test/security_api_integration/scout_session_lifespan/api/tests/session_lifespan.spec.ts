@@ -27,6 +27,40 @@ function extractSessionCookie(setCookieHeader: string | string[] | undefined): s
   return sidCookie.split(';')[0];
 }
 
+async function waitFor(
+  condition: () => Promise<void>,
+  timeout = 30000,
+  interval = 1000
+): Promise<void> {
+  const deadline = Date.now() + timeout;
+  let lastError: unknown;
+  while (Date.now() < deadline) {
+    try {
+      await condition();
+      return;
+    } catch (err) {
+      lastError = err;
+      await new Promise((r) => setTimeout(r, interval));
+    }
+  }
+  throw lastError;
+}
+
+async function clearAllSessions(
+  apiClient: any,
+  config: { auth: { username: string; password: string } }
+): Promise<void> {
+  const adminBase64 = Buffer.from(`${config.auth.username}:${config.auth.password}`).toString(
+    'base64'
+  );
+  await apiClient
+    .post('/api/security/session/_invalidate', {
+      headers: { 'kbn-xsrf': KBN_XSRF, Authorization: `Basic ${adminBase64}` },
+      body: { match: 'all' },
+    })
+    .catch(() => {});
+}
+
 async function getSessionCount(esClient: any): Promise<number> {
   await esClient.indices
     .refresh({ index: '.kibana_security_session*', ignore_unavailable: true })
@@ -67,7 +101,7 @@ async function loginWithSAML(apiClient: any, providerName: string): Promise<stri
 }
 
 test.describe('Session Lifespan cleanup', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeEach(async ({ esClient }) => {
+  test.beforeEach(async ({ apiClient, config, esClient }) => {
     await esClient.cluster.health({
       index: '.kibana_security_session*',
       wait_for_status: 'green',
@@ -76,9 +110,10 @@ test.describe('Session Lifespan cleanup', { tag: [...tags.stateful.classic] }, (
     await esClient.cluster.putSettings({
       body: { persistent: { 'logger.org.elasticsearch.xpack.security.authc': 'debug' } },
     } as any);
-    await esClient.indices
-      .delete({ index: '.kibana_security_session*', ignore_unavailable: true })
-      .catch(() => {});
+    await waitFor(async () => {
+      await clearAllSessions(apiClient, config);
+      expect(await getSessionCount(esClient)).toBe(0);
+    }, 10000, 500);
   });
 
   test(
@@ -96,17 +131,15 @@ test.describe('Session Lifespan cleanup', { tag: [...tags.stateful.classic] }, (
         },
       });
       expect(loginResponse).toHaveStatusCode(200);
-      await esClient.indices.refresh({
-        index: '.kibana_security_session*',
-        ignore_unavailable: true,
-      } as any);
       const cookie = extractSessionCookie(loginResponse.headers['set-cookie'] as string[]);
 
       const meResponse = await apiClient.get('/internal/security/me', {
         headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
       });
       expect(meResponse.body.username).toBe(config.auth.username);
-      expect(await getSessionCount(esClient)).toBe(1);
+      await waitFor(async () => {
+        expect(await getSessionCount(esClient)).toBe(1);
+      }, 5000, 200);
 
       // Cleanup routine runs every 20s, wait 60s for lifespan (10s) to be exceeded and cleaned up
       await new Promise((r) => setTimeout(r, 60000));
@@ -148,7 +181,9 @@ test.describe('Session Lifespan cleanup', { tag: [...tags.stateful.classic] }, (
         headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookie },
       });
       expect(meBasic.body.username).toBe(config.auth.username);
-      expect(await getSessionCount(esClient)).toBe(4);
+      await waitFor(async () => {
+        expect(await getSessionCount(esClient)).toBe(4);
+      }, 10000, 500);
 
       // Wait 60s for lifespan (10s) to expire and cleanup to run
       await new Promise((r) => setTimeout(r, 60000));
@@ -169,7 +204,7 @@ test.describe('Session Lifespan cleanup', { tag: [...tags.stateful.classic] }, (
         headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlOverrideCookie },
       });
       expect(overrideMe).toHaveStatusCode(200);
-      expect(overrideMe.body.authentication_provider).toEqual({
+      expect(overrideMe.body.authentication_provider).toStrictEqual({
         type: 'saml',
         name: 'saml_override',
       });
@@ -178,7 +213,7 @@ test.describe('Session Lifespan cleanup', { tag: [...tags.stateful.classic] }, (
         headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlDisableCookie },
       });
       expect(disableMe).toHaveStatusCode(200);
-      expect(disableMe.body.authentication_provider).toEqual({
+      expect(disableMe.body.authentication_provider).toStrictEqual({
         type: 'saml',
         name: 'saml_disable',
       });

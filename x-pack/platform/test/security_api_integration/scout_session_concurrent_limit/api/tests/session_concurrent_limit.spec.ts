@@ -31,9 +31,13 @@ function extractSessionCookie(setCookieHeader: string | string[] | undefined): s
   return sidCookie.split(';')[0];
 }
 
+
 async function getSessionCount(esClient: any): Promise<number> {
   await esClient.indices
-    .refresh({ index: '.kibana_security_session*', ignore_unavailable: true })
+    .refresh(
+      { index: '.kibana_security_session*', ignore_unavailable: true } as any,
+      { headers: { 'x-elastic-product-origin': 'kibana' } } as any
+    )
     .catch(() => {});
   const result = await esClient.search({
     index: '.kibana_security_session*',
@@ -122,6 +126,18 @@ async function loginWithAnonymous(apiClient: any): Promise<string> {
   return extractSessionCookie(response.headers['set-cookie'] as string[]);
 }
 
+async function refreshSessionIndex(
+  apiClient: any,
+  config: { auth: { username: string; password: string } }
+): Promise<void> {
+  const authBase64 = Buffer.from(`${config.auth.username}:${config.auth.password}`).toString(
+    'base64'
+  );
+  await apiClient.post('/session/_refresh_session_index', {
+    headers: { 'kbn-xsrf': KBN_XSRF, Authorization: `Basic ${authBase64}` },
+  });
+}
+
 async function runCleanupTask(
   apiClient: any,
   config: { auth: { username: string; password: string } }
@@ -183,7 +199,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
   });
 
   test.describe('Cleanup', () => {
-    test.beforeEach(async ({ esClient }) => {
+    test.beforeEach(async ({ apiClient, config, esClient }) => {
       await esClient.cluster.health({
         index: '.kibana_security_session*',
         wait_for_status: 'green',
@@ -192,9 +208,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
       await esClient.cluster.putSettings({
         body: { persistent: { 'logger.org.elasticsearch.xpack.security.authc': 'debug' } },
       } as any);
-      await esClient.indices
-        .delete({ index: '.kibana_security_session*', ignore_unavailable: true })
-        .catch(() => {});
+      await invalidateAllSessions(apiClient, config);
     });
 
     test(
@@ -364,12 +378,13 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
         });
         expect(sessionIds.length).toBe(2);
 
-        await esClient.updateByQuery({
-          index: '.kibana_security_session*',
-          script: 'ctx._source.remove("createdAt")',
-          query: { ids: { values: sessionIds } },
-          refresh: true,
-        } as any);
+        const authBase64 = Buffer.from(`${config.auth.username}:${config.auth.password}`).toString(
+          'base64'
+        );
+        await apiClient.post('/session/_remove_created_at', {
+          body: { ids: sessionIds },
+          headers: { 'kbn-xsrf': KBN_XSRF, Authorization: `Basic ${authBase64}` },
+        });
 
         await runCleanupTask(apiClient, config);
 
@@ -510,10 +525,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
           handshakeThree.location
         );
 
-        await esClient.indices.refresh({
-          index: '.kibana_security_session*',
-          ignore_unavailable: true,
-        } as any);
+        await refreshSessionIndex(apiClient, config);
 
         const s1 = await apiClient.get('/internal/security/me', {
           headers: { 'kbn-xsrf': KBN_XSRF, Cookie: samlCookieOne },
@@ -543,10 +555,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
     });
 
     test.beforeEach(async ({ apiClient, config, esClient }) => {
-      await esClient.indices.refresh({
-        index: '.kibana_security_session*',
-        ignore_unavailable: true,
-      } as any);
+      await refreshSessionIndex(apiClient, config);
       await esClient.cluster.health({
         index: '.kibana_security_session*',
         wait_for_status: 'green',
@@ -579,10 +588,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
 
         // Third login should displace the oldest
         const cookieThree = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
-        await esClient.indices.refresh({
-          index: '.kibana_security_session*',
-          ignore_unavailable: true,
-        } as any);
+        await refreshSessionIndex(apiClient, config);
         const ex1 = await apiClient.get('/internal/security/me', {
           headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookieOne },
         });
@@ -598,10 +604,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
 
         // Fourth login should displace the next oldest
         const cookieFour = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
-        await esClient.indices.refresh({
-          index: '.kibana_security_session*',
-          ignore_unavailable: true,
-        } as any);
+        await refreshSessionIndex(apiClient, config);
         const ex2 = await apiClient.get('/internal/security/me', {
           headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookieTwo },
         });
@@ -649,10 +652,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
 
         // 5th login as admin displaces oldest admin session
         const c5 = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
-        await esClient.indices.refresh({
-          index: '.kibana_security_session*',
-          ignore_unavailable: true,
-        } as any);
+        await refreshSessionIndex(apiClient, config);
         expect(
           (await apiClient.get('/internal/security/me', {
             headers: { 'kbn-xsrf': KBN_XSRF, Cookie: c1 },
@@ -681,10 +681,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
 
         // 6th login as admin displaces next admin session
         const c6 = await loginWithBasic(apiClient, config.auth.username, config.auth.password);
-        await esClient.indices.refresh({
-          index: '.kibana_security_session*',
-          ignore_unavailable: true,
-        } as any);
+        await refreshSessionIndex(apiClient, config);
         expect(
           (await apiClient.get('/internal/security/me', {
             headers: { 'kbn-xsrf': KBN_XSRF, Cookie: c1 },
@@ -713,10 +710,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
 
         // 7th login as test user displaces oldest test user session
         const c7 = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
-        await esClient.indices.refresh({
-          index: '.kibana_security_session*',
-          ignore_unavailable: true,
-        } as any);
+        await refreshSessionIndex(apiClient, config);
         expect(
           (await apiClient.get('/internal/security/me', {
             headers: { 'kbn-xsrf': KBN_XSRF, Cookie: c1 },
@@ -747,7 +741,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
 
     test(
       'should properly enforce session limit even for multiple concurrent logins',
-      async ({ apiClient, esClient }) => {
+      async ({ apiClient, config }) => {
         const cookies = await Promise.all(
           Array.from({ length: 10 }).map(() =>
             loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD)
@@ -756,10 +750,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
 
         const statusCodes: number[] = [];
         for (const cookie of cookies) {
-          await esClient.indices.refresh({
-            index: '.kibana_security_session*',
-            ignore_unavailable: true,
-          } as any);
+          await refreshSessionIndex(apiClient, config);
           const r = await apiClient.get('/internal/security/me', {
             headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
           });
@@ -779,10 +770,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
         const samlCookieOne = await loginWithSAML(apiClient);
         const samlCookieTwo = await loginWithSAML(apiClient);
 
-        await esClient.indices.refresh({
-          index: '.kibana_security_session*',
-          ignore_unavailable: true,
-        } as any);
+        await refreshSessionIndex(apiClient, config);
 
         // All active
         expect(
@@ -808,10 +796,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
 
         // SAML exceeds limit, basic unaffected
         const samlCookieThree = await loginWithSAML(apiClient);
-        await esClient.indices.refresh({
-          index: '.kibana_security_session*',
-          ignore_unavailable: true,
-        } as any);
+        await refreshSessionIndex(apiClient, config);
         expect(
           (await apiClient.get('/internal/security/me', {
             headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookieOne },
@@ -840,10 +825,7 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
 
         // Basic exceeds limit, SAML unaffected
         const basicCookieThree = await loginWithBasic(apiClient, TEST_USERNAME, TEST_PASSWORD);
-        await esClient.indices.refresh({
-          index: '.kibana_security_session*',
-          ignore_unavailable: true,
-        } as any);
+        await refreshSessionIndex(apiClient, config);
         expect(
           (await apiClient.get('/internal/security/me', {
             headers: { 'kbn-xsrf': KBN_XSRF, Cookie: basicCookieOne },
@@ -874,14 +856,11 @@ test.describe('Session Concurrent Limit', { tag: [...tags.stateful.classic] }, (
 
     test('should not enforce session limit for anonymous users', async ({
       apiClient,
-      esClient,
+      config,
     }) => {
       for (const _ of [0, 1, 2, 3]) {
         const cookie = await loginWithAnonymous(apiClient);
-        await esClient.indices.refresh({
-          index: '.kibana_security_session*',
-          ignore_unavailable: true,
-        } as any);
+        await refreshSessionIndex(apiClient, config);
         const r = await apiClient.get('/internal/security/me', {
           headers: { 'kbn-xsrf': KBN_XSRF, Cookie: cookie },
         });

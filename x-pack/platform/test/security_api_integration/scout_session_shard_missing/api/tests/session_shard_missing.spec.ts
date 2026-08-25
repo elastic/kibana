@@ -21,6 +21,21 @@ function extractSessionCookie(setCookieHeader: string | string[] | undefined): s
   return sidCookie.split(';')[0];
 }
 
+async function clearAllSessions(
+  apiClient: any,
+  config: { auth: { username: string; password: string } }
+): Promise<void> {
+  const adminBase64 = Buffer.from(`${config.auth.username}:${config.auth.password}`).toString(
+    'base64'
+  );
+  await apiClient
+    .post('/api/security/session/_invalidate', {
+      headers: { 'kbn-xsrf': KBN_XSRF, Authorization: `Basic ${adminBase64}` },
+      body: { match: 'all' },
+    })
+    .catch(() => {});
+}
+
 async function getSessionCount(esClient: any): Promise<number> {
   await esClient.indices
     .refresh({ index: '.kibana_security_session*', ignore_unavailable: true })
@@ -33,7 +48,7 @@ async function getSessionCount(esClient: any): Promise<number> {
 }
 
 test.describe('Session index shard missing', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeEach(async ({ esClient }) => {
+  test.beforeEach(async ({ apiClient, config, esClient }) => {
     await esClient.cluster.health({
       index: '.kibana_security_session*',
       wait_for_status: 'green',
@@ -42,9 +57,7 @@ test.describe('Session index shard missing', { tag: [...tags.stateful.classic] }
     await esClient.cluster.putSettings({
       body: { persistent: { 'logger.org.elasticsearch.xpack.security.authc': 'debug' } },
     } as any);
-    await esClient.indices
-      .delete({ index: '.kibana_security_session*', ignore_unavailable: true })
-      .catch(() => {});
+    await clearAllSessions(apiClient, config);
   });
 
   test.afterEach(async ({ apiClient, config }) => {

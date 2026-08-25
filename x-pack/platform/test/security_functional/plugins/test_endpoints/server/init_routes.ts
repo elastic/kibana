@@ -607,6 +607,52 @@ export function initRoutes(
 
   router.post(
     {
+      path: '/session/_refresh_session_index',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
+    async (context, request, response) => {
+      const [coreStart] = await core.getStartServices();
+      await coreStart.elasticsearch.client.asInternalUser.indices.refresh({
+        index: '.kibana_security_session*',
+        expand_wildcards: 'all',
+        ignore_unavailable: true,
+      } as any);
+      return response.ok();
+    }
+  );
+
+  router.post(
+    {
+      path: '/session/_remove_created_at',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { body: schema.object({ ids: schema.arrayOf(schema.string()) }) },
+    },
+    async (context, request, response) => {
+      const { ids } = request.body;
+      const [coreStart] = await core.getStartServices();
+      await coreStart.elasticsearch.client.asInternalUser.updateByQuery({
+        index: '.kibana_security_session*',
+        script: 'ctx._source.remove("createdAt")',
+        query: { ids: { values: ids } },
+        refresh: true,
+      } as any);
+      return response.ok();
+    }
+  );
+
+  router.post(
+    {
       path: '/simulate_point_in_time_failure',
       security: {
         authc: {

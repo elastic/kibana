@@ -63,6 +63,21 @@ async function loginWithSAML(apiClient: any): Promise<string> {
   return cookie;
 }
 
+async function clearAllSessions(
+  apiClient: any,
+  config: { auth: { username: string; password: string } }
+): Promise<void> {
+  const adminBase64 = Buffer.from(`${config.auth.username}:${config.auth.password}`).toString(
+    'base64'
+  );
+  await apiClient
+    .post('/api/security/session/_invalidate', {
+      headers: { 'kbn-xsrf': KBN_XSRF, Authorization: `Basic ${adminBase64}` },
+      body: { match: 'all' },
+    })
+    .catch(() => {});
+}
+
 async function loginWithBasic(
   apiClient: any,
   username: string,
@@ -107,9 +122,7 @@ test.describe('Session Invalidate', { tag: [...tags.stateful.classic] }, () => {
     await esClient.cluster.putSettings({
       body: { persistent: { 'logger.org.elasticsearch.xpack.security.authc': 'debug' } },
     } as any);
-    await esClient.indices
-      .delete({ index: '.kibana_security_session*', ignore_unavailable: true })
-      .catch(() => {});
+    await clearAllSessions(apiClient, config);
 
     // Ensure test user has kibana_admin role (reset between tests)
     await esClient.security.putUser({
