@@ -6,7 +6,7 @@
  */
 
 import { GLOBAL_SPACE_ID } from '../../../../common/threat_intel';
-import { fetchUrl, redactUrl } from '../http_client';
+import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../severity';
 import { buildReportContent, collapseWhitespace, truncate } from '../text';
@@ -96,6 +96,7 @@ const fetchViaConnector = async (
 export const taxiiAdapter: FetchAdapter = {
   adapterType: 'taxii',
   async run(source, context: AdapterRunContext) {
+    const fetchUrl = fetchUrlForContext(context);
     const log = context.logger.get('taxii-adapter');
     const url = readCollectionUrl(source);
     if (!url) {
@@ -118,8 +119,6 @@ export const taxiiAdapter: FetchAdapter = {
       const response = await fetchUrl(pageUrl, {
         abortSignal: context.abortSignal,
         headers: { Accept: TAXII_ACCEPT },
-        fetchFn: context.fetchFn,
-        lookupFn: context.lookupFn,
       });
       if (response.status >= 400) {
         throw new Error(

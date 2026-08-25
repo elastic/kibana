@@ -6,7 +6,7 @@
  */
 
 import { GLOBAL_SPACE_ID } from '../../../../common/threat_intel';
-import { fetchUrl } from '../http_client';
+import { fetchUrlForContext } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../severity';
 import { buildReportContent } from '../text';
@@ -188,6 +188,7 @@ const chunkBlocks = (
 export const textIndicatorListAdapter: FetchAdapter = {
   adapterType: 'text_indicator_list',
   async run(source: SourceHit, context: AdapterRunContext): Promise<NormalizedReport[]> {
+    const fetchUrl = fetchUrlForContext(context);
     const log = context.logger.get('text-indicator-list-adapter');
     const url = readTrailUrl(source);
     if (!url) {
@@ -198,8 +199,6 @@ export const textIndicatorListAdapter: FetchAdapter = {
     const response = await fetchUrl(url, {
       abortSignal: context.abortSignal,
       headers: { Accept: 'text/plain, */*' },
-      fetchFn: context.fetchFn,
-      lookupFn: context.lookupFn,
     });
     if (response.status >= 400) {
       throw new Error(

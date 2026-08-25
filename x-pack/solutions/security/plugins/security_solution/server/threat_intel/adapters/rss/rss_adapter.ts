@@ -6,7 +6,7 @@
  */
 
 import { GLOBAL_SPACE_ID } from '../../../../common/threat_intel';
-import { fetchUrl, redactUrl } from '../http_client';
+import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../severity';
 import { buildReportContent, collapseWhitespace, stripHtml, truncate } from '../text';
@@ -35,11 +35,9 @@ const readFeedBody = async (feedUrl: string, context: AdapterRunContext): Promis
     return decodeDataUrl(feedUrl);
   }
 
-  const response = await fetchUrl(feedUrl, {
+  const response = await fetchUrlForContext(context)(feedUrl, {
     abortSignal: context.abortSignal,
     headers: { Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml' },
-    fetchFn: context.fetchFn,
-    lookupFn: context.lookupFn,
   });
 
   if (response.status >= 400) {

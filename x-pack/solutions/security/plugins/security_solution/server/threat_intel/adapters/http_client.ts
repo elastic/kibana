@@ -7,6 +7,7 @@
 
 import net from 'node:net';
 import dns from 'node:dns/promises';
+import { Agent } from 'undici';
 import { isNonRoutableIPv4, isNonRoutableIPv6 } from '../lib/ip_ranges';
 
 const DEFAULT_USER_AGENT = 'Kibana-ThreatIntel/1.0 (+https://www.elastic.co/security)';
@@ -52,8 +53,16 @@ export const redactUrl = (rawUrl: string): string => {
   }
 };
 
-/** Blocks SSRF: http/https only, no private/link-local/reserved IPs (literal host only). */
-export const assertSafeUrl = (rawUrl: string): void => {
+/**
+ * Blocks SSRF: http/https only, no private/link-local/reserved IPs (literal
+ * host only).
+ *
+ * Deliberately not exported. It cannot see where a DNS name points, so a
+ * caller who used it directly before making a request would miss the
+ * "public name, private A record" vector. `assertSafeUrlResolved` is the
+ * complete check and the only one callers should reach for.
+ */
+const assertSafeUrl = (rawUrl: string): void => {
   let parsed: URL;
   try {
     parsed = new URL(rawUrl);
@@ -109,26 +118,35 @@ export type DnsLookupFn = (hostname: string) => Promise<Array<{ address: string 
 const defaultLookup: DnsLookupFn = (hostname) => dns.lookup(hostname, { all: true });
 
 /**
+ * The address the pre-flight validated, so the connection can be pinned to it.
+ * `undefined` when the URL host was already a literal IP and there is nothing
+ * to pin.
+ */
+interface ValidatedAddress {
+  address: string;
+  family: 4 | 6;
+}
+
+/**
  * Full pre-flight check: the literal checks in `assertSafeUrl`, then DNS
  * resolution so a public hostname that points at a private address is rejected
  * before any connection is made.
  *
- * This closes the "public name, private A record" case. It does not close DNS
- * rebinding, because Node resolves the name again when it connects and the
- * second answer can differ. Pinning the validated address requires a custom
- * dispatcher that `fetch` does not expose, so treat this as one layer and keep
- * feed URLs operator-managed.
+ * Returns the validated address so the caller can pin the connection to it.
+ * Validating and then letting Node resolve the name again at connect time
+ * leaves a DNS-rebinding window in which the second answer differs from the
+ * one that was checked; `fetchUrl` closes that by pinning.
  */
 export const assertSafeUrlResolved = async (
   rawUrl: string,
   lookupFn: DnsLookupFn = defaultLookup
-): Promise<void> => {
+): Promise<ValidatedAddress | undefined> => {
   assertSafeUrl(rawUrl);
 
   const host = new URL(rawUrl).hostname.toLowerCase();
   // Literal IPs were already classified; skip the pointless lookup.
   if (net.isIP(host.startsWith('[') && host.endsWith(']') ? host.slice(1, -1) : host) !== 0) {
-    return;
+    return undefined;
   }
 
   let addresses: Array<{ address: string }>;
@@ -153,22 +171,71 @@ export const assertSafeUrlResolved = async (
       );
     }
   }
+
+  // Every answer passed, so pinning to the first is safe and keeps the
+  // connection on an address this function actually checked.
+  const [{ address }] = addresses;
+  const family = net.isIP(address);
+  return family === 4 || family === 6 ? { address, family } : undefined;
 };
 
+/**
+ * Dispatcher that forces the connection onto the pre-validated address instead
+ * of re-resolving the hostname, closing the DNS-rebinding window between the
+ * pre-flight check and the connect. `servername` is left alone so TLS SNI and
+ * the Host header still carry the original hostname and certificate
+ * verification is unaffected.
+ */
+const createPinnedDispatcher = ({ address, family }: ValidatedAddress): Agent =>
+  new Agent({
+    connect: {
+      lookup: (
+        _hostname: string,
+        options: { all?: boolean },
+        callback: (
+          err: NodeJS.ErrnoException | null,
+          addressOrList: string | Array<{ address: string; family: number }>,
+          family?: number
+        ) => void
+      ) => {
+        // Node's net layer calls this either in `all` mode or single-answer
+        // mode depending on the connect path, so satisfy both shapes.
+        if (options?.all) {
+          callback(null, [{ address, family }]);
+        } else {
+          callback(null, address, family);
+        }
+      },
+    },
+  });
+
+/**
+ * The public contract. Deliberately does not expose the test seams below: they
+ * would show up in every caller's autocomplete and could not be removed later
+ * without a breaking change, and `fetchFn` / `lookupFn` in particular are ways
+ * to bypass the SSRF guard.
+ */
 export interface FetchUrlOptions {
   /** Step-level cancellation. Combined with the per-request timeout. */
   abortSignal: AbortSignal;
   /** Optional headers. Adapter sets `Accept` for STIX/TAXII negotiation. */
   headers?: Record<string, string>;
-  /** Override default 30s. Used only by tests today. */
-  timeoutMs?: number;
-  /** Override default 10MiB cap. Used only by tests today. */
-  maxBytes?: number;
-  /** Override `globalThis.fetch`. Used only by tests today. */
-  fetchFn?: typeof fetch;
-  /** Override DNS resolution for the SSRF pre-flight. Used only by tests today. */
-  lookupFn?: DnsLookupFn;
 }
+
+/** Internal seams, settable only through `createFetchUrl`. */
+interface FetchUrlDeps {
+  timeoutMs: number;
+  maxBytes: number;
+  fetchFn: typeof fetch;
+  lookupFn: DnsLookupFn;
+}
+
+const DEFAULT_DEPS: FetchUrlDeps = {
+  timeoutMs: DEFAULT_TIMEOUT_MS,
+  maxBytes: DEFAULT_MAX_BYTES,
+  fetchFn: (...args) => globalThis.fetch(...args),
+  lookupFn: defaultLookup,
+};
 
 export interface FetchUrlResult {
   status: number;
@@ -272,20 +339,19 @@ const isSameOrigin = (a: string, b: string): boolean => {
   }
 };
 
-export const fetchUrl = async (url: string, options: FetchUrlOptions): Promise<FetchUrlResult> => {
-  const {
-    abortSignal,
-    headers,
-    timeoutMs = DEFAULT_TIMEOUT_MS,
-    maxBytes = DEFAULT_MAX_BYTES,
-    fetchFn = globalThis.fetch,
-    lookupFn,
-  } = options;
+const fetchUrlImpl = async (
+  url: string,
+  options: FetchUrlOptions,
+  deps: FetchUrlDeps
+): Promise<FetchUrlResult> => {
+  const { abortSignal, headers } = options;
+  const { timeoutMs, maxBytes, fetchFn, lookupFn } = deps;
 
   // Validate the initial URL before any network activity.
-  await assertSafeUrlResolved(url, lookupFn);
+  let pinned = await assertSafeUrlResolved(url, lookupFn);
 
   const { signal, cancel } = linkSignals(abortSignal, timeoutMs);
+  let dispatcher = pinned ? createPinnedDispatcher(pinned) : undefined;
 
   try {
     let currentUrl = url;
@@ -303,7 +369,10 @@ export const fetchUrl = async (url: string, options: FetchUrlOptions): Promise<F
           ...currentHeaders,
         },
         signal,
-      });
+        // Pins the socket to the address the pre-flight validated. Not part of
+        // the standard RequestInit type, but Node's fetch (undici) reads it.
+        ...(dispatcher ? { dispatcher } : {}),
+      } as RequestInit);
 
       // Not a redirect — consume and return the response body.
       if (response.status < 300 || response.status >= 400) {
@@ -332,8 +401,12 @@ export const fetchUrl = async (url: string, options: FetchUrlOptions): Promise<F
       hopsRemaining -= 1;
 
       // SSRF guard on each redirect destination — an open redirect on a
-      // legitimate feed host is the usual way into the internal network.
-      await assertSafeUrlResolved(nextUrl, lookupFn);
+      // legitimate feed host is the usual way into the internal network. The
+      // hop gets its own pin, so each connection goes to an address that was
+      // checked for that specific host.
+      pinned = await assertSafeUrlResolved(nextUrl, lookupFn);
+      await dispatcher?.close().catch(() => {});
+      dispatcher = pinned ? createPinnedDispatcher(pinned) : undefined;
 
       // Release the redirect body so the connection is not held open.
       await response.body?.cancel().catch(() => {});
@@ -353,5 +426,35 @@ export const fetchUrl = async (url: string, options: FetchUrlOptions): Promise<F
     }
   } finally {
     cancel();
+    await dispatcher?.close().catch(() => {});
   }
 };
+
+/**
+ * Builds a `fetchUrl` with the internal seams overridden. Tests use this; the
+ * production entry point below is the same function with defaults, so callers
+ * never see the seams.
+ */
+export const createFetchUrl =
+  (overrides: Partial<FetchUrlDeps> = {}) =>
+  (url: string, options: FetchUrlOptions): Promise<FetchUrlResult> =>
+    fetchUrlImpl(url, options, { ...DEFAULT_DEPS, ...overrides });
+
+export const fetchUrl = createFetchUrl();
+
+/**
+ * Resolves the fetcher for an adapter run. Production runs carry no transport
+ * overrides and get the default; adapter tests inject them through the run
+ * context. Keeping the seam on the run context rather than on every
+ * `fetchUrl` call means production callers cannot reach it by accident.
+ */
+export const fetchUrlForContext = (context: {
+  fetchFn?: typeof fetch;
+  lookupFn?: DnsLookupFn;
+}): typeof fetchUrl =>
+  context.fetchFn || context.lookupFn
+    ? createFetchUrl({
+        ...(context.fetchFn ? { fetchFn: context.fetchFn } : {}),
+        ...(context.lookupFn ? { lookupFn: context.lookupFn } : {}),
+      })
+    : fetchUrl;

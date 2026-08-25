@@ -6,7 +6,7 @@
  */
 
 import { GLOBAL_SPACE_ID } from '../../../../common/threat_intel';
-import { fetchUrl, redactUrl } from '../http_client';
+import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../severity';
 import { buildReportContent, collapseWhitespace, truncate } from '../text';
@@ -34,6 +34,7 @@ const safeParseJson = (body: string): unknown => {
 export const stixAdapter: FetchAdapter = {
   adapterType: 'stix',
   async run(source, context: AdapterRunContext) {
+    const fetchUrl = fetchUrlForContext(context);
     const log = context.logger.get('stix-adapter');
     const url = readBundleUrl(source);
     if (!url) {
@@ -44,8 +45,6 @@ export const stixAdapter: FetchAdapter = {
     const response = await fetchUrl(url, {
       abortSignal: context.abortSignal,
       headers: { Accept: 'application/stix+json;version=2.1, application/json' },
-      fetchFn: context.fetchFn,
-      lookupFn: context.lookupFn,
     });
     if (response.status >= 400) {
       throw new Error(

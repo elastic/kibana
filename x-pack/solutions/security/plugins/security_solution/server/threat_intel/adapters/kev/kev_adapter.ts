@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fetchUrl } from '../http_client';
+import { fetchUrlForContext } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { severityScore } from '../severity';
 import { buildReportContent } from '../text';
@@ -134,8 +134,9 @@ export const kevAdapter: FetchAdapter = {
   adapterType: 'kev',
 
   async run(source: SourceHit, context: AdapterRunContext): Promise<NormalizedReport[]> {
-    const { logger, abortSignal, fetchFn, lookupFn, now } = context;
+    const { logger, abortSignal, now } = context;
     const log = logger.get('kev-adapter');
+    const fetchUrl = fetchUrlForContext(context);
 
     const feedUrl = readFeedUrl(source);
     const ingestedAt = now().toISOString();
@@ -143,8 +144,6 @@ export const kevAdapter: FetchAdapter = {
 
     const response = await fetchUrl(feedUrl, {
       abortSignal,
-      fetchFn,
-      lookupFn,
       headers: { 'User-Agent': BROWSER_USER_AGENT },
     });
 

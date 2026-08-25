@@ -6,7 +6,7 @@
  */
 
 import { GLOBAL_SPACE_ID } from '../../../../common/threat_intel';
-import { fetchUrl, redactUrl } from '../http_client';
+import { fetchUrlForContext, redactUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { rssAdapter } from '../rss/rss_adapter';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../severity';
@@ -104,11 +104,9 @@ const runJsonList = async (
     return [];
   }
 
-  const response = await fetchUrl(url, {
+  const response = await fetchUrlForContext(context)(url, {
     abortSignal: context.abortSignal,
     headers: { Accept: handler.accept ?? 'application/json' },
-    fetchFn: context.fetchFn,
-    lookupFn: context.lookupFn,
   });
   if (response.status >= 400) {
     throw new Error(

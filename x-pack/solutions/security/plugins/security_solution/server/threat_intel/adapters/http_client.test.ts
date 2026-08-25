@@ -5,80 +5,92 @@
  * 2.0.
  */
 
-import { assertSafeUrl, assertSafeUrlResolved, fetchUrl, redactUrl } from './http_client';
+import { assertSafeUrlResolved, createFetchUrl, redactUrl } from './http_client';
+
+/** Every hostname in these tests resolves to a public address. */
+const publicLookup = async () => [{ address: '93.184.216.34' }];
+
+/**
+ * `assertSafeUrl` is intentionally not exported: on its own it cannot see
+ * where a DNS name points, so exposing it would invite callers to run the
+ * weaker check. The literal-host rules are exercised here through the full
+ * pre-flight, which short-circuits before DNS for literal IPs.
+ */
+const expectRejected = (url: string) => expect(assertSafeUrlResolved(url, publicLookup)).rejects;
+const expectAllowed = (url: string) => assertSafeUrlResolved(url, publicLookup);
 
 // ---------------------------------------------------------------------------
 // assertSafeUrl — SSRF guard unit tests
 // ---------------------------------------------------------------------------
 
-describe('assertSafeUrl', () => {
-  it('allows normal public https URL', () => {
-    expect(() => assertSafeUrl('https://example.com/feed.xml')).not.toThrow();
+describe('assertSafeUrl (via assertSafeUrlResolved)', () => {
+  it('allows normal public https URL', async () => {
+    await expectAllowed('https://example.com/feed.xml');
   });
 
-  it('allows normal public http URL', () => {
-    expect(() => assertSafeUrl('http://example.com/feed.xml')).not.toThrow();
+  it('allows normal public http URL', async () => {
+    await expectAllowed('http://example.com/feed.xml');
   });
 
-  it('rejects non-http/https scheme', () => {
-    expect(() => assertSafeUrl('ftp://example.com/file')).toThrow(/scheme/i);
-    expect(() => assertSafeUrl('file:///etc/passwd')).toThrow(/scheme/i);
+  it('rejects non-http/https scheme', async () => {
+    await expectRejected('ftp://example.com/file').toThrow(/scheme/i);
+    await expectRejected('file:///etc/passwd').toThrow(/scheme/i);
   });
 
-  it('rejects loopback IPv4 (127.0.0.1)', () => {
-    expect(() => assertSafeUrl('http://127.0.0.1/secret')).toThrow(/restricted/i);
+  it('rejects loopback IPv4 (127.0.0.1)', async () => {
+    await expectRejected('http://127.0.0.1/secret').toThrow(/restricted/i);
   });
 
-  it('rejects loopback IPv4 (127.x.x.x subnet)', () => {
-    expect(() => assertSafeUrl('http://127.0.0.99/secret')).toThrow(/restricted/i);
+  it('rejects loopback IPv4 (127.x.x.x subnet)', async () => {
+    await expectRejected('http://127.0.0.99/secret').toThrow(/restricted/i);
   });
 
-  it('rejects cloud IMDS link-local (169.254.169.254)', () => {
-    expect(() => assertSafeUrl('http://169.254.169.254/latest/meta-data/')).toThrow(/restricted/i);
+  it('rejects cloud IMDS link-local (169.254.169.254)', async () => {
+    await expectRejected('http://169.254.169.254/latest/meta-data/').toThrow(/restricted/i);
   });
 
-  it('rejects RFC-1918 10.x.x.x', () => {
-    expect(() => assertSafeUrl('http://10.0.0.1/internal')).toThrow(/restricted/i);
+  it('rejects RFC-1918 10.x.x.x', async () => {
+    await expectRejected('http://10.0.0.1/internal').toThrow(/restricted/i);
   });
 
-  it('rejects RFC-1918 172.16.x.x', () => {
-    expect(() => assertSafeUrl('http://172.16.0.1/internal')).toThrow(/restricted/i);
+  it('rejects RFC-1918 172.16.x.x', async () => {
+    await expectRejected('http://172.16.0.1/internal').toThrow(/restricted/i);
   });
 
-  it('rejects RFC-1918 172.31.x.x (top of range)', () => {
-    expect(() => assertSafeUrl('http://172.31.255.255/internal')).toThrow(/restricted/i);
+  it('rejects RFC-1918 172.31.x.x (top of range)', async () => {
+    await expectRejected('http://172.31.255.255/internal').toThrow(/restricted/i);
   });
 
-  it('allows 172.32.x.x (just outside RFC-1918 range)', () => {
-    expect(() => assertSafeUrl('http://172.32.0.1/feed')).not.toThrow();
+  it('allows 172.32.x.x (just outside RFC-1918 range)', async () => {
+    await expectAllowed('http://172.32.0.1/feed');
   });
 
-  it('rejects RFC-1918 192.168.x.x', () => {
-    expect(() => assertSafeUrl('http://192.168.1.1/internal')).toThrow(/restricted/i);
+  it('rejects RFC-1918 192.168.x.x', async () => {
+    await expectRejected('http://192.168.1.1/internal').toThrow(/restricted/i);
   });
 
-  it('rejects unspecified 0.0.0.0', () => {
-    expect(() => assertSafeUrl('http://0.0.0.0/')).toThrow(/restricted/i);
+  it('rejects unspecified 0.0.0.0', async () => {
+    await expectRejected('http://0.0.0.0/').toThrow(/restricted/i);
   });
 
-  it('rejects IPv6 loopback ::1', () => {
-    expect(() => assertSafeUrl('http://[::1]/secret')).toThrow(/restricted/i);
+  it('rejects IPv6 loopback ::1', async () => {
+    await expectRejected('http://[::1]/secret').toThrow(/restricted/i);
   });
 
-  it('rejects IPv6 link-local fe80::', () => {
-    expect(() => assertSafeUrl('http://[fe80::1]/secret')).toThrow(/restricted/i);
+  it('rejects IPv6 link-local fe80::', async () => {
+    await expectRejected('http://[fe80::1]/secret').toThrow(/restricted/i);
   });
 
-  it('rejects IPv6 unique-local fc00::', () => {
-    expect(() => assertSafeUrl('http://[fc00::1]/secret')).toThrow(/restricted/i);
+  it('rejects IPv6 unique-local fc00::', async () => {
+    await expectRejected('http://[fc00::1]/secret').toThrow(/restricted/i);
   });
 
-  it('rejects IPv6 unique-local fd00::', () => {
-    expect(() => assertSafeUrl('http://[fd00::1]/secret')).toThrow(/restricted/i);
+  it('rejects IPv6 unique-local fd00::', async () => {
+    await expectRejected('http://[fd00::1]/secret').toThrow(/restricted/i);
   });
 
-  it('rejects an invalid URL', () => {
-    expect(() => assertSafeUrl('not-a-url')).toThrow(/Invalid URL/i);
+  it('rejects an invalid URL', async () => {
+    await expectRejected('not-a-url').toThrow(/Invalid URL/i);
   });
 
   // --- Bypass 1: obfuscated IPv4 encodings ---
@@ -86,95 +98,95 @@ describe('assertSafeUrl', () => {
   // before our code sees them, so they are caught by the IPv4 range check
   // (not a separate "obfuscated" branch).
 
-  it('rejects decimal-encoded IPv4 (2130706433 → normalized to 127.0.0.1)', () => {
+  it('rejects decimal-encoded IPv4 (2130706433 → normalized to 127.0.0.1)', async () => {
     // URL parser: 2130706433 → 127.0.0.1 → caught by loopback range check
-    expect(() => assertSafeUrl('http://2130706433/')).toThrow();
+    await expectRejected('http://2130706433/').toThrow();
   });
 
-  it('rejects hex-integer IPv4 (0x7f000001 → normalized to 127.0.0.1)', () => {
+  it('rejects hex-integer IPv4 (0x7f000001 → normalized to 127.0.0.1)', async () => {
     // URL parser: 0x7f000001 → 127.0.0.1 → caught by loopback range check
-    expect(() => assertSafeUrl('http://0x7f000001/')).toThrow();
+    await expectRejected('http://0x7f000001/').toThrow();
   });
 
-  it('rejects hex-dotted IPv4 (0x7f.0.0.1 → normalized to 127.0.0.1)', () => {
-    expect(() => assertSafeUrl('http://0x7f.0.0.1/')).toThrow();
+  it('rejects hex-dotted IPv4 (0x7f.0.0.1 → normalized to 127.0.0.1)', async () => {
+    await expectRejected('http://0x7f.0.0.1/').toThrow();
   });
 
-  it('rejects octal-dotted IPv4 (0177.0.0.1 → normalized to 127.0.0.1)', () => {
+  it('rejects octal-dotted IPv4 (0177.0.0.1 → normalized to 127.0.0.1)', async () => {
     // URL parser normalizes octal-looking segments to decimal before our check
-    expect(() => assertSafeUrl('http://0177.0.0.1/')).toThrow();
+    await expectRejected('http://0177.0.0.1/').toThrow();
   });
 
   // --- Bypass 2: IPv4-mapped IPv6 ---
   // The WHATWG URL parser canonicalizes the dotted form to hex groups, so
   // ::ffff:169.254.169.254 → ::ffff:a9fe:a9fe (and similar).
 
-  it('rejects IPv4-mapped IPv6 ::ffff:169.254.169.254 (URL parser → ::ffff:a9fe:a9fe)', () => {
-    expect(() => assertSafeUrl('http://[::ffff:169.254.169.254]/')).toThrow(/restricted/i);
+  it('rejects IPv4-mapped IPv6 ::ffff:169.254.169.254 (URL parser → ::ffff:a9fe:a9fe)', async () => {
+    await expectRejected('http://[::ffff:169.254.169.254]/').toThrow(/restricted/i);
   });
 
-  it('rejects IPv4-mapped IPv6 ::ffff:a9fe:a9fe (hex groups, IMDS)', () => {
-    expect(() => assertSafeUrl('http://[::ffff:a9fe:a9fe]/')).toThrow(/restricted/i);
+  it('rejects IPv4-mapped IPv6 ::ffff:a9fe:a9fe (hex groups, IMDS)', async () => {
+    await expectRejected('http://[::ffff:a9fe:a9fe]/').toThrow(/restricted/i);
   });
 
-  it('rejects IPv4-mapped IPv6 ::ffff:127.0.0.1 (URL parser → ::ffff:7f00:1)', () => {
-    expect(() => assertSafeUrl('http://[::ffff:127.0.0.1]/')).toThrow(/restricted/i);
+  it('rejects IPv4-mapped IPv6 ::ffff:127.0.0.1 (URL parser → ::ffff:7f00:1)', async () => {
+    await expectRejected('http://[::ffff:127.0.0.1]/').toThrow(/restricted/i);
   });
 
-  it('rejects IPv4-compatible ::169.254.169.254 (URL parser → ::a9fe:a9fe)', () => {
-    expect(() => assertSafeUrl('http://[::169.254.169.254]/')).toThrow(/restricted/i);
+  it('rejects IPv4-compatible ::169.254.169.254 (URL parser → ::a9fe:a9fe)', async () => {
+    await expectRejected('http://[::169.254.169.254]/').toThrow(/restricted/i);
   });
 
   // --- Still allowed: normal public addresses ---
 
-  it('allows a normal public hostname', () => {
-    expect(() => assertSafeUrl('https://feeds.example.com/rss')).not.toThrow();
+  it('allows a normal public hostname', async () => {
+    await expectAllowed('https://feeds.example.com/rss');
   });
 
-  it('allows a normal public IPv4 literal (93.184.216.34)', () => {
-    expect(() => assertSafeUrl('https://93.184.216.34/')).not.toThrow();
+  it('allows a normal public IPv4 literal (93.184.216.34)', async () => {
+    await expectAllowed('https://93.184.216.34/');
   });
 
   // --- Bypass 3: hostnames that always point somewhere local ---
 
-  it('rejects localhost', () => {
-    expect(() => assertSafeUrl('http://localhost:5601/api/status')).toThrow(/restricted/i);
+  it('rejects localhost', async () => {
+    await expectRejected('http://localhost:5601/api/status').toThrow(/restricted/i);
   });
 
-  it('rejects a single-label host (a neighbouring service name)', () => {
-    expect(() => assertSafeUrl('http://elasticsearch:9200/_cat/indices')).toThrow(/restricted/i);
+  it('rejects a single-label host (a neighbouring service name)', async () => {
+    await expectRejected('http://elasticsearch:9200/_cat/indices').toThrow(/restricted/i);
   });
 
-  it('rejects metadata.google.internal (GCP metadata server)', () => {
-    expect(() => assertSafeUrl('http://metadata.google.internal/computeMetadata/v1/')).toThrow(
+  it('rejects metadata.google.internal (GCP metadata server)', async () => {
+    await expectRejected('http://metadata.google.internal/computeMetadata/v1/').toThrow(
       /restricted/i
     );
   });
 
-  it('rejects a .local mDNS host', () => {
-    expect(() => assertSafeUrl('http://printer.local/')).toThrow(/restricted/i);
+  it('rejects a .local mDNS host', async () => {
+    await expectRejected('http://printer.local/').toThrow(/restricted/i);
   });
 
   // --- Bypass 4: IPv4 ranges beyond RFC1918 ---
 
-  it('rejects 0.0.0.0/8 beyond the exact unspecified address', () => {
-    expect(() => assertSafeUrl('http://0.0.0.1/')).toThrow(/restricted/i);
+  it('rejects 0.0.0.0/8 beyond the exact unspecified address', async () => {
+    await expectRejected('http://0.0.0.1/').toThrow(/restricted/i);
   });
 
-  it('rejects carrier-grade NAT 100.64.0.0/10', () => {
-    expect(() => assertSafeUrl('http://100.64.0.1/')).toThrow(/restricted/i);
+  it('rejects carrier-grade NAT 100.64.0.0/10', async () => {
+    await expectRejected('http://100.64.0.1/').toThrow(/restricted/i);
   });
 
-  it('rejects benchmarking range 198.18.0.0/15', () => {
-    expect(() => assertSafeUrl('http://198.19.0.1/')).toThrow(/restricted/i);
+  it('rejects benchmarking range 198.18.0.0/15', async () => {
+    await expectRejected('http://198.19.0.1/').toThrow(/restricted/i);
   });
 
-  it('rejects multicast 224.0.0.0/4', () => {
-    expect(() => assertSafeUrl('http://239.255.255.250/')).toThrow(/restricted/i);
+  it('rejects multicast 224.0.0.0/4', async () => {
+    await expectRejected('http://239.255.255.250/').toThrow(/restricted/i);
   });
 
-  it('allows 100.63.x.x just below the CGNAT block', () => {
-    expect(() => assertSafeUrl('http://100.63.0.1/')).not.toThrow();
+  it('allows 100.63.x.x just below the CGNAT block', async () => {
+    await expectAllowed('http://100.63.0.1/');
   });
 });
 
@@ -208,12 +220,16 @@ describe('assertSafeUrlResolved', () => {
     ).rejects.toThrow(/restricted/i);
   });
 
-  it('allows a hostname that resolves only to public addresses', async () => {
+  it('returns the validated address so the caller can pin the connection', async () => {
     await expect(
       assertSafeUrlResolved('https://feed.example.com/rss', async () => [
         { address: '93.184.216.34' },
       ])
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ address: '93.184.216.34', family: 4 });
+  });
+
+  it('returns undefined for a literal IP, which needs no pin', async () => {
+    await expect(assertSafeUrlResolved('https://93.184.216.34/')).resolves.toBeUndefined();
   });
 
   it('rejects a hostname that resolves to nothing', async () => {
@@ -244,10 +260,8 @@ describe('redactUrl', () => {
     expect(redactUrl('ht!tp://svc:s3cr3t@host/x')).toBe('ht!tp://host/x');
   });
 
-  it('keeps credentials out of the invalid-URL error', () => {
-    expect(() => assertSafeUrl('ht!tp://svc:s3cr3t@host/x')).toThrow(
-      /Invalid URL: ht!tp:\/\/host\/x/
-    );
+  it('keeps credentials out of the invalid-URL error', async () => {
+    await expectRejected('ht!tp://svc:s3cr3t@host/x').toThrow(/Invalid URL: ht!tp:\/\/host\/x/);
   });
 });
 
@@ -295,9 +309,6 @@ const makeStreamingResponse = (status: number, chunks: string[]): Response => {
   } as unknown as Response;
 };
 
-/** Every hostname in these tests resolves to a public address. */
-const publicLookup = async () => [{ address: '93.184.216.34' }];
-
 describe('fetchUrl redirect handling', () => {
   it('rejects a redirect to a private host', async () => {
     const controller = new AbortController();
@@ -311,12 +322,11 @@ describe('fetchUrl redirect handling', () => {
     });
 
     await expect(
-      fetchUrl('https://example.com/feed', {
-        abortSignal: controller.signal,
+      createFetchUrl({
         fetchFn: fetchFn as unknown as typeof fetch,
         timeoutMs: 1000,
         lookupFn: publicLookup,
-      })
+      })('https://example.com/feed', { abortSignal: controller.signal })
     ).rejects.toThrow(/restricted/i);
 
     expect(fetchFn).toHaveBeenCalledTimes(1);
@@ -333,12 +343,11 @@ describe('fetchUrl redirect handling', () => {
       return makeResponse(200, {}, '<feed/>');
     });
 
-    const result = await fetchUrl('https://example.com/feed', {
-      abortSignal: controller.signal,
+    const result = await createFetchUrl({
       fetchFn: fetchFn as unknown as typeof fetch,
       timeoutMs: 1000,
       lookupFn: publicLookup,
-    });
+    })('https://example.com/feed', { abortSignal: controller.signal });
 
     expect(result.body).toBe('<feed/>');
     expect(fetchFn).toHaveBeenCalledTimes(2);
@@ -351,18 +360,137 @@ describe('fetchUrl redirect handling', () => {
     );
 
     await expect(
-      fetchUrl('https://example.com/feed', {
-        abortSignal: controller.signal,
+      createFetchUrl({
         fetchFn: fetchFn as unknown as typeof fetch,
         timeoutMs: 1000,
         lookupFn: async (hostname: string) =>
           hostname === 'internal.example.com'
             ? [{ address: '10.0.0.5' }]
             : [{ address: '93.184.216.34' }],
-      })
+      })('https://example.com/feed', { abortSignal: controller.signal })
     ).rejects.toThrow(/restricted/i);
 
     expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+});
+
+// Credential stripping is security-critical, and a refactor that renamed
+// SENSITIVE_HEADERS or broke isSameOrigin would otherwise pass CI unnoticed.
+describe('fetchUrl redirect credential handling', () => {
+  const SENSITIVE = {
+    Authorization: 'Bearer s3cr3t',
+    'x-api-key': 'key-123',
+    Cookie: 'session=abc',
+  };
+
+  /** Redirects once to `location`, then returns 200. Records sent headers. */
+  const redirectOnceTo = (location: string) => {
+    const sent: Array<Record<string, string>> = [];
+    const fetchFn = jest.fn(async (_url: string, init?: RequestInit) => {
+      sent.push({ ...((init?.headers ?? {}) as Record<string, string>) });
+      return sent.length === 1 ? makeResponse(301, { location }) : makeResponse(200, {}, 'ok');
+    });
+    return { fetchFn, sent };
+  };
+
+  const run = (fetchFn: jest.Mock) =>
+    createFetchUrl({
+      fetchFn: fetchFn as unknown as typeof fetch,
+      timeoutMs: 1000,
+      lookupFn: publicLookup,
+    })('https://example.com/feed', {
+      abortSignal: new AbortController().signal,
+      headers: { ...SENSITIVE, Accept: 'application/xml' },
+    });
+
+  it('strips Authorization, x-api-key and Cookie on a cross-origin hop', async () => {
+    const { fetchFn, sent } = redirectOnceTo('https://evil.example.net/feed');
+
+    await run(fetchFn);
+
+    const afterRedirect = sent[1];
+    expect(afterRedirect.Authorization).toBeUndefined();
+    expect(afterRedirect['x-api-key']).toBeUndefined();
+    expect(afterRedirect.Cookie).toBeUndefined();
+    // Non-sensitive headers survive the hop.
+    expect(afterRedirect.Accept).toBe('application/xml');
+  });
+
+  it('preserves those headers on a same-origin hop', async () => {
+    const { fetchFn, sent } = redirectOnceTo('https://example.com/feed/v2');
+
+    await run(fetchFn);
+
+    const afterRedirect = sent[1];
+    expect(afterRedirect.Authorization).toBe('Bearer s3cr3t');
+    expect(afterRedirect['x-api-key']).toBe('key-123');
+    expect(afterRedirect.Cookie).toBe('session=abc');
+  });
+
+  it('sends the credentials on the first request', async () => {
+    const { fetchFn, sent } = redirectOnceTo('https://evil.example.net/feed');
+
+    await run(fetchFn);
+
+    expect(sent[0].Authorization).toBe('Bearer s3cr3t');
+  });
+});
+
+describe('fetchUrl redirect hop limit', () => {
+  it('stops after MAX_REDIRECT_HOPS rather than following forever', async () => {
+    let hop = 0;
+    const fetchFn = jest.fn(async () => {
+      hop += 1;
+      return makeResponse(302, { location: `https://example.com/hop-${hop}` });
+    });
+
+    await expect(
+      createFetchUrl({
+        fetchFn: fetchFn as unknown as typeof fetch,
+        timeoutMs: 1000,
+        lookupFn: publicLookup,
+      })('https://example.com/feed', { abortSignal: new AbortController().signal })
+    ).rejects.toThrow(/Exceeded maximum redirect hops \(5\)/);
+
+    // Initial request plus the five permitted hops.
+    expect(fetchFn).toHaveBeenCalledTimes(6);
+  });
+});
+
+describe('fetchUrl DNS pinning', () => {
+  /** Captures the RequestInit so the dispatcher can be inspected. */
+  const capturingFetch = () => {
+    let init: (RequestInit & { dispatcher?: unknown }) | undefined;
+    const fetchFn = jest.fn(async (_url: string, requestInit?: RequestInit) => {
+      init = requestInit as RequestInit & { dispatcher?: unknown };
+      return makeResponse(200, {}, 'ok');
+    });
+    return { fetchFn, getInit: () => init };
+  };
+
+  const fetchThrough = (url: string, fetchFn: jest.Mock) =>
+    createFetchUrl({
+      fetchFn: fetchFn as unknown as typeof fetch,
+      timeoutMs: 1000,
+      lookupFn: publicLookup,
+    })(url, { abortSignal: new AbortController().signal });
+
+  it('pins the connection to the address the pre-flight validated', async () => {
+    const { fetchFn, getInit } = capturingFetch();
+
+    await fetchThrough('https://feed.example.com/rss', fetchFn);
+
+    // A dispatcher pinned to the validated address closes the rebinding window
+    // between the pre-flight lookup and the connect.
+    expect(getInit()?.dispatcher).toBeDefined();
+  });
+
+  it('does not pin when the host is already a literal IP', async () => {
+    const { fetchFn, getInit } = capturingFetch();
+
+    await fetchThrough('https://93.184.216.34/rss', fetchFn);
+
+    expect(getInit()?.dispatcher).toBeUndefined();
   });
 });
 
@@ -374,13 +502,12 @@ describe('fetchUrl body cap', () => {
     );
 
     await expect(
-      fetchUrl('https://example.com/feed', {
-        abortSignal: controller.signal,
+      createFetchUrl({
         fetchFn: fetchFn as unknown as typeof fetch,
         timeoutMs: 1000,
         maxBytes: 100,
         lookupFn: publicLookup,
-      })
+      })('https://example.com/feed', { abortSignal: controller.signal })
     ).rejects.toThrow(/exceeded the 100-byte cap/i);
   });
 
@@ -389,13 +516,12 @@ describe('fetchUrl body cap', () => {
     const fetchFn = jest.fn(async () => makeResponse(200, {}, 'x'.repeat(200)));
 
     await expect(
-      fetchUrl('https://example.com/feed', {
-        abortSignal: controller.signal,
+      createFetchUrl({
         fetchFn: fetchFn as unknown as typeof fetch,
         timeoutMs: 1000,
         maxBytes: 100,
         lookupFn: publicLookup,
-      })
+      })('https://example.com/feed', { abortSignal: controller.signal })
     ).rejects.toThrow(/exceeded the 100-byte cap/i);
   });
 
@@ -403,13 +529,12 @@ describe('fetchUrl body cap', () => {
     const controller = new AbortController();
     const fetchFn = jest.fn(async () => makeStreamingResponse(200, ['<feed', '/>']));
 
-    const result = await fetchUrl('https://example.com/feed', {
-      abortSignal: controller.signal,
+    const result = await createFetchUrl({
       fetchFn: fetchFn as unknown as typeof fetch,
       timeoutMs: 1000,
       maxBytes: 100,
       lookupFn: publicLookup,
-    });
+    })('https://example.com/feed', { abortSignal: controller.signal });
 
     expect(result.body).toBe('<feed/>');
   });
