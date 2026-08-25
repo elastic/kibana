@@ -20,9 +20,17 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export type {
   TriggerEventsContract,
+  WorkflowServiceAccountExecution,
+  WorkflowServiceAccountOperation,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';
+
+export {
+  getWorkflowServiceAccountCoordinates,
+  WORKFLOW_SERVICE_ACCOUNT_OPERATION_TYPE,
+  WORKFLOW_SERVICE_ACCOUNT_WORKLOAD_TYPE,
+} from './service_account_execution';
 
 export type {
   LogsRepository,

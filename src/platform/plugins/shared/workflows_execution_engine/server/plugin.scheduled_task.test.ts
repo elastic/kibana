@@ -83,7 +83,11 @@ jest.mock('./repositories/workflow_execution_repository', () => ({
 }));
 
 import { WorkflowsExecutionEnginePlugin } from './plugin';
-import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';
+import type { WorkflowsExecutionEnginePluginStart } from './types';
+import {
+  WORKFLOW_RUN_TASK_TYPE,
+  WORKFLOW_SCHEDULED_TASK_TYPE,
+} from './workflow_task_manager/types';
 
 describe('workflow:scheduled task runner', () => {
   const workflowId = 'missing-workflow';
@@ -97,7 +101,9 @@ describe('workflow:scheduled task runner', () => {
   let taskDefinitions: Record<string, TaskRegisterDefinition>;
   let initializerContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
   let plugin: WorkflowsExecutionEnginePlugin;
+  let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
+  let pluginStart: WorkflowsExecutionEnginePluginStart;
 
   const createTaskInstance = (): ConcreteTaskInstance =>
     ({
@@ -122,7 +128,7 @@ describe('workflow:scheduled task runner', () => {
       eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     });
     plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
-    const coreSetup = coreMock.createSetup();
+    coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
     coreSetup.getStartServices.mockResolvedValue([
       coreStart,
@@ -146,7 +152,7 @@ describe('workflow:scheduled task runner', () => {
       workflowsExtensions: { registerConnectorAdapter: jest.fn() } as never,
     });
 
-    plugin.start(coreStart, {
+    pluginStart = plugin.start(coreStart, {
       taskManager: taskManagerMock.createStart(),
       actions: {} as never,
       cloud: {} as never,
@@ -165,6 +171,193 @@ describe('workflow:scheduled task runner', () => {
     mockGetWorkflowExecutionById.mockResolvedValue(null);
     mockRunWorkflow.mockResolvedValue(undefined);
   });
+
+  it('registers and exposes the workflow_execution service account operation', () => {
+    setupPlugin();
+    const registerOperation = coreSetup.security.serviceAccounts.registerOperation as jest.Mock;
+
+    expect(registerOperation).toHaveBeenCalledWith({
+      type: 'workflow_execution',
+    });
+    expect(pluginStart.serviceAccountExecution.operation).toBe(
+      registerOperation.mock.results[0].value
+    );
+    expect(pluginStart.serviceAccountExecution.isEnabled()).toBe(
+      coreStart.security.serviceAccounts.isEnabled()
+    );
+  });
+
+  it('runs a manual bound workflow with the service-account scoped request', async () => {
+    setupPlugin();
+    const fallbackRequest = { request: 'task-manager' } as unknown as KibanaRequest;
+    const scopedRequest = { request: 'service-account' } as unknown as KibanaRequest;
+    const operation = pluginStart.serviceAccountExecution.operation;
+    (operation.getBinding as jest.Mock).mockResolvedValue({
+      operationType: 'workflow_execution',
+      workloadType: 'workflow',
+      workloadId: workflowId,
+      serviceAccountId: 'service-account-1',
+      spaceId,
+      attachedAt: '2024-01-01T00:00:00.000Z',
+      attachedBy: { type: 'user', username: 'alice' },
+    });
+    (operation.withScopedRequest as jest.Mock).mockImplementation(async (_coordinates, fn) =>
+      fn(scopedRequest)
+    );
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      id: 'workflow-run-1',
+      workflowId,
+      spaceId,
+      triggeredBy: 'manual',
+      workflowDefinition: {
+        name: 'Bound workflow',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        settings: { run_as: 'service-account-1' },
+      },
+    });
+    mockRunWorkflow.mockResolvedValue({ shouldDeleteTask: true });
+    const taskInstance = {
+      ...createTaskInstance(),
+      id: 'workflow:run:workflow-run-1',
+      taskType: WORKFLOW_RUN_TASK_TYPE,
+      params: { workflowRunId: 'workflow-run-1', spaceId },
+      state: {},
+      schedule: undefined,
+    } as ConcreteTaskInstance;
+    const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance,
+        fakeRequest: fallbackRequest,
+      })
+    );
+
+    await runner.run();
+
+    expect(operation.getBinding).toHaveBeenCalledWith({
+      workloadType: 'workflow',
+      workloadId: workflowId,
+      spaceId,
+    });
+    expect(operation.withScopedRequest).toHaveBeenCalledWith(
+      {
+        workloadType: 'workflow',
+        workloadId: workflowId,
+        spaceId,
+      },
+      expect.any(Function)
+    );
+    expect(mockRunWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ fakeRequest: scopedRequest })
+    );
+  });
+
+  it('runs a scheduled bound workflow with the service-account scoped request', async () => {
+    setupPlugin();
+    const fallbackRequest = { request: 'task-manager' } as unknown as KibanaRequest;
+    const scopedRequest = { request: 'service-account' } as unknown as KibanaRequest;
+    const operation = pluginStart.serviceAccountExecution.operation;
+    (operation.getBinding as jest.Mock).mockResolvedValue({
+      operationType: 'workflow_execution',
+      workloadType: 'workflow',
+      workloadId: workflowId,
+      serviceAccountId: 'service-account-1',
+      spaceId,
+      attachedAt: '2024-01-01T00:00:00.000Z',
+      attachedBy: { type: 'user', username: 'alice' },
+    });
+    (operation.withScopedRequest as jest.Mock).mockImplementation(async (_coordinates, fn) =>
+      fn(scopedRequest)
+    );
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      yaml: 'name: Bound scheduled workflow',
+      definition: {
+        name: 'Bound scheduled workflow',
+        enabled: true,
+        triggers: [{ type: 'scheduled', with: { every: '1m' } }],
+        steps: [],
+        settings: { run_as: 'service-account-1' },
+      },
+    });
+
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: createTaskInstance(),
+        fakeRequest: fallbackRequest,
+      })
+    );
+
+    await runner.run();
+
+    expect(operation.getBinding).toHaveBeenCalledWith({
+      workloadType: 'workflow',
+      workloadId: workflowId,
+      spaceId,
+    });
+    expect(operation.withScopedRequest).toHaveBeenCalledWith(
+      {
+        workloadType: 'workflow',
+        workloadId: workflowId,
+        spaceId,
+      },
+      expect.any(Function)
+    );
+    expect(mockRunWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ fakeRequest: scopedRequest })
+    );
+  });
+
+  it.each([
+    { executionType: 'test', isTestRun: true, isEphemeral: false },
+    { executionType: 'ephemeral', isTestRun: false, isEphemeral: true },
+  ])(
+    'does not apply a saved-workflow binding to a manual $executionType execution',
+    async ({ isTestRun, isEphemeral }) => {
+      setupPlugin();
+      const fallbackRequest = { request: 'task-manager' } as unknown as KibanaRequest;
+      const operation = pluginStart.serviceAccountExecution.operation;
+      mockGetWorkflowExecutionById.mockResolvedValue({
+        id: 'workflow-run-1',
+        workflowId,
+        spaceId,
+        triggeredBy: 'manual',
+        isTestRun,
+        isEphemeral,
+        workflowDefinition: {
+          name: 'Inline workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+          settings: { run_as: 'service-account-1' },
+        },
+      });
+      mockRunWorkflow.mockResolvedValue({ shouldDeleteTask: true });
+      const taskInstance = {
+        ...createTaskInstance(),
+        id: 'workflow:run:workflow-run-1',
+        taskType: WORKFLOW_RUN_TASK_TYPE,
+        params: { workflowRunId: 'workflow-run-1', spaceId },
+        state: {},
+        schedule: undefined,
+      } as ConcreteTaskInstance;
+      const runner = taskDefinitions[WORKFLOW_RUN_TASK_TYPE]!.createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance,
+          fakeRequest: fallbackRequest,
+        })
+      );
+
+      await runner.run();
+
+      expect(operation.getBinding).not.toHaveBeenCalled();
+      expect(operation.withScopedRequest).not.toHaveBeenCalled();
+      expect(mockRunWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ fakeRequest: fallbackRequest })
+      );
+    }
+  );
 
   it('requests task deletion when the workflow document is missing', async () => {
     setupPlugin();

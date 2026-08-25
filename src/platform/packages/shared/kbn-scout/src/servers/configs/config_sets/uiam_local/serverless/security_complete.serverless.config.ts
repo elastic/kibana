@@ -19,11 +19,12 @@ const pluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
   'x-pack/platform/test/security_functional/plugins/test_endpoints'
 )}`;
+const enableServiceAccounts = '--xpack.security.serviceAccounts.enabled=true';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, pluginPath],
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, pluginPath, enableServiceAccounts],
   },
 };

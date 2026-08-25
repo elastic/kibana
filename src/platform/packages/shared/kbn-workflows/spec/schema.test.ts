@@ -25,6 +25,7 @@ import {
   PARALLEL_BRANCH_NAMES_UNIQUE_MESSAGE,
   PARALLEL_MODE_REFINEMENT_MESSAGE,
   ParallelStepSchema,
+  SERVICE_ACCOUNT_ID_MAX_LENGTH,
   WaitForApprovalStepSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
@@ -368,6 +369,30 @@ describe('WorkflowSchema with workflow.output', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+});
+
+describe('WorkflowSettingsSchema run_as', () => {
+  it('accepts a bounded service account ID in run_as', () => {
+    expect(
+      WorkflowSettingsSchema.safeParse({
+        run_as: 'service-account-id',
+      })
+    ).toEqual({
+      success: true,
+      data: {
+        run_as: 'service-account-id',
+      },
+    });
+  });
+
+  it('rejects an empty or unbounded run_as value', () => {
+    expect(WorkflowSettingsSchema.safeParse({ run_as: '' }).success).toBe(false);
+    expect(
+      WorkflowSettingsSchema.safeParse({
+        run_as: 'a'.repeat(SERVICE_ACCOUNT_ID_MAX_LENGTH + 1),
+      }).success
+    ).toBe(false);
   });
 });
 

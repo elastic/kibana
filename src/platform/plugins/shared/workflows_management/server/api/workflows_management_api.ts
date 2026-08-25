@@ -457,7 +457,10 @@ export class WorkflowsManagementApi {
       throw new ManagedWorkflowDeleteForbiddenError();
     }
 
-    const result = await this.workflowsService.deleteWorkflows(workflowIds, spaceId, options);
+    const result = await this.workflowsService.deleteWorkflows(workflowIds, spaceId, {
+      ...options,
+      request,
+    });
     if (result.successfulIds) {
       for (const id of result.successfulIds) {
         this.notifySml(id, 'delete', request);
