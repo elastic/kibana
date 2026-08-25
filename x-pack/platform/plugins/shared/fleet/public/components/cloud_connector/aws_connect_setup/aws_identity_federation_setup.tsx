@@ -35,7 +35,6 @@ import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 export interface AwsIdentityFederationSetupProps {
   accountType?: AccountType;
   packageName?: string;
-  policyTemplate?: string;
   cloud?: CloudSetupForCloudConnector;
   iacTemplateUrl?: string;
   hasInvalidRequiredVars?: boolean;
@@ -48,7 +47,6 @@ export interface AwsIdentityFederationSetupProps {
 export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProps> = ({
   accountType = 'single-account',
   packageName,
-  policyTemplate,
   cloud,
   iacTemplateUrl,
   hasInvalidRequiredVars = false,
@@ -61,7 +59,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     cloudProvider: 'aws',
     accountType,
     packageName,
-    policyTemplate,
   });
 
   const [selectedTabId, setSelectedTabId] = useState<string>(TABS.NEW_CONNECTION);
@@ -239,7 +236,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
           }}
           accountType={accountType}
           packageName={packageName}
-          policyTemplate={policyTemplate}
         />
       ),
     },

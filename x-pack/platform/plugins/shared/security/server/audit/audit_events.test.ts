@@ -360,6 +360,7 @@ describe('#userLoginEvent', () => {
         },
         "message": "User [user] has logged in using basic provider [name=basic1]",
         "user": Object {
+          "email": "email",
           "id": "uid",
           "name": "user",
           "roles": Array [
