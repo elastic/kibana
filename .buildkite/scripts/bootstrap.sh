@@ -27,9 +27,9 @@ fi
 # But only for agents not mounting the workspace on a local ssd or in memory
 # It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
 if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
-  if [[ -d ~/.kibana/node_modules ]]; then
-    echo "Using ~/.kibana/node_modules as a starting point"
-    mv ~/.kibana/node_modules ./
+  if [[ -f ~/.kibana/node_modules.tar.zst ]]; then
+    echo "Extracting ~/.kibana/node_modules.tar.zst as a starting point"
+    tar -xf ~/.kibana/node_modules.tar.zst -I zstd -C ./
   fi
   if [[ -d ~/.kibana/.yarn-local-mirror ]]; then
     echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
