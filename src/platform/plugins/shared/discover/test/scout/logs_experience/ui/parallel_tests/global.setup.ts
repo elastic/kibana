@@ -16,18 +16,12 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
   const from = new Date(LOGS.DEFAULT_START_TIME).getTime();
   const to = new Date(LOGS.DEFAULT_END_TIME).getTime();
 
-  // Logs data: the data source that triggers the logs profile.
   const { logsEsClient } = await getSynthtraceClient('logsEsClient', {
     esClient,
     log,
     config,
   });
 
-  // Seeding is delete-then-create so a re-run against a long-lived stack produces the same
-  // state as a fresh one. Without this, indexing appends and doc counts drift on every run,
-  // which would silently break count-dependent assertions. Scoped to this suite's own resources
-  // rather than `logsEsClient.clean()`, which resolves `logs-*-*` and would delete data seeded by
-  // any other suite sharing the stack.
   await deleteLogsExperienceData(esClient);
 
   await logsEsClient.index([
@@ -51,8 +45,6 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
   // profile. Indexed directly rather than via `infraEsClient`, whose `metrics-*` data streams
   // are TSDB and reject timestamps outside a moving window around now.
   //
-  // Already deleted above, for the same reason as the logs data: a leftover index from an
-  // interrupted run would otherwise accumulate duplicate documents on the bulk below.
   await esClient.indices.create({
     index: LOGS.NON_LOGS_INDEX,
     mappings: {
@@ -71,7 +63,7 @@ globalSetupHook('Setup logs experience tests data', async ({ esClient, log, conf
   const intervalMs = 2 * 60 * 1000;
   const documents = Array.from({ length: 31 }, (_, i) => ({
     '@timestamp': new Date(from + i * intervalMs).toISOString(),
-    'host.name': 'synth-metrics-host-01',
+    'host.name': LOGS.NON_LOGS_HOST,
     'system.cpu.total.norm.pct': 0.98,
     'system.memory.actual.used.pct': 0.5,
   }));

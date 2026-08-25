@@ -76,9 +76,6 @@ spaceTest.describe(
           'non-logs-no-recommended'
         );
 
-        // Open by id rather than through the "Open search" flyout: that flyout filters via a
-        // saved-object *search*, which lags behind the write when workers run concurrently.
-        // Loading by id is a realtime get, so it can't race the index refresh.
         await discover.goto({ queryMode: 'classic', savedSearchId: sessionId });
         await discover.waitUntilTabIsLoaded();
 

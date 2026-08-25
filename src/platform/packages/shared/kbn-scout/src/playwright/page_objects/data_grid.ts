@@ -16,12 +16,8 @@ const IN_TABLE_SEARCH_INPUT_TEST_SUBJ = 'inTableSearchInput';
 const IN_TABLE_SEARCH_COUNTER_TEST_SUBJ = 'inTableSearchMatchesCounter';
 const IN_TABLE_SEARCH_NEXT_BUTTON_TEST_SUBJ = 'inTableSearchButtonNext';
 const IN_TABLE_SEARCH_HIGHLIGHT_CLASS_NAME = 'dataGridInTableSearch__match';
-// EUI internal class on the react-window scroll container. `UnifiedDataTable` queries the same
-// class to decide `hasScrolledToBottom` (see `data_table.tsx`, which carries a TODO asking EUI to
-// expose `outerRef` via `virtualizationOptions`) — keep the two in sync until it does.
-// `EuiDataGridObject` in `@elastic/eui-test-helpers` exposes no scroll API yet; requesting one
-// from Apps DX (#kibana-qa) is the way out of this workaround.
-const EUI_DATA_GRID_VIRTUALIZED_CLASS = 'euiDataGrid__virtualized';
+const EUI_DATA_GRID_VIRTUALIZED_CLASS_NAME = 'euiDataGrid__virtualized';
+
 const SCROLL_STEP_PX = 500;
 const FINAL_SCROLL_STEP_PX = 100;
 const MAX_SCROLL_STEPS = 200;
@@ -687,7 +683,7 @@ export class DataGrid {
   async scrollToRow(rowIndex: number, container: Locator = this.getDocTableWrapper()) {
     await expect(container).toHaveAttribute('data-render-complete', 'true');
 
-    const grid = container.locator(`.${EUI_DATA_GRID_VIRTUALIZED_CLASS}`);
+    const grid = container.locator(`.${EUI_DATA_GRID_VIRTUALIZED_CLASS_NAME}`);
 
     await expect
       .poll(async () => {
@@ -715,7 +711,7 @@ export class DataGrid {
   async scrollToBottom(container: Locator = this.getDocTableWrapper()) {
     await expect(container).toHaveAttribute('data-render-complete', 'true');
 
-    const grid = container.locator(`.${EUI_DATA_GRID_VIRTUALIZED_CLASS}`);
+    const grid = container.locator(`.${EUI_DATA_GRID_VIRTUALIZED_CLASS_NAME}`);
 
     // Fail loudly on a grid with nothing to scroll, rather than let an absence assertion pass.
     await expect

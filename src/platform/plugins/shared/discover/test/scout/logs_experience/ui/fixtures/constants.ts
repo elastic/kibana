@@ -33,4 +33,5 @@ export const LOGS = {
   // timestamps above. The name also stays clear of `metrics-*-*` so no Fleet template claims it.
   NON_LOGS_INDEX: 'synth-metrics-2025',
   NON_LOGS_DATA_VIEW: 'synth-metrics*',
+  NON_LOGS_HOST: 'synth-metrics-host-01',
 } as const;
