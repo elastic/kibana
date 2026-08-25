@@ -78,9 +78,7 @@ export const getFieldFromSchema = ({
       try {
         // Coerce non-empty strings to numbers before validating numeric schemas.
         const coerced =
-          schema instanceof z.ZodNumber && typeof value === 'string'
-            ? Number(value)
-            : value;
+          schema instanceof z.ZodNumber && typeof value === 'string' ? Number(value) : value;
         schema.parse(coerced);
         return undefined;
       } catch (error) {
