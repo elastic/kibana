@@ -154,13 +154,22 @@ export class SyncPrivateLocationMonitorsTask {
             });
           }
         } else {
-          await this.deployPackagePolicies.syncAllPackagePolicies({
-            allPrivateLocations,
-            soClient,
-            encryptedSavedObjects,
-          });
+          // Recreating missing policies can race Fleet/ESO; retry in-process
+          // because this task is maxAttempts: 1 and the next schedule is minutes out.
+          await pRetry(
+            async () => {
+              await this.deployPackagePolicies.syncAllPackagePolicies({
+                allPrivateLocations,
+                soClient,
+                encryptedSavedObjects,
+              });
+            },
+            { retries: 3, minTimeout: 1000, factor: 2, randomize: false }
+          );
         }
         this.debugLog(`Completed post-cleanup sync`);
+        taskState.hasAlreadyDoneCleanup = true;
+        taskState.maxCleanUpRetries = 3;
         return defaultState;
       }
 

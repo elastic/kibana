@@ -109,8 +109,14 @@ export async function cleanUpDuplicatedPackagePolicies(
         serverSetup
       );
     }
-    taskState.hasAlreadyDoneCleanup = true;
-    taskState.maxCleanUpRetries = 3;
+    // If a follow-up sync is required (missing expected policies or we just
+    // deleted extras), leave hasAlreadyDoneCleanup unset until that sync
+    // succeeds. Marking it done here made a failed recreate a one-shot: the
+    // next run skipped cleanup and never tried again.
+    if (!performCleanupSync) {
+      taskState.hasAlreadyDoneCleanup = true;
+      taskState.maxCleanUpRetries = 3;
+    }
     return { performCleanupSync };
   } catch (e) {
     taskState.maxCleanUpRetries -= 1;

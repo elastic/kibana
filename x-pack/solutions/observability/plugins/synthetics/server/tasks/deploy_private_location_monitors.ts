@@ -271,9 +271,9 @@ export class DeployPrivateLocationMonitors {
         );
 
         if (result?.failedCreates && result.failedCreates.length > 0) {
-          this.serverSetup.logger.error(
-            `[DeployPrivateLocationMonitors] Failed to create ${result.failedCreates.length} policies during sync`
-          );
+          const message = `[DeployPrivateLocationMonitors] Failed to create ${result.failedCreates.length} policies during sync`;
+          this.serverSetup.logger.error(message);
+          throw new Error(message);
         }
       } else {
         this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);

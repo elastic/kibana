@@ -23,6 +23,7 @@ import {
 } from '../../../common/fixtures/monitors';
 import {
   createLegacyPackagePolicy,
+  deletePackagePolicyById,
   getSyntheticsPackagePolicies,
 } from '../../../common/fixtures/fleet';
 import { tryForTime } from '../../../common/fixtures/retry';
@@ -246,11 +247,36 @@ apiTest.describe(
       }
     );
 
-    // https://github.com/elastic/kibana/issues/263665
-    // The cleanup task deletes legacy policies but the subsequent
-    // syncAllPackagePolicies does not reliably recreate the missing new-format
-    // policy. Skipped until the sync-after-cleanup path in the product is fixed.
-    apiTest.skip('should migrate legacy policies to new format when cleanup runs', async () => {});
+    apiTest(
+      'should migrate legacy policies to new format when cleanup runs',
+      async ({ apiClient }) => {
+        apiTest.setTimeout(TEST_TIMEOUT);
+        const monitorId = uuidv4();
+        await createMonitor(apiClient, monitorId);
+
+        const newFormatPolicyId = `${monitorId}-${privateLocation.id}`;
+        await tryForTime(CLEANUP_TIMEOUT, async () => {
+          const policies = await getPackagePolicies(apiClient);
+          expect(policies.some((policy) => policy.id === newFormatPolicyId)).toBe(true);
+        });
+
+        await deletePackagePolicyById(apiClient, adminHeaders, newFormatPolicyId);
+
+        const legacyPolicy1 = await seedLegacyPolicy(apiClient, monitorId, 'default');
+        const legacyPolicy2 = await seedLegacyPolicy(apiClient, monitorId, 'space-2');
+
+        await triggerPrivateLocationCleanup(apiClient, editorHeaders);
+
+        await tryForTime(CLEANUP_TIMEOUT, async () => {
+          const policies = await getPackagePolicies(apiClient);
+          expect(policies.some((policy) => policy.id === newFormatPolicyId)).toBe(true);
+          expect(policies.some((policy) => policy.id === legacyPolicy1)).toBe(false);
+          expect(policies.some((policy) => policy.id === legacyPolicy2)).toBe(false);
+        });
+
+        await deleteMonitors(apiClient, editorHeaders, [monitorId]);
+      }
+    );
 
     apiTest(
       'should clean up legacy policies from spaces with no monitors',
