@@ -21,12 +21,6 @@
 .mapLayerControl__openLayerTOCButton {
   pointer-events: all;
   padding: 0 $euiSizeS;
-
-  &:enabled,
-  &:enabled:hover,
-  &:enabled:focus {
-    @include euiBottomShadowLarge;
-  }
 }
 
 .mapLayerControl__openLayerTOCButton,

@@ -7,7 +7,6 @@
 
 .mapToolbarOverlay__button,
 .mapToolbarOverlay__buttonGroup {
-  @include euiBottomShadowLarge;
   position: relative;
   transition: transform $euiAnimSpeedNormal ease-in-out, background $euiAnimSpeedNormal ease-in-out;
 
