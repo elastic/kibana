@@ -85,9 +85,7 @@ describe('useSearchAction', () => {
   it('syncs the input value when the controlled value prop changes', () => {
     const { rerender } = render(<Harness {...defaultProps} value="modified" />);
 
-    expect(screen.getByTestId(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ)).toHaveValue(
-      'modified'
-    );
+    expect(screen.getByTestId(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ)).toHaveValue('modified');
 
     rerender(<Harness {...defaultProps} value="saved" />);
 
