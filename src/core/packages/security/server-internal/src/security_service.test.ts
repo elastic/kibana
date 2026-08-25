@@ -124,6 +124,114 @@ describe('SecurityService', function () {
       });
     });
 
+    describe('#serviceAccounts.registerOperation', () => {
+      const registerOperation = (type: string) =>
+        service.setup().serviceAccounts.registerOperation({ type });
+
+      it('returns a handle for the claimed operation type', () => {
+        expect(registerOperation('alerting_rule')).toEqual({
+          attach: expect.any(Function),
+          detach: expect.any(Function),
+          getBinding: expect.any(Function),
+          withScopedRequest: expect.any(Function),
+        });
+      });
+
+      it('accepts lowercase alphanumerics and underscores', () => {
+        const setup = service.setup();
+
+        for (const type of ['alerting', 'alerting_rule', 'workflow2', '123', 'a_1_b']) {
+          expect(() => setup.serviceAccounts.registerOperation({ type })).not.toThrow();
+        }
+      });
+
+      it.each([
+        ['uppercase letters', 'AlertingRule'],
+        ['dashes', 'alerting-rule'],
+        ['dots', 'alerting.rule'],
+        ['spaces', 'alerting rule'],
+        ['colons', 'alerting:rule'],
+        ['slashes', 'alerting/rule'],
+        ['an empty string', ''],
+      ])('rejects %s', (_label, type) => {
+        expect(() => registerOperation(type)).toThrow(
+          /only lowercase letters, digits and underscores are allowed/
+        );
+      });
+
+      it('rejects a type longer than 256 characters', () => {
+        const setup = service.setup();
+
+        expect(() =>
+          setup.serviceAccounts.registerOperation({ type: 'a'.repeat(256) })
+        ).not.toThrow();
+        expect(() => setup.serviceAccounts.registerOperation({ type: 'b'.repeat(257) })).toThrow(
+          /must be at most 256 characters, but got 257/
+        );
+      });
+
+      it('claims the type, so an operation has exactly one owner', () => {
+        const setup = service.setup();
+        setup.serviceAccounts.registerOperation({ type: 'alerting_rule' });
+
+        expect(() => setup.serviceAccounts.registerOperation({ type: 'alerting_rule' })).toThrow(
+          /Service account operation type \[alerting_rule\] has already been registered/
+        );
+      });
+
+      it('does not claim a type it rejected', () => {
+        const setup = service.setup();
+
+        expect(() => setup.serviceAccounts.registerOperation({ type: 'Nope' })).toThrow();
+        expect(() => setup.serviceAccounts.registerOperation({ type: 'nope' })).not.toThrow();
+      });
+
+      it('rejects handle calls made before the security delegate is registered', async () => {
+        const handle = registerOperation('alerting_rule');
+
+        await expect(handle.getBinding({ workloadType: 'rule', workloadId: 'r' })).rejects.toThrow(
+          /Cannot use service account operation \[alerting_rule\] before the security delegate has been registered/
+        );
+      });
+
+      it('passes its own operation type to the delegate, so a handle cannot reach another', async () => {
+        const setup = service.setup();
+        const handle = setup.serviceAccounts.registerOperation({ type: 'alerting_rule' });
+
+        const serviceAccounts = {
+          getWorkloadBinding: jest.fn().mockResolvedValue(null),
+          attachWorkload: jest.fn(),
+          detachWorkload: jest.fn(),
+          withScopedRequestForWorkload: jest.fn(),
+        };
+        setup.registerSecurityDelegate({
+          serviceAccounts,
+        } as unknown as CoreSecurityDelegateContract);
+
+        const params = { workloadType: 'rule', workloadId: 'rule-id' };
+        await handle.getBinding(params);
+
+        expect(serviceAccounts.getWorkloadBinding).toHaveBeenCalledWith('alerting_rule', params);
+      });
+
+      it('resolves the delegate per call, not at registration time', async () => {
+        const setup = service.setup();
+        // Handle acquired first: a plugin's setup can run before the security plugin's.
+        const handle = setup.serviceAccounts.registerOperation({ type: 'alerting_rule' });
+
+        const attachWorkload = jest.fn().mockResolvedValue({});
+        setup.registerSecurityDelegate({
+          serviceAccounts: { attachWorkload },
+        } as unknown as CoreSecurityDelegateContract);
+
+        const request = {} as any;
+        const params = { serviceAccountId: 'sa', workloadType: 'rule', workloadId: 'rule-id' };
+        await handle.attach(request, params);
+
+        expect(attachWorkload).toHaveBeenCalledWith('alerting_rule', request, params);
+      });
+    });
+
     describe('#uiam', () => {
       it('should be set to `null` if UIAM is not configured ', () => {
         expect(service.setup().uiam).toBeNull();
