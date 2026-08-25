@@ -14,7 +14,8 @@ import { isIndexPattern, validateAiIndexId } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { AiIndexAlreadyExistsError, AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
-import type { ContextEngineAnalyticsService } from '../telemetry';
+import type { ContextEngineAnalyticsService, KiWriteAction } from '../telemetry';
+import { errorTypeForTelemetry } from '../telemetry';
 
 /** Dependencies injected into the KI step definition factories. */
 export interface KiStepDependencies {
@@ -36,6 +37,64 @@ export interface ResolvedAiIndex {
 /** Whether the error is a cancellation, not a write failure. */
 export const isAbortError = (error: unknown): boolean =>
   isRequestAbortedError(error) || (error instanceof Error && error.name === 'AbortError');
+
+const KI_WRITE_SUCCESS_VERB: Record<KiWriteAction, string> = {
+  create: 'created in',
+  update: 'updated in',
+  delete: 'deleted from',
+};
+
+/**
+ * Runs a KI write step body, reporting the outcome (success, failure, or
+ * aborted) to EBT and the logs. The body receives a callback to record the
+ * AI index's managed state once resolved, and returns the step output whose
+ * `id` is the KI id.
+ */
+export const withKiWriteTelemetry = async <Output extends { id: string }>({
+  action,
+  aiIndexId,
+  analyticsService,
+  logger,
+  run,
+}: {
+  action: KiWriteAction;
+  aiIndexId: string;
+  analyticsService: ContextEngineAnalyticsService;
+  logger: Logger;
+  run: (setManaged: (managed: boolean) => void) => Promise<{ output: Output }>;
+}): Promise<{ output: Output }> => {
+  let managed: boolean | undefined;
+  try {
+    const result = await run((resolvedManaged) => {
+      managed = resolvedManaged;
+    });
+    analyticsService.reportKiWrite({ action, aiIndexId, managed, outcome: 'success' });
+    logger.debug(
+      `KI '${result.output.id}' ${
+        KI_WRITE_SUCCESS_VERB[action]
+      } AI index '${analyticsService.aiIndexIdForTelemetry(aiIndexId, managed)}'`
+    );
+    return result;
+  } catch (error) {
+    // A cancelled run is not a write failure; report it as aborted.
+    const aborted = isAbortError(error);
+    const errorType = aborted ? undefined : errorTypeForTelemetry(error);
+    analyticsService.reportKiWrite({
+      action,
+      aiIndexId,
+      managed,
+      outcome: aborted ? 'aborted' : 'failure',
+      errorType,
+    });
+    const idForLog = analyticsService.aiIndexIdForTelemetry(aiIndexId, managed);
+    logger.debug(
+      aborted
+        ? `KI ${action} aborted in AI index '${idForLog}'`
+        : `KI ${action} failed in AI index '${idForLog}': ${errorType}`
+    );
+    throw error;
+  }
+};
 
 /** Fails the step when the workflow user lacks the Context Engine write API privilege. */
 export const assertKiWritePrivilege = async (

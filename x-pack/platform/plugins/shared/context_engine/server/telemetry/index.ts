@@ -6,4 +6,5 @@
  */
 
 export { ContextEngineAnalyticsService } from './analytics_service';
+export type { KiWriteAction } from './analytics_service';
 export { errorTypeForTelemetry } from './error_utils';

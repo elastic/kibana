@@ -8,15 +8,14 @@
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { isResponseError } from '@kbn/es-errors';
 import { deleteKiStepCommonDefinition } from '../../common/step_types/delete_ki';
-import { errorTypeForTelemetry } from '../telemetry';
 import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
   findKiBackingIndex,
-  isAbortError,
   kiNotFoundError,
   resolveAiIndex,
+  withKiWriteTelemetry,
 } from './helpers';
 
 export const getDeleteKiStepDefinition = ({
@@ -33,73 +32,45 @@ export const getDeleteKiStepDefinition = ({
       await assertContextEngineEnabled(isContextEngineEnabled, request);
 
       const { ai_index_id: aiIndexId, ki_id: kiId } = context.input;
-      let managed: boolean | undefined;
-      try {
-        await assertKiWritePrivilege(checkWritePrivilege, request);
+      return withKiWriteTelemetry({
+        action: 'delete',
+        aiIndexId,
+        analyticsService,
+        logger,
+        run: async (setManaged) => {
+          await assertKiWritePrivilege(checkWritePrivilege, request);
 
-        const { dest, managed: resolvedManaged } = await resolveAiIndex(
-          getAiIndexService,
-          aiIndexId
-        );
-        managed = resolvedManaged;
-        const esClient = context.contextManager.getScopedEsClient();
+          const { dest, managed } = await resolveAiIndex(getAiIndexService, aiIndexId);
+          setManaged(managed);
+          const esClient = context.contextManager.getScopedEsClient();
 
-        const backingIndex = await findKiBackingIndex({
-          esClient,
-          aiIndexId,
-          destValue: dest.value,
-          kiId,
-          abortSignal: context.abortSignal,
-        });
-
-        await esClient
-          .delete(
-            {
-              index: backingIndex,
-              id: kiId,
-              refresh: 'wait_for',
-            },
-            { signal: context.abortSignal }
-          )
-          .catch((error) => {
-            // The KI (or its backing index) may have been removed concurrently.
-            if (isResponseError(error) && error.statusCode === 404) {
-              throw kiNotFoundError(aiIndexId, kiId);
-            }
-            throw error;
+          const backingIndex = await findKiBackingIndex({
+            esClient,
+            aiIndexId,
+            destValue: dest.value,
+            kiId,
+            abortSignal: context.abortSignal,
           });
 
-        analyticsService.reportKiWrite({
-          action: 'delete',
-          aiIndexId,
-          managed,
-          outcome: 'success',
-        });
-        logger.debug(
-          `KI '${kiId}' deleted from AI index '${analyticsService.aiIndexIdForTelemetry(
-            aiIndexId,
-            managed
-          )}'`
-        );
-        return { output: { id: kiId } };
-      } catch (error) {
-        // A cancelled run is not a write failure; report it as aborted.
-        const aborted = isAbortError(error);
-        const errorType = aborted ? undefined : errorTypeForTelemetry(error);
-        analyticsService.reportKiWrite({
-          action: 'delete',
-          aiIndexId,
-          managed,
-          outcome: aborted ? 'aborted' : 'failure',
-          errorType,
-        });
-        const idForLog = analyticsService.aiIndexIdForTelemetry(aiIndexId, managed);
-        logger.debug(
-          aborted
-            ? `KI delete aborted in AI index '${idForLog}'`
-            : `KI delete failed in AI index '${idForLog}': ${errorType}`
-        );
-        throw error;
-      }
+          await esClient
+            .delete(
+              {
+                index: backingIndex,
+                id: kiId,
+                refresh: 'wait_for',
+              },
+              { signal: context.abortSignal }
+            )
+            .catch((error) => {
+              // The KI (or its backing index) may have been removed concurrently.
+              if (isResponseError(error) && error.statusCode === 404) {
+                throw kiNotFoundError(aiIndexId, kiId);
+              }
+              throw error;
+            });
+
+          return { output: { id: kiId } };
+        },
+      });
     },
   });
