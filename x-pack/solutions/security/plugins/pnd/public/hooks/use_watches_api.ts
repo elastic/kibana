@@ -40,8 +40,8 @@ const getWatchUpdateErrorTitle = (status: number | undefined): string => {
     });
   }
   if (status === 403) {
-    return i18n.translate('xpack.pnd.watchSettingsSpaceDisabledErrorMessage', {
-      defaultMessage: 'PND watches are disabled in this space',
+    return i18n.translate('xpack.pnd.watchSettingsForbiddenErrorMessage', {
+      defaultMessage: 'You do not have permission to update this watch',
     });
   }
   return i18n.translate('xpack.pnd.watchUpdateErrorMessage', {
