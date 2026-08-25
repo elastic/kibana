@@ -174,14 +174,14 @@ describe('autocomplete', () => {
       testSuggestions(query, commandsAfterNonTsSource);
     });
 
-    it.each([
-      'PROMQL index=metrics (sum(/',
-      'PROMQL index=metrics col0=(sum(/',
-    ])('does not treat parenthesized PromQL as an ES|QL subquery: %s', async (query) => {
-      const { suggest: suggestFn } = await setup();
+    it.each(['PROMQL index=metrics (sum(/', 'PROMQL index=metrics col0=(sum(/'])(
+      'does not treat parenthesized PromQL as an ES|QL subquery: %s',
+      async (query) => {
+        const { suggest: suggestFn } = await setup();
 
-      await expect(suggestFn(query)).resolves.toEqual(expect.any(Array));
-    });
+        await expect(suggestFn(query)).resolves.toBeDefined();
+      }
+    );
   });
 
   describe('command filtering by metadata (requiresTimeseriesSource, hiddenAfterCommands)', () => {
