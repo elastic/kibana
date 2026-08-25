@@ -476,6 +476,39 @@ describe('Discover url generator', () => {
     });
   });
 
+  describe('when expandedDoc is used', () => {
+    test('should include expandedDoc in appState', async () => {
+      const { locator } = await setup();
+      const expandedDoc = {
+        id: 'doc-1',
+        index: 'logs-2024.01.01',
+        routing: 'route-1',
+        extraKey: 'discarded',
+      };
+      const { path } = await locator.getLocation({
+        dataViewId,
+        expandedDoc,
+      });
+      const { _a } = getStatesFromKbnUrl(path, ['_a']);
+
+      expect((_a as Record<string, unknown>).expandedDoc).toEqual({
+        id: 'doc-1',
+        index: 'logs-2024.01.01',
+        routing: 'route-1',
+      });
+    });
+  });
+
+  describe('when expandedDoc is not used', () => {
+    test('expandedDoc should not be set in appState', async () => {
+      const { locator } = await setup();
+      const { path } = await locator.getLocation({ dataViewId });
+      const { _a } = getStatesFromKbnUrl(path, ['_a']);
+
+      expect((_a as Record<string, unknown>).expandedDoc).toBeUndefined();
+    });
+  });
+
   describe('useHash property', () => {
     describe('when default useHash is set to false', () => {
       test('when using default, sets data view ID in the generated URL', async () => {

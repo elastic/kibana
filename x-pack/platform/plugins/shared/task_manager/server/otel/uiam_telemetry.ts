@@ -25,8 +25,9 @@ export type CredentialType = 'uiam_api_key' | 'es_api_key' | 'none';
 /**
  * Why the run authenticated with that credential type. Set on every series so
  * grouping keys stay consistent: `provisioned` pairs with `uiam_api_key`,
- * `not_set` with `none`, and the remaining values explain an `es_api_key` run
- * (project configured for ES keys, user-created key, or a fallback because no
+ * `not_set` with `none`, `user_created_key` pairs with either key type (a task
+ * whose key was supplied by the user), and the remaining values explain an
+ * `es_api_key` run (project configured for ES keys, or a fallback because no
  * UIAM key was available). Shares the vocabulary of the alerting
  * `kibana.alerting.rule_run.count` counter so both metrics can be charted with
  * the same queries.
