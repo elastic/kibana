@@ -10,7 +10,7 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
-import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
+import { resolveHistorySnapshotIndexPatterns } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/constants';
@@ -384,8 +384,9 @@ const enrichEntityResult = async ({
   // date takes full priority: skip risk inputs and return the profile for the matching calendar day
   if (date != null) {
     const { start, end } = dateToUtcDayRange(date);
-    const snapshotQuery = `FROM ${getHistorySnapshotIndexPattern(
-      spaceId
+    const historyPatterns = await resolveHistorySnapshotIndexPatterns(esClient, spaceId);
+    const snapshotQuery = `FROM ${historyPatterns.join(
+      ','
     )} | WHERE entity.id == "${escapedRowEntityId}" AND @timestamp >= "${start}" AND @timestamp <= "${end}" | LIMIT 1`;
     const snapshotResponse = await executeEsql({ query: snapshotQuery, esClient });
     const profileHistory = snapshotResponse.values.map((r) =>
@@ -447,8 +448,9 @@ const enrichEntityResult = async ({
   }
 
   if (interval) {
-    const snapshotQuery = `FROM ${getHistorySnapshotIndexPattern(
-      spaceId
+    const historyPatterns = await resolveHistorySnapshotIndexPatterns(esClient, spaceId);
+    const snapshotQuery = `FROM ${historyPatterns.join(
+      ','
     )} | WHERE entity.id == "${escapedRowEntityId}" AND @timestamp >= ${intervalToEsql(
       interval
     )} | SORT @timestamp DESC | LIMIT 100`;

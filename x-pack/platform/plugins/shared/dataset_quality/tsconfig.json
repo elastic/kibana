@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -75,7 +76,10 @@
     "@kbn/streams-schema",
     "@kbn/streams-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/scout",
+    "@kbn/scout-synthtrace",
+    "@kbn/synthtrace-client"
   ],
   "exclude": [
     "target/**/*"
