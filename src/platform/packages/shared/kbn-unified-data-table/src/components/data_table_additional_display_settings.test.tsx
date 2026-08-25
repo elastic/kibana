@@ -27,7 +27,7 @@ const defaultDisplaySettingsProps = {
   jsonModeSettings: {},
 };
 
-const getSampleSizeNumberInput = () => screen.getByRole('spinbutton');
+const getSampleSizeNumberInput = () => screen.getByRole('spinbutton', { name: 'Sample size' });
 
 const renderDisplaySettings = (
   props: Partial<UnifiedDataTableAdditionalDisplaySettingsProps> = {}
