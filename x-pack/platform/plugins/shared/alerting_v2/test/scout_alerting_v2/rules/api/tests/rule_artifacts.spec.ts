@@ -48,11 +48,7 @@ apiTest.describe('Rule artifacts API', { tag: '@local-stateful-classic' }, () =>
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
   });
 
-  apiTest.beforeEach(async ({ apiServices }) => {
-    await apiServices.alertingV2.rules.cleanUp();
-  });
-
-  apiTest.afterAll(async ({ apiServices }) => {
+  apiTest.afterEach(async ({ apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
   });
 

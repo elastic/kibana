@@ -30,16 +30,13 @@ export const RUNBOOK_CONTENT_LIMIT = 50_000;
 export const MAX_ARTIFACT_STRING_LENGTH = 65_536;
 
 /** Framework ceiling for any array's `maxItems` in a registered `dataSchema`. */
-export const MAX_ARTIFACT_ARRAY_ITEMS = 1_000;
+export const MAX_ARTIFACT_ARRAY_ITEMS = 10;
 
 /**
- * Ceiling for the worst-case `data` size implied by a registered `dataSchema`,
- * checked at `registerArtifactType` time. Strictly greater than
- * {@link MAX_ARTIFACT_STRING_LENGTH} so a schema may declare a single max-length
- * string alongside the key names and punctuation that surround it.
+ * Ceiling for the worst-case `data` size implied by a registered `dataSchema`.
  *
  * "Bytes" is an approximation: the walk charges `maxLength` characters per
  * string, so JSON escaping of non-ASCII values can serialize larger. This is a
  * registration-time guardrail for schema authors, not an exact runtime cap.
  */
-export const MAX_ARTIFACT_DATA_BYTES = 131_072;
+export const MAX_ARTIFACT_DATA_BYTES = MAX_ARTIFACT_STRING_LENGTH * 2;

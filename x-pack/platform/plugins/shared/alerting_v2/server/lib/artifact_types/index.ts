@@ -22,4 +22,3 @@ export {
   injectArtifactReferences,
 } from './artifact_references';
 export { registerBuiltinArtifactTypes, dashboardIdSchema } from './register_builtin_artifact_types';
-export { validateArtifactsAgainstRegistry } from './validate_artifacts';

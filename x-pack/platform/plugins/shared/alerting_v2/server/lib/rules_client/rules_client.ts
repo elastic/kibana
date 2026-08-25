@@ -36,7 +36,6 @@ import {
   extractArtifactReferences,
   injectArtifactReferences,
   rebuildArtifactReferences,
-  validateArtifactsAgainstRegistry,
 } from '../artifact_types';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
@@ -384,7 +383,7 @@ export class RulesClient {
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
-    validateArtifactsAgainstRegistry(parsed.artifacts, this.artifactTypeRegistry);
+    this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
@@ -460,7 +459,7 @@ export class RulesClient {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
     if (parsed.artifacts !== undefined) {
-      validateArtifactsAgainstRegistry(parsed.artifacts ?? undefined, this.artifactTypeRegistry);
+      this.artifactTypeRegistry.validate(parsed.artifacts ?? undefined);
     }
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
@@ -1526,7 +1525,7 @@ export class RulesClient {
     data: CreateRuleData;
   }): Promise<{ rule: RuleResponse; created: boolean }> {
     const parsed = this.parseRuleData(createRuleDataSchema, data, 'upsert');
-    validateArtifactsAgainstRegistry(parsed.artifacts, this.artifactTypeRegistry);
+    this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const exists = await this.ruleExists({ id });
 

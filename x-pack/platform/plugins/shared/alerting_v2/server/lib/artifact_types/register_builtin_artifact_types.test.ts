@@ -12,13 +12,12 @@ import {
 } from '@kbn/alerting-v2-constants';
 import { ArtifactTypeRegistry } from './artifact_type_registry';
 import { registerBuiltinArtifactTypes } from './register_builtin_artifact_types';
-import { validateArtifactsAgainstRegistry } from './validate_artifacts';
 
 describe('registerBuiltinArtifactTypes', () => {
   let registry: ArtifactTypeRegistry;
 
   const validate = (type: string, data: Record<string, unknown>) =>
-    validateArtifactsAgainstRegistry([{ id: 'a1', type, data }], registry);
+    registry.validate([{ id: 'a1', type, data }]);
 
   beforeEach(() => {
     registry = new ArtifactTypeRegistry();

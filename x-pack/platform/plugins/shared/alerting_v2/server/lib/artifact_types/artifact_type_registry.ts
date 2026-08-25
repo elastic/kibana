@@ -5,10 +5,28 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { injectable } from 'inversify';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
+import { treeifyError } from '@kbn/zod/v4';
+import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import { assertBoundedSchema } from './assert_bounded_schema';
 import { assertValidDefinition } from './assert_valid_definition';
-import type { ArtifactTypeDefinition } from './types';
+import type { ArtifactTypeDefinition, RuleArtifactLike } from './types';
+
+const invalidArtifactData = (
+  artifact: RuleArtifactLike,
+  message: string,
+  errors?: unknown
+): Boom.Boom =>
+  Boom.badRequest(message, {
+    code: ALERTING_ERROR_CODES.INVALID_ARTIFACT_DATA,
+    details: {
+      artifact_id: artifact.id,
+      artifact_type: artifact.type,
+      ...(errors === undefined ? {} : { errors }),
+    },
+  });
 
 /**
  * Server-side registry of artifact type definitions. Populated during plugin
@@ -44,6 +62,45 @@ export class ArtifactTypeRegistry {
 
   public getAll(): ArtifactTypeDefinition[] {
     return [...this.types.values()];
+  }
+
+  /**
+   * Validates each artifact's `data` against its registered `dataSchema`.
+   * Limits are enforced once, at registration, where `assertBoundedSchema`
+   * proves every registrable schema is fully bounded.
+   */
+  public validate(artifacts: RuleArtifactLike[] | undefined): void {
+    if (!artifacts?.length) {
+      return;
+    }
+
+    for (const artifact of artifacts) {
+      const def = this.types.get(artifact.type);
+      if (!def) {
+        continue;
+      }
+
+      let result;
+      try {
+        result = def.dataSchema.safeParse(artifact.data);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw invalidArtifactData(
+          artifact,
+          `Artifact "${artifact.id}" of type "${artifact.type}" failed validation: ${message}`
+        );
+      }
+
+      if (!result.success) {
+        throw invalidArtifactData(
+          artifact,
+          `Artifact "${artifact.id}" of type "${
+            artifact.type
+          }" has invalid data: ${stringifyZodError(result.error)}`,
+          treeifyError(result.error)
+        );
+      }
+    }
   }
 }
 
