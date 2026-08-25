@@ -32,16 +32,18 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export interface SoftDeleteGapsByQueryParams {
   ruleIds: string[];
+  spaceId: string;
   eventLogClient: IEventLogClient;
   logger: Logger;
 }
 
-const buildGapQuery = (ruleIds: string[]): estypes.QueryDslQueryContainer => ({
+const buildGapQuery = (ruleIds: string[], spaceId: string): estypes.QueryDslQueryContainer => ({
   bool: {
     must: [
       { term: { 'event.action': GAP_EVENT_ACTION } },
       { term: { 'event.provider': GAP_EVENT_PROVIDER } },
       { terms: { 'rule.id': ruleIds } },
+      { term: { 'kibana.space_ids': spaceId } },
     ],
     must_not: [{ term: { [GAP_DELETED_FIELD]: true } }],
   },
@@ -68,10 +70,12 @@ const isIncomplete = (response: estypes.UpdateByQueryResponse): boolean =>
 
 const softDeleteChunk = async ({
   ruleIdChunk,
+  spaceId,
   eventLogClient,
   logger,
 }: {
   ruleIdChunk: string[];
+  spaceId: string;
   eventLogClient: IEventLogClient;
   logger: Logger;
 }): Promise<void> => {
@@ -81,7 +85,7 @@ const softDeleteChunk = async ({
       () =>
         eventLogClient.softDeleteByQuery({
           field: GAP_DELETED_FIELD,
-          query: buildGapQuery(ruleIdChunk),
+          query: buildGapQuery(ruleIdChunk, spaceId),
         })
     );
 
@@ -102,21 +106,15 @@ const softDeleteChunk = async ({
   }
 };
 
-/**
- * Soft-deletes every non-deleted gap document for the given rule IDs through the
- * event log client. Owns the gap-domain query and the `terms` chunking. Rule IDs
- * are globally unique, so gaps are matched by `rule.id` alone (intentionally
- * cross-space). Best-effort: per-chunk failures are logged and swallowed so gap
- * cleanup never blocks rule deletion.
- */
 export const softDeleteGapsByQuery = async ({
   ruleIds,
+  spaceId,
   eventLogClient,
   logger,
 }: SoftDeleteGapsByQueryParams): Promise<void> => {
   for (const ruleIdChunk of chunk(ruleIds, MAX_RULE_IDS_PER_QUERY)) {
     try {
-      await softDeleteChunk({ ruleIdChunk, eventLogClient, logger });
+      await softDeleteChunk({ ruleIdChunk, spaceId, eventLogClient, logger });
     } catch (err) {
       // A client-side timeout aborts the request, but Elasticsearch runs the
       // update to completion server-side, so this is not a failure to act on.

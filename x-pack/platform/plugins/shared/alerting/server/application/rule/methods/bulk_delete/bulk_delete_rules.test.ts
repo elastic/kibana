@@ -193,7 +193,7 @@ describe('bulkDelete', () => {
       unsecuredSavedObjectsClient,
     });
 
-    expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({ ruleIds, eventLogClient, logger });
+    expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({ ruleIds, spaceId: 'default', eventLogClient, logger });
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
@@ -447,6 +447,7 @@ describe('bulkDelete', () => {
 
     expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({
       ruleIds: ['id1'],
+      spaceId: 'default',
       eventLogClient,
       logger,
     });
@@ -525,11 +526,13 @@ describe('bulkDelete', () => {
     expect(softDeleteGapsByQueryMock).toHaveBeenCalledTimes(2);
     expect(softDeleteGapsByQueryMock).toHaveBeenNthCalledWith(1, {
       ruleIds: ['id1'],
+      spaceId: 'default',
       eventLogClient,
       logger,
     });
     expect(softDeleteGapsByQueryMock).toHaveBeenNthCalledWith(2, {
       ruleIds: ['id2'],
+      spaceId: 'default',
       eventLogClient,
       logger,
     });
@@ -1188,6 +1191,7 @@ describe('bulkDelete', () => {
       expect(softDeleteGapsByQueryMock).toHaveBeenCalledTimes(1);
       expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({
         ruleIds: ['id1', 'id3'],
+        spaceId: 'default',
         eventLogClient,
         logger,
       });

@@ -274,6 +274,7 @@ const bulkDeleteWithOCC = async (
       const eventLogClient = await context.getEventLogClient();
       await softDeleteGapsByQuery({
         ruleIds: deletedRuleIds,
+        spaceId: context.spaceId,
         eventLogClient,
         logger: context.logger,
       });
