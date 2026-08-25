@@ -380,6 +380,7 @@ export const Sentry: ConnectorSpec = {
 
     deleteIssue: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Permanently delete a Sentry issue confirmed as noise or a duplicate. This is irreversible.',
       input: SentryDeleteIssueInputSchema,

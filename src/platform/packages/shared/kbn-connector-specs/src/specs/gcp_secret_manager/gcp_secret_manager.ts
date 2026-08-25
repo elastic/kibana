@@ -395,6 +395,7 @@ Gotchas:
       // Returns live credential material when opted in, so an agent must never be able to call
       // it autonomously. Workflow-only, and even there the payload is withheld by default.
       isTool: false,
+      scope: 'read',
       description:
         'Read a secret version and verify it, optionally returning the secret value itself. ' +
         'By DEFAULT the value is withheld and the action returns only metadata plus an integrity signal (the byte length and the API crc32c), which is enough to confirm a rotation landed without exposing the secret. ' +
@@ -434,6 +435,7 @@ Gotchas:
     addSecretVersion: {
       // Writes new credential material; a wrong target silently becomes the value consumers read.
       isTool: false,
+      scope: 'write',
       description:
         'Store a new version of a secret, which becomes the new "latest". The create half of a rotation: this is how a workflow saves a freshly minted credential. ' +
         'It does NOT disable the previous version, so deploy the new value first and then call disableSecretVersion on the old version number. ' +
@@ -454,6 +456,7 @@ Gotchas:
 
     disableSecretVersion: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Disable one secret version so it can no longer be accessed, without destroying it. The safe, reversible first step of a rotate-and-revoke workflow, and the rollback is enableSecretVersion. ' +
         'Anything still reading this version starts failing immediately, so confirm with listSecretVersions first. ' +
@@ -474,6 +477,7 @@ Gotchas:
 
     enableSecretVersion: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Re-enable a previously disabled secret version so it can be accessed again. The rollback path when a rotation broke a consumer and the old credential needs to work again. ' +
         'Only works on a DISABLED version: a DESTROYED version is gone permanently and cannot be enabled.',
@@ -494,6 +498,7 @@ Gotchas:
     destroySecretVersion: {
       // Irreversible destruction of credential material.
       isTool: false,
+      scope: 'destroy',
       description:
         'Permanently destroy the value of a secret version. The terminal revocation step for a leaked or superseded credential and NOT reversible, unlike disableSecretVersion. ' +
         'The version remains listed with state DESTROYED as an audit record, but the value is unrecoverable. ' +
@@ -514,6 +519,7 @@ Gotchas:
 
     createSecret: {
       isTool: false,
+      scope: 'write',
       description:
         'Create an empty secret container. Pair it with addSecretVersion to provision a brand-new credential, since a secret with no versions holds no value and cannot be accessed. ' +
         'Replication defaults to "automatic", which lets Google choose regions; use "user-managed" with replicaLocations when data residency requires pinned regions. ' +
@@ -560,6 +566,7 @@ Gotchas:
 
     updateSecret: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Update a secret container: labels, TTL or expiry, version aliases, and the rotation schedule. Use it to tag a secret or to re-schedule rotation. ' +
         'Only the fields you set are changed, but labels and versionAliases are REPLACED wholesale rather than merged, so read the current values with getSecret first. ' +
@@ -587,6 +594,7 @@ Gotchas:
     deleteSecret: {
       // Deletes the container and every version in it, with no undelete.
       isTool: false,
+      scope: 'destroy',
       description:
         'Delete a secret and ALL of its versions permanently. The cleanup step when decommissioning, and there is no undelete. ' +
         'Everything reading any version of this secret breaks immediately. ' +
@@ -635,6 +643,7 @@ Gotchas:
     setSecretIamPolicy: {
       // Replaces the whole policy on the secret: the highest-blast-radius action here.
       isTool: false,
+      scope: 'destroy',
       description:
         'Replace the entire IAM policy on one secret in a single call, to grant or revoke accessor bindings during a remediation. ' +
         'This REPLACES every binding, so any binding missing from the input is revoked. Always build the bindings from a getSecretIamPolicy response and pass back its etag. ' +

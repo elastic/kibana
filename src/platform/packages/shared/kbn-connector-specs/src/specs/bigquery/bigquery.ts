@@ -296,6 +296,7 @@ export const BigQuery: ConnectorSpec = {
 
     executeQuery: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Run any GoogleSQL query in BigQuery from a workflow or direct connector execution. This action is intentionally hidden from agents because it can run DML, DDL, scripts, stored procedures, or expensive queries. Returns normalized rows as objects plus the BigQuery job reference and pagination token when more rows are available.',
       input: ExecuteQueryInputSchema,

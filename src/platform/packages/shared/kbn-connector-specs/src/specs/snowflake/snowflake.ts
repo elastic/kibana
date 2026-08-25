@@ -380,6 +380,7 @@ export const Snowflake: ConnectorSpec = {
 
     executeStatement: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Run any SQL statement asynchronously in Snowflake. Exposed to workflow authors and direct API callers only — not available to agents (agents must use runQuery for read-only access). Can modify or destroy data: accepts SELECT, DML (INSERT, UPDATE, DELETE, MERGE), DDL (CREATE, ALTER, DROP, TRUNCATE), privilege changes, stored procedure calls, and session state statements. Returns a statement handle — use getStatementStatus to poll for results or cancelStatement to abort. Supports bind variables, multi-statement execution (via multiStatementCount), and session-scoped context (warehouse, database, schema, role).',
       input: ExecuteStatementInputSchema,

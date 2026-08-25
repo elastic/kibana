@@ -395,6 +395,7 @@ export const GraphQLConnector: ConnectorSpec = {
     // ── Write operations ──────────────────────────────────────────────────────
     mutation: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Execute a GraphQL mutation against the configured endpoint. ' +
         'Use this to create, update, or delete data. ' +

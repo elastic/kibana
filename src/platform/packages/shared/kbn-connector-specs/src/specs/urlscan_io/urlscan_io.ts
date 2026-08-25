@@ -658,6 +658,7 @@ Gotchas that matter:
       // Spends submission quota and puts a URL into urlscan's public corpus when visibility
       // is public, so it is not something an agent should do unsupervised.
       isTool: false,
+      scope: 'write',
       description:
         'Submit a URL to URLScan.io for scanning. Returns the scan uuid and the result API link immediately; the scan itself takes roughly 10 to 30 seconds, so the result is not available yet. ' +
         'Use this when you want to submit now and collect later, for example fanning out many URLs then reading results in a second pass. For a single URL where you need the verdict in one step, use scanUrlAndWait instead. ' +
@@ -683,6 +684,7 @@ Gotchas that matter:
     scanUrlAndWait: {
       // Same quota and publication consequences as scanUrl, plus it holds a step open.
       isTool: false,
+      scope: 'write',
       description:
         'Submit a URL and poll until the scan finishes, returning the completed result in one step. The action a triage workflow should use to detonate a URL, since it avoids hand-rolling a poll loop. ' +
         'Returns the same trimmed result as getResult: verdict, page identity, stats, contacted indicators, and downloaded files. ' +

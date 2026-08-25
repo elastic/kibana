@@ -318,6 +318,7 @@ Gotchas:
     disableServiceAccount: {
       // Locks a workload identity out entirely; a wrong target can break production.
       isTool: false,
+      scope: 'destroy',
       description:
         'Disable a service account so it can no longer authenticate. The primary containment move for a compromised cloud identity, and fully reversible with enableServiceAccount. ' +
         'Every workload using this identity stops working immediately, so confirm the target with getServiceAccount first. Returns an empty body on success.',
@@ -337,6 +338,7 @@ Gotchas:
 
     enableServiceAccount: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Re-enable a previously disabled service account so it can authenticate again. The rollback for disableServiceAccount, used once an investigation clears the identity.',
       input: ServiceAccountActionInputSchema,
@@ -378,6 +380,7 @@ Gotchas:
 
     disableServiceAccountKey: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Disable one service account key. Cuts off a leaked credential while the account itself keeps working, so it contains the leak without taking down every workload. ' +
         'Reversible with enableServiceAccountKey. Prefer this over deleteServiceAccountKey while an investigation is still open.',
@@ -400,6 +403,7 @@ Gotchas:
 
     enableServiceAccountKey: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Re-enable a previously disabled service account key. The rollback for disableServiceAccountKey, for when a key turns out to have been disabled in error.',
       input: ServiceAccountKeyActionInputSchema,
@@ -422,6 +426,7 @@ Gotchas:
     deleteServiceAccountKey: {
       // Irreversible: a deleted key cannot be restored.
       isTool: false,
+      scope: 'destroy',
       description:
         'Permanently delete a service account key. The terminal containment for a leaked credential and NOT reversible, unlike disableServiceAccountKey. ' +
         'Anything still authenticating with this key breaks immediately. Prefer disabling first unless the key is known-compromised.',
@@ -443,6 +448,7 @@ Gotchas:
 
     createServiceAccountKey: {
       isTool: false,
+      scope: 'write',
       description:
         'Create a new key on a service account: the create half of a rotate-then-revoke key rotation. ' +
         'For safety this returns only the new key metadata (id, algorithm, validity), NEVER the private key material, so the secret cannot leak into a workflow log or an agent transcript. ' +
@@ -483,6 +489,7 @@ Gotchas:
 
     addIamPolicyBinding: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Grant one role to one member, leaving every other binding untouched. ' +
         'Targets a project, folder, or organization, or a single service account to let a member impersonate it. ' +
@@ -541,6 +548,7 @@ Gotchas:
 
     removeIamPolicyBinding: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Revoke one role from one member, leaving every other binding untouched. The core access-revocation response. ' +
         'Targets a project, folder, or organization, or a single service account to cut off an impersonator, which is the narrowest containment move available here. ' +
@@ -600,6 +608,7 @@ Gotchas:
     setIamPolicy: {
       // Replaces the whole policy: the highest-blast-radius action in the connector.
       isTool: false,
+      scope: 'destroy',
       description:
         'Replace an entire IAM allow policy in one call. For bulk remediation only. ' +
         'This REPLACES every binding, so any binding missing from the input is revoked. Always build the bindings from a getIamPolicy response and pass back its etag. ' +
@@ -723,6 +732,7 @@ Gotchas:
 
     createServiceAccount: {
       isTool: false,
+      scope: 'write',
       description:
         'Create a service account in a project, for automated onboarding or a scoped break-glass identity. ' +
         'The new account starts with no roles at all, so pair it with addIamPolicyBinding to grant the least privilege it needs. ' +
@@ -750,6 +760,7 @@ Gotchas:
     deleteServiceAccount: {
       // Restorable for 30 days, and only by uniqueId, so treat as effectively terminal.
       isTool: false,
+      scope: 'destroy',
       description:
         'Delete a service account: terminal cleanup after decommissioning. ' +
         'Everything authenticating as this identity breaks immediately. It can be restored with undeleteServiceAccount for 30 days, but only by uniqueId, so read that with getServiceAccount BEFORE deleting. ' +
@@ -767,6 +778,7 @@ Gotchas:
 
     undeleteServiceAccount: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Restore a recently deleted service account: the safety net for a delete made in error. ' +
         'Takes the numeric uniqueId, not the email, because the email is not resolvable once deleted. Only works within 30 days of deletion.',

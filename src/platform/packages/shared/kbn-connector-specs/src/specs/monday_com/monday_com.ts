@@ -248,6 +248,7 @@ export const MondayCom: ConnectorSpec = {
 
     createItem: {
       isTool: false,
+      scope: 'write',
       description:
         'Create a new item (row) on a Monday.com board. Optionally assign it to a specific group ' +
         'and set initial column values. Use getBoardInfo to discover group IDs and column IDs and ' +
@@ -265,6 +266,7 @@ export const MondayCom: ConnectorSpec = {
 
     changeItemColumnValues: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Update one or more column values on an existing Monday.com item. Provide a map of column ' +
         'IDs to new values. Use getBoardInfo to discover column IDs and their expected value formats ' +
@@ -281,6 +283,7 @@ export const MondayCom: ConnectorSpec = {
 
     createSubitem: {
       isTool: false,
+      scope: 'write',
       description:
         'Create a subitem under an existing Monday.com item. Subitems share the same column ' +
         "structure as the parent board's subitems board. Returns the created subitem with its ID.",
@@ -301,6 +304,7 @@ export const MondayCom: ConnectorSpec = {
 
     moveItemToGroup: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Move a Monday.com item to a different group within the same board. Use getBoardInfo to ' +
         'discover available group IDs. Returns the moved item with its updated group.',
@@ -317,6 +321,7 @@ export const MondayCom: ConnectorSpec = {
 
     archiveItem: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Archive a Monday.com item. Archived items are hidden from the board view but remain ' +
         'accessible via filters and are not permanently deleted. Returns the archived item.',
@@ -333,6 +338,7 @@ export const MondayCom: ConnectorSpec = {
 
     deleteItem: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Permanently delete a Monday.com item and all its subitems and updates. ' +
         'This action cannot be undone. Returns the deleted item ID.',

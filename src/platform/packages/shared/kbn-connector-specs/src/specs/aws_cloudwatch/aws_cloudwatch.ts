@@ -167,6 +167,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     setAlarmState: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Force an alarm into a specific state (OK, ALARM, or INSUFFICIENT_DATA) for testing or to manually close a resolved alarm. The alarm typically returns to its real state within seconds once CloudWatch next evaluates it, so use getAlarmHistory to confirm a lasting change. This triggers any actions configured for the target state (e.g. sends an SNS notification) — use with care.',
       input: SetAlarmStateInputSchema,
@@ -210,6 +211,7 @@ export const AwsCloudwatch: ConnectorSpec = {
 
     putMetricAlarm: {
       isTool: false,
+      scope: 'destroy',
       description:
         'Create a new metric alarm, or completely overwrite an existing one with this exact name. Use this to automate monitor setup or tune a threshold. This is an admin-style operation with side effects on notification wiring — review the alarm definition carefully, since it replaces the full prior configuration when updating.',
       input: PutMetricAlarmInputSchema,

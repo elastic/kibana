@@ -285,6 +285,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
     createMonitor: {
       // Not a tool: creates new detection logic (an admin-style operation), workflow steps only.
       isTool: false,
+      scope: 'write',
       description:
         'Create a new OpenSearch Alerting monitor (query-level, bucket-level, or doc-level) to stand up detection, e.g. as part of an automated onboarding workflow. See the "inputs" and "triggers" parameter descriptions for the exact shape each monitor type expects.',
       input: CreateMonitorInputSchema,
@@ -314,6 +315,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
     updateMonitor: {
       // Not a tool: replaces the monitor's stored definition (an admin-style operation), workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Update an existing monitor\u2019s name, schedule, inputs, or triggers without recreating it. Only the fields you provide are changed; everything else on the monitor is preserved. Use getMonitor or searchMonitors first to find the monitor ID.',
       input: UpdateMonitorInputSchema,
@@ -339,6 +341,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
     deleteMonitor: {
       // Not a tool: irreversible deletion, workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Permanently delete a monitor, completing the monitor lifecycle for teardown and cleanup. This does not delete alerts already raised by the monitor. Use getMonitor or searchMonitors first to confirm the monitor ID.',
       input: MonitorIdInputSchema,

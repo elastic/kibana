@@ -457,6 +457,7 @@ Gotchas:
     quarantineMessageGroups: {
       // Deliberately not a tool: destructive mailbox mutation, workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Quarantine one or more message groups: removes the messages from user mailboxes and holds them, ' +
         'and also quarantines late-arriving copies of the same messages. Optionally records a classification, report label, and review comment. ' +
@@ -479,6 +480,7 @@ Gotchas:
     trashMessageGroups: {
       // Deliberately not a tool: destructive mailbox mutation, workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Move all messages in one or more message groups to trash in the affected mailboxes, ' +
         'and keep auto-trashing late-arriving copies of the same messages. ' +
@@ -502,6 +504,7 @@ Gotchas:
     restoreMessageGroups: {
       // Deliberately not a tool: mailbox mutation (the undo), workflow steps only.
       isTool: false,
+      scope: 'destroy',
       description:
         'Restore one or more previously quarantined or trashed message groups back to user mailboxes, ' +
         'and turn off automatic trashing of late-arriving copies. ' +
