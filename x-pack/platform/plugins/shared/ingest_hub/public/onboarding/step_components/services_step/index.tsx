@@ -26,6 +26,8 @@ import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 import { useServicesStep } from './use_services_step';
 import { getCategoryTitle } from '../../service_categories';
 import { ServiceSearchFilter } from '../service_search_filter';
+import { DataFormatSelect } from './data_format_select';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 interface ServicesStepProps {
   onContinue: () => void;
@@ -51,7 +53,16 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     handleSelectAllInCategory,
     handleDeselectAllInCategory,
     handleNext,
+    dataFormat,
+    setDataFormat,
   } = useServicesStep({ onContinue });
+
+  const { deployAndDetectStep } = useOnboardingFlow();
+  const isFormatDisabled =
+    Object.keys(deployAndDetectStep.policyIdsByInstance).length > 0 ||
+    Object.values(deployAndDetectStep.serviceStatuses).some(
+      (s) => s !== 'error' && s !== 'timeout'
+    );
 
   return (
     <div data-test-subj="onboardingStep-services">
@@ -73,6 +84,12 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
         </p>
       </EuiText>
       <EuiSpacer size="l" />
+      <DataFormatSelect
+        dataFormat={dataFormat}
+        onChange={setDataFormat}
+        disabled={isFormatDisabled}
+      />
+      <EuiSpacer size="m" />
       <ServiceSearchFilter
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}

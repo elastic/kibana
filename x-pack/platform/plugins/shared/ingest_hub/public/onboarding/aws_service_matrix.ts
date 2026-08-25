@@ -24,7 +24,16 @@ export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
  * Services with `ecfLogType` set are deployed via the "Launch CloudFormation" button in Step 4.
  * @see https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release
  */
-export type EcfLogType = 'vpcflow' | 'cloudtrail' | 'waf';
+export type EcfLogType =
+  | 'vpcflow'
+  | 'cloudtrail'
+  | 'waf'
+  | 'networkfirewall'
+  | 's3access'
+  | 'elbaccess';
+
+/** Whether the service lands data in OpenTelemetry or ECS schema. */
+export type DataFormat = 'ecs' | 'otel';
 
 /**
  * Marker for services that use a dedicated ECF CloudFormation template rather than the shared
@@ -122,6 +131,25 @@ export interface AwsServiceMatrixEntry {
    * When set, this service uses a dedicated ECF CloudFormation template instead of the unified one.
    */
   ecfDedicatedTemplate?: EcfDedicatedTemplate;
+  /** Whether the service produces OTel-native or ECS-compatible data. Absent implies 'ecs'. */
+  dataFormat?: DataFormat;
+  /**
+   * Manifest policy-template name, when it differs from `id`.
+   * OTel twin entries alias the ECS policy template (the aws package has no *_otel PTs),
+   * so this is load-bearing for manifest resolution in buildAwsServiceMatrix and service_icon.tsx.
+   */
+  policyTemplate?: string;
+  /**
+   * Data-stream id the ECF trigger vars (bucket_arn / log_group_arn) live under, when it
+   * differs from `id`. Required for multi-DS policy templates where the DS path != entry.id.
+   */
+  ecfDataStream?: string;
+  /**
+   * Force ECF-only deployment, suppressing a manifest-derived managed_integration flag.
+   * Needed for OTel twins that alias agentless-enabled policy templates (e.g. s3, elb) — without
+   * this gate they would inherit managed_integration and be POSTed to Fleet with an unknown input.
+   */
+  ecfOnly?: boolean;
 }
 
 /**
@@ -214,14 +242,17 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
     ecfLogType: 'cloudtrail',
   },
-  // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
   {
     id: 'cloudtrail_otel',
+    name: 'AWS CloudTrail',
     category: 'management_governance',
+    dataFormat: 'otel',
+    policyTemplate: 'cloudtrail',
+    ecfDataStream: 'cloudtrail',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
+    ecfOnly: true,
     packageName: 'aws',
     ecfLogType: 'cloudtrail',
-    showInUI: false,
     ecfDedicatedTemplate: 'otel',
   },
   {
@@ -247,6 +278,21 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     excludedDataStreams: ['firewall_metrics'],
   },
   {
+    id: 'firewall_otel',
+    name: 'AWS Network Firewall',
+    category: 'security_identity_compliance',
+    dataFormat: 'otel',
+    policyTemplate: 'firewall',
+    ecfDataStream: 'firewall_logs',
+    excludedDataStreams: ['firewall_metrics'],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    ecfOnly: true,
+    packageName: 'aws',
+    ecfLogType: 'networkfirewall',
+    ecfDedicatedTemplate: 'otel',
+    inputs: ['aws-s3'],
+  },
+  {
     id: 'securityhub',
     category: 'security_identity_compliance',
     packageName: 'aws',
@@ -260,15 +306,19 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     // ECF only supports S3 for WAF; CloudWatch input is intentionally excluded.
     inputs: ['aws-s3'],
   },
-  // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
   {
     id: 'waf_otel',
-    category: 'management_governance',
+    name: 'AWS WAF',
+    category: 'security_identity_compliance',
+    dataFormat: 'otel',
+    policyTemplate: 'waf',
+    ecfDataStream: 'waf',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
+    ecfOnly: true,
     packageName: 'aws',
     ecfLogType: 'waf',
-    showInUI: false,
     ecfDedicatedTemplate: 'otel',
+    inputs: ['aws-s3'],
   },
 
   // ── aws package — Networking and Content Delivery ─────────────────────────
@@ -284,6 +334,21 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'elb',
     category: 'networking_content_delivery',
     packageName: 'aws',
+  },
+  {
+    id: 'elb_otel',
+    name: 'AWS ELB',
+    category: 'networking_content_delivery',
+    dataFormat: 'otel',
+    policyTemplate: 'elb',
+    ecfDataStream: 'elb_logs',
+    excludedDataStreams: ['elb_metrics'],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    ecfOnly: true,
+    packageName: 'aws',
+    ecfLogType: 'elbaccess',
+    ecfDedicatedTemplate: 'otel',
+    inputs: ['aws-s3'],
   },
   {
     id: 'natgateway',
@@ -307,14 +372,17 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
     ecfLogType: 'vpcflow',
   },
-  // TODO otel variants should be enabled when the Data format selector is added in ingest-dev#8530
   {
     id: 'vpcflow_otel',
-    category: 'management_governance',
+    name: 'AWS VPC Flow Logs',
+    category: 'networking_content_delivery',
+    dataFormat: 'otel',
+    policyTemplate: 'vpcflow',
+    ecfDataStream: 'vpcflow',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
+    ecfOnly: true,
     packageName: 'aws',
     ecfLogType: 'vpcflow',
-    showInUI: false,
     ecfDedicatedTemplate: 'otel',
   },
   {
@@ -333,6 +401,21 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 's3',
     category: 'storage',
     packageName: 'aws',
+  },
+  {
+    id: 's3access_otel',
+    name: 'Amazon S3 Access Logs',
+    category: 'storage',
+    dataFormat: 'otel',
+    policyTemplate: 's3',
+    ecfDataStream: 's3access',
+    excludedDataStreams: ['s3_daily_storage', 's3_request'],
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+    ecfOnly: true,
+    packageName: 'aws',
+    ecfLogType: 's3access',
+    ecfDedicatedTemplate: 'otel',
+    inputs: ['aws-s3'],
   },
   {
     id: 's3_storage_lens',
@@ -449,15 +532,19 @@ export function buildAwsServiceMatrix(
     const badge = entry.badge ?? releaseToBadge((packageInfo as any)?.release);
 
     if (packageInfo) {
-      // Find the policy template by name (entry.id IS the PT name).
-      pt = (packageInfo.policy_templates ?? []).find((p: any) => p.name === entry.id);
+      // Find the policy template by name. OTel twins alias an existing ECS policy template via
+      // `policyTemplate` — the aws package has no *_otel policy templates on EPR.
+      pt = (packageInfo.policy_templates ?? []).find(
+        (p: any) => p.name === (entry.policyTemplate ?? entry.id)
+      );
 
       if (pt) {
         // Agentless is read at the policy-template level, which may cover both logs and metrics
         // data streams (e.g. ec2 has ec2_logs + ec2_metrics under one template). Both signal
         // types inherit managed_integration from the same flag, which is the correct behaviour
         // today — all those templates are intended for agentless.
-        managedIntegrations = (pt as any)?.deployment_modes?.agentless?.enabled === true;
+        managedIntegrations =
+          (pt as any)?.deployment_modes?.agentless?.enabled === true && !entry.ecfOnly;
 
         if (!name && (pt as any)?.title) {
           name = (pt as any).title as string;

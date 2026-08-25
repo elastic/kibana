@@ -73,8 +73,13 @@ export function OnboardingShell() {
   const { completedSteps, markStepComplete, markStepsIncomplete, firstIncompleteStepId } =
     useStepState(integrationId);
 
-  const { servicesStep, awsServiceMatrix, awsServiceMatrixError, refetchAwsServiceMatrix } =
-    useOnboardingFlow();
+  const {
+    servicesStep,
+    awsServiceMatrix,
+    awsServiceMatrixError,
+    refetchAwsServiceMatrix,
+    isDataFormatResolved,
+  } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   useInvalidateDownstreamSteps({
@@ -188,7 +193,7 @@ export function OnboardingShell() {
               },
             }}
           />
-        ) : !awsServiceMatrix ? (
+        ) : !awsServiceMatrix || !isDataFormatResolved ? (
           <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '300px' }}>
             <EuiLoadingSpinner size="xl" />
           </EuiFlexGroup>
