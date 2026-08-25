@@ -15,7 +15,7 @@ interface MockPool {
 }
 
 const mockCreatePool = jest.fn(
-  (): MockPool => ({
+  (_opts?: unknown): MockPool => ({
     end: jest.fn().mockResolvedValue(undefined),
   })
 );
