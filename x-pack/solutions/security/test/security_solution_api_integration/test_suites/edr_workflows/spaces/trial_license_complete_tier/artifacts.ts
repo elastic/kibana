@@ -63,9 +63,10 @@ export default function ({ getService }: FtrProviderContext) {
     : allowedExperimentalValues.endpointExceptionsMovedUnderManagement ||
       experimentalOverrides.includes('endpointExceptionsMovedUnderManagement');
 
-  // @skipInServerless: due to the fact that the serverless builtin roles are not yet updated with new privilege
-  //                    and tests below are currently creating a new role/user
-  describe('@ess @serverless, @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
+  // @skipInServerless: needs two custom roles at once (artifact write with and without
+  // global artifact management). Serverless allows only one custom role, and no builtin
+  // role has artifact write without GAM.
+  describe('@ess @skipInServerless Endpoint Artifacts space awareness support', function () {
     const afterEachDataCleanup: Array<Pick<ArtifactTestData, 'cleanup'>> = [];
     const spaceOneId = 'space_one';
     const spaceTwoId = 'space_two';
