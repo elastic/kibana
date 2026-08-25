@@ -41,6 +41,12 @@ export interface AgentStat {
   lastCheckinMessage: string | null;
   platform: string | null;
   tags: string[];
+  /**
+   * Monitors pinned to this agent via a stamped `${agent.id}` condition.
+   * Null on classic (non-sharded) locations — every enrolled agent runs all
+   * of the location's monitors.
+   */
+  monitorsAssigned: number | null;
 }
 
 export interface LocationAgentStats {
@@ -49,5 +55,7 @@ export interface LocationAgentStats {
   agentPolicyId: string;
   /** Agent policy display name, or the id when the policy can't be resolved. */
   agentPolicyName: string;
+  /** Whether this location opts into condition-based monitor distribution. */
+  isAgentSharding: boolean;
   agents: AgentStat[];
 }
