@@ -25,6 +25,7 @@ const agent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   lastCheckinMessage: 'Running',
   platform: 'linux',
   tags: [],
+  monitorsAssigned: null,
   ...overrides,
 });
 
@@ -33,6 +34,7 @@ const stats = (agents: AgentStat[]): LocationAgentStats => ({
   locationLabel: 'Local',
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Synthetics policy',
+  isAgentSharding: false,
   agents,
 });
 
