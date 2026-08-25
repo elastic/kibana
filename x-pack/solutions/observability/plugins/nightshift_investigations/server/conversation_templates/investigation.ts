@@ -23,8 +23,11 @@ export const investigationTemplate: ConversationTemplate = {
       options: ['critical', 'high', 'medium', 'low'],
     },
     summary: { input_type: 'TEXT', description: 'Summary' },
-    root_cause: { input_type: 'TEXT', description: 'Root cause' },
+    conclusion: { input_type: 'TEXT', description: 'Conclusion' },
     affected_services: { input_type: 'TEXT_ARRAY', description: 'Affected services' },
+    hypotheses: { input_type: 'OBJECT_ARRAY', description: 'Hypotheses investigated (each: candidate, confidence, status, reason?, evidence?)' },
+    recommendations: { input_type: 'OBJECT_ARRAY', description: 'Remediation recommendations (each: title, description?, code?)' },
+    blind_spots: { input_type: 'OBJECT_ARRAY', description: 'Known blind spots in the investigation (each: title, description)' },
     assigned_to: { input_type: 'USER', description: 'Assigned to' },
   },
 };

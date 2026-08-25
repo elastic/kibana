@@ -12,7 +12,7 @@ import type {
   SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 
-/** Converts a domain metadata value to its ES `flattened` storage form. TEXT_ARRAY → string[]; everything else → String(value). */
+/** Converts a domain metadata value to its ES `flattened` storage form. TEXT_ARRAY → string[]; OBJECT_ARRAY → passed through; everything else → String(value). */
 export const serializeMetadataValue = (
   value: MetadataFieldValue,
   inputType: ConversationTemplateInputType
@@ -20,6 +20,9 @@ export const serializeMetadataValue = (
   if (inputType === 'TEXT_ARRAY') {
     const arr = Array.isArray(value) ? value : [String(value)];
     return arr.map(String);
+  }
+  if (inputType === 'OBJECT_ARRAY') {
+    return Array.isArray(value) ? (value as Array<Record<string, unknown>>) : [];
   }
   return String(value);
 };
@@ -41,6 +44,9 @@ export const deserializeMetadataValue = (
   }
   if (inputType === 'TEXT_ARRAY') {
     return Array.isArray(value) ? value : [value as string];
+  }
+  if (inputType === 'OBJECT_ARRAY') {
+    return Array.isArray(value) ? (value as Array<Record<string, unknown>>) : [];
   }
   return value;
 };

@@ -115,6 +115,7 @@ export function registerInternalConversationRoutes({
               schema.number(),
               schema.boolean(),
               schema.arrayOf(schema.string({ maxLength: 2_000 }), { maxSize: 100 }),
+              schema.arrayOf(schema.any(), { maxSize: 100 }),
             ]),
             {
               validate: (record) => {

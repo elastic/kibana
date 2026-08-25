@@ -23,7 +23,7 @@ import type {
   NightshiftSetupDependencies,
   NightshiftStartDependencies,
 } from './types';
-import { InvestigationOverviewTab } from './investigation/investigation_overview_tab';
+import { createSidebarInvestigationOverviewTab } from './investigation/investigation_overview_tab_sidebar';
 
 export class NightshiftPlugin
   implements
@@ -91,7 +91,7 @@ export class NightshiftPlugin
 
       agentBuilder.conversationTemplates.registerTab('nightshift.overview', {
         label: 'Overview',
-        content: InvestigationOverviewTab,
+        content: createSidebarInvestigationOverviewTab({ ...coreStart, ...pluginsStart }),
       });
 
       agentBuilder.conversationTemplates.registerTemplateUIDefinition(

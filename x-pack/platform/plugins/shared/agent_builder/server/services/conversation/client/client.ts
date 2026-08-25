@@ -22,7 +22,6 @@ import {
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
-  createConversationAlreadyExistsError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
   createInternalError,
@@ -61,7 +60,7 @@ import type {
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
-import { createStorage } from './storage';
+import { createStorage, conversationIndexName } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
@@ -181,6 +180,7 @@ export const createClient = ({
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
     storage,
+    esClient,
     user,
     space,
     agentRegistry,
@@ -191,24 +191,28 @@ export const createClient = ({
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
+  private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
 
   constructor({
     storage,
+    esClient,
     user,
     space,
     agentRegistry,
     logger,
   }: {
     storage: ConversationStorage;
+    esClient: ElasticsearchClient;
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
     logger: Logger;
   }) {
     this.storage = storage;
+    this.esClient = esClient;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
@@ -384,7 +388,24 @@ class ConversationClientImpl implements ConversationClient {
       });
     } catch (error) {
       if (isVersionConflictError(error)) {
-        throw createConversationAlreadyExistsError({ conversationId: id });
+        // set_conversation_metadata upserted a partial doc during the agent run before the
+        // conversation was fully persisted. Merge the full document in while preserving any
+        // metadata the agent already wrote (agent-written values take precedence over defaults).
+        await this.esClient.update({
+          index: conversationIndexName,
+          id,
+          script: {
+            lang: 'painless',
+            // Merge: save any metadata already written by the agent, apply full doc, re-overlay agent metadata.
+            source:
+              'Map agentMeta = ctx._source.metadata != null ? new HashMap(ctx._source.metadata) : [:];' +
+              'ctx._source = params.doc;' +
+              'if (ctx._source.metadata == null) { ctx._source.metadata = agentMeta; } else { ctx._source.metadata.putAll(agentMeta); }',
+            params: { doc: attributes },
+          },
+          retry_on_conflict: 3,
+        });
+        return this.get(id);
       }
 
       throw error;

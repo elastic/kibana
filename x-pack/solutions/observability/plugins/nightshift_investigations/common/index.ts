@@ -26,6 +26,8 @@ export interface StartInvestigationRequest {
    */
   concurrency_key?: string;
   context?: InvestigationContext;
+  /** Free-form prompt that overrides the default "Investigation requested for …" message. */
+  message?: string;
 }
 
 export interface StartInvestigationResponse {

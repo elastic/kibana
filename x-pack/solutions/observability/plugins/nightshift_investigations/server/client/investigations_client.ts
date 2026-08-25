@@ -131,6 +131,7 @@ export class NightshiftInvestigationsClient {
     subject,
     concurrency_key,
     context = {},
+    message,
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!this.workflowsManagement) {
       throw new Error('workflowsManagement is not available');
@@ -150,7 +151,7 @@ export class NightshiftInvestigationsClient {
     }
 
     const inputs = {
-      message: `Investigation requested for ${subject.type} ${subject.id}`,
+      message: message ?? `Investigation requested for ${subject.type} ${subject.id}`,
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
         ...context,

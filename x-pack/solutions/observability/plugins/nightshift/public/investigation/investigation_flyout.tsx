@@ -130,7 +130,9 @@ function InvestigationOverviewTabWrapper({
     if (!conversationId) return;
     setLoading(true);
     http
-      .get(`/internal/agent-builder/conversations/${conversationId}`)
+      .get(`/api/agent_builder/conversations/${conversationId}`, {
+        headers: { 'elastic-api-version': '2023-10-31' },
+      })
       .then((res: unknown) => {
         const r = res as Record<string, unknown>;
         setConversation((r.conversation as Record<string, unknown>) ?? r);

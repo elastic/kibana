@@ -6,22 +6,28 @@
  */
 
 /** A metadata value as callers and the LLM supply it — before serialization to ES `flattened`. */
-export type MetadataFieldValue = string | string[] | number | boolean;
+export type MetadataFieldValue =
+  | string
+  | string[]
+  | number
+  | boolean
+  | Array<Record<string, unknown>>;
 
 /** A metadata value as persisted in the ES `flattened` field (all leaves are keywords). */
-export type SerializedMetadataValue = string | string[];
+export type SerializedMetadataValue = string | string[] | Array<Record<string, unknown>>;
 
 /**
  * The authoring type that governs what a user/agent supplies for a field.
  *
  * Maps to Elasticsearch storage types through serialization:
- *   TEXT_ARRAY → string[]  (flattened keyword array)
- *   TOGGLE     → "true"/"false" string
- *   NUMBER     → numeric string
- *   DATE       → ISO 8601 string
- *   USER       → plain string (profile uid or username)
- *   SELECT     → exact string from `options`
- *   TEXT       → string
+ *   TEXT_ARRAY   → string[]  (flattened keyword array)
+ *   OBJECT_ARRAY → Array<Record<string, unknown>>  (stored as-is in flattened _source)
+ *   TOGGLE       → "true"/"false" string
+ *   NUMBER       → numeric string
+ *   DATE         → ISO 8601 string
+ *   USER         → plain string (profile uid or username)
+ *   SELECT       → exact string from `options`
+ *   TEXT         → string
  */
 export type ConversationTemplateInputType =
   | 'SELECT'
@@ -30,6 +36,7 @@ export type ConversationTemplateInputType =
   | 'DATE'
   | 'TOGGLE'
   | 'TEXT_ARRAY'
+  | 'OBJECT_ARRAY'
   | 'USER';
 
 export interface ConversationTemplateFieldDefinition {

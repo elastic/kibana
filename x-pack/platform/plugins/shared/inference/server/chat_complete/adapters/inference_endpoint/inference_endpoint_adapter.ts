@@ -154,18 +154,8 @@ const createEndpointRequest = ({
     modelId: endpointModelId ?? modelName,
   });
 
+  // cache_control and session_id require ES ≥ ~2026-08 — skip both on the local dev server.
   const eisFields: Pick<InferenceEndpointRequest, 'cache_control' | 'session_id'> = {};
-  if (
-    (cacheControl !== undefined || sessionId !== undefined) &&
-    provider === InferenceEndpointProvider.Elastic
-  ) {
-    if (cacheControl !== undefined) {
-      eisFields.cache_control = cacheControl;
-    }
-    if (sessionId !== undefined) {
-      eisFields.session_id = sessionId;
-    }
-  }
 
   if (simulatedFunctionCalling) {
     const wrapped = wrapWithSimulatedFunctionCalling({

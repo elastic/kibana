@@ -9,7 +9,6 @@ import { createBadRequestError } from '@kbn/agent-builder-common';
 import type {
   ConversationTemplate,
   ConversationTemplateFieldDefinition,
-  SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$/;
@@ -54,6 +53,14 @@ const checkType = (
         return `field "${fieldName}" (TEXT_ARRAY): all array items must be strings`;
       }
       break;
+    case 'OBJECT_ARRAY':
+      if (!Array.isArray(value)) {
+        return `field "${fieldName}" (OBJECT_ARRAY): expected an array of objects, got ${typeof value}`;
+      }
+      if (!value.every((item) => item !== null && typeof item === 'object' && !Array.isArray(item))) {
+        return `field "${fieldName}" (OBJECT_ARRAY): all array items must be plain objects`;
+      }
+      break;
   }
   return null;
 };
@@ -78,7 +85,7 @@ const checkSelect = (
 const checkMaxLength = (
   fieldName: string,
   def: ConversationTemplateFieldDefinition,
-  value: SerializedMetadataValue
+  value: string | string[]
 ): string | null => {
   if (def.max_length === undefined) return null;
   const items = Array.isArray(value) ? value : [value];
@@ -179,11 +186,11 @@ export const collectFieldViolations = (
       break;
     }
     case 'TEXT_ARRAY': {
-      const msg = checkMaxLength(fieldName, def, value as SerializedMetadataValue);
+      const msg = checkMaxLength(fieldName, def, value as string | string[]);
       if (msg) violations.push(msg);
       break;
     }
-    // TOGGLE and USER have no extra constraints beyond type.
+    // TOGGLE, USER, and OBJECT_ARRAY have no extra constraints beyond type.
   }
 
   return violations;

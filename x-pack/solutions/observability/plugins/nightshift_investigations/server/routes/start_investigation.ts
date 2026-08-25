@@ -37,6 +37,7 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         .record(z.string().max(128), z.unknown())
         .refine((v) => Object.keys(v).length <= 50, { message: 'context exceeds 50 key limit' })
         .optional(),
+      message: z.string().max(2000).optional(),
     }),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {

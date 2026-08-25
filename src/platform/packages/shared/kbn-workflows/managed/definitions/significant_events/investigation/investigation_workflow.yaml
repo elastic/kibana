@@ -95,7 +95,14 @@ steps:
         As you work, use the set_conversation_metadata tool to record structured findings:
         - At the start: set status = "in_progress" and an initial severity ("critical", "high", "medium", or "low") based on the signal.
         - As you identify affected services: set affected_services as an array of service names.
-        - When you reach a conclusion: set summary (one concise paragraph), root_cause (the specific technical cause), and update severity if your analysis changes your initial assessment.
+        - When you reach a conclusion, call set_conversation_metadata with all of the following at once:
+          • summary: one concise paragraph describing what happened
+          • conclusion: the mechanism/root-cause narrative as plain prose (same text as the structured output conclusion field)
+          • hypotheses: the full hypotheses array you are reporting in structured output (each entry has candidate, confidence, status, and optionally reason and evidence)
+          • recommendations: the full recommendations array (each entry has title, and optionally description and code)
+          • blind_spots: the full blind_spots array (each entry has title and description)
+          • severity: final severity after analysis (update if your initial estimate was wrong)
+          • affected_services: final list of impacted service names
         - At the end: set status = "resolved" if the issue has a clear fix or is self-correcting, or "false_positive" if the signal is not a real problem.
         Only set severity = "critical" or "high" if there is active user impact or confirmed data exposure.
       # Keep this in sync with investigationStateSchema in @kbn/significant-events-schema

@@ -247,6 +247,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       ? async (updates: Record<string, SerializedMetadataValue>) => {
           // Painless script merge — preserves any metadata keys written by concurrent tool
           // calls in the same run that a doc-replace update would silently discard.
+          // upsert handles the race where set_conversation_metadata fires before
+          // createConversation$ has persisted the document (workflow path).
           await context.esClient.asInternalUser.update({
             index: conversationIndexName,
             id: conversationId,
@@ -256,6 +258,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
                 'if (ctx._source.metadata == null) { ctx._source.metadata = params.updates; } else { ctx._source.metadata.putAll(params.updates); }',
               params: { updates },
             },
+            upsert: { metadata: updates },
             retry_on_conflict: 3,
           });
         }

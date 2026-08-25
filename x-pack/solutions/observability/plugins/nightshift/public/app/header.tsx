@@ -25,6 +25,7 @@ export interface NightshiftHeaderProps {
   isLoading?: boolean;
   hasNeedsAction?: boolean;
   showAllEventsHref?: string;
+  startInvestigationButton?: React.ReactNode;
 }
 
 const getGreeting = (): string => {
@@ -84,6 +85,7 @@ export function NightshiftHeader({
   isLoading = false,
   hasNeedsAction = false,
   showAllEventsHref,
+  startInvestigationButton,
 }: NightshiftHeaderProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
@@ -153,25 +155,34 @@ export function NightshiftHeader({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {!isEmptyState && showAllEventsHref && (
+        {!isEmptyState && (showAllEventsHref || startInvestigationButton) && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="text"
-              data-test-subj="o11yNightshiftAppShowAllLink"
-              href={showAllEventsHref}
-              size="s"
-              {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ALL_SIGNIFICANT_EVENTS,
-                element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
-              })}
-              css={css`
-                color: ${euiTheme.colors.textSubdued};
-              `}
-            >
-              {i18n.translate('xpack.nightshift.summary.showAllEventsLinkText', {
-                defaultMessage: 'Show all events',
-              })}
-            </EuiButtonEmpty>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              {startInvestigationButton && (
+                <EuiFlexItem grow={false}>{startInvestigationButton}</EuiFlexItem>
+              )}
+              {showAllEventsHref && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="text"
+                    data-test-subj="o11yNightshiftAppShowAllLink"
+                    href={showAllEventsHref}
+                    size="s"
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ALL_SIGNIFICANT_EVENTS,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+                    })}
+                    css={css`
+                      color: ${euiTheme.colors.textSubdued};
+                    `}
+                  >
+                    {i18n.translate('xpack.nightshift.summary.showAllEventsLinkText', {
+                      defaultMessage: 'Show all events',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

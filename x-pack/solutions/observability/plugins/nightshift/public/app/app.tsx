@@ -21,11 +21,14 @@ import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { useInvestigationState } from '@kbn/investigation-output';
 import { useKibana } from '../hooks/use_kibana';
+import { StartInvestigationButton } from './start_investigation_button';
 import { buildNewSignificantEventChatOptions } from '../chat/open_significant_event_in_chat';
 import {
   byCriticalityAndUpdatedAtDesc,
   getLatestInvestigation,
+  isEventInvestigated,
   getNeedsActionEvents,
   getResolvedEvents,
 } from '../event/significant_event_status';
@@ -89,6 +92,8 @@ export function NightshiftApp(): React.ReactElement {
   const needsActionSectionRef = useRef<HTMLElement>(null);
   const resolvedSectionRef = useRef<HTMLElement>(null);
   const [isTransitioningFromLoading, setIsTransitioningFromLoading] = useState(false);
+  const [pendingChatEvent, setPendingChatEvent] = useState<SignificantEvent | null>(null);
+  const [pendingNewInvestigationId, setPendingNewInvestigationId] = useState<string | null>(null);
 
   const { data, error: eventsError, isFetching, isLoading, refetch } = useFetchSignificantEvents();
   const { closeSignificantEvent, closingEventUuid } = useCloseSignificantEvent();
@@ -161,7 +166,7 @@ export function NightshiftApp(): React.ReactElement {
     [closeSignificantEvent]
   );
 
-  const handleEventClick = useCallback(
+  const openEventFlyout = useCallback(
     (event: SignificantEvent) => {
       setNotFoundEventId(undefined);
       const params = new URLSearchParams(history.location.search);
@@ -169,6 +174,17 @@ export function NightshiftApp(): React.ReactElement {
       history.replace({ search: params.toString() });
     },
     [history]
+  );
+
+  const handleEventClick = useCallback(
+    (event: SignificantEvent) => {
+      if (agentBuilder && isEventInvestigated(event)) {
+        setPendingChatEvent(event);
+      } else {
+        openEventFlyout(event);
+      }
+    },
+    [agentBuilder, openEventFlyout]
   );
 
   const handleFlyoutClose = useCallback(() => {
@@ -376,6 +392,11 @@ export function NightshiftApp(): React.ReactElement {
         isLoading={isLoading}
         hasNeedsAction={hasNeedsAction}
         showAllEventsHref={hasEvents ? showAllEventsHref : undefined}
+        startInvestigationButton={
+          agentBuilder ? (
+            <StartInvestigationButton onSuccess={setPendingNewInvestigationId} />
+          ) : undefined
+        }
       />
 
       {showCenteredEmptyLayout ? (
@@ -528,6 +549,29 @@ export function NightshiftApp(): React.ReactElement {
         </div>
       )}
 
+      {pendingChatEvent && agentBuilder && (
+        <InvestigationChatOpener
+          key={pendingChatEvent.event_uuid}
+          event={pendingChatEvent}
+          agentBuilder={agentBuilder}
+          onOpened={() => setPendingChatEvent(null)}
+          onFallback={() => {
+            const evt = pendingChatEvent;
+            setPendingChatEvent(null);
+            openEventFlyout(evt);
+          }}
+        />
+      )}
+
+      {pendingNewInvestigationId && agentBuilder && (
+        <NewInvestigationTracker
+          key={pendingNewInvestigationId}
+          investigationId={pendingNewInvestigationId}
+          agentBuilder={agentBuilder}
+          onOpened={() => setPendingNewInvestigationId(null)}
+        />
+      )}
+
       {selectedEvent && (
         <EventFlyout
           key={selectedEvent.event_id}
@@ -537,6 +581,95 @@ export function NightshiftApp(): React.ReactElement {
       )}
     </EuiFlexGroup>
   );
+}
+
+/**
+ * Headless component: resolves the conversationId for a completed investigation and opens the
+ * Agent Builder chat sidebar directly. Falls back to the event flyout on any error.
+ */
+function InvestigationChatOpener({
+  event,
+  agentBuilder,
+  onOpened,
+  onFallback,
+}: {
+  event: SignificantEvent;
+  agentBuilder: NonNullable<ReturnType<typeof useKibana>['services']['agentBuilder']>;
+  onOpened: () => void;
+  onFallback: () => void;
+}): null {
+  const { http } = useKibana().services;
+  const workflowExecutionId = getLatestInvestigation(event)?.workflow_execution_id;
+  const { conversationId, status } = useInvestigationState({
+    http,
+    workflowExecutionId,
+    isRunning: false,
+  });
+
+  const onOpenedRef = useRef(onOpened);
+  onOpenedRef.current = onOpened;
+  const onFallbackRef = useRef(onFallback);
+  onFallbackRef.current = onFallback;
+
+  useEffect(() => {
+    if (!workflowExecutionId) {
+      onFallbackRef.current();
+    }
+  }, [workflowExecutionId]);
+
+  useEffect(() => {
+    if (conversationId) {
+      agentBuilder.openChat({ conversationId });
+      onOpenedRef.current();
+    }
+  }, [agentBuilder, conversationId]);
+
+  useEffect(() => {
+    if (status === 'failed' || status === 'unavailable') {
+      onFallbackRef.current();
+    }
+  }, [status]);
+
+  return null;
+}
+
+/**
+ * Headless component: polls a freshly-started (isRunning: true) investigation for its
+ * conversationId, then opens the Agent Builder chat sidebar and unmounts.
+ */
+function NewInvestigationTracker({
+  investigationId,
+  agentBuilder,
+  onOpened,
+}: {
+  investigationId: string;
+  agentBuilder: NonNullable<ReturnType<typeof useKibana>['services']['agentBuilder']>;
+  onOpened: () => void;
+}): null {
+  const { http } = useKibana().services;
+  const { conversationId, status } = useInvestigationState({
+    http,
+    workflowExecutionId: investigationId,
+    isRunning: true,
+  });
+
+  const onOpenedRef = useRef(onOpened);
+  onOpenedRef.current = onOpened;
+
+  useEffect(() => {
+    if (conversationId) {
+      agentBuilder.openChat({ conversationId });
+      onOpenedRef.current();
+    }
+  }, [agentBuilder, conversationId]);
+
+  useEffect(() => {
+    if (status === 'failed' || status === 'unavailable') {
+      onOpenedRef.current();
+    }
+  }, [status]);
+
+  return null;
 }
 
 function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactElement {
