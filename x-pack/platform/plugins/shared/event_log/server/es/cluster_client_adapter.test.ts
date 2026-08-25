@@ -2878,20 +2878,8 @@ describe('softDeleteByQuery', () => {
     });
   });
 
-  test.each([
-    ['an injection attempt', 'deleted = true; ctx._source.other'],
-    ['an empty field', ''],
-    ['a leading dot', '.deleted'],
-    ['a trailing dot', 'deleted.'],
-    ['consecutive dots', 'a..b'],
-    ['a disallowed character', 'kibana.alert-rule.deleted'],
-  ])('rejects %s without issuing a request', async (_label, field) => {
-    await expect(
-      clusterClientAdapter.softDeleteByQuery({ query: gapQuery, field })
-    ).rejects.toThrow(/invalid field/);
-
-    expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
-  });
+  // Field validation is now enforced by the EventLogClient schema; the adapter
+  // trusts its caller. See event_log_client.test.ts for rejection cases.
 
   test('does not pass wait_for_completion (blocking)', async () => {
     await clusterClientAdapter.softDeleteByQuery({ query: gapQuery, field: 'a.b' });

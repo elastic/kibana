@@ -96,6 +96,14 @@ export type FindOptionsSearchAfterType = Omit<FindOptionsType, 'page'> & {
   search_after?: estypes.SortResults;
 };
 
+const softDeleteByQuerySchema = schema.object({
+  query: schema.object({}, { unknowns: 'allow' }),
+  field: schema.oneOf([schema.literal('kibana.alert.rule.gap.deleted')]),
+  conflicts: schema.maybe(schema.oneOf([schema.literal('abort'), schema.literal('proceed')])),
+  slices: schema.maybe(schema.oneOf([schema.literal('auto'), schema.number({ min: 1 })])),
+  requestsPerSecond: schema.maybe(schema.number({ min: 1 })),
+});
+
 interface EventLogServiceCtorParams {
   esContext: EsContext;
   savedObjectGetter: SavedObjectBulkGetterResult;
@@ -243,8 +251,7 @@ export class EventLogClient implements IEventLogClient {
   public async softDeleteByQuery(
     params: SoftDeleteByQueryParams
   ): Promise<estypes.UpdateByQueryResponse> {
-    // Generic, index-scoped update-by-query. The caller owns the query, so any
-    // domain scoping (e.g. rule IDs, namespace) is expressed in `params.query`.
+    softDeleteByQuerySchema.validate(params);
     return this.esContext.esAdapter.softDeleteByQuery(params);
   }
 

@@ -37,33 +37,6 @@ export interface SoftDeleteByQueryParams {
   requestsPerSecond?: number;
 }
 
-// `field` is spliced directly into Painless source, so it must be a
-// dot-delimited path of plain identifiers — nothing that could terminate the
-// expression and append script of its own.
-const VALID_FIELD_PATH = /^[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*$/;
-
-// Builds a null-safe Painless assignment that sets a nested boolean field to
-// `true`, but only when the field's parent object exists (a no-op otherwise), so
-// a malformed document cannot fail the batch.
-const buildSetFieldTrueScript = (field: string): string => {
-  if (!VALID_FIELD_PATH.test(field)) {
-    throw new Error(
-      `softDeleteByQuery: invalid field "${field}", expected a dot-delimited path of [a-zA-Z0-9_] segments`
-    );
-  }
-  const segments = field.split('.');
-  const assignPath = `ctx._source.${segments.join('.')}`;
-  const parents = segments.slice(0, -1);
-  if (parents.length === 0) {
-    return `${assignPath} = true;`;
-  }
-  const guardPath = `ctx._source.${parents[0]}${parents
-    .slice(1)
-    .map((segment) => `?.${segment}`)
-    .join('')}`;
-  return `if (${guardPath} != null) { ${assignPath} = true; }`;
-};
-
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
 export interface InternalFields {
@@ -751,7 +724,22 @@ export class ClusterClientAdapter<
     slices = 'auto',
     requestsPerSecond,
   }: SoftDeleteByQueryParams): Promise<estypes.UpdateByQueryResponse> {
-    const source = buildSetFieldTrueScript(field);
+    const buildSetFieldTrueScript = (): string => {
+      const segments = field.split('.');
+      const assignPath = `ctx._source.${segments.join('.')}`;
+      const parents = segments.slice(0, -1);
+      if (parents.length === 0) {
+        return `${assignPath} = true;`;
+      }
+      const guardPath = `ctx._source.${parents[0]}${parents
+        .slice(1)
+        .map((segment) => `?.${segment}`)
+        .join('')}`;
+      return `if (${guardPath} != null) { ${assignPath} = true; }`;
+    };
+
+    const source = buildSetFieldTrueScript();
+
     const esClient = await this.elasticsearchClientPromise;
     return esClient.updateByQuery({
       index: this.esNames.dataStream,
