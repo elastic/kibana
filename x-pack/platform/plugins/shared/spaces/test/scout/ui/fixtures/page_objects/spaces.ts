@@ -247,7 +247,9 @@ export class SpacesPage {
 
   /** The remove ("x") icon buttons on the project-tag filter badges. */
   projectTagFilterRemoveButtonLocator() {
-    return this.projectTagFilterDisplayLocator().locator('[aria-label="Remove filter"]');
+    return this.projectTagFilterDisplayLocator().locator(
+      '[data-test-subj^="filterBadgeCloseButton-"]'
+    );
   }
 
   projectPickerListLoadingIndicatorLocator() {

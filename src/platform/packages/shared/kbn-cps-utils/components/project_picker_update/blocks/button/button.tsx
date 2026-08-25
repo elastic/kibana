@@ -24,6 +24,8 @@ import { strings } from '../../../strings';
 import { createProjectPickerContext } from '../../state';
 import { CPSIconDisabled } from '../../../cps_icon';
 
+export const tooltipDataTestSubj = 'cps-project-picker-button-tooltip';
+
 export interface ProjectPickerButtonProps extends Pick<EuiButtonProps, 'size' | 'isDisabled'> {
   onClick: () => void;
   customTooltipContent?: string;
@@ -50,6 +52,9 @@ export const ProjectPickerButton = ({
       <EuiToolTip
         content={customTooltipContent ?? strings.projectPickerButtonDisabledAriaLabel}
         id={id}
+        anchorProps={{
+          'data-test-subj': tooltipDataTestSubj,
+        }}
       >
         <EuiButtonIcon
           {...sharedButtonProps}
@@ -74,7 +79,13 @@ export const ProjectPickerButton = ({
   const shouldWarn = filteredProjectsCount === 0;
 
   return (
-    <EuiToolTip content={customTooltipContent ?? strings.projectPickerButtonAriaLabel} id={id}>
+    <EuiToolTip
+      id={id}
+      anchorProps={{
+        'data-test-subj': tooltipDataTestSubj,
+      }}
+      content={customTooltipContent ?? strings.projectPickerButtonAriaLabel}
+    >
       {shouldWarn ? (
         <EuiButton
           {...sharedButtonProps}

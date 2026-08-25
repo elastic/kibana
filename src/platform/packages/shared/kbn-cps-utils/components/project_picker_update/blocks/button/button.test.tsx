@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { createContext } from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { ProjectPickerButton } from './button';
+import { ProjectPickerButton, tooltipDataTestSubj } from './button';
 import type { ProjectPickerState } from '../../state/reducers';
 import { strings } from '../../../strings';
 
@@ -112,7 +112,7 @@ describe('ProjectPickerButton', () => {
     renderButton({ isDisabled: true });
 
     const button = screen.getByTestId('cps-project-picker-button-disabled');
-    const tooltipAnchor = button.closest('.euiToolTipAnchor') ?? button;
+    const tooltipAnchor = screen.getByTestId(tooltipDataTestSubj);
     await userEvent.hover(tooltipAnchor);
 
     const tooltip = await screen.findByRole('tooltip');
