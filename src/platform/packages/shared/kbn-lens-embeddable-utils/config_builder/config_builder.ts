@@ -9,7 +9,6 @@
 
 import type { LensEmbeddableInput, LensPartitionVisualizationState } from '@kbn/lens-common';
 import { v4 as uuidv4 } from 'uuid';
-import { toStoredTags } from '@kbn/as-code-shared-transforms';
 import type { LensAttributes, LensConfig, LensConfigOptions, DataViewsCommon } from './types';
 import {
   buildGauge,
@@ -286,10 +285,9 @@ export class LensConfigBuilder {
     }
 
     const converter = this.apiConvertersByChart[chartType];
-    const { state: configWithoutTags, references: tagReferences } = toStoredTags(config as any); // handle type mismatches
-    const attributes = converter.fromAPItoLensState(configWithoutTags as any); // handle type mismatches
+    const attributes = converter.fromAPItoLensState(config as any); // handle type mismatches
     const { filters, query, references } = filtersAndQueryToLensState(
-      configWithoutTags as any,
+      config as any,
       attributes.references ?? []
     );
 
@@ -297,7 +295,7 @@ export class LensConfigBuilder {
       // @TODO investigate why it complains about missing type
       // type: 'lens',
       ...attributes,
-      references: [...(attributes.references ?? []), ...references, ...tagReferences],
+      references: [...(attributes.references ?? []), ...references],
       state: {
         ...attributes.state,
         query: { language: 'kuery', query: '' },
