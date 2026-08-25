@@ -79,7 +79,7 @@ const labels = {
     defaultMessage: 'Only manually added members can see this chat',
   }),
   publicHelp: i18n.translate('xpack.agentBuilder.conversationSharing.publicHelp', {
-    defaultMessage: "Anyone with access to this chat's agent can see this chat",
+    defaultMessage: 'Any user can see and join this chat',
   }),
   currentMembers: i18n.translate('xpack.agentBuilder.conversationSharing.currentMembers', {
     defaultMessage: 'Current members',
@@ -444,7 +444,7 @@ const ConversationSharePopover: React.FC<{
                 paddingBottom: euiTheme.size.xs,
               }}
               popoverProps={{
-                panelPaddingSize: 's',
+                panelPaddingSize: 'none',
                 anchorPosition: 'downRight',
               }}
               data-test-subj="agentBuilderConversationSharingAccessModeSelect"

@@ -205,6 +205,8 @@ describe('ConversationShareButton', () => {
       fireEvent.click(screen.getByTestId('agentBuilderConversationSharingAccessModeSelect'));
     });
 
+    expect(screen.getByText('Any user can see and join this chat')).toBeInTheDocument();
+
     await act(async () => {
       fireEvent.click(screen.getByText('Public'));
     });
