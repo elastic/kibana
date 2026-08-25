@@ -7,19 +7,10 @@
 
 import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { agentIdCondition, agentIdFromCondition } from './assign_by_condition';
+import { agentIdCondition, agentIdFromCondition, configIdOf } from './assign_by_condition';
 import { getMonitorCostMib, type MonitorPlacement } from './assign_shards';
 
-/**
- * Config id embedded in a package-policy id, or undefined when the id doesn't
- * belong to this location. New format is `${configId}-${locationId}`; legacy
- * space-suffixed format is `${configId}-${locationId}-${spaceId}`, so the
- * location id is an infix — `indexOf` (not a fixed trailing strip) handles both.
- */
-export const configIdOf = (policyId: string, locationId: string): string | undefined => {
-  const idx = policyId.indexOf(`-${locationId}`);
-  return idx > 0 ? policyId.slice(0, idx) : undefined;
-};
+export { configIdOf };
 
 /**
  * Monitor type of a synthetics package policy, read from its single enabled
