@@ -80,7 +80,7 @@ describe('ResolutionGroupTab', () => {
     );
 
     expect(getByTestId(RESOLUTION_GROUP_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
-    // v.4 default (same as v.3): aliases only — primary target is omitted from the table
+    // v.5 default (same as v.3/v.4): aliases only — primary target is omitted from the table
     expect(queryByText('alice', { exact: true })).not.toBeInTheDocument();
     expect(getByText('alice-azure')).toBeInTheDocument();
     expect(getByText('bob')).toBeInTheDocument();

@@ -65,6 +65,11 @@ export interface GroupSelectorProps {
   onGroupChange: (groupSelection: string) => void;
   options: Array<{ key: string; label: string }>;
   title?: string;
+  /**
+   * Overrides the context-menu panel title (defaults to "Select grouping" /
+   * "Select up to N groupings").
+   */
+  optionsTitle?: string;
   maxGroupingLevels?: number;
   onOpenTracker?: (
     type: UiCounterMetricType,
@@ -80,6 +85,7 @@ const GroupSelectorComponent = ({
   onGroupChange,
   options,
   title = i18n.GROUP_BY,
+  optionsTitle,
   maxGroupingLevels = 1,
   onOpenTracker,
   settings,
@@ -125,7 +131,8 @@ const GroupSelectorComponent = ({
     };
 
     const topLevelTitle =
-      maxGroupingLevels === 1 ? i18n.SELECT_SINGLE_FIELD : i18n.SELECT_FIELD(maxGroupingLevels);
+      optionsTitle ??
+      (maxGroupingLevels === 1 ? i18n.SELECT_SINGLE_FIELD : i18n.SELECT_FIELD(maxGroupingLevels));
 
     return [
       {
@@ -189,6 +196,7 @@ const GroupSelectorComponent = ({
     hideNoneOption,
     hideCustomFieldOption,
     hideOptionsTitle,
+    optionsTitle,
     enforcedGroups,
     groupsSelected,
   ]);
@@ -213,12 +221,12 @@ const GroupSelectorComponent = ({
     // need to use groupsSelected to ensure proper selection order (selectedOptions does not handle selection order)
     const buttonLabel = isGroupSelected(NONE_GROUP_KEY)
       ? i18n.NONE
-      : groupsSelected.reduce((optionsTitle, o) => {
+      : groupsSelected.reduce((label, o) => {
           const selection = selectedOptions.find((opt) => opt.key === o);
           if (selection == null) {
-            return optionsTitle;
+            return label;
           }
-          return optionsTitle ? [optionsTitle, selection.label].join(', ') : selection.label;
+          return label ? [label, selection.label].join(', ') : selection.label;
         }, '');
     return (
       <EuiButtonEmpty

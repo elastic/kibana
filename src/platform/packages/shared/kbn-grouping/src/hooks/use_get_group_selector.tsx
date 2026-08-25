@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { groupActions, groupByIdSelector } from './state';
 import type { GroupOption, Action, GroupMap, GroupSettings } from './types';
 import { defaultGroup } from './types';
-import { GroupSelector, isNoneGroup } from '..';
+import { GroupSelector, isNoneGroup } from '../components';
 import { validateEnforcedGroups, ensureEnforcedGroupsInFront } from '../helpers';
 import { getTelemetryEvent } from '../telemetry/const';
 

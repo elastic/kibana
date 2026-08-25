@@ -35,6 +35,8 @@ import { FaceliftHome, FaceliftPageDescription } from '../components/home/faceli
 
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 import { TabId } from './entity_analytics_management_page';
+import { OPEN_CREATE_WATCHLIST_STORAGE_KEY } from '../components/watchlists/watchlists_tab';
+import { useNavigateTo } from '../../common/lib/kibana';
 import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { EntityAnalyticsReadPrivilegesCallout } from '../components/entity_analytics_read_privileges_callout';
@@ -57,6 +59,11 @@ const MANAGEMENT_BUTTON_LABEL = i18n.translate(
 const SAVE_VIEW_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.homePage.saveViewButtonLabel',
   { defaultMessage: 'Save view' }
+);
+
+const CREATE_WATCHLIST_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.createWatchlistButtonLabel',
+  { defaultMessage: 'Create watchlist' }
 );
 
 export const EntityAnalyticsHomePage = () => {
@@ -115,6 +122,7 @@ const EntityAnalyticsHomePageContent = () => {
   const { search } = useLocation();
   const history = useHistory();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const { navigateTo } = useNavigateTo();
 
   /** v.2+ AppHeader Management → Entity Risk Score tab. */
   const managementHref = useMemo(
@@ -135,6 +143,15 @@ const EntityAnalyticsHomePageContent = () => {
       }),
     [getSecuritySolutionUrl]
   );
+
+  const openCreateWatchlist = useCallback(() => {
+    try {
+      sessionStorage.setItem(OPEN_CREATE_WATCHLIST_STORAGE_KEY, 'true');
+    } catch {
+      // Ignore quota / private-mode failures; navigation still lands on Watchlists.
+    }
+    navigateTo({ url: watchlistsManagementHref });
+  }, [navigateTo, watchlistsManagementHref]);
 
   const selectedWatchlistId = useMemo(() => {
     const params = new URLSearchParams(search);
@@ -172,7 +189,7 @@ const EntityAnalyticsHomePageContent = () => {
       },
     ];
 
-    // Save view is v.2 only — v.3+ drops the primary header action.
+    // Save view is v.2 only; Create watchlist is the v.5 primary header action.
     if (faceliftVersion === 'v2') {
       return {
         primaryActionItem: {
@@ -187,8 +204,22 @@ const EntityAnalyticsHomePageContent = () => {
       };
     }
 
+    if (faceliftVersion === 'v5') {
+      return {
+        primaryActionItem: {
+          id: 'entityAnalyticsCreateWatchlist',
+          label: CREATE_WATCHLIST_BUTTON_LABEL,
+          iconType: 'plusInCircle',
+          href: watchlistsManagementHref,
+          run: openCreateWatchlist,
+          testId: 'eaFaceliftCreateWatchlistButton',
+        },
+        items,
+      };
+    }
+
     return { items };
-  }, [faceliftVersion, managementHref]);
+  }, [faceliftVersion, managementHref, openCreateWatchlist, watchlistsManagementHref]);
 
   // Design prototype: show "Today" in the KQL bar date picker on page entry
   // (same relative range Alerts/Discover use via DEFAULT_FROM / DEFAULT_TO).

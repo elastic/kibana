@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
@@ -16,6 +16,12 @@ import { useEntityStoreStatus } from '../entity_store/hooks/use_entity_store';
 import { useWatchlistsPrivileges } from '../../api/hooks/use_watchlists_privileges';
 import { MissingPrivilegesCallout } from '../missing_privileges_callout';
 import { Watchlists } from '.';
+
+/**
+ * sessionStorage flag set by Entity Analytics home "Create watchlist" before navigating
+ * to Management → Watchlists. Avoids URL-param races with expandable-flyout sync.
+ */
+export const OPEN_CREATE_WATCHLIST_STORAGE_KEY = 'eaFaceliftOpenCreateWatchlist';
 
 export const WatchlistsTab: React.FC = () => {
   const { openFlyout } = useExpandableFlyoutApi();
@@ -30,7 +36,7 @@ export const WatchlistsTab: React.FC = () => {
   const canWrite = privileges?.has_write_permissions ?? false;
   const hasAllRequired = privileges?.has_all_required ?? false;
 
-  const handleCreateClick = () => {
+  const openCreateWatchlistFlyout = useCallback(() => {
     openFlyout({
       right: {
         id: WatchlistsFlyoutKey,
@@ -40,7 +46,32 @@ export const WatchlistsTab: React.FC = () => {
         },
       },
     });
+  }, [openFlyout, spaceId]);
+
+  const handleCreateClick = () => {
+    openCreateWatchlistFlyout();
   };
+
+  // Deep-link from Entity Analytics home "Create watchlist".
+  // Delay clearing the flag so React Strict Mode remount still sees it.
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(OPEN_CREATE_WATCHLIST_STORAGE_KEY) !== 'true') {
+        return;
+      }
+    } catch {
+      return;
+    }
+    openCreateWatchlistFlyout();
+    const timeoutId = window.setTimeout(() => {
+      try {
+        sessionStorage.removeItem(OPEN_CREATE_WATCHLIST_STORAGE_KEY);
+      } catch {
+        // ignore
+      }
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [openCreateWatchlistFlyout]);
 
   const entityStoreNotRunningCallout = useMemo(() => {
     if (

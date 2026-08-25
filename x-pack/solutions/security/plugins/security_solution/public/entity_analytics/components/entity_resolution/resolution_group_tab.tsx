@@ -95,7 +95,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
   const [faceliftVersion] = useActiveFaceliftVersion();
   /** v.3+ matches the flyout Resolution overview: raw records only, no primary row. */
   const isFaceliftAliasesOnly =
-    faceliftVersion === 'v3' || faceliftVersion === 'v4';
+    faceliftVersion === 'v3' || faceliftVersion === 'v4' || faceliftVersion === 'v5';
   const riskScoreLabel = isFaceliftAliasesOnly
     ? RESOLVED_ENTITY_RISK_SCORE_LABEL
     : GROUP_RISK_SCORE_LABEL;

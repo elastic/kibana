@@ -61,6 +61,12 @@ export interface DonutChartProps {
    * Defaults to `defaultPartitionValueFormatter`.
    */
   valueFormatter?: (value: number) => string;
+  /**
+   * Keep slices in the order of `data`, starting at 12 o'clock and proceeding
+   * clockwise. When false (default), Elastic Charts sorts by size and rotates
+   * the largest slice away from north.
+   */
+  preserveDataOrder?: boolean;
 }
 
 export interface DonutChartWrapperProps {
@@ -170,6 +176,7 @@ export const DonutChart = ({
   title,
   totalCount,
   valueFormatter,
+  preserveDataOrder = false,
 }: DonutChartProps) => {
   const { baseTheme, theme } = useThemes();
 
@@ -218,10 +225,19 @@ export const DonutChart = ({
               valueFormatter={
                 valueFormatter ?? ((d: number) => `${defaultPartitionValueFormatter(d)}`)
               }
+              {...(preserveDataOrder
+                ? {
+                    clockwiseSectors: true,
+                    // First data item at 12 o'clock; default true starts with the 2nd-largest.
+                    specialFirstInnermostSector: false,
+                  }
+                : {})}
               layers={[
                 {
                   groupByRollup: (d: Datum) => d.label ?? d.key,
                   nodeLabel: (d: Datum) => d,
+                  // Default sunburst sort is by descending size; keep input order when requested.
+                  ...(preserveDataOrder ? { sortPredicate: () => 0 } : {}),
                   shape: {
                     fillColor,
                   },

@@ -48,7 +48,12 @@ jest.mock('@kbn/app-header', () => {
     }: {
       title: string;
       menu?: {
-        primaryActionItem?: { label: string; testId?: string; iconType?: string };
+        primaryActionItem?: {
+          label: string;
+          href?: string;
+          testId?: string;
+          iconType?: string;
+        };
         items?: Array<{ label: string; href?: string; testId?: string; iconType?: string }>;
       };
     }) =>
@@ -58,9 +63,10 @@ jest.mock('@kbn/app-header', () => {
         mockReact.createElement('h1', null, title),
         menu?.primaryActionItem
           ? mockReact.createElement(
-              'button',
+              menu.primaryActionItem.href ? 'a' : 'button',
               {
                 key: menu.primaryActionItem.testId ?? menu.primaryActionItem.label,
+                href: menu.primaryActionItem.href,
                 'data-test-subj': menu.primaryActionItem.testId,
                 'aria-label': menu.primaryActionItem.label,
               },
@@ -296,7 +302,7 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    // The SiemSearchBar is in-page under the header for v.4 (default; same as v.2/v.3).
+    // The SiemSearchBar is in-page under the header for v.5 (default; same as v.2+).
     expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
   });
 
@@ -338,7 +344,7 @@ describe('EntityAnalyticsHomePage', () => {
     );
   });
 
-  it('does not render the Save view primary action on v.4 (default)', () => {
+  it('does not render the Save view primary action on v.5 (default)', () => {
     render(
       <MemoryRouter>
         <EntityAnalyticsHomePage />
@@ -347,6 +353,19 @@ describe('EntityAnalyticsHomePage', () => {
     );
 
     expect(screen.queryByRole('button', { name: 'Save view' })).not.toBeInTheDocument();
+  });
+
+  it('renders the Create watchlist primary action on v.5 (default)', () => {
+    render(
+      <MemoryRouter>
+        <EntityAnalyticsHomePage />
+      </MemoryRouter>,
+      { wrapper: TestProviders }
+    );
+
+    const createWatchlistLink = screen.getByTestId('eaFaceliftCreateWatchlistButton');
+    expect(createWatchlistLink).toBeInTheDocument();
+    expect(createWatchlistLink).toHaveAttribute('href', expect.stringContaining('/watchlists'));
   });
 
   it('renders the homepage (not onboarding) when running even if the data view has no matched indices', () => {

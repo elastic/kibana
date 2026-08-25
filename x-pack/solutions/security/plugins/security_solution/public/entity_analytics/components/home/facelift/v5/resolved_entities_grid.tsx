@@ -45,6 +45,7 @@ import { i18n } from '@kbn/i18n';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useGrouping, type GroupOption } from '@kbn/grouping';
+import { GroupSelector } from '@kbn/grouping/src/components/group_selector';
 
 import { EntityType } from '../../../../../../common/entity_analytics/types';
 import { EntityIconByType } from '../../../entity_store/entity_icon_by_type';
@@ -137,6 +138,21 @@ const GROUPING_OPTIONS: GroupOption[] = [
   { label: 'Resolution', key: ENTITY_GROUPING_OPTIONS.RESOLUTION },
   { label: 'Entity type', key: ENTITY_GROUPING_OPTIONS.ENTITY_TYPE },
 ];
+
+const VIEW_BY_OPTIONS: GroupOption[] = [
+  { key: 'resolved', label: 'Resolved entities' },
+  { key: 'raw', label: 'Raw records' },
+];
+
+const VIEW_BY_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.viewByTitle',
+  { defaultMessage: 'View by' }
+);
+
+const SELECT_VIEW_TITLE = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.facelift.selectViewTitle',
+  { defaultMessage: 'Select view' }
+);
 
 /** The resolved view is already grouped by resolution, so the selector starts at None. */
 const INITIAL_GROUPINGS = {
@@ -907,6 +923,7 @@ export interface ResolvedEntitiesGridProps {
   /** The page's ES query, so the rows follow the KQL bar and the overview band. */
   query?: unknown;
   view: TableView;
+  onViewChange: (view: TableView) => void;
   /** Filter-group facets — applied in-page, not as KQL pills. */
   pageFilters?: PageFilters;
   /** Needs-attention metric selection — applied in-page, not as KQL pills. */
@@ -916,6 +933,7 @@ export interface ResolvedEntitiesGridProps {
 export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
   query,
   view,
+  onViewChange,
   pageFilters = EMPTY_PAGE_FILTERS,
   activeFilter = null,
 }) => {
@@ -1010,7 +1028,7 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
     initialGroupings: INITIAL_GROUPINGS,
     fields: dataViewIsLoading ? [] : dataView.fields,
     groupingId: GROUPING_ID,
-    title: 'Group entities by',
+    title: 'Group by',
   });
 
   // A narrower filter can leave the grid on a page that no longer exists.
@@ -1465,12 +1483,26 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
           ),
         },
         right: (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <InspectButton queryId={ENTITY_ANALYTICS_TABLE_ID} title={INSPECT_TITLE} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <LastUpdated updatedAt={lastUpdatedAt} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <GroupSelector
+                groupingId="entity-analytics-facelift-view"
+                groupsSelected={[view]}
+                onGroupChange={(key) => onViewChange(key as TableView)}
+                options={VIEW_BY_OPTIONS}
+                fields={[]}
+                title={VIEW_BY_TITLE}
+                optionsTitle={SELECT_VIEW_TITLE}
+                maxGroupingLevels={1}
+                settings={{ hideNoneOption: true, hideCustomFieldOption: true }}
+                data-test-subj="eaFaceliftViewBySelector"
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{grouping.groupSelector}</EuiFlexItem>
           </EuiFlexGroup>
@@ -1485,6 +1517,8 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
       onRemoveColumn,
       onResetColumns,
       lastUpdatedAt,
+      view,
+      onViewChange,
       grouping.groupSelector,
       selectedIds.size,
       isBulkActionsOpen,
@@ -1508,6 +1542,11 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
           margin-inline-start: 0;
           margin-inline-end: ${euiTheme.size.s};
           padding-right: ${euiTheme.size.m};
+        }
+
+        /* 16px between Updated / View by / Group by and the trailing toolbar icons. */
+        .euiDataGrid__rightControls {
+          column-gap: ${euiTheme.size.m};
         }
 
         /* Data cells inherit the row height, so their content needs centering. */
