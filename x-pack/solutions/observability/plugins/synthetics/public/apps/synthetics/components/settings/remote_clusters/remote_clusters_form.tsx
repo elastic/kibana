@@ -180,7 +180,7 @@ export const RemoteClustersForm = () => {
           <EuiCallOut
             announceOnMount
             title={NO_CLUSTERS_TITLE}
-            iconType="iInCircle"
+            iconType="info"
             color="warning"
           >
             <p>{NO_CLUSTERS_DESCRIPTION}</p>

@@ -64,7 +64,7 @@ export function ContentPackObjectsList({
       <EuiCallOut
         announceOnMount
         size="s"
-        iconType="iInCircle"
+        iconType="info"
         title={
           isSignificantEventsAvailable
             ? i18n.translate('xpack.streams.contentPackObjectsList.structuralOnlyCallout', {
