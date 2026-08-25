@@ -69,7 +69,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   useEffect(() => {
     if (onRegisterCallbacks) {
       onRegisterCallbacks({
-        updateProps: (newProps) => setCurrentProps(newProps),
+        updateProps: (newProps) => setCurrentProps((prev) => ({ ...prev, ...newProps })),
         resetBrowserApiTools: () =>
           setCurrentProps((prevProps) => ({ ...prevProps, browserApiTools: undefined })),
         addAttachment: (attachment) =>

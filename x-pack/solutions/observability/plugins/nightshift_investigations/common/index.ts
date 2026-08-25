@@ -73,6 +73,7 @@ export interface ListInvestigationItem {
   completed_at?: string;
   concurrency_key?: string;
   executed_by?: string;
+  conversation_title?: string;
 }
 
 export interface ListInvestigationsResponse {

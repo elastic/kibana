@@ -204,7 +204,7 @@ export class AgentBuilderPlugin
 
       // Set runtime context before opening
       setSidebarRuntimeContext({
-        options: config,
+        options: conversationId ? { ...config, conversationId } : config,
         onRegisterCallbacks: (callbacks) => {
           this.sidebarCallbacks = callbacks;
         },

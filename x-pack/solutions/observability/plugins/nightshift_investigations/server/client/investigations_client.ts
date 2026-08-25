@@ -297,6 +297,7 @@ export class NightshiftInvestigationsClient {
         completed_at: isTerminal ? execution.finishedAt : undefined,
         concurrency_key: execution.concurrencyGroupKey,
         executed_by: execution.executedBy,
+        conversation_title: undefined,
       };
     });
 

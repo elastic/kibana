@@ -20,6 +20,7 @@ import { EmbeddableWelcomeMessage } from './embeddable_welcome_message';
 import { EmbeddableAccessBoundary } from './embeddable_access_boundary';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useConversation } from '../application/hooks/use_conversation';
+import { useKibana } from '../application/hooks/use_kibana';
 
 // Below this sidebar width (px) the side-by-side layout is too cramped; collapse to tabs.
 const SIDE_BY_SIDE_MIN_WIDTH = 750;
@@ -38,8 +39,22 @@ function TemplateAwareBody(): React.ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'chat'>('overview');
+  const {
+    services: { chrome },
+  } = useKibana();
 
   useEffect(() => {
+    // When inside the Kibana sidebar, subscribe to the sidebar-width BehaviorSubject directly.
+    // The drag handle calls sidebar.setWidth() → width$.next(), but that change reaches the DOM
+    // only after several async React render cycles. ResizeObserver on an inner flex div would lag
+    // noticeably and — worse — misses the initial mount entirely because the containerRef div is
+    // only rendered after conversation data loads (hasTabs starts false), so useEffect([]) runs
+    // once with containerRef.current = null and never re-fires.
+    if (chrome.sidebar.isOpen()) {
+      const subscription = chrome.sidebar.getWidth$().subscribe(setContainerWidth);
+      return () => subscription.unsubscribe();
+    }
+    // Standalone embeddable: fall back to ResizeObserver on the container div.
     const el = containerRef.current;
     if (!el) return;
     const observer = new ResizeObserver(([entry]) => {
@@ -47,7 +62,7 @@ function TemplateAwareBody(): React.ReactElement {
     });
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [chrome.sidebar]);
 
   const uiDef = conversation?.template_id
     ? conversationTemplatesService.getTemplateUIDefinition(conversation.template_id)

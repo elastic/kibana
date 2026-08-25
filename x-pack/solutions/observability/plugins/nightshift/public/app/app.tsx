@@ -858,24 +858,38 @@ function InvestigationCard({
         }
       `}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color={INVESTIGATION_STATUS_BADGE_COLORS[item.status]}>
-            {item.status}
-          </EuiBadge>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            {item.started_at ? <FormattedRelative value={item.started_at} /> : '—'}
-          </EuiText>
-        </EuiFlexItem>
-        {item.executed_by && (
+      <EuiFlexGroup alignItems="stretch" direction="column" gutterSize="xs" responsive={false}>
+        <EuiFlexGroup
+          alignItems="center"
+          gutterSize="xs"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={INVESTIGATION_STATUS_BADGE_COLORS[item.status]}>
+              {item.status}
+            </EuiBadge>
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
-              {item.executed_by}
+              {item.started_at ? <FormattedRelative value={item.started_at} /> : '—'}
             </EuiText>
           </EuiFlexItem>
-        )}
+        </EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiText
+            className="eui-textTruncate"
+            size="s"
+            css={css`
+              font-weight: ${euiTheme.font.weight.medium};
+            `}
+          >
+            {item.conversation_title ??
+              i18n.translate('xpack.nightshift.investigations.untitledInvestigation', {
+                defaultMessage: 'Untitled investigation',
+              })}
+          </EuiText>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </div>
   );
