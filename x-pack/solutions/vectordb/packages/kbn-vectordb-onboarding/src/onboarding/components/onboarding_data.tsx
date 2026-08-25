@@ -69,6 +69,7 @@ export const getStepContent = (docLinks: DocLinksStart) => {
               defaultMessage:
                 "Your trial includes up to 30,000 embedding requests or 100 million tokens, whichever comes first. You'll only be billed once you're on a paid plan.",
             }),
+            trialOnly: true,
           },
           {
             id: 'jinaModels',
@@ -265,6 +266,17 @@ export const getStepContent = (docLinks: DocLinksStart) => {
               defaultMessage:
                 'Elasticsearch uses an index mode optimized for vector search use cases. It applies settings and defaults tuned for indexing, merging, and searching dense vector data.',
             }),
+          },
+          {
+            id: 'generateWithJina',
+            label: i18n.translate('vectordbOnboarding.haveVectors.ingest.pills.jina.label', {
+              defaultMessage: 'Generate new embeddings with Jina',
+            }),
+            content: i18n.translate('vectordbOnboarding.haveVectors.ingest.pills.jina.content', {
+              defaultMessage:
+                'Generate embeddings with jina-embeddings-v3, included in your trial up to 30,000 requests or 100 million tokens (whichever comes first).',
+            }),
+            trialOnly: true,
           },
         ],
         docsPanel: [

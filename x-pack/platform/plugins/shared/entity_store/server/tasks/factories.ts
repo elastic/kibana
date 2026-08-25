@@ -17,6 +17,7 @@ import {
   type RemoteLogExtractionStateClient,
 } from '../domain/saved_objects';
 import type { TelemetryReporter } from '../telemetry/events';
+import { isLegacySecurityAssetsMigrationEnabled } from '../infra/feature_flags';
 
 export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;
@@ -132,6 +133,8 @@ export async function createAssetManagerClient({
       security: pluginsStart.security,
       analytics,
       savedObjectsClient: soClient,
+      isLegacySecurityAssetsMigrationEnabled: () =>
+        isLegacySecurityAssetsMigrationEnabled(coreStart.featureFlags),
     }),
   };
 }

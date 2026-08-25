@@ -43,7 +43,7 @@ export function ProjectPickerListItemTagsPopover({
   const { euiTheme } = useEuiTheme();
   const styles = projectTagsStyles(euiTheme);
   const isFilterAlreadyAdded = (filter: FilterExpressionValue) =>
-    state.filterExpressions.has(getFilterExpressionLookupKey(filter));
+    state.displayedFilterExpressions.has(getFilterExpressionLookupKey(filter));
 
   const addFilterAction = useCallback(
     (filter: FilterExpressionValue) => {
@@ -94,7 +94,7 @@ export function ProjectPickerListItemTagsPopover({
                     css={styles.projectTagsBadge}
                     isDisabled={isAlreadyAdded}
                     filter={filter}
-                    {...(state.isReadOnly
+                    {...(state.controlsState !== 'enabled' || state.isFilterProposalPending
                       ? {
                           iconType: 'empty',
                           color: 'default',
