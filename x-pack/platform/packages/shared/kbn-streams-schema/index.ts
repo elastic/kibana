@@ -84,6 +84,7 @@ export {
   extractWhereExpression,
   findOverBroadMatchPredicates,
   renderOverBroadMatchError,
+  buildExistenceProbeQueries,
   getFromSources,
   getStatsQueryHints,
   hasStatsCommand,

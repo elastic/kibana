@@ -6,6 +6,7 @@
  */
 
 import {
+  buildExistenceProbeQueries,
   deriveQueryType,
   ensureMetadata,
   extractBucketColumnName,
@@ -460,5 +461,56 @@ describe('findOverBroadMatchPredicates', () => {
 
   it('returns an empty array for an unparseable query', () => {
     expect(findOverBroadMatchPredicates('THIS IS NOT ESQL {{{')).toEqual([]);
+  });
+});
+
+describe('buildExistenceProbeQueries', () => {
+  it('caps a match query at one matching row', () => {
+    expect(buildExistenceProbeQueries('FROM logs | WHERE error.type : "OutOfMemoryError"')).toEqual(
+      ['FROM logs | WHERE error.type : "OutOfMemoryError"\n| LIMIT 1\n| STATS COUNT(*)']
+    );
+  });
+
+  it('keeps the row-level filter for a stats query whose aggregation is unfiltered', () => {
+    const probes = buildExistenceProbeQueries(
+      'FROM logs | WHERE status_code == "500" | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute) | WHERE metric_value > 10 | KEEP bucket, metric_value'
+    );
+    expect(probes).toEqual(['FROM logs | WHERE status_code == "500"\n| LIMIT 1\n| STATS COUNT(*)']);
+  });
+
+  it('re-applies an aggregation detection filter as a row-level predicate', () => {
+    const probes = buildExistenceProbeQueries(
+      'FROM logs | STATS metric_value = COUNT(*) WHERE error.type == "X" BY bucket = BUCKET(@timestamp, 1 minute) | KEEP bucket, metric_value'
+    );
+    expect(probes).toEqual(['FROM logs\n| WHERE error.type == "X"\n| LIMIT 1\n| STATS COUNT(*)']);
+  });
+
+  it('excludes IS NOT NULL denominators so a dead numerator is still probed', () => {
+    const probes = buildExistenceProbeQueries(
+      'FROM logs | STATS errors = COUNT(*) WHERE severity == "ERROR", total = COUNT(*) WHERE severity IS NOT NULL BY bucket = BUCKET(@timestamp, 1 minute)'
+    );
+    expect(probes).toEqual(['FROM logs\n| WHERE severity == "ERROR"\n| LIMIT 1\n| STATS COUNT(*)']);
+  });
+
+  it('probes an IS NOT NULL numerator when it is the only detection filter', () => {
+    const probes = buildExistenceProbeQueries(
+      'FROM logs | STATS exceptions = COUNT(*) WHERE error.type IS NOT NULL, total = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(total > 0, exceptions * 100.0 / total, 0) | KEEP bucket, metric_value'
+    );
+    expect(probes).toEqual([
+      'FROM logs\n| WHERE error.type IS NOT NULL\n| LIMIT 1\n| STATS COUNT(*)',
+    ]);
+  });
+
+  it('excludes a filtered denominator referenced by division', () => {
+    const probes = buildExistenceProbeQueries(
+      'FROM logs | STATS failures = COUNT(*) WHERE event.outcome == "failure", attempts = COUNT(*) WHERE event.outcome IN ("success", "failure") BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(attempts > 0, failures * 100.0 / attempts, 0) | KEEP bucket, metric_value'
+    );
+    expect(probes).toEqual([
+      'FROM logs\n| WHERE event.outcome == "failure"\n| LIMIT 1\n| STATS COUNT(*)',
+    ]);
+  });
+
+  it('returns null for an unparseable query', () => {
+    expect(buildExistenceProbeQueries('THIS IS NOT ESQL {{{')).toBeNull();
   });
 });
