@@ -16,10 +16,21 @@ export interface AutocompleteNextGroup {
   fallback?: boolean;
 }
 
+export interface AutocompleteContinuationState {
+  parentName?: string;
+  components: AutocompleteComponent[];
+  contextExtensionList: Array<Record<string, unknown>>;
+  fallbackGroups: string[];
+  preferredFallbackGroups: string[];
+  priority?: number;
+  specificity: number;
+}
+
 export interface AutocompleteMatchResult {
   context_values?: Record<string, unknown>;
   next?: AutocompleteComponent | AutocompleteComponent[];
   nextGroups?: AutocompleteNextGroup[];
+  nextStates?: AutocompleteContinuationState[];
   priority?: number;
 }
 
