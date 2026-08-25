@@ -894,7 +894,7 @@ class MyPlugin {
       name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
         defaultMessage: 'Phishing Investigation',
       }),
-      icon: 'email',
+      icon: 'mail',
       tabs: ['security.entities', 'security.overview'],
     });
   }
@@ -933,7 +933,7 @@ class SecurityPlugin {
       name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
         defaultMessage: 'Phishing Investigation',
       }),
-      icon: 'email',
+      icon: 'mail',
       tabs: ['security.overview'],
     });
   }
