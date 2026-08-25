@@ -155,8 +155,8 @@ steps:
             attributes:
               # Stable dedup key; find_existing_ki looks this up so re-runs update instead of append.
               slug: "{{ foreach.item }}"
-              # Runnable ES|QL always goes in attributes.esql — the field the verifiers read.
-              # Here: each access pattern's esql_example (?param templates stay in content).
+              # Put every ES|QL query the KI carries in attributes.esql so verifiers check it.
+              # Here: each access pattern's runnable esql_example.
               esql: "${{ steps.profile_index.output.content.access_patterns | map: 'esql_example' }}"
               ingestion_method: manual
               key_fields: "{{ steps.profile_index.output.content.key_fields | join: ', ' }}"

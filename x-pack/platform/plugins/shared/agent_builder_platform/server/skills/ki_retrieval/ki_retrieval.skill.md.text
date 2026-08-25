@@ -26,11 +26,11 @@ Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, 
 
 ### `attributes.esql` — a KI's runnable ES|QL
 
-When a KI carries a complete runnable ES|QL query (e.g. a `detection` KI with a materialized
-query), that query lives in `attributes.esql`, as a string or an array of strings. This is the
-canonical location — do not hunt for runnable queries elsewhere in `attributes`.
-(Parameterized `?param` access-pattern templates are different: those live as prose inside
-`content`.)
+When a KI carries runnable ES|QL (e.g. a `detection` KI's materialized query, or an
+`index_metadata` KI's runnable example queries), those queries live in `attributes.esql`, as a
+string or an array of strings. This is the canonical location — do not hunt for runnable
+queries elsewhere in `attributes`. The prose access-pattern presentation (templates, params,
+returns) also appears inside `content`.
 
 The field is **optional**: only KI kinds that carry ES|QL set it, so queries must tolerate its
 absence rather than assume every KI has it. `attributes` is `flattened`, so extract the value

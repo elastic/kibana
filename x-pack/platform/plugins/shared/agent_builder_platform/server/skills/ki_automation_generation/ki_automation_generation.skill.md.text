@@ -370,7 +370,7 @@ The AI Index schema has these base fields (all required unless noted):
 | `attributes.evidence` | string[] | Observed values that justify a materialized detection/fact; each string quotes a real distribution (e.g. `"~20% of spans are errors (1,204 / 6,033)"`) |
 | `attributes.expires_at` | string (ISO date) | Expiry date (~30 days); used by the expiry-based freshness guard. **Omit entirely for durable (immutable-fact) KIs** — a KI with no `expires_at` never ages out (principle #2). Stored as an ISO-8601 string; compare with `TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at"))` in ES\|QL. |
 | `attributes.excluded` | boolean | Soft-exclude: KI exists but is skipped by agents |
-| `attributes.esql` | string or string[] | **The canonical location for a KI's complete runnable ES\|QL** (e.g. a detection's materialized query) — this is the field the ES\|QL verifiers read (see "Writing and verifying KIs"). **Optional:** KI kinds without ES\|QL simply omit it. Parameterized `?param` templates are not runnable — those stay in `content` as access patterns — but always populate `attributes.esql` with their runnable `esql_example` counterparts so verifiers check them. |
+| `attributes.esql` | string or string[] | **The canonical location for the KI's ES\|QL** — the field the ES\|QL verifiers read (see "Writing and verifying KIs"). Populate it wherever the KI carries any ES\|QL: a detection's materialized query, an index profile's runnable `esql_example` queries. Keep the prose access-pattern presentation (templates + params + returns) in `content` for the agent to read; only KI kinds with no ES\|QL at all omit `attributes.esql`. |
 | `attributes.slug` | string | Stable dedup key built from the KI's own data — `context-engine.createKi` generates the document id, so idempotency comes from looking this key up (see the KI upsert). |
 
 Strategy-specific structured output (e.g. a detection's materialized query and `query_type`/`severity_score`, a feature's `subtype`/`slug`) also goes in `content` + `attributes` — never in bespoke declared mappings.
@@ -400,8 +400,8 @@ attributes:
   coverage:        <0.0–1.0 completeness score from profile_index (optional)>
   expires_at:      "2025-08-20T10:00:00Z"   # omit for durable (immutable-fact) KIs
   evidence:        ["~20% of spans are errors (1,204 / 6,033)"]
-  # Complete runnable ES|QL carried by the KI (a detection's materialized query, or an
-  # index profile's esql_example queries) — the field verifiers read:
+  # Every ES|QL query the KI carries, in the field verifiers read (a detection's
+  # materialized query, an index profile's runnable esql_example queries):
   esql:            'FROM logs-* | WHERE event.outcome == "failure" | STATS c = COUNT(*) BY user.name'
   # Repeat structured values here for exact-match / filter queries.
   # Index Metadata example:
@@ -550,7 +550,7 @@ Before presenting any workflow to the user:
 - [ ] Grounding contract honored: non-empty grounding gate, calibrated `confidence` bands, 2–5 `field=value` evidence strings (see "Quality & grounding contract")
 - [ ] KIs are written via the `context-engine` steps (`createKi` / `updateKi`) — never raw `elasticsearch.index`
 - [ ] Every write is gated on `context-engine.verifyKi`: the workflow writes only when `passed` is true and surfaces the failing `results` (verifier + reason) otherwise
-- [ ] Any complete runnable ES|QL a KI carries lives in `attributes.esql` (string or array of strings) — the field verifiers read; KI kinds without ES|QL omit it
+- [ ] Every ES|QL query the KI carries lives in `attributes.esql` (string or array of strings) so verifiers check it; only KI kinds with no ES|QL at all omit it
 - [ ] `attributes.slug` holds a stable, normalized key built from the KI's own data; collisions **merge** (merged values computed in the workflow, written via `updateKi`) rather than blind-overwrite
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
@@ -566,6 +566,8 @@ Use these descriptions as input to `platform.core.generate_workflow`. Do not sub
 to the tool — describe the workflow in natural language using these shapes as the spec.
 
 Set the KI `type` field to the stable value for the strategy: Index Metadata → `index_metadata`; Bottom-Up → `document`; Selective / Outlier → `event`; Atomic Facts → `fact`; Cumulative / Wiki-style → `entity`; Detection / Feature → `detection` and `feature` respectively.
+
+In every shape, mirror the ES|QL the KI carries into `attributes.esql` wherever possible — a detection's materialized query, and the runnable `esql_example` of each access pattern the `ai.prompt` emits — so verification covers every query the KI ships.
 
 **Index Metadata:**
 A `foreach` loop over a hardcoded list of index names. Per iteration: `GET /<index>/_mapping`,
