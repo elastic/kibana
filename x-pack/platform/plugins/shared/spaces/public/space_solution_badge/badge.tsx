@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBadgeProps } from '@elastic/eui';
+import type { EuiBadgeProps, IconType } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
@@ -14,7 +14,7 @@ import type { Space } from '../../common';
 
 const SolutionOptions: Record<
   NonNullable<Space['solution']>,
-  { iconType: string; label: JSX.Element }
+  { iconType: IconType; label: JSX.Element }
 > = {
   es: {
     iconType: 'logoElasticsearch',

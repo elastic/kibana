@@ -144,11 +144,11 @@ describe('action_type_model_utils', () => {
       const withIcon = transformSpecToActionTypeModel(
         {
           ...baseSpec,
-          metadata: { ...baseSpec.metadata, icon: 'custom-icon' },
+          metadata: { ...baseSpec.metadata, icon: 'custom-icon.svg' },
         },
         docLinks
       );
-      expect(withIcon.iconClass).toBe('custom-icon');
+      expect(withIcon.iconClass).toBe('custom-icon.svg');
       expect(transformSpecToActionTypeModel(baseSpec, docLinks).iconClass).toBe('plugs');
     });
 

@@ -144,7 +144,7 @@ export const useQualityIssuesDocsChart = () => {
       getDisplayName(): string {
         return openInLensText;
       },
-      getIconType(): string {
+      getIconType() {
         return 'chartArea';
       },
       async isCompatible(): Promise<boolean> {

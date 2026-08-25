@@ -72,7 +72,7 @@ describe('connectors_selection', () => {
 
   const actionType = actionTypeRegistryMock.createMockActionTypeModel({
     id: '.pagerduty',
-    iconClass: 'test',
+    iconClass: 'test.svg',
     selectMessage: 'test',
     validateParams: (): Promise<GenericValidationResult<unknown>> => {
       const validationResult = { errors: {} };

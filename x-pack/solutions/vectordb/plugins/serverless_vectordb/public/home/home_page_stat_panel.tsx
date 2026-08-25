@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiButton,
@@ -34,7 +35,7 @@ export interface HomePageStatPanelMetric {
 
 export interface HomePageStatPanelAction {
   key: string;
-  iconType?: string;
+  iconType?: IconType;
   label: string;
   onClick: () => void;
   testSubj?: string;
@@ -42,7 +43,7 @@ export interface HomePageStatPanelAction {
 }
 
 export interface HomePageStatPanelProps {
-  iconType: string;
+  iconType: IconType;
   title: string;
   testSubj: string;
   metrics: HomePageStatPanelMetric[];

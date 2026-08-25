@@ -42,7 +42,7 @@ export const createResetGroupByFieldAction: CreateResetGroupByFieldAction = ({
   getDisplayName(): string {
     return RESET_GROUP_BY_FIELDS;
   },
-  getIconType(): string | undefined {
+  getIconType() {
     return 'redo';
   },
   type: 'actionButton',

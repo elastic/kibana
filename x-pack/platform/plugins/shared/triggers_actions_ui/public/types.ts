@@ -8,7 +8,7 @@
 import type { ComponentType, ReactNode } from 'react';
 import type React from 'react';
 import type { Moment } from 'moment';
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiSuperSelectOption, IconType } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -303,7 +303,7 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
   getDescriptionFields?: GetDescriptionFieldsFn<Params>;
-  iconClass: string;
+  iconClass: IconType;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (ruleParams: Params, isServerless?: boolean) => ValidationResult;
   ruleParamsExpression:

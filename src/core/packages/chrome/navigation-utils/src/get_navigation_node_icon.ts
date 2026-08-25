@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import { AppDeepLinkIdToIcon } from './known_icons_mappings';
 
 /**
@@ -16,10 +17,10 @@ import { AppDeepLinkIdToIcon } from './known_icons_mappings';
  */
 interface NavigationNode {
   id: string;
-  icon?: unknown;
+  icon?: IconType;
   deepLink?: {
-    euiIconType?: string;
-    icon?: string;
+    euiIconType?: IconType;
+    icon?: IconType;
   };
 }
 
@@ -59,9 +60,9 @@ const warnOnce = (message: string) => {
  * `@kbn/core-chrome-browser`) and the navigation customization modal
  * (via dynamic import).
  */
-export const getNavigationNodeIcon = (node: NavigationNode | null): string => {
+export const getNavigationNodeIcon = (node: NavigationNode | null): IconType => {
   if (node?.icon) {
-    return node.icon as string;
+    return node.icon;
   }
 
   if (node && AppDeepLinkIdToIcon[node.id]) {

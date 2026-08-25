@@ -82,7 +82,7 @@ describe('action_type_form', () => {
   beforeEach(() => {
     const actionType = actionTypeRegistryMock.createMockActionTypeModel({
       id: '.test-system-action',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       selectMessage: 'test',
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
@@ -221,7 +221,7 @@ describe('action_type_form', () => {
     beforeEach(() => {
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: '.test-system-action-with-license',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         selectMessage: 'test',
         validateParams: (): Promise<GenericValidationResult<unknown>> => {
           const validationResult = { errors: {} };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IconType } from '@elastic/eui';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -63,7 +64,7 @@ export interface AddToDatasetActionConfig extends AddToDatasetFlyoutOpenOptions 
   /**
    * Icon type for the CTA (defaults to `flask`).
    */
-  iconType?: string;
+  iconType?: IconType;
   /**
    * Whether to call `event.stopPropagation()` for click events.
    *
@@ -79,7 +80,7 @@ export interface AddToDatasetActionConfig extends AddToDatasetFlyoutOpenOptions 
 export interface AddToDatasetAction {
   label: string;
   ariaLabel: string;
-  iconType: string;
+  iconType: IconType;
   onClick: (event?: { stopPropagation?: () => void }) => void;
 }
 

@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
+import type { IconType } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
 
 import type { CallOutMessage } from './callout_types';
@@ -14,7 +15,7 @@ import { CallOutDismissButton } from './callout_dismiss_button';
 
 export interface CallOutProps {
   message: CallOutMessage;
-  iconType?: string;
+  iconType?: IconType;
   dismissButtonText?: string;
   onDismiss?: (message: CallOutMessage) => void;
   showDismissButton?: boolean;

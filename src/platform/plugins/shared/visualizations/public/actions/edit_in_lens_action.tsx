@@ -131,7 +131,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
 
   MenuItem = MenuItem;
 
-  getIconType(): string {
+  getIconType() {
     return 'merge';
   }
 

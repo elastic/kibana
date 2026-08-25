@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const makeAction = (actionsName: string, icon: string = 'icon', order?: number) => ({
+import type { IconType } from '@elastic/eui';
+
+export const makeAction = (actionsName: string, icon: IconType = 'empty', order?: number) => ({
   id: actionsName,
   type: actionsName,
   order,

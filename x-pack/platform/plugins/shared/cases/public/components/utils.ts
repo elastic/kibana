@@ -159,7 +159,7 @@ export const getConnectorIcon = (
    * triggersActionsUi.actionTypeRegistry.get will throw an error if the type is not registered.
    * This will break Kibana if not handled properly.
    */
-  const emptyResponse = '';
+  const emptyResponse: IconType = 'empty';
 
   if (type == null) {
     return emptyResponse;

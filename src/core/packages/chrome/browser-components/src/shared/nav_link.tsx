@@ -76,7 +76,7 @@ export function createEuiListItem({
       iconProps,
       icon:
         !euiIconType && icon ? (
-          <EuiIcon type={basePath.prepend(`/${icon}`)} size="m" aria-hidden={true} />
+          <EuiIcon type={basePath.prepend(`/${icon}`) as IconType} size="m" aria-hidden={true} />
         ) : undefined,
     }),
   };

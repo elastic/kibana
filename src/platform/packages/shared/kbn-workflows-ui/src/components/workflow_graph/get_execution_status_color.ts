@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed, IconType } from '@elastic/eui';
 import { ExecutionStatus } from '@kbn/workflows';
 
 /**
@@ -18,7 +18,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 export interface StatusVisual {
   color: string;
   bg: string;
-  iconType: string;
+  iconType: IconType;
   isSpinner?: boolean;
 }
 

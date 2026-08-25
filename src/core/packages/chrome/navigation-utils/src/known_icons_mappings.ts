@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
+
 // TODO: move this to core as part of deep link registration
-export const AppDeepLinkIdToIcon: Record<string, string> = {
+export const AppDeepLinkIdToIcon: Record<string, IconType> = {
   workflows: 'workflowsApp',
   // analytics
   discover: 'discoverApp',

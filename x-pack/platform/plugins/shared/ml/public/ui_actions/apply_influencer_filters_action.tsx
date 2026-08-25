@@ -30,7 +30,7 @@ export function createApplyInfluencerFiltersAction(
   return {
     id: 'apply-to-current-view',
     type: APPLY_INFLUENCER_FILTERS_ACTION,
-    getIconType(): string {
+    getIconType() {
       return 'filter';
     },
     getDisplayName() {

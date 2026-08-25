@@ -7,6 +7,7 @@
 
 import type { MouseEvent } from 'react';
 import React from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiContextMenuItem,
   EuiButtonIcon,
@@ -22,7 +23,7 @@ interface ActionIconItemProps {
   width?: number;
   dataTestSubj?: string;
   content?: string;
-  iconType?: string;
+  iconType?: IconType;
   isDisabled?: boolean;
   onClick?: (event: MouseEvent) => void;
   children?: React.ReactNode;

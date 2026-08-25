@@ -41,7 +41,7 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
     });
   }
 
-  getIconType(): string | undefined {
+  getIconType() {
     return 'discoverApp';
   }
 

@@ -25,7 +25,7 @@ test('should sort groups by containing enabled rule types first and then by name
           checkEnabledResult: { isEnabled: false, message: 'gold license' },
           ruleTypeItem: {
             id: 'my-rule-type',
-            iconClass: 'test',
+            iconClass: 'test.svg',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -46,7 +46,7 @@ test('should sort groups by containing enabled rule types first and then by name
           checkEnabledResult: { isEnabled: false, message: 'platinum license' },
           ruleTypeItem: {
             id: 'my-rule-type',
-            iconClass: 'test',
+            iconClass: 'test.svg',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -62,7 +62,7 @@ test('should sort groups by containing enabled rule types first and then by name
           checkEnabledResult: { isEnabled: true },
           ruleTypeItem: {
             id: 'disabled-rule-type',
-            iconClass: 'test',
+            iconClass: 'test.svg',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -83,7 +83,7 @@ test('should sort groups by containing enabled rule types first and then by name
           checkEnabledResult: { isEnabled: true },
           ruleTypeItem: {
             id: 'my-rule-type',
-            iconClass: 'test',
+            iconClass: 'test.svg',
             description: 'Alert when testing',
             documentationUrl: 'https://localhost.local/docs',
             validate: () => {
@@ -120,7 +120,7 @@ describe('ruleTypeUngroupedCompare', () => {
             checkEnabledResult: { isEnabled: false, message: 'gold license' },
             ruleTypeItem: {
               id: 'ruleTypeItemId1',
-              iconClass: 'test',
+              iconClass: 'test.svg',
               description: 'Alert when testing',
               documentationUrl: 'https://localhost.local/docs',
               validate: () => {
@@ -141,7 +141,7 @@ describe('ruleTypeUngroupedCompare', () => {
             checkEnabledResult: { isEnabled: false, message: 'platinum license' },
             ruleTypeItem: {
               id: 'ruleTypeItemId2',
-              iconClass: 'test',
+              iconClass: 'test.svg',
               description: 'Alert when testing',
               documentationUrl: 'https://localhost.local/docs',
               validate: () => {
@@ -157,7 +157,7 @@ describe('ruleTypeUngroupedCompare', () => {
             checkEnabledResult: { isEnabled: true },
             ruleTypeItem: {
               id: 'ruleTypeItemId3',
-              iconClass: 'test',
+              iconClass: 'test.svg',
               description: 'Alert when testing',
               documentationUrl: 'https://localhost.local/docs',
               validate: () => {
@@ -178,7 +178,7 @@ describe('ruleTypeUngroupedCompare', () => {
             checkEnabledResult: { isEnabled: true },
             ruleTypeItem: {
               id: 'ruleTypeItemId4',
-              iconClass: 'test',
+              iconClass: 'test.svg',
               description: 'Alert when testing',
               documentationUrl: 'https://localhost.local/docs',
               validate: () => {
@@ -217,7 +217,7 @@ test('should sort rule types by enabled first and then by name', async () => {
       checkEnabledResult: { isEnabled: false, message: 'gold license' },
       ruleTypeItem: {
         id: 'my-rule-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         description: 'Alert when testing',
         documentationUrl: 'https://localhost.local/docs',
         validate: () => {
@@ -233,7 +233,7 @@ test('should sort rule types by enabled first and then by name', async () => {
       checkEnabledResult: { isEnabled: false, message: 'platinum license' },
       ruleTypeItem: {
         id: 'my-rule-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         description: 'Alert when testing',
         documentationUrl: 'https://localhost.local/docs',
         validate: () => {
@@ -249,7 +249,7 @@ test('should sort rule types by enabled first and then by name', async () => {
       checkEnabledResult: { isEnabled: true },
       ruleTypeItem: {
         id: 'disabled-rule-type',
-        iconClass: 'test',
+        iconClass: 'test.svg',
         description: 'Alert when testing',
         documentationUrl: 'https://localhost.local/docs',
         validate: () => {

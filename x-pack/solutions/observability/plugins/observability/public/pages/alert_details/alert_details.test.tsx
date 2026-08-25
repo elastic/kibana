@@ -53,7 +53,7 @@ jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
 const validationMethod = (): ValidationResult => ({ errors: {} });
 const ruleType: RuleTypeModel = {
   id: 'logs.alert.document.count',
-  iconClass: 'test',
+  iconClass: 'test.svg',
   description: 'Testing',
   documentationUrl: 'https://...',
   requiresAppContext: false,

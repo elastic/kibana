@@ -22,6 +22,7 @@ import type {
   ResolvedSanitizedRule,
 } from '@kbn/alerting-types';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
+import type { IconType } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { TypeRegistry } from '../type_registry';
 
@@ -112,7 +113,7 @@ export interface RuleTypeParamsExpressionProps<
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
-  iconClass: string;
+  iconClass: IconType;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (ruleParams: Params, isServerless?: boolean) => ValidationResult;
   ruleParamsExpression:

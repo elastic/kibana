@@ -88,7 +88,7 @@ function getDocsUrlFromSpec(spec: ConnectorSpecResponse, docLinks: DocLinksStart
  */
 function getIconFromSpec(spec: ConnectorSpecResponse): IconType {
   if (spec.metadata.icon) {
-    return spec.metadata.icon;
+    return spec.metadata.icon as IconType;
   }
 
   const lazyIcon = ConnectorIconsMap.get(spec.metadata.id);

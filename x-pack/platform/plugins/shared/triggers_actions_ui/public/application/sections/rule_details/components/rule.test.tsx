@@ -111,7 +111,7 @@ const mocks = coreMock.createSetup();
 
 const ruleTypeR: RuleTypeModel = {
   id: 'my-rule-type',
-  iconClass: 'test',
+  iconClass: 'test.svg',
   description: 'Rule when testing',
   documentationUrl: 'https://localhost.local/docs',
   validate: () => {

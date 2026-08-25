@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IconType } from '@elastic/eui';
 import type { EnabledFeatures } from '@kbn/spaces-plugin/public/management/components/enabled_features';
 import {
   ResponseActionTypes,
@@ -14,7 +15,7 @@ import {
 export interface ResponseActionType {
   id: ResponseActionTypes;
   name: string;
-  iconClass: string;
+  iconClass: IconType;
   disabled?: boolean;
 }
 

@@ -104,7 +104,7 @@ describe('Rule Definition', () => {
 
     ruleTypeR = {
       id: 'my-rule-type',
-      iconClass: 'test',
+      iconClass: 'test.svg',
       description: 'Rule when testing',
       documentationUrl: 'https://localhost.local/docs',
       validate: () => {

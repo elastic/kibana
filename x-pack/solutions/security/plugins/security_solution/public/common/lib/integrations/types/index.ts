@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { IconType } from '@elastic/eui';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import type { GetInstalledPackagesResponse } from '@kbn/fleet-plugin/common/types';
 
@@ -15,7 +16,7 @@ export interface IntegrationCardMetadata {
 export interface Tab {
   category: string;
   featuredCardIds?: Array<IntegrationCardItem['id']>;
-  iconType?: string;
+  iconType?: IconType;
   id: IntegrationTabId;
   label: string;
   overflow?: 'hidden' | 'scroll';
