@@ -40,7 +40,6 @@ export const servers: ScoutServerConfig = {
       // for CPS fan-out (stock ES API keys don't carry x-client-authentication).
       '--xpack.task_manager.api_key_type=uiam',
       '--xpack.task_manager.grant_uiam_api_keys=true',
-      '--feature_flags.overrides.taskManager.provisionUiamApiKeys=true',
     ],
   },
 };

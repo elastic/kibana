@@ -51,6 +51,6 @@ export const MISSING_UIAM_API_KEY_TAG = i18n.translate('xpack.alerting.missingUi
 });
 
 /**
- * Feature flag for provisioning UIAM API keys for alerting rules
+ * Feature flag for tagging rules that are missing a UIAM API key
  */
 export const PROVISION_UIAM_API_KEYS_FEATURE_FLAG = 'alerting.rules.provisionUiamApiKeys';

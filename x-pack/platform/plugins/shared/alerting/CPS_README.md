@@ -80,17 +80,9 @@ Both keys are stored as encrypted attributes on the rule saved object:
 | `apiKeyOwner` | Username of the key owner |
 | `apiKeyCreatedByUser` | `true` if the user authenticated with their own API key |
 
-#### Provisioning (Backfill for Existing Rules)
+#### Missing UIAM API Key Tagging
 
-The `UiamApiKeyProvisioningTask` runs on serverless deployments when the `alerting.rules.provisionUiamApiKeys` feature flag is enabled. It:
-
-1. Finds rules with system ES keys but no `uiamApiKey`
-2. Converts existing ES keys to UIAM keys via `security.authc.apiKeys.uiam.convert`
-3. Bulk-updates rule saved objects with the new UIAM keys
-4. Writes `uiam_api_keys_provisioning_status` saved objects for tracking
-5. Queues orphaned UIAM keys for invalidation on failure
-
-Rules that should have a UIAM key but don't are tagged with `Missing Elastic Cloud API Key` (the `MISSING_UIAM_API_KEY_TAG`).
+Rules that should have a UIAM key but don't are tagged with `Missing Elastic Cloud API Key` (the `MISSING_UIAM_API_KEY_TAG`) when the `alerting.rules.provisionUiamApiKeys` feature flag is enabled.
 
 #### Invalidation
 
@@ -112,7 +104,7 @@ Both ES and UIAM keys are queued for invalidation during rule create, update, en
 
 | Feature Flag | Description |
 |-------------|-------------|
-| `alerting.rules.provisionUiamApiKeys` | Enables the UIAM API key provisioning task and missing-key tagging (serverless only) |
+| `alerting.rules.provisionUiamApiKeys` | Enables missing-key tagging for rules that should have a UIAM key (serverless only) |
 
 ## Structured Log Tags
 
@@ -130,5 +122,5 @@ All UIAM-related log entries use structured tags for filtering:
 Task Manager provides generic infrastructure that alerting leverages:
 
 - **Invalidation framework:** Alerting imports `runInvalidate` from `@kbn/task-manager-plugin/server` and passes both `invalidateApiKeyFn` (ES) and `invalidateUiamApiKeyFn` (UIAM) to handle both key types.
-- **Task scheduling:** Both the `UiamApiKeyProvisioningTask` and the `alerts_invalidate_api_keys` task are registered with and scheduled by Task Manager.
+- **Task scheduling:** The `alerts_invalidate_api_keys` task is registered with and scheduled by Task Manager.
 - **Config schema:** Task Manager declares its own `api_key_type` enum (`'es'` | `'uiam'`) in its config, but this is **not used at runtime** in Task Manager's own execution pipeline. Rule-level UIAM key selection lives entirely in alerting's `rule_loader.ts`.
