@@ -238,6 +238,34 @@ When you add new tests, fix flakes, or make significant changes, run the same te
 
 Prefer doing this locally first (faster feedback), and use the Flaky Test Runner in CI when needed. See [Debug flaky tests](../testing/debugging.md#scout-debugging-flaky-tests) for guidance.
 
+## Wait on the flow's terminal readiness signal [wait-on-the-flows-terminal-readiness-signal]
+
+Most UI flakes are a race between the test and an async step. A wait-based fix holds only when it targets the *terminal* readiness signal — the element or value the failing assertion actually reads — not an earlier step in the flow.
+
+- **Wait on the signal the assertion reads, not the step near the error.** Guarding the click (adding `{ force: true }` or a retry), dismissing one toast, or waiting on one intermediate render, while the element or value you assert on still races, is the single most common wait-based fix that silently fails. Find the step that produced the error and wait on *that*.
+- **Wait on the rendered outcome, not the plumbing.** The element that displays the data *is* the readiness signal, and web-first assertions (`expect(locator).toBeVisible()`) auto-wait on it. Don't wait on a proxy such as a spinner disappearing. If there's no element to wait on, the best fix is to expose one in the DOM — add a `data-test-subj` or a `data-loaded`/state attribute in the app — because it reflects the committed render (a network response resolving doesn't) and won't break when the endpoint or transport changes. Where the flake is data *arrival*, make the gate deterministic (mock the endpoint, seed via API) instead. Use `page.waitForResponse(...)` (armed *before* the action) only for a gate with no UI at all, e.g. a background write or a setup precondition.
+- **Poll a read, never an action.** Re-querying an element/value and re-checking it in `expect.poll` / `toPass` is a legitimate wait for a late re-render — but it must re-query *inside* the loop, and must never re-fire a click, type, navigation, or request (that hides an actionability bug a real user would hit). Re-reading a handle captured once, or re-querying only once, still goes stale.
+- **Prefer removing the race.** Where you can, make the gate deterministic — mock the gating endpoint, or ingest the fixture via API in setup — so the data is present before the flow runs.
+- **A stale or empty read after a write is a propagation problem — find who owns it before blaming the environment.** When a readiness signal is satisfied but a later read comes back stale or empty (config poll, cache, ES refresh, entity-store/cluster sync, multi-node lag), a bigger timeout only hides it. It is one of three things: the app *exposes* a convergence signal your test isn't using (wait on it, or index with `refresh=wait_for`); the app exposes *no* such signal (an observability gap — ask for one rather than looping in the test); or the app returns stale/errors where it should be read-your-writes consistent (a real product bug your test caught — a cache not invalidated after a write, a transient "unknown index" shown to the user). Only genuinely inherent multi-node latency with no usable signal is a deployment condition to gate on or hand off.
+
+:::::{dropdown} Examples
+❌ **Don't:** guard the click and re-read a handle captured once — a late re-render still staled it, and the assertion still races:
+
+```ts
+await cell.click({ force: true });
+const rows = await page.testSubj.locator('dataGridRow').all(); // captured once
+expect(rows.length).toBe(3); // StaleElementReferenceError / wrong count under load
+```
+
+✔️ **Do:** poll the rendered outcome (re-querying each attempt) — it auto-waits, so you don't need to know the network at all:
+
+```ts
+await expect
+  .poll(async () => (await page.testSubj.locator('dataGridRow').all()).length)
+  .toBe(3);
+```
+:::::
+
 ## Keep test suites independent [keep-test-suites-independent]
 
 - Keep **one top-level suite** per file (`test.describe`).
