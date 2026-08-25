@@ -8,18 +8,26 @@
  */
 
 import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
-import { hasTransformationalCommand, getLimitFromESQLQuery } from '../query_parsing_helpers';
+import { hasTransformationalCommand } from '../query_parsing_helpers';
 import { getSourceCommandFromESQLQuery } from '../get_index_pattern_from_query';
 import { appendToESQLQuery } from './utils';
 
 const METRICS_INFO_SUFFIX = ' | METRICS_INFO';
 
+export interface BuildMetricsInfoQueryOptions {
+  postFilter?: string;
+}
+
 /**
  * Appends `| METRICS_INFO` to a TS ES|QL query when it has no transformational commands.
- * SORT is removed; LIMIT, if present, is re-appended at the end.
- * `postFilter`, if provided, is appended as a `WHERE` after METRICS_INFO (before LIMIT).
+ * SORT and document LIMIT are removed. Catalog listing must not inherit the
+ * document-page LIMIT (Discover often starts at `LIMIT 10`).
+ * `options.postFilter`, if provided, is appended as a `WHERE` after METRICS_INFO.
  */
-export function buildMetricsInfoQuery(esql?: string, postFilter?: string): string {
+export function buildMetricsInfoQuery(
+  esql?: string,
+  options?: BuildMetricsInfoQueryOptions
+): string {
   const trimmed = esql?.trim();
   if (!trimmed) {
     return '';
@@ -44,12 +52,10 @@ export function buildMetricsInfoQuery(esql?: string, postFilter?: string): strin
     return trimmed;
   }
 
-  const hasLimit = Walker.matchAll(root, { type: 'command', name: 'limit' }).length > 0;
   const baseCommands = root.commands.filter((cmd) => cmd.name !== 'sort' && cmd.name !== 'limit');
   const baseQuery = BasicPrettyPrinter.print({ ...root, commands: baseCommands }).trim();
   const esqlQuery = appendToESQLQuery(baseQuery, METRICS_INFO_SUFFIX);
 
-  const postFilterSuffix = postFilter ? ` | WHERE ${postFilter}` : '';
-  const limitSuffix = hasLimit ? ` | LIMIT ${getLimitFromESQLQuery(trimmed)}` : '';
-  return `${esqlQuery}${postFilterSuffix}${limitSuffix}`;
+  const postFilterSuffix = options?.postFilter ? ` | WHERE ${options.postFilter}` : '';
+  return `${esqlQuery}${postFilterSuffix}`;
 }

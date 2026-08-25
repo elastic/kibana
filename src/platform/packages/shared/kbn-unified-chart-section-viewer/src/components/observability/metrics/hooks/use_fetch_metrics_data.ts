@@ -11,6 +11,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, escapeStringValue } from '@kbn/esql-utils';
+import { isFilterDisabled, type Filter } from '@kbn/es-query';
 import { getFieldIconType } from '@kbn/field-utils';
 import type { Dimension, MetricsESQLResponse, MetricsInfo, ParsedMetrics } from '../../../../types';
 import {
@@ -22,6 +23,7 @@ import { useTelemetry } from '../../../../context/ebt_telemetry_context';
 import { useChartSectionInspector } from '../../../../context/chart_section_inspector';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
+import { telemetryFromMetricItems } from '../utils/telemetry_from_metric_items';
 import { getEsqlQuery } from '../utils/get_esql_query';
 import {
   MetricsExecutionContextAction,
@@ -33,15 +35,20 @@ import {
 } from '../utils/metrics_inspector_requests';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
 
+const hasEnabledDiscoverFilters = (filters: Filter[] | undefined): boolean =>
+  Boolean(filters?.some((filter) => !isFilterDisabled(filter)));
+
 /**
  * Fetches METRICS_INFO for the metrics grid.
  *
  * Capability (`Grid of metrics`): when a dimension is selected, every WHERE
- * command is dropped, then METRICS_INFO + MV_CONTAINS. This is also the source
- * of the dimension dropdown.
+ * command is dropped, Discover filter pills are omitted (time range stays),
+ * then METRICS_INFO + MV_CONTAINS. This is also the source of the dimension
+ * dropdown.
  *
- * Membership (`Metrics with data`): the full user query + METRICS_INFO, names
- * only. Run only when dropping WHERE changed the query.
+ * Membership (`Metrics with data`): the full user query + METRICS_INFO + pills,
+ * names only. Run when dropping WHERE changed the query, or when pills remain
+ * after a dimension is selected.
  *
  * Cards = capability ∩ membership.
  */
@@ -93,16 +100,24 @@ export function useFetchMetricsData({
   );
 
   const capabilityQuery = useMemo(
-    () => buildMetricsInfoQuery(capabilitySourceQuery, declaredDimensionFilter),
+    () =>
+      buildMetricsInfoQuery(
+        capabilitySourceQuery,
+        declaredDimensionFilter ? { postFilter: declaredDimensionFilter } : undefined
+      ),
     [capabilitySourceQuery, declaredDimensionFilter]
   );
 
   const membershipQuery = useMemo(() => {
-    if (!esql || capabilitySourceQuery === esql) {
+    if (!esql || !appliedDimensionNames?.length) {
+      return '';
+    }
+    const whereDropped = capabilitySourceQuery !== esql;
+    if (!whereDropped && !hasEnabledDiscoverFilters(fetchParams.filters)) {
       return '';
     }
     return buildMetricsInfoQuery(esql);
-  }, [esql, capabilitySourceQuery]);
+  }, [esql, capabilitySourceQuery, appliedDimensionNames, fetchParams.filters]);
 
   const shouldFetch = isComponentVisible && !!capabilityQuery;
 
@@ -115,10 +130,20 @@ export function useFetchMetricsData({
         return null;
       }
 
+      signal.throwIfAborted();
       resetRequests();
 
-      const runMetricsInfo = async (name: string, description: string, esqlQuery: string) =>
-        trackRequest(name, description, async () => {
+      const discoverFilters = fetchParams.filters ?? [];
+      const capabilityFilters = appliedDimensionNames?.length ? [] : discoverFilters;
+
+      const runMetricsInfo = async (
+        name: string,
+        description: string,
+        esqlQuery: string,
+        filters: Filter[]
+      ) => {
+        signal.throwIfAborted();
+        return trackRequest(name, description, async () => {
           const { documents, rawResponse, requestParams } =
             await executeEsqlQuery<MetricsESQLResponse>({
               esqlQuery,
@@ -126,7 +151,7 @@ export function useFetchMetricsData({
               signal,
               dataView: metricsDataView,
               timeRange: fetchParams.timeRange,
-              filters: fetchParams.filters ?? [],
+              filters,
               variables: fetchParams.esqlVariables,
               uiSettings: services.uiSettings,
               profileId,
@@ -138,6 +163,7 @@ export function useFetchMetricsData({
             response: rawResponse,
           };
         });
+      };
 
       const getFieldType = (name: string) => {
         const field = fetchParams.dataView?.getFieldByName(name);
@@ -147,8 +173,11 @@ export function useFetchMetricsData({
       const capableDocuments = await runMetricsInfo(
         GRID_OF_METRICS_REQUEST,
         'This request lists metrics that declare the selected dimensions.',
-        capabilityQuery
+        capabilityQuery,
+        capabilityFilters
       );
+
+      signal.throwIfAborted();
 
       const capable = parseMetricsWithTelemetry(capableDocuments, getFieldType);
 
@@ -156,9 +185,12 @@ export function useFetchMetricsData({
         ? await runMetricsInfo(
             METRICS_WITH_DATA_REQUEST,
             'This request lists metrics that have data under the current query.',
-            membershipQuery
+            membershipQuery,
+            discoverFilters
           )
         : undefined;
+
+      signal.throwIfAborted();
 
       const metricItems = withDataDocuments
         ? keepMetricsPresentInBoth(
@@ -167,10 +199,7 @@ export function useFetchMetricsData({
           )
         : capable.metricItems;
 
-      const telemetry = {
-        ...capable.telemetry,
-        total_number_of_metrics: metricItems.length,
-      };
+      const telemetry = telemetryFromMetricItems(metricItems);
 
       if (!signal.aborted) {
         trackMetricsInfo(telemetry);
@@ -195,6 +224,7 @@ export function useFetchMetricsData({
       services.uiSettings,
       trackMetricsInfo,
       appliedDimensions,
+      appliedDimensionNames,
       profileId,
     ]
   );

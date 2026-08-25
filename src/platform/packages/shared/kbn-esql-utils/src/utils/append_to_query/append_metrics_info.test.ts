@@ -29,24 +29,30 @@ describe('buildMetricsInfoQuery', () => {
 
   it('does not inject a postFilter when METRICS_INFO is already user-authored', () => {
     const userQuery = 'TS INDEX | METRICS_INFO';
-    expect(buildMetricsInfoQuery(userQuery, 'MV_CONTAINS(dimension_fields, "environment")')).toBe(
-      userQuery
-    );
+    expect(
+      buildMetricsInfoQuery(userQuery, {
+        postFilter: 'MV_CONTAINS(dimension_fields, "environment")',
+      })
+    ).toBe(userQuery);
   });
 
   it('appends a caller-supplied postFilter after METRICS_INFO', () => {
-    expect(buildMetricsInfoQuery('TS INDEX', 'MV_CONTAINS(dimension_fields, "environment")')).toBe(
-      `TS INDEX\n | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment")`
-    );
+    expect(
+      buildMetricsInfoQuery('TS INDEX', {
+        postFilter: 'MV_CONTAINS(dimension_fields, "environment")',
+      })
+    ).toBe(`TS INDEX\n | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment")`);
   });
 
   it('ignores an empty postFilter', () => {
-    expect(buildMetricsInfoQuery('TS INDEX', '')).toBe(`TS INDEX\n | METRICS_INFO`);
+    expect(buildMetricsInfoQuery('TS INDEX', { postFilter: '' })).toBe(`TS INDEX\n | METRICS_INFO`);
+    expect(buildMetricsInfoQuery('TS INDEX', {})).toBe(`TS INDEX\n | METRICS_INFO`);
   });
 
-  it('places the postFilter before LIMIT', () => {
-    expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10', 'foo == 1')).toBe(
-      `TS INDEX\n | METRICS_INFO | WHERE foo == 1 | LIMIT 10`
+  it('does not inherit the document LIMIT onto the catalog query', () => {
+    expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10')).toBe(`TS INDEX\n | METRICS_INFO`);
+    expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10', { postFilter: 'foo == 1' })).toBe(
+      `TS INDEX\n | METRICS_INFO | WHERE foo == 1`
     );
   });
 
@@ -60,28 +66,24 @@ describe('buildMetricsInfoQuery', () => {
     expect(buildMetricsInfoQuery('FROM metrics-* | LIMIT 100')).toBe('');
   });
 
-  it('inserts METRICS_INFO before LIMIT when query has LIMIT', () => {
-    expect(buildMetricsInfoQuery('TS INDEX | LIMIT 10')).toBe(
-      `TS INDEX\n | METRICS_INFO | LIMIT 10`
-    );
-  });
-
   it('removes SORT from the query', () => {
     expect(buildMetricsInfoQuery('TS metrics-* | LIMIT 100 | SORT timestamp DESC')).toBe(
-      `TS metrics-*\n | METRICS_INFO | LIMIT 100`
+      `TS metrics-*\n | METRICS_INFO`
     );
 
     expect(buildMetricsInfoQuery('TS metrics-* | SORT timestamp DESC | LIMIT 100')).toBe(
-      `TS metrics-*\n | METRICS_INFO | LIMIT 100`
+      `TS metrics-*\n | METRICS_INFO`
     );
 
     expect(
       buildMetricsInfoQuery(
         'TS metrics-* | SORT timestamp DESC | LIMIT 100 | WHERE timestamp > now-1h',
-        'MV_CONTAINS(dimension_fields, "environment")'
+        {
+          postFilter: 'MV_CONTAINS(dimension_fields, "environment")',
+        }
       )
     ).toBe(
-      `TS metrics-* | WHERE timestamp > now - 1h\n | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment") | LIMIT 100`
+      `TS metrics-* | WHERE timestamp > now - 1h\n | METRICS_INFO | WHERE MV_CONTAINS(dimension_fields, "environment")`
     );
   });
 });
