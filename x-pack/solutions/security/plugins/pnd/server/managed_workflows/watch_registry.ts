@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SYSTEM_SECURITY_WATCH_IDS, WATCHES_SEED, type Watch } from '@kbn/pnd-common';
+import {
+  SYSTEM_SECURITY_WATCH_IDS,
+  createCatalogWatchPlaceholder,
+  type Watch,
+} from '@kbn/pnd-common';
 import {
   getManagedWorkflowDefinition,
   type ManagedWorkflowTemplateValues,
@@ -39,14 +43,6 @@ export const installRegisteredWatch = async (
     installOptions: RegisteredWatchInstallOptions
   ) => Promise<void>;
   await install(registration.id, options);
-};
-
-const getSeedWatch = (id: RegisteredWatchId): Watch => {
-  const watch = WATCHES_SEED.find((candidate) => candidate.id === id);
-  if (!watch) {
-    throw new Error(`Missing watch catalog seed for "${id}"`);
-  }
-  return structuredClone(watch);
 };
 
 class WatchRegistry {
@@ -84,7 +80,7 @@ for (const id of SYSTEM_SECURITY_WATCH_IDS) {
   }
   watchRegistry.register({
     id,
-    watch: getSeedWatch(id),
+    watch: createCatalogWatchPlaceholder(id),
     ...(settings ? { settings } : {}),
   });
 }

@@ -192,7 +192,11 @@ describe('WatchesService', () => {
 
       expect(floor).toEqual(
         expect.objectContaining({
+          id: FLOOR,
+          name: 'Watch Floor',
           enabled: false,
+          mandate: '',
+          description: '',
           callables: [],
           coverage: [],
           scopes: [],

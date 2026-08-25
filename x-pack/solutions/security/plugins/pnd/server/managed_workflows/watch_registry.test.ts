@@ -6,7 +6,12 @@
  */
 
 import { parse } from 'yaml';
-import { SYSTEM_SECURITY_WATCH_IDS, WatchSettings, WATCH_TIER_TAGS } from '@kbn/pnd-common';
+import {
+  SYSTEM_SECURITY_WATCH_CATALOG,
+  SYSTEM_SECURITY_WATCH_IDS,
+  WATCH_TIER_TAGS,
+  WatchSettings,
+} from '@kbn/pnd-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { watchRegistry } from './watch_registry';
 
@@ -15,6 +20,25 @@ describe('watchRegistry', () => {
     expect(watchRegistry.list()).toHaveLength(5);
     for (const watchId of SYSTEM_SECURITY_WATCH_IDS) {
       expect(watchRegistry.get(watchId)?.settings).toBeDefined();
+    }
+  });
+
+  it('builds not-installed rows from the catalog rather than mock fixtures', () => {
+    for (const registration of watchRegistry.list()) {
+      const catalog = SYSTEM_SECURITY_WATCH_CATALOG.find(({ id }) => id === registration.id);
+      expect(catalog).toBeDefined();
+      expect(registration.watch).toEqual(
+        expect.objectContaining({
+          id: catalog?.id,
+          name: catalog?.name,
+          color: catalog?.color,
+          enabled: false,
+          callables: [],
+          coverage: [],
+          recentRuns: [],
+          metrics: { lastRun: null },
+        })
+      );
     }
   });
 

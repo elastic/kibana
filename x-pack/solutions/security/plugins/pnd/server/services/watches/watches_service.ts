@@ -69,27 +69,7 @@ const toWatchListItem = (detail: WorkflowDetailDto): WorkflowListItemDto => ({
   history: undefined,
 });
 
-const projectNotInstalledWatch = (watch: Watch): Watch => ({
-  ...structuredClone(watch),
-  enabled: false,
-  schedule: {
-    set: false,
-    mode: 'demand',
-    from: 0,
-    to: 23,
-    onDemand: true,
-    cadence: 'manual',
-    every: 1,
-    handoff: 'none',
-  },
-  triggers: [],
-  coverage: [],
-  scopeSummary: '',
-  scopes: [],
-  callables: [],
-  metrics: { lastRun: null },
-  recentRuns: [],
-});
+const projectNotInstalledWatch = (watch: Watch): Watch => structuredClone(watch);
 
 const templateValuesEqual = (
   left: Record<string, unknown> | null,

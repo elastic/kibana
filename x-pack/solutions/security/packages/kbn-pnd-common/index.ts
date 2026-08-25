@@ -103,9 +103,11 @@ export {
 export {
   compareWatchesForDisplay,
   coverageFromSchedule,
+  createCatalogWatchPlaceholder,
   isOnDutyNow,
 } from './impl/watches/watch_helpers';
 export type {
+  CatalogWatchId,
   WatchDisplaySortable,
   WatchScheduleCoverageInput,
 } from './impl/watches/watch_helpers';

@@ -72,8 +72,8 @@ export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as con
  * entries from this list rather than from `list_watches`.
  *
  * Deliberately free of schema and sample imports: both consumers are page-load critical, and pulling
- * `WATCHES_SEED` in would drag Zod and the mock samples into that bundle. `WATCHES_SEED` derives its
- * name, colour and lifecycle from here so the two cannot drift.
+ * `WATCHES_SEED` in would drag Zod and the mock samples into that bundle. Live placeholders and
+ * `WATCHES_SEED` both take name, colour and lifecycle from here so the two cannot drift.
  *
  * Custom (unmanaged) watches are absent by construction — they are discoverable only at runtime.
  */
