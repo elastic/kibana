@@ -107115,9 +107115,12 @@ components:
             description:
               description: A short description of the panel.
               type: string
-            esqlQuery:
-              maxLength: 1000000
-              type: string
+            esql_query:
+              items:
+                maxLength: 1000000
+                type: string
+              maxItems: 1
+              type: array
             hide_border:
               description: When true, the panel border is hidden. Defaults to false.
               type: boolean
