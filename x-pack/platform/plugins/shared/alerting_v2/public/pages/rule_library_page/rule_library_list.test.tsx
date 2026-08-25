@@ -66,7 +66,6 @@ jest.mock('../../hooks/use_installed_rule_counts', () => ({
   useInstalledRuleCounts: () => ({ counts: mockInstalledCounts, isLoading: false }),
 }));
 
-
 const createRulePayload = (overrides: Partial<CreateRuleData> = {}): CreateRuleData =>
   ({
     kind: 'signal',

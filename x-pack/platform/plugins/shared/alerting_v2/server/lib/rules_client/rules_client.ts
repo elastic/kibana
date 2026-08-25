@@ -268,9 +268,11 @@ export class RulesClient {
     return parsed.data;
   }
 
-  private async getExistingRule(
-    id: string
-  ): Promise<{ attrs: RuleSavedObjectAttributes; version: string | undefined; references?: import('@kbn/core/server').SavedObjectReference[] }> {
+  private async getExistingRule(id: string): Promise<{
+    attrs: RuleSavedObjectAttributes;
+    version: string | undefined;
+    references?: import('@kbn/core/server').SavedObjectReference[];
+  }> {
     try {
       const doc = await this.rulesSavedObjectService.get(id);
       return { attrs: doc.attributes, version: doc.version, references: doc.references };
@@ -408,7 +410,11 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const { attrs: existingAttrs, version: existingVersion, references: existingRefs } = await this.getExistingRule(id);
+    const {
+      attrs: existingAttrs,
+      version: existingVersion,
+      references: existingRefs,
+    } = await this.getExistingRule(id);
 
     if (
       !isStateTransitionAllowed({

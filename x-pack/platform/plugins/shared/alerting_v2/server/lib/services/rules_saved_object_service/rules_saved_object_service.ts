@@ -108,10 +108,7 @@ export interface RulesSavedObjectServiceContract {
     id?: string;
     references?: SavedObjectReference[];
   }): Promise<RuleWriteResult>;
-  get(
-    id: string,
-    spaceId?: string
-  ): Promise<RuleSoGetResult>;
+  get(id: string, spaceId?: string): Promise<RuleSoGetResult>;
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
   findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]>;
   update(params: {
@@ -180,17 +177,19 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     );
     return { id: result.id, version: result.version };
   }
-  public async get(
-    id: string,
-    spaceId?: string
-  ): Promise<RuleSoGetResult> {
+  public async get(id: string, spaceId?: string): Promise<RuleSoGetResult> {
     const namespace = spaceIdToNamespace(this.spaces, spaceId);
     const doc = await this.client.get<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
       id,
       namespace ? { namespace } : undefined
     );
-    return { id: doc.id, attributes: doc.attributes, version: doc.version, references: doc.references };
+    return {
+      id: doc.id,
+      attributes: doc.attributes,
+      version: doc.version,
+      references: doc.references,
+    };
   }
 
   public async bulkGetByIds(

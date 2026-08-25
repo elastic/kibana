@@ -21,7 +21,9 @@ jest.mock('./invalidate_rules_content_list', () => ({
 
 const mockContentListInvalidate = jest.fn(() => Promise.resolve());
 jest.mock('@kbn/content-list-provider', () => ({
-  contentListQueryClient: { invalidateQueries: (...args: unknown[]) => mockContentListInvalidate(...args) },
+  contentListQueryClient: {
+    invalidateQueries: (...args: unknown[]) => mockContentListInvalidate(...args),
+  },
 }));
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;

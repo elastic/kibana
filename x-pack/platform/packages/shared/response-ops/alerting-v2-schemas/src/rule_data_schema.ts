@@ -816,7 +816,9 @@ export const findRulesRequestSchema = z.object({
     .min(1)
     .max(ID_MAX_LENGTH)
     .optional()
-    .describe('Filter to rules referencing a saved object with this id (requires has_reference_type).'),
+    .describe(
+      'Filter to rules referencing a saved object with this id (requires has_reference_type).'
+    ),
 });
 
 export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;

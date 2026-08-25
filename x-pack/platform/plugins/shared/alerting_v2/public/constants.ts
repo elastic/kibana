@@ -69,7 +69,9 @@ export const paths = {
   ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
   ruleList: ALERTING_V2_RULES_BASE_PATH,
   ruleListFilteredByTemplate: (templateId: string) =>
-    `${ALERTING_V2_RULES_BASE_PATH}?has_reference_type=alerting_rule_template&has_reference_id=${encodeURIComponent(templateId)}`,
+    `${ALERTING_V2_RULES_BASE_PATH}?has_reference_type=alerting_rule_template&has_reference_id=${encodeURIComponent(
+      templateId
+    )}`,
   actionPolicyCreate: `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/create`,
   actionPolicyEdit: (id: string) =>
     `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,

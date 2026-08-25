@@ -44,9 +44,7 @@ function getDescriptors(sourceType: string): SourceReferenceDescriptor[] | undef
  * SOURCE_REFERENCE_DESCRIPTORS. Returns an empty array when source is absent
  * or has no registered descriptors.
  */
-export function extractSourceReferences(
-  source: SourceLike | undefined
-): SavedObjectReference[] {
+export function extractSourceReferences(source: SourceLike | undefined): SavedObjectReference[] {
   if (!source) {
     return [];
   }

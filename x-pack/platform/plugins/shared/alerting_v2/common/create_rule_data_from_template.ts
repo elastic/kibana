@@ -24,7 +24,8 @@ import { RULE_TEMPLATE_SOURCE_TYPE } from '@kbn/alerting-v2-constants';
 export const createRuleDataFromTemplate = (
   template: RuleTemplateData | RuleTemplateResponse
 ): CreateRuleData => {
-  const rule = 'rule' in template && 'id' in template ? template.rule : (template as RuleTemplateData).rule;
+  const rule =
+    'rule' in template && 'id' in template ? template.rule : (template as RuleTemplateData).rule;
   const templateId = 'id' in template ? (template as RuleTemplateResponse).id : undefined;
 
   const parsed = createRuleDataSchema.parse(rule);
