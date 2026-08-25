@@ -159,6 +159,7 @@ export class AuditService {
               id: user.profile_uid,
               name: user.username,
               ...(user.email ? { email: user.email } : {}),
+              ...(user.full_name ? { full_name: user.full_name } : {}),
               roles: user.roles as string[],
             }) ||
             event.user,

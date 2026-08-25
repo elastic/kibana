@@ -33,6 +33,31 @@ describe('applyAuditOtelFieldMap', () => {
     expect(result).not.toHaveProperty('client.ip');
   });
 
+  it('replaces the user profile UID in user.id with the username', () => {
+    const result = applyAuditOtelFieldMap({ 'user.id': 'uid', 'user.name': 'jdoe' });
+
+    expect(result['user.id']).toBe('jdoe');
+    expect(result['user.name']).toBe('jdoe');
+  });
+
+  it('drops user.id when there is no username to key the user by', () => {
+    expect(applyAuditOtelFieldMap({ 'user.id': 'uid' })).not.toHaveProperty('user.id');
+    expect(applyAuditOtelFieldMap({ 'user.id': 'uid', 'user.name': '' })).not.toHaveProperty(
+      'user.id'
+    );
+  });
+
+  it('passes user.email and user.full_name through unchanged', () => {
+    const result = applyAuditOtelFieldMap({
+      'user.name': 'jdoe',
+      'user.email': 'jdoe@example.com',
+      'user.full_name': 'Jane Doe',
+    });
+
+    expect(result['user.email']).toBe('jdoe@example.com');
+    expect(result['user.full_name']).toBe('Jane Doe');
+  });
+
   it('renames trace.id to http.request.id and x-forwarded-for to network.forwarded_ip', () => {
     const result = applyAuditOtelFieldMap({
       'trace.id': 'REQUEST_ID',
@@ -156,6 +181,7 @@ describe('applyAuditOtelFieldMap', () => {
       'url.domain': 'localhost',
       'url.path': '/api/status',
       'url.port': 5601,
+      'user.id': 'uid',
       'user.name': 'jdoe',
     });
 
@@ -173,6 +199,7 @@ describe('applyAuditOtelFieldMap', () => {
       'source.address': '3.3.3.3',
       'source.ip': '3.3.3.3',
       'url.original': 'http://localhost/api/status',
+      'user.id': 'jdoe',
       'user.name': 'jdoe',
     });
   });

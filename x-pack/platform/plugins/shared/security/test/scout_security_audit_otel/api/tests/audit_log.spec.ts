@@ -114,9 +114,9 @@ apiTest.describe(
         // fieldDefaults: auth events carry no event.type — default supplies ['access'].
         expect(e['event.type']).toStrictEqual(['access']);
 
-        // User identity.
+        // User identity. On Serverless user.id is keyed by login name, not by profile UID.
         expect(e['user.name']).toBe(username);
-        expect(e['user.id']).toBeDefined();
+        expect(e['user.id']).toBe(username);
         expect(e['user.roles']).toStrictEqual(['superuser']);
 
         // AUDIT_OTEL_FIELD_DROPS: kibana.authentication_provider and kibana.authentication_realm
@@ -249,7 +249,7 @@ apiTest.describe(
 
         // Authenticated user.
         expect(e['user.name']).toBeDefined();
-        expect(e['user.id']).toBeDefined();
+        expect(e['user.id']).toBe(e['user.name']);
         expect(Array.isArray(e['user.roles'])).toBe(true);
 
         // Kibana context.
@@ -305,7 +305,7 @@ apiTest.describe(
 
         // Authenticated user.
         expect(e['user.name']).toBeDefined();
-        expect(e['user.id']).toBeDefined();
+        expect(e['user.id']).toBe(e['user.name']);
         expect(Array.isArray(e['user.roles'])).toBe(true);
 
         // AUDIT_OTEL_FIELD_RENAMES: kibana.space_id → kibana.space.id.
@@ -345,7 +345,7 @@ apiTest.describe(
 
         // User who logged out.
         expect(e['user.name']).toBeDefined();
-        expect(e['user.id']).toBeDefined();
+        expect(e['user.id']).toBe(e['user.name']);
 
         // Auth provider — dropped on Serverless (fixed value).
         expect(e['kibana.authentication_provider']).toBeUndefined();

@@ -44,6 +44,16 @@ export const applyAuditOtelFieldMap: OtelAttributesTransform = (attributes) => {
     delete attrs['client.ip'];
   }
 
+  // Serverless audit delivery keys users by login name, not by user profile UID: user.id becomes
+  // the username and the profile UID is not emitted. user.id is deleted when there is no username
+  // so a profile UID cannot leak through on events that carry an id but no name (user_logout).
+  const userName = attrs['user.name'];
+  if (typeof userName === 'string' && userName !== '') {
+    attrs['user.id'] = userName;
+  } else {
+    delete attrs['user.id'];
+  }
+
   // The ingest pipeline reparses url.original back into components. Skipped for non-http events
   // or non-scalar components (array values would silently comma-join).
   const scheme = attrs['url.scheme'];
