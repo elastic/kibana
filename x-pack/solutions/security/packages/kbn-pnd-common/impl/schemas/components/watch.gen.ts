@@ -171,10 +171,6 @@ export const Watch = lazySchema(() =>
      * Accent color for coverage strip and cards (hex or CSS var)
      */
     color: z.string(),
-    /**
-     * Icon key for UI (EUI icon name)
-     */
-    icon: z.string(),
     enabled: z.boolean(),
     draft: z.boolean(),
     /**

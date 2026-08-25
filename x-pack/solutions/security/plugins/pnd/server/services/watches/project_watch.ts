@@ -27,7 +27,6 @@ interface WatchPolicyAttrs {
 }
 
 const DEFAULT_COLOR = '#6b7280';
-const DEFAULT_ICON = 'email';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -241,7 +240,6 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     name: item.name,
     tags,
     color: asString(policy?.ui?.color, DEFAULT_COLOR),
-    icon: DEFAULT_ICON,
     enabled: item.enabled,
     draft: false,
     managed: item.managed === true,

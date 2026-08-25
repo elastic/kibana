@@ -42,7 +42,6 @@ export function createCatalogWatchPlaceholder(watchId: CatalogWatchId): Watch {
     name: entry.name,
     tags: [WATCH_TAG, tierTag],
     color: entry.color,
-    icon: 'email',
     enabled: false,
     draft: false,
     managed: true,

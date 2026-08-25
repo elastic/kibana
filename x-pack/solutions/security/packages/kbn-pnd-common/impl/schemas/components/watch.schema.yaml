@@ -186,7 +186,6 @@ components:
         - name
         - tags
         - color
-        - icon
         - enabled
         - draft
         - managed
@@ -214,9 +213,6 @@ components:
         color:
           type: string
           description: Accent color for coverage strip and cards (hex or CSS var)
-        icon:
-          type: string
-          description: Icon key for UI (EUI icon name)
         enabled:
           type: boolean
         draft:
