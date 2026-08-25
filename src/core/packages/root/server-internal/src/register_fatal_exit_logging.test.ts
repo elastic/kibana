@@ -12,6 +12,10 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { FatalExitLogging } from './register_fatal_exit_logging';
 import { registerFatalExitLogging } from './register_fatal_exit_logging';
 
+// `process.emit` types don't accept the `origin` argument that Node passes in production.
+const emitUncaughtExceptionMonitor = (error: Error, origin = 'uncaughtException') =>
+  (process as NodeJS.EventEmitter).emit('uncaughtExceptionMonitor', error, origin);
+
 describe('registerFatalExitLogging', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let consoleErrorSpy: jest.SpyInstance;
@@ -29,28 +33,49 @@ describe('registerFatalExitLogging', () => {
   });
 
   describe('uncaught exceptions', () => {
-    it('logs fatal and mirrors to stderr', () => {
+    it('logs fatal with the error attached and mirrors to stderr', () => {
       const error = new Error('something went wrong');
-      process.emit('uncaughtExceptionMonitor', error); // Types won't allow us to provide the `origin`
+
+      emitUncaughtExceptionMonitor(error);
 
       expect(logger.fatal).toHaveBeenCalledTimes(1);
-      expect(logger.fatal.mock.calls[0][0]).toMatch(
-        /Kibana is shutting down due to an undefined: Error: something went wrong\n.*at /
+      expect(logger.fatal).toHaveBeenCalledWith(
+        'Kibana is shutting down due to an uncaughtException',
+        { error }
       );
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
-      expect(consoleErrorSpy.mock.calls[0][0]).toContain('Kibana is shutting down due to an');
+      expect(consoleErrorSpy.mock.calls[0][0]).toMatch(
+        /Kibana is shutting down due to an uncaughtException: Error: something went wrong\n.*at /
+      );
     });
 
-    it('does not log for a CriticalError, which is reported by the root shutdown path', () => {
+    it('logs an uncaught CriticalError, which never reaches the root shutdown path', () => {
       const error = new CriticalError('something went wrong', 'ERROR_CODE', 1234);
-      process.emit('uncaughtExceptionMonitor', error); // Types won't allow us to provide the `origin`
 
-      expect(logger.fatal).not.toHaveBeenCalled();
-      expect(consoleErrorSpy).not.toHaveBeenCalled();
+      emitUncaughtExceptionMonitor(error);
+
+      expect(logger.fatal).toHaveBeenCalledWith(
+        'Kibana is shutting down due to an uncaughtException',
+        { error }
+      );
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('mirrors to stderr even when the logger throws', () => {
+      logger.fatal.mockImplementation(() => {
+        throw new Error('the logging system is broken too');
+      });
+
+      emitUncaughtExceptionMonitor(new Error('something went wrong'));
+
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+      expect(consoleErrorSpy.mock.calls[0][0]).toContain(
+        'Kibana is shutting down due to an uncaughtException'
+      );
     });
 
     it('silences the exit guard once the exception has been reported', () => {
-      process.emit('uncaughtExceptionMonitor', new Error('something went wrong'));
+      emitUncaughtExceptionMonitor(new Error('something went wrong'));
       consoleErrorSpy.mockClear();
 
       process.emit('exit', 1);

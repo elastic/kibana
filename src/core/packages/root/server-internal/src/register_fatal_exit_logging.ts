@@ -9,7 +9,6 @@
 
 import chalk from 'chalk';
 import type { Logger } from '@kbn/logging';
-import { CriticalError } from '@kbn/core-base-server-internal';
 
 /** @internal */
 export interface FatalExitLogging {
@@ -42,19 +41,19 @@ export const registerFatalExitLogging = ({
   let shutdownReasonReported = false;
 
   const onUncaughtExceptionMonitor = (error: Error, origin: string) => {
-    // CriticalErrors are reported through the root shutdown path
-    if (error instanceof CriticalError) {
-      return;
+    shutdownReasonReported = true;
+    const message = `Kibana is shutting down due to an ${origin}`;
+
+    try {
+      logger.fatal(message, { error });
+    } catch {
+      // The logging system itself may be the thing that broke, so the stderr mirror below
+      // has to run regardless.
     }
 
-    shutdownReasonReported = true;
-    const message = `Kibana is shutting down due to an ${origin}: ${
-      error?.stack ?? JSON.stringify(error)
-    }`;
-    logger.fatal(message);
     // Appenders are not guaranteed to flush before the process dies, so always mirror to stderr.
     // eslint-disable-next-line no-console
-    console.error(`\n${fatalTag()} ${message}\n`);
+    console.error(`\n${fatalTag()} ${message}: ${error?.stack ?? JSON.stringify(error)}\n`);
   };
 
   const onExit = (code: number) => {
