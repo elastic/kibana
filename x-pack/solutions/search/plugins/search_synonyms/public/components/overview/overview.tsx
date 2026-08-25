@@ -24,7 +24,6 @@ import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { isPermissionError } from '../../utils/synonyms_utils';
 
-
 export const SearchSynonymsOverview = () => {
   const {
     services: { console: consolePlugin, history, searchNavigation },
@@ -107,10 +106,11 @@ export const SearchSynonymsOverview = () => {
             })}
           >
             <EuiFlexItem>
-
-              <EmptyPrompt getStartedAction={() => {
-                setIsCreateModalVisible(true);
-              }} />
+              <EmptyPrompt
+                getStartedAction={() => {
+                  setIsCreateModalVisible(true);
+                }}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}

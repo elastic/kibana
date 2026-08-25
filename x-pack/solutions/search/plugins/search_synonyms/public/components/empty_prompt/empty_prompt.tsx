@@ -7,16 +7,12 @@
 
 import React from 'react';
 
-import {
-  EuiButton,
-  EuiLink,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiLink, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { docLinks } from '../../../common/doc_links';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { highFive } from '@elastic/eui-illustrations';
 import { EuiIllustration } from '@elastic/eui';
+import { docLinks } from '../../../common/doc_links';
 
 interface EmptyPromptProps {
   getStartedAction: () => void;
@@ -41,15 +37,22 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
           />
         </h2>
       }
-      body={<p>
-        <FormattedMessage
-          id="xpack.searchSynonyms.emptyPrompt.subtitle"
-          defaultMessage="Create and manage Elasticsearch synonym sets and rules, which expand search results by matching different terms that express the same concept."
-        />
-      </p>}
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.searchSynonyms.emptyPrompt.subtitle"
+            defaultMessage="Create and manage Elasticsearch synonym sets and rules, which expand search results by matching different terms that express the same concept."
+          />
+        </p>
+      }
       actions={
-        <EuiButton color="primary" fill iconType="plusCircle" iconSide="left" onClick={getStartedAction}>
-
+        <EuiButton
+          color="primary"
+          fill
+          iconType="plusCircle"
+          iconSide="left"
+          onClick={getStartedAction}
+        >
           <FormattedMessage
             id="xpack.searchSynonyms.emptyPrompt.getStartedButton"
             defaultMessage="Create a synonym set"
@@ -79,7 +82,6 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
           </EuiLink>
         </>
       }
-
     />
   );
 };
