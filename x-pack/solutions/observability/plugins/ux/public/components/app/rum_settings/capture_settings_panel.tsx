@@ -483,8 +483,8 @@ export function CaptureSettingsPanel() {
             <EuiSpacer size="s" />
             <EuiButton
               size="s"
-              onClick={() => void onSave()}
-              isLoading={saving}
+              onClick={() => void onInstallAnalytics()}
+              isLoading={installing}
               isDisabled={analyticsInvalid}
               data-test-subj="uxSessionAnalyticsApplyButton"
             >

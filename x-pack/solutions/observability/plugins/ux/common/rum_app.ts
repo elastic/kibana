@@ -54,32 +54,38 @@ export interface RumTrendPoint {
 
 export type SessionTrendAlign = '1d' | '1h';
 
-export const sessionTrendAlignKey = (timestamp: string, align: SessionTrendAlign): string => {
-  const ms = Date.parse(timestamp);
-  if (!Number.isFinite(ms)) {
-    return timestamp;
-  }
-  const iso = new Date(ms).toISOString();
-  return align === '1d' ? iso.slice(0, 10) : iso.slice(0, 13);
-};
-
-/** Session-dest started counts on an existing series. Keeps page views / errors. */
+/**
+ * Session-dest started counts on an existing series. Keeps page views / errors.
+ *
+ * The two series come from independent histograms (raw `@timestamp` vs dest
+ * `start_time`), so their bucket boundaries do not line up. Session counts are
+ * folded into the bucket of `trends` that contains them rather than matched on
+ * an equal timestamp.
+ */
 export const applySessionIndexTrendSessions = (
   trends: RumTrendPoint[],
-  sessionTrends: RumTrendPoint[],
-  align: SessionTrendAlign
+  sessionTrends: RumTrendPoint[]
 ): RumTrendPoint[] => {
-  if (sessionTrends.length === 0) {
+  if (sessionTrends.length === 0 || trends.length === 0) {
     return trends;
   }
-  const sessionsByKey = new Map<string, number>();
-  for (const point of sessionTrends) {
-    sessionsByKey.set(sessionTrendAlignKey(point.timestamp, align), point.sessions);
+  const startMs = trends.map((point) => Date.parse(point.timestamp));
+  if (startMs.some((ms) => !Number.isFinite(ms))) {
+    return trends;
   }
-  return trends.map((point) => ({
-    ...point,
-    sessions: sessionsByKey.get(sessionTrendAlignKey(point.timestamp, align)) ?? 0,
-  }));
+  const sessionsByBucket = new Array<number>(trends.length).fill(0);
+  for (const point of sessionTrends) {
+    const ms = Date.parse(point.timestamp);
+    if (!Number.isFinite(ms)) {
+      continue;
+    }
+    let bucket = 0;
+    while (bucket + 1 < startMs.length && startMs[bucket + 1] <= ms) {
+      bucket += 1;
+    }
+    sessionsByBucket[bucket] += point.sessions;
+  }
+  return trends.map((point, index) => ({ ...point, sessions: sessionsByBucket[index] }));
 };
 
 export interface RumFrustrationCounts {

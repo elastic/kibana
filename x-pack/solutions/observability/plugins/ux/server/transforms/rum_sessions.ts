@@ -14,6 +14,7 @@ import {
   RUM_SESSIONS_INDEX,
   RUM_SESSIONS_LOOKBACK_DAYS,
   RUM_SESSIONS_PIPELINE_NAME,
+  RUM_SESSIONS_SPEC,
   RUM_SESSIONS_SYNC_DELAY,
   RUM_SESSIONS_TEMPLATE_NAME,
   RUM_SESSIONS_TRANSFORM_ID,
@@ -52,6 +53,7 @@ import {
   removePreviousTransform,
   restartUnhealthyTransform,
   startTransformIgnoreRunning,
+  transformNeedsUpgrade,
   updateTransformSourceWindow,
   updateTransformSyncDelay,
 } from './rum_transform_utils';
@@ -429,6 +431,32 @@ export const reconcileRumSessionsTransform = async ({
     logger.error(`Failed to put ${RUM_SESSIONS_TEMPLATE_NAME}: ${extractEsErrorMessage(error)}`);
   }
   if (status.installed) {
+    const needsUpgrade = await transformNeedsUpgrade({
+      client,
+      transformId: RUM_SESSIONS_TRANSFORM_ID,
+      version: RUM_SESSIONS_VERSION,
+      spec: RUM_SESSIONS_SPEC,
+    });
+    // A deploy that changes the transform body is otherwise invisible: the
+    // installed transform keeps running the previous spec until reinstalled.
+    if (needsUpgrade) {
+      logger.info(
+        `Upgrading ${RUM_SESSIONS_TRANSFORM_ID} to version ${RUM_SESSIONS_VERSION} spec ${RUM_SESSIONS_SPEC}`
+      );
+      try {
+        await ensureRumSessionsTransform({
+          client,
+          logger,
+          syncDelay: delay,
+          sourceLookbackDays: lookbackDays,
+        });
+        return;
+      } catch (error) {
+        logger.error(
+          `Failed to upgrade ${RUM_SESSIONS_TRANSFORM_ID}: ${extractEsErrorMessage(error)}`
+        );
+      }
+    }
     const { destRecreated } = await ensureSessionsDestSorted({ client, logger });
     if (destRecreated) {
       await resetSessionsTransformAfterDestRecreate({ client, logger, destRecreated });

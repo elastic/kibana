@@ -108,7 +108,7 @@ const overlaySessionIndex = async (
   ]);
   return {
     ...result,
-    trends: applySessionIndexTrendSessions(result.trends, slice.trends, '1h'),
+    trends: applySessionIndexTrendSessions(result.trends, slice.trends),
     kpis: {
       ...result.kpis,
       sessions: slice.sessions,

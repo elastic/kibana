@@ -242,6 +242,30 @@ export const removePreviousTransform = async ({
   }
 };
 
+/** True when the installed transform carries an older version/spec than the code. */
+export const transformNeedsUpgrade = async ({
+  client,
+  transformId,
+  version,
+  spec,
+}: {
+  client: ElasticsearchClient;
+  transformId: string;
+  version: number;
+  spec?: number;
+}): Promise<boolean> => {
+  try {
+    const current = await client.transform.getTransform({ transform_id: transformId });
+    const meta = current.transforms[0]?._meta as { version?: number; spec?: number } | undefined;
+    if (meta == null) {
+      return false;
+    }
+    return meta.version !== version || (spec != null && meta.spec !== spec);
+  } catch {
+    return false;
+  }
+};
+
 export const putOrReplaceTransform = async ({
   client,
   logger,

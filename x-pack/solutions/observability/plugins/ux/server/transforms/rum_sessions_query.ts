@@ -594,7 +594,7 @@ export const overlaySessionTrendSessions = async ({
     calendarInterval: align === '1d' ? '1d' : undefined,
     ...params,
   });
-  return applySessionIndexTrendSessions(trends, sessionTrends, align);
+  return applySessionIndexTrendSessions(trends, sessionTrends);
 };
 
 export const querySessionIndexFilters = async ({

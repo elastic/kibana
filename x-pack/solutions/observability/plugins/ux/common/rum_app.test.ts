@@ -28,7 +28,6 @@ import {
   ranksFromPercentileRanks,
   rateVital,
   rumFailingApps,
-  sessionTrendAlignKey,
   stackErrorTrends,
   summarizePagesKpis,
   tryParseBotUaTokens,
@@ -455,7 +454,6 @@ describe('mergeRumCountries', () => {
 
 describe('applySessionIndexTrendSessions', () => {
   it('replaces daily sessions and keeps page views', () => {
-    expect(sessionTrendAlignKey('2026-08-14T12:30:00.000Z', '1d')).toBe('2026-08-14');
     expect(
       applySessionIndexTrendSessions(
         [
@@ -472,8 +470,7 @@ describe('applySessionIndexTrendSessions', () => {
             errors: 0,
           },
         ],
-        [{ timestamp: '2026-08-14T00:00:00.000Z', sessions: 17, pageViews: 0, errors: 0 }],
-        '1d'
+        [{ timestamp: '2026-08-14T00:00:00.000Z', sessions: 17, pageViews: 0, errors: 0 }]
       )
     ).toEqual([
       { timestamp: '2026-08-14T00:00:00.000Z', sessions: 17, pageViews: 808, errors: 15 },
@@ -481,10 +478,37 @@ describe('applySessionIndexTrendSessions', () => {
     ]);
   });
 
+  it('folds session buckets into the containing trend bucket when boundaries differ', () => {
+    expect(
+      applySessionIndexTrendSessions(
+        [
+          { timestamp: '2026-08-18T11:00:00.000Z', sessions: 0, pageViews: 100, errors: 2 },
+          { timestamp: '2026-08-18T23:00:00.000Z', sessions: 0, pageViews: 50, errors: 1 },
+        ],
+        [
+          { timestamp: '2026-08-18T13:00:00.000Z', sessions: 25, pageViews: 0, errors: 0 },
+          { timestamp: '2026-08-19T01:00:00.000Z', sessions: 4, pageViews: 0, errors: 0 },
+        ]
+      )
+    ).toEqual([
+      { timestamp: '2026-08-18T11:00:00.000Z', sessions: 25, pageViews: 100, errors: 2 },
+      { timestamp: '2026-08-18T23:00:00.000Z', sessions: 4, pageViews: 50, errors: 1 },
+    ]);
+  });
+
+  it('counts sessions that start before the first bucket', () => {
+    expect(
+      applySessionIndexTrendSessions(
+        [{ timestamp: '2026-08-18T11:00:00.000Z', sessions: 0, pageViews: 100, errors: 2 }],
+        [{ timestamp: '2026-08-18T00:00:00.000Z', sessions: 7, pageViews: 0, errors: 0 }]
+      )
+    ).toEqual([{ timestamp: '2026-08-18T11:00:00.000Z', sessions: 7, pageViews: 100, errors: 2 }]);
+  });
+
   it('leaves the series alone when the session index is empty', () => {
     const trends = [
       { timestamp: '2026-08-16T10:00:00.000Z', sessions: 3, pageViews: 10, errors: 1 },
     ];
-    expect(applySessionIndexTrendSessions(trends, [], '1h')).toBe(trends);
+    expect(applySessionIndexTrendSessions(trends, [])).toBe(trends);
   });
 });

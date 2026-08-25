@@ -15,6 +15,7 @@ import {
   isEsAuthzDenied,
   isEsNotFound,
   readRollupStatus,
+  transformNeedsUpgrade,
   transformSourceWindowUpdate,
 } from './rum_transform_utils';
 
@@ -95,6 +96,37 @@ describe('es status helpers', () => {
     expect(isEsAuthzDenied({ meta: { statusCode: 403 } })).toBe(true);
     expect(isEsAuthzDenied({ statusCode: 401 })).toBe(true);
     expect(isEsAuthzDenied({ statusCode: 500 })).toBe(false);
+  });
+});
+
+describe('transformNeedsUpgrade', () => {
+  const withMeta = (_meta: unknown): ElasticsearchClient =>
+    ({
+      transform: { getTransform: jest.fn().mockResolvedValue({ transforms: [{ _meta }] }) },
+    } as unknown as ElasticsearchClient);
+
+  const args = { transformId: 'ux-rum-sessions-3', version: 3, spec: 6 };
+
+  it('is true when the installed spec is behind the code', async () => {
+    const client = withMeta({ managed_by: 'ux', version: 3, spec: 4 });
+    expect(await transformNeedsUpgrade({ client, ...args })).toBe(true);
+  });
+
+  it('is true when the installed version is behind the code', async () => {
+    const client = withMeta({ managed_by: 'ux', version: 2, spec: 6 });
+    expect(await transformNeedsUpgrade({ client, ...args })).toBe(true);
+  });
+
+  it('is false when version and spec already match', async () => {
+    const client = withMeta({ managed_by: 'ux', version: 3, spec: 6 });
+    expect(await transformNeedsUpgrade({ client, ...args })).toBe(false);
+  });
+
+  it('is false when the transform is missing', async () => {
+    const client = {
+      transform: { getTransform: jest.fn().mockRejectedValue(esError(404)) },
+    } as unknown as ElasticsearchClient;
+    expect(await transformNeedsUpgrade({ client, ...args })).toBe(false);
   });
 });
 
