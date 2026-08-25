@@ -44,6 +44,7 @@ function buildVisualizationState(config: LensXYConfig): XYVisualizationState {
       yLeft: config.axisTitleVisibility?.showYAxisTitle ?? true,
       yRight: config.axisTitleVisibility?.showYRightAxisTitle ?? true,
     },
+    yTitle: config.yTitle ?? '',
     legend: {
       isVisible: config.legend?.show ?? true,
       position: config.legend?.position ?? 'left',

@@ -150,6 +150,7 @@ test('generates xy chart config', async () => {
             "mode": "full",
             "upperBound": undefined,
           },
+          "yTitle": "",
         },
       },
       "title": "test",
@@ -297,6 +298,50 @@ test('it generates xy chart with multiple reference lines', async () => {
         forAccessor: 'metric_formula_accessor2_0',
       },
     ],
+  });
+});
+
+describe('y-axis title', () => {
+  const baseConfig = {
+    chartType: 'xy' as const,
+    title: 'test',
+    dataset: {
+      esql: 'from test | count=count() by @timestamp',
+    },
+    layers: [
+      {
+        type: 'series' as const,
+        seriesType: 'line' as const,
+        xAxis: '@timestamp',
+        yAxis: [
+          {
+            label: 'test',
+            value: 'count',
+          },
+        ],
+      },
+    ],
+  };
+
+  it('sets a custom y-axis title in the visualization state when yTitle is provided', async () => {
+    const result = await buildXY(
+      { ...baseConfig, yTitle: 'Avg' },
+      {
+        dataViewsAPI: mockDataViewsService() as any,
+      }
+    );
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.yTitle).toBe('Avg');
+  });
+
+  it('defaults to an empty y-axis title when yTitle is not provided', async () => {
+    const result = await buildXY(baseConfig, {
+      dataViewsAPI: mockDataViewsService() as any,
+    });
+
+    const visualization = result.state.visualization as XYVisualizationState;
+    expect(visualization.yTitle).toBe('');
   });
 });
 
