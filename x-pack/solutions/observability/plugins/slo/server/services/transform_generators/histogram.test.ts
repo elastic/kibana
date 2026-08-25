@@ -222,9 +222,9 @@ describe('Histogram Transform Generator', () => {
       expect(transform.source.project_routing).toBe(LOCAL_PROJECT_ROUTING);
     });
 
-    it('uses origin routing when both routing fields are unset', async () => {
+    it('uses all-projects routing when both routing fields are unset', async () => {
       const transform = await cpsGenerator.getTransformParams(sloWithSettings({}));
-      expect(transform.source.project_routing).toBe(LOCAL_PROJECT_ROUTING);
+      expect(transform.source.project_routing).toBe(ALL_PROJECT_ROUTING);
     });
 
     it('uses all-projects routing when preventCrossProjectSearch is false', async () => {

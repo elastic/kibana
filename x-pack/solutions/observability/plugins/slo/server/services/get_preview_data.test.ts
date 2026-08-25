@@ -9,7 +9,7 @@ import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 import type { GetPreviewDataParams } from '@kbn/slo-schema';
-import { LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
+import { ALL_PROJECT_ROUTING } from '../../common/project_routings';
 import { GetPreviewData } from './get_preview_data';
 import { oneMinute } from './fixtures/duration';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
@@ -576,10 +576,10 @@ describe('GetPreviewData', () => {
       expect(searchRequest()).not.toHaveProperty('project_routing');
     });
 
-    it('defaults project_routing to _alias:_origin when serverless+CPS and projectRoutings is omitted', async () => {
+    it('defaults project_routing to _alias:* when serverless+CPS and projectRoutings is omitted', async () => {
       await createService({ isServerless: true, isCpsAvailable: true }).execute(kqlPreviewParams);
 
-      expect(searchRequest()).toHaveProperty('project_routing', LOCAL_PROJECT_ROUTING);
+      expect(searchRequest()).toHaveProperty('project_routing', ALL_PROJECT_ROUTING);
     });
   });
 });

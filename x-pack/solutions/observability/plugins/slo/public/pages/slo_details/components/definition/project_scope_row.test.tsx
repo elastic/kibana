@@ -131,11 +131,11 @@ describe('ProjectScopeRow', () => {
     expect(screen.queryByText('Project scope')).not.toBeInTheDocument();
   });
 
-  it('shows This project when neither routing field is stored', () => {
+  it('shows All projects when neither routing field is stored', () => {
     renderRow({ preventCrossProjectSearch: undefined });
 
     expect(screen.getByText('Project scope')).toBeInTheDocument();
-    expect(screen.getByText('This project')).toBeInTheDocument();
+    expect(screen.getByText('All projects')).toBeInTheDocument();
   });
 
   it('shows This project for legacy preventCrossProjectSearch true', () => {

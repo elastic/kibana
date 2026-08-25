@@ -28,12 +28,11 @@ export function toPickerProjectRouting(
   return undefined;
 }
 
-// Same mapping as the picker, but never-configured falls back to origin-only (fail-safe).
+// Same mapping as the picker, but never-configured falls back to all projects, matching the
+// pre-projectRoutings behavior where the absent/false boolean left project_routing unset.
 export function toEsProjectRouting(
   projectRoutings: string | null | undefined,
   preventCrossProjectSearch: boolean | undefined
 ): string {
-  return (
-    toPickerProjectRouting(projectRoutings, preventCrossProjectSearch) ?? LOCAL_PROJECT_ROUTING
-  );
+  return toPickerProjectRouting(projectRoutings, preventCrossProjectSearch) ?? ALL_PROJECT_ROUTING;
 }

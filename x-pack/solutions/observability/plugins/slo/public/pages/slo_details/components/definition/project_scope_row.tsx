@@ -17,10 +17,7 @@ import { ProjectPickerContent, useFetchProjects } from '@kbn/cps-utils';
 import { getEbtProps } from '@kbn/ebt-click';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
-import {
-  LOCAL_PROJECT_ROUTING,
-  toPickerProjectRouting,
-} from '../../../../../common/project_routings';
+import { toEsProjectRouting } from '../../../../../common/project_routings';
 import { SLO_DETAILS_EBT_ACTIONS, SLO_DETAILS_EBT_ELEMENTS } from '../../ebt_constants';
 import type { CpsProjectScope } from '../../../../hooks/use_cps_project_scope';
 import { useCpsProjectScope } from '../../../../hooks/use_cps_project_scope';
@@ -75,9 +72,7 @@ export function ProjectScopeRow({ slo }: Props) {
   const popoverTitleId = useGeneratedHtmlId();
 
   const { projectRoutings, preventCrossProjectSearch } = slo.settings;
-  // An unset routing means origin-only, which is the same display bucket as `_alias:_origin`.
-  const projectRouting =
-    toPickerProjectRouting(projectRoutings, preventCrossProjectSearch) ?? LOCAL_PROJECT_ROUTING;
+  const projectRouting = toEsProjectRouting(projectRoutings, preventCrossProjectSearch);
 
   if (!showProjectScopeUI || !cpsManager) {
     return null;

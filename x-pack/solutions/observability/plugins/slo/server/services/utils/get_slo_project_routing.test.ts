@@ -60,7 +60,7 @@ const PRECEDENCE_CASES: Array<{
   {
     name: 'both unset',
     settings: {},
-    expected: LOCAL_PROJECT_ROUTING,
+    expected: ALL_PROJECT_ROUTING,
   },
   {
     name: 'stored projectRoutings wins over preventCrossProjectSearch',

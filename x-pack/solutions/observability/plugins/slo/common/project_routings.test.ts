@@ -35,8 +35,8 @@ describe('toEsProjectRouting', () => {
     expect(toEsProjectRouting(undefined, false)).toBe(ALL_PROJECT_ROUTING);
   });
 
-  it('maps both unset to LOCAL', () => {
-    expect(toEsProjectRouting(undefined, undefined)).toBe(LOCAL_PROJECT_ROUTING);
+  it('maps both unset to ALL', () => {
+    expect(toEsProjectRouting(undefined, undefined)).toBe(ALL_PROJECT_ROUTING);
   });
 
   it('passes through subset expressions', () => {
