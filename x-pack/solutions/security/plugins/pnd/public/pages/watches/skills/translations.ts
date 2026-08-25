@@ -43,6 +43,18 @@ export const LOAD_ERROR = i18n.translate('xpack.pnd.watches.skills.loadError', {
   defaultMessage: 'Unable to load skills.',
 });
 
+export const NOT_IMPLEMENTED_TITLE = i18n.translate(
+  'xpack.pnd.watches.skills.notImplemented.title',
+  {
+    defaultMessage: 'Skills are not implemented yet',
+  }
+);
+
+export const NOT_IMPLEMENTED_BODY = i18n.translate('xpack.pnd.watches.skills.notImplemented.body', {
+  defaultMessage:
+    'The skill catalog has no durable storage in live mode. Open a Watch on the left to change its settings.',
+});
+
 export const enableSkillAriaLabel = (name: string) =>
   i18n.translate('xpack.pnd.watches.skills.enableAriaLabel', {
     defaultMessage: 'Enable skill {name}',

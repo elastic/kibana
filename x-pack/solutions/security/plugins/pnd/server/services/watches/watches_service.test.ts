@@ -204,6 +204,29 @@ describe('WatchesService', () => {
       expect(floor?.schedule.set).toBe(false);
     });
 
+    it('still lists installed catalog watches when workflow search returns none', async () => {
+      const harness = createPersistentHarness();
+      const service = harness.createService();
+      await service.update(FLOOR, { enabled: true }, SPACE, request);
+      jest.mocked(harness.management.getWorkflows).mockResolvedValue({
+        page: 1,
+        size: 100,
+        total: 0,
+        results: [],
+      });
+
+      const response = await service.list(SPACE);
+      const floor = response.watches.find(({ id }) => id === FLOOR);
+
+      expect(response.watches).toHaveLength(5);
+      expect(floor).toEqual(
+        expect.objectContaining({
+          id: FLOOR,
+          enabled: true,
+        })
+      );
+    });
+
     it('reads managed enablement while retaining the mock catalog presentation', async () => {
       const harness = createPersistentHarness();
       const service = harness.createService(true);

@@ -24,7 +24,11 @@ export const retryOnTransientError = (failureCount: number, error: unknown): boo
     return false;
   }
   if (isHttpFetchError(error)) {
-    return !error.response?.status || error.response.status >= 500;
+    const status = error.response?.status;
+    if (status === 501) {
+      return false;
+    }
+    return !status || status >= 500;
   }
   return true;
 };

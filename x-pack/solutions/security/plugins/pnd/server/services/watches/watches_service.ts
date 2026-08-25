@@ -18,7 +18,11 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  type WorkflowDetailDto,
+  type WorkflowListItemDto,
+} from '@kbn/workflows';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { isWorkflowConflictError } from '@kbn/workflows-yaml';
 import {
@@ -51,6 +55,20 @@ import {
 import { PND_MANAGED_WORKFLOW_OWNER_ID } from '../../../common/constants';
 
 const WATCH_VISIBILITY_CONTEXT = getManagedWorkflowSelectorVisibilityContext('watch');
+
+const toWatchListItem = (detail: WorkflowDetailDto): WorkflowListItemDto => ({
+  id: detail.id,
+  name: detail.name,
+  description: detail.description ?? '',
+  enabled: detail.enabled,
+  managed: detail.managed,
+  managedBy: detail.managedBy,
+  definition: detail.definition,
+  createdAt: detail.createdAt,
+  tags: detail.definition?.tags ?? [],
+  valid: detail.valid,
+  history: undefined,
+});
 
 const projectNotInstalledWatch = (watch: Watch): Watch => ({
   ...structuredClone(watch),
@@ -259,11 +277,33 @@ export class WatchesService {
       });
 
     const watchIds = new Set(watches.map(({ id }) => id));
-    for (const { registration, status } of statuses) {
-      if (!status.installed && !watchIds.has(registration.id)) {
-        watches.push(projectNotInstalledWatch(registration.watch));
-      }
-    }
+    const missingCatalog = await Promise.all(
+      statuses
+        .filter(({ registration }) => !watchIds.has(registration.id))
+        .map(async ({ registration, status }) => {
+          // The PND catalog is the registry, not Workflows search visibility. Installed watches
+          // omitted from getWorkflows (selector filter, pagination) must still appear.
+          if (status.installed) {
+            try {
+              const detail = await management.getWorkflow(status.workflowId, spaceId);
+              if (detail) {
+                return {
+                  ...projectWorkflowToWatch(toWatchListItem(detail)),
+                  id: registration.id,
+                };
+              }
+            } catch (error) {
+              this.logger.debug(
+                `Failed to project installed watch ${registration.id}: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            }
+          }
+          return projectNotInstalledWatch(registration.watch);
+        })
+    );
+    watches.push(...missingCatalog);
 
     return ListWatchesResponse.parse({ watches: watches.sort(compareWatchesForDisplay) });
   }
@@ -348,19 +388,7 @@ export class WatchesService {
       return undefined;
     }
 
-    const listItem = {
-      id: detail.id,
-      name: detail.name,
-      description: detail.description ?? '',
-      enabled: detail.enabled,
-      managed: detail.managed,
-      managedBy: detail.managedBy,
-      definition: detail.definition,
-      createdAt: detail.createdAt,
-      tags,
-      valid: detail.valid,
-      history: undefined,
-    };
+    const listItem = toWatchListItem(detail);
 
     let settings: WatchSettings | undefined;
     let settingsRevision: number | null = null;
