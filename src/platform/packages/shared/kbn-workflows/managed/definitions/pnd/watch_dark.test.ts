@@ -19,7 +19,7 @@ const values: DarkWatchTemplateValues = {
   scheduleId: 'dark-overnight-sweep',
   allowManualRun: true,
   scopes: [{ name: 'Mail · IdP', access: 'full', label: 'Read + monitor' }],
-  connectorId: 'dark-inference-connector',
+  inferenceEndpointId: 'dark-tier2-inference-endpoint',
   tier2When: 'on_hits',
   candidateLimit: 10,
   fanOutMax: 10,
@@ -71,7 +71,7 @@ describe('PND_WATCH_DARK_WORKFLOW', () => {
       ?.steps?.find(({ name }) => name === 'hunt');
 
     expect(huntStep?.with?.inputs).toMatchObject({
-      connector_id: '{{ consts.watch_settings.connectorId }}',
+      inference_endpoint_id: '{{ consts.watch_settings.inferenceEndpointId }}',
       tier2_when: '{{ consts.watch_settings.tier2When }}',
       target_technology: '{{ consts.watch_settings.targetTechnology }}',
     });
@@ -82,8 +82,9 @@ describe('PND_WATCH_DARK_WORKFLOW', () => {
       steps: Array<{ name: string; steps?: Array<{ name: string }> }>;
     };
     const branchStepNames =
-      document.steps.find(({ name }) => name === 'report_fan_out')?.steps?.map(({ name }) => name) ??
-      [];
+      document.steps
+        .find(({ name }) => name === 'report_fan_out')
+        ?.steps?.map(({ name }) => name) ?? [];
 
     expect(branchStepNames).toEqual([
       'find_or_create_investigation',

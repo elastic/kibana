@@ -94,7 +94,7 @@ export const UpdateWatchRequestBody = lazySchema(() =>
      */
     dark: z
       .object({
-        connectorId: z.string().max(256).optional(),
+        inferenceEndpointId: z.string().max(256).optional(),
         tier2When: DarkWatchTier2When.optional(),
         candidateLimit: z.number().int().min(1).max(100).optional(),
         fanOutMax: z.number().int().min(1).max(20).optional(),

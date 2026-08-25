@@ -356,17 +356,19 @@ describe('WatchesService', () => {
         .createService()
         .update(
           DARK,
-          { dark: { connectorId: 'dark-inference-connector' }, settingsRevision: null },
+          { dark: { inferenceEndpointId: 'dark-inference-endpoint' }, settingsRevision: null },
           SPACE,
           request
         );
 
       expect(result.outcome).toBe('updated');
       expect(
-        result.outcome === 'updated' ? result.response.settings?.dark?.connectorId : undefined
-      ).toBe('dark-inference-connector');
+        result.outcome === 'updated'
+          ? result.response.settings?.dark?.inferenceEndpointId
+          : undefined
+      ).toBe('dark-inference-endpoint');
       expect(harness.documents.get(`${DARK}-${SPACE}`)?.values).toEqual(
-        expect.objectContaining({ connectorId: 'dark-inference-connector' })
+        expect.objectContaining({ inferenceEndpointId: 'dark-inference-endpoint' })
       );
     });
 
@@ -376,7 +378,12 @@ describe('WatchesService', () => {
       await expect(
         harness
           .createService()
-          .update(FLOOR, { dark: { connectorId: 'nope' }, settingsRevision: null }, SPACE, request)
+          .update(
+            FLOOR,
+            { dark: { inferenceEndpointId: 'nope' }, settingsRevision: null },
+            SPACE,
+            request
+          )
       ).resolves.toEqual({ outcome: 'rejected', what: 'dark watch settings' });
     });
 

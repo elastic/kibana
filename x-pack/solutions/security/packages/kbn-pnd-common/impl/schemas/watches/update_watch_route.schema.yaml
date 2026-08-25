@@ -117,7 +117,7 @@ paths:
                     Partial Dark Watch settings patch. Only valid for system-security-watch-dark;
                     other watches reject it.
                   properties:
-                    connectorId:
+                    inferenceEndpointId:
                       type: string
                       maxLength: 256
                     tier2When:

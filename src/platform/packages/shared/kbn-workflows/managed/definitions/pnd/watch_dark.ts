@@ -20,7 +20,7 @@ const renderPndWatchDarkYaml = ({
   scheduleId,
   allowManualRun,
   scopes,
-  connectorId,
+  inferenceEndpointId,
   tier2When,
   candidateLimit,
   fanOutMax,
@@ -35,7 +35,7 @@ const renderPndWatchDarkYaml = ({
     .replaceAll('__WATCH_SCHEDULE_ID__', scheduleId)
     .replaceAll('__WATCH_ALLOW_MANUAL_RUN__', String(allowManualRun))
     .replaceAll('__WATCH_SCOPES_JSON__', JSON.stringify(scopes))
-    .replaceAll('__WATCH_CONNECTOR_ID__', connectorId)
+    .replaceAll('__WATCH_INFERENCE_ENDPOINT_ID__', inferenceEndpointId)
     .replaceAll('__WATCH_TIER2_WHEN__', tier2When)
     .replaceAll('__WATCH_CANDIDATE_LIMIT__', String(candidateLimit))
     .replaceAll('__WATCH_FAN_OUT_MAX__', String(fanOutMax))

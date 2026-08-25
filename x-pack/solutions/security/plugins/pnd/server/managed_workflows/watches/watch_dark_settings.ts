@@ -85,7 +85,7 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
     scheduleId,
     allowManualRun,
     scopes,
-    connectorId,
+    inferenceEndpointId,
     tier2When,
     candidateLimit,
     fanOutMax,
@@ -121,9 +121,9 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
       `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid allowManualRun`
     );
   }
-  if (typeof connectorId !== 'string' || connectorId.length > 256) {
+  if (typeof inferenceEndpointId !== 'string' || inferenceEndpointId.length > 256) {
     throw new Error(
-      `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid connectorId`
+      `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid inferenceEndpointId`
     );
   }
   const parsedTier2When = TIER2_WHEN.find((value) => value === tier2When);
@@ -150,7 +150,7 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
     scheduleId,
     allowManualRun,
     scopes: parseScopes(scopes),
-    connectorId,
+    inferenceEndpointId,
     tier2When: parsedTier2When,
     candidateLimit: parsePositiveInt(candidateLimit, 'candidateLimit', MAX_CANDIDATE_LIMIT),
     fanOutMax: parsePositiveInt(fanOutMax, 'fanOutMax', MAX_FAN_OUT_MAX),
@@ -176,7 +176,7 @@ const DEFAULT_DARK_WATCH_VALUES: DarkWatchTemplateValues = {
   scheduleId: 'dark-overnight-sweep',
   allowManualRun: true,
   scopes: DEFAULT_SCOPES,
-  connectorId: '',
+  inferenceEndpointId: '',
   tier2When: 'on_hits',
   candidateLimit: 10,
   fanOutMax: 10,
@@ -225,7 +225,7 @@ export const createDarkWatchSettingsRegistration = (): WatchSettingsRegistration
       scheduleId: patch.triggers?.scheduleId ?? patch.dark?.scheduleId ?? values.scheduleId,
       allowManualRun:
         patch.triggers?.allowManualRun ?? patch.dark?.allowManualRun ?? values.allowManualRun,
-      connectorId: patch.dark?.connectorId ?? values.connectorId,
+      inferenceEndpointId: patch.dark?.inferenceEndpointId ?? values.inferenceEndpointId,
       tier2When: patch.dark?.tier2When ?? values.tier2When,
       candidateLimit: patch.dark?.candidateLimit ?? values.candidateLimit,
       fanOutMax: patch.dark?.fanOutMax ?? values.fanOutMax,
@@ -247,7 +247,7 @@ export const createDarkWatchSettingsRegistration = (): WatchSettingsRegistration
       watchId: SYSTEM_SECURITY_WATCH_DARK_ID,
       autonomy: values.autonomyLevel,
       dark: {
-        connectorId: values.connectorId,
+        inferenceEndpointId: values.inferenceEndpointId,
         tier2When: values.tier2When,
         candidateLimit: values.candidateLimit,
         fanOutMax: values.fanOutMax,

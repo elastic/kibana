@@ -31,7 +31,7 @@ export interface CommonWatchTemplateValues extends ManagedWorkflowTemplateValues
 
 /** Dark Watch extends the common slice with the dials only Dark exposes. */
 export interface DarkWatchTemplateValues extends CommonWatchTemplateValues {
-  connectorId: string;
+  inferenceEndpointId: string;
   tier2When: 'on_hits' | 'always';
   candidateLimit: number;
   fanOutMax: number;

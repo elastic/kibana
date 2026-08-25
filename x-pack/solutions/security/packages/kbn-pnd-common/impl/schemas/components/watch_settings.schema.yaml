@@ -259,7 +259,7 @@ components:
         Dark Watch settings extension returned on GET and accepted (partially) on PATCH. Maps onto
         managedTemplateValues for system-security-watch-dark.
       required:
-        - connectorId
+        - inferenceEndpointId
         - tier2When
         - candidateLimit
         - fanOutMax
@@ -272,10 +272,10 @@ components:
         - allowManualRun
         - scopes
       properties:
-        connectorId:
+        inferenceEndpointId:
           type: string
           maxLength: 256
-          description: Inference connector id for Tier 2; empty string degrades to Tier 1 only.
+          description: Inference endpoint id for Tier 2; empty string degrades to Tier 1 only.
         tier2When:
           $ref: '#/components/schemas/DarkWatchTier2When'
         candidateLimit:

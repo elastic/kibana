@@ -36,7 +36,7 @@ consts:
       scheduleId: "__WATCH_SCHEDULE_ID__"
       allowManualRun: __WATCH_ALLOW_MANUAL_RUN__
     scopes: __WATCH_SCOPES_JSON__
-    connectorId: "__WATCH_CONNECTOR_ID__"
+    inferenceEndpointId: "__WATCH_INFERENCE_ENDPOINT_ID__"
     tier2When: __WATCH_TIER2_WHEN__
     candidateLimit: __WATCH_CANDIDATE_LIMIT__
     fanOutMax: __WATCH_FAN_OUT_MAX__
@@ -137,7 +137,7 @@ steps:
           inputs:
             report_id: "{{ foreach.item._source.report_id }}"
             investigation_id: "{{ steps.find_or_create_investigation.output.investigation_id }}"
-            connector_id: "{{ consts.watch_settings.connectorId }}"
+            inference_endpoint_id: "{{ consts.watch_settings.inferenceEndpointId }}"
             tier2_when: "{{ consts.watch_settings.tier2When }}"
             target_technology: "{{ consts.watch_settings.targetTechnology }}"
 
