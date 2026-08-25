@@ -20,8 +20,8 @@ import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
 import { useLocalStorage } from '../../hooks/use_local_storage';
 import { useProfilingSetupStatus } from '../contexts/profiling_setup_status/use_profiling_setup_status';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
-import { AddDataTabs } from '../../views/add_data_view';
 import { useBackNavigation } from '../contexts/back_navigation/use_back_navigation';
+import { AddDataTabs } from '../../views/add_data_view/types';
 
 export function ProfilingAppPageTemplate({
   children,
@@ -64,8 +64,8 @@ export function ProfilingAppPageTemplate({
 
   const searchParams = new URLSearchParams(search);
   const kuery = searchParams.get('kuery') ?? '';
-  const rangeFrom = searchParams.get('rangeFrom') ?? 'now-15m';
-  const rangeTo = searchParams.get('rangeTo') ?? 'now';
+  const rangeFrom = searchParams.get('rangeFrom') || 'now-15m';
+  const rangeTo = searchParams.get('rangeTo') || 'now';
 
   const backTarget = useBackNavigation();
 
@@ -73,8 +73,55 @@ export function ProfilingAppPageTemplate({
     window.scrollTo(0, 0);
   }, [pathname]);
 
+  const appHeaderMenu = {
+    items: [
+      {
+        id: 'storage-explorer',
+        label: i18n.translate('xpack.profiling.headerActionMenu.storageExplorer', {
+          defaultMessage: 'Storage explorer',
+        }),
+        href: router.link('/storage-explorer', {
+          query: {
+            kuery,
+            rangeFrom,
+            rangeTo,
+            indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,
+          },
+        }),
+        iconType: 'database',
+      },
+      {
+        id: 'settings',
+        label: i18n.translate('xpack.profiling.headerActionMenu.settings', {
+          defaultMessage: 'Settings',
+        }),
+        href: router.link('/settings'),
+        iconType: 'gear',
+        overflow: true,
+      },
+    ],
+    primaryActionItem: {
+      id: 'add-data',
+      label: i18n.translate('xpack.profiling.headerActionMenu.addData', {
+        defaultMessage: 'Add data',
+      }),
+      href: router.link('/add-data-instructions', {
+        query: { selectedTab: AddDataTabs.Kubernetes },
+      }),
+      iconType: 'plusCircle',
+    },
+  };
+
   return (
     <>
+      {/*
+        In some contexts like when using the noDataConfig prop, the page template might choose not to render it's children. 
+        When that happens, because AppHeader is nested inside the template, it won't be rendered.
+        Without an explicit AppHeader component, the Chrome Next framework would attempt to render the compatibility header with the back button derived from breadcrumbs.
+        This component is here to prevent these edge cases from rendering incorrect back buttons. 
+        When AppHeader exists, this component doesn't do anything so the explicit back buttons we do want to render (when using the back prop) won't be hidden. 
+        It's safe to render both at the same time, suppression only happens for auto-generated back targets.
+      */}
       <SuppressChromeBackButton />
       <ObservabilityPageTemplate
         noDataConfig={noDataConfig}
@@ -94,48 +141,7 @@ export function ProfilingAppPageTemplate({
             spacing="largeBleed"
             title={pageTitle}
             tabs={tabs}
-            menu={
-              suppressMenu
-                ? undefined
-                : {
-                    items: [
-                      {
-                        id: 'storage-explorer',
-                        label: i18n.translate('xpack.profiling.headerActionMenu.storageExplorer', {
-                          defaultMessage: 'Storage explorer',
-                        }),
-                        href: router.link('/storage-explorer', {
-                          query: {
-                            kuery,
-                            rangeFrom,
-                            rangeTo,
-                            indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,
-                          },
-                        }),
-                        iconType: 'database',
-                      },
-                      {
-                        id: 'settings',
-                        label: i18n.translate('xpack.profiling.headerActionMenu.settings', {
-                          defaultMessage: 'Settings',
-                        }),
-                        href: router.link('/settings'),
-                        iconType: 'gear',
-                        overflow: true,
-                      },
-                    ],
-                    primaryActionItem: {
-                      id: 'add-data',
-                      label: i18n.translate('xpack.profiling.headerActionMenu.addData', {
-                        defaultMessage: 'Add data',
-                      }),
-                      href: router.link('/add-data-instructions', {
-                        query: { selectedTab: AddDataTabs.Kubernetes },
-                      }),
-                      iconType: 'plusCircle',
-                    },
-                  }
-            }
+            menu={suppressMenu ? undefined : appHeaderMenu}
             badges={
               showBetaBadge
                 ? [

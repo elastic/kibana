@@ -31,28 +31,8 @@ import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { useProfilingSetupStatus } from '../../components/contexts/profiling_setup_status/use_profiling_setup_status';
-
-export enum AddDataTabs {
-  Kubernetes = 'kubernetes',
-  Docker = 'docker',
-  Binary = 'binary',
-  Deb = 'deb',
-  RPM = 'rpm',
-  ElasticAgentIntegration = 'elasticAgentIntegration',
-  Symbols = 'symbols',
-}
-
-interface Step {
-  title: string;
-  content: string | React.ReactNode;
-}
-
-interface Tab {
-  key: string;
-  title: string;
-  steps?: Step[];
-  subTabs?: Tab[];
-}
+import type { AddDataTab } from './types';
+import { AddDataTabs } from './types';
 
 const supportedCPUArchitectures = ['x86_64', 'arm64'];
 
@@ -83,7 +63,7 @@ export function AddDataView() {
   const stackVersion = data?.stackVersion;
   const majorVersion = stackVersion ? major(stackVersion).toString() : undefined;
 
-  const tabs: Tab[] = useMemo(
+  const tabs: AddDataTab[] = useMemo(
     () => [
       {
         key: AddDataTabs.Kubernetes,
@@ -516,7 +496,7 @@ EOF`}
       pageTitle={i18n.translate('xpack.profiling.noDataPage.pageTitle', {
         defaultMessage: 'Add profiling data',
       })}
-      suppressMenu={profilingSetupStatus.profilingSetupStatus?.has_data === false}
+      suppressMenu={!profilingSetupStatus.profilingSetupStatus?.has_data}
     >
       {isLoading ? (
         <EuiFlexItem>
