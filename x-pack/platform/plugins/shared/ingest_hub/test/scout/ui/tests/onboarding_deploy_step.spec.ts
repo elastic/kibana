@@ -15,9 +15,10 @@ import {
 } from '../helpers/onboarding';
 
 // elb (DS: elb_logs, managed_integration): dual-transport S3+CloudWatch.
-// Used because:
-//   - agentless.enabled → managed_integration preferred → ManagedIntegrationsSection renders
-//   - no hide_in_var_group_options → identityFederationSupported=true → method radio shown
+// Used because agentless.enabled → managed_integration preferred → ManagedIntegrationsSection renders.
+// hide_in_var_group_options is set on all inputs to force identityFederationSupported=false so
+// LazyAwsStaticKeysForm mounts directly (no radio-toggle path) — avoids a Suspense race where
+// switching from identity federation leaves a window with neither form in the DOM.
 //
 // Granular buildPackageInputs shape assertions (stream keys, var values, disabled-input
 // structure) live in use_deploy.test.ts (Jest). This spec verifies UI wiring only:
@@ -33,7 +34,20 @@ const MOCK_AWS_PACKAGE_WITH_VERSION = {
         title: 'AWS ELB',
         data_streams: ['elb_logs'],
         deployment_modes: { agentless: { enabled: true } },
-        inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }],
+        // hide_in_var_group_options makes identityFederationSupported=false for both inputs →
+        // showIdentityFederation=false → no radio group renders → LazyAwsStaticKeysForm
+        // mounts immediately after the section appears, avoiding a Suspense race condition
+        // where switching radio tabs leaves a window with neither form in the DOM.
+        inputs: [
+          {
+            type: 'aws-s3',
+            hide_in_var_group_options: { credential_type: ['identity_federation'] },
+          },
+          {
+            type: 'aws-cloudwatch',
+            hide_in_var_group_options: { credential_type: ['identity_federation'] },
+          },
+        ],
       },
     ],
     data_streams: [
@@ -110,18 +124,11 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
     // Wait for awsServicesMap to resolve and ManagedIntegrationsSection to render.
     // The section only appears after the React Query for the aws package manifest completes.
+    // The mock sets identityFederationSupported=false for all inputs → showIdentityFederation=false
+    // → no radio group → LazyAwsStaticKeysForm mounts as soon as the section appears.
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
 
-    // elb has identityFederationSupported=true → radio defaults to Identity Federation.
-    // Switch to Access Keys so the static-keys form appears.
-    // EUI hides the real <input type="radio"> element for custom styling — click the
-    // visible label text instead so the change event fires.
-    await page.testSubj
-      .locator('managedIntegrationsSection-preferredMethodRadio')
-      .getByText('Access Keys')
-      .click();
-
-    // Wait for the lazy-loaded static-keys form to appear before filling.
+    // Wait for the static-keys form (lazy-loaded Fleet component) to appear before filling.
     const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId').locator('input');
     const secretKeyField = page.testSubj
       .locator('awsStaticKeysForm-secretAccessKey')
