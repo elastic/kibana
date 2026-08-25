@@ -17,6 +17,11 @@ import { defaultConfig } from '../../default/stateful/base.config';
  * Server at `http://host.docker.internal:8220` so enrolled containers keep
  * checking in through the published port.
  *
+ * Bind ES HTTP on all interfaces. Docker Desktop maps `host.docker.internal`
+ * to the host loopback (so localhost-only ES works locally), but Linux CI
+ * maps it to the docker0 gateway (`172.17.0.1`), which refuses connections
+ * unless ES listens there too.
+ *
  * Specs must live under `test/scout_agent_e2e/` so `detectCustomConfigDir`
  * resolves to this set.
  *
@@ -29,6 +34,10 @@ const esPort = defaultConfig.servers.elasticsearch.port;
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
+  esTestCluster: {
+    ...defaultConfig.esTestCluster,
+    serverArgs: [...defaultConfig.esTestCluster.serverArgs, 'http.host=0.0.0.0'],
+  },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: replacePrefixedArg(
