@@ -74,6 +74,26 @@ export const countActiveTaskManagerEsApiKeys = async (esClient: Client): Promise
   return apiKeys.filter(({ invalidated }) => !invalidated).length;
 };
 
+/**
+ * Reads the key ids of every `api_key_to_invalidate` marker saved object. One granted ES + UIAM
+ * key set produces two markers: one carrying the ES key id and one carrying the UIAM key id.
+ */
+export const readInvalidationMarkerKeyIds = async (esClient: Client): Promise<string[]> => {
+  await esClient.indices.refresh({ index: TASK_MANAGER_INDEX }).catch(() => {});
+  const { hits } = await esClient.search({
+    index: TASK_MANAGER_INDEX,
+    size: 100,
+    query: { term: { type: 'api_key_to_invalidate' } },
+  });
+  return hits.hits
+    .map((hit) => {
+      const source = hit._source as Record<string, unknown> | undefined;
+      const attrs = source?.api_key_to_invalidate as Record<string, unknown> | undefined;
+      return typeof attrs?.apiKeyId === 'string' ? attrs.apiKeyId : undefined;
+    })
+    .filter((id): id is string => id !== undefined);
+};
+
 /** `state.runs` for the recurring UIAM provisioning task doc (`task:uiam_api_key_provisioning`). */
 export const readProvisioningTaskRuns = async (esClient: Client, provisioningTaskId: string) => {
   const task = await readTaskAttributes(esClient, taskDocId(provisioningTaskId));
