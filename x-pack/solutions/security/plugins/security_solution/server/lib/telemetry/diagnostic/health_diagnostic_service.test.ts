@@ -21,8 +21,8 @@ import {
   QueryType,
   type ApiExecutableQuery,
   type HealthDiagnosticQuery,
-  type HealthDiagnosticQueryV1,
-  type HealthDiagnosticQueryV3,
+  type IndexQuery,
+  type ApiQuery,
   type ResolvedQuery,
 } from './health_diagnostic_service.types';
 import { artifactService } from '../artifact';
@@ -83,7 +83,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
             if ('_raw' in q) {
               return { kind: 'skipped', query: q, reason: 'parse_failure' };
             }
-            return { kind: 'executable', query: q as HealthDiagnosticQueryV1 };
+            return { kind: 'executable', query: q as IndexQuery };
           })
         )
       ),
@@ -138,7 +138,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
           name: 'test-query',
           passed: true,
           status: 'success',
-          descriptorVersion: 1,
+          descriptorVersion: 2,
           numDocs: 1,
           fieldNames: expect.arrayContaining(['@timestamp', 'user.name', 'event.action']),
         });
@@ -333,7 +333,7 @@ enabled: true`,
           name: 'test-query',
           passed: false,
           status: 'failed',
-          descriptorVersion: 1,
+          descriptorVersion: 2,
           failure: {
             message: 'Query execution failed',
             reason: undefined,
@@ -583,9 +583,7 @@ enabled: true`,
     });
 
     describe('runHealthDiagnosticQueries — API queries', () => {
-      const buildResolvedApiQuery = (
-        overrides: Partial<HealthDiagnosticQueryV3> = {}
-      ): ApiExecutableQuery => ({
+      const buildResolvedApiQuery = (overrides: Partial<ApiQuery> = {}): ApiExecutableQuery => ({
         kind: 'executable_api',
         query: createMockApiQueryV3(overrides),
       });
