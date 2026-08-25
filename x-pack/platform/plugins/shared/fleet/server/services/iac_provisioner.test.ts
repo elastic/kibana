@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import fs from 'fs';
+
 import { fetch as undiciFetch, Agent } from 'undici';
 
 import {
@@ -249,6 +251,88 @@ describe('IacProvisionerService', () => {
     await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
       IacProvisionerUnavailableError
     );
+  });
+
+  it('logs the TLS cause when undici wraps it as fetch failed', async () => {
+    mockConfig();
+    const logger = mockLogger();
+    const failure = new TypeError('fetch failed');
+    failure.cause = new Error('unable to get issuer certificate');
+    mockedFetch.mockRejectedValueOnce(failure);
+
+    await expect(iacProvisionerService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProvisionerUnavailableError
+    );
+    const errorLogged = logger.error.mock.calls.flat().map(String).join(' ');
+    expect(errorLogged).toContain('fetch failed');
+    expect(errorLogged).toContain('unable to get issuer certificate');
+  });
+
+  it('passes an array of CA paths through to the TLS agent', async () => {
+    mockConfig({
+      api: {
+        url: 'https://iac-provisioner.example',
+        tls: {
+          certificate: '/path/tls.crt',
+          key: '/path/tls.key',
+          ca: ['/path/trust-bundle/ca.crt', '/path/http-certs/ca.crt'],
+        },
+      },
+    });
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
+    );
+
+    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+
+    expect(mockedAgent).toHaveBeenCalledWith({
+      connect: expect.objectContaining({
+        ca: ['/path/trust-bundle/ca.crt', '/path/http-certs/ca.crt'],
+        rejectUnauthorized: true,
+      }),
+    });
+  });
+
+  it('also trusts ca.crt next to the client certificate when that file exists', async () => {
+    // Serverless Kibana mounts the client cert at http-certs/tls.crt and the
+    // MKI intermediate at http-certs/ca.crt. cluster-internal-cas (the
+    // configured tls.ca) only has the cluster CA, which is itself issued by
+    // that MKI intermediate — without both, rejectUnauthorized: true fails
+    // the handshake.
+    const existsSync = jest.spyOn(fs, 'existsSync').mockImplementation((p) => {
+      return p === '/mnt/elastic-internal/http-certs/ca.crt';
+    });
+    mockConfig({
+      api: {
+        url: 'https://iac-provisioner.example',
+        tls: {
+          certificate: '/mnt/elastic-internal/http-certs/tls.crt',
+          key: '/mnt/elastic-internal/http-certs/tls.key',
+          ca: '/mnt/elastic-internal/trust-bundle/ca.crt',
+        },
+      },
+    });
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
+    );
+
+    try {
+      await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+
+      expect(mockedAgent).toHaveBeenCalledWith({
+        connect: expect.objectContaining({
+          ca: [
+            '/mnt/elastic-internal/trust-bundle/ca.crt',
+            '/mnt/elastic-internal/http-certs/ca.crt',
+          ],
+          rejectUnauthorized: true,
+        }),
+      });
+    } finally {
+      existsSync.mockRestore();
+    }
   });
 
   it('maps a body that fails to read to IacProvisionerUnavailableError', async () => {

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { existsSync } from 'fs';
+import path from 'path';
+
 import { Agent, fetch as undiciFetch } from 'undici';
 
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
@@ -25,6 +28,41 @@ import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 
 const RENDER_ENDPOINT = '/api/v1/render';
 const RENDER_TIMEOUT_MS = 30_000;
+
+/**
+ * Build the CA list for outbound mTLS.
+ *
+ * A single `tls.ca` path is still valid (local dev, or an explicit bundle).
+ * On Serverless the configured file is cluster-internal-cas — the ECP cluster
+ * CA — which is issued by MKI, not a root. The MKI intermediate sits next to
+ * the Kibana client cert at `dirname(certificate)/ca.crt`. Include it when
+ * present so `rejectUnauthorized: true` can complete the chain. Agentless
+ * skips this because it leaves rejectUnauthorized false.
+ */
+const resolveIacProvisionerCertificateAuthorities = (
+  tls: { certificate?: string; ca?: string | string[] } | undefined
+): string | string[] | undefined => {
+  const configured = tls?.ca == null ? [] : Array.isArray(tls.ca) ? [...tls.ca] : [tls.ca];
+  if (tls?.certificate) {
+    const siblingCa = path.join(path.dirname(tls.certificate), 'ca.crt');
+    if (!configured.includes(siblingCa) && existsSync(siblingCa)) {
+      configured.push(siblingCa);
+    }
+  }
+  if (configured.length === 0) {
+    return undefined;
+  }
+  return configured.length === 1 ? configured[0] : configured;
+};
+
+/** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
+const formatIacProvisionerNetworkError = (error: unknown): string => {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+  const causeMessage = error.cause instanceof Error ? error.cause.message : undefined;
+  return causeMessage ? `${error.message}: ${causeMessage}` : error.message;
+};
 
 export interface IacProvisionerRenderPolicyTemplate {
   name: string;
@@ -168,10 +206,11 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       // stalled or wasn't JSON. Logged distinctly from HTTP errors:
       // availability signal, not contract.
       const latencyMs = Date.now() - startTime;
+      const detail = formatIacProvisionerNetworkError(error);
       logger.error(
-        `[IaC Provisioner] No response from provider after ${latencyMs}ms (${error.message}) [Request Id: ${traceId}]`
+        `[IaC Provisioner] No response from provider after ${latencyMs}ms (${detail}) [Request Id: ${traceId}]`
       );
-      throw new IacProvisionerUnavailableError(`no response from provider (${error.message})`);
+      throw new IacProvisionerUnavailableError(`no response from provider (${detail})`);
     } finally {
       clearTimeout(timeout);
     }
@@ -253,7 +292,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         enabled: Boolean(tls?.certificate && tls?.key),
         certificate: tls?.certificate,
         key: tls?.key,
-        certificateAuthorities: tls?.ca,
+        certificateAuthorities: resolveIacProvisionerCertificateAuthorities(tls),
       })
     );
     return new Agent({
