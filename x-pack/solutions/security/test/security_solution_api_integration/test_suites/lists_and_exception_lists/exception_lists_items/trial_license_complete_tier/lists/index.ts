@@ -17,6 +17,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./read_exception_lists'));
     loadTestFile(require.resolve('./update_exception_lists'));
     loadTestFile(require.resolve('./delete_exception_lists'));
+    loadTestFile(require.resolve('./bulk_delete_exception_lists'));
     loadTestFile(require.resolve('./find_exception_lists'));
     loadTestFile(require.resolve('./summary_exception_lists'));
   });

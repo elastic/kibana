@@ -27,6 +27,7 @@ export const INTERNAL_EXCEPTION_FILTER = `${INTERNAL_LIST_URL}/_create_filter` a
  */
 export const EXCEPTION_LIST_URL = '/api/exception_lists';
 export const EXCEPTION_LIST_ITEM_URL = '/api/exception_lists/items';
+export const EXCEPTION_LIST_BULK_ACTION_URL = `${EXCEPTION_LIST_URL}/_bulk_action` as const;
 
 /**
  * Internal exception list routes
