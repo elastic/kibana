@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublicAppInfo } from '@kbn/core-application-browser';
 import type {
   AppDeepLinkId,
   ChromeNavLinks,
@@ -49,7 +48,6 @@ interface StartDeps {
   history: History;
   prependBasePath: (path: string) => string;
   navLinks: ChromeNavLinks;
-  applications$: Observable<ReadonlyMap<string, PublicAppInfo>>;
   getUiSettingsHomeRoute: () => string | undefined;
   logger: Logger;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
@@ -70,7 +68,6 @@ export class ProjectNavigationService {
       chromeBreadcrumbs$,
       history,
       navLinks,
-      applications$,
       logger,
       prependBasePath,
       getUiSettingsHomeRoute,
@@ -126,37 +123,14 @@ export class ProjectNavigationService {
       shareReplay(1)
     );
 
-    const appRoutes$ = applications$.pipe(
-      map((apps) => {
-        const routes = new Map<string, string>();
-        apps.forEach((app, id) => {
-          if (app.appRoute) {
-            routes.set(id, prependBasePath(app.appRoute).replace(/\/$/, ''));
-          }
-        });
-        return routes as ReadonlyMap<string, string>;
-      }),
-      takeUntil(this.stop$),
-      shareReplay(1)
-    );
-
-    const navigation$ = combineLatest([parsedNavigation$, location$, appRoutes$]).pipe(
-      filter(
-        (args): args is [ParsedNavigation, Location, ReadonlyMap<string, string>] =>
-          args[0] !== null
-      ),
-      map(([parsed, location, appRoutes]) => {
+    const navigation$ = combineLatest([parsedNavigation$, location$]).pipe(
+      filter((args): args is [ParsedNavigation, Location] => args[0] !== null),
+      map(([parsed, location]) => {
         const pathname = stripQueryParams(`${prependBasePath(location.pathname)}${location.hash}`);
         return {
           solutionId: parsed.id,
           navigationTree: parsed.treeUI,
-          activeNodes: findActiveNodes(
-            pathname,
-            parsed.flattened,
-            location,
-            prependBasePath,
-            appRoutes
-          ),
+          activeNodes: findActiveNodes(pathname, parsed.flattened, location, prependBasePath),
           overflowItemIds: parsed.overflowItemIds,
           defaultItemIds: parsed.defaultItemIds,
           renderableNodes: parsed.renderableNodes,

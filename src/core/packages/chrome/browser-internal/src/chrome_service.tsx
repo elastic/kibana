@@ -165,7 +165,6 @@ export class ChromeService {
       logger: this.logger,
       chromeBreadcrumbs$: state.breadcrumbs.classic.$,
       isNextChrome: isNextChrome(featureFlags),
-      applications$: application.applications$,
     });
 
     const sidebar = this.sidebar.start();

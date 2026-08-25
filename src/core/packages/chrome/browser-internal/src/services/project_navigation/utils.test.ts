@@ -465,12 +465,12 @@ describe('findActiveNodes', () => {
     ]);
   });
 
-  test('keeps app links active on sibling routes when url includes defaultPath', () => {
+  test('keeps app-level links active on sibling routes when url includes defaultPath', () => {
     const agentBuilderLink: ChromeNavLink = {
       ...getDeepLink('agent_builder', 'agent_builder/agents', 'Agents'),
+      baseUrl: '/foo/agent_builder',
       url: '/foo/agent_builder/agents',
     };
-    const appRoutes = new Map([['agent_builder', '/foo/agent_builder']]);
     const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
       '[0]': {
         id: 'agent_builder',
@@ -491,41 +491,19 @@ describe('findActiveNodes', () => {
       ],
     ];
 
-    expect(
-      findActiveNodes('/foo/agent_builder/agents', flattendNavTree, undefined, undefined, appRoutes)
-    ).toEqual(expected);
-    expect(
-      findActiveNodes(
-        '/foo/agent_builder/manage/agents',
-        flattendNavTree,
-        undefined,
-        undefined,
-        appRoutes
-      )
-    ).toEqual(expected);
-    expect(
-      findActiveNodes(
-        '/foo/agent_builder#/agents',
-        flattendNavTree,
-        undefined,
-        undefined,
-        appRoutes
-      )
-    ).toEqual(expected);
-    expect(
-      findActiveNodes('/foo/agent_builder_other', flattendNavTree, undefined, undefined, appRoutes)
-    ).toEqual([]);
-    expect(findActiveNodes('/foo/other', flattendNavTree, undefined, undefined, appRoutes)).toEqual(
-      []
-    );
+    expect(findActiveNodes('/foo/agent_builder/agents', flattendNavTree)).toEqual(expected);
+    expect(findActiveNodes('/foo/agent_builder/manage/agents', flattendNavTree)).toEqual(expected);
+    expect(findActiveNodes('/foo/agent_builder#/agents', flattendNavTree)).toEqual(expected);
+    expect(findActiveNodes('/foo/agent_builder_other', flattendNavTree)).toEqual([]);
+    expect(findActiveNodes('/foo/other', flattendNavTree)).toEqual([]);
   });
 
-  test('does not match deep links against the application catalog', () => {
+  test('does not match deep links against baseUrl', () => {
     const manageLink: ChromeNavLink = {
       ...getDeepLink('agent_builder:manage', 'agent_builder/manage/agents', 'Manage'),
+      baseUrl: '/foo/agent_builder',
       url: '/foo/agent_builder/manage/agents',
     };
-    const appRoutes = new Map([['agent_builder', '/foo/agent_builder']]);
     const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
       '[0]': {
         id: 'manage',
@@ -535,15 +513,7 @@ describe('findActiveNodes', () => {
       },
     };
 
-    expect(
-      findActiveNodes(
-        '/foo/agent_builder/manage/agents',
-        flattendNavTree,
-        undefined,
-        undefined,
-        appRoutes
-      )
-    ).toEqual([
+    expect(findActiveNodes('/foo/agent_builder/manage/agents', flattendNavTree)).toEqual([
       [
         {
           id: 'manage',
@@ -553,27 +523,20 @@ describe('findActiveNodes', () => {
         },
       ],
     ]);
-    expect(
-      findActiveNodes(
-        '/foo/agent_builder/conversations',
-        flattendNavTree,
-        undefined,
-        undefined,
-        appRoutes
-      )
-    ).toEqual([]);
+    expect(findActiveNodes('/foo/agent_builder/conversations', flattendNavTree)).toEqual([]);
   });
 
-  test('prefers a longer deep link over the app route', () => {
+  test('prefers a longer deep link over the app-level baseUrl', () => {
     const appLink: ChromeNavLink = {
       ...getDeepLink('agent_builder', 'agent_builder/agents', 'Agents'),
+      baseUrl: '/foo/agent_builder',
       url: '/foo/agent_builder/agents',
     };
     const manageLink: ChromeNavLink = {
       ...getDeepLink('agent_builder:manage', 'agent_builder/manage/agents', 'Manage'),
+      baseUrl: '/foo/agent_builder',
       url: '/foo/agent_builder/manage/agents',
     };
-    const appRoutes = new Map([['agent_builder', '/foo/agent_builder']]);
     const flattendNavTree: Record<string, ChromeProjectNavigationNode> = {
       '[0]': {
         id: 'agent_builder',
@@ -589,15 +552,7 @@ describe('findActiveNodes', () => {
       },
     };
 
-    expect(
-      findActiveNodes(
-        '/foo/agent_builder/conversations',
-        flattendNavTree,
-        undefined,
-        undefined,
-        appRoutes
-      )
-    ).toEqual([
+    expect(findActiveNodes('/foo/agent_builder/conversations', flattendNavTree)).toEqual([
       [
         {
           id: 'agent_builder',
@@ -607,15 +562,7 @@ describe('findActiveNodes', () => {
         },
       ],
     ]);
-    expect(
-      findActiveNodes(
-        '/foo/agent_builder/manage/agents',
-        flattendNavTree,
-        undefined,
-        undefined,
-        appRoutes
-      )
-    ).toEqual([
+    expect(findActiveNodes('/foo/agent_builder/manage/agents', flattendNavTree)).toEqual([
       [
         {
           id: 'agent_builder',

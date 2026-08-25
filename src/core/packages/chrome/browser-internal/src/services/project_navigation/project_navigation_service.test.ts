@@ -88,7 +88,6 @@ const setup = ({
     logger,
     chromeBreadcrumbs$,
     isNextChrome,
-    applications$: of(new Map()),
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$, navLinksService };
