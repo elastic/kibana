@@ -54,12 +54,12 @@ export const getAuditStatus$ = ({
   writeAccess$,
   derivedStatus$,
 }: {
-  if (!writeAccess$) {
-    return derivedStatus$;
-  }
+  /** Absent when the audit appender does not write to the filesystem, or audit is disabled. */
+  writeAccess$: Observable<AuditLogWriteAccess | undefined> | undefined;
+  derivedStatus$: Observable<ServiceStatus>;
 }): Observable<ServiceStatus> => {
   if (!writeAccess$) {
-      if (!writeAccess || writeAccess.granted || derived.level >= ServiceStatusLevels.degraded) {
+    return derivedStatus$;
   }
 
   return combineLatest([derivedStatus$, writeAccess$]).pipe(
