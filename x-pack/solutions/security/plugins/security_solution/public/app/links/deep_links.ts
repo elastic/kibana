@@ -76,6 +76,11 @@ const solutionNodesFormatter = (
   const deepLinks: AppDeepLink[] = [];
 
   navigationNodes.forEach((node) => {
+    // skip extension nodes
+    if (node.renderAs === 'extension') {
+      return;
+    }
+
     // Process links without an id: external links or second level groups
     if (!node.id && node.children) {
       deepLinks.push(...solutionNodesFormatter(node.children, normalizedLinks));
