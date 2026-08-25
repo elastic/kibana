@@ -153,6 +153,8 @@ export const AiButtonBase = (props: AiButtonProps) => {
       iconSize: rest.iconSize ?? getSyncedIconSize(rest.size),
       iconType: iconType ? resolvedIconType(iconType) : undefined,
       css: [buttonCss, iconGradientCss, userCss],
+      // Skip EuiButtonEmpty's extra text span so label padding is not doubled.
+      textProps: false as const,
       children: <span css={labelCss}>{resolveButtonLabel(iconType, children)}</span>,
     };
     return (
