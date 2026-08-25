@@ -22,7 +22,6 @@ export {
   getESQLWithSafeLimit,
   appendToESQLQuery,
   escapeStringValue,
-  buildJoinedFilter,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
   appendLimitToQuery,
