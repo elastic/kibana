@@ -102,9 +102,16 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
         () => sloRepository.findById(params.sloId)
       );
     } catch (err) {
+      // `cause` is what lets the alerting framework act on *why* the lookup failed. This fetch
+      // authenticates with the rule's API key, so a missing SLO is only one possible cause: when UIAM
+      // no longer knows that key, Elasticsearch answers 401 with an `authentication_error_code`, and
+      // the framework's healer re-grants the key off that structured error. Interpolating only
+      // `err.message` leaves the code in prose that nothing can match, stranding the rule on a
+      // credential no scheduled run can repair.
       throw createTaskRunError(
         new Error(
-          `Rule "${options.rule.name}" ${options.rule.id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`
+          `Rule "${options.rule.name}" ${options.rule.id} is referencing an SLO which cannot be found: "${params.sloId}": ${err.message}`,
+          { cause: err }
         ),
         TaskErrorSource.USER
       );
