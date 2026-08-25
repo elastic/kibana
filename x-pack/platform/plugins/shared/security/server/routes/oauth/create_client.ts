@@ -17,6 +17,7 @@ import {
 import { createClientBodySchema } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import { getOAuthProtectedResource } from '../../get_oauth_protected_resource';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 const KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE: Partial<Record<KibanaSolution, UiamOAuthProjectType>> =
@@ -29,8 +30,10 @@ const KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE: Partial<Record<KibanaSolution, UiamO
 
 export function defineCreateOAuthClientRoute({
   router,
+  basePath,
   config,
   getAuthenticationService,
+  serverBaseUrl,
   serverlessProjectId,
   serverlessProjectType,
 }: RouteDefinitionParams) {
@@ -60,8 +63,7 @@ export function defineCreateOAuthClientRoute({
           });
         }
 
-        const resource = config.mcp?.oauth2?.metadata?.resource;
-        if (!resource) {
+        if (!config.mcp?.oauth2) {
           return response.notFound({
             body: {
               message:
@@ -69,6 +71,12 @@ export function defineCreateOAuthClientRoute({
             },
           });
         }
+
+        const resource = getOAuthProtectedResource({
+          configuredResource: config.mcp.oauth2.metadata.resource,
+          publicBaseUrl: basePath.publicBaseUrl,
+          serverBaseUrl,
+        });
 
         if (!serverlessProjectId) {
           return response.notFound({

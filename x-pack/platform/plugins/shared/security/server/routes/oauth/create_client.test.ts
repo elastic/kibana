@@ -322,6 +322,29 @@ describe('Create OAuth Client route', () => {
     expect(oauthMock.createClient).not.toHaveBeenCalled();
   });
 
+  // un-skipped in the schema-change commit
+  it.skip('falls back to the server base URL as resource when mcp resource config is absent', async () => {
+    ({ routeHandler, oauthMock } = setup({
+      mcp: {
+        oauth2: {
+          metadata: { authorization_servers: ['https://auth.example.com'] },
+        },
+      },
+    }));
+    oauthMock.createClient.mockResolvedValue({ client_id: 'client-1' } as any);
+
+    await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ body: { name: 'my-client' } }),
+      kibanaResponseFactory
+    );
+
+    expect(oauthMock.createClient).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ resource: 'http://localhost:5601' })
+    );
+  });
+
   it('returns error from service', async () => {
     const error = Boom.badRequest('Invalid resource');
     oauthMock.createClient.mockRejectedValue(error);
