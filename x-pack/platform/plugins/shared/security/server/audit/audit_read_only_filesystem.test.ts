@@ -122,9 +122,17 @@ describeUnlessRoot('AuditService on a read-only filesystem', () => {
     });
   };
 
+  // The settled status, not the first emission: the stream is seeded with a pass-through value so
+  // that core does not time the status check out before the license resolves. Everything here is
+  // synchronous (a `BehaviorSubject` license and a sync probe), so the last value is the settled one.
   const reportedStatus = async (): Promise<ServiceStatus> => {
     expect(status.set).toHaveBeenCalledTimes(1);
-    return firstValueFrom(status.set.mock.calls[0][0]);
+
+    const seen: ServiceStatus[] = [];
+    status.set.mock.calls[0][0].subscribe((next: ServiceStatus) => seen.push(next)).unsubscribe();
+
+    expect(seen.length).toBeGreaterThan(0);
+    return seen[seen.length - 1];
   };
 
   const lastLoggingConfig = async (): Promise<LoggerContextConfigInput> => {

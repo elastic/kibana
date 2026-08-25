@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { distinctUntilKeyChanged, map, merge, shareReplay, Subject, withLatestFrom } from 'rxjs';
+import {
+  distinctUntilKeyChanged,
+  map,
+  merge,
+  shareReplay,
+  startWith,
+  Subject,
+  withLatestFrom,
+} from 'rxjs';
 
 import type {
   HttpServiceSetup,
@@ -120,8 +128,15 @@ export class AuditService {
       )
     ).pipe(shareReplay(1));
 
+    // `startWith` matters: `license.features$` does not emit until the first Elasticsearch license
+    // fetch resolves, and the status observable is a `combineLatest`. Without a seed the plugin
+    // status stays silent, and core reports `unavailable: Status check timed out after 30s` instead
+    // of the derived status that names the real culprit. `undefined` reads as "nothing probed yet".
     const writeAccess$ = auditLogPath
-      ? state$.pipe(map(({ writeAccess }) => writeAccess))
+      ? state$.pipe(
+          map(({ writeAccess }) => writeAccess),
+          startWith(undefined)
+        )
       : undefined;
 
     // Report the plugin as degraded while the audit log cannot be written, so the lost audit

@@ -188,7 +188,8 @@ describe('write failures', () => {
     pid: 5355,
   };
 
-  const createMockStream = () => Object.assign(new EventEmitter(), { write: jest.fn() });
+  const createMockStream = () =>
+    Object.assign(new EventEmitter(), { write: jest.fn(), destroy: jest.fn() });
 
   const enospc = () =>
     Object.assign(new Error("ENOSPC: no space left on device, write 'mock://path/file.log'"), {
@@ -260,6 +261,64 @@ describe('write failures', () => {
       appender.append(record);
 
       expect(stream.write).not.toHaveBeenCalled();
+    });
+
+    it('lets a layout failure through instead of blaming the file', () => {
+      // A record that cannot be formatted is a bad record, not a broken disk. Treating it as a
+      // write error would latch the appender off and report the file as unwritable.
+      const stream = createMockStream();
+      mockCreateWriteStream.mockReturnValue(stream);
+      const onWriteError = jest.fn();
+      const boom = new Error('Converting circular structure to JSON');
+
+      const appender = new FileAppender(
+        {
+          format: () => {
+            throw boom;
+          },
+        },
+        'mock://path/file.log',
+        onWriteError
+      );
+
+      expect(() => appender.append(record)).toThrow(boom);
+      expect(onWriteError).not.toHaveBeenCalled();
+    });
+
+    it('keeps accepting records after a layout failure', () => {
+      const stream = createMockStream();
+      mockCreateWriteStream.mockReturnValue(stream);
+      let shouldThrow = true;
+
+      const appender = new FileAppender(
+        {
+          format: () => {
+            if (shouldThrow) {
+              throw new Error('Converting circular structure to JSON');
+            }
+            return 'formatted';
+          },
+        },
+        'mock://path/file.log',
+        jest.fn()
+      );
+
+      expect(() => appender.append(record)).toThrow();
+      shouldThrow = false;
+      appender.append(record);
+
+      expect(stream.write).toHaveBeenCalledWith('formatted\n');
+    });
+
+    it('releases the stream, so a broken appender does not orphan the descriptor', () => {
+      const stream = createMockStream();
+      mockCreateWriteStream.mockReturnValue(stream);
+
+      const appender = new FileAppender({ format: () => '' }, 'mock://path/file.log', jest.fn());
+      appender.append(record);
+      stream.emit('error', enospc());
+
+      expect(stream.destroy).toHaveBeenCalledTimes(1);
     });
 
     it('reports only once, so a stream erroring repeatedly does not flood the handler', () => {
