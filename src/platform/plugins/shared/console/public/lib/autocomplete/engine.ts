@@ -146,10 +146,11 @@ export function walkTokenPath(
   tokenPath: Array<string | string[]>,
   walkingStates: WalkingState[],
   context: AutocompleteContext,
-  editor: unknown
+  editor: unknown,
+  preserveFallbackStates = false
 ): WalkingState[] {
   if (!tokenPath || tokenPath.length === 0) {
-    return resolveFallbackStates(walkingStates);
+    return preserveFallbackStates ? walkingStates : resolveFallbackStates(walkingStates);
   }
   const token = tokenPath[0];
   const nextWalkingStates: WalkingState[] = [];
@@ -218,7 +219,13 @@ export function walkTokenPath(
     );
   }
 
-  return walkTokenPath(tokenPath.slice(1), nextWalkingStates, context, editor);
+  return walkTokenPath(
+    tokenPath.slice(1),
+    nextWalkingStates,
+    context,
+    editor,
+    preserveFallbackStates
+  );
 }
 
 export function populateContext(
@@ -232,29 +239,60 @@ export function populateContext(
     tokenPath,
     [new WalkingState('ROOT', components, [])],
     context,
-    editor
+    editor,
+    includeAutoComplete
   );
   if (includeAutoComplete) {
     const autoCompleteSet = new Map<ResultTerm['name'], ResultTerm>();
-    _.each(walkStates, function (ws) {
+    const stateTerms = new Map<WalkingState, AutocompleteTermDefinition[]>();
+    const preferredFallbackGroupsWithTerms = new Set<string>();
+    // An outer preferred branch must be able to shadow its entire fallback
+    // subtree before any nested fallback component is evaluated.
+    const statesByFallbackDepth = _.sortBy(walkStates, (ws) => ws.fallbackGroups.length);
+    _.each(statesByFallbackDepth, function (ws) {
+      if (
+        _.some(ws.fallbackGroups, (fallbackGroup) =>
+          preferredFallbackGroupsWithTerms.has(fallbackGroup)
+        )
+      ) {
+        return;
+      }
+
       const contextForState = passThroughContext(context, ws.contextExtensionList);
+      const termsForState: AutocompleteTermDefinition[] = [];
       _.each(ws.components, function (component) {
         const terms = component.getTerms(contextForState, editor);
         if (!terms) {
           return;
         }
-        _.each(terms, function (term) {
-          const termObj: ResultTerm = typeof term === 'string' ? { name: term } : term;
+        termsForState.push(...terms);
+      });
 
-          // Add the term to the autoCompleteSet if it doesn't already exist
-          if (!autoCompleteSet.has(termObj.name)) {
-            autoCompleteSet.set(termObj.name, termObj);
-          }
+      stateTerms.set(ws, termsForState);
+      if (termsForState.length) {
+        _.each(ws.preferredFallbackGroups, (fallbackGroup) => {
+          preferredFallbackGroupsWithTerms.add(fallbackGroup);
         });
+      }
+    });
+    _.each(walkStates, (ws) => {
+      const terms = stateTerms.get(ws);
+      if (!terms) {
+        return;
+      }
+      _.each(terms, function (term) {
+        const termObj: ResultTerm = typeof term === 'string' ? { name: term } : term;
+
+        // Add the term to the autoCompleteSet if it doesn't already exist
+        if (!autoCompleteSet.has(termObj.name)) {
+          autoCompleteSet.set(termObj.name, termObj);
+        }
       });
     });
     context.autoCompleteSet = Array.from(autoCompleteSet.values());
   }
+
+  walkStates = resolveFallbackStates(walkStates);
 
   // Apply accumulated context from the best matching state.
   if (walkStates.length !== 0) {

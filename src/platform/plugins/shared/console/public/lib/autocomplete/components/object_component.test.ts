@@ -10,6 +10,7 @@
 import { ConstantComponent } from './constant_component';
 import { ObjectComponent } from './object_component';
 import { SharedComponent } from './shared_component';
+import { SimpleParamComponent } from './simple_param_component';
 import { WalkingState, populateContext, walkTokenPath } from '../engine';
 import type { AutoCompleteContext } from '../types';
 
@@ -21,7 +22,7 @@ type TestContext = AutoCompleteContext & {
 };
 
 describe('WHEN matching object child rules', () => {
-  it('SHOULD return every matching constant child before wildcard and global rules', () => {
+  it('SHOULD pair matching constant children with same-name global rules as fallback', () => {
     const firstConstant = new ConstantComponent('query');
     const secondConstant = new ConstantComponent('query');
     const wildcard = new SharedComponent('*');
@@ -33,9 +34,13 @@ describe('WHEN matching object child rules', () => {
     const component = new ObjectComponent('object', [firstConstant, secondConstant], [wildcard]);
 
     expect(component.match('query', { globalComponentResolver }, null)).toEqual({
-      next: [firstConstantChild, secondConstantChild],
+      next: [firstConstantChild, secondConstantChild, globalChild],
+      nextGroups: [
+        { next: [firstConstantChild, secondConstantChild] },
+        { next: [globalChild], fallback: true },
+      ],
     });
-    expect(globalComponentResolver).not.toHaveBeenCalled();
+    expect(globalComponentResolver).toHaveBeenCalledWith('query', false);
   });
 
   it('SHOULD order every matching wildcard child before a same-name global rule', () => {
@@ -80,6 +85,26 @@ describe('WHEN matching object child rules', () => {
     expect(globalComponentResolver).toHaveBeenCalledWith('query', false);
   });
 
+  it('SHOULD expose only explicit states when wildcard and global rules match the full path', () => {
+    const wildcard = new SharedComponent('*');
+    const wildcardObjectOpen = new ConstantComponent('{', wildcard);
+    const wildcardQueryChild = new ConstantComponent('wildcard_query_child', wildcardObjectOpen);
+    const globalObjectOpen = new ConstantComponent('{');
+    new ConstantComponent('global_query_child', globalObjectOpen);
+    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const component = new ObjectComponent('object', [], [wildcard]);
+
+    const states = walkTokenPath(
+      ['query', '{'],
+      [new WalkingState('ROOT', [component], [])],
+      { globalComponentResolver },
+      null
+    );
+
+    expect(states.flatMap((state) => state.components)).toEqual([wildcardQueryChild]);
+    expect(globalComponentResolver).toHaveBeenCalledWith('query', false);
+  });
+
   it('SHOULD hide same-name global rules when wildcard children match the full token path', () => {
     const wildcard = new SharedComponent('*');
     const wildcardObjectOpen = new ConstantComponent('{', wildcard);
@@ -93,6 +118,83 @@ describe('WHEN matching object child rules', () => {
     populateContext(['query', '{'], context, null, true, [component]);
 
     expect(context.autoCompleteSet).toEqual([{ name: 'wildcard_query_child' }]);
+    expect(globalComponentResolver).toHaveBeenCalledWith('query', false);
+  });
+
+  it('SHOULD keep global rules when wildcard children match but have no suggestions', () => {
+    const wildcard = new SharedComponent('*');
+    new ConstantComponent('{', wildcard);
+    const globalObjectOpen = new ConstantComponent('{');
+    new ConstantComponent('global_query_child', globalObjectOpen);
+    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const component = new ObjectComponent('object', [], [wildcard]);
+    const context: TestContext = { globalComponentResolver };
+
+    populateContext(['query', '{'], context, null, true, [component]);
+
+    expect(context.autoCompleteSet).toEqual([{ name: 'global_query_child' }]);
+    expect(globalComponentResolver).toHaveBeenCalledWith('query', false);
+  });
+
+  it('SHOULD hide same-name global rules when constant children produce suggestions', () => {
+    const queryConstant = new ConstantComponent('query');
+    const queryObjectOpen = new ConstantComponent('{', queryConstant);
+    queryObjectOpen.addComponent(
+      new ObjectComponent('inner', [new ConstantComponent('explicit_query_child')], [])
+    );
+    const globalObjectOpen = new ConstantComponent('{');
+    const globalQueryChild = new ConstantComponent('global_query_child', globalObjectOpen);
+    const globalGetTerms = jest.spyOn(globalQueryChild, 'getTerms');
+    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const component = new ObjectComponent('object', [queryConstant], []);
+    const context: TestContext = { globalComponentResolver };
+
+    populateContext(['query', '{'], context, null, true, [component]);
+
+    expect(context.autoCompleteSet).toEqual([{ name: 'explicit_query_child' }]);
+    expect(globalGetTerms).not.toHaveBeenCalled();
+    expect(globalComponentResolver).toHaveBeenCalledWith('query', false);
+  });
+
+  it('SHOULD apply context from the explicit branch when its suggestions preempt a global rule', () => {
+    const queryConstant = new ConstantComponent('query');
+    const explicitObjectOpen = new SimpleParamComponent('explicitBranch', queryConstant);
+    explicitObjectOpen.addComponent(new ConstantComponent('explicit_query_child'));
+    const globalObjectOpen = new SimpleParamComponent('globalBranch');
+    const globalComponentResolver = jest.fn(() => [globalObjectOpen]);
+    const component = new ObjectComponent('object', [queryConstant], []);
+    const context: TestContext & {
+      explicitBranch?: unknown;
+      globalBranch?: unknown;
+    } = { globalComponentResolver };
+
+    populateContext(['query', '{'], context, null, true, [component]);
+
+    expect(context.autoCompleteSet).toEqual([{ name: 'explicit_query_child' }]);
+    expect(context.explicitBranch).toBe('{');
+    expect(context.globalBranch).toBeUndefined();
+  });
+
+  it('SHOULD keep global rules when constant children match but have no suggestions', () => {
+    // Regression test for the console FTR suite: at runtime the `search` endpoint
+    // declares `query: {}` (an empty subtree) while Query DSL suggestions come from
+    // the same-name GLOBAL.query rule, so the global branch must survive the walk.
+    const queryConstant = new ConstantComponent('query');
+    const queryObjectOpen = new ConstantComponent('{', queryConstant);
+    queryObjectOpen.addComponent(new ObjectComponent('inner', [], []));
+    const globalObjectOpen = new ConstantComponent('{');
+    new ConstantComponent('global_query_child', globalObjectOpen);
+    const globalComponentResolver = jest.fn((token: unknown) =>
+      token === 'query' ? [globalObjectOpen] : null
+    );
+    // runtime body root shape: ConstantComponent('{') wrapping the key matcher
+    const bodyRoot = new ConstantComponent('{');
+    bodyRoot.addComponent(new ObjectComponent('object', [queryConstant], []));
+    const context: TestContext = { globalComponentResolver };
+
+    populateContext(['{', 'query', '{'], context, null, true, [bodyRoot]);
+
+    expect(context.autoCompleteSet).toEqual([{ name: 'global_query_child' }]);
     expect(globalComponentResolver).toHaveBeenCalledWith('query', false);
   });
 
