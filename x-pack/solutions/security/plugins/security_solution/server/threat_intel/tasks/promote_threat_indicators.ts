@@ -17,6 +17,7 @@ import {
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
 import {
+  GLOBAL_SPACE_ID,
   INDICATOR_REFERENCE_PREFIX,
   IOC_TYPES,
   type IocType,
@@ -84,6 +85,7 @@ interface ReportHit {
   sort?: Array<string | number | null>;
   _source?: {
     '@timestamp'?: string;
+    space_id?: string;
     source?: { name?: string; url?: string };
     content?: { title?: string };
     severity?: { level?: string };
@@ -179,11 +181,16 @@ const isPromotableTier = (tier: unknown): boolean =>
   typeof tier !== 'string' || !NON_PROMOTABLE_TIERS.has(tier);
 
 /**
- * Stable id per IOC across reports so re-running the task is idempotent.
- * `<type>:<lowercased_value>` is unique within an IOC space; using the value
- * directly keeps the rows joinable from human inspection (`GET /…/_doc/ip:1.2.3.4`).
+ * Stable id per IOC per space so re-running the task is idempotent. Keyed
+ * `<space_id>:<type>:<lowercased_value>` so the same value cited by reports in
+ * different spaces stays in separate docs and sources[] never merges across
+ * space boundaries — the promote scan runs as the internal user over every
+ * space's reports, so the space prefix is what enforces the isolation the rest
+ * of the pipeline relies on. Space ids cannot contain `:`, so the prefix parses
+ * cleanly (`GET /…/_doc/default:ip:1.2.3.4`).
  */
-const indicatorId = (type: IocType, value: string): string => `${type}:${value.toLowerCase()}`;
+const indicatorId = (spaceId: string, type: IocType, value: string): string =>
+  `${spaceId}:${type}:${value.toLowerCase()}`;
 
 /**
  * Maps an IOC into the ECS `threat.indicator.*` shape Detection Engine's
@@ -230,6 +237,10 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
   const ops: IocIndicatorOp[] = [];
   for (const report of reports) {
     const reportId = report._id;
+    // Reports carry space_id (seeded/global rows use GLOBAL_SPACE_ID). It scopes
+    // the indicator _id below so a value cited in two spaces never collapses into
+    // one cross-space doc.
+    const spaceId = report._source?.space_id ?? GLOBAL_SPACE_ID;
     const iocs = report._source?.extracted?.iocs ?? [];
     const provider = report._source?.source?.name ?? 'unknown';
     const reportUrl = report._source?.source?.url;
@@ -249,7 +260,7 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
         isPromotableTier(ioc.tier)
     );
     for (const ioc of usableIocs) {
-      const id = indicatorId(ioc.type, ioc.value);
+      const id = indicatorId(spaceId, ioc.type, ioc.value);
       // Per-IOC reference: use the Maltrail nearest-ref URL when present,
       // fall back to the report's source.url, absent otherwise.
       const reference = ioc.reference ?? reportUrl ?? null;
@@ -279,6 +290,7 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
             },
           },
           sources: [sourceEntry],
+          space_id: spaceId,
           source_report_id: reportId,
           ...(reportUrl ? { source_report_url: reportUrl } : {}),
           ...(severity ? { severity } : {}),
@@ -380,6 +392,7 @@ export const registerPromoteThreatIndicatorsTask = ({
                   size: PAGE_SIZE,
                   _source: [
                     '@timestamp',
+                    'space_id',
                     'source.name',
                     'source.url',
                     'content.title',

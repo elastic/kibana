@@ -15,7 +15,7 @@ import {
   DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
 } from '../../../common/threat_intel';
 
-const TEMPLATE_VERSION = 23;
+const TEMPLATE_VERSION = 24;
 
 const TEMPLATE_META = { managed_by: 'threat_intel', version: TEMPLATE_VERSION };
 
@@ -424,6 +424,10 @@ const COMPANION_INDEX_TEMPLATES: Array<{
                 first_seen: { type: 'date' },
               },
             },
+            // Owning space of the citing reports. Indicators are keyed
+            // `<space_id>:<type>:<value>` so a value seen in two spaces stays two
+            // isolated docs and sources[] never merges across space boundaries.
+            space_id: { type: 'keyword' },
             // Legacy single-source fields; sources[] is authoritative for citations.
             source_report_id: { type: 'keyword' },
             source_report_url: { type: 'keyword' },
@@ -1055,6 +1059,51 @@ const migrateExistingIndicatorTypeMappings = async (
   }
 };
 
+/**
+ * Adds the top-level `space_id` keyword to the indicators index (v24). Indicators
+ * are keyed `<space_id>:<type>:<value>` so a value cited by reports in different
+ * spaces stays in separate docs and sources[] never merges across space
+ * boundaries. Without the mapping `dynamic: 'strict'` rejects every upsert once
+ * the promote task starts stamping `space_id`.
+ */
+const migrateExistingIndicatorSpaceIdMapping = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('indicator-space-id-mapping-migration');
+
+  try {
+    const exists = await esClient.indices.exists({ index: THREAT_INTEL_INDICATORS_INDEX });
+    if (!exists) {
+      log.debug('indicator-space-id-mapping-migration: index not found — skipping');
+      return;
+    }
+
+    const { [THREAT_INTEL_INDICATORS_INDEX]: indexMappings } = await esClient.indices.getMapping({
+      index: THREAT_INTEL_INDICATORS_INDEX,
+    });
+    const topLevelProps = indexMappings?.mappings?.properties as
+      | Record<string, unknown>
+      | undefined;
+
+    if (topLevelProps?.space_id) return;
+
+    await esClient.indices.putMapping({
+      index: THREAT_INTEL_INDICATORS_INDEX,
+      properties: {
+        space_id: { type: 'keyword' },
+      },
+    });
+    log.info(`Migrated space_id mapping on ${THREAT_INTEL_INDICATORS_INDEX} (v24 backfill)`);
+  } catch (err) {
+    log.error(
+      `Failed to migrate space_id mapping on ${THREAT_INTEL_INDICATORS_INDEX}: ${
+        (err as Error).message
+      }. Indicators will be rejected by dynamic: strict until the mapping is updated manually.`
+    );
+  }
+};
+
 const migrateExistingVulnerabilityMappings = async (
   esClient: ElasticsearchClient,
   logger: Logger
@@ -1161,6 +1210,7 @@ export const installIndexTemplates = async ({
   await migrateExistingIocReferenceMappings(esClient, log);
   await migrateExistingIndicatorSourcesMapping(esClient, log);
   await migrateExistingIndicatorTypeMappings(esClient, log);
+  await migrateExistingIndicatorSpaceIdMapping(esClient, log);
   await migrateExistingVulnerabilityMappings(esClient, log);
   await migrateExistingContentScrubbedMapping(esClient, log);
   await migrateExistingIndicesToHidden(esClient, log);

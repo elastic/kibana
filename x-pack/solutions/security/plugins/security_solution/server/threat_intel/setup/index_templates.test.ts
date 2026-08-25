@@ -175,4 +175,26 @@ describe('index_templates — mapping coverage guard', () => {
     const callIdx = src.indexOf('await migrateExistingVulnerabilityMappings', installIdx);
     expect(callIdx).toBeGreaterThan(installIdx);
   });
+
+  it('indicators template declares a top-level space_id keyword (v24 space isolation)', async () => {
+    const { byIndex } = await runInstall();
+
+    const properties = (
+      byIndex(THREAT_INTEL_INDICATORS_INDEX)?.template?.mappings as {
+        properties: Record<string, unknown>;
+      }
+    ).properties;
+
+    expect(properties).toEqual(expect.objectContaining({ space_id: { type: 'keyword' } }));
+  });
+
+  it('migrateExistingIndicatorSpaceIdMapping is wired into installIndexTemplates', () => {
+    expect(src).toContain('const migrateExistingIndicatorSpaceIdMapping');
+
+    const installIdx = src.indexOf('export const installIndexTemplates');
+    expect(installIdx).toBeGreaterThan(-1);
+
+    const callIdx = src.indexOf('await migrateExistingIndicatorSpaceIdMapping', installIdx);
+    expect(callIdx).toBeGreaterThan(installIdx);
+  });
 });

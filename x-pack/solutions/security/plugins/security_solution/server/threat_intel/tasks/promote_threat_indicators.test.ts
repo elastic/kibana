@@ -56,6 +56,7 @@ const makeReport = ({
   sourceUrl = 'https://example.com/trail.txt',
   trailLabel,
   extractedAt = EXTRACTED_AT,
+  spaceId = 'default',
 }: {
   id: string;
   iocs: Array<{ type: string; value: string; reference?: string }>;
@@ -63,11 +64,13 @@ const makeReport = ({
   sourceUrl?: string;
   trailLabel?: string;
   extractedAt?: string;
+  spaceId?: string;
 }) => ({
   _id: id,
   sort: [extractedAt, 0],
   _source: {
     '@timestamp': extractedAt,
+    space_id: spaceId,
     source: { name: sourceName, url: sourceUrl },
     ...(trailLabel !== undefined ? { content: { title: trailLabel } } : {}),
     severity: { level: 'low' },
@@ -85,8 +88,9 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       );
       expect(ops).toHaveLength(1);
       const op = ops[0];
-      // Stable _id
-      expect(op._id).toBe('ip:1.2.3.4');
+      // Stable, space-scoped _id
+      expect(op._id).toBe('default:ip:1.2.3.4');
+      expect((op.upsert as Record<string, unknown>).space_id).toBe('default');
       // Script present
       expect(op.scriptParams.report_id).toBe('r1');
       expect(op.scriptParams.now).toBe(NOW);
@@ -108,10 +112,10 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       ];
       const ops = buildBulkOpsForTest(reports, NOW);
 
-      // Two ops with the SAME indicator _id — one per citing report.
+      // Two ops with the SAME indicator _id — one per citing report, same space.
       expect(ops).toHaveLength(2);
-      expect(ops[0]._id).toBe('ip:10.0.0.1');
-      expect(ops[1]._id).toBe('ip:10.0.0.1');
+      expect(ops[0]._id).toBe('default:ip:10.0.0.1');
+      expect(ops[1]._id).toBe('default:ip:10.0.0.1');
 
       // Different report_ids in scriptParams — when the Painless script runs,
       // each will append its own entry to sources[] on the live doc, resulting
@@ -238,7 +242,36 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
         NOW
       );
       expect(ops).toHaveLength(1);
-      expect(ops[0]._id).toBe('ip:1.2.3.4');
+      expect(ops[0]._id).toBe('default:ip:1.2.3.4');
+    });
+  });
+
+  describe('space isolation', () => {
+    it('keys the same IOC value in different spaces as separate docs', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({ id: 'r-a', iocs: [{ type: 'ip', value: '9.9.9.9' }], spaceId: 'team-a' }),
+          makeReport({ id: 'r-b', iocs: [{ type: 'ip', value: '9.9.9.9' }], spaceId: 'team-b' }),
+        ],
+        NOW
+      );
+
+      // Same value, different spaces → two isolated _ids, so the scripted upsert
+      // never merges sources[] across space boundaries.
+      expect(ops.map((op) => op._id)).toEqual(['team-a:ip:9.9.9.9', 'team-b:ip:9.9.9.9']);
+      expect((ops[0].upsert as Record<string, unknown>).space_id).toBe('team-a');
+      expect((ops[1].upsert as Record<string, unknown>).space_id).toBe('team-b');
+    });
+
+    it('falls back to the global space when a report carries no space_id', () => {
+      const report = makeReport({ id: 'r-global', iocs: [{ type: 'ip', value: '8.8.8.8' }] });
+      // Simulate a legacy report written before space_id existed.
+      delete (report._source as { space_id?: string }).space_id;
+
+      const ops = buildBulkOpsForTest([report], NOW);
+
+      expect(ops[0]._id).toBe('*:ip:8.8.8.8');
+      expect((ops[0].upsert as Record<string, unknown>).space_id).toBe('*');
     });
   });
 });
@@ -381,7 +414,7 @@ describe('vetting gate', () => {
       NOW
     );
 
-    expect(ops.map((op) => op._id)).toEqual(['ip:1.1.1.1']);
+    expect(ops.map((op) => op._id)).toEqual(['default:ip:1.1.1.1']);
   });
 
   it('keeps contextual and uncertain IOCs', () => {
@@ -395,7 +428,7 @@ describe('vetting gate', () => {
       NOW
     );
 
-    expect(ops.map((op) => op._id)).toEqual(['ip:4.4.4.4', 'ip:5.5.5.5']);
+    expect(ops.map((op) => op._id)).toEqual(['default:ip:4.4.4.4', 'default:ip:5.5.5.5']);
   });
 
   it('promotes IOCs written before tiering existed', () => {
@@ -404,7 +437,7 @@ describe('vetting gate', () => {
       NOW
     );
 
-    expect(ops.map((op) => op._id)).toEqual(['ip:6.6.6.6']);
+    expect(ops.map((op) => op._id)).toEqual(['default:ip:6.6.6.6']);
   });
 
   it('records the tier that let the row through', () => {
