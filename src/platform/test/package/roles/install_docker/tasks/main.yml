@@ -38,4 +38,4 @@
   pip:
     name: 
       - 'docker==7.1.0'
-      - 'requests==2.32.3'
+      - 'requests==2.31.0'
