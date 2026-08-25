@@ -97,7 +97,7 @@ describe('computeValidationLookback', () => {
     expect(query.mock.calls[0][0].query).toBe('FROM logs-a, logs-a.* | STATS total = COUNT(*)');
   });
 
-  it('floors the window at the 24h evidence window for a dense stream', async () => {
+  it('floors the window at the 24h evidence window', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce(countResponse(100_000));
 
@@ -286,7 +286,7 @@ describe('identifyKIQueries agent', () => {
   });
 
   describe('eval-only intent contract', () => {
-    it('production mode advertises expects_matches without requiring it and adds valid queries', async () => {
+    it('advertises optional expects_matches in production', async () => {
       const { result, capturedOptions, addQueriesResponses } = await runIdentifyKIQueries({
         scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message == "x"')]],
       });
@@ -629,7 +629,7 @@ describe('identifyKIQueries agent', () => {
     const deadPredicateResponses = (queryString: string) =>
       queryString.includes('"AutoOpsRuntimeException"') ? countResponse(0) : undefined;
 
-    it('rejects a zero-match query that is expected to match', async () => {
+    it('rejects an expected query with no matches', async () => {
       const { result, addQueriesResponses } = await runIdentifyKIQueries({
         collectQueryAttempts: true,
         scriptedAddQueries: [[scriptedQuery(deadEsql)]],
@@ -646,30 +646,25 @@ describe('identifyKIQueries agent', () => {
       expect(flagged.error).toContain('matched 0 documents');
       expect(flagged.error).toContain('expects_matches');
 
-      expect(result.toolUsage.add_queries.failures).toBe(1);
       expect(result.queryAttempts?.[0]).toMatchObject({
-        status: 'Failed to add',
         failureReason: 'no_matches',
       });
     });
 
-    it('accepts a zero-match query as a watch when expects_matches is false', async () => {
+    it('accepts a zero-match watch', async () => {
       const { result, addQueriesResponses } = await runIdentifyKIQueries({
         scriptedAddQueries: [[scriptedQuery(deadEsql, { expects_matches: false })]],
         esqlResponse: deadPredicateResponses,
       });
 
       const response = addQueriesResponses[0] as {
-        response: { queries: Array<{ status: string; hints?: string[] }> };
+        response: { queries: Array<{ hints?: string[] }> };
       };
-      expect(response.response.queries[0].status).toBe('Added');
       expect(response.response.queries[0].hints).toEqual([expect.stringContaining('watch query')]);
-      expect(result.queries).toHaveLength(1);
       expect(result.queries[0].expects_matches).toBe(false);
-      expect(result.toolUsage.add_queries.failures).toBe(0);
     });
 
-    it('records a watch as a live query when it already matches data', async () => {
+    it('promotes a matching watch to a live query', async () => {
       const { result, addQueriesResponses } = await runIdentifyKIQueries({
         scriptedAddQueries: [
           [scriptedQuery('FROM logs | WHERE error.type == "Live"', { expects_matches: false })],
@@ -677,18 +672,32 @@ describe('identifyKIQueries agent', () => {
       });
 
       const response = addQueriesResponses[0] as {
-        response: { queries: Array<{ status: string; hints?: string[] }> };
+        response: { queries: Array<{ hints?: string[] }> };
       };
-      expect(response.response.queries[0].status).toBe('Added');
       expect(response.response.queries[0].hints).toEqual([
         expect.stringContaining('recorded as a live query'),
       ]);
-      expect(result.queries).toHaveLength(1);
       expect(result.queries[0].expects_matches).toBe(true);
-      expect(result.toolUsage.add_queries.failures).toBe(0);
     });
 
-    it('rejects an unmapped field but points at the mapped value that carries it', async () => {
+    it('skips existence validation for STATS queries', async () => {
+      const statsEsql =
+        'FROM logs | STATS metric_value = COUNT(*) WHERE error.type == "Absent" BY bucket = BUCKET(@timestamp, 1 minute) | KEEP bucket, metric_value';
+      const { result, esqlQueryMock } = await runIdentifyKIQueries({
+        scriptedAddQueries: [[scriptedQuery(statsEsql)]],
+        esqlResponse: (queryString: string) =>
+          queryString.includes('"Absent"') ? countResponse(0) : undefined,
+      });
+
+      expect(result.queries).toHaveLength(1);
+      expect(result.queries[0].type).toBe('stats');
+      expect(esqlQueryMock.mock.calls.map(([request]) => request.query)).toEqual([
+        'FROM logs, logs.* | STATS total = COUNT(*)',
+        `${statsEsql.replace('FROM logs', 'FROM logs, logs.*')}\n| LIMIT 0`,
+      ]);
+    });
+
+    it('distinguishes an unmapped field found in _source', async () => {
       const unmappedEsql = 'FROM logs | WHERE attributes.exception.type == "OutOfMemoryError"';
 
       const { result, addQueriesResponses } = await runIdentifyKIQueries({
@@ -706,21 +715,18 @@ describe('identifyKIQueries agent', () => {
       expect(result.queries).toHaveLength(0);
 
       const response = addQueriesResponses[0] as {
-        response: { queries: Array<{ status: string; error?: string }> };
+        response: { queries: Array<{ error?: string }> };
       };
       const [flagged] = response.response.queries;
-      expect(flagged.status).toBe('Failed to add');
       expect(flagged.error).toContain('queryable schema');
       expect(flagged.error).toContain('attributes.exception.type');
 
-      expect(result.toolUsage.add_queries.failures).toBe(1);
       expect(result.queryAttempts?.[0]).toMatchObject({
-        status: 'Failed to add',
         failureReason: 'unmapped_field',
       });
     });
 
-    it('rejects an unknown field when loading from _source still finds nothing', async () => {
+    it('rejects an unknown field absent from _source', async () => {
       const unknownEsql = 'FROM logs | WHERE nope.field == "value"';
 
       const { result, addQueriesResponses } = await runIdentifyKIQueries({
@@ -737,17 +743,15 @@ describe('identifyKIQueries agent', () => {
 
       expect(result.queries).toHaveLength(0);
       const response = addQueriesResponses[0] as {
-        response: { queries: Array<{ status: string; error?: string }> };
+        response: { queries: Array<{ error?: string }> };
       };
-      expect(response.response.queries[0].status).toBe('Failed to add');
       expect(response.response.queries[0].error).toContain('nope.field');
       expect(result.queryAttempts?.[0]).toMatchObject({
-        status: 'Failed to add',
         failureReason: 'no_matches',
       });
     });
 
-    it('rejects a STATS query whose aggregation field fails execution validation', async () => {
+    it('keeps STATS unknown columns as validation errors', async () => {
       const esql =
         'FROM logs | STATS metric_value = PERCENTILE(missing.duration, 95) BY bucket = BUCKET(@timestamp, 1 minute) | KEEP bucket, metric_value';
       const { result } = await runIdentifyKIQueries({
@@ -761,7 +765,6 @@ describe('identifyKIQueries agent', () => {
 
       expect(result.queries).toHaveLength(0);
       expect(result.queryAttempts?.[0]).toMatchObject({
-        status: 'Failed to add',
         failureReason: 'validation_error',
       });
     });

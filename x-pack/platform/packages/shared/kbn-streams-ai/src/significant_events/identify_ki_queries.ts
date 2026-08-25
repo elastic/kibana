@@ -9,7 +9,6 @@ import type { Streams } from '@kbn/streams-schema';
 import type { QueryType } from '@kbn/significant-events-schema';
 import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
-  buildExistenceProbeQueries,
   deriveQueryType,
   findOverBroadMatchPredicates,
   renderOverBroadMatchError,
@@ -541,35 +540,30 @@ export async function identifyKIQueries({
                   await probeMatchCount(`${rewritten}\n| LIMIT 0`);
                 } catch (preflightError) {
                   const preflightMessage = getErrorMessage(preflightError);
-                  if (!isUnknownColumnError(preflightMessage)) throw preflightError;
+                  if (derivedType === 'stats' || !isUnknownColumnError(preflightMessage)) {
+                    throw preflightError;
+                  }
                   preflightUnknownColumnError = preflightMessage;
                 }
 
-                const existenceProbes = buildExistenceProbeQueries(rewritten);
                 const isWatch = query.expects_matches === false;
                 let effectiveExpectsMatches = query.expects_matches;
 
-                if (existenceProbes) {
-                  const matchCounts: number[] = [];
-                  let unknownColumnError: string | null = null;
-                  let failedProbe: string | null = null;
-                  for (const existenceProbe of existenceProbes) {
-                    try {
-                      matchCounts.push(await probeMatchCount(existenceProbe));
-                    } catch (probeError) {
-                      const probeMessage = getErrorMessage(probeError);
-                      if (!isUnknownColumnError(probeMessage)) throw probeError;
-                      unknownColumnError = probeMessage;
-                      failedProbe = existenceProbe;
-                      break;
-                    }
-                  }
+                if (derivedType === 'match') {
+                  const existenceProbe = `${rewritten}\n| LIMIT 1\n| STATS COUNT(*)`;
+                  let matchCount: number;
+                  try {
+                    matchCount = await probeMatchCount(existenceProbe);
+                  } catch (probeError) {
+                    const probeMessage = getErrorMessage(probeError);
+                    if (!isUnknownColumnError(probeMessage)) throw probeError;
 
-                  if (unknownColumnError !== null && failedProbe !== null) {
-                    const fields = extractUnknownColumns(unknownColumnError);
+                    const fields = extractUnknownColumns(probeMessage);
                     let loadCount = 0;
                     try {
-                      loadCount = await probeMatchCount(withUnmappedFieldsDirective(failedProbe));
+                      loadCount = await probeMatchCount(
+                        withUnmappedFieldsDirective(existenceProbe)
+                      );
                     } catch {
                       loadCount = 0;
                     }
@@ -591,7 +585,7 @@ export async function identifyKIQueries({
                     throw new Error(preflightUnknownColumnError);
                   }
 
-                  const matched = matchCounts.every((count) => count > 0);
+                  const matched = matchCount > 0;
 
                   if (isWatch) {
                     if (matched) {
@@ -615,8 +609,6 @@ export async function identifyKIQueries({
                       error: renderNoMatchesError(validationLookback),
                     };
                   }
-                } else if (preflightUnknownColumnError !== null) {
-                  throw new Error(preflightUnknownColumnError);
                 }
 
                 validatedQueries.push({
