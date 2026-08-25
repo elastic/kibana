@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -15,14 +14,8 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { i18n } from '@kbn/i18n';
 import { resolveIdentity } from '../core/resolve_identity';
 import { tombstoneMemory } from '../core/tombstone_memory';
+import { forgetInputSchema } from '../schemas';
 import type { GetMemoryStorage } from '../types';
-
-const forgetSchema = z.object({
-  id: z
-    .string()
-    .max(512)
-    .describe('The memory id to soft-delete. Obtain this from a prior recall call.'),
-});
 
 /**
  * Creates the `platform.memory.forget` registered tool.
@@ -40,7 +33,7 @@ export const createForgetTool = ({
   getStorage: GetMemoryStorage;
   getCoreSecurity: () => SecurityServiceStart;
   writeConfirmation?: ToolConfirmationPolicyMode;
-}): BuiltinToolDefinition<typeof forgetSchema> => ({
+}): BuiltinToolDefinition<typeof forgetInputSchema> => ({
   id: platformMemoryTools.forget,
   type: ToolType.builtin,
   description: `
@@ -54,7 +47,7 @@ Ownership is validated; you can only forget memories belonging to the current us
 
 Returns { result: 'deleted' } or { result: 'not_found' }.
   `.trim(),
-  schema: forgetSchema,
+  schema: forgetInputSchema,
   tags: [],
   excludeFromMcp: true,
   confirmation: {

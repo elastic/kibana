@@ -7,11 +7,18 @@
 
 import { resolveIdentity } from '../core/resolve_identity';
 import { recallMemory } from '../core/recall_memory';
+import { tombstoneMemory } from '../core/tombstone_memory';
 import { writeMemory } from '../core/write_memory';
-import { MEMORY_RECALL_STEP_ID, MEMORY_REMEMBER_STEP_ID, registerMemoryWorkflowSteps } from '.';
+import {
+  MEMORY_FORGET_STEP_ID,
+  MEMORY_RECALL_STEP_ID,
+  MEMORY_REMEMBER_STEP_ID,
+  registerMemoryWorkflowSteps,
+} from '.';
 
 jest.mock('../core/resolve_identity');
 jest.mock('../core/recall_memory');
+jest.mock('../core/tombstone_memory');
 jest.mock('../core/write_memory');
 
 const request = { request: true };
@@ -19,6 +26,7 @@ const currentUserEsClient = { currentUser: true };
 const storage = { storage: true };
 const coreSecurity = { coreSecurity: true };
 const identity = { author: 'profile-user-1', author_kind: 'profile_uid' as const };
+const abortSignal = new AbortController().signal;
 
 const registerStepDefinition = jest.fn();
 const getStorage = jest.fn().mockReturnValue(storage);
@@ -28,6 +36,7 @@ const getCurrentUserEsClient = jest.fn().mockReturnValue(currentUserEsClient);
 const createContext = (input: Record<string, unknown>) =>
   ({
     input,
+    abortSignal,
     contextManager: {
       getFakeRequest: () => request,
       getContext: () => ({ workflow: { spaceId: 'space-1' } }),
@@ -44,7 +53,8 @@ const registerSteps = () => {
 
   const recallStep = registerStepDefinition.mock.calls[0][0];
   const rememberStepLoader = registerStepDefinition.mock.calls[1][0];
-  return { recallStep, rememberStepLoader };
+  const forgetStep = registerStepDefinition.mock.calls[2][0];
+  return { recallStep, rememberStepLoader, forgetStep };
 };
 
 describe('registerMemoryWorkflowSteps', () => {
@@ -71,16 +81,22 @@ describe('registerMemoryWorkflowSteps', () => {
         },
       ],
     });
-    const { recallStep, rememberStepLoader } = registerSteps();
+    const { recallStep, rememberStepLoader, forgetStep } = registerSteps();
     const rememberStep = await rememberStepLoader();
 
-    expect(registerStepDefinition).toHaveBeenCalledTimes(2);
-    expect([recallStep.id, rememberStep.id]).toEqual([
+    expect(registerStepDefinition).toHaveBeenCalledTimes(3);
+    expect([recallStep.id, rememberStep.id, forgetStep.id]).toEqual([
       MEMORY_RECALL_STEP_ID,
       MEMORY_REMEMBER_STEP_ID,
+      MEMORY_FORGET_STEP_ID,
     ]);
     const result = await recallStep.handler(
-      createContext({ query: 'preferences', category: 'preferences', limit: 4 })
+      createContext({
+        query: 'preferences',
+        category: 'preferences',
+        tags: ['project:phoenix', 'source:workflow'],
+        limit: 4,
+      })
     );
 
     expect(resolveIdentity).toHaveBeenCalledWith({
@@ -94,6 +110,7 @@ describe('registerMemoryWorkflowSteps', () => {
       params: {
         query: 'preferences',
         category: 'preferences',
+        tags: ['project:phoenix', 'source:workflow'],
         limit: 4,
         space_id: 'space-1',
         identity,
@@ -143,9 +160,34 @@ describe('registerMemoryWorkflowSteps', () => {
     expect(result.output).toEqual({ id: 'memory-1', revision: 2, action: 'updated' });
   });
 
-  it('handles missing identity for both recall and remember', async () => {
+  it.each(['deleted', 'not_found'] as const)(
+    'registers memory.forget and returns %s from the shared tombstone core',
+    async (result) => {
+      jest.mocked(tombstoneMemory).mockResolvedValue({ result });
+      const { forgetStep } = registerSteps();
+
+      const response = await forgetStep.handler(createContext({ id: 'memory-1' }));
+
+      expect(forgetStep.id).toBe(MEMORY_FORGET_STEP_ID);
+      expect(getCurrentUserEsClient).toHaveBeenCalledWith(request);
+      expect(getStorage).toHaveBeenCalledWith(currentUserEsClient);
+      expect(tombstoneMemory).toHaveBeenCalledWith({
+        storage,
+        abortSignal,
+        params: {
+          id: 'memory-1',
+          space_id: 'space-1',
+          identity,
+        },
+      });
+      expect(response.output).toEqual({ result });
+      expect(forgetStep.outputSchema.parse(response.output)).toEqual(response.output);
+    }
+  );
+
+  it('handles missing identity for recall, remember, and forget', async () => {
     jest.mocked(resolveIdentity).mockReturnValue(undefined);
-    const { recallStep, rememberStepLoader } = registerSteps();
+    const { recallStep, rememberStepLoader, forgetStep } = registerSteps();
     const rememberStep = await rememberStepLoader();
 
     await expect(recallStep.handler(createContext({ query: 'preferences' }))).resolves.toEqual({
@@ -156,9 +198,13 @@ describe('registerMemoryWorkflowSteps', () => {
         createContext({ title: 'Preferred sources', description: 'Use primary sources.' })
       )
     ).rejects.toThrow('Cannot remember memory: no user identity available for scoping.');
+    await expect(forgetStep.handler(createContext({ id: 'memory-1' }))).rejects.toThrow(
+      'Cannot forget memory: no user identity available for scoping.'
+    );
 
     expect(getCurrentUserEsClient).not.toHaveBeenCalled();
     expect(recallMemory).not.toHaveBeenCalled();
     expect(writeMemory).not.toHaveBeenCalled();
+    expect(tombstoneMemory).not.toHaveBeenCalled();
   });
 });

@@ -15,9 +15,17 @@ export const memoryCategorySchema = z.enum([
   'procedures',
 ]);
 
+export const memoryTagsSchema = z
+  .array(z.string().max(100))
+  .max(20)
+  .describe('Optional exact-match tags for classification and recall filtering.');
+
 export const recallInputSchema = z.object({
   query: z.string().max(2000).describe('The query text used to retrieve relevant memories.'),
   category: memoryCategorySchema.optional().describe('Limit results to this memory category.'),
+  tags: memoryTagsSchema
+    .optional()
+    .describe('Require recalled memories to contain every supplied tag.'),
   limit: z
     .number()
     .int()
@@ -38,10 +46,17 @@ export const rememberInputSchema = z.object({
     .max(10000)
     .describe('Full content of the memory. Write in clear, complete sentences.'),
   category: memoryCategorySchema.describe('Memory category.'),
-  tags: z.array(z.string().max(100)).max(20).optional().describe('Optional classification tags.'),
+  tags: memoryTagsSchema.optional(),
   expires_at: z
     .string()
     .datetime()
     .optional()
     .describe('ISO-8601 datetime after which this memory should no longer be recalled.'),
+});
+
+export const forgetInputSchema = z.object({
+  id: z
+    .string()
+    .max(512)
+    .describe('The memory id to soft-delete. Obtain this from a prior recall call.'),
 });

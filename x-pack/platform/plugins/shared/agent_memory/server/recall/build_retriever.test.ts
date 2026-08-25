@@ -22,13 +22,17 @@ const expiryFilter = {
   },
 };
 
-const buildTestFilter = (category?: string) =>
-  buildBeliefFilter({
+const buildTestFilter = (category?: string, tags?: string[]) => {
+  const params = {
     space_id: 'space-1',
     scope_kind: 'user',
     scope_id: 'user-1',
     category,
-  });
+    tags,
+  } as Parameters<typeof buildBeliefFilter>[0] & { tags?: string[] };
+
+  return buildBeliefFilter(params);
+};
 
 describe('Agent Memory ES|QL recall builders', () => {
   beforeEach(() => {
@@ -41,7 +45,7 @@ describe('Agent Memory ES|QL recall builders', () => {
   });
 
   it('builds the authoritative body filter independently from the ES|QL pipeline', () => {
-    expect(buildTestFilter('preferences')).toEqual({
+    expect(buildTestFilter('preferences', ['project:phoenix', 'source:workflow'])).toEqual({
       bool: {
         filter: [
           { term: { space_id: 'space-1' } },
@@ -50,6 +54,8 @@ describe('Agent Memory ES|QL recall builders', () => {
           { term: { deleted: false } },
           expiryFilter,
           { term: { 'memory.category': 'preferences' } },
+          { term: { tags: 'project:phoenix' } },
+          { term: { tags: 'source:workflow' } },
         ],
       },
     });

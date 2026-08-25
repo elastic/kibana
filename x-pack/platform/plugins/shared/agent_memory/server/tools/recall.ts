@@ -45,6 +45,9 @@ Use this tool to:
 - Retrieve relevant facts from past conversations
 - Ground the response in remembered context without issuing additional searches
 
+Use tags to require exact generic groupings such as a project, customer, case, or workflow.
+Every requested tag must be present on a recalled memory.
+
 Fails open: if the memory service is unavailable, returns an empty list without error.
   `.trim(),
   schema: recallInputSchema,
@@ -57,7 +60,7 @@ Fails open: if the memory service is unavailable, returns an empty list without 
     idempotentHint: true,
     openWorldHint: false,
   },
-  handler: async ({ query, category, limit }, context) => {
+  handler: async ({ query, category, tags, limit }, context) => {
     const identity = resolveIdentity({
       request: context.request,
       security: getCoreSecurity(),
@@ -80,6 +83,7 @@ Fails open: if the memory service is unavailable, returns an empty list without 
       params: {
         query,
         category,
+        tags,
         limit,
         space_id: context.spaceId,
         identity,

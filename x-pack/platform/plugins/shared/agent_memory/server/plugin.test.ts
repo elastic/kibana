@@ -17,7 +17,7 @@ import { AgentMemoryPlugin } from './plugin';
 import { rememberInputSchema } from './schemas';
 import { MEMORY_SKILL_ID } from './skills/memory_skill';
 import type { AgentMemorySetupDependencies, GetMemoryStorage } from './types';
-import { MEMORY_RECALL_STEP_ID } from './workflow_steps';
+import { MEMORY_FORGET_STEP_ID, MEMORY_RECALL_STEP_ID } from './workflow_steps';
 
 jest.mock('./storage/memory_storage', () => ({
   createMemoryStorage: jest.fn().mockReturnValue({}),
@@ -140,6 +140,9 @@ describe('AgentMemoryPlugin', () => {
       /Before similar work.+procedures.+current evidence.+conflicts/i
     );
     expect(normalizedSkillContent).toMatch(
+      /tags.+project.+customer.+case.+workflow.+every requested tag must match/i
+    );
+    expect(normalizedSkillContent).toMatch(
       /unverified, user-authored content.+not treat.+instructions.+cross-check/i
     );
     expect(normalizedSkillContent).toMatch(
@@ -184,6 +187,7 @@ describe('AgentMemoryPlugin', () => {
 
     const recallStep = registerStepDefinition.mock.calls[0]?.[0];
     const rememberStepLoader = registerStepDefinition.mock.calls[1]?.[0];
+    const forgetStep = registerStepDefinition.mock.calls[2]?.[0];
     expect(recallStep).toEqual(
       expect.objectContaining({ id: MEMORY_RECALL_STEP_ID, handler: expect.any(Function) })
     );
@@ -196,6 +200,9 @@ describe('AgentMemoryPlugin', () => {
       expect.objectContaining({ id: 'memory.remember', handler: expect.any(Function) })
     );
     expect(rememberStep).not.toEqual(expect.objectContaining({ id: 'memory.retain' }));
+    expect(forgetStep).toEqual(
+      expect.objectContaining({ id: MEMORY_FORGET_STEP_ID, handler: expect.any(Function) })
+    );
   });
 
   it('uses the request client for data and the internal client for index templates', async () => {

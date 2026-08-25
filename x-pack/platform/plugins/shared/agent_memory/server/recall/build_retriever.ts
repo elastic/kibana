@@ -22,6 +22,8 @@ export interface BuildRecallQueryParams {
   scope_id: string;
   /** Optional category filter applied on top of the belief filter. */
   category?: string;
+  /** Optional exact tags; every supplied tag must be present. */
+  tags?: string[];
   /** Max results to return. */
   limit: number;
 }
@@ -41,7 +43,8 @@ const buildBeliefFilterClauses = (
   space_id: string,
   scope_kind: 'user',
   scope_id: string,
-  category?: string
+  category?: string,
+  tags?: string[]
 ): QueryDslQueryContainer[] => {
   const now = new Date().toISOString();
 
@@ -70,6 +73,10 @@ const buildBeliefFilterClauses = (
     filters.push({ term: { 'memory.category': category } });
   }
 
+  for (const tag of tags ?? []) {
+    filters.push({ term: { tags: tag } });
+  }
+
   return filters;
 };
 
@@ -78,9 +85,10 @@ export const buildBeliefFilter = ({
   scope_kind,
   scope_id,
   category,
+  tags,
 }: Omit<BuildRecallQueryParams, 'query' | 'limit'>): QueryDslQueryContainer => ({
   bool: {
-    filter: buildBeliefFilterClauses(space_id, scope_kind, scope_id, category),
+    filter: buildBeliefFilterClauses(space_id, scope_kind, scope_id, category, tags),
   },
 });
 

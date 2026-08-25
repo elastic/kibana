@@ -54,9 +54,13 @@ describe('recallMemory', () => {
       .mockResolvedValueOnce(lexicalResponse);
     const logger = { warn: jest.fn() };
     const storage = { getClient: () => ({ esql }) } as never;
+    const taggedRecallParams = {
+      ...recallParams,
+      tags: ['project:phoenix', 'source:workflow'],
+    };
 
     await expect(
-      recallMemory({ storage, params: recallParams, logger: logger as never })
+      recallMemory({ storage, params: taggedRecallParams, logger: logger as never })
     ).resolves.toEqual({
       memories: [
         {
@@ -78,6 +82,12 @@ describe('recallMemory', () => {
     expect(esql.mock.calls[1][0].pipeline.toRequest().query).not.toContain('FUSE');
     expect(esql.mock.calls[0][0].metadata).toEqual(['_id', '_index', '_score']);
     expect(JSON.stringify(esql.mock.calls[0][0].filter)).toContain('memory.scope_id');
+    expect(esql.mock.calls[0][0].filter.bool.filter).toEqual(
+      expect.arrayContaining([
+        { term: { tags: 'project:phoenix' } },
+        { term: { tags: 'source:workflow' } },
+      ])
+    );
     expect(JSON.stringify(esql.mock.calls[0][0].filter)).not.toContain('memory.provenance.author');
   });
 

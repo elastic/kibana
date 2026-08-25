@@ -40,7 +40,16 @@ describe('createRecallTool', () => {
   it('recalls Agent Memory as the current user', async () => {
     const tool = createRecallTool({ getStorage, getCoreSecurity });
 
-    await expect(tool.handler({ query: 'preferences', limit: 10 }, mockContext)).resolves.toEqual({
+    await expect(
+      tool.handler(
+        {
+          query: 'preferences',
+          tags: ['project:phoenix', 'source:workflow'],
+          limit: 10,
+        } as never,
+        mockContext
+      )
+    ).resolves.toEqual({
       results: [{ type: ToolResultType.other, data: { memories: [] } }],
     });
 
@@ -51,6 +60,7 @@ describe('createRecallTool', () => {
       params: {
         query: 'preferences',
         category: undefined,
+        tags: ['project:phoenix', 'source:workflow'],
         limit: 10,
         space_id: 'space-1',
         identity: { author: 'user-1', author_kind: 'username' },

@@ -208,6 +208,58 @@ describe('tombstoneMemory', () => {
     expect(malformedIndex).not.toHaveBeenCalled();
   });
 
+  it('does not mutate when execution is aborted after loading the document', async () => {
+    const abortController = new AbortController();
+    const abortReason = new Error('Workflow execution cancelled');
+    const existingDocument: MemoryDocument = {
+      id: 'memory-1',
+      type: 'memory',
+      title: 'Memory title',
+      description: 'Memory description',
+      content: 'Memory title\n\nMemory description',
+      deleted: false,
+      created_at: '2026-08-01T00:00:00.000Z',
+      space_id: 'default',
+      permissions: permissionsForSpace('default'),
+      memory: {
+        revision: 1,
+        content_hash: 'memory-hash',
+        scope_kind: 'user',
+        scope_id: 'user-1',
+        provenance: {
+          author: 'user-1',
+          author_kind: 'profile_uid',
+        },
+      },
+    };
+    const get = jest.fn().mockImplementation(async () => {
+      abortController.abort(abortReason);
+      return {
+        found: true,
+        _source: existingDocument,
+        _seq_no: 7,
+        _primary_term: 3,
+      };
+    });
+    const index = jest.fn();
+    const storage = {
+      getClient: () => ({ get, index }),
+    } as never;
+
+    await expect(
+      tombstoneMemory({
+        storage,
+        abortSignal: abortController.signal,
+        params: {
+          id: existingDocument.id,
+          space_id: 'default',
+          identity: { author: 'user-1', author_kind: 'profile_uid' },
+        },
+      })
+    ).rejects.toMatchObject({ name: 'AbortError' });
+    expect(index).not.toHaveBeenCalled();
+  });
+
   it('returns not_found only for genuine 404 errors and propagates other failures', async () => {
     const params = {
       id: 'memory-1',

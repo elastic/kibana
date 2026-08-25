@@ -221,7 +221,7 @@ describe('Agent Memory AI Index integration', () => {
     });
     expect(lexicalOnly.hits.hits).toHaveLength(0);
 
-    const recalled = await recallMemory({
+    const unconstrainedRecall = await recallMemory({
       storage,
       params: {
         query: semanticQuery,
@@ -230,6 +230,30 @@ describe('Agent Memory AI Index integration', () => {
         limit: 10,
       },
     });
+    expect(unconstrainedRecall.memories.map(({ id }) => id)).toContain(writeResult.id);
+
+    const recalled = await recallMemory({
+      storage,
+      params: {
+        query: semanticQuery,
+        tags: ['incident-response'],
+        space_id: spaceId,
+        identity,
+        limit: 10,
+      },
+    });
     expect(recalled.memories.map(({ id }) => id)).toContain(writeResult.id);
+
+    const excludedByTags = await recallMemory({
+      storage,
+      params: {
+        query: semanticQuery,
+        tags: ['incident-response', 'project:other'],
+        space_id: spaceId,
+        identity,
+        limit: 10,
+      },
+    });
+    expect(excludedByTags.memories).toEqual([]);
   });
 });

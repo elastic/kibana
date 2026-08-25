@@ -147,6 +147,7 @@ describe('agent memory injection hook tracing', () => {
         params: expect.objectContaining({ limit: 5, space_id: 'space-1' }),
       })
     );
+    expect(mockRecallMemory.mock.calls[0][0].params).not.toHaveProperty('tags');
     expect(hookSpan.attributes).toEqual(
       expect.objectContaining({
         'agent_memory.recall.outcome': 'injected',

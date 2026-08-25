@@ -18,6 +18,7 @@ import {
 export interface RecallMemoryParams {
   query: string;
   category?: MemoryCategory;
+  tags?: string[];
   /** Max results. Default 10, cap 50. */
   limit?: number;
   space_id: string;
@@ -64,7 +65,7 @@ export const recallMemory = async ({
   params: RecallMemoryParams;
   logger?: Logger;
 }): Promise<RecallMemoryResult> => {
-  const { query, category, space_id, identity } = params;
+  const { query, category, tags, space_id, identity } = params;
   const limit = Math.min(params.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
   const client = storage.getClient();
 
@@ -73,6 +74,7 @@ export const recallMemory = async ({
     scope_kind: 'user',
     scope_id: identity.author,
     category,
+    tags,
   });
 
   const searchWithPipeline = async (

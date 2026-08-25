@@ -14,7 +14,8 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { resolveIdentity } from '../core/resolve_identity';
 import { recallMemory } from '../core/recall_memory';
-import { recallInputSchema, rememberInputSchema } from '../schemas';
+import { tombstoneMemory } from '../core/tombstone_memory';
+import { forgetInputSchema, recallInputSchema, rememberInputSchema } from '../schemas';
 import type { GetMemoryStorage } from '../types';
 
 /**
@@ -37,6 +38,7 @@ import type { GetMemoryStorage } from '../types';
  */
 export const MEMORY_RECALL_STEP_ID = 'memory.recall' as const;
 export const MEMORY_REMEMBER_STEP_ID = 'memory.remember' as const;
+export const MEMORY_FORGET_STEP_ID = 'memory.forget' as const;
 
 const RecallOutputSchema = z.object({
   memories: z.array(
@@ -61,9 +63,13 @@ const RememberOutputSchema = z.object({
   action: z.enum(['created', 'updated']).describe('Whether this was a new memory or supersession.'),
 });
 
+const ForgetOutputSchema = z.object({
+  result: z.enum(['deleted', 'not_found']),
+});
+
 /**
- * Registers `memory.recall` and `memory.remember` step definitions with the
- * Workflows engine. Both steps use the same core functions as the agent tools.
+ * Registers memory recall, remember, and forget step definitions with the
+ * Workflows engine. The steps use the same core functions as the agent tools.
  *
  * Identity and space are derived from the step execution context — they are
  * never accepted as step inputs (cross-user forge prevention).
@@ -84,7 +90,7 @@ export const registerMemoryWorkflowSteps = (
       inputSchema: recallInputSchema,
       outputSchema: RecallOutputSchema,
       handler: async (context) => {
-        const { query, category, limit } = context.input;
+        const { query, category, tags, limit } = context.input;
         const request = context.contextManager.getFakeRequest();
         const spaceId = context.contextManager.getContext().workflow.spaceId;
         const identity = resolveIdentity({
@@ -98,7 +104,7 @@ export const registerMemoryWorkflowSteps = (
 
         const result = await recallMemory({
           storage: getStorage(getCurrentUserEsClient(request)),
-          params: { query, category, limit, space_id: spaceId, identity },
+          params: { query, category, tags, limit, space_id: spaceId, identity },
         });
 
         return { output: { memories: result.memories } };
@@ -152,4 +158,41 @@ export const registerMemoryWorkflowSteps = (
       },
     });
   });
+
+  // ── memory.forget ──────────────────────────────────────────────────────────
+  workflowsExtensions.registerStepDefinition(
+    createServerStepDefinition({
+      id: MEMORY_FORGET_STEP_ID,
+      category: StepCategory.Ai,
+      label: 'Forget memory',
+      description: 'Soft-deletes a personal memory owned by the executing user.',
+      inputSchema: forgetInputSchema,
+      outputSchema: ForgetOutputSchema,
+      handler: async (context) => {
+        const { id } = context.input;
+        const request = context.contextManager.getFakeRequest();
+        const spaceId = context.contextManager.getContext().workflow.spaceId;
+        const identity = resolveIdentity({
+          request,
+          security: getCoreSecurity(),
+        });
+
+        if (!identity) {
+          throw new Error('Cannot forget memory: no user identity available for scoping.');
+        }
+
+        const result = await tombstoneMemory({
+          storage: getStorage(getCurrentUserEsClient(request)),
+          abortSignal: context.abortSignal,
+          params: {
+            id,
+            space_id: spaceId,
+            identity,
+          },
+        });
+
+        return { output: result };
+      },
+    })
+  );
 };

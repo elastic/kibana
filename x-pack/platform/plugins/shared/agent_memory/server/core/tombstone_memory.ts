@@ -33,13 +33,17 @@ export interface TombstoneMemoryResult {
 export const tombstoneMemory = async ({
   storage,
   params,
+  abortSignal,
 }: {
   storage: MemoryStorage;
   params: TombstoneMemoryParams;
+  abortSignal?: AbortSignal;
 }): Promise<TombstoneMemoryResult> => {
   const { id, space_id, identity } = params;
   const client = storage.getClient();
   const now = new Date().toISOString();
+
+  abortSignal?.throwIfAborted();
 
   // Fetch the doc to confirm ownership before mutating it.
   let existing: MemoryDocument | undefined;
@@ -60,6 +64,8 @@ export const tombstoneMemory = async ({
     }
     throw error;
   }
+
+  abortSignal?.throwIfAborted();
 
   if (!existing) {
     return { result: 'not_found' };
