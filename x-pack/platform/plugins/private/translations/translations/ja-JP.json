@@ -11719,8 +11719,6 @@
     "xpack.agentBuilder.featureRegistry.subFeatures.management": "管理",
     "xpack.agentBuilder.featureRegistry.subFeatures.manageSkills.privilege": "スキルを作成および編集する",
     "xpack.agentBuilder.featureRegistry.subFeatures.manageTools.privilege": "カスタムツールの作成と編集",
-    "xpack.agentBuilder.labels.viewMore.ariaLabel": "その他{hiddenCount}件の{hiddenCount, plural, one {label} other {ラベル}}を表示（合計{totalCount}件）",
-    "xpack.agentBuilder.labels.viewMore.buttonLabel": "さらに表示",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.ariaLabel": "並べ替えとフィルタリング",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.filterActive": "このエージェントに割り当てられています",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.filterAll": "すべて",

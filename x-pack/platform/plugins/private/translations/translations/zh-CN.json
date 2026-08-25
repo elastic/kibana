@@ -11721,8 +11721,6 @@
     "xpack.agentBuilder.featureRegistry.subFeatures.management": "管理",
     "xpack.agentBuilder.featureRegistry.subFeatures.manageSkills.privilege": "创建和编辑技能",
     "xpack.agentBuilder.featureRegistry.subFeatures.manageTools.privilege": "创建和编辑自定义工具",
-    "xpack.agentBuilder.labels.viewMore.ariaLabel": "查看另外 {hiddenCount} 个{hiddenCount, plural, one {label} other {标签}}（共 {totalCount} 个）",
-    "xpack.agentBuilder.labels.viewMore.buttonLabel": "查看更多内容",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.ariaLabel": "排序和筛选",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.filterActive": "已分配给此智能体",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.filterAll": "全部",
