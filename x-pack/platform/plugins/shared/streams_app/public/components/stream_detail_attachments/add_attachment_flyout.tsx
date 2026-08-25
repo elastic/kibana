@@ -107,7 +107,6 @@ export function AddAttachmentFlyout({
       onClose={onClose}
       aria-label={flyoutTitleLabel}
       size={canvas.enabled ? 'm' : undefined}
-      type={canvas.enabled ? 'overlay' : 'push'}
       hasChildBackground
     >
       <EuiFlyoutHeader hasBorder>
