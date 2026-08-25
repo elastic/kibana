@@ -22,17 +22,9 @@ export const createAdaptiveUiViewRegistry = (): ViewRegistry<unknown, PrimitiveN
   return registry;
 };
 
-export {
-  buildSignificantEventSpec,
-  significantEventFixture,
-  significantEventSpec,
-  significantEventView,
-} from './significant_event';
-export type { SignificantEventInput } from './significant_event';
-export {
-  investigationSpec,
-  investigationView,
-  sampleInvestigation,
-  toInvestigationViewSpec,
-} from './investigation';
+export { significantEventView } from './significant_event';
+export type { SignificantEventAttachmentInput } from './significant_event';
+export { investigationView, toInvestigationViewSpec } from './investigation';
 export type { InvestigationInput } from './investigation';
+export { resolveLiveView } from './resolve_live_view';
+export type { ResolveLiveViewDeps, ResolveLiveViewResult } from './resolve_live_view';

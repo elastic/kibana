@@ -32,6 +32,11 @@
 #   ES_AUTH         (default: elastic:changeme)
 #   KIBANA_URL      (default: http://localhost:5601 — base path is auto-detected)
 #
+# Significant Events is gated by streams.significantEventsAvailable (default false). This script
+# enables it via PUT /internal/core/_settings when coreApp.allowDynamicConfigOverrides is true.
+# Otherwise add this to config/kibana.dev.yml and restart Kibana:
+#   feature_flags.overrides.streams.significantEventsAvailable: true
+#
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -66,7 +71,7 @@ CLEAN=false
 if [[ "${1:-}" == "--clean" ]]; then
   CLEAN=true
 elif [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
-  sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,36p' "$0" | sed 's/^# \{0,1\}//'
   exit 0
 elif [[ -n "${1:-}" ]]; then
   echo "Unknown argument: $1 (try --help)" >&2
@@ -120,6 +125,82 @@ normalize_evidence_bucket_size() {
   printf "%s" "$body"
 }
 
+kibana_curl() {
+  local method="$1"
+  local path="$2"
+  local out_file="$3"
+  shift 3
+  curl -s -o "$out_file" -w "%{http_code}" -u "$ES_AUTH" \
+    -X "$method" "${KIBANA_URL}${path}" \
+    -H "kbn-xsrf: true" \
+    -H "x-elastic-internal-origin: Kibana" \
+    "$@"
+}
+
+read_json_field() {
+  local file="$1"
+  local field="$2"
+  python3 -c "import json,sys; print(json.load(open(sys.argv[1])).get(sys.argv[2], ''))" "$file" "$field"
+}
+
+ensure_significant_events_available() {
+  echo "Ensuring Significant Events is available ..."
+
+  local settings_file settings_status
+  settings_file=$(mktemp "${TMPDIR:-/tmp}/seed_nightshift_settings.XXXXXX")
+  settings_status=$(kibana_curl PUT "/internal/core/_settings" "$settings_file" \
+    -H "Content-Type: application/json" \
+    -H "elastic-api-version: 1" \
+    -d '{"feature_flags.overrides":{"streams.significantEventsAvailable":true}}')
+  rm -f "$settings_file"
+
+  local max_wait_s=0
+  if [[ "$settings_status" == "200" ]]; then
+    echo "  Enabled streams.significantEventsAvailable via dynamic config."
+    max_wait_s=30
+  elif [[ "$settings_status" == "404" ]]; then
+    echo "  Dynamic config overrides are disabled; the availability flag must come from kibana.yml."
+  else
+    echo "  Could not toggle streams.significantEventsAvailable (HTTP ${settings_status})."
+  fi
+
+  local avail_file avail_status available reason waited
+  avail_file=$(mktemp "${TMPDIR:-/tmp}/seed_nightshift_availability.XXXXXX")
+  waited=0
+  available=""
+  reason=""
+  while true; do
+    avail_status=$(kibana_curl GET "/internal/significant_events/availability" "$avail_file")
+    if [[ "$avail_status" == "404" ]]; then
+      echo "ERROR: Significant Events plugin is not loaded (HTTP 404)." >&2
+      rm -f "$avail_file"
+      exit 1
+    fi
+    if [[ "$avail_status" == "200" ]]; then
+      available=$(read_json_field "$avail_file" available)
+      reason=$(read_json_field "$avail_file" reason)
+      if [[ "$available" == "True" ]]; then
+        echo "  Significant Events is available."
+        rm -f "$avail_file"
+        return 0
+      fi
+    fi
+    if [[ "$waited" -ge "$max_wait_s" ]]; then
+      break
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  rm -f "$avail_file"
+
+  echo "ERROR: Significant Events is not available${reason:+ (reason: ${reason})}." >&2
+  if [[ "$reason" == "feature_flag" || -z "$reason" ]]; then
+    echo "Add this to config/kibana.dev.yml and restart Kibana, then re-run this script:" >&2
+    echo "  feature_flags.overrides.streams.significantEventsAvailable: true" >&2
+  fi
+  exit 1
+}
+
 trigger_investigation() {
   local event_uuid="$1"
   local response_file
@@ -127,16 +208,12 @@ trigger_investigation() {
   local execution_id
 
   response_file=$(mktemp "${TMPDIR:-/tmp}/seed_nightshift_investigation.XXXXXX")
-  status=$(curl -s -o "$response_file" -w "%{http_code}" -u "$ES_AUTH" \
-    -X POST "${KIBANA_URL}/internal/significant_events/events/${event_uuid}/investigate" \
-    -H "kbn-xsrf: true" \
-    -H "x-elastic-internal-origin: Kibana")
+  status=$(kibana_curl POST "/internal/significant_events/events/${event_uuid}/investigate" "$response_file")
 
   if [[ "$status" != "200" ]]; then
     echo "ERROR: Failed to trigger investigation for ${event_uuid} (HTTP ${status}):" >&2
-    while IFS= read -r line; do
-      echo "$line" >&2
-    done < "$response_file"
+    cat "$response_file" >&2
+    echo "" >&2
     rm -f "$response_file"
     return 1
   fi
@@ -196,6 +273,8 @@ else
   echo "WARNING: Unexpected Streams enable status ${STREAMS_STATUS} — continuing." >&2
 fi
 rm -f "$STREAMS_RESPONSE_FILE"
+
+ensure_significant_events_available
 
 # ---------------------------------------------------------------------------
 # Events (.significant_events-events)
@@ -316,11 +395,18 @@ ES_URL="$ES_URL" \
 
 echo ""
 echo "Triggering investigations for open landing-visible significant events ..."
+INVESTIGATION_FAILURES=0
 for event_uuid in \
   evt-uuid-001 evt-uuid-002 evt-uuid-003 \
   evt-uuid-006 evt-uuid-008 evt-uuid-009; do
-  trigger_investigation "$event_uuid"
+  if ! trigger_investigation "$event_uuid"; then
+    INVESTIGATION_FAILURES=$((INVESTIGATION_FAILURES + 1))
+  fi
 done
+if [[ "$INVESTIGATION_FAILURES" -gt 0 ]]; then
+  echo "ERROR: ${INVESTIGATION_FAILURES} investigation(s) failed to start." >&2
+  exit 1
+fi
 
 echo ""
 echo "Verifying ..."

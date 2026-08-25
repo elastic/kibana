@@ -27,3 +27,4 @@ export { createMemoryDiscoveryTools } from './lib/significant_events/memory_disc
 export { MemoryServiceImpl } from './memory_and_investigation/lib/memory';
 
 export type { SignificantEventsRouteRepository } from './routes';
+export type { SignificantEventsPluginStart } from './types';

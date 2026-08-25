@@ -6,7 +6,18 @@
  */
 
 import { registeredViewIds } from '../../common/constants';
-import { createAdaptiveUiViewRegistry, significantEventSpec } from '.';
+import { createAdaptiveUiViewRegistry } from '.';
+
+const liveEventInput = {
+  event_id: 'evt-003',
+  event_uuid: 'evt-003-v1',
+  title: 'Elasticsearch cluster — disk watermark write throttling',
+  summary: 'Disk usage crossed the 85% high watermark.',
+  status: 'open',
+  severity: '80-critical',
+  confidence: 0.91,
+  stream_names: ['logs.elasticsearch'],
+};
 
 describe('createAdaptiveUiViewRegistry', () => {
   it('registers the significant event and investigation views', () => {
@@ -18,26 +29,22 @@ describe('createAdaptiveUiViewRegistry', () => {
     );
   });
 
-  it('builds the curated default spec for the registered view', async () => {
+  it('does not render sample data when input is omitted', async () => {
     const registry = createAdaptiveUiViewRegistry();
-    const response = await registry.request(registeredViewIds.significantEvent, undefined);
-    expect(response.validation.valid).toBe(true);
-    expect(response.spec).toEqual(significantEventSpec);
+    await expect(registry.request(registeredViewIds.significantEvent, undefined)).rejects.toThrow(
+      /live significant event/
+    );
   });
 
-  it('applies input overrides through the registry', async () => {
+  it('builds from a live event payload without payment-service leftovers', async () => {
     const registry = createAdaptiveUiViewRegistry();
-    const response = await registry.request(registeredViewIds.significantEvent, undefined, {
-      title: 'Custom incident',
-    });
+    const response = await registry.request(
+      registeredViewIds.significantEvent,
+      undefined,
+      liveEventInput
+    );
     expect(response.validation.valid).toBe(true);
-    expect(response.spec.title).toBe('Custom incident');
-  });
-
-  it('builds the curated default spec for the investigation view', async () => {
-    const registry = createAdaptiveUiViewRegistry();
-    const response = await registry.request(registeredViewIds.investigation, undefined);
-    expect(response.validation.valid).toBe(true);
-    expect(response.spec.title).toContain('payment-service v2.4.1');
+    expect(response.spec.title).toBe(liveEventInput.title);
+    expect(JSON.stringify(response.spec)).not.toContain('payment-service');
   });
 });

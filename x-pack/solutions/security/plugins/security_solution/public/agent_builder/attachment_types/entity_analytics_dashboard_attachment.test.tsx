@@ -154,6 +154,36 @@ const renderCanvas = (
   );
 };
 
+describe('createEntityAnalyticsDashboardAttachmentDefinition getViewSpec', () => {
+  it('emits a donut from the native severity_count snapshot', () => {
+    const application = applicationServiceMock.createStartContract();
+    const definition = createEntityAnalyticsDashboardAttachmentDefinition({
+      application,
+      experimentalFeatures,
+    });
+    const spec = definition.getViewSpec?.({
+      id: 'ea-dashboard-1',
+      type: 'security.entity_analytics_dashboard',
+      data: {
+        summary:
+          'Risk is concentrated in the finance subnet: three hosts and two users crossed the critical threshold in the last 24 hours.',
+        severity_count: { Critical: 5, High: 12, Moderate: 34, Low: 88, Unknown: 0 },
+        entities: [
+          {
+            entity_type: 'host',
+            entity_id: 'finance-db-01',
+            entity_name: 'finance-db-01',
+            risk_score_norm: 96,
+            risk_level: 'Critical',
+          },
+        ],
+      },
+    } as EntityAnalyticsDashboardAttachment);
+
+    expect(spec?.body.some((node) => node.type === 'donut')).toBe(true);
+  });
+});
+
 describe('EntityAnalyticsDashboardCanvasContent', () => {
   afterEach(() => {
     delete (global as unknown as Record<string, unknown>)[RESIZE_CALLBACK_KEY];
