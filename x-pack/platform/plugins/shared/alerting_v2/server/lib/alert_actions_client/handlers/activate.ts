@@ -63,11 +63,8 @@ const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
  * 2. The `.alert-actions` audit document already built by the
  *    orchestrator (`alertActionDoc` — unchanged).
  *
- * `episode.status_count` starts at `1` — user-forced reopen is a new
- * active span, matching engine `→ active` transitions. Subsequent
- * director ticks while user-locked increment the count. If the alert
- * later re-enters `pending` or `recovering`, the engine restarts
- * counting from scratch.
+ * `episode.status_count` starts at `1` — entering a new status resets
+ * the count. Subsequent director ticks while user-locked increment it.
  *
  * `status: breached` is hardcoded because that is the only event
  * status compatible with `episode.status: active` in practice; if the

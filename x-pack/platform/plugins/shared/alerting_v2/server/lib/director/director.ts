@@ -162,8 +162,8 @@ export class DirectorService {
     // the incoming event's `status` (e.g. `recovered`) so downstream
     // analytics keep the raw engine signal. Only `episode.status` is
     // forced. `episode.status_count` follows the same per-span rules as
-    // the engine: reset to 1 when entering a new active span, increment
-    // while staying active.
+    // the engine: reset to 1 when entering a new status, increment
+    // while staying.
     if (this.isUserLocked(previousAlertEvent)) {
       return {
         alertEvent: {
@@ -252,8 +252,8 @@ export class DirectorService {
   }
 
   /**
-   * User-lock is a contiguous active span: reset to 1 if the previous
-   * status was not already active, otherwise increment.
+   * Follows the same per-span rules as the engine: reset to 1 on
+   * status change, increment while staying in the same status.
    */
   private getUserLockedStatusCount(previousAlertEvent: LatestAlertEventState): number {
     const defaultCount = 1;

@@ -752,10 +752,9 @@ describe('DirectorService', () => {
       });
 
       it('increments status_count on the forced-active event (same per-span counting as the engine)', async () => {
-        // User-lock is a contiguous active span. After Activate writes
-        // status_count=1, later locked ticks increment — matching engine
-        // stay-active behaviour. A recovering engine signal does not reset
-        // the count because the episode is held in active.
+        // User-lock follows the same per-span rules: entering a status
+        // resets to 1, staying increments. A recovering engine signal
+        // does not reset the count because the episode is held in active.
         const ruleWithTransition = createRuleResponse({
           state_transition: { pending_count: 3 },
         });

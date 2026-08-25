@@ -100,8 +100,6 @@ const isThresholdMet = (
  * - recovering count of 0 means skip recovering entirely (active → inactive).
  * - When no threshold is configured for a phase, the strategy behaves
  *   identically to the basic strategy for that phase.
- * - `active` spans emit `statusCount` like `pending`/`recovering`: reset
- *   to 1 on each new contiguous active run, increment while staying active.
  */
 @injectable()
 export class CountTimeframeStrategy extends BasicTransitionStrategy {
