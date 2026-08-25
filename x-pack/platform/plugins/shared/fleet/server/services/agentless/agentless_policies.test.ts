@@ -254,13 +254,23 @@ describe('AgentlessPoliciesService', () => {
   describe('updateAgentlessPolicy', () => {
     let packagePolicyService: ReturnType<typeof createPackagePolicyServiceMock>;
 
-    const createService = () =>
-      new AgentlessPoliciesServiceImpl(
+    const createService = () => {
+      const soClient = savedObjectsClientMock.create();
+      // Connector-reuse policy-group check queries package policies by cloud_connector_id;
+      // default to "no existing usages" (an unattached connector is adoptable by any group).
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 1,
+        page: 1,
+      } as any);
+      return new AgentlessPoliciesServiceImpl(
         packagePolicyService,
-        savedObjectsClientMock.create(),
+        soClient,
         elasticsearchServiceMock.createClusterClient().asInternalUser,
         loggingSystemMock.createLogger()
       );
+    };
 
     const buildUpdateRequest = (overrides: Record<string, any> = {}): any => ({
       name: 'Test Agentless Policy',

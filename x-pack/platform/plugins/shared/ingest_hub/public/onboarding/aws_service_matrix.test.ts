@@ -101,8 +101,11 @@ describe('AWS service matrix', () => {
         expect(VALID_CATEGORIES).toContain(entry.category);
       });
 
-      it('has a valid signalType', () => {
-        expect(VALID_SIGNAL_TYPES).toContain(entry.signalType);
+      it('has a valid signalTypes array', () => {
+        expect(Array.isArray(entry.signalTypes)).toBe(true);
+        for (const st of entry.signalTypes) {
+          expect(VALID_SIGNAL_TYPES).toContain(st);
+        }
       });
 
       it('has a deploymentMethods array', () => {
@@ -133,6 +136,13 @@ describe('AWS service matrix', () => {
 
       it('has a boolean defaultEnabled', () => {
         expect(typeof entry.defaultEnabled).toBe('boolean');
+      });
+
+      it('has defaultEnabledInputs as an array of strings', () => {
+        expect(Array.isArray(entry.defaultEnabledInputs)).toBe(true);
+        for (const input of entry.defaultEnabledInputs) {
+          expect(typeof input).toBe('string');
+        }
       });
 
       it('has a boolean showInUI', () => {
@@ -202,7 +212,7 @@ describe('AWS service matrix', () => {
     const IF_PACKAGES = { aws: IF_MOCK_PKG_CONTENT } as any;
 
     const IF_STATIC = AWS_SERVICES_STATIC.filter((e) =>
-      ['guardduty', 'config', 'elb_logs'].includes(e.id)
+      ['guardduty', 'config', 'elb'].includes(e.id)
     );
     const IF_MATRIX = buildAwsServiceMatrix(IF_PACKAGES, IF_STATIC);
 
@@ -217,9 +227,9 @@ describe('AWS service matrix', () => {
     });
 
     it('is true when at least one input does not hide identity_federation', () => {
-      // elb_logs has aws-s3 (no hide) and aws-cloudwatch (hides IF).
+      // elb has aws-s3 (no hide) and aws-cloudwatch (hides IF).
       // Supported because one valid IF input path exists.
-      const elbLogs = IF_MATRIX.find((e) => e.id === 'elb_logs');
+      const elbLogs = IF_MATRIX.find((e) => e.id === 'elb');
       expect(elbLogs?.identityFederationSupported).toBe(true);
     });
 
@@ -250,6 +260,46 @@ describe('AWS service matrix', () => {
   )('managed_integration service "%s"', (_id, entry) => {
     it('has managed_integration as a deployment method', () => {
       expect(entry.deploymentMethods.some((dm) => dm.method === 'managed_integration')).toBe(true);
+    });
+  });
+
+  describe('defaultEnabledInputs derivation', () => {
+    it('excludes inputs whose stream has enabled:false', () => {
+      const pkg = {
+        policy_templates: [{ name: 'elb', data_streams: ['elb_logs'] }],
+        data_streams: [
+          {
+            path: 'elb_logs',
+            type: 'logs',
+            streams: [
+              { input: 'aws-s3', enabled: true },
+              { input: 'aws-cloudwatch', enabled: false },
+            ],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
+        { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
+      ]);
+      expect(result.inputs).toEqual(['aws-s3', 'aws-cloudwatch']);
+      expect(result.defaultEnabledInputs).toEqual(['aws-s3']);
+    });
+
+    it('includes all inputs when enabled is absent (implicit true)', () => {
+      const pkg = {
+        policy_templates: [{ name: 'elb', data_streams: ['elb_logs'] }],
+        data_streams: [
+          {
+            path: 'elb_logs',
+            type: 'logs',
+            streams: [{ input: 'aws-s3' }, { input: 'aws-cloudwatch' }],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws: pkg as any }, [
+        { id: 'elb', category: 'networking_content_delivery', packageName: 'aws' },
+      ]);
+      expect(result.defaultEnabledInputs).toEqual(['aws-s3', 'aws-cloudwatch']);
     });
   });
 });
