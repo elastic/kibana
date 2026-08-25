@@ -12,7 +12,10 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
-import { CreateTransformButton } from './create_transform_button';
+import {
+  CreateTransformButton,
+  getCreateTransformPrimaryActionItem,
+} from './create_transform_button';
 
 const queryClient = new QueryClient();
 
@@ -49,5 +52,50 @@ describe('Transform: Transform List <CreateTransformButton />', () => {
     fireEvent.click(screen.getByTestId('transformCreateLatestButton'));
 
     expect(onClick).toHaveBeenCalledWith(TRANSFORM_FUNCTION.LATEST);
+  });
+
+  test('builds an enabled AppHeader primary action with pivot and latest items', () => {
+    const onClick = jest.fn();
+    const primaryActionItem = getCreateTransformPrimaryActionItem({
+      onClick,
+      transformNodes: 1,
+      capabilities: {
+        canCreateTransform: true,
+        canPreviewTransform: true,
+        canStartStopTransform: true,
+      },
+    });
+
+    expect(primaryActionItem.testId).toBe('transformButtonCreate');
+    expect('items' in primaryActionItem).toBe(true);
+    if (!('items' in primaryActionItem) || primaryActionItem.items === undefined) {
+      throw new Error('expected popover items');
+    }
+
+    const latestItem = primaryActionItem.items[1];
+    if (latestItem === undefined) {
+      throw new Error('expected latest item');
+    }
+
+    latestItem.run?.({
+      triggerElement: document.createElement('button'),
+      returnFocus: () => {},
+    });
+    expect(onClick).toHaveBeenCalledWith(TRANSFORM_FUNCTION.LATEST);
+  });
+
+  test('disables the AppHeader primary action when there are no transform nodes', () => {
+    const primaryActionItem = getCreateTransformPrimaryActionItem({
+      onClick: jest.fn(),
+      transformNodes: 0,
+      capabilities: {
+        canCreateTransform: true,
+        canPreviewTransform: true,
+        canStartStopTransform: true,
+      },
+    });
+
+    expect(primaryActionItem.disableButton).toBe(true);
+    expect(primaryActionItem.testId).toBe('transformButtonCreate');
   });
 });

@@ -20,13 +20,109 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import type { AppHeaderMenu } from '@kbn/app-header';
 
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 import { TRANSFORM_FUNCTION, type TransformFunction } from '../../../../../../common/constants';
+import type { TransformCapabilities } from '../../../../../../common/types/capabilities';
 
 import { useTransformCapabilities } from '../../../../hooks';
+
+const createTransformButtonLabel = i18n.translate(
+  'xpack.transform.transformList.createTransformButton',
+  {
+    defaultMessage: 'Create a transform',
+  }
+);
+
+const pivotTitle = i18n.translate('xpack.transform.transformList.createPivotTransformButton', {
+  defaultMessage: 'Pivot',
+});
+const pivotDescription = i18n.translate(
+  'xpack.transform.transformList.createPivotTransformDescription',
+  {
+    defaultMessage: 'Aggregate and group your data',
+  }
+);
+const latestTitle = i18n.translate('xpack.transform.transformList.createLatestTransformButton', {
+  defaultMessage: 'Latest',
+});
+const latestDescription = i18n.translate(
+  'xpack.transform.transformList.createLatestTransformDescription',
+  {
+    defaultMessage: 'Keep track of your most recent data',
+  }
+);
+
+const isCreateTransformDisabled = (
+  capabilities: Pick<
+    TransformCapabilities,
+    'canCreateTransform' | 'canPreviewTransform' | 'canStartStopTransform'
+  >,
+  transformNodes: number
+): boolean =>
+  !capabilities.canCreateTransform ||
+  !capabilities.canPreviewTransform ||
+  !capabilities.canStartStopTransform ||
+  transformNodes === 0;
+
+export const getCreateTransformPrimaryActionItem = ({
+  onClick,
+  transformNodes,
+  capabilities,
+}: {
+  onClick: (transformFunction: TransformFunction) => void;
+  transformNodes: number;
+  capabilities: Pick<
+    TransformCapabilities,
+    'canCreateTransform' | 'canPreviewTransform' | 'canStartStopTransform'
+  >;
+}): NonNullable<AppHeaderMenu['primaryActionItem']> => {
+  const disabled = isCreateTransformDisabled(capabilities, transformNodes);
+  const tooltipContent = disabled
+    ? createCapabilityFailureMessage(transformNodes > 0 ? 'canCreateTransform' : 'noTransformNodes')
+    : undefined;
+
+  if (disabled) {
+    return {
+      id: 'createTransform',
+      label: createTransformButtonLabel,
+      iconType: 'plusCircle',
+      testId: 'transformButtonCreate',
+      disableButton: true,
+      tooltipContent,
+      run: () => undefined,
+    };
+  }
+
+  return {
+    id: 'createTransform',
+    label: createTransformButtonLabel,
+    iconType: 'plusCircle',
+    testId: 'transformButtonCreate',
+    popoverTestId: 'transformCreatePopover',
+    popoverWidth: 250,
+    items: [
+      {
+        id: 'createPivot',
+        label: pivotTitle,
+        description: pivotDescription,
+        iconType: 'aggregate',
+        testId: 'transformCreatePivotButton',
+        run: () => onClick(TRANSFORM_FUNCTION.PIVOT),
+      },
+      {
+        id: 'createLatest',
+        label: latestTitle,
+        description: latestDescription,
+        iconType: 'clock',
+        testId: 'transformCreateLatestButton',
+        run: () => onClick(TRANSFORM_FUNCTION.LATEST),
+      },
+    ],
+  };
+};
 
 interface CreateTransformButtonProps {
   label?: ReactNode;
@@ -43,11 +139,7 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverTitleId = useGeneratedHtmlId();
 
-  const disabled =
-    !capabilities.canCreateTransform ||
-    !capabilities.canPreviewTransform ||
-    !capabilities.canStartStopTransform ||
-    transformNodes === 0;
+  const disabled = isCreateTransformDisabled(capabilities, transformNodes);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const onSelectTransformFunction = useCallback(
@@ -66,12 +158,7 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
       iconType="plusCircle"
       data-test-subj="transformButtonCreate"
     >
-      {label ?? (
-        <FormattedMessage
-          id="xpack.transform.transformList.createTransformButton"
-          defaultMessage="Create a transform"
-        />
-      )}
+      {label ?? createTransformButtonLabel}
     </EuiButton>
   );
 
@@ -100,25 +187,6 @@ export const CreateTransformButton: FC<CreateTransformButtonProps> = ({
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
-  );
-
-  const pivotTitle = i18n.translate('xpack.transform.transformList.createPivotTransformButton', {
-    defaultMessage: 'Pivot',
-  });
-  const pivotDescription = i18n.translate(
-    'xpack.transform.transformList.createPivotTransformDescription',
-    {
-      defaultMessage: 'Aggregate and group your data',
-    }
-  );
-  const latestTitle = i18n.translate('xpack.transform.transformList.createLatestTransformButton', {
-    defaultMessage: 'Latest',
-  });
-  const latestDescription = i18n.translate(
-    'xpack.transform.transformList.createLatestTransformDescription',
-    {
-      defaultMessage: 'Keep track of your most recent data',
-    }
   );
 
   const panels = [

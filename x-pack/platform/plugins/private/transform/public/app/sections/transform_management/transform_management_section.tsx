@@ -8,10 +8,11 @@
 import React, { type FC, useCallback, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { EuiButtonEmpty, EuiPageTemplate, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { EuiPageTemplate, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
@@ -41,6 +42,7 @@ import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../se
 import { SECTION_SLUG } from '../../common/constants';
 
 import { TransformList } from './components/transform_list';
+import { getCreateTransformPrimaryActionItem } from './components/create_transform_button';
 import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
 import {
   AlertRulesManageContext,
@@ -131,7 +133,8 @@ export const TransformManagement: FC = () => {
 
   const isInitialLoading = transformNodesInitialLoading || transformsInitialLoading;
 
-  const { canStartStopTransform } = useTransformCapabilities();
+  const capabilities = useTransformCapabilities();
+  const { canStartStopTransform } = capabilities;
 
   const unauthorizedTransformsWarning = useMemo(() => {
     const unauthorizedCnt = transforms.filter((t) => needsReauthorization(t)).length;
@@ -179,52 +182,36 @@ export const TransformManagement: FC = () => {
     [history]
   );
 
-  const docsLink = (
-    <EuiButtonEmpty
-      href={esTransform}
-      target="_blank"
-      iconType="question"
-      data-test-subj="documentationLink"
-      aria-label={i18n.translate('xpack.transform.transformList.transformDocsLinkAriaLabel', {
-        defaultMessage: 'Transform documentation link',
-      })}
-    >
-      <FormattedMessage
-        id="xpack.transform.transformList.transformDocsLinkText"
-        defaultMessage="Transform docs"
-      />
-    </EuiButtonEmpty>
-  );
+  const showCreateInHeader = !isInitialLoading && transforms.length > 0;
+  const menu: AppHeaderMenu | undefined = showCreateInHeader
+    ? {
+        primaryActionItem: getCreateTransformPrimaryActionItem({
+          onClick: onCreateTransform,
+          transformNodes,
+          capabilities,
+        }),
+      }
+    : undefined;
 
   return (
     <>
-      <EuiPageTemplate.Header
-        pageTitle={
-          <span data-test-subj="transformAppTitle">
-            <FormattedMessage
-              id="xpack.transform.transformList.transformTitle"
-              defaultMessage="Transforms"
-            />
-          </span>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.transform.transformList.transformDescription"
-            defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access."
-          />
-        }
-        rightSideItems={[docsLink]}
-        bottomBorder
-        paddingSize={'none'}
+      <AppHeader
+        title={i18n.translate('xpack.transform.transformList.transformTitle', {
+          defaultMessage: 'Transforms',
+        })}
+        description={i18n.translate('xpack.transform.transformList.transformDescription', {
+          defaultMessage:
+            'Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access.',
+        })}
+        docLink={esTransform}
+        menu={menu}
+        spacing="bleed"
       />
 
+      <EuiSpacer size="l" />
+
       <EuiPageTemplate.Section paddingSize={'none'} data-test-subj="transformPageTransformList">
-        {isInitialLoading && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiSkeletonText lines={2} />
-          </>
-        )}
+        {isInitialLoading && <EuiSkeletonText lines={2} />}
         {!isInitialLoading && (
           <>
             {unauthorizedTransformsWarning}
