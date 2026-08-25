@@ -303,6 +303,55 @@ describe('QueryService', () => {
       expect(JSON.parse(JSON.stringify(batches[0]))).toEqual([{ host: 'host-a', count: 99 }]);
     });
 
+    it('truncates date_nanos columns to integer epoch millis (parity with the JSON path)', async () => {
+      // Arrow decodes date_nanos to fractional millis; the JSON path yields
+      // integer millis via Date.parse. Both must agree.
+      const fractionalMillis = 1787580092123.4568;
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        {
+          numRows: 1,
+          rows: [{ bucket: fractionalMillis, host: 'host-a' }],
+          timestampColumns: ['bucket'],
+        },
+      ]);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toEqual([[{ bucket: 1787580092123, host: 'host-a' }]]);
+      expect(Number.isInteger(batches[0][0].bucket)).toBe(true);
+    });
+
+    it('truncates multivalue timestamp columns element-wise', async () => {
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        {
+          numRows: 1,
+          rows: [{ bucket: [1787580092123.4568, 1787580095123.99] }],
+          timestampColumns: ['bucket'],
+        },
+      ]);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toEqual([[{ bucket: [1787580092123, 1787580095123] }]]);
+    });
+
+    it('leaves fractional non-timestamp numeric columns untouched', async () => {
+      mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ ratio: 12.75 }] }]);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toEqual([[{ ratio: 12.75 }]]);
+    });
+
     it('passes the query and abort signal to the ES|QL Arrow helper', async () => {
       const reader = createMockArrowReader([{ numRows: 1, rows: [{ host: 'host-a' }] }]);
       const toArrowReader = jest.fn().mockResolvedValue(reader);
@@ -643,7 +692,8 @@ describe('QueryService', () => {
         batches.push(batch);
       }
 
-      expect(batches).toEqual([[{ bucket: Date.parse(iso) }]]);
+      // `date_nanos` is truncated to millisecond precision; `.456789` is dropped
+      expect(batches).toEqual([[{ bucket: 1787580092123 }]]);
     });
 
     it('maps multivalue date columns element-wise to epoch millis', async () => {
