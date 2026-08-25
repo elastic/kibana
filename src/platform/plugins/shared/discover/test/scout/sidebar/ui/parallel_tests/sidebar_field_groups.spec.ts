@@ -32,7 +32,7 @@ const setFieldPopularity = async (
 /**
  *  Popularity tests need to select columns, which calls popularizeField. That
  *  requires indexPatterns.save and persists counts on the data view; Security editor
- *  lacks that capability, so they log in as admin. 
+ *  lacks that capability, so they log in as admin.
  */
 const loginAndOpenDiscover = async (
   browserAuth: BrowserAuthFixture,
