@@ -18,6 +18,8 @@ export const queryKeys = {
   },
   agentProfiles: {
     all: ['agentProfiles'] as const,
+    agentAiIndicesList: ['agentProfiles', 'aiIndices'] as const,
+    agentAiIndicesById: (agentId: string) => ['agentProfiles', 'aiIndices', agentId] as const,
     byId: (agentProfileId?: string) => ['agentProfiles', agentProfileId],
     accessControl: (agentProfileId: string) =>
       ['agentProfiles', agentProfileId, 'accessControl'] as const,
@@ -80,6 +82,9 @@ export const queryKeys = {
   oauthClients: {
     all: ['oauthClients', 'list'] as const,
     byId: (clientId: string) => ['oauthClients', clientId] as const,
+  },
+  aiIndices: {
+    list: ['aiIndices', 'list'] as const,
   },
   spaceSettings: {
     all: ['spaceSettings'] as const,
