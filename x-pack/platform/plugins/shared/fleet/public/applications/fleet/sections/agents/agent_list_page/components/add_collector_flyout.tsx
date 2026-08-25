@@ -20,11 +20,10 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiLoadingSpinner,
   EuiFlyoutFooter,
-  EuiCallOut,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
@@ -34,6 +33,7 @@ import {
   EuiFilterButton,
   EuiToolTip,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -677,16 +677,21 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
               </EuiCodeBlock>
             </>
           ) : loading || !yaml ? (
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               size="m"
-              color="primary"
-              iconType={EuiLoadingSpinner}
               title={
-                <FormattedMessage
-                  id="xpack.fleet.agentEnrollment.loading.preparingOpAMPConfig"
-                  defaultMessage="Preparing OpAMP configuration..."
-                />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollment.loading.preparingOpAMPConfig"
+                      defaultMessage="Preparing OpAMP configuration..."
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               }
             />
           ) : null}

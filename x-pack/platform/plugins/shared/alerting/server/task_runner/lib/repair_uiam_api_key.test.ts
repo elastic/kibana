@@ -14,7 +14,11 @@ import { ErrorWithReason } from '../../lib/error_with_reason';
 import { RuleExecutionStatusErrorReasons } from '../../types';
 import type { RawRule } from '../../types';
 import { ApiKeyType, type TaskRunnerContext } from '../types';
-import { isMissingUiamApiKeyRunError, repairUiamApiKey } from './repair_uiam_api_key';
+import {
+  isMissingUiamApiKeyLastRunError,
+  isMissingUiamApiKeyRunError,
+  repairUiamApiKey,
+} from './repair_uiam_api_key';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -133,6 +137,63 @@ describe('isMissingUiamApiKeyRunError()', () => {
   });
 });
 
+describe('isMissingUiamApiKeyLastRunError()', () => {
+  // Both messages are the text production actually records, taken from `siem.*` runs in
+  // production eu-west-1. Neither retains the structured Elasticsearch error, which is why these
+  // runs are matched on the message rather than through isMissingUiamApiKeyRunError().
+  const STRINGIFIED_RESPONSE_ERROR = [
+    'security_exception',
+    '\tCaused by:',
+    '\t\tsecurity_exception: failed to authenticate cloud API key: [0x28D520]',
+    '\tRoot causes:',
+    '\t\tsecurity_exception: failed to authenticate cloud API key: [0x28D520]',
+  ].join('\n');
+
+  const WRAPPED_BY_RULE_TYPE = `unable to fetch exception list items, message: "${STRINGIFIED_RESPONSE_ERROR}" full error: "ResponseError: ${STRINGIFIED_RESPONSE_ERROR}"`;
+
+  test('returns true for a stringified Elasticsearch error the rule type recorded as-is', () => {
+    expect(
+      isMissingUiamApiKeyLastRunError([{ message: STRINGIFIED_RESPONSE_ERROR, userError: false }])
+    ).toBe(true);
+  });
+
+  test('returns true when the rule type wrapped the error in its own message', () => {
+    expect(
+      isMissingUiamApiKeyLastRunError([{ message: WRAPPED_BY_RULE_TYPE, userError: false }])
+    ).toBe(true);
+  });
+
+  test('returns true when only one of several recorded errors reports the missing key', () => {
+    expect(
+      isMissingUiamApiKeyLastRunError([
+        { message: 'a different rule execution problem', userError: false },
+        { message: STRINGIFIED_RESPONSE_ERROR, userError: false },
+      ])
+    ).toBe(true);
+  });
+
+  test('requires the full Elasticsearch phrase, not just the code', () => {
+    // A detection rule searching for authentication failures can put the bare code into its own
+    // error text; re-granting a key off that would be wrong.
+    expect(
+      isMissingUiamApiKeyLastRunError([
+        { message: 'found 3 documents matching "0x28D520"', userError: false },
+      ])
+    ).toBe(false);
+  });
+
+  test('ignores errors the rule author is responsible for', () => {
+    expect(
+      isMissingUiamApiKeyLastRunError([{ message: STRINGIFIED_RESPONSE_ERROR, userError: true }])
+    ).toBe(false);
+  });
+
+  test('returns false for unrelated or absent run errors', () => {
+    expect(isMissingUiamApiKeyLastRunError([])).toBe(false);
+    expect(isMissingUiamApiKeyLastRunError([{ message: 'boom', userError: false }])).toBe(false);
+  });
+});
+
 describe('repairUiamApiKey()', () => {
   test('converts the Elasticsearch API key and persists the fresh UIAM key on the rule', async () => {
     const rawRule = getRawRule();
@@ -152,12 +213,56 @@ describe('repairUiamApiKey()', () => {
     );
   });
 
+  test('removes the leaked UIAM API key from a user-keyed rule instead of re-granting', async () => {
+    // A rule holding both a user-created Elasticsearch key and a UIAM key is a state the rules
+    // client refuses to create: it can only be the residue of the historical clone/update leak.
+    const rawRule = getRawRule({ apiKeyCreatedByUser: true, uiamApiKeyExternal: false });
+    const { context, unsafeClient } = setup({ rawRule });
+
+    await repairUiamApiKey({ context, logger, ruleId: 'rule-1', spaceId: 'space-a' });
+
+    expect(context.uiamConvert).not.toHaveBeenCalled();
+    expect(unsafeClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      'rule-1',
+      { ...rawRule, uiamApiKey: null, uiamApiKeyExternal: null },
+      { mergeAttributes: false, version: 'WzQyLDFd', namespace: 'space-a' }
+    );
+    // The leaked key may be a clone's source rule's key, still in live use there — not Kibana's to
+    // revoke on this rule's behalf.
+    expect(unsafeClient.bulkCreate).not.toHaveBeenCalled();
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('Removed the leaked UIAM API key'),
+      expect.anything()
+    );
+  });
+
+  test('reports a failed leak removal as a removal, not a re-grant', async () => {
+    const { context, unsafeClient } = setup({
+      rawRule: getRawRule({ apiKeyCreatedByUser: true }),
+    });
+    unsafeClient.update = jest
+      .fn()
+      .mockRejectedValue(
+        SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-1')
+      );
+
+    await callRepair(context);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to remove the leaked UIAM API key from the rule'),
+      expect.anything()
+    );
+    // No key was minted, so there is nothing to queue for invalidation.
+    expect(unsafeClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
   // Every skip logs a distinct reason: these lines are how an operator tells which check left a
   // broken rule alone, so identical messages would make the log useless.
   test.each([
     [
-      'the key was created by the user',
-      { apiKeyCreatedByUser: true },
+      'the key was created by the user and there is no leaked key to remove',
+      { apiKeyCreatedByUser: true, apiKey: null },
       'it was created by the user, who manages its lifecycle',
     ],
     ['the rule has no UIAM API key', { uiamApiKey: null }, 'the rule does not have one'],
@@ -198,7 +303,7 @@ describe('repairUiamApiKey()', () => {
     const messages = new Set<string>();
 
     for (const overrides of [
-      { apiKeyCreatedByUser: true },
+      { apiKeyCreatedByUser: true, apiKey: null },
       { uiamApiKey: null },
       { apiKey: null },
     ]) {
