@@ -43,17 +43,15 @@ export const createJobId = (): string => randomUUID();
 
 export const getWorkdir = (jobId: string): string => `${REMOTE_HOST_JOB_ROOT}/${jobId}`;
 
-export const wrapUserScript = (code: string): string => `#!/bin/bash
-STEP_OUTPUT=''
-_capture_output() {
-  if [ -n "$STEP_OUTPUT" ]; then
-    printf '%s' "$STEP_OUTPUT" > "$WORKDIR/output.txt"
-  fi
-}
-trap '_capture_output' EXIT
-export FORCE_COLOR=1 TERM=xterm-256color
+export const wrapUserScript = (code: string): string =>
+  `
+#!/bin/bash
+STEP_OUTPUT="$WORKDIR/output.txt"
+touch "$STEP_OUTPUT"
 
-${code}`;
+export FORCE_COLOR=1 TERM=xterm-256color
+${code}
+`.trim();
 
 export const parseScriptOutput = (raw: string | undefined): unknown => {
   if (raw === undefined || raw === '') return null;

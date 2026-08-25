@@ -8,14 +8,14 @@
  */
 
 import React from 'react';
-import { remoteHostRunCommandStepCommonDefinition } from '../../../common/steps/remote_host';
 import { SshHostConnectorTypeId as SSH_HOST_CONNECTOR_ID } from '@kbn/connector-schemas';
+import { remoteHostRunCommandStepCommonDefinition } from '../../../common/steps/remote_host';
 import { createPublicStepDefinition } from '../../step_registry/types';
 
 export const remoteHostRunCommandStepDefinition = createPublicStepDefinition({
   ...remoteHostRunCommandStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/console').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/app_console').then(({ icon }) => ({
       default: icon,
     }))
   ),
