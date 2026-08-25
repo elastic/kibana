@@ -17,10 +17,21 @@ describe('buildSignificantEventSpec', () => {
     expect(validateView(significantEventSpec)).toEqual(expect.objectContaining({ valid: true }));
   });
 
-  it('renders the title and severity-derived subtitle', () => {
+  it('renders the title and the severity-derived assessment stats', () => {
     expect(significantEventSpec.title).toBe(significantEventFixture.title);
-    // criticality 92 -> "Critical".
-    expect(significantEventSpec.subtitle).toContain('Critical');
+
+    const stats = significantEventSpec.body.find((node) => node.type === 'statGroup');
+    expect(stats).toEqual(
+      expect.objectContaining({
+        stats: [
+          expect.objectContaining({ label: 'Criticality', value: '92' }),
+          expect.objectContaining({ label: 'Confidence', value: '88%' }),
+          // criticality 92 -> "Critical".
+          expect.objectContaining({ label: 'Severity', value: 'Critical', tone: 'danger' }),
+          expect.objectContaining({ label: 'Status', value: 'Promoted', tone: 'warning' }),
+        ],
+      })
+    );
   });
 
   it('omits optional sections when their inputs are empty', () => {
