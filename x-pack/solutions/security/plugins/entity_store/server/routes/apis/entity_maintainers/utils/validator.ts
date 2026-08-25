@@ -8,21 +8,11 @@
 import { z } from '@kbn/zod/v4';
 import { entityMaintainersRegistry } from '../../../../tasks/entity_maintainers/entity_maintainers_registry';
 
-function validateMaintainerIdExists(data: { id: string }, ctx: z.RefinementCtx): void {
-  if (!entityMaintainersRegistry.hasId(data.id)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['id'],
-      message: 'Entity maintainer not found',
-    });
-  }
-}
+export const maintainerIdExists = (id: string) => entityMaintainersRegistry.hasId(id);
 
-export const maintainerIdParamsSchema = z
-  .object({
-    id: z.string().min(1, 'id is required'),
-  })
-  .superRefine(validateMaintainerIdExists);
+export const maintainerIdParamsSchema = z.object({
+  id: z.string().min(1, 'id is required'),
+});
 
 export const maintainerIdsQuerySchema = z.object({
   ids: z

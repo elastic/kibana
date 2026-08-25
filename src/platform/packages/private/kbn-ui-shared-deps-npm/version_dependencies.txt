@@ -18,7 +18,7 @@
 @elastic/esql@1.8.0
 @elastic/eui-theme-borealis@7.0.0
 @elastic/eui-theme-common@9.0.0
-@elastic/eui@115.0.0
+@elastic/eui@115.0.0-backport.0
 @elastic/numeral@2.5.1
 @elastic/prismjs-esql@1.1.2
 @emotion/babel-plugin@11.13.5
@@ -113,7 +113,7 @@ baseline-browser-mapping@2.9.14
 bezier-easing@2.1.0
 bn.js@4.11.9
 bn.js@5.2.3
-brace-expansion@1.1.16
+brace-expansion@1.1.18
 brorand@1.1.0
 browser-resolve@2.0.0
 browserify-aes@1.2.0
@@ -494,7 +494,6 @@ util-deprecate@1.0.2
 util@0.12.5
 utility-types@3.11.0
 uuid@14.0.1
-uuid@8.3.2
 value-equal@0.4.0
 vfile-location@3.0.1
 vfile-message@2.0.4

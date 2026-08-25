@@ -1,3 +1,4 @@
+@eslint-community/eslint-plugin-eslint-comments
 @xterm/xterm
 safe-stable-stringify
 ajv-draft-04
@@ -61,4 +62,3 @@ redux-v4
 reselect-v4
 graphql
 @swc/helpers
-xml-formatter

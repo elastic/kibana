@@ -17,7 +17,9 @@ import {
   ChatCompletionEventType,
   isChatCompletionChunkEvent,
   MessageRole,
+  InferenceConnectorType,
 } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from './openai_adapter';
@@ -83,9 +85,19 @@ describe('openAIAdapter', () => {
   };
 
   const logger = loggerMock.create();
+  const connector: InferenceConnector = {
+    type: InferenceConnectorType.OpenAI,
+    name: 'OpenAI connector',
+    connectorId: 'test-connector-id',
+    config: {},
+    capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
+  };
 
   beforeEach(() => {
     executorMock.invoke.mockReset();
+    executorMock.getConnector.mockReset().mockReturnValue(connector);
     isNativeFunctionCallingSupportedMock.mockReset().mockReturnValue(true);
 
     executorMock.invoke.mockImplementation(async () => {
