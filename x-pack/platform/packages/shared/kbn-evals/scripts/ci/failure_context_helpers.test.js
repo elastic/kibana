@@ -8,6 +8,8 @@
 const {
   failureLogMetadataKey,
   failureLogMetadataKeysForProject,
+  TRIAGE_OPENROUTER_CONNECTOR_ID,
+  resolveTriageConnector,
 } = require('./failure_context_helpers');
 
 const SUITE = 'significant-events';
@@ -54,5 +56,40 @@ describe('failureLogMetadataKeysForProject', () => {
       miniBase,
       `${miniBase}:features`,
     ]);
+  });
+});
+
+describe('resolveTriageConnector', () => {
+  const originalEnv = { ...process.env };
+
+  afterEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env.OPENROUTER_BASE_URL;
+    delete process.env.OPENROUTER_API_KEY;
+    delete process.env.KBN_EVALS_CONFIG_B64;
+    delete process.env.KIBANA_TESTING_AI_CONNECTORS;
+  });
+
+  it('builds from vault credentials with the pinned native id, ignoring generated connectors', () => {
+    process.env.OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
+    process.env.OPENROUTER_API_KEY = 'sk-test';
+    process.env.KIBANA_TESTING_AI_CONNECTORS = Buffer.from(
+      JSON.stringify({
+        [TRIAGE_OPENROUTER_CONNECTOR_ID]: {
+          config: {
+            apiUrl: 'https://example.invalid/chat',
+            defaultModel: 'google/gemini-3.7-flash-stale',
+          },
+          secrets: { apiKey: 'sk-generated' },
+        },
+      }),
+      'utf8'
+    ).toString('base64');
+
+    const { connector, modelId } = resolveTriageConnector();
+
+    expect(modelId).toBe('openrouter-google-gemini-3-7-flash');
+    expect(connector.config.defaultModel).toBe('google/gemini-3.7-flash');
+    expect(connector.secrets.apiKey).toBe('sk-test');
   });
 });
