@@ -12,6 +12,7 @@ import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -44,6 +45,7 @@ import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+import { AlertingV2RuleLibraryLocatorDefinition } from './locator';
 
 const LazyCreateRuleOptionsFlyout = React.lazy(() =>
   import('./create_rule_options_flyout').then((m) => ({ default: m.CreateRuleOptionsFlyout }))
@@ -58,6 +60,7 @@ const CreateRuleOptionsFlyout = (props: CreateRuleOptionsFlyoutProps) =>
 
 export type { AlertingV2PublicStart, CreateRuleOptionsFlyoutLegacyItem } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
+export type { AlertingV2RuleLibraryLocator, AlertingV2RuleLibraryLocatorParams } from './locator';
 
 const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -93,6 +96,12 @@ const pluginModule = new ContainerModule(({ bind }) => {
       });
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
+    const share = container.get(PluginSetup('share')) as SharePluginSetup;
+    share.url.locators.create(
+      new AlertingV2RuleLibraryLocatorDefinition({
+        managementAppLocator: management.locator,
+      })
+    );
     const alertingSection = management.sections.register({
       id: ALERTING_V2_SECTION_ID,
       title: 'Alerting V2 Preview',
