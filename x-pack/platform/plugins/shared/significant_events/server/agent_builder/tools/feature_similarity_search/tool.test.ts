@@ -34,15 +34,20 @@ describe('ki_feature_similarity_search tool', () => {
         licensing: {},
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ findFeatures }),
       } as unknown as RouteHandlerScopedClients;
-    }) as jest.MockedFunction<GetScopedClients>;
+    }) as unknown as jest.MockedFunction<GetScopedClients>;
+
+    const tool = createFeatureSimilaritySearchTool({
+      getScopedClients,
+      server,
+      logger,
+    });
+    if (!('schema' in tool)) {
+      throw new Error('Expected a schema-backed tool registration');
+    }
 
     return {
       findFeatures,
-      tool: createFeatureSimilaritySearchTool({
-        getScopedClients,
-        server,
-        logger,
-      }),
+      tool,
     };
   };
 
@@ -103,6 +108,9 @@ describe('ki_feature_similarity_search tool', () => {
       },
       createMockToolContext()
     );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
 
     expect(findFeatures).toHaveBeenCalledWith('logs.test', 'Tech X some technology', {
       searchMode: 'semantic',
@@ -140,6 +148,9 @@ describe('ki_feature_similarity_search tool', () => {
       },
       createMockToolContext()
     );
+    if (!('results' in result)) {
+      throw new Error('Expected a standard tool result');
+    }
 
     expect(result.results).toEqual([
       {
