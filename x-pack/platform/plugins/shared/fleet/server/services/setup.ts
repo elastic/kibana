@@ -66,7 +66,10 @@ import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_co
 import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
-import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
+import {
+  ensureFleetAgentsIndexExists,
+  ensureFleetGlobalEsAssets,
+} from './setup/ensure_fleet_global_es_assets';
 import {
   ensurePreconfiguredDownloadSources,
   getPreconfiguredDownloadSourcesFromConfig,
@@ -331,6 +334,9 @@ async function createSetupSideEffects(
   logger.debug('Create CCS index patterns for remote clusters');
   const { savedObjectsImporter } = getSpaceAwareSaveobjectsClients();
   await createCCSIndexPatterns(esClient, soClient, savedObjectsImporter);
+
+  logger.debug('Ensuring Fleet agents index exists');
+  await ensureFleetAgentsIndexExists(esClient, logger);
 
   const rawNonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,

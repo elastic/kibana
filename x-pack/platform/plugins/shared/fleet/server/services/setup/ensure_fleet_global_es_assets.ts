@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
+import { AGENTS_INDEX } from '../../../common/constants';
 import { ensureDefaultComponentTemplates } from '../epm/elasticsearch/template/install';
 import {
   ensureFleetEventIngestedPipelineIsInstalled,
@@ -67,5 +68,33 @@ export async function ensureFleetGlobalEsAssets(
         );
       }
     }
+  }
+}
+
+/**
+ * Ensure the .fleet-agents index exists.
+ *
+ * Fleet Server PR #7662 introduced a pre-enrollment _refresh call on .fleet-agents. On a fresh
+ * Serverless project the index does not yet exist (it is lazy-created on first enrollment write),
+ * so every enrollment attempt fails with a 404 from _refresh before any document can be written —
+ * a deadlock where the index is never created because enrollment always fails first.
+ *
+ * Creating the index explicitly here (after the fleet_server package index template is installed)
+ * breaks the deadlock: the template provides the correct mappings, and concurrent Kibana instances
+ * are safe because resource_already_exists_exception is treated as a no-op.
+ */
+export async function ensureFleetAgentsIndexExists(
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> {
+  try {
+    logger.debug(`Creating ${AGENTS_INDEX} index`);
+    await esClient.indices.create({ index: AGENTS_INDEX });
+    logger.info(`Created ${AGENTS_INDEX} index`);
+  } catch (err) {
+    if (err?.body?.error?.type === 'resource_already_exists_exception') {
+      return;
+    }
+    throw err;
   }
 }
