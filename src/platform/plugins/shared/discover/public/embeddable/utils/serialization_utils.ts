@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mergeWith, omit, pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import { type SerializedTimeRange, type SerializedTitles } from '@kbn/presentation-publishing';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
@@ -60,15 +60,21 @@ export const deserializeState = async ({
 
     // Build runtime state from the resolved tab's attributes
     // ignore the time range from the tab - only global time range + panel time range matter
+    // Panel overrides replace the resolved tab's values wholesale, so an override can drop entries
+    // (e.g. a removed grid column or sort field). jsonModeSettings is the exception: it partial-
+    // merges with the source, so overriding only one of hide_nulls/wrap_lines keeps the other.
     const runtimeSavedSearchState = isSelectedTabDeleted
       ? {}
-      : mergeWith(
-          {},
-          omit(resolvedTab, 'timeRange'),
-          savedObjectOverride,
-          (_savedObjectValue, overrideValue) =>
-            Array.isArray(overrideValue) ? overrideValue : undefined
-        );
+      : {
+          ...omit(resolvedTab, 'timeRange'),
+          ...savedObjectOverride,
+          ...(savedObjectOverride.jsonModeSettings && {
+            jsonModeSettings: {
+              ...resolvedTab?.jsonModeSettings,
+              ...savedObjectOverride.jsonModeSettings,
+            },
+          }),
+        };
 
     return {
       ...runtimeSavedSearchState,

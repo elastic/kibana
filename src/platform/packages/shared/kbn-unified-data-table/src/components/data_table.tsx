@@ -1447,7 +1447,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       () => ({
         ...toolbarVisibilityDefaults,
         showSortSelector: isSortEnabled && !isJsonSourceMode,
-        showColumnSelector: toolbarVisibilityDefaults.showColumnSelector && !isJsonSourceMode,
+        showColumnSelector: isJsonSourceMode ? false : toolbarVisibilityDefaults.showColumnSelector,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,
