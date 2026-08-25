@@ -56,7 +56,8 @@ const buildKevReport = (
   vuln: KevVulnerability,
   feedUrl: string,
   ingestedAt: string,
-  spaceId: string
+  spaceId: string,
+  sourceId: string
 ): NormalizedReport => {
   const bodyText = `${vuln.shortDescription}\n\nRequired Action: ${vuln.requiredAction}`;
 
@@ -92,7 +93,12 @@ const buildKevReport = (
       type: 'kev',
       name: 'CISA Known Exploited Vulnerabilities',
       url: feedUrl,
-      adapter_id: `kev:${vuln.cveID}`,
+      // Identifies the *source*, not the item, matching every other adapter
+      // (`<type>:<source doc id>`). list_sources aggregates report activity on
+      // this field, so a per-CVE value would leave the KEV catalog row with no
+      // stats. The CVE identity lives in lineage.source_doc_ref.id below and in
+      // extracted.vulnerability.cve_id.
+      adapter_id: `kev:${sourceId}`,
     },
     content: {
       ...buildReportContent({ title: vuln.vulnerabilityName, bodyText, language: 'en' }),
@@ -165,7 +171,7 @@ export const kevAdapter: FetchAdapter = {
     const reports: NormalizedReport[] = [];
     for (const vuln of vulnerabilities) {
       if (vuln.cveID && vuln.vendorProject && vuln.product && vuln.vulnerabilityName) {
-        reports.push(buildKevReport(vuln, feedUrl, ingestedAt, spaceId));
+        reports.push(buildKevReport(vuln, feedUrl, ingestedAt, spaceId, source._id));
       } else {
         log.warn(
           `kev-adapter: skipping malformed entry (missing required fields): ${JSON.stringify(

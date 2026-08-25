@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { loadSourceReportStatsByName } from './list_sources';
+import { loadSourceReportStatsByAdapterId } from './list_sources';
 
-describe('loadSourceReportStatsByName', () => {
+describe('loadSourceReportStatsByAdapterId', () => {
   const logger = {
     warn: jest.fn(),
   };
@@ -21,14 +21,14 @@ describe('loadSourceReportStatsByName', () => {
     jest.clearAllMocks();
   });
 
-  it('returns report counts keyed by source name', async () => {
+  it('returns report counts keyed by adapter id', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({
         aggregations: {
-          by_source_name: {
+          by_adapter_id: {
             buckets: [
               {
-                key: 'ti-rss-okta',
+                key: 'rss:ti-rss-okta',
                 doc_count: 3,
                 last_ingested: { value_as_string: '2026-07-22T12:00:00.000Z' },
                 env_hits: { value: 5 },
@@ -39,26 +39,75 @@ describe('loadSourceReportStatsByName', () => {
       }),
     };
 
-    const stats = await loadSourceReportStatsByName({
+    const stats = await loadSourceReportStatsByAdapterId({
       ...defaultArgs,
       esClient: esClient as never,
     });
 
-    expect(stats.get('ti-rss-okta')).toEqual({
+    expect(stats.get('rss:ti-rss-okta')).toEqual({
       report_count: 3,
       last_ingested_at: '2026-07-22T12:00:00.000Z',
       env_hits_total: 5,
     });
   });
 
-  it('applies time_range to the report enrichment query', async () => {
+  // Aggregating on source.name merged rows whenever two sources shared a
+  // display name — the create API allows duplicates, and a space-private source
+  // can share a name with a global one.
+  it('keeps two sources that share a display name separate', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({
-        aggregations: { by_source_name: { buckets: [] } },
+        aggregations: {
+          by_adapter_id: {
+            buckets: [
+              { key: 'rss:private-copy', doc_count: 2, env_hits: { value: 1 } },
+              { key: 'rss:global-copy', doc_count: 7, env_hits: { value: 4 } },
+            ],
+          },
+        },
       }),
     };
 
-    await loadSourceReportStatsByName({
+    const stats = await loadSourceReportStatsByAdapterId({
+      ...defaultArgs,
+      esClient: esClient as never,
+    });
+
+    expect(stats.get('rss:private-copy')?.report_count).toBe(2);
+    expect(stats.get('rss:global-copy')?.report_count).toBe(7);
+  });
+
+  it('aggregates on the stable adapter id rather than the mutable name', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: { by_adapter_id: { buckets: [] } },
+      }),
+    };
+
+    await loadSourceReportStatsByAdapterId({
+      ...defaultArgs,
+      esClient: esClient as never,
+    });
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: expect.objectContaining({
+          by_adapter_id: expect.objectContaining({
+            terms: expect.objectContaining({ field: 'source.adapter_id' }),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('applies time_range to the report enrichment query', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: { by_adapter_id: { buckets: [] } },
+      }),
+    };
+
+    await loadSourceReportStatsByAdapterId({
       ...defaultArgs,
       esClient: esClient as never,
       timeRange: { from: '2026-07-16T00:00:00.000Z', to: '2026-07-23T00:00:00.000Z' },
@@ -89,7 +138,7 @@ describe('loadSourceReportStatsByName', () => {
       search: jest.fn().mockRejectedValue(new Error('index missing')),
     };
 
-    const stats = await loadSourceReportStatsByName({
+    const stats = await loadSourceReportStatsByAdapterId({
       ...defaultArgs,
       esClient: esClient as never,
     });

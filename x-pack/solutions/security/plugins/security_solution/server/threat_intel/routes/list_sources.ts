@@ -127,9 +127,19 @@ const loadSourceForMutation = async ({
 };
 
 /**
- * Aggregate report activity per `source.name` for list_sources enrichment.
+ * The `source.adapter_id` an adapter stamps on the reports it produces.
+ * Adapters build it as `<adapter type>:<source doc id>`, which is stable and
+ * unique per catalog row — unlike the display name, which is mutable and which
+ * the create API allows to be duplicated (including between a space-private
+ * source and a global one).
  */
-export const loadSourceReportStatsByName = async ({
+const adapterIdForSource = (adapterType: string | undefined, sourceId: string): string =>
+  `${adapterType ?? ''}:${sourceId}`;
+
+/**
+ * Aggregate report activity per `source.adapter_id` for list_sources enrichment.
+ */
+export const loadSourceReportStatsByAdapterId = async ({
   esClient,
   spaceId,
   logger,
@@ -140,7 +150,7 @@ export const loadSourceReportStatsByName = async ({
   logger: Logger;
   timeRange?: { from: string; to: string };
 }): Promise<Map<string, SourceReportStats>> => {
-  const statsByName = new Map<string, SourceReportStats>();
+  const statsByAdapterId = new Map<string, SourceReportStats>();
 
   try {
     const filters: Record<string, unknown>[] = [buildSpaceFilterTerms(spaceId)];
@@ -167,9 +177,9 @@ export const loadSourceReportStatsByName = async ({
         },
       },
       aggs: {
-        by_source_name: {
+        by_adapter_id: {
           terms: {
-            field: 'source.name',
+            field: 'source.adapter_id',
             size: 500,
           },
           aggs: {
@@ -186,7 +196,7 @@ export const loadSourceReportStatsByName = async ({
 
     const buckets =
       (
-        response.aggregations?.by_source_name as
+        response.aggregations?.by_adapter_id as
           | {
               buckets?: Array<{
                 key: string | number;
@@ -199,13 +209,13 @@ export const loadSourceReportStatsByName = async ({
       )?.buckets ?? [];
 
     for (const bucket of buckets) {
-      const name = String(bucket.key);
+      const adapterId = String(bucket.key);
       const lastIngested =
         bucket.last_ingested?.value_as_string ??
         (typeof bucket.last_ingested?.value === 'number'
           ? new Date(bucket.last_ingested.value).toISOString()
           : undefined);
-      statsByName.set(name, {
+      statsByAdapterId.set(adapterId, {
         report_count: bucket.doc_count,
         ...(lastIngested ? { last_ingested_at: lastIngested } : {}),
         env_hits_total: Math.round(bucket.env_hits?.value ?? 0),
@@ -217,7 +227,7 @@ export const loadSourceReportStatsByName = async ({
     );
   }
 
-  return statsByName;
+  return statsByAdapterId;
 };
 
 /**
@@ -247,7 +257,7 @@ export const registerListSourcesRoute = ({
         const size = request.body.size ?? 500;
 
         try {
-          const [searchResponse, reportStatsByName] = await Promise.all([
+          const [searchResponse, reportStatsByAdapterId] = await Promise.all([
             esClient.search<ThreatIntelSourceDoc>({
               index: THREAT_INTEL_SOURCES_INDEX,
               ignore_unavailable: true,
@@ -260,7 +270,7 @@ export const registerListSourcesRoute = ({
                 },
               },
             }),
-            loadSourceReportStatsByName({
+            loadSourceReportStatsByAdapterId({
               esClient,
               spaceId,
               logger,
@@ -271,7 +281,8 @@ export const registerListSourcesRoute = ({
           const sources = (searchResponse.hits.hits ?? []).map((hit) => {
             const base = mapSourceHit(hit);
             const stats =
-              (base.name ? reportStatsByName.get(base.name) : undefined) ?? emptyStats();
+              reportStatsByAdapterId.get(adapterIdForSource(base.adapter_type, base.source_id)) ??
+              emptyStats();
             return {
               ...base,
               report_count: stats.report_count,

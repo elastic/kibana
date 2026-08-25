@@ -125,6 +125,21 @@ describe('kevAdapter', () => {
     expect(revised.content_fingerprint).not.toBe(original.content_fingerprint);
   });
 
+  // adapter_id identifies the source, not the item: list_sources aggregates
+  // report activity on it, so a per-CVE value left the KEV catalog row with no
+  // stats. The CVE identity lives in lineage.source_doc_ref.id instead.
+  it('stamps a source-stable adapter_id shared by every entry', async () => {
+    const reports = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
+
+    for (const report of reports) {
+      expect(report.source.adapter_id).toBe('kev:kev:cisa-known-exploited-vulnerabilities');
+    }
+    expect(reports.map((r) => r.lineage.source_doc_ref?.id)).toEqual([
+      'CVE-2021-44228',
+      'CVE-2022-30190',
+    ]);
+  });
+
   it('fingerprints are distinct per CVE', async () => {
     const reports = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
     const fps = reports.map((r) => r.content_fingerprint);
