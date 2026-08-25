@@ -577,32 +577,42 @@ describe('createCaseFromTemplateStepDefinition', () => {
       expect(createPayload.settings).toEqual({ syncAlerts: false, extractObservables: true });
     });
 
-    it('defaults settings from OWNER_INFO when the template does not specify them', async () => {
-      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
-      const getTemplate = jest.fn().mockResolvedValue(
-        buildTemplateSO({
-          name: 'Triage default title',
-          description: 'Triage default description',
-          fields: [],
-        })
-      );
-      const getCasesClient = jest.fn().mockResolvedValue({
-        templates: { getTemplate },
-        configure: { get: jest.fn() },
-        cases: { create },
-      } as unknown as CasesClient);
+    it.each([
+      ['securitySolution', { syncAlerts: true, extractObservables: true }],
+      ['observability', { syncAlerts: false, extractObservables: false }],
+      ['cases', { syncAlerts: false, extractObservables: false }],
+    ])(
+      'defaults settings from OWNER_INFO when the template does not specify them (owner=%s)',
+      async (owner, settings) => {
+        const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+        const getTemplate = jest.fn().mockResolvedValue(
+          buildTemplateSO(
+            {
+              name: 'Triage default title',
+              description: 'Triage default description',
+              fields: [],
+            },
+            { owner }
+          )
+        );
+        const getCasesClient = jest.fn().mockResolvedValue({
+          templates: { getTemplate },
+          configure: { get: jest.fn() },
+          cases: { create },
+        } as unknown as CasesClient);
 
-      const definition = createCaseFromTemplateStepDefinition(getCasesClient, true);
-      await definition.handler(
-        createContext({
-          owner: 'securitySolution',
-          case_template_id: 'triage_template',
-        })
-      );
+        const definition = createCaseFromTemplateStepDefinition(getCasesClient, true);
+        await definition.handler(
+          createContext({
+            owner,
+            case_template_id: 'triage_template',
+          })
+        );
 
-      const createPayload = create.mock.calls[0][0];
-      expect(createPayload.settings).toEqual({ syncAlerts: true, extractObservables: true });
-    });
+        const createPayload = create.mock.calls[0][0];
+        expect(createPayload.settings).toEqual(settings);
+      }
+    );
 
     it('fails with a clear message when the template has no default title and no title overwrite is provided', async () => {
       const create = jest.fn();

@@ -32,11 +32,14 @@ describe('getCaseSettings', () => {
     });
   });
 
-  it.each([[''], ['foobar']])('defaults every flag off for unknown owner %j', (owner) => {
-    expect(getCaseSettings(owner)).toEqual({
-      syncAlerts: false,
-      extractObservables: false,
-      observablesEnabled: false,
-    });
-  });
+  it.each([[''], ['foobar'], ['toString'], ['constructor']])(
+    'defaults every flag off for unknown owner %j',
+    (owner) => {
+      expect(getCaseSettings(owner)).toEqual({
+        syncAlerts: false,
+        extractObservables: false,
+        observablesEnabled: false,
+      });
+    }
+  );
 });

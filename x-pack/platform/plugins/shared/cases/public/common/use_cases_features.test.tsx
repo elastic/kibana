@@ -91,7 +91,7 @@ describe('useCasesFeatures', () => {
   });
 
   it.each([
-    [{ enabled: false, sync: true }, false, false],
+    [{ enabled: false }, false, false],
     [{ enabled: false, all: true }, false, false],
     [{ enabled: true, all: false }, true, false],
     [{ enabled: true, all: true }, true, true],

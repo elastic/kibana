@@ -26,7 +26,7 @@ const UNAVAILABLE: OwnerCaseSettings = {
  * solution is selected) get every flag off.
  */
 export const getCaseSettings = (owner: string): OwnerCaseSettings => {
-  if (!(owner in OWNER_INFO)) {
+  if (!Object.hasOwn(OWNER_INFO, owner)) {
     return UNAVAILABLE;
   }
 
