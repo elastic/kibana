@@ -43,12 +43,13 @@ export const createJobId = (): string => randomUUID();
 
 export const getWorkdir = (jobId: string): string => `${REMOTE_HOST_JOB_ROOT}/${jobId}`;
 
-export const wrapUserScript = (code: string, hasEnv: boolean): string =>
+export const wrapUserScript = (code: string, hasEnv: boolean, cwd?: string): string =>
   `
 #!/bin/bash
 STEP_OUTPUT="$WORKDIR/output.txt"
 touch "$STEP_OUTPUT"
 ${hasEnv ? '. "$WORKDIR/env.sh"' : ''}
+${cwd ? `cd ${JSON.stringify(cwd)} || exit 1` : ''}
 export FORCE_COLOR=1 TERM=xterm-256color
 ${code}
 `.trim();
@@ -193,7 +194,8 @@ const envRecordToScript = (env: Record<string, string>): string =>
 export async function startJob(
   ctx: ConnectorCallContext,
   script: string,
-  env?: Record<string, string>
+  env?: Record<string, string>,
+  cwd?: string
 ): Promise<RemoteHostJobStatus & { jobId: string }> {
   const jobId = createJobId();
   const workdir = getWorkdir(jobId);
@@ -209,7 +211,7 @@ export async function startJob(
 
   await uploadFile(ctx, {
     remotePath: scriptFile,
-    content: wrapUserScript(script, hasEnv),
+    content: wrapUserScript(script, hasEnv, cwd),
   });
 
   const { stdout, stderr, code } = await execScript(ctx, buildLauncherScript(workdir, scriptFile));
