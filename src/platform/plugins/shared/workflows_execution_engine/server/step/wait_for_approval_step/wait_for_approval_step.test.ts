@@ -91,6 +91,7 @@ describe('WaitForApprovalStepImpl', () => {
       tryEnterWaitUntil: jest.fn().mockReturnValue(true),
       finishStep: jest.fn(),
       failStep: jest.fn(),
+      stampHitlAudit: jest.fn(),
       setInput: jest.fn(),
       updateWorkflowExecution: jest.fn(),
       stepExecutionId: 'test-step-exec-id',
