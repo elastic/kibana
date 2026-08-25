@@ -19,6 +19,7 @@ import { siemReadinessLinks } from '../../siem_readiness/links';
 import type { AppLinkItems } from '../../common/links/types';
 import { indicatorsLinks } from '../../threat_intelligence/links';
 import { alertDetectionsLinks, alertsLink, alertSummaryLink } from '../../detections/links';
+import { alertsV2Links } from '../../alerts_v2/links';
 import { links as rulesLinks } from '../../rules/links';
 import { links as siemMigrationsLinks } from '../../siem_migrations/links';
 import { links as timelinesLinks } from '../../timelines/links';
@@ -34,6 +35,7 @@ import { entityAnalyticsLinks, entityAnalyticsV2Links } from '../../entity_analy
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
   alertsLink,
+  alertsV2Links,
   alertSummaryLink,
   attackDiscoveryLinks,
   findingsLinks,
@@ -77,6 +79,7 @@ export const getFilteredLinks = async (
   return Object.freeze([
     dashboardsLinks,
     enableAlertsAndAttacksAlignment ? alertDetectionsLinks : alertsLink,
+    alertsV2Links,
     alertSummaryLink,
     // Attack Discovery remains a permanent top-level page and stays visible in the side
     // navigation, global navigation, and global search regardless of the alerts-and-attacks

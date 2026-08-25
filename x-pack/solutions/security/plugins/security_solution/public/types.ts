@@ -91,6 +91,7 @@ import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { AssetInventory } from './asset_inventory';
 import type { SiemReadiness } from './siem_readiness';
+import type { AlertsV2 } from './alerts_v2';
 import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
 import type { EntityAnalytics } from './entity_analytics';
@@ -279,6 +280,7 @@ export interface SubPlugins {
   siemMigrations: SiemMigrations;
   siemReadiness: SiemReadiness;
   configurations: Configurations;
+  alertsV2: AlertsV2;
 }
 
 // TODO: find a better way to defined these types
@@ -304,4 +306,5 @@ export interface StartedSubPlugins {
   siemMigrations: ReturnType<SiemMigrations['start']>;
   siemReadiness: ReturnType<SiemReadiness['start']>;
   configurations: ReturnType<Configurations['start']>;
+  alertsV2: ReturnType<AlertsV2['start']>;
 }
