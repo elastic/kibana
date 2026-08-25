@@ -80,7 +80,9 @@ const mockedDeleteVersionSpecificFleetServerPoliciesForVersions =
     typeof deleteVersionSpecificFleetServerPoliciesForVersions
   >;
 const mockedGetAgentCountsForVariantPolicyIds =
-  getAgentCountsForVariantPolicyIds as jest.MockedFunction<typeof getAgentCountsForVariantPolicyIds>;
+  getAgentCountsForVariantPolicyIds as jest.MockedFunction<
+    typeof getAgentCountsForVariantPolicyIds
+  >;
 const mockedGetAgentVersionsForVersionSpecificPolicies =
   getAgentVersionsForVersionSpecificPolicies as jest.MockedFunction<
     typeof getAgentVersionsForVersionSpecificPolicies
