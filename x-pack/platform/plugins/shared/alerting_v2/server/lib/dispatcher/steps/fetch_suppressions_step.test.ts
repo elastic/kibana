@@ -42,8 +42,8 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(1);
-    expect(result.data?.suppressions?.[0].should_suppress).toBe(true);
+    expect(result.data?.suppressions?.rows).toHaveLength(1);
+    expect(result.data?.suppressions?.rows[0].should_suppress).toBe(true);
   });
 
   it('returns empty suppressions when no episodes exist', async () => {
@@ -55,7 +55,7 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(0);
+    expect(result.data?.suppressions?.rows).toHaveLength(0);
   });
 
   it('returns empty suppressions when episodes is undefined', async () => {
@@ -67,7 +67,7 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(0);
+    expect(result.data?.suppressions?.rows).toHaveLength(0);
   });
 
   it('parses external suppressions (source != internal, null rule_id) correctly', async () => {
@@ -102,8 +102,8 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(1);
-    const suppression = result.data?.suppressions?.[0];
+    expect(result.data?.suppressions?.rows).toHaveLength(1);
+    const suppression = result.data?.suppressions?.rows[0];
     expect(suppression?.source).toBe('pagerduty');
     expect(suppression?.rule_id).toBeNull();
     expect(suppression?.should_suppress).toBe(true);
@@ -159,7 +159,7 @@ describe('FetchSuppressionsStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    expect(result.data?.suppressions).toHaveLength(2);
-    expect(result.data?.suppressions?.map((s) => s.episode_id)).toEqual(['e0', 'e199']);
+    expect(result.data?.suppressions?.rows).toHaveLength(2);
+    expect(result.data?.suppressions?.rows.map((s) => s.episode_id)).toEqual(['e0', 'e199']);
   });
 });
