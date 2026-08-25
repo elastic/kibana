@@ -55,6 +55,7 @@ describe('adaptive-ui "view" renderer', () => {
     const host = container.querySelector(SHADOW_HOST_SELECTOR);
     expect(host?.shadowRoot?.querySelector('.aui')).not.toBeNull();
     expect(container.querySelector('.aui')).toBeNull();
+    expect(host?.shadowRoot?.querySelector('.aui style')?.textContent).toContain('.aui{');
   });
 
   it('mounts the React surface in the light DOM when styleIsolation is document', () => {
