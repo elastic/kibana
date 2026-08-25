@@ -29,7 +29,8 @@ export const DASHBOARD_LABEL = i18n.translate('xpack.ux.title', {
 });
 
 export function RumHome() {
-  const { docLinks, http, observabilityShared, observabilityAIAssistant, uiSettings } = useKibanaServices();
+  const { docLinks, http, observabilityShared, observabilityAIAssistant, uiSettings } =
+    useKibanaServices();
 
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
 
@@ -101,13 +102,9 @@ export function RumHome() {
       isEmptyState={isLoading}
     >
       <div> FOOOOOOOOO</div>
-      <AppHeader
-        title={DASHBOARD_LABEL}
-        menu={appMenu}
-        spacing="largeBleed"
-      />
+      <AppHeader title={DASHBOARD_LABEL} menu={appMenu} spacing="largeBleed" />
       <EuiSpacer size="m" />
-      <DashboardToolbar />  
+      <DashboardToolbar />
       {isLoading && <EmptyStateLoading />}
       <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>
         <RumOverview />

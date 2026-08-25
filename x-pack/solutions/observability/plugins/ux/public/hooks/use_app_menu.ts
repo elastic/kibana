@@ -12,8 +12,7 @@ import { RECORDS_FIELD, createExploratoryViewUrl } from '@kbn/exploratory-view-p
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { SERVICE_NAME } from '../../common/elasticsearch_fieldnames';
-import { useKibanaServices } from '../hooks/use_kibana_services';
-
+import { useKibanaServices } from './use_kibana_services';
 
 const ANALYZE_DATA = i18n.translate('xpack.ux.analyzeDataButtonLabel', {
   defaultMessage: 'Explore data',
@@ -56,7 +55,7 @@ export function useAppMenu(enableInspector: boolean) {
         label: 'Add data',
         href: application.getUrlForApp('/apm/tutorial'),
         iconType: 'plus',
-      }
+      },
     ] as AppMenuItemType[];
     if (enableInspector) {
       items.unshift({
