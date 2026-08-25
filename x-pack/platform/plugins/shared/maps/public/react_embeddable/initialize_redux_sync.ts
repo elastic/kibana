@@ -12,7 +12,6 @@ import type { PublishingSubject, StateComparators } from '@kbn/presentation-publ
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import type { ComparatorFunction } from 'joi';
 import type { MapCenterAndZoom } from '../../common/descriptor_types';
 import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
 import type { MapStoreState } from '../reducers/store';
@@ -72,7 +71,7 @@ export const reduxSyncComparators: StateComparators<
     if (a.lat !== b.lat) return false;
     if (a.lon !== b.lon) return false;
     // Map may not restore reset zoom exactly
-    return Math.abs(a.zoom - b.zoom) < 0.5;
+    return Math.abs(a.zoom - b.zoom) < 0.05;
   },
   mapBuffer: 'skip',
   openTOCDetails: 'deepEquality',
@@ -105,10 +104,9 @@ export function initializeReduxSync({
   const openTOCDetails$ = new BehaviorSubject<string[]>(
     state.openTOCDetails ?? getOpenTOCDetails(store.getState())
   );
-  const reduxSyncLoading$ = new BehaviorSubject<boolean>(false);
+  const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   const unsubscribeFromStore = store.subscribe(() => {
-    reduxSyncLoading$.next(true);
     if (!getMapReady(store.getState())) {
       return;
     }
@@ -123,12 +121,7 @@ export function initializeReduxSync({
     }
 
     const nextMapCenterAndZoom = getMapCenterAndZoom(store.getState());
-    if (
-      !(reduxSyncComparators.mapCenter as ComparatorFunction)(
-        mapCenterAndZoom$.value,
-        nextMapCenterAndZoom
-      )
-    ) {
+    if (!fastIsEqual(mapCenterAndZoom$.value, nextMapCenterAndZoom)) {
       mapCenterAndZoom$.next(nextMapCenterAndZoom);
     }
 
@@ -137,7 +130,10 @@ export function initializeReduxSync({
       openTOCDetails$.next(nextOpenTOCDetails);
     }
 
-    reduxSyncLoading$.next(isMapLoading(store.getState()));
+    const nextIsMapLoading = isMapLoading(store.getState());
+    if (nextIsMapLoading !== dataLoading$.value) {
+      dataLoading$.next(nextIsMapLoading);
+    }
   });
 
   store.dispatch(setReadOnly(true));
@@ -188,7 +184,7 @@ export function initializeReduxSync({
       unsubscribeFromStore();
     },
     api: {
-      reduxSyncLoading$,
+      dataLoading$,
       filters$,
       getInspectorAdapters: () => {
         return getInspectorAdapters(store.getState());
@@ -196,7 +192,7 @@ export function initializeReduxSync({
       getLayerList: () => {
         return getLayerList(store.getState());
       },
-      onRenderComplete$: reduxSyncLoading$.pipe(
+      onRenderComplete$: dataLoading$.pipe(
         filter((isDataLoading) => typeof isDataLoading === 'boolean' && !isDataLoading),
         debounceTime(RENDER_TIMEOUT),
         map(() => {

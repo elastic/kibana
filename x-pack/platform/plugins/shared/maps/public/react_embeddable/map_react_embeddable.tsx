@@ -19,14 +19,7 @@ import {
   apiPublishesSettings,
   initializeStateApi,
 } from '@kbn/presentation-publishing';
-import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  distinctUntilChanged,
-  map,
-  merge,
-} from 'rxjs';
+import { BehaviorSubject, merge } from 'rxjs';
 import {
   ON_APPLY_FILTER,
   ON_CLICK_VALUE,
@@ -106,20 +99,6 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
     });
     const projectRoutingManager = await initializeProjectRoutingManager(savedMap);
 
-    const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
-    const stateLoading$ = new BehaviorSubject<boolean>(false);
-    const dataLoadingSubscription = combineLatest([reduxSync.api.reduxSyncLoading$, stateLoading$])
-      .pipe(
-        debounceTime(100),
-        map(([reduxSyncLoading, stateLoading]) => {
-          return reduxSyncLoading || stateLoading;
-        }),
-        distinctUntilChanged()
-      )
-      .subscribe((loading) => {
-        dataLoading$.next(loading);
-      });
-
     function getLatestState() {
       return {
         ...state,
@@ -166,19 +145,15 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         };
       },
       applySerializedState: async (nextState) => {
-        stateLoading$.next(true);
-
         drilldownsManager.reinitializeState(nextState);
         timeRangeManager.reinitializeState(nextState);
         titleManager.reinitializeState(nextState);
 
         await savedMap.reset(nextState);
-        stateLoading$.next(false);
       },
     });
 
     api = finalizeApi({
-      dataLoading$,
       cancelRequests: () => {
         savedMap.getStore().dispatch<any>(cancelAllInFlightRequests());
       },
@@ -238,7 +213,6 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
             reduxSync.cleanup();
             unsubscribeFromFetch();
             projectRoutingManager.cleanup();
-            dataLoadingSubscription.unsubscribe();
           };
         }, []);
 
