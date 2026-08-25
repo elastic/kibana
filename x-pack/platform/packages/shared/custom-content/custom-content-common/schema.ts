@@ -29,6 +29,13 @@ export type CustomContentState = z.output<typeof customContentStateSchema>;
  */
 export const customContentUpdateSchema = z
   .object({
+    embeddable_id: z
+      .string()
+      .min(1)
+      .max(100)
+      .describe(
+        'The embeddable_id of the custom content panel to update. It is shown in the panel context header (e.g. "Custom content panel (embeddable_id: …)"). Required when multiple panels are present in the conversation so the tool can target the correct one.'
+      ),
     prompt: z
       .string()
       .min(1)

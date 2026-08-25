@@ -41,14 +41,22 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 
 On success this returns \`attachment_id\` and \`version\`. You MUST render the updated panel inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\` — without it the user cannot preview or step back through earlier versions of the panel.`,
   schema: updateCustomContentSchema,
-  handler: async ({ prompt, esqlQuery }, { attachments, logger, esClient, modelProvider }) => {
+  handler: async (
+    { embeddable_id, prompt, esqlQuery },
+    { attachments, logger, esClient, modelProvider }
+  ) => {
     const allAttachments = attachments.getAll();
     const contextAttachment = allAttachments.find(
-      (a) => a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE
+      (a) =>
+        a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE &&
+        (getLatestVersion(a)?.data as CustomContentContextAttachmentData | undefined)
+          ?.embeddable_id === embeddable_id
     );
 
     if (!contextAttachment) {
-      logger.warn('custom_content_update_panel: no custom_content_context attachment found');
+      logger.warn(
+        `custom_content_update_panel: no custom_content_context attachment found for embeddable_id "${embeddable_id}"`
+      );
       return {
         results: [
           {
