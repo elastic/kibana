@@ -72,6 +72,7 @@ export function userLoginEvent({
     user: authenticationResult.user && {
       id: userProfileId,
       name: authenticationResult.user.username,
+      ...(authenticationResult.user.email ? { email: authenticationResult.user.email } : {}),
       roles: authenticationResult.user.roles as string[],
     },
     kibana: {

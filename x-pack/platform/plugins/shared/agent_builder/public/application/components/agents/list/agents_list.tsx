@@ -13,6 +13,7 @@ import type {
   CriteriaWithPagination,
 } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -37,6 +38,11 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import {
+  useSetSpaceDefaultAgent,
+  useSpaceDefaultAgent,
+} from '../../../hooks/use_space_default_agent';
+import { useToasts } from '../../../hooks/use_toasts';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
@@ -119,7 +125,33 @@ const actionLabels = {
   deleteDescription: i18n.translate('xpack.agentBuilder.agents.actions.deleteDescription', {
     defaultMessage: 'Delete agent',
   }),
+  setSpaceDefault: i18n.translate('xpack.agentBuilder.agents.actions.setSpaceDefault', {
+    defaultMessage: 'Set as space default',
+  }),
+  setSpaceDefaultDescription: i18n.translate(
+    'xpack.agentBuilder.agents.actions.setSpaceDefaultDescription',
+    { defaultMessage: 'Make this the default agent for users in this space' }
+  ),
+  clearSpaceDefault: i18n.translate('xpack.agentBuilder.agents.actions.clearSpaceDefault', {
+    defaultMessage: 'Remove as space default',
+  }),
+  clearSpaceDefaultDescription: i18n.translate(
+    'xpack.agentBuilder.agents.actions.clearSpaceDefaultDescription',
+    { defaultMessage: 'Users in this space will no longer be pinned to this agent' }
+  ),
 };
+
+const spaceDefaultBadgeLabel = i18n.translate('xpack.agentBuilder.agents.spaceDefaultBadge', {
+  defaultMessage: 'Space default',
+});
+
+const spaceDefaultBadgeTooltip = i18n.translate(
+  'xpack.agentBuilder.agents.spaceDefaultBadgeTooltip',
+  {
+    defaultMessage:
+      'This agent is assigned as the default for this space. Users without agent-management privileges are restricted to it when they open Agent Builder here.',
+  }
+);
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
@@ -127,10 +159,34 @@ export const AgentsList: React.FC = () => {
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents } = useUiPrivileges();
+  const { addSuccessToast, addErrorToast } = useToasts();
   const {
     services: { settings },
   } = useKibana();
   const dateFormat = settings?.client.get<string>('dateFormat');
+  const { defaultAgentId: spaceDefaultAgentId } = useSpaceDefaultAgent();
+  const setSpaceDefaultAgent = useSetSpaceDefaultAgent({
+    onSuccess: (defaultAgentId) => {
+      addSuccessToast({
+        title:
+          defaultAgentId === null
+            ? i18n.translate('xpack.agentBuilder.agents.spaceDefaultClearedToast', {
+                defaultMessage: 'Space default agent removed',
+              })
+            : i18n.translate('xpack.agentBuilder.agents.spaceDefaultSetToast', {
+                defaultMessage: 'Space default agent updated',
+              }),
+      });
+    },
+    onError: (err: Error & { body?: { message?: string } }) => {
+      addErrorToast({
+        title: i18n.translate('xpack.agentBuilder.agents.spaceDefaultErrorToast', {
+          defaultMessage: 'Failed to update the space default agent',
+        }),
+        text: err.body?.message ?? err.message,
+      });
+    },
+  });
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
   const [aclAgent, setAclAgent] = React.useState<ListAgentResponseItem | null>(null);
@@ -170,6 +226,7 @@ export const AgentsList: React.FC = () => {
             <EuiText size="m">{name}</EuiText>
           </EuiLink>
         );
+        const isSpaceDefault = spaceDefaultAgentId === agent.id;
         return (
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
@@ -178,6 +235,20 @@ export const AgentsList: React.FC = () => {
                 {isPreconfiguredAgentType(agent.type) && (
                   <EuiFlexItem grow={false}>
                     <AgentTypeBadge agentType={agent.type} />
+                  </EuiFlexItem>
+                )}
+                {isSpaceDefault && (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip position="top" content={spaceDefaultBadgeTooltip}>
+                      <EuiBadge
+                        color="hollow"
+                        iconType="starFilled"
+                        tabIndex={0}
+                        data-test-subj="agentBuilderAgentsListSpaceDefaultBadge"
+                      >
+                        {spaceDefaultBadgeLabel}
+                      </EuiBadge>
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -279,6 +350,25 @@ export const AgentsList: React.FC = () => {
           available: canManageAgentAccess,
         },
         {
+          type: 'icon',
+          icon: (agent) => (spaceDefaultAgentId === agent.id ? 'starFilled' : 'starEmpty'),
+          name: (agent) =>
+            spaceDefaultAgentId === agent.id
+              ? actionLabels.clearSpaceDefault
+              : actionLabels.setSpaceDefault,
+          description: (agent) =>
+            spaceDefaultAgentId === agent.id
+              ? actionLabels.clearSpaceDefaultDescription
+              : actionLabels.setSpaceDefaultDescription,
+          'data-test-subj': (agent) => `agentBuilderAgentsListSpaceDefault-${agent.id}`,
+          showOnHover: true,
+          available: () => manageAgents,
+          onClick: (agent) => {
+            const isCurrent = spaceDefaultAgentId === agent.id;
+            setSpaceDefaultAgent.mutate(isCurrent ? null : agent.id);
+          },
+        },
+        {
           // Have to use a custom action to display the danger color
           // Can use default action if this proposal is implemented: https://github.com/elastic/eui/discussions/8735
           render: (agent) => {
@@ -323,6 +413,8 @@ export const AgentsList: React.FC = () => {
     deleteAgent,
     manageAgents,
     canManageAgentAccess,
+    spaceDefaultAgentId,
+    setSpaceDefaultAgent,
     profileMap,
     dateFormat,
   ]);

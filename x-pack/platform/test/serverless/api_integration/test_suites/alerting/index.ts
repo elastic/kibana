@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./rules'));
     loadTestFile(require.resolve('./alert_documents'));
     loadTestFile(require.resolve('./summary_actions'));
+    loadTestFile(require.resolve('./user_managed_uiam_api_key'));
   });
 }
