@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { MonitorLocationAssignment } from '../../../../../../../common/types';
 import { fetchMonitorAgentAssignments } from '../../../../state/agent_stats/api';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
@@ -25,13 +25,21 @@ export const useMonitorAgentAssignments = (
   const [assignments, setAssignments] = useState<MonitorLocationAssignment[]>([]);
   const [loading, setLoading] = useState(Boolean(monitorId));
   const [error, setError] = useState(false);
+  const loadedMonitorIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!monitorId) {
+      loadedMonitorIdRef.current = undefined;
       setAssignments([]);
       setLoading(false);
       setError(false);
       return;
+    }
+
+    // Drop the previous monitor's rows immediately so a shared location id
+    // cannot flash the wrong assigned agent while the next fetch is in flight.
+    if (loadedMonitorIdRef.current !== monitorId) {
+      setAssignments([]);
     }
 
     let cancelled = false;
@@ -40,6 +48,7 @@ export const useMonitorAgentAssignments = (
     fetchMonitorAgentAssignments(monitorId)
       .then((result) => {
         if (!cancelled) {
+          loadedMonitorIdRef.current = monitorId;
           setAssignments(result);
           setError(false);
         }

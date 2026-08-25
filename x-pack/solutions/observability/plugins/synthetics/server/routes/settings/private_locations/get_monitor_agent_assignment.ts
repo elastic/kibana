@@ -11,6 +11,7 @@ import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import { getEnrolledAgents } from './get_agent_stats';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { ConfigKey } from '../../../../common/runtime_types';
 import type { MonitorAssignedAgent, MonitorLocationAssignment } from '../../../../common/types';
 import { getMonitorNotFoundResponse } from '../../synthetics_service/service_errors';
 import {
@@ -64,6 +65,10 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
 
     try {
       const monitor = await monitorConfigRepository.get(monitorId);
+      // Fleet package-policy ids use HeartbeatConfig.id (MONITOR_QUERY_ID /
+      // custom_heartbeat_id), which differs from the saved-object config_id on
+      // project monitors. Looking up by monitorId would miss the pin.
+      const policyMonitorId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID] || monitorId;
       const privateMonitorLocations = (monitor.attributes.locations ?? []).filter(
         (location) => !location.isServiceManaged
       );
@@ -88,8 +93,8 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
           ? await new PackagePolicyService(server).getByIds({
               spaceId,
               packagePolicyIds: shardedMonitorLocations.flatMap((location) => [
-                `${monitorId}-${location.id}`,
-                `${monitorId}-${location.id}-${spaceId}`,
+                `${policyMonitorId}-${location.id}`,
+                `${policyMonitorId}-${location.id}-${spaceId}`,
               ]),
               fields: ['id', 'name', 'condition'],
             })
@@ -120,7 +125,7 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
               (policy): policy is { id: string; condition?: string | null } =>
                 typeof policy.id === 'string'
             ),
-            monitorId,
+            policyMonitorId,
             monitorLocation.id,
             spaceId
           );
