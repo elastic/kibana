@@ -1313,6 +1313,38 @@ describe('WorkflowsBaseTelemetry', () => {
       expect(eventData.errorTypes).toEqual(
         expect.arrayContaining(['yaml', 'step-name-validation'])
       );
+      expect(eventData.ruleIds).toEqual(
+        expect.arrayContaining(['schemaViolation', 'duplicateStepName'])
+      );
+    });
+
+    it('deduplicates on rule id, so a reworded message does not re-report', () => {
+      const reported = createMockValidationResult({
+        owner: 'yaml',
+        ruleId: 'schemaViolation',
+        message: 'Invalid field',
+        startLineNumber: 1,
+        startColumn: 1,
+      });
+      const reworded = createMockValidationResult({
+        owner: 'yaml',
+        ruleId: 'schemaViolation',
+        message: 'Champ invalide',
+        startLineNumber: 1,
+        startColumn: 1,
+      });
+
+      telemetry.reportWorkflowValidationError({
+        workflowId: 'wf-1',
+        validationResults: [reported],
+      });
+      expect(mockClient.reportEvent).toHaveBeenCalledTimes(1);
+
+      telemetry.reportWorkflowValidationError({
+        workflowId: 'wf-1',
+        validationResults: [reworded],
+      });
+      expect(mockClient.reportEvent).toHaveBeenCalledTimes(1);
     });
 
     it('does not report when there are no error-severity results', () => {

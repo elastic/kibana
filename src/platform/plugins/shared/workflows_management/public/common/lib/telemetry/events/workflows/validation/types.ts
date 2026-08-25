@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WorkflowValidationRuleId } from '@kbn/workflows';
 import type { WorkflowEditorType, WorkflowTelemetryOrigin } from '../types';
 
 export enum WorkflowValidationEventTypes {
@@ -40,6 +41,11 @@ export interface ReportWorkflowValidationErrorActionParams {
    * Unique validation error types
    */
   errorTypes: WorkflowValidationErrorType[];
+  /**
+   * Unique rule IDs of the errors. Stable across rewordings and translations, unlike
+   * `errorTypes`, which only names the validator that produced the error.
+   */
+  ruleIds: WorkflowValidationRuleId[];
   /**
    * Total number of validation errors
    */
