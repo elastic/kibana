@@ -94,7 +94,7 @@ describe('KiVerificationService', () => {
     expect(summary.results).toEqual([{ verifier: 'applies', passed: true }]);
   });
 
-  it('records a throwing verifier as a failure, logs it, and continues the run', async () => {
+  it('propagates a verifier execution failure', async () => {
     const thrower: KiVerifier = {
       id: 'thrower',
       applies: () => true,
@@ -102,22 +102,12 @@ describe('KiVerificationService', () => {
         throw new Error('boom');
       }),
     };
-    const after = makeVerifier('after', { passed: true });
     registry.register(thrower);
-    registry.register(after);
 
-    const summary = await run('thrower', 'after');
-
-    expect(after.verify).toHaveBeenCalledTimes(1);
-    expect(summary.passed).toBe(false);
-    expect(summary.results).toEqual([
-      { verifier: 'thrower', passed: false, reason: 'boom' },
-      { verifier: 'after', passed: true },
-    ]);
-    expect(context.logger.warn).toHaveBeenCalledWith("KI verifier 'thrower' threw: boom");
+    await expect(run('thrower')).rejects.toThrow('boom');
   });
 
-  it('records a verifier whose applies() throws as a failure and continues the run', async () => {
+  it('propagates a failure from applies()', async () => {
     const thrower: KiVerifier = {
       id: 'applies-thrower',
       applies: () => {
@@ -125,22 +115,11 @@ describe('KiVerificationService', () => {
       },
       verify: jest.fn(async () => ({ passed: true as const })),
     };
-    const after = makeVerifier('after', { passed: true });
     registry.register(thrower);
-    registry.register(after);
 
-    const summary = await run('applies-thrower', 'after');
+    await expect(run('applies-thrower')).rejects.toThrow('applies boom');
 
     expect(thrower.verify).not.toHaveBeenCalled();
-    expect(after.verify).toHaveBeenCalledTimes(1);
-    expect(summary.passed).toBe(false);
-    expect(summary.results).toEqual([
-      { verifier: 'applies-thrower', passed: false, reason: 'applies boom' },
-      { verifier: 'after', passed: true },
-    ]);
-    expect(context.logger.warn).toHaveBeenCalledWith(
-      "KI verifier 'applies-thrower' threw: applies boom"
-    );
   });
 
   it('stamps the result with the verifier id from the registry', async () => {

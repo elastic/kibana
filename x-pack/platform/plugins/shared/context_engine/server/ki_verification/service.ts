@@ -9,7 +9,6 @@ import type { KiVerifierRegistry } from './registry';
 import type {
   KiVerificationContext,
   KiVerificationSummary,
-  KiVerifierContext,
   KiVerifierResult,
   KnowledgeIndicator,
 } from './types';
@@ -18,10 +17,9 @@ export class KiVerificationService {
   constructor(private readonly registry: KiVerifierRegistry) {}
 
   /**
-   * Runs all applicable verifiers and aggregates their results, stamping each
-   * result with its verifier id. A verifier that throws from `applies` or
-   * `verify` is recorded as a failure and does not abort the run. No-op when the
-   * feature flag is off.
+   * Runs all applicable verifiers and aggregates their validation results.
+   * Verifier exceptions propagate because they represent execution failures,
+   * not invalid KI content. No-op when the feature flag is off.
    */
   async verifyKi(
     ki: KnowledgeIndicator,
@@ -43,31 +41,14 @@ export class KiVerificationService {
         continue;
       }
 
-      let applies: boolean;
-      try {
-        applies = verifier.applies(ki, verifierContext);
-      } catch (error) {
-        results.push(this.toFailure(verifier.id, error, verifierContext));
-        continue;
-      }
-      if (!applies) {
+      if (!verifier.applies(ki, verifierContext)) {
         continue;
       }
 
-      try {
-        const outcome = await verifier.verify(ki, verifierContext);
-        results.push({ ...outcome, verifier: verifier.id });
-      } catch (error) {
-        results.push(this.toFailure(verifier.id, error, verifierContext));
-      }
+      const outcome = await verifier.verify(ki, verifierContext);
+      results.push({ ...outcome, verifier: verifier.id });
     }
 
     return { passed: results.every((result) => result.passed), results };
-  }
-
-  private toFailure(id: string, error: unknown, { logger }: KiVerifierContext): KiVerifierResult {
-    const reason = error instanceof Error ? error.message : String(error);
-    logger.warn(`KI verifier '${id}' threw: ${reason}`);
-    return { verifier: id, passed: false, reason };
   }
 }
