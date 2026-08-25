@@ -11,6 +11,18 @@ import { tombstoneMemory } from './tombstone_memory';
 
 const CURRENT_TIME = '2026-08-13T12:00:00.000Z';
 
+const permissionsForSpace = (space: string): MemoryDocument['permissions'] => ({
+  kibana: {
+    privileges: [
+      {
+        space,
+        name: ['ai_index:agent_memory/read'],
+        count: 1,
+      },
+    ],
+  },
+});
+
 const responseError = (statusCode: number) =>
   new errors.ResponseError({
     statusCode,
@@ -41,6 +53,7 @@ describe('tombstoneMemory', () => {
       '@timestamp': '2026-08-02T00:00:00.000Z',
       created_at: '2026-08-01T00:00:00.000Z',
       space_id: 'default',
+      permissions: permissionsForSpace('default'),
       memory: {
         revision: 2,
         content_hash: 'memory-hash',
@@ -116,6 +129,7 @@ describe('tombstoneMemory', () => {
         deleted: false,
         created_at: '2026-08-01T00:00:00.000Z',
         space_id: scope.space_id,
+        permissions: permissionsForSpace(scope.space_id),
         memory: {
           revision: 1,
           content_hash: 'memory-hash',

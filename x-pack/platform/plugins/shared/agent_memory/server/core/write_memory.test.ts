@@ -168,6 +168,17 @@ describe('writeMemory', () => {
         '@timestamp': CURRENT_TIME,
         content: 'Preferred editor\n\nThe user prefers Vim.',
         space_id: 'default',
+        permissions: {
+          kibana: {
+            privileges: [
+              {
+                space: 'default',
+                name: ['ai_index:agent_memory/read'],
+                count: 1,
+              },
+            ],
+          },
+        },
         memory: {
           scope_kind: 'user',
           scope_id: 'user-1',
@@ -307,6 +318,17 @@ describe('writeMemory', () => {
       title: 'Updated title',
       tags: ['updated'],
       expires_at: '2026-09-01T00:00:00.000Z',
+      permissions: {
+        kibana: {
+          privileges: [
+            {
+              space: 'default',
+              name: ['ai_index:agent_memory/read'],
+              count: 1,
+            },
+          ],
+        },
+      },
       memory: {
         scope_kind: 'user',
         scope_id: 'user-1',

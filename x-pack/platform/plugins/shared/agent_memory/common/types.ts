@@ -19,6 +19,18 @@ export interface MemoryProvenance {
   readonly call_source?: CallSource;
 }
 
+export interface MemoryKibanaPrivilegeGroup {
+  readonly space: string;
+  readonly name: string[];
+  readonly count: number;
+}
+
+export interface MemoryPermissions {
+  readonly kibana: {
+    readonly privileges: MemoryKibanaPrivilegeGroup[];
+  };
+}
+
 export interface MemoryPayload {
   readonly type?: MemoryType;
   readonly category?: MemoryCategory;
@@ -42,6 +54,7 @@ export interface MemoryDocumentEnvelope {
   readonly '@timestamp'?: string;
   readonly created_at: string;
   readonly space_id: string;
+  readonly permissions: MemoryPermissions;
 }
 
 export interface MemoryDocument extends MemoryDocumentEnvelope {

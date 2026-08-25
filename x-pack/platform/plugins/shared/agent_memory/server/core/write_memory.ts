@@ -9,7 +9,8 @@ import { createHash } from 'crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { isOccConflictError, OccWriter, type OccMetadata } from '@kbn/occ';
-import { AGENT_MEMORY_INDEX } from '../../common';
+import { AGENT_MEMORY_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { AGENT_MEMORY_INDEX, type MemoryPermissions } from '../../common';
 import type { CallSource, MemoryCategory } from '../storage/memory_storage';
 import type { MemoryDocument, MemoryStorage } from '../storage/memory_storage';
 import type { ResolvedIdentity } from './resolve_identity';
@@ -40,6 +41,18 @@ const normalise = (text: string): string => text.replace(/\s+/g, ' ').trim();
 
 const contentHash = (description: string): string =>
   createHash('sha256').update(normalise(description)).digest('hex');
+
+const buildMemoryPermissions = (space: string): MemoryPermissions => ({
+  kibana: {
+    privileges: [
+      {
+        space,
+        name: [`ai_index:${AGENT_MEMORY_KI_TYPE}/read`],
+        count: 1,
+      },
+    ],
+  },
+});
 
 const deterministicDocumentId = ({
   spaceId,
@@ -139,6 +152,7 @@ export const writeMemory = async ({
     '@timestamp': now,
     created_at: now,
     space_id,
+    permissions: buildMemoryPermissions(space_id),
     memory: {
       category,
       revision: 1,
@@ -177,6 +191,7 @@ export const writeMemory = async ({
         tags: tags ?? previous.tags,
         expires_at:
           expires_at ?? (previous.deleted || previousIsExpired ? undefined : previous.expires_at),
+        permissions: buildMemoryPermissions(space_id),
         memory: {
           scope_kind: scopeKind,
           scope_id: scopeId,

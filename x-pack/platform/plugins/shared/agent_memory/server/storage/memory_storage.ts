@@ -54,6 +54,21 @@ export const agentMemoryMappingsComponentProperties = {
   created_at: types.date({}),
   /** Kibana space; mandatory filter on every recall query (G3). */
   space_id: types.keyword({}),
+  permissions: types.object({
+    properties: {
+      kibana: types.object({
+        properties: {
+          privileges: types.nested({
+            properties: {
+              name: types.keyword({}),
+              space: types.keyword({}),
+              count: types.long({}),
+            },
+          }),
+        },
+      }),
+    },
+  }),
 
   // ── Memory payload ─────────────────────────────────────────────────────
   memory: types.object({

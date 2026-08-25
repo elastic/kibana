@@ -116,6 +116,10 @@ describe('Agent Memory AI Index integration', () => {
       memoryStorageSettings.schema.properties.memory;
     const { type: _provenanceObjectType, ...expectedProvenanceMapping } =
       expectedMemoryMapping.properties.provenance;
+    const { type: _permissionsObjectType, ...expectedPermissionsMapping } =
+      agentMemoryMappingsComponentProperties.permissions;
+    const { type: _kibanaObjectType, ...expectedKibanaMapping } =
+      expectedPermissionsMapping.properties.kibana;
     expect(simulatedTemplate.template).toMatchObject({
       aliases: {
         [AGENT_MEMORY_INDEX]: {
@@ -159,6 +163,13 @@ describe('Agent Memory AI Index integration', () => {
             },
           },
           ...agentMemoryMappingsComponentProperties,
+          permissions: {
+            ...expectedPermissionsMapping,
+            properties: {
+              ...expectedPermissionsMapping.properties,
+              kibana: expectedKibanaMapping,
+            },
+          },
           memory: {
             ...expectedMemoryMapping,
             properties: {
@@ -176,6 +187,17 @@ describe('Agent Memory AI Index integration', () => {
       id: writeResult.id,
       content: `${title}\n\n${description}`,
       deleted: false,
+      permissions: {
+        kibana: {
+          privileges: [
+            {
+              space: spaceId,
+              name: ['ai_index:agent_memory/read'],
+              count: 1,
+            },
+          ],
+        },
+      },
     });
 
     const aliases = await esClient.indices.getAlias({ name: AGENT_MEMORY_INDEX });
