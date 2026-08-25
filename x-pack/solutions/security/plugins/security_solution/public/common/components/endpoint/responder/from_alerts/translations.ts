@@ -25,3 +25,9 @@ export const METADATA_API_ERROR_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.generalMetadataErrorTooltip',
   { defaultMessage: 'Failed to retrieve Endpoint metadata' }
 );
+export const HOST_ON_LINKED_PROJECT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.hostOnLinkedProjectTooltip',
+  {
+    defaultMessage: 'Response actions are not available for a host enrolled in a linked project.',
+  }
+);
