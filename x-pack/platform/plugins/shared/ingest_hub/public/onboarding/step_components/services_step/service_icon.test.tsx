@@ -36,12 +36,12 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
 
 const BASE_SERVICE: AwsServiceMatrixEntry = {
-  id: 's3_logs',
+  id: 's3',
   name: 'Amazon S3',
   category: 'storage',
-  signalType: 'logs',
+  signalTypes: ['logs'],
+  dataStreams: [],
   packageName: 'aws',
-  policyTemplate: 's3',
   deploymentMethods: [{ method: 'managed_integration' }],
   defaultEnabled: false,
   defaultEnabledInputs: [],
@@ -104,7 +104,6 @@ describe('ServiceIcon', () => {
     const service: AwsServiceMatrixEntry = {
       ...BASE_SERVICE,
       packageName: 'awsfargate',
-      policyTemplate: undefined,
     };
 
     mockUseGetPackageInfoByKeyQuery.mockReturnValue({
