@@ -101,6 +101,17 @@ export const indexHostsAndAlerts = usageTracker.track(
       agentPolicies: [],
     };
 
+    const shouldWaitForEndpointMetadataDocs = fleet;
+
+    // Stop any running metadata transforms before (re)installing/upgrading the Endpoint package.
+    // An upgrade deletes and recreates the transform configs, which kills a still-running
+    // prior-version transform mid-reload and leaves it in an unrecoverable failed state — that
+    // dead transform then never populates the united metadata index and the test's wait times out.
+    // On a first install there are no transforms yet (allow_no_match makes this a no-op).
+    if (shouldWaitForEndpointMetadataDocs) {
+      await stopMetadataTransforms(client, epmEndpointPackage.version);
+    }
+
     // Ensure fleet is setup and endpoint package installed
     await setupFleetForEndpoint(kbnClient, logger);
 
@@ -112,7 +123,6 @@ export const indexHostsAndAlerts = usageTracker.track(
     // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)
     const realPolicies: Record<string, CreatePackagePolicyResponse['item']> = {};
 
-    const shouldWaitForEndpointMetadataDocs = fleet;
     if (shouldWaitForEndpointMetadataDocs) {
       await waitForMetadataTransformsReady(client, epmEndpointPackage.version);
       await stopMetadataTransforms(client, epmEndpointPackage.version);
