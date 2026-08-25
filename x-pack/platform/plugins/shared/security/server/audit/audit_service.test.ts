@@ -6,9 +6,9 @@
  */
 
 import type { Socket } from 'net';
-import { lastValueFrom, Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
@@ -45,6 +45,7 @@ const createAuditConfig = (settings: Partial<ConfigType['audit']>) => {
 
 const config = createAuditConfig({ enabled: true });
 const { logging } = coreMock.createSetup();
+const status = statusServiceMock.createSetupContract();
 const http = httpServiceMock.createSetupContract();
 const getCurrentUser = jest
   .fn()
@@ -69,6 +70,7 @@ describe('#setup', () => {
         license,
         config,
         logging,
+        status,
         http,
         getCurrentUser,
         getSpaceId,
@@ -103,6 +105,7 @@ describe('#setup', () => {
         },
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -130,6 +133,7 @@ describe('#setup', () => {
         },
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -154,6 +158,7 @@ describe('#setup', () => {
         appender: undefined,
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -174,6 +179,7 @@ describe('#setup', () => {
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -192,6 +198,7 @@ describe('#asScoped', () => {
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -228,12 +235,47 @@ describe('#asScoped', () => {
     audit.stop();
   });
 
+  it('includes user.email when the current user has an email', async () => {
+    const getCurrentUserWithEmail = jest.fn().mockReturnValue({
+      username: 'jdoe',
+      roles: ['admin'],
+      profile_uid: 'uid',
+      email: 'jdoe@example.com',
+    });
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      status,
+      http,
+      getCurrentUser: getCurrentUserWithEmail,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    const request = httpServerMock.createKibanaRequest();
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+    });
+    expect(logger.info).toHaveBeenLastCalledWith(
+      'MESSAGE',
+      expect.objectContaining({
+        user: { id: 'uid', name: 'jdoe', email: 'jdoe@example.com', roles: ['admin'] },
+      })
+    );
+    audit.stop();
+  });
+
   it('logs event enriched with meta data from fake request', async () => {
     const audit = new AuditService(logger);
     const auditSetup = audit.setup({
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId: () => undefined,
@@ -280,6 +322,7 @@ describe('#asScoped', () => {
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser,
       // Mirror real wiring (spacesService.getSpaceId) by sourcing the space id
@@ -324,6 +367,7 @@ describe('#asScoped', () => {
         ignore_filters: [{ actions: ['ACTION'] }],
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -359,6 +403,7 @@ describe('#asScoped', () => {
         ignore_filters: [{ actions: ['ACTION'] }],
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -386,6 +431,7 @@ describe('#asScoped', () => {
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -425,6 +471,7 @@ describe('#withoutRequest', () => {
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -455,6 +502,7 @@ describe('#withoutRequest', () => {
         ignore_filters: [{ actions: ['ACTION'] }],
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -483,6 +531,7 @@ describe('#withoutRequest', () => {
         ignore_filters: [{ actions: ['ACTION'] }],
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -497,25 +546,19 @@ describe('#withoutRequest', () => {
 });
 
 describe('#createLoggingConfig', () => {
-  test('sets log level to `info` when audit logging is enabled and appender is defined', async () => {
-    const features$ = of({
-      allowAuditLogging: true,
-    });
+  test('sets log level to `info` when audit logging is enabled and appender is defined', () => {
+    const features = { allowAuditLogging: true };
 
-    const loggingConfig = await features$
-      .pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'console',
-            layout: {
-              type: 'pattern',
-            },
-          },
-        })
-      )
-      .toPromise();
+    const loggingConfig = createLoggingConfig({
+      enabled: true,
+      include_saved_object_names: false,
+      appender: {
+        type: 'console',
+        layout: {
+          type: 'pattern',
+        },
+      },
+    })(features);
 
     expect(loggingConfig).toMatchInlineSnapshot(`
       Object {
@@ -540,71 +583,55 @@ describe('#createLoggingConfig', () => {
     `);
   });
 
-  test('sets log level to `off` when audit logging is disabled', async () => {
-    const features$ = of({
-      allowAuditLogging: true,
-    });
+  test('sets log level to `off` when audit logging is disabled', () => {
+    const features = { allowAuditLogging: true };
 
-    const loggingConfig = await lastValueFrom(
-      features$.pipe(
-        createLoggingConfig({
-          enabled: false,
-          include_saved_object_names: false,
-          appender: {
-            type: 'console',
-            layout: {
-              type: 'pattern',
-            },
-          },
-        })
-      )
-    );
+    const loggingConfig = createLoggingConfig({
+      enabled: false,
+      include_saved_object_names: false,
+      appender: {
+        type: 'console',
+        layout: {
+          type: 'pattern',
+        },
+      },
+    })(features);
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });
 
-  test('sets log level to `off` when license does not allow audit logging', async () => {
-    const features$ = of({
-      allowAuditLogging: false,
-    });
+  test('sets log level to `off` when license does not allow audit logging', () => {
+    const features = { allowAuditLogging: false };
 
-    const loggingConfig = await lastValueFrom(
-      features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'console',
-            layout: {
-              type: 'pattern',
-            },
-          },
-        })
-      )
-    );
+    const loggingConfig = createLoggingConfig({
+      enabled: true,
+      include_saved_object_names: false,
+      appender: {
+        type: 'console',
+        layout: {
+          type: 'pattern',
+        },
+      },
+    })(features);
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });
 
   test('injects the audit OTel attribute transform when serverless and using an OTel appender', async () => {
-    const features$ = of({ allowAuditLogging: true });
+    const features = { allowAuditLogging: true };
 
-    const loggingConfig = await lastValueFrom(
-      features$.pipe(
-        createLoggingConfig(
-          {
-            enabled: true,
-            include_saved_object_names: false,
-            appender: {
-              type: 'otel',
-              protocol: 'http',
-              url: 'http://collector:4318/v1/logs',
-            },
-          },
-          true
-        )
-      )
-    );
+    const loggingConfig = createLoggingConfig(
+      {
+        enabled: true,
+        include_saved_object_names: false,
+        appender: {
+          type: 'otel',
+          protocol: 'http',
+          url: 'http://collector:4318/v1/logs',
+        },
+      },
+      true
+    )(features);
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
@@ -612,24 +639,20 @@ describe('#createLoggingConfig', () => {
   });
 
   test('the injected transform maps flattened audit attributes to the Serverless field set', async () => {
-    const features$ = of({ allowAuditLogging: true });
+    const features = { allowAuditLogging: true };
 
-    const loggingConfig = await lastValueFrom(
-      features$.pipe(
-        createLoggingConfig(
-          {
-            enabled: true,
-            include_saved_object_names: false,
-            appender: {
-              type: 'otel',
-              protocol: 'http',
-              url: 'http://collector:4318/v1/logs',
-            },
-          },
-          true
-        )
-      )
-    );
+    const loggingConfig = createLoggingConfig(
+      {
+        enabled: true,
+        include_saved_object_names: false,
+        appender: {
+          type: 'otel',
+          protocol: 'http',
+          url: 'http://collector:4318/v1/logs',
+        },
+      },
+      true
+    )(features);
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
@@ -660,44 +683,36 @@ describe('#createLoggingConfig', () => {
   });
 
   test('does not inject the audit transform for non-OTel appenders', async () => {
-    const features$ = of({ allowAuditLogging: true });
+    const features = { allowAuditLogging: true };
 
-    const loggingConfig = await lastValueFrom(
-      features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'console',
-            layout: { type: 'pattern' },
-          },
-        })
-      )
-    );
+    const loggingConfig = createLoggingConfig({
+      enabled: true,
+      include_saved_object_names: false,
+      appender: {
+        type: 'console',
+        layout: { type: 'pattern' },
+      },
+    })(features);
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     expect(appenders.auditTrailAppender).not.toHaveProperty('transformAttributes');
   });
 
-  test('injects a minimal resource allowlist + attributes when using an OTel appender', async () => {
-    const features$ = of({ allowAuditLogging: true });
+  test('injects a minimal resource allowlist + attributes when using an OTel appender', () => {
+    const features = { allowAuditLogging: true };
 
-    const loggingConfig = await lastValueFrom(
-      features$.pipe(
-        createLoggingConfig(
-          {
-            enabled: true,
-            include_saved_object_names: false,
-            appender: {
-              type: 'otel',
-              protocol: 'http',
-              url: 'http://collector:4318/v1/logs',
-            },
-          },
-          true
-        )
-      )
-    );
+    const loggingConfig = createLoggingConfig(
+      {
+        enabled: true,
+        include_saved_object_names: false,
+        appender: {
+          type: 'otel',
+          protocol: 'http',
+          url: 'http://collector:4318/v1/logs',
+        },
+      },
+      true
+    )(features);
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
@@ -712,26 +727,22 @@ describe('#createLoggingConfig', () => {
     expect(otelAppender.promoteResourceAttributes).toEqual(AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES);
   });
 
-  test('merges user-provided attributes with audit resource attributes', async () => {
-    const features$ = of({ allowAuditLogging: true });
+  test('merges user-provided attributes with audit resource attributes', () => {
+    const features = { allowAuditLogging: true };
 
-    const loggingConfig = await lastValueFrom(
-      features$.pipe(
-        createLoggingConfig(
-          {
-            enabled: true,
-            include_saved_object_names: false,
-            appender: {
-              type: 'otel',
-              protocol: 'http',
-              url: 'http://collector:4318/v1/logs',
-              attributes: { 'custom.attr': 'value' },
-            },
-          },
-          true
-        )
-      )
-    );
+    const loggingConfig = createLoggingConfig(
+      {
+        enabled: true,
+        include_saved_object_names: false,
+        appender: {
+          type: 'otel',
+          protocol: 'http',
+          url: 'http://collector:4318/v1/logs',
+          attributes: { 'custom.attr': 'value' },
+        },
+      },
+      true
+    )(features);
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     const otelAppender = appenders.auditTrailAppender as OtelAppenderPluginConfig;
@@ -749,20 +760,16 @@ describe('#createLoggingConfig', () => {
   });
 
   test('does not inject the transform, includeResources or promoteResourceAttributes for non-OTel appenders', async () => {
-    const features$ = of({ allowAuditLogging: true });
+    const features = { allowAuditLogging: true };
 
-    const loggingConfig = await lastValueFrom(
-      features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'console',
-            layout: { type: 'pattern' },
-          },
-        })
-      )
-    );
+    const loggingConfig = createLoggingConfig({
+      enabled: true,
+      include_saved_object_names: false,
+      appender: {
+        type: 'console',
+        layout: { type: 'pattern' },
+      },
+    })(features);
 
     const appenders = loggingConfig.appenders as Record<string, AppenderConfigType>;
     expect(appenders.auditTrailAppender).not.toHaveProperty('transformAttributes');
@@ -770,25 +777,22 @@ describe('#createLoggingConfig', () => {
     expect(appenders.auditTrailAppender).not.toHaveProperty('promoteResourceAttributes');
   });
 
-  test('does not inject audit transforms for an OTel appender when not serverless', async () => {
-    const features$ = of({ allowAuditLogging: true });
+  test('does not inject audit transforms for an OTel appender when not serverless', () => {
+    const features = { allowAuditLogging: true };
 
-    const loggingConfig = await lastValueFrom(
-      features$.pipe(
-        createLoggingConfig(
-          {
-            enabled: true,
-            include_saved_object_names: false,
-            appender: {
-              type: 'otel',
-              protocol: 'http',
-              url: 'http://collector:4318/v1/logs',
-            },
-          },
-          false // not serverless — the OTel appender is left untouched
-        )
-      )
-    );
+    const loggingConfig = createLoggingConfig(
+      {
+        enabled: true,
+        include_saved_object_names: false,
+        appender: {
+          type: 'otel',
+          protocol: 'http',
+          url: 'http://collector:4318/v1/logs',
+        },
+      },
+      // not serverless — the OTel appender is left untouched
+      false
+    )(features);
 
     // The transform is Serverless-only: on other build flavors the OTel appender passes through
     // unchanged (full resource, raw ECS field names).

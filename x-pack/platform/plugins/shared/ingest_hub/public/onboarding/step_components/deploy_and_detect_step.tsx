@@ -11,14 +11,10 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -55,8 +51,8 @@ interface DeployAndDetectStepProps {
 
 export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
-  const { deployAndDetectStep, retryDeploy } = useOnboardingFlow();
-  const { isDeploying, serviceStatuses, failedInstances, deployErrors } = deployAndDetectStep;
+  const { deployAndDetectStep } = useOnboardingFlow();
+  const { serviceStatuses } = deployAndDetectStep;
 
   // Read service settings (global region + per-instance vars + instances) from session storage.
   const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
@@ -98,12 +94,6 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
 
   // ── Agentless section ────────────────────────────────────────────────────
 
-  // Unique service IDs — used to check whether any agentless services are present.
-  const selectedServiceIds = useMemo(
-    () => [...new Set(instances.map((i) => i.serviceId))],
-    [instances]
-  );
-
   // ECF services are deployed via CloudFormation — filter them out of the agentless status chips
   // so they don't appear redundantly alongside the ECF panels above.
   const agentlessStatuses = useMemo(
@@ -115,27 +105,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
     [serviceStatuses, instancesById, ecfServiceIds]
   );
 
-  const agentlessFailedInstances = useMemo(
-    () =>
-      failedInstances.filter((instanceId) => {
-        const serviceId = instancesById.get(instanceId)?.serviceId ?? instanceId;
-        return !ecfServiceIds.has(serviceId);
-      }),
-    [failedInstances, instancesById, ecfServiceIds]
-  );
-
   const hasStarted = agentlessStatuses.length > 0;
-  const allAgentlessSucceeded =
-    hasStarted &&
-    !isDeploying &&
-    agentlessFailedInstances.length === 0 &&
-    agentlessStatuses.some(([, state]) => state === 'receiving');
-
-  // Whether the agentless section has any content to show
-  const hasAgentlessServices = selectedServiceIds.some(
-    (id) =>
-      AWS_SERVICES_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'agentless') ?? false
-  );
 
   // ── Render ───────────────────────────────────────────────────────────────
 
@@ -143,31 +113,9 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
     <div data-test-subj="onboardingStep-deploy-and-detect">
       {/* ── ECF section ─────────────────────────────────────────────────── */}
       {hasAnyEcf && <EcfDeploymentSection {...sectionProps} />}
-      {hasAnyEcf && hasAgentlessServices && <EuiHorizontalRule />}
+      {hasAnyEcf && hasStarted && <EuiHorizontalRule />}
 
-      {/* ── Agentless section ────────────────────────────────────────────── */}
-      {isDeploying && (
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="m"
-          data-test-subj="deployAndDetectStep-loading"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="s">
-              <h2>
-                <FormattedMessage
-                  id="xpack.ingestHub.deployAndDetectStep.deployingTitle"
-                  defaultMessage="Deploying services…"
-                />
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-
+      {/* ── Agentless status chips ───────────────────────────────────────── */}
       {hasStarted && (
         <>
           <EuiSpacer size="m" />
@@ -178,50 +126,11 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
-
-          {!isDeploying && agentlessFailedInstances.length > 0 && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiCallOut
-                title={
-                  <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.errorCallout.title"
-                    defaultMessage="Deployment failed"
-                  />
-                }
-                color="danger"
-                iconType="error"
-                announceOnMount
-                data-test-subj="deployAndDetectStep-errorCallout"
-              >
-                {agentlessFailedInstances.map((instanceId) => (
-                  <EuiText key={instanceId} size="s">
-                    {deployErrors[instanceId] ?? getChipLabel(instanceId)}
-                  </EuiText>
-                ))}
-                <EuiSpacer size="s" />
-                <EuiButton
-                  size="s"
-                  color="danger"
-                  onClick={() => retryDeploy(agentlessFailedInstances)}
-                  data-test-subj="deployAndDetectStep-retryButton"
-                >
-                  <FormattedMessage
-                    id="xpack.ingestHub.deployAndDetectStep.retryButton"
-                    defaultMessage="Retry failed services"
-                  />
-                </EuiButton>
-              </EuiCallOut>
-            </>
-          )}
         </>
       )}
 
       {/* ── Navigation ──────────────────────────────────────────────────── */}
-      {/* ECF-only users have no agentless statuses, so allAgentlessSucceeded is always false for
-          them. Allow continue whenever ECF services are present (user launched the CF stack) or
-          all agentless services have succeeded. */}
-      {(onBack || allAgentlessSucceeded || hasAnyEcf) && (
+      {(onBack || hasStarted || hasAnyEcf) && (
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -236,7 +145,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {(allAgentlessSucceeded || hasAnyEcf) && (
+              {(hasStarted || hasAnyEcf) && (
                 <EuiButton
                   fill
                   onClick={onContinue}

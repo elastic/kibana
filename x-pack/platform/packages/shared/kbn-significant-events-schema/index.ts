@@ -89,6 +89,7 @@ export {
   type InvestigationHypothesis,
   type InvestigationRecommendation,
   type InvestigationBlindSpot,
+  type InvestigationRunStatus,
   type InvestigationState,
   type SignificantEventUpdate,
   type InvestigationEvidence,
