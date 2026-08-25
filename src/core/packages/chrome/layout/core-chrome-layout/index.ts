@@ -47,7 +47,6 @@ export {
   getHighContrastSeparator,
   useCurrentChromeApplicationBreakpoint,
   useIsWithinChromeApplicationBreakpoints,
-  focusMainContent,
 } from '@kbn/ui-chrome-layout';
 
 export { APP_FIXED_VIEWPORT_ID } from './kibana_layout_constants';

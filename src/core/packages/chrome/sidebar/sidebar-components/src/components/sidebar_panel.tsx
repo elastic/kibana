@@ -11,7 +11,7 @@ import type { FC, ReactNode } from 'react';
 import React, { useCallback, useId, useLayoutEffect, useMemo, useRef } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiPanel, euiShadow } from '@elastic/eui';
-import { focusMainContent, getHighContrastBorder } from '@kbn/ui-chrome-layout';
+import { getHighContrastBorder, MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout';
 import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -49,6 +49,13 @@ export interface SidebarPanelProps {
 const defaultAriaLabel = i18n.translate('core.ui.chrome.sidebar.sidebarAriaLabel', {
   defaultMessage: 'Side panel',
 });
+
+const focusMainContent = () => {
+  const mainElement = document.querySelector(MAIN_CONTENT_SELECTORS.join(','));
+  if (mainElement instanceof HTMLElement) {
+    mainElement.focus();
+  }
+};
 
 /** Rescues focus to main content (or custom callback) when the panel unmounts with focus inside. */
 const useFocusRescue = () => {

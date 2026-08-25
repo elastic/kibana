@@ -7,24 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MAIN_CONTENT_SELECTORS } from '../constants';
-
-const focusElement = (element: HTMLElement) => {
-  if (element.tabIndex < 0 && !element.hasAttribute('tabindex')) {
-    element.tabIndex = -1;
-    element.addEventListener('blur', () => element.removeAttribute('tabindex'), { once: true });
-  }
-
-  element.focus();
-};
+import { MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout';
 
 /**
- * Focuses the main content landmark.
+ * Utility function for focusing the main content landmark.
  */
 export const focusMainContent = () => {
   const mainElement = document.querySelector(MAIN_CONTENT_SELECTORS.join(','));
 
   if (mainElement instanceof HTMLElement) {
-    focusElement(mainElement);
+    mainElement.focus();
   }
 };

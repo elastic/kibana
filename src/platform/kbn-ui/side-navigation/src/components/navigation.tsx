@@ -12,7 +12,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import { focusMainContent } from '@kbn/ui-chrome-layout';
 
 import type { NavigationStructure, SideNavLogo, MenuItem, SecondaryMenuItem } from '../../types';
 import {
@@ -24,6 +23,7 @@ import {
 } from '../constants';
 import { SideNav } from './side_nav';
 import { SideNavCollapseButton } from './collapse_button';
+import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
 import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';

@@ -38,6 +38,7 @@ export const LayoutApplication = ({
       id={APP_MAIN_SCROLL_CONTAINER_ID}
       className="kbnChromeLayoutApplication"
       data-test-subj="kbnChromeLayoutApplication"
+      tabIndex={-1}
     >
       {topBar && <div css={styles.topBar}>{topBar}</div>}
       <div css={[styles.content]}>{children}</div>
