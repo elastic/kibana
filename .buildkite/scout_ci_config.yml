@@ -62,6 +62,7 @@ plugins:
     - monitoring
     - navigation
     - nightshift
+    - nightshift_investigations
     - notification_center
     - observability
     - observability_onboarding
@@ -73,6 +74,7 @@ plugins:
     - reindex_service
     - saved_objects_management
     - saved_objects_tagging
+    - searchExamples
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
@@ -129,3 +131,4 @@ excluded_configs:
   - x-pack/platform/plugins/shared/entity_store/test/scout_cps_local/api/playwright.config.ts
   - x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts
   - x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts
+  - x-pack/platform/plugins/private/transform/test/scout_cps_local/ui/playwright.config.ts
