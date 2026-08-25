@@ -6,6 +6,8 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { createPortal } from 'react-dom';
+import useObservable from 'react-use/lib/useObservable';
 
 import { EuiWindowEvent, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -15,6 +17,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { isMac } from '@kbn/shared-ux-utility';
 
 import { useKibana } from '../../hooks/use_kibana';
+import { sidenavPanelHost$ } from '../../panel/agent_builder_panel';
 
 import {
   CONDENSED_SIDEBAR_WIDTH,
@@ -29,12 +32,18 @@ interface AppLayoutProps {
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { analytics },
+    services: { analytics, chrome },
   } = useKibana();
   const [isCondensed, setIsCondensed] = useState(false);
+  const panelHost = useObservable(sidenavPanelHost$, null);
+  const chromeStyle = useObservable(chrome.getChromeStyle$(), chrome.getChromeStyle());
+  const isProjectNav = chromeStyle === 'project';
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
+      if (isProjectNav) {
+        return;
+      }
       if (
         (event.code === 'Period' || event.key === '.') &&
         (isMac ? event.metaKey : event.ctrlKey)
@@ -52,7 +61,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         setIsCondensed(nextIsCondensed);
       }
     },
-    [analytics, isCondensed]
+    [analytics, isCondensed, isProjectNav]
   );
 
   const sidebarStyles = css`
@@ -69,21 +78,38 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
     <>
       <SuppressChromeBackButton />
-      <EuiWindowEvent event="keydown" handler={onKeyDown} />
+      {!isProjectNav && <EuiWindowEvent event="keydown" handler={onKeyDown} />}
+      {isProjectNav && panelHost
+        ? createPortal(
+            <UnifiedSidebar
+              isCondensed={false}
+              onToggleCondensed={() => undefined}
+              fillContainer
+              showCollapseToggle={false}
+            />,
+            panelHost
+          )
+        : null}
       <KibanaPageTemplate
         paddingSize="none"
         restrictWidth={false}
         responsive={[]}
         pageSideBar={
-          <UnifiedSidebar
-            isCondensed={isCondensed}
-            onToggleCondensed={() => setIsCondensed((v) => !v)}
-          />
+          isProjectNav ? undefined : (
+            <UnifiedSidebar
+              isCondensed={isCondensed}
+              onToggleCondensed={() => setIsCondensed((v) => !v)}
+            />
+          )
         }
-        pageSideBarProps={{
-          minWidth: isCondensed ? CONDENSED_SIDEBAR_WIDTH : SIDEBAR_WIDTH,
-          css: sidebarStyles,
-        }}
+        pageSideBarProps={
+          isProjectNav
+            ? undefined
+            : {
+                minWidth: isCondensed ? CONDENSED_SIDEBAR_WIDTH : SIDEBAR_WIDTH,
+                css: sidebarStyles,
+              }
+        }
       >
         <KibanaPageTemplate.Section paddingSize="none" grow={true} css={contentStyles}>
           {children}

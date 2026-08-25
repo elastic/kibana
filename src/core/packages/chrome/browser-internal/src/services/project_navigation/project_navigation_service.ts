@@ -242,14 +242,35 @@ export class ProjectNavigationService {
           logger.error(`Duplicate navigation content id "${content.id}".`);
           return;
         }
-        if (
-          content.kind === 'linkList' &&
-          current.some(
-            (registered) => registered.kind === 'linkList' && registered.target === content.target
-          )
-        ) {
-          logger.error(`A second linkList on target "${content.target}" is not implemented.`);
-          return;
+        switch (content.kind) {
+          case 'linkList':
+            if (
+              current.some(
+                (registered) =>
+                  registered.kind === 'linkList' && registered.target === content.target
+              )
+            ) {
+              logger.error(`A second linkList on target "${content.target}" is not implemented.`);
+              return;
+            }
+            break;
+          case 'agentBuilder':
+            if (
+              current.some(
+                (registered) =>
+                  registered.kind === 'agentBuilder' && registered.target === content.target
+              )
+            ) {
+              logger.error(
+                `A second agentBuilder on target "${content.target}" is not implemented.`
+              );
+              return;
+            }
+            break;
+          default: {
+            const exhaustive: never = content;
+            throw new Error(`Unknown navigation content kind: ${JSON.stringify(exhaustive)}`);
+          }
         }
         this.registeredContent$.next([...current, content]);
       },

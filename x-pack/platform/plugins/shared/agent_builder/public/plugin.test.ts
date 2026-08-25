@@ -159,6 +159,7 @@ const createMockStartDeps = (): AgentBuilderStartDependencies =>
   ({
     licensing: {},
     inference: {},
+    navigation: { registerNavigationContent: jest.fn() },
   } as unknown as AgentBuilderStartDependencies);
 
 const createMockAttachmentGroup = (overrides: Partial<AttachmentGroup> = {}): AttachmentGroup => ({

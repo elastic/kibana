@@ -81,6 +81,11 @@ export interface MenuItem {
    * When omitted, popover falls back to `sections`.
    */
   popoverSections?: SecondaryMenuSection[];
+  /**
+   * Optional custom expanded-panel body. Replaces the sections menu.
+   * Opens the side panel when this item is the active opener.
+   */
+  panelContent?: ReactNode;
 }
 
 /**

@@ -11,6 +11,7 @@ import type {
   AppDeepLinkId,
   ChromeProjectNavigationNode,
   NavigationTreeDefinitionUI,
+  ProjectNavigationAgentBuilderContent,
   ProjectNavigationContent,
   ProjectNavigationLinkItem,
   ProjectNavigationLinkListContent,
@@ -24,6 +25,11 @@ export interface ResolvedLinksContent {
   nodeId: string;
   title: string;
   items: SecondaryMenuItem[];
+}
+
+export interface ResolvedPanelContent {
+  nodeId: string;
+  load: ProjectNavigationAgentBuilderContent['load'];
 }
 
 const toSecondaryMenuItem = (item: ProjectNavigationLinkItem): SecondaryMenuItem => ({
@@ -58,6 +64,10 @@ const isLinkListContent = (
   content: ProjectNavigationContent
 ): content is ProjectNavigationLinkListContent => content.kind === 'linkList';
 
+const isAgentBuilderContent = (
+  content: ProjectNavigationContent
+): content is ProjectNavigationAgentBuilderContent => content.kind === 'agentBuilder';
+
 export const resolveLinksContent = (
   tree: NavigationTreeDefinitionUI,
   contents: readonly ProjectNavigationContent[]
@@ -89,6 +99,21 @@ export const resolveLinksContent = (
       )
     )
   ).pipe(map((resolved) => resolved.filter((section) => section.items.length > 0)));
+};
+
+export const resolvePanelContent = (
+  tree: NavigationTreeDefinitionUI,
+  contents: readonly ProjectNavigationContent[]
+): readonly ResolvedPanelContent[] => {
+  if (!tree?.body) {
+    return [];
+  }
+  return contents.filter(isAgentBuilderContent).flatMap((content) =>
+    findMatchingNodeIds(tree, content.target).map((nodeId) => ({
+      nodeId,
+      load: content.load,
+    }))
+  );
 };
 
 const stripQuery = (url: string): string => url.split('?')[0];

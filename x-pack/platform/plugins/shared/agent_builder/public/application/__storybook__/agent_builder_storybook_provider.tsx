@@ -72,6 +72,10 @@ const kibanaServices = {
     getUrlForApp: () => '/',
     navigateToUrl: () => Promise.resolve(),
   },
+  chrome: {
+    getChromeStyle: () => 'classic',
+    getChromeStyle$: () => of('classic'),
+  },
   appParams: { history: {} },
   plugins: {},
 } as unknown as StartServices;

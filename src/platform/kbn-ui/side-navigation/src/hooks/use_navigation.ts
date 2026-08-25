@@ -49,7 +49,8 @@ export const useNavigation = (
   const visuallyActivePageId = primaryItem?.id;
   const visuallyActiveSubpageId = secondaryItem?.id;
   const openerNode = primaryItem;
-  const isSidePanelOpen = !isCollapsed && !!openerNode?.sections;
+  const isSidePanelOpen =
+    !isCollapsed && (!!openerNode?.sections || openerNode?.panelContent != null);
 
   const state: NavigationState = {
     actualActiveItemId,

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
 
 export type BadgeType = 'beta' | 'techPreview' | 'new';
@@ -104,6 +105,11 @@ export interface MenuItem {
    * Does not open the expanded side panel.
    */
   popoverSections?: SecondaryMenuSection[];
+  /**
+   * (optional) Custom expanded-panel body. Replaces the sections menu.
+   * Opens the side panel when this item is the active opener.
+   */
+  panelContent?: ReactNode;
 }
 
 /**

@@ -158,7 +158,13 @@ export const Navigation = ({
           {({ mainNavigationInstructionsId }) => (
             <>
               {visibleMenuItems.map((item, index) => {
-                const { sections, popoverSections, secondaryMenuTitle, ...itemProps } = item;
+                const {
+                  sections,
+                  popoverSections,
+                  secondaryMenuTitle,
+                  panelContent: _panelContent,
+                  ...itemProps
+                } = item;
                 const renderedPopoverSections = popoverSections ?? sections;
                 const isFirstItem = index === 0;
                 const ariaDescribedBy = isFirstItem ? mainNavigationInstructionsId : undefined;
@@ -288,6 +294,7 @@ export const Navigation = ({
                                   sections,
                                   popoverSections,
                                   secondaryMenuTitle,
+                                  panelContent: _panelContent,
                                   ...itemProps
                                 } = item;
                                 const isFirstItem = index === 0;
@@ -389,7 +396,13 @@ export const Navigation = ({
           {({ footerNavigationInstructionsId }) => (
             <>
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
-                const { sections, popoverSections, secondaryMenuTitle, ...itemProps } = item;
+                const {
+                  sections,
+                  popoverSections,
+                  secondaryMenuTitle,
+                  panelContent: _panelContent,
+                  ...itemProps
+                } = item;
                 const renderedPopoverSections = popoverSections ?? sections;
                 const isFirstItem = index === 0;
                 const ariaDescribedBy = isFirstItem ? footerNavigationInstructionsId : undefined;
@@ -468,48 +481,54 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && openerNode && (
-        <SideNav.SidePanel footer={sidePanelFooter} openerNode={openerNode}>
-          {({ secondaryNavigationInstructionsId }) => {
-            const firstNonEmptySectionIndex = openerNode.sections?.findIndex(
-              (s) => s.items.length > 0
-            );
+        <SideNav.SidePanel
+          footer={sidePanelFooter}
+          openerNode={openerNode}
+          isMenu={!openerNode.panelContent}
+        >
+          {openerNode.panelContent
+            ? openerNode.panelContent
+            : ({ secondaryNavigationInstructionsId }) => {
+                const firstNonEmptySectionIndex = openerNode.sections?.findIndex(
+                  (s) => s.items.length > 0
+                );
 
-            return (
-              <SideNav.SecondaryMenu
-                badgeType={openerNode.badgeType}
-                isPanel
-                title={openerNode.secondaryMenuTitle ?? openerNode.label}
-                isNew={getIsNewSecondary(openerNode.id)}
-              >
-                {openerNode.sections?.map((section, sectionIndex) => (
-                  <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
-                    {section.items.map((subItem, subItemIndex) => {
-                      const isFirstItem =
-                        sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
-                      const ariaDescribedBy = isFirstItem
-                        ? secondaryNavigationInstructionsId
-                        : undefined;
+                return (
+                  <SideNav.SecondaryMenu
+                    badgeType={openerNode.badgeType}
+                    isPanel
+                    title={openerNode.secondaryMenuTitle ?? openerNode.label}
+                    isNew={getIsNewSecondary(openerNode.id)}
+                  >
+                    {openerNode.sections?.map((section, sectionIndex) => (
+                      <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                        {section.items.map((subItem, subItemIndex) => {
+                          const isFirstItem =
+                            sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
+                          const ariaDescribedBy = isFirstItem
+                            ? secondaryNavigationInstructionsId
+                            : undefined;
 
-                      return (
-                        <SideNav.SecondaryMenu.Item
-                          aria-describedby={ariaDescribedBy}
-                          key={subItem.id}
-                          isCurrent={actualActiveItemId === subItem.id}
-                          isHighlighted={subItem.id === visuallyActiveSubpageId}
-                          isNew={getIsNewSecondary(subItem.id)}
-                          onClick={() => onItemClick?.(subItem)}
-                          testSubjPrefix={sidePanelItemPrefix}
-                          {...subItem}
-                        >
-                          {subItem.label}
-                        </SideNav.SecondaryMenu.Item>
-                      );
-                    })}
-                  </SideNav.SecondaryMenu.Section>
-                ))}
-              </SideNav.SecondaryMenu>
-            );
-          }}
+                          return (
+                            <SideNav.SecondaryMenu.Item
+                              aria-describedby={ariaDescribedBy}
+                              key={subItem.id}
+                              isCurrent={actualActiveItemId === subItem.id}
+                              isHighlighted={subItem.id === visuallyActiveSubpageId}
+                              isNew={getIsNewSecondary(subItem.id)}
+                              onClick={() => onItemClick?.(subItem)}
+                              testSubjPrefix={sidePanelItemPrefix}
+                              {...subItem}
+                            >
+                              {subItem.label}
+                            </SideNav.SecondaryMenu.Item>
+                          );
+                        })}
+                      </SideNav.SecondaryMenu.Section>
+                    ))}
+                  </SideNav.SecondaryMenu>
+                );
+              }}
         </SideNav.SidePanel>
       )}
     </div>

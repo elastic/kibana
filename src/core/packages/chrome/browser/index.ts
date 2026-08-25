@@ -82,6 +82,7 @@ export type {
   SolutionId,
   ProjectNavigationLinkItem,
   ProjectNavigationLinkListContent,
+  ProjectNavigationAgentBuilderContent,
   ProjectNavigationContent,
   SidebarApp,
   SidebarAppConfig,

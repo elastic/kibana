@@ -15,6 +15,7 @@ import type {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -78,4 +79,5 @@ export interface AgentBuilderStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   cps?: CPSPluginStart;
+  navigation: NavigationPublicPluginStart;
 }

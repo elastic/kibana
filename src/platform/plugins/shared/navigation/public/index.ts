@@ -25,6 +25,7 @@ export type {
 export type {
   ProjectNavigationContent,
   ProjectNavigationLinkListContent,
+  ProjectNavigationAgentBuilderContent,
   ProjectNavigationLinkItem,
 } from '@kbn/core-chrome-browser';
 

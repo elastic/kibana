@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { Suspense, useMemo, type ComponentType, type ReactNode } from 'react';
 import { combineLatest, distinctUntilChanged, map, switchMap } from 'rxjs';
 import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
@@ -15,6 +15,7 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import type { MenuItem } from '@kbn/ui-side-navigation/types';
 import { useBasePath } from '../../../shared/chrome_hooks';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
@@ -22,6 +23,8 @@ import {
   attachPopoverSections,
   findActivePopoverItemId,
   resolveLinksContent,
+  resolvePanelContent,
+  type ResolvedPanelContent,
 } from './resolve_navigation_content';
 import { PanelStateManager } from './panel_state_manager';
 
@@ -77,21 +80,36 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
     const resolvedContent$ = combineLatest([
       tree$,
       registeredContent$.pipe(distinctUntilChanged()),
-    ]).pipe(switchMap(([tree, contents]) => resolveLinksContent(tree, contents)));
+    ]).pipe(
+      switchMap(([tree, contents]) =>
+        resolveLinksContent(tree, contents).pipe(
+          map((links) => ({
+            links,
+            panels: resolvePanelContent(tree, contents),
+          }))
+        )
+      )
+    );
+
+    const panelElements = new Map<string, ReactNode>();
 
     return combineLatest([navigation$, resolvedContent$]).pipe(
       map(([nav, resolved]) => {
-        const items = attachPopoverSections(
-          toNavigationItems(
-            nav.navigationTree,
-            nav.activeNodes,
-            nav.overflowItemIds,
-            panelStateManager
+        const items = attachPanelContent(
+          attachPopoverSections(
+            toNavigationItems(
+              nav.navigationTree,
+              nav.activeNodes,
+              nav.overflowItemIds,
+              panelStateManager
+            ),
+            resolved.links
           ),
-          resolved
+          resolved.panels,
+          panelElements
         );
         const popoverActiveId = findActivePopoverItemId(
-          resolved,
+          resolved.links,
           `${window.location.pathname}${window.location.hash}`
         );
         return {
@@ -111,4 +129,47 @@ const useCustomizeNavigation = (): (() => void) | undefined => {
   const handler$ = useMemo(() => chrome.project.getCustomizeNavigationHandler$(), [chrome]);
   const handler = useObservable(handler$, null);
   return handler ?? undefined;
+};
+
+const NavigationPanelLoader = ({ load }: { load: () => Promise<{ default: ComponentType }> }) => {
+  const LazyPanel = useMemo(() => React.lazy(load), [load]);
+  return (
+    <Suspense fallback={null}>
+      <LazyPanel />
+    </Suspense>
+  );
+};
+
+const attachPanelContent = (
+  navigationItems: NavigationItems,
+  panels: readonly ResolvedPanelContent[],
+  cache: Map<string, ReactNode>
+): NavigationItems => {
+  if (panels.length === 0) {
+    return navigationItems;
+  }
+
+  const byNodeId = new Map(panels.map((panel) => [panel.nodeId, panel]));
+
+  const attach = (item: MenuItem): MenuItem => {
+    const panel = byNodeId.get(item.id);
+    if (!panel) {
+      return item;
+    }
+    let element = cache.get(panel.nodeId);
+    if (!element) {
+      element = <NavigationPanelLoader load={panel.load} />;
+      cache.set(panel.nodeId, element);
+    }
+    return { ...item, panelContent: element };
+  };
+
+  return {
+    ...navigationItems,
+    navItems: {
+      primaryItems: navigationItems.navItems.primaryItems.map(attach),
+      overflowItems: navigationItems.navItems.overflowItems?.map(attach),
+      footerItems: navigationItems.navItems.footerItems.map(attach),
+    },
+  };
 };

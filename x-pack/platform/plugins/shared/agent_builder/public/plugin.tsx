@@ -257,6 +257,16 @@ export class AgentBuilderPlugin
 
     setSidebarServices(core, internalServices);
 
+    startDependencies.navigation.registerNavigationContent({
+      kind: 'agentBuilder',
+      id: 'agentBuilderPanel',
+      target: 'agent_builder',
+      load: async () => {
+        const { AgentBuilderPanel } = await import('./application/panel/agent_builder_panel');
+        return { default: AgentBuilderPanel };
+      },
+    });
+
     const LazyConfiguredEmbeddableConversation = React.lazy(async () => {
       const { createEmbeddableConversation } = await import(
         './embeddable/create_embeddable_conversation'

@@ -36,15 +36,18 @@ jest.mock('rxjs', () => {
   };
 });
 
-const getNavLink = (partial: Partial<ChromeNavLink> = {}): ChromeNavLink => ({
-  id: 'kibana',
-  title: 'Kibana',
-  baseUrl: '/app',
-  url: `/app/${partial.id ?? 'kibana'}`,
-  href: `/app/${partial.id ?? 'kibana'}`,
-  visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
-  ...partial,
-});
+const getNavLink = (partial: Partial<ChromeNavLink> = {}): ChromeNavLink => {
+  const id = partial.id ?? 'kibana';
+  return {
+    id: 'kibana',
+    title: 'Kibana',
+    baseUrl: `/app/${id}`,
+    url: `/app/${id}`,
+    href: `/app/${id}`,
+    visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
+    ...partial,
+  };
+};
 
 const getNavLinksService = (ids: Readonly<string[]> = []) => {
   const navLinks = ids.map((id) => getNavLink({ id, title: id.toUpperCase() }));
@@ -367,7 +370,7 @@ describe('initNavigation()', () => {
             children: [
               {
                 deepLink: {
-                  baseUrl: '/app',
+                  baseUrl: '/app/foo',
                   href: '/app/foo',
                   id: 'foo',
                   title: 'FOO',
@@ -918,7 +921,7 @@ describe('getNavigation$() active nodes', () => {
           deepLink: {
             id: 'item1',
             title: 'ITEM1',
-            baseUrl: '/app',
+            baseUrl: '/app/item1',
             url: '/app/item1',
             href: '/app/item1',
             visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
@@ -972,7 +975,7 @@ describe('getNavigation$() active nodes', () => {
           deepLink: {
             id: 'item1',
             title: 'ITEM1',
-            baseUrl: '/app',
+            baseUrl: '/app/item1',
             url: '/app/item1',
             href: '/app/item1',
             visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],

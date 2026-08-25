@@ -8,6 +8,7 @@
  */
 
 import type { Location } from 'history';
+import type { ComponentType } from 'react';
 import type { EuiSideNavItemType, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
@@ -319,7 +320,17 @@ export interface ProjectNavigationLinkListContent {
   items$: Observable<readonly ProjectNavigationLinkItem[]>;
 }
 
-export type ProjectNavigationContent = ProjectNavigationLinkListContent;
+/** Expanded-panel slot. Agent Builder owns the lazy panel tree; chrome hosts it. */
+export interface ProjectNavigationAgentBuilderContent {
+  kind: 'agentBuilder';
+  id: string;
+  target: 'agent_builder';
+  load: () => Promise<{ default: ComponentType }>;
+}
+
+export type ProjectNavigationContent =
+  | ProjectNavigationLinkListContent
+  | ProjectNavigationAgentBuilderContent;
 
 /**
  * @public

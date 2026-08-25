@@ -84,6 +84,7 @@ export type {
   RenderAs,
   ProjectNavigationLinkItem,
   ProjectNavigationLinkListContent,
+  ProjectNavigationAgentBuilderContent,
   ProjectNavigationContent,
 } from './project_navigation';
 

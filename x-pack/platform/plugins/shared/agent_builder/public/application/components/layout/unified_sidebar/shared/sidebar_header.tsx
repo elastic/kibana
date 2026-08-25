@@ -47,6 +47,7 @@ interface SidebarHeaderProps {
   getNavigationPath: (newAgentId: string) => string;
   isCondensed: boolean;
   onToggleCondensed: () => void;
+  showCollapseToggle?: boolean;
 }
 
 export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
@@ -55,6 +56,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
   getNavigationPath,
   isCondensed,
   onToggleCondensed,
+  showCollapseToggle = true,
 }) => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
@@ -150,7 +152,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}
-        {
+        {showCollapseToggle && (
           <EuiFlexItem grow={false}>
             <EuiToolTip content={labels.toggleSidebar} disableScreenReaderOutput>
               <EuiButtonIcon
@@ -168,7 +170,7 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               />
             </EuiToolTip>
           </EuiFlexItem>
-        }
+        )}
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
