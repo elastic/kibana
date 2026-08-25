@@ -100,6 +100,31 @@ describe('createVisualizationTool schema', () => {
       }).success
     ).toBe(false);
   });
+
+  it('accepts an optional time_range and rejects a partial one', () => {
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+      }).success
+    ).toBe(true);
+
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+        time_range: { from: 'now-7d', to: 'now' },
+      }).success
+    ).toBe(true);
+
+    expect(
+      schema.safeParse({
+        query: 'errors over time',
+        chartType: SupportedChartType.XY,
+        time_range: { from: 'now-7d' },
+      }).success
+    ).toBe(false);
+  });
 });
 
 describe('createVisualizationTool handler', () => {
@@ -209,6 +234,7 @@ describe('createVisualizationTool handler', () => {
     expect(mockBuildVega).toHaveBeenCalledWith(
       expect.objectContaining({ existingSpec: '{"old":true}' })
     );
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
     expect(attachments.update).toHaveBeenCalledWith(
       'existing',
       expect.objectContaining({ data: expect.objectContaining({ renderer: 'vega' }) })
@@ -220,6 +246,97 @@ describe('createVisualizationTool handler', () => {
     expect(data.renderer).toBe('vega');
     expect(data.attachment_id).toBe('existing');
     expect(data.version).toBe(2);
+    expect(data.time_range).toBeUndefined();
+  });
+
+  it('reuses the existing time_range on edit instead of probing', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'lens',
+            query: 'errors over time',
+            visualization: { title: 'Errors' },
+            esql: 'FROM logs | STATS count() BY @timestamp',
+            time_range: { from: 'now-7d', to: 'now' },
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      { query: 'make it a line chart', attachment_id: 'existing' },
+      { attachments }
+    );
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(attachments.update).toHaveBeenCalledWith(
+      'existing',
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }),
+      })
+    );
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-7d', to: 'now' });
+  });
+
+  it('uses an explicit time_range on create and skips the data-aware probe', async () => {
+    const { result, attachments } = await runHandler({
+      query: 'errors over the last 7 days',
+      chartType: SupportedChartType.XY,
+      time_range: { from: 'now-7d', to: 'now' },
+    });
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-7d', to: 'now' });
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }),
+      })
+    );
+  });
+
+  it('uses an explicit time_range on edit instead of the stored range', async () => {
+    const attachments = createAttachments();
+    attachments.getAttachmentRecord.mockReturnValue({
+      id: 'existing',
+      type: VISUALIZATION_ATTACHMENT_TYPE,
+      current_version: 1,
+      versions: [
+        {
+          version: 1,
+          data: {
+            renderer: 'lens',
+            query: 'errors over time',
+            visualization: { title: 'Errors' },
+            esql: 'FROM logs | STATS count() BY @timestamp',
+            time_range: { from: 'now-24h', to: 'now' },
+          },
+        },
+      ],
+    });
+
+    const { result } = await runHandler(
+      {
+        query: 'show the last 30 days',
+        attachment_id: 'existing',
+        time_range: { from: 'now-30d', to: 'now' },
+      },
+      { attachments }
+    );
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(result.results[0].data.time_range).toEqual({ from: 'now-30d', to: 'now' });
+    expect(attachments.update).toHaveBeenCalledWith(
+      'existing',
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: 'now-30d', to: 'now' } }),
+      })
+    );
   });
 
   it('returns an error when the attachment to update does not exist', async () => {

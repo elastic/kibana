@@ -84,6 +84,25 @@ const createVisualizationSchema = z
       .describe(
         '(optional) An ES|QL query. If not provided, the tool will automatically generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
       ),
+    time_range: z
+      .object({
+        from: z
+          .string()
+          .max(256)
+          .describe(
+            'Start of the time range. Use Kibana date math for relative ranges (e.g. "now-30m", "now-24h", "now-7d") or an ISO 8601 string for an absolute start.'
+          ),
+        to: z
+          .string()
+          .max(256)
+          .describe(
+            'End of the time range. Use "now" for the current time, or an ISO 8601 string for an absolute end.'
+          ),
+      })
+      .optional()
+      .describe(
+        '(optional) Only set this when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.'
+      ),
   })
   .check((ctx) => {
     if (ctx.value.attachment_id && ctx.value.renderer) {
@@ -121,6 +140,8 @@ You choose how to render the request via the "renderer" parameter:
 
 When updating via "attachment_id", omit "renderer" because the existing visualization determines it. "chartType" is optional on updates.
 
+Only pass "time_range" when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise: create applies a data-aware default, and edits keep the existing range.
+
 This tool will:
 1. If attachment_id is provided, read the existing visualization from that attachment (edits keep the same renderer)
 2. Generate an ES|QL query if not provided
@@ -145,6 +166,7 @@ Ground first: make sure the target index exists and every field you reference is
         chartType,
         esql,
         attachment_id: attachmentId,
+        time_range: requestedTimeRange,
       },
       { esClient, modelProvider, logger, events, attachments }
     ) => {
@@ -228,13 +250,19 @@ Ground first: make sure the target index exists and every field you reference is
           };
         }
 
-        const timeRange = await selectDefaultTimeRange({
-          esqlQueries: visualizationData.esql ? [visualizationData.esql] : [],
-          esClient,
-          logger,
-        });
-        if (timeRange) {
-          visualizationData.time_range = { from: timeRange.from, to: timeRange.to };
+        if (requestedTimeRange) {
+          visualizationData.time_range = requestedTimeRange;
+        } else if (existingData?.time_range) {
+          visualizationData.time_range = existingData.time_range;
+        } else if (!existingData) {
+          const timeRange = await selectDefaultTimeRange({
+            esqlQueries: visualizationData.esql ? [visualizationData.esql] : [],
+            esClient,
+            logger,
+          });
+          if (timeRange) {
+            visualizationData.time_range = { from: timeRange.from, to: timeRange.to };
+          }
         }
 
         // Step 4: Persist as an attachment so the agent can render it inline
