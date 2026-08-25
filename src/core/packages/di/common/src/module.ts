@@ -8,9 +8,15 @@
  */
 
 import {
+  type BindingActivation,
+  type BindInWhenOnFluentSyntax,
+  type BindToFluentSyntax,
+  type BindWhenOnFluentSyntax,
   type Container,
   ContainerModule,
   type ContainerModuleLoadOptions,
+  type DynamicValueBuilder,
+  type Factory,
   type GetOptions,
   type GetAllOptions,
   LazyServiceIdentifier,
@@ -19,13 +25,29 @@ import {
   type ResolvedValueInjectOptions,
   type ServiceIdentifier,
 } from 'inversify';
-import { once } from 'lodash';
+import { once, wrap } from 'lodash';
 import { OnSetup, OnStart } from './services/plugin';
 
 /**
  * Extended container module options providing Kibana-specific features.
+ * @public
  */
 export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOptions {
+  /**
+   * An extended binding supporting Kibana-specific features.
+   */
+  bind: KibanaBind;
+
+  /**
+   * Registers a handler that will be called after the service activation.
+   * @param serviceIdentifier The service identifier to register the handler to.
+   * @param activation The handler to perform an action with the service instance.
+   */
+  onActivation<T>(
+    serviceIdentifier: ServiceIdentifier<T>,
+    activation: KibanaBindingActivation<T>
+  ): void;
+
   /**
    * Registers a handler that will be called after the setup phase against every bound service.
    * @param serviceIdentifier The service identifier to bind the handler to.
@@ -67,12 +89,71 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
   ): (context: Pick<ResolutionContext, 'getAsync' | 'getAllAsync'>, ...args: A) => Promise<R>;
 }
 
-export type KibanaHandler<T, A extends unknown[] = []> = (
+/**
+ * An extended binding supporting Kibana-specific features.
+ * @public
+ */
+export type KibanaBind = <T>(
+  serviceIdentifier: ServiceIdentifier<T>
+) => KibanaBindToFluentSyntax<T>;
+
+/**
+ * An extended fluent binding syntax supporting Kibana-specific features.
+ * @public
+ */
+export interface KibanaBindToFluentSyntax<T> extends BindToFluentSyntax<T> {
+  /**
+   * A dynamic value binding supporting Kibana resolution context.
+   * @param builder A function that will be called to resolve the value of the binding.
+   */
+  toDynamicValue(builder: KibanaDynamicValueBuilder<T>): BindInWhenOnFluentSyntax<T>;
+
+  /**
+   * A factory binding supporting Kibana resolution context.
+   * @param factory A function that will be called to resolve the value of the binding.
+   */
+  toFactory(
+    factory: T extends Factory<unknown, any> ? KibanaFactory<T> : never
+  ): BindWhenOnFluentSyntax<T>;
+}
+
+/**
+ * A dynamic value builder supporting Kibana resolution context.
+ * @public
+ */
+export type KibanaDynamicValueBuilder<T> = (
+  context: KibanaResolutionContext
+) => ReturnType<DynamicValueBuilder<T>>;
+
+/**
+ * A factory supporting Kibana resolution context.
+ * @public
+ */
+export type KibanaFactory<T> = (context: KibanaResolutionContext) => T | Promise<T>;
+
+/**
+ * A handler that will be called after the setup or start phase injecting the listed dependencies.
+ * @public
+ */
+export type KibanaHandler<T, A extends unknown[] = [], R = void> = (
   context: KibanaResolutionContext,
   injectable: T,
   ...services: A
-) => void;
+) => R;
 
+/**
+ * An extended binding activation handler supporting Kibana resolution context.
+ * @public
+ */
+export type KibanaBindingActivation<T = unknown> = (
+  context: KibanaResolutionContext,
+  injectable: T
+) => ReturnType<BindingActivation<T>>;
+
+/**
+ * An extended resolution context providing Kibana-specific features.
+ * @public
+ */
 export interface KibanaResolutionContext extends ResolutionContext {
   /**
    * Wraps a handler that will be called after the start phase injecting the listed dependencies.
@@ -96,6 +177,10 @@ export interface KibanaResolutionContext extends ResolutionContext {
   ): (...args: A) => Promise<R>;
 }
 
+/**
+ * A function that can be injected with dependencies and arguments.
+ * @public
+ */
 export type Injectable<R, A extends unknown[], D extends unknown[]> = (
   ...args: [...dependencies: D, ...arguments: A]
 ) => Promise<R> | R;
@@ -174,6 +259,44 @@ function toKibanaContainerModuleLoadOptions(
     };
   }
 
+  function bind<T>(serviceIdentifier: ServiceIdentifier<T>): KibanaBindToFluentSyntax<T> {
+    const fluentSyntax = options.bind(serviceIdentifier);
+
+    Object.defineProperties(fluentSyntax, {
+      toDynamicValue: {
+        value: wrap(
+          fluentSyntax.toDynamicValue,
+          (toDynamicValue, builder: DynamicValueBuilder<T>) =>
+            toDynamicValue.call(
+              fluentSyntax,
+              wrap(builder, (inner, context) => inner(toKibanaResolutionContext(context)))
+            )
+        ),
+      },
+      toFactory: {
+        value: wrap(fluentSyntax.toFactory, (toFactory, factory: KibanaFactory<T>) =>
+          toFactory.call(
+            fluentSyntax,
+            wrap(factory, (inner, context) =>
+              inner(toKibanaResolutionContext(context))
+            ) as Parameters<typeof toFactory>[0]
+          )
+        ),
+      },
+    });
+
+    return fluentSyntax as KibanaBindToFluentSyntax<T>;
+  }
+
+  function onActivation<T>(
+    serviceIdentifier: ServiceIdentifier<T>,
+    activation: KibanaBindingActivation<T>
+  ): void {
+    options.onActivation(serviceIdentifier, (context, injectable) =>
+      activation(toKibanaResolutionContext(context), injectable)
+    );
+  }
+
   function onHook<T, A extends unknown[]>(
     hook: ServiceIdentifier<(container: Container) => void>,
     serviceIdentifier: ServiceIdentifier<T>,
@@ -221,7 +344,9 @@ function toKibanaContainerModuleLoadOptions(
 
   return {
     ...options,
+    bind,
     inject,
+    onActivation,
     onSetup: onHook.bind(undefined, OnSetup) as KibanaContainerModuleLoadOptions['onSetup'],
     onStart: onHook.bind(undefined, OnStart) as KibanaContainerModuleLoadOptions['onStart'],
   };
