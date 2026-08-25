@@ -43,8 +43,6 @@ consts:
   reviewed_tag: detection-watch:tuning-reviewed
   dismissed_tag: detection-watch:tuning-dismissed
   applied_tag: detection-watch:tuning-applied
-  reviewed_only_tags:
-    - detection-watch:tuning-reviewed
   dismissed_tags:
     - detection-watch:tuning-reviewed
     - detection-watch:tuning-dismissed
@@ -233,7 +231,6 @@ steps:
         type: kibana.request
         if: >-
           ${{ steps.review_tuning.output.response.approved == true
-            and steps.diagnose_rule.output.structured_output.change_type == 'query'
             and steps.diagnose_rule.output.structured_output.proposed_query != ''
             and steps.fetch_rule.output.type == 'query'
             and steps.preview_proposed_query.output.succeeded == true
@@ -264,15 +261,8 @@ steps:
           tags_to_add: >-
             {% if steps.review_tuning.output.response.approved == false -%}
             ${{ consts.dismissed_tags }}
-            {%- elsif steps.review_tuning.output.response.approved == true
-                 and steps.diagnose_rule.output.structured_output.change_type == 'query'
-                 and steps.diagnose_rule.output.structured_output.proposed_query != ''
-                 and steps.fetch_rule.output.type == 'query'
-                 and steps.preview_proposed_query.output.succeeded == true
-                 and steps.preview_proposed_query.output.is_aborted == false -%}
-            ${{ consts.applied_tags }}
             {%- else -%}
-            ${{ consts.reviewed_only_tags }}
+            ${{ consts.applied_tags }}
             {%- endif %}
         on-failure:
           continue: true

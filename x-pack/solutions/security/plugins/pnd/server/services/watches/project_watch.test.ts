@@ -325,13 +325,12 @@ describe('project watch', () => {
         expect(tagStep.if).toContain('steps.review_tuning.output.response.approved != null');
         expect(String(tagStep.with?.tags_to_add)).toContain('consts.dismissed_tags');
         expect(String(tagStep.with?.tags_to_add)).toContain('consts.applied_tags');
-        expect(String(tagStep.with?.tags_to_add)).toContain('consts.reviewed_only_tags');
+        expect(String(tagStep.with?.tags_to_add)).not.toContain('reviewed_only_tags');
       });
 
-      it('declares tag sets for each decision path', () => {
+      it('declares dismissed and applied tag sets', () => {
         expect(tuning.consts).toEqual(
           expect.objectContaining({
-            reviewed_only_tags: ['detection-watch:tuning-reviewed'],
             dismissed_tags: [
               'detection-watch:tuning-reviewed',
               'detection-watch:tuning-dismissed',
@@ -342,6 +341,7 @@ describe('project watch', () => {
             ],
           })
         );
+        expect(tuning.consts).not.toHaveProperty('reviewed_only_tags');
       });
 
       it('does not use classify_proposal or can_apply', () => {
