@@ -22,7 +22,7 @@ interface FakeConversationProviderProps {
 
 /**
  * Provides a real ConversationContext in Storybook by holding attachment state locally.
- * No hook mocks — state management matches what the production providers do.
+ * No hook mocks.
  */
 export const FakeConversationProvider: React.FC<FakeConversationProviderProps> = ({
   children,

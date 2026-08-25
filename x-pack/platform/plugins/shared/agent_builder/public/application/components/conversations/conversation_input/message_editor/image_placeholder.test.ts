@@ -33,7 +33,7 @@ describe('createImagePlaceholderElement', () => {
     expect(svgs.length).toBe(2);
   });
 
-  it('marks the document icon with IMAGE_PLACEHOLDER_ICON_ATTRIBUTE', () => {
+  it('marks the image icon with IMAGE_PLACEHOLDER_ICON_ATTRIBUTE', () => {
     const el = createImagePlaceholderElement('a.png');
     const iconSvg = el.querySelector(`[${IMAGE_PLACEHOLDER_ICON_ATTRIBUTE}]`);
     expect(iconSvg).not.toBeNull();
@@ -45,7 +45,7 @@ describe('createImagePlaceholderElement', () => {
     expect(removeSvg).not.toBeNull();
   });
 
-  it('renders document icon first, cross icon second', () => {
+  it('renders image icon first, cross icon second', () => {
     const el = createImagePlaceholderElement('a.png');
     const svgs = el.querySelectorAll('svg');
     expect(svgs[0].hasAttribute(IMAGE_PLACEHOLDER_ICON_ATTRIBUTE)).toBe(true);

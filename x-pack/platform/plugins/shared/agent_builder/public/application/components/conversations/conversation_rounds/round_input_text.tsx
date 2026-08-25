@@ -105,7 +105,7 @@ export const RoundInputText: React.FC<RoundInputTextProps> = ({ text }) => {
           return (
             <EuiToolTip key={index} content={segment.name} disableScreenReaderOutput>
               <span css={imageBadgeWrapperCss} tabIndex={0}>
-                <EuiIcon type="document" size="s" aria-hidden={true} />
+                <EuiIcon type="image" size="s" aria-hidden={true} />
                 <span className="image-badge-label" css={imageBadgeInnerCss}>
                   {segment.name}
                 </span>

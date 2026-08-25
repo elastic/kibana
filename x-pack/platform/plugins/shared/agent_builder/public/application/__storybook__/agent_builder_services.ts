@@ -38,10 +38,6 @@ const storybookAttachmentsService = new AttachmentsService({
   http: kibanaServices.http as never,
 });
 
-// The agent_builder_platform plugin registers the image attachment definition in its start()
-// lifecycle, which never runs in Storybook. Register a matching one here so image pills resolve
-// getThumbnail. The blob URL is turned into a solid placeholder image by kibana_services'
-// mocked basePath.prepend.
 type StorybookImageAttachment = UnknownAttachment & { data: ImageAttachmentData };
 const storybookImageAttachmentDefinition: AttachmentUIDefinition<StorybookImageAttachment> = {
   getLabel: (attachment) => attachment.data.name ?? 'Image',
