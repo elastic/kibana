@@ -35,11 +35,7 @@ import {
   getRangeFilter,
   getTimespanFilter,
 } from '../../../common/constants/client_defaults';
-import {
-  isCCSEnabled,
-  isRemoteIndexMetadataEnabled,
-  getRemoteMonitorInfo,
-} from '../../lib/remote_result_utils';
+import { isRemoteIndexMetadataEnabled, getRemoteMonitorInfo } from '../../lib/remote_result_utils';
 
 interface LocationStatusEntry {
   status: string;
@@ -283,7 +279,7 @@ export class OverviewStatusService {
       showFromAllSpaces,
     } = params;
     const { locationIds } = this.filterData;
-    const ccsEnabled = isCCSEnabled(this.routeContext.server);
+    const remoteIndexMetadataEnabled = isRemoteIndexMetadataEnabled(this.routeContext.server);
     const getTermFilter = (field: string, value: string | string[] | undefined) => {
       if (!value || isEmpty(value)) {
         return [];
@@ -313,11 +309,10 @@ export class OverviewStatusService {
     ];
 
     // `remoteNames` filters pings to those originating from the selected
-    // remote clusters. Cluster alias is encoded in the `_index` metadata field
-    // as `<alias>:<index>` (CCS convention). `_index` does not support
-    // `terms`/`regexp`, so we use a `bool.should` of `wildcard` filters — one
-    // per selected alias.
-    if (ccsEnabled && remoteNames?.length) {
+    // remote clusters or CPS linked projects. The alias is encoded in `_index`
+    // as `<alias>:<index>`. `_index` does not support `terms`/`regexp`, so we
+    // use a `bool.should` of `wildcard` filters — one per selected alias.
+    if (remoteIndexMetadataEnabled && remoteNames?.length) {
       const aliases = Array.isArray(remoteNames) ? remoteNames : [remoteNames];
       filters.push({
         bool: {
@@ -395,11 +390,9 @@ export class OverviewStatusService {
       return [activeSpaceTerms];
     }
 
-    // "All permitted spaces" on a local-only cluster: there are no remote pings,
-    // and local pings are bounded by the SO join, so nothing to add. Checked
-    // before the privilege lookup below so non-CCS deployments short-circuit
-    // without an authz round-trip.
-    if (!isCCSEnabled(this.routeContext.server)) {
+    // "All permitted spaces" with no remote `_index` prefix possible: there are
+    // no CCS/CPS remotes, and local pings are bounded by the SO join.
+    if (!isRemoteIndexMetadataEnabled(this.routeContext.server)) {
       return [];
     }
 
@@ -1130,7 +1123,7 @@ export class OverviewStatusService {
     // Returning an empty list here also avoids dragging local monitors through
     // `processOverviewStatus`, where the filtered ping query has no rows for
     // them and they would otherwise surface as misleading "Pending" entries.
-    if (isCCSEnabled(server) && remoteNames?.length) {
+    if (isRemoteIndexMetadataEnabled(server) && remoteNames?.length) {
       return [];
     }
 

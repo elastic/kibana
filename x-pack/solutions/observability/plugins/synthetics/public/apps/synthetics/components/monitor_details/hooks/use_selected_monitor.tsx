@@ -93,10 +93,10 @@ export const useSelectedMonitor = ({
     ? externalMonitor ?? null
     : availableLocalMonitor ?? externalMonitor ?? null;
 
-  // Only declare the monitor truly missing once the heartbeat probe has had its
-  // say: while it is loading we hold off (avoids a flash redirect to "not
-  // found"), and if it resolves a projection the monitor is not missing.
-  const isMonitorMissing = localSoMissing && !externalMonitor && !externalMonitorLoading;
+  // Local: wait for the heartbeat probe after a 404. Remote: the probe is the
+  // only source — once it settles empty the monitor is missing (do not spin).
+  const isMonitorMissing =
+    (isRemote || localSoMissing) && !externalMonitor && !externalMonitorLoading;
 
   useEffect(() => {
     if (

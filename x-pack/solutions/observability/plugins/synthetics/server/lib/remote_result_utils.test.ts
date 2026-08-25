@@ -95,10 +95,10 @@ describe('remote_result_utils', () => {
       ).toBe(true);
     });
 
-    it('is false on serverless when platform CPS is off', () => {
+    it('is true on serverless even when the CPS plugin flag was not wired', () => {
       expect(
         isRemoteIndexMetadataEnabled({ isElasticsearchServerless: true, isCpsEnabled: false })
-      ).toBe(false);
+      ).toBe(true);
     });
   });
 });
