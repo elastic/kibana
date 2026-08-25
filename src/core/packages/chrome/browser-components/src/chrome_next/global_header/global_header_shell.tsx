@@ -107,7 +107,7 @@ const useGlobalHeaderStyles = () => {
       width: 1px;
       height: 24px;
       flex-shrink: 0;
-      background: ${euiTheme.colors.borderBaseSubdued};
+      background: ${euiTheme.colors.borderBasePlain};
     `;
 
     return {
