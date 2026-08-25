@@ -18,9 +18,7 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
 // Significant events is gated solely by the availability flag now, so the installer always writes
-// the full set: 9 base workflows + 4 memory workflows (both via `installWorkflows`). The
-// investigation workflow is no longer installed here — its managed-workflow ownership moved to
-// `nightshiftInvestigations`.
+// the full set: 9 base workflows + 4 memory workflows (both via `installWorkflows`).
 const BASE_WORKFLOW_COUNT = 8;
 const MEMORY_WORKFLOW_COUNT = 4;
 const TOTAL_WORKFLOW_COUNT = BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT;
