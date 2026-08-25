@@ -18,9 +18,11 @@ import {
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { AiIndexHttpItem } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
+import type { AgentAiIndicesWarning } from '../../../../../common/http_api/agents';
 import { useAgentAiIndicesById } from '../../../hooks/ai_indices/use_agent_ai_indices_by_id';
 import { useListAiIndices } from '../../../hooks/ai_indices/use_list_ai_indices';
 import { labels } from '../../../utils/i18n';
+import { AiIndicesWarningsPanel } from './ai_indices_warnings_panel';
 
 export const useAiIndices = (agentId?: string) => {
   const {
@@ -30,6 +32,7 @@ export const useAiIndices = (agentId?: string) => {
   } = useListAiIndices();
   const {
     aiIndices: agentAiIndices,
+    warnings,
     isLoading: isLoadingAgentAiIndices,
     error: agentAiIndicesError,
   } = useAgentAiIndicesById(agentId, { enabled: Boolean(agentId) });
@@ -42,6 +45,7 @@ export const useAiIndices = (agentId?: string) => {
   return {
     availableAiIndices,
     inheritedIds,
+    warnings,
     isLoading: isLoadingAiIndices || isLoadingAgentAiIndices,
     error: aiIndicesError ?? agentAiIndicesError,
   };
@@ -53,6 +57,7 @@ export interface AiIndicesFieldsProps {
   assignedIds: string[];
   /** AI indices contributed by the agent's type. They always apply and cannot be removed here. */
   inheritedIds: string[];
+  warnings?: AgentAiIndicesWarning[];
   isLoading: boolean;
   error?: Error;
   isFormDisabled: boolean;
@@ -63,6 +68,7 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
   aiIndices,
   assignedIds,
   inheritedIds,
+  warnings = [],
   isLoading,
   error,
   isFormDisabled,
@@ -122,6 +128,12 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
             title={labels.aiIndices.loadErrorMessage}
             data-test-subj="agentBuilderAiIndicesLoadError"
           />
+        </EuiFlexItem>
+      )}
+
+      {warnings.length > 0 && (
+        <EuiFlexItem grow={false}>
+          <AiIndicesWarningsPanel warnings={warnings} />
         </EuiFlexItem>
       )}
 

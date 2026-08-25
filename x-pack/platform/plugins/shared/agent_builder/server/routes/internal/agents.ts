@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
+  AgentAiIndicesWarning,
   GetAgentAiIndicesResponse,
   ListAgentAiIndicesResponse,
 } from '../../../common/http_api/agents';
@@ -20,6 +21,11 @@ import { AGENT_BUILDER_READ_SECURITY } from '../route_security';
 import { isContextEngineEnabled } from '../agents';
 import { buildEffectiveAgentAiIndices } from '../../services/agents/build_effective_agent_ai_indices';
 import type { AgentsServiceStart } from '../../services/agents/types';
+
+interface InheritedAiIndicesResolveResult {
+  inherited: string[];
+  error?: string;
+}
 
 const resolveInheritedAiIndicesForType = async ({
   agentsService,
@@ -31,15 +37,15 @@ const resolveInheritedAiIndicesForType = async ({
   agentType: string;
   request: KibanaRequest;
   logger: Logger;
-}): Promise<string[]> => {
+}): Promise<InheritedAiIndicesResolveResult> => {
   try {
     const base = await agentsService.resolveAgentBaseConfiguration({ agentType, request });
-    return base?.ai_indices ?? [];
+    return { inherited: base?.ai_indices ?? [] };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
 
     logger.warn(`Failed to resolve AI indices for type "${agentType}": ${message}`);
-    return [`Failed to resolve AI indices`];
+    return { inherited: [], error: message };
   }
 };
 
@@ -75,26 +81,44 @@ export function registerInternalAgentRoutes({
       const aiIndicesByType = new Map(
         await Promise.all(
           types.map(async (type) => {
-            const inherited = await resolveInheritedAiIndicesForType({
+            const resolved = await resolveInheritedAiIndicesForType({
               agentsService,
               agentType: type,
               request,
               logger,
             });
-            return [type, inherited] as const;
+            return [type, resolved] as const;
           })
         )
       );
 
-      const results = agents.map((agent) => ({
-        agent_id: agent.id,
-        ai_indices: buildEffectiveAgentAiIndices({
-          inherited: aiIndicesByType.get(agent.type) ?? [],
-          assigned: agent.configuration.ai_indices ?? [],
-        }),
-      }));
+      const results = agents.map((agent) => {
+        const { inherited } = aiIndicesByType.get(agent.type) ?? { inherited: [] };
 
-      return response.ok<ListAgentAiIndicesResponse>({ body: { results } });
+        return {
+          agent_id: agent.id,
+          ai_indices: buildEffectiveAgentAiIndices({
+            inherited,
+            assigned: agent.configuration.ai_indices ?? [],
+          }),
+        };
+      });
+
+      const warnings = [...aiIndicesByType.entries()].flatMap(
+        ([agentType, { error: message }]): AgentAiIndicesWarning[] =>
+          message
+            ? [
+                {
+                  message,
+                  agent_type: agentType,
+                },
+              ]
+            : []
+      );
+
+      return response.ok<ListAgentAiIndicesResponse>({
+        body: { results, ...(warnings.length > 0 ? { warnings } : {}) },
+      });
     })
   );
 
@@ -118,12 +142,16 @@ export function registerInternalAgentRoutes({
       const { agents: agentsService } = getInternalServices();
       const registry = await agentsService.getRegistry({ request });
       const agent = await registry.get(request.params.id);
-      const inherited = await resolveInheritedAiIndicesForType({
+      const { inherited, error } = await resolveInheritedAiIndicesForType({
         agentsService,
         agentType: agent.type,
         request,
         logger,
       });
+
+      const warnings: AgentAiIndicesWarning[] = error
+        ? [{ message: error, agent_type: agent.type }]
+        : [];
 
       return response.ok<GetAgentAiIndicesResponse>({
         body: {
@@ -131,6 +159,7 @@ export function registerInternalAgentRoutes({
             inherited,
             assigned: agent.configuration.ai_indices ?? [],
           }),
+          ...(warnings.length > 0 ? { warnings } : {}),
         },
       });
     })

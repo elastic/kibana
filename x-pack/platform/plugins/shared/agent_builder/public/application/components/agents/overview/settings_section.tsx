@@ -27,6 +27,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { useIsContextEngineEnabled } from '../../../hooks/use_is_context_engine_enabled';
 import { useAgentAiIndicesById } from '../../../hooks/ai_indices/use_agent_ai_indices_by_id';
+import { AiIndicesWarningsPanel } from '../ai_indices/ai_indices_warnings_panel';
 
 const { agentOverview: overviewLabels } = labels;
 
@@ -64,10 +65,11 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const isContextEngineEnabled = useIsContextEngineEnabled();
-  const { aiIndices: agentAiIndices, isLoading: isLoadingAgentAiIndices } = useAgentAiIndicesById(
-    agentId,
-    { enabled: isContextEngineEnabled }
-  );
+  const {
+    aiIndices: agentAiIndices,
+    warnings: aiIndicesWarnings,
+    isLoading: isLoadingAgentAiIndices,
+  } = useAgentAiIndicesById(agentId, { enabled: isContextEngineEnabled });
   const aiIndicesSummary = agentAiIndices
     .map(({ id, is_default: isDefault }) =>
       isDefault ? labels.aiIndices.defaultIndexBadge(id) : id
@@ -251,6 +253,18 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
               {isContextEngineEnabled && (
                 <>
                   <EuiHorizontalRule margin="none" />
+
+                  {aiIndicesWarnings && aiIndicesWarnings.length > 0 && (
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <AiIndicesWarningsPanel
+                          warnings={aiIndicesWarnings}
+                          data-test-subj="agentOverviewAiIndicesWarnings"
+                        />
+                      </EuiFlexItem>
+                      <EuiHorizontalRule margin="none" />
+                    </>
+                  )}
 
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

@@ -110,5 +110,32 @@ describe('useAgentAiIndicesById', () => {
       { id: 'elastic', is_default: true },
       { id: 'sales', is_default: false },
     ]);
+    expect(result.current.warnings).toBeUndefined();
+  });
+
+  it('returns response warnings', () => {
+    useQuery.mockReturnValue({
+      data: {
+        ai_indices: [{ id: 'my-index', is_default: false }],
+        warnings: [
+          {
+            message: 'boom',
+            agent_type: 'chat',
+          },
+        ],
+      },
+      isLoading: false,
+      error: undefined,
+      isError: false,
+    });
+
+    const { result } = renderHook(() => useAgentAiIndicesById('chat-agent'));
+
+    expect(result.current.warnings).toEqual([
+      {
+        message: 'boom',
+        agent_type: 'chat',
+      },
+    ]);
   });
 });

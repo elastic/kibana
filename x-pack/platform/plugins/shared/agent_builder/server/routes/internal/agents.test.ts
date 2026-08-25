@@ -11,6 +11,10 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { registerInternalAgentRoutes } from './agents';
 import type { RouteDependencies } from '../types';
 import { internalApiPath } from '../../../common/constants';
+import type {
+  GetAgentAiIndicesResponse,
+  ListAgentAiIndicesResponse,
+} from '../../../common/http_api/agents';
 
 type Handler = (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
@@ -48,12 +52,7 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
       mockResponse
     ) as Promise<{
       type: string;
-      body: {
-        results: Array<{
-          agent_id: string;
-          ai_indices: Array<{ id: string; is_default: boolean }>;
-        }>;
-      };
+      body: ListAgentAiIndicesResponse;
     }>;
 
   const callById = (contextEngineEnabled: boolean, id = 'chat-agent') =>
@@ -63,7 +62,7 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
       mockResponse
     ) as Promise<{
       type: string;
-      body: { ai_indices: Array<{ id: string; is_default: boolean }> };
+      body: GetAgentAiIndicesResponse;
     }>;
 
   beforeEach(() => {
@@ -154,17 +153,17 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
       expect(result.body.results).toEqual([
         {
           agent_id: 'chat-agent',
-          ai_indices: [
-            {
-              id: 'Failed to resolve AI indices',
-              is_default: true,
-            },
-            { id: 'my-index', is_default: false },
-          ],
+          ai_indices: [{ id: 'my-index', is_default: false }],
         },
         {
           agent_id: 'discovery-agent',
           ai_indices: [{ id: 'another-one', is_default: true }],
+        },
+      ]);
+      expect(result.body.warnings).toEqual([
+        {
+          message: 'boom',
+          agent_type: 'chat',
         },
       ]);
     });
@@ -191,6 +190,20 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
       expect(result.type).toBe('notFound');
       expect(mockGet).not.toHaveBeenCalled();
       expect(mockResolveBase).not.toHaveBeenCalled();
+    });
+
+    it('reports a resolve error separately instead of failing the whole request', async () => {
+      mockResolveBase.mockRejectedValue(new Error('boom'));
+
+      const result = await callById(true);
+
+      expect(result.body.ai_indices).toEqual([{ id: 'my-index', is_default: false }]);
+      expect(result.body.warnings).toEqual([
+        {
+          message: 'boom',
+          agent_type: 'chat',
+        },
+      ]);
     });
   });
 });

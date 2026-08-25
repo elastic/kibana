@@ -21,6 +21,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiSkeletonText,
+  EuiSpacer,
   EuiText,
   EuiTextBlockTruncate,
   EuiToolTip,
@@ -53,6 +54,7 @@ import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_ma
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentAiIndices } from './agent_ai_indices';
+import { AiIndicesWarningsPanel } from '../ai_indices/ai_indices_warnings_panel';
 import { AgentAccessControlModeBadge } from './agent_access_control_mode_badge';
 import { AgentTypeBadge, isPreconfiguredAgentType } from './agent_type_badge';
 import { AccessFlyout } from '../access/access_flyout';
@@ -167,6 +169,7 @@ export const AgentsList: React.FC = () => {
   const isContextEngineEnabled = useIsContextEngineEnabled();
   const {
     aiIndicesByAgentId,
+    warnings: aiIndicesWarnings,
     isLoading: isLoadingAgentAiIndices,
     error: aiIndicesError,
   } = useAgentAiIndices({
@@ -318,6 +321,7 @@ export const AgentsList: React.FC = () => {
             />
           );
         }
+
         return (
           <AgentAiIndices aiIndices={(aiIndicesByAgentId[agent.id] ?? []).map(({ id }) => id)} />
         );
@@ -496,6 +500,15 @@ export const AgentsList: React.FC = () => {
 
   return (
     <>
+      {isContextEngineEnabled && aiIndicesWarnings && aiIndicesWarnings.length > 0 && (
+        <>
+          <AiIndicesWarningsPanel
+            warnings={aiIndicesWarnings}
+            data-test-subj="agentBuilderAgentsListAiIndicesWarnings"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiInMemoryTable
         tableCaption={i18n.translate('xpack.agentBuilder.agents.tableCaption', {
           defaultMessage: 'Agents',

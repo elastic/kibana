@@ -18,6 +18,7 @@ import { useToasts } from '../use_toasts';
 
 interface UseAgentAiIndicesByIdResult {
   aiIndices: AgentAiIndexEntry[];
+  warnings: GetAgentAiIndicesResponse['warnings'];
   isLoading: boolean;
   error: Error | undefined;
 }
@@ -49,6 +50,7 @@ export const useAgentAiIndicesById = (
 
   return {
     aiIndices: data?.ai_indices ?? [],
+    warnings: data?.warnings,
     isLoading: isEnabled && isLoading,
     error: error ?? undefined,
   };

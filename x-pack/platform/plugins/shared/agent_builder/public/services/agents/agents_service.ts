@@ -14,7 +14,6 @@ import type {
   AgentUpdateRequest,
 } from '../../../common/agents';
 import type {
-  AgentAiIndicesItem,
   CreateAgentResponse,
   DeleteAgentResponse,
   GetAgentAccessControlResponse,
@@ -57,9 +56,8 @@ export class AgentService {
   /**
    * Lists the effective AI indices for each listed agent, with type-contributed ones flagged.
    */
-  async listAgentAiIndices(): Promise<AgentAiIndicesItem[]> {
-    const res = await this.http.get<ListAgentAiIndicesResponse>(AGENT_AI_INDICES_LIST_PATH);
-    return res.results;
+  async listAgentAiIndices(): Promise<ListAgentAiIndicesResponse> {
+    return await this.http.get<ListAgentAiIndicesResponse>(AGENT_AI_INDICES_LIST_PATH);
   }
 
   /**

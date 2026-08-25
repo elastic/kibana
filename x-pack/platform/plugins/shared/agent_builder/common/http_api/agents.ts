@@ -45,6 +45,11 @@ export interface AgentAiIndexEntry {
   is_default: boolean;
 }
 
+export interface AgentAiIndicesWarning {
+  message: string;
+  agent_type?: string;
+}
+
 export interface AgentAiIndicesItem {
   agent_id: string;
   ai_indices: AgentAiIndexEntry[];
@@ -52,10 +57,12 @@ export interface AgentAiIndicesItem {
 
 export interface ListAgentAiIndicesResponse {
   results: AgentAiIndicesItem[];
+  warnings?: AgentAiIndicesWarning[];
 }
 
 export interface GetAgentAiIndicesResponse {
   ai_indices: AgentAiIndexEntry[];
+  warnings?: AgentAiIndicesWarning[];
 }
 
 /**

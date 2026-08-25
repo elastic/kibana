@@ -76,15 +76,17 @@ describe('useAgentAiIndices', () => {
 
   it('keys results by agent id', () => {
     useQuery.mockReturnValue({
-      data: [
-        {
-          agent_id: 'chat-agent',
-          ai_indices: [
-            { id: 'elastic', is_default: true },
-            { id: 'sales', is_default: false },
-          ],
-        },
-      ],
+      data: {
+        results: [
+          {
+            agent_id: 'chat-agent',
+            ai_indices: [
+              { id: 'elastic', is_default: true },
+              { id: 'sales', is_default: false },
+            ],
+          },
+        ],
+      },
       isLoading: false,
       error: undefined,
       isError: false,
@@ -98,5 +100,36 @@ describe('useAgentAiIndices', () => {
         { id: 'sales', is_default: false },
       ],
     });
+  });
+
+  it('exposes response warnings', () => {
+    useQuery.mockReturnValue({
+      data: {
+        results: [
+          {
+            agent_id: 'chat-agent',
+            ai_indices: [{ id: 'my-index', is_default: false }],
+          },
+        ],
+        warnings: [
+          {
+            message: 'boom',
+            agent_type: 'chat',
+          },
+        ],
+      },
+      isLoading: false,
+      error: undefined,
+      isError: false,
+    });
+
+    const { result } = renderHook(() => useAgentAiIndices());
+
+    expect(result.current.warnings).toEqual([
+      {
+        message: 'boom',
+        agent_type: 'chat',
+      },
+    ]);
   });
 });

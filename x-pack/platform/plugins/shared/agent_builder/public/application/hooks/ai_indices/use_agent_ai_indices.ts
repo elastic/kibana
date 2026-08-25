@@ -8,7 +8,10 @@
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
-import type { AgentAiIndexEntry, AgentAiIndicesItem } from '../../../../common/http_api/agents';
+import type {
+  AgentAiIndexEntry,
+  ListAgentAiIndicesResponse,
+} from '../../../../common/http_api/agents';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
@@ -17,6 +20,7 @@ import { useToasts } from '../use_toasts';
 interface UseAgentAiIndicesResult {
   /** Effective AI indices per agent, with type-contributed ones flagged as defaults. */
   aiIndicesByAgentId: Record<string, AgentAiIndexEntry[]>;
+  warnings: ListAgentAiIndicesResponse['warnings'];
   isLoading: boolean;
   error: Error | undefined;
 }
@@ -30,7 +34,7 @@ export const useAgentAiIndices = ({
   const { agentService } = useAgentBuilderServices();
   const { addErrorToast } = useToasts();
 
-  const { data, isLoading, error } = useQuery<AgentAiIndicesItem[], Error>({
+  const { data, isLoading, error } = useQuery<ListAgentAiIndicesResponse, Error>({
     queryKey: queryKeys.agentProfiles.agentAiIndicesList,
     queryFn: () => agentService.listAgentAiIndices(),
     enabled,
@@ -47,13 +51,17 @@ export const useAgentAiIndices = ({
   const aiIndicesByAgentId = useMemo(
     () =>
       Object.fromEntries(
-        (data ?? []).map(({ agent_id: agentId, ai_indices: aiIndices }) => [agentId, aiIndices])
+        (data?.results ?? []).map(({ agent_id: agentId, ai_indices: aiIndices }) => [
+          agentId,
+          aiIndices,
+        ])
       ),
     [data]
   );
 
   return {
     aiIndicesByAgentId,
+    warnings: data?.warnings,
     isLoading: enabled && isLoading,
     error: error ?? undefined,
   };

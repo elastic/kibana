@@ -2989,6 +2989,16 @@ export const labels = {
         defaultMessage: 'Failed to fetch default AI indices',
       }
     ),
+    warningsTitle: i18n.translate('xpack.agentBuilder.aiIndices.warningsTitle', {
+      defaultMessage: 'Some AI index details could not be loaded',
+    }),
+    warningMessage: ({ message, agentType }: { message: string; agentType?: string }) =>
+      agentType
+        ? i18n.translate('xpack.agentBuilder.aiIndices.warningMessageWithAgentType', {
+            defaultMessage: '{agentType}: {message}',
+            values: { agentType, message },
+          })
+        : message,
     columnTitle: i18n.translate('xpack.agentBuilder.aiIndices.columnTitle', {
       defaultMessage: 'AI indices',
     }),
