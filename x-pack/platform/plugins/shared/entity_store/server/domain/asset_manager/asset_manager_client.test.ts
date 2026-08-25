@@ -552,21 +552,16 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   const buildClient = (
     overrides: Partial<{
       latestExists: boolean;
-      updatesExists: boolean;
       metadataExists: boolean;
     }> = {}
   ) => {
-    const { latestExists = true, updatesExists = true, metadataExists = true } = overrides;
+    const { latestExists = true, metadataExists = true } = overrides;
 
     mockUserEsClient = {
       indices: {
         exists: jest.fn().mockResolvedValue(latestExists),
         getDataStream: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
-          if (name.includes('updates')) {
-            return updatesExists ? { data_streams: [{ name }] } : { data_streams: [] };
-          } else {
-            return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
-          }
+          return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
         }),
       },
     } as unknown as jest.Mocked<ElasticsearchClient>;
@@ -607,7 +602,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   });
 
   it('returns false and does not reinstall when all assets are present', async () => {
-    buildClient({ latestExists: true, updatesExists: true, metadataExists: true });
+    buildClient({ latestExists: true, metadataExists: true });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -616,7 +611,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   });
 
   it('returns true and reinstalls when the latest index is missing', async () => {
-    buildClient({ latestExists: false, updatesExists: true, metadataExists: true });
+    buildClient({ latestExists: false, metadataExists: true });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -632,20 +627,8 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
     );
   });
 
-  it('returns true and reinstalls when the updates data stream is missing', async () => {
-    buildClient({ latestExists: true, updatesExists: false, metadataExists: true });
-
-    const result = await client.reinstallSharedAssetsIfMissing();
-
-    expect(result).toBe(true);
-    expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('.entities.v2.updates.default')
-    );
-  });
-
   it('returns true and reinstalls when the metadata data stream is missing', async () => {
-    buildClient({ latestExists: true, updatesExists: true, metadataExists: false });
+    buildClient({ latestExists: true, metadataExists: false });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 

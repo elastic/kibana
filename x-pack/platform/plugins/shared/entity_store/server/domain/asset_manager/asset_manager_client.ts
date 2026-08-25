@@ -62,10 +62,7 @@ import {
 } from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
 import { getComponentTemplateName } from './component_templates';
-import {
-  getUpdatesEntitiesDataStreamName,
-  getLegacySecurityUpdatesEntitiesDataStreamName,
-} from './updates_data_stream';
+import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import {
   getMetadataEntitiesDataStreamName,
   getLegacySecurityMetadataEntitiesDataStreamName,
@@ -615,17 +612,15 @@ export class AssetManagerClient {
   }
 
   /**
-   * Checks whether the three shared per-namespace assets exist (latest index, updates data stream,
-   * metadata data stream) and reinstalls any that are missing. Returns true if anything was
-   * recreated, false if all assets were already present.
+   * Checks whether the two shared per-namespace assets exist (latest index, metadata data stream)
+   * and reinstalls any that are missing. Returns true if anything was recreated, false if all
+   * assets were already present.
    *
    * Safe to call from a running task — the underlying creates use `throwIfExists: false`.
    */
   public async reinstallSharedAssetsIfMissing(): Promise<boolean> {
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
     const legacyLatestIndex = getLegacySecurityLatestEntitiesIndexName(this.namespace);
-    const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
-    const legacyUpdatesDataStream = getLegacySecurityUpdatesEntitiesDataStreamName(this.namespace);
     const metadataDataStream = getMetadataEntitiesDataStreamName(this.namespace);
     const legacyMetadataDataStream = getLegacySecurityMetadataEntitiesDataStreamName(
       this.namespace
@@ -636,27 +631,23 @@ export class AssetManagerClient {
         .getDataStream({ name }, { ignore: [404] })
         .then((r) => (r?.data_streams?.length ?? 0) > 0);
 
-    const [latestExists, updatesExists, metadataExists] = await Promise.all([
+    const [latestExists, metadataExists] = await Promise.all([
       this.esClient.indices
         .exists({ index: latestIndex })
         .then(
           async (exists) => exists || this.esClient.indices.exists({ index: legacyLatestIndex })
         ),
-      dataStreamExists(updatesDataStream).then(
-        async (exists) => exists || dataStreamExists(legacyUpdatesDataStream)
-      ),
       dataStreamExists(metadataDataStream).then(
         async (exists) => exists || dataStreamExists(legacyMetadataDataStream)
       ),
     ]);
 
-    if (latestExists && updatesExists && metadataExists) {
+    if (latestExists && metadataExists) {
       return false;
     }
 
     const missing = [
       !latestExists && latestIndex,
-      !updatesExists && updatesDataStream,
       !metadataExists && metadataDataStream,
     ].filter(Boolean);
     this.logger.warn(
