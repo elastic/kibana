@@ -34,7 +34,7 @@ Entity Store is part of Kibana **Security Solution's** Entity Analytics. It aggr
 
 **Host** (`host.name`), **User** (`user.name`), **Service**, **Generic** (dynamic, Asset Inventory).
 
-User entities use namespace-qualified `entity.id` (`user:id@namespace`). `entity.namespace` from `event.module`. Non-IDP entities have `namespace: 'local'`, confidence `medium`.
+User entities use namespace-qualified `entity.id` (`user:id@namespace`). `entity.namespace` from `event.module`. Non-IDP entities have `namespace: 'local'`, confidence `medium`. IDP user entities are only created from `event.kind: asset` events; other events can enrich one that already exists but never create it.
 
 ## Plugin Location
 
