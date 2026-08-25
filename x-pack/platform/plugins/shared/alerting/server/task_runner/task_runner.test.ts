@@ -336,15 +336,19 @@ describe('Task Runner', () => {
     expect(call.services).toBeTruthy();
 
     expect(logger.debug).toHaveBeenCalledTimes(5);
-    expect(logger.debug).toHaveBeenNthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      labels: {
-        executionId: RULE_EXECUTION_UUID,
-        ruleId: '1',
-        ruleType: 'test',
-        spaceId: 'default',
-        taskInstanceId: '1',
-      },
-    });
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}',
@@ -395,7 +399,9 @@ describe('Task Runner', () => {
       })
     );
 
-    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledTimes(
+      1
+    );
     expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledWith(
       {
         id: '1',
@@ -611,15 +617,19 @@ describe('Task Runner', () => {
     );
 
     expect(logger.debug).toHaveBeenCalledTimes(6);
-    expect(logger.debug).toHaveBeenNthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      labels: {
-        executionId: RULE_EXECUTION_UUID,
-        ruleId: '1',
-        ruleType: 'test',
-        spaceId: 'default',
-        taskInstanceId: '1',
-      },
-    });
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
@@ -782,15 +792,19 @@ describe('Task Runner', () => {
     await taskRunner.run();
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
-    expect(logger.debug).toHaveBeenNthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      labels: {
-        executionId: RULE_EXECUTION_UUID,
-        ruleId: '1',
-        ruleType: 'test',
-        spaceId: 'default',
-        taskInstanceId: '1',
-      },
-    });
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
@@ -1199,15 +1213,19 @@ describe('Task Runner', () => {
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
-    expect(logger.debug).toHaveBeenNthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      labels: {
-        executionId: RULE_EXECUTION_UUID,
-        ruleId: '1',
-        ruleType: 'test',
-        spaceId: 'default',
-        taskInstanceId: '1',
-      },
-    });
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:1: '${RULE_NAME}' has 2 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"},{\"instanceId\":\"2\",\"actionGroup\":\"default\"}]`,
@@ -1655,15 +1673,19 @@ describe('Task Runner', () => {
     );
 
     expect(logger.debug).toHaveBeenCalledTimes(7);
-    expect(logger.debug).toHaveBeenNthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z', {
-      labels: {
-        executionId: RULE_EXECUTION_UUID,
-        ruleId: '1',
-        ruleType: 'test',
-        spaceId: 'default',
-        taskInstanceId: '1',
-      },
-    });
+    expect(logger.debug).toHaveBeenNthCalledWith(
+      1,
+      'executing rule test:1 at 1970-01-01T00:00:00.000Z',
+      {
+        labels: {
+          executionId: RULE_EXECUTION_UUID,
+          ruleId: '1',
+          ruleType: 'test',
+          spaceId: 'default',
+          taskInstanceId: '1',
+        },
+      }
+    );
     expect(logger.debug).toHaveBeenNthCalledWith(
       2,
       `rule test:1: '${RULE_NAME}' has 1 active alerts: [{\"instanceId\":\"1\",\"actionGroup\":\"default\"}]`,
