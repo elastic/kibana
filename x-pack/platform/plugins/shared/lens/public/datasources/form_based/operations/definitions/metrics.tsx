@@ -39,6 +39,7 @@ import {
   ofNameMetric,
   adjustTimeScaleLabelSuffix,
   getSafeName,
+  metricEsqlMeta,
 } from '@kbn/lens-common';
 import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
@@ -234,8 +235,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       ...getInvalidFieldMessage(layer, columnId, indexPattern),
       ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
     ],
-    filterable: true,
-    canReduceTimeRange: true,
+    ...metricEsqlMeta,
     quickFunctionDocumentation,
     shiftable: true,
   } as OperationDefinition<T, 'field', {}, true>;

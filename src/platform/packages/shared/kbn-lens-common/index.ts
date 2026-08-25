@@ -448,7 +448,14 @@ export type {
   UiSettingsReader,
 } from './esql/operations';
 export type { EsqlOperationMeta } from './esql/operations/registry';
-export { esqlOperationMetaRegistry } from './esql/operations/registry';
+export {
+  esqlOperationMetaRegistry,
+  countEsqlMeta,
+  cardinalityEsqlMeta,
+  percentileEsqlMeta,
+  metricEsqlMeta,
+  dateHistogramEsqlMeta,
+} from './esql/operations/registry';
 export {
   getCountSerializedFormat,
   getCardinalitySerializedFormat,

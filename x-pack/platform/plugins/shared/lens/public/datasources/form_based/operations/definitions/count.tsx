@@ -13,7 +13,7 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { COUNT_ID, COUNT_NAME } from '@kbn/lens-formula-docs';
 import type { CountIndexPatternColumn } from '@kbn/lens-common';
-import { toEsqlRegistry, ofNameCount, getCountSerializedFormat } from '@kbn/lens-common';
+import { toEsqlRegistry, ofNameCount, countEsqlMeta } from '@kbn/lens-common';
 import type { OperationDefinition, ParamEditorProps } from '.';
 import {
   getInvalidFieldMessage,
@@ -148,7 +148,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       },
     ];
   },
-  getSerializedFormat: getCountSerializedFormat,
+  ...countEsqlMeta,
   toESQL: toEsqlRegistry[COUNT_ID],
   toEsAggsFn: (column, columnId, indexPattern) => {
     const field = indexPattern.getFieldByName(column.sourceField);
@@ -193,8 +193,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     );
   },
   timeScalingMode: 'optional',
-  filterable: true,
-  canReduceTimeRange: true,
   quickFunctionDocumentation: i18n.translate('xpack.lens.indexPattern.count.documentation.quick', {
     defaultMessage: `
 The total number of documents. When you provide a field, the total number of field values is counted. When you use the Count function for fields that have multiple values in a single document, all values are counted.

@@ -20,6 +20,13 @@ export { buildMetricToESQL } from './metric_to_esql';
 export { dateHistogramToESQL, getDateHistogramSerializedFormat } from './date_histogram_to_esql';
 export { rangesToESQL } from './ranges_to_esql';
 export { toEsqlRegistry, DATE_HISTOGRAM_ID, RANGE_ID, STATIC_VALUE_ID } from './registry';
+export {
+  countEsqlMeta,
+  cardinalityEsqlMeta,
+  percentileEsqlMeta,
+  metricEsqlMeta,
+  dateHistogramEsqlMeta,
+} from './registry';
 export type { GetDefaultLabelFn } from './default_labels';
 export {
   defaultLabelRegistry,

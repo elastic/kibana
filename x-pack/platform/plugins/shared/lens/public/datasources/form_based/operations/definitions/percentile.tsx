@@ -23,6 +23,7 @@ import {
   ofNamePercentile,
   ALLOWED_DECIMAL_DIGITS,
   getSafeName,
+  percentileEsqlMeta,
 } from '@kbn/lens-common';
 import type { OperationDefinition } from '.';
 import {
@@ -87,9 +88,8 @@ export const percentileOperation: OperationDefinition<
   operationParams: [
     { name: 'percentile', type: 'number', required: false, defaultValue: DEFAULT_PERCENTILE_VALUE },
   ],
-  filterable: true,
+  ...percentileEsqlMeta,
   shiftable: true,
-  canReduceTimeRange: true,
   getPossibleOperationForField: ({
     aggregationRestrictions,
     aggregatable,

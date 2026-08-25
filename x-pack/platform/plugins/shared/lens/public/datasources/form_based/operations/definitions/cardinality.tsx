@@ -16,7 +16,7 @@ import type { CardinalityIndexPatternColumn } from '@kbn/lens-common';
 import {
   toEsqlRegistry,
   ofNameCardinality,
-  getCardinalitySerializedFormat,
+  cardinalityEsqlMeta,
   getSafeName,
 } from '@kbn/lens-common';
 import type { OperationDefinition, ParamEditorProps } from '.';
@@ -57,7 +57,7 @@ export const cardinalityOperation: OperationDefinition<
   displayName: CARDINALITY_NAME,
   allowAsReference: true,
   input: 'field',
-  getSerializedFormat: getCardinalitySerializedFormat,
+  ...cardinalityEsqlMeta,
   getPossibleOperationForField: ({
     aggregationRestrictions,
     aggregatable,
@@ -87,9 +87,7 @@ export const cardinalityOperation: OperationDefinition<
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
-  filterable: true,
   shiftable: true,
-  canReduceTimeRange: true,
   getDefaultLabel: (column, columns, indexPattern) =>
     ofNameCardinality(
       getSafeName(column.sourceField, indexPattern),

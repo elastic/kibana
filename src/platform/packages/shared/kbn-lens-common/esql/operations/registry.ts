@@ -59,18 +59,35 @@ export interface EsqlOperationMeta {
   getSerializedFormat?: GetSerializedFormatFn;
 }
 
-const METRIC_META: EsqlOperationMeta = { filterable: true, canReduceTimeRange: true };
+/** Shared meta for basic field metrics (min/max/avg/sum/median/std_dev). */
+export const metricEsqlMeta: EsqlOperationMeta = { filterable: true, canReduceTimeRange: true };
+
+export const countEsqlMeta: EsqlOperationMeta = {
+  ...metricEsqlMeta,
+  getSerializedFormat: getCountSerializedFormat,
+};
+
+export const cardinalityEsqlMeta: EsqlOperationMeta = {
+  ...metricEsqlMeta,
+  getSerializedFormat: getCardinalitySerializedFormat,
+};
+
+export const percentileEsqlMeta: EsqlOperationMeta = metricEsqlMeta;
+
+export const dateHistogramEsqlMeta: EsqlOperationMeta = {
+  getSerializedFormat: getDateHistogramSerializedFormat,
+};
 
 export const esqlOperationMetaRegistry: Partial<Record<OperationType, EsqlOperationMeta>> = {
-  [COUNT_ID]: { ...METRIC_META, getSerializedFormat: getCountSerializedFormat },
-  [CARDINALITY_ID]: { ...METRIC_META, getSerializedFormat: getCardinalitySerializedFormat },
-  [PERCENTILE_ID]: METRIC_META,
-  [MIN_ID]: METRIC_META,
-  [MAX_ID]: METRIC_META,
-  [AVG_ID]: METRIC_META,
-  [SUM_ID]: METRIC_META,
-  [MEDIAN_ID]: METRIC_META,
-  [STD_DEVIATION_ID]: METRIC_META,
-  [DATE_HISTOGRAM_ID]: { getSerializedFormat: getDateHistogramSerializedFormat },
+  [COUNT_ID]: countEsqlMeta,
+  [CARDINALITY_ID]: cardinalityEsqlMeta,
+  [PERCENTILE_ID]: percentileEsqlMeta,
+  [MIN_ID]: metricEsqlMeta,
+  [MAX_ID]: metricEsqlMeta,
+  [AVG_ID]: metricEsqlMeta,
+  [SUM_ID]: metricEsqlMeta,
+  [MEDIAN_ID]: metricEsqlMeta,
+  [STD_DEVIATION_ID]: metricEsqlMeta,
+  [DATE_HISTOGRAM_ID]: dateHistogramEsqlMeta,
   [RANGE_ID]: {},
 };

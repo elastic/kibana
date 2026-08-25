@@ -30,7 +30,7 @@ import {
   toEsqlRegistry,
   DATE_HISTOGRAM_ID,
   getDateHistogramDefaultLabel,
-  getDateHistogramSerializedFormat,
+  dateHistogramEsqlMeta,
   AUTO_INTERVAL,
   getTimeZoneAndInterval,
   restrictedInterval,
@@ -148,7 +148,7 @@ export const dateHistogramOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
-  getSerializedFormat: getDateHistogramSerializedFormat,
+  ...dateHistogramEsqlMeta,
   toESQL: toEsqlRegistry[DATE_HISTOGRAM_ID],
   toEsAggsFn: (column, columnId, indexPattern) => {
     const sourceField = column.sourceField ? column.sourceField : indexPattern.timeFieldName ?? '';
