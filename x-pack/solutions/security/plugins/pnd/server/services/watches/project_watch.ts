@@ -255,10 +255,6 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     scopes: [],
     callables: projectCallablesFromDefinition(definition, policy),
     metrics: {
-      // Real 7-day run counts are not available from the list/history projection yet.
-      runs7d: null,
-      acceptedPct: null,
-      timeSaved: null,
       lastRun,
     },
     recentRuns,

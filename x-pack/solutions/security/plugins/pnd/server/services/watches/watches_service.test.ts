@@ -198,7 +198,7 @@ describe('WatchesService', () => {
           coverage: [],
           scopes: [],
           recentRuns: [],
-          metrics: { runs7d: null, acceptedPct: null, timeSaved: null, lastRun: null },
+          metrics: { lastRun: null },
         })
       );
       expect(floor?.schedule.set).toBe(false);

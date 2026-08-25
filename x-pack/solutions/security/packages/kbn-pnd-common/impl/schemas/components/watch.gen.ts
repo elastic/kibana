@@ -143,12 +143,6 @@ export type WatchRecentRun = z.infer<typeof WatchRecentRun>;
 
 export const WatchMetrics = lazySchema(() =>
   z.object({
-    runs7d: z.number().int().nullable(),
-    /**
-     * Acceptance rate as a percentage from 0 to 100
-     */
-    acceptedPct: z.number().nullable(),
-    timeSaved: z.string().nullable(),
     /**
      * ISO 8601 timestamp of most recent run
      */

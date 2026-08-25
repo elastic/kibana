@@ -26,14 +26,6 @@ import {
 /* Header                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export const ENABLED_BADGE = i18n.translate('xpack.pnd.watches.settings.enabledBadge', {
-  defaultMessage: 'Enabled',
-});
-
-export const DISABLED_BADGE = i18n.translate('xpack.pnd.watches.settings.disabledBadge', {
-  defaultMessage: 'Disabled',
-});
-
 export const ENABLED_SWITCH_LABEL = i18n.translate('xpack.pnd.watches.settings.enabledSwitch', {
   defaultMessage: 'Enabled',
 });
@@ -143,21 +135,6 @@ export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
 
 export const autonomyLevelName = (levelId: string): string =>
   AUTONOMY_LEVEL_NAMES[levelId] ?? levelId;
-
-export const AUTONOMY_GUARDRAILS_NOTE = i18n.translate(
-  'xpack.pnd.watches.settings.autonomy.guardrailsNote',
-  {
-    defaultMessage:
-      'Org guardrails still apply — actions outside the allow-list stay gated at any level.',
-  }
-);
-
-export const VIEW_GUARDRAILS = i18n.translate(
-  'xpack.pnd.watches.settings.autonomy.viewGuardrails',
-  {
-    defaultMessage: 'View guardrails',
-  }
-);
 
 export const AUTONOMY_RANGE_ARIA_LABEL = i18n.translate(
   'xpack.pnd.watches.settings.autonomy.rangeAriaLabel',

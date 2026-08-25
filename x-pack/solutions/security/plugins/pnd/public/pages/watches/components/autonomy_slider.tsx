@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiRange, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiRange, EuiSpacer, EuiText } from '@elastic/eui';
 import { WATCH_AUTONOMY_LEVELS, type WatchAutonomyLevel } from '@kbn/pnd-common';
 import * as i18n from '../settings_translations';
 
@@ -66,21 +66,6 @@ export const AutonomySlider: React.FC<AutonomySliderProps> = ({
           </EuiText>
         </>
       ) : null}
-      <EuiSpacer size="m" />
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.AUTONOMY_GUARDRAILS_NOTE}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            <EuiLink href="#" data-test-subj="pndViewGuardrailsLink">
-              {i18n.VIEW_GUARDRAILS}
-            </EuiLink>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
     </>
   );
 };

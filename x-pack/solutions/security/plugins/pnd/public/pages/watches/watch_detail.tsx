@@ -19,7 +19,7 @@ import {
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import type { ApprovalRequirement } from '@kbn/pnd-common';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useUpdateWatch, useWatch } from '../../hooks/use_watches_api';
@@ -66,20 +66,6 @@ export const WatchDetailPage: React.FC = () => {
       updateWatch({ approvalGate: { gateId, approverRoleId } }),
     [updateWatch]
   );
-
-  const badges = useMemo<AppHeaderBadge[]>(() => {
-    if (!watch) {
-      return [];
-    }
-    return [
-      {
-        label: watch.enabled ? settingsI18n.ENABLED_BADGE : settingsI18n.DISABLED_BADGE,
-        color: watch.enabled ? 'success' : 'default',
-        'data-test-subj': 'pndWatchEnabledBadge',
-      },
-      { label: watch.mandate, color: 'hollow', 'data-test-subj': 'pndWatchMandateBadge' },
-    ];
-  }, [watch]);
 
   const headerSwitch = useMemo<AppHeaderMenu['switch']>(() => {
     if (!watch) {
@@ -269,12 +255,7 @@ export const WatchDetailPage: React.FC = () => {
   }
 
   return (
-    <WatchesSectionLayout
-      active={watchId}
-      title={watch.name}
-      badges={badges}
-      headerSwitch={headerSwitch}
-    >
+    <WatchesSectionLayout active={watchId} title={watch.name} headerSwitch={headerSwitch}>
       <EuiFlexGroup direction="column" gutterSize="xl" responsive={false}>
         {intro ? (
           <EuiFlexItem grow={false}>

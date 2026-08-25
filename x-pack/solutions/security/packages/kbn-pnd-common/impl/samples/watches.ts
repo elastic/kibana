@@ -82,9 +82,6 @@ const floorWatchBase: Watch = {
     },
   ],
   metrics: {
-    runs7d: 847,
-    acceptedPct: 91,
-    timeSaved: '42h',
     lastRun: '2026-07-20T14:02:00Z',
   },
   recentRuns: [
@@ -139,9 +136,6 @@ const officerWatchBase: Watch = {
   scopes: [],
   callables: [],
   metrics: {
-    runs7d: 23,
-    acceptedPct: 78,
-    timeSaved: '8h',
     lastRun: '2026-07-20T11:30:00Z',
   },
   recentRuns: [
@@ -190,9 +184,6 @@ const darkWatchBase: Watch = {
   scopes: [],
   callables: [],
   metrics: {
-    runs7d: 56,
-    acceptedPct: 65,
-    timeSaved: '18h',
     lastRun: '2026-07-20T03:00:00Z',
   },
   recentRuns: [
@@ -235,9 +226,6 @@ const deepWatchBase: Watch = {
   scopes: [],
   callables: [],
   metrics: {
-    runs7d: 4,
-    acceptedPct: null,
-    timeSaved: '6h',
     lastRun: '2026-07-19T16:45:00Z',
   },
   recentRuns: [
@@ -283,9 +271,6 @@ const detectionWatchBase: Watch = {
   scopes: [],
   callables: [],
   metrics: {
-    runs7d: 412,
-    acceptedPct: 83,
-    timeSaved: '15h',
     lastRun: '2026-07-20T13:44:00Z',
   },
   recentRuns: [
