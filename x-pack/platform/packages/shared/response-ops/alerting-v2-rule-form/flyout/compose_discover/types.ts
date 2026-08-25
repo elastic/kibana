@@ -72,7 +72,6 @@ export interface StepDefinition {
  * mirrored here. Pass `isAlert` explicitly to any reducer action or helper that needs it.
  */
 export interface ComposeDiscoverState {
-  mode: ComposeDiscoverMode;
   step: number;
   /** 'default' = no_breach; 'custom' = query; 'none' = no recovery (persists as 'none'). */
   recoveryType: RecoveryType;
