@@ -52,6 +52,12 @@ jest.mock('../../../../../hooks/use_agent_builder_service', () => ({
   }),
 }));
 
+jest.mock('./attachment_adaptive_body', () => ({
+  AttachmentAdaptiveBody: ({ spec }: { spec: { title?: string } }) => (
+    <div data-test-subj="attachment-adaptive-body">{spec.title}</div>
+  ),
+}));
+
 const mockAttachmentsService = {
   getAttachmentUiDefinition: jest.fn(),
   updateOrigin: jest.fn(),
@@ -81,6 +87,38 @@ describe('CanvasFlyout', () => {
     render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
 
     expect(screen.getByText("Couldn't render this attachment")).not.toBeNull();
+  });
+
+  it('renders getViewSpec when renderCanvasContent is absent', () => {
+    mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Test attachment',
+      getViewSpec: () => ({ type: 'view', title: 'Spec canvas', body: [] }),
+    });
+    mockCanvasState = {
+      attachment: { id: 'attachment-1', type: 'test', data: {} },
+      isSidebar: false,
+    };
+
+    render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
+
+    expect(screen.getByTestId('attachment-adaptive-body').textContent).toBe('Spec canvas');
+  });
+
+  it('prefers renderCanvasContent over getViewSpec', () => {
+    mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Test attachment',
+      getViewSpec: () => ({ type: 'view', title: 'Spec canvas', body: [] }),
+      renderCanvasContent: () => <div>native canvas</div>,
+    });
+    mockCanvasState = {
+      attachment: { id: 'attachment-1', type: 'test', data: {} },
+      isSidebar: false,
+    };
+
+    render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
+
+    expect(screen.getByText('native canvas')).not.toBeNull();
+    expect(screen.queryByTestId('attachment-adaptive-body')).toBeNull();
   });
 
   it('closes canvas when conversation ID changes', () => {

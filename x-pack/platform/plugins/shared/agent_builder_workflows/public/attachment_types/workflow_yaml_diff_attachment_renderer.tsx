@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toWorkflowYamlDiffViewSpec } from '@kbn/adaptive-ui-adapters';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -379,5 +380,6 @@ export const workflowYamlDiffAttachmentUiDefinition: AttachmentUIDefinition<Work
             defaultMessage: 'Workflow changes',
           }),
     getIcon: () => 'compare',
+    getViewSpec: ({ data }) => toWorkflowYamlDiffViewSpec(data),
     renderInlineContent: ({ attachment }) => <DiffInlineContent attachment={attachment} />,
   };

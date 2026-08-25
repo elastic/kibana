@@ -7,6 +7,7 @@
 
 import type { ReactNode } from 'react';
 import type { EuiButtonColor, IconType } from '@elastic/eui';
+import type { ViewSpec } from '@kbn/adaptive-ui';
 import type {
   UnknownAttachment,
   AttachmentVersion,
@@ -200,6 +201,13 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
     props: AttachmentRenderProps<TAttachment>,
     callbacks?: InlineRenderCallbacks
   ) => ReactNode;
+  /**
+   * Optional Adaptive UI body. When provided, the framework mounts this `ViewSpec`
+   * for the inline attachment body instead of `renderInlineContent`. Return
+   * `undefined` to fall back. Canvas still uses `renderCanvasContent` when that
+   * is set; `getViewSpec` is the canvas body only when canvas is unset.
+   */
+  getViewSpec?: (attachment: TAttachment) => ViewSpec | undefined;
   /**
    * Optional preferred width for the canvas flyout when opened in full-screen context.
    * Accepts any valid CSS width value (e.g. `'600px'`, `'40vw'`).

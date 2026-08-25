@@ -40,6 +40,7 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/agent-builder-plugin",
     "@kbn/files-plugin",
+    "@kbn/adaptive-ui-adapters",
     "@kbn/cloud-plugin",
   ]
 }

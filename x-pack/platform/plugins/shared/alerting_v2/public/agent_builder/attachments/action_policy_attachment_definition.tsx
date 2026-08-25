@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { toActionPolicyViewSpec } from '@kbn/adaptive-ui-adapters';
 import {
   ActionButtonType,
   type AttachmentUIDefinition,
@@ -39,6 +40,19 @@ export const createActionPolicyAttachmentDefinition = ({
   getIcon: () => 'workflow',
 
   canvasWidth: '40vw',
+
+  getViewSpec: ({ data }) =>
+    toActionPolicyViewSpec({
+      name: data.name,
+      description: data.description,
+      destinations: data.destinations,
+      matcher: data.matcher ?? undefined,
+      group_by: data.group_by ?? undefined,
+      grouping_mode: data.grouping_mode ?? undefined,
+      throttle: data.throttle?.interval ?? undefined,
+      tags: data.tags ?? undefined,
+      enabled: data.enabled,
+    }),
 
   renderInlineContent: (props) => <ActionPolicyInlineContent {...props} />,
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { toWorkflowYamlViewSpec } from '@kbn/adaptive-ui-adapters';
 import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -384,6 +385,8 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
       }),
 
     getIcon: () => 'workflowsApp',
+
+    getViewSpec: ({ data }) => toWorkflowYamlViewSpec(data),
 
     getActionButtons: ({ attachment, isCanvas, openCanvas }) => {
       if (isCanvas) return [];

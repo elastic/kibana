@@ -145,4 +145,10 @@ describe('significantEventAttachmentDefinition', () => {
   it('does not render inline content', () => {
     expect(significantEventAttachmentDefinition.renderInlineContent).toBeUndefined();
   });
+
+  it('supplies an Adaptive UI ViewSpec for the inline body', () => {
+    const spec = significantEventAttachmentDefinition.getViewSpec?.(attachment);
+    expect(spec?.title).toBe('Payment outage');
+    expect(spec?.body.some((node) => node.type === 'actions')).toBe(true);
+  });
 });
