@@ -1649,9 +1649,12 @@ steps:
       };
       api.setAuditLog(audit as any);
       mockWorkflowsService.getWorkflow.mockResolvedValue({ id: 'wf-1' } as WorkflowDetailDto);
-      mockWorkflowsExecutionEngine.cancelAllActiveWorkflowExecutions.mockResolvedValue({
-        cancelledIds: ['run-a', 'run-b'],
-      });
+      mockWorkflowsExecutionEngine.cancelAllActiveWorkflowExecutions.mockImplementation(
+        async ({ onCancelled }) => {
+          onCancelled?.('run-a');
+          onCancelled?.('run-b');
+        }
+      );
 
       await api.cancelAllActiveWorkflowExecutions('wf-1', 'default', mockRequest, {
         channel: 'kibana_execution_view',

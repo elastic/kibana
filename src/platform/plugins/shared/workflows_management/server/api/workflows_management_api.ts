@@ -895,14 +895,14 @@ export class WorkflowsManagementApi {
     }
     try {
       const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-      const { cancelledIds } = await workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
+      await workflowsExecutionEngine.cancelAllActiveWorkflowExecutions({
         spaceId,
         workflowId,
         schedulingRequest: request,
+        onCancelled: (executionId) => {
+          this.audit?.logExecutionCanceled(request, { executionId, channel });
+        },
       });
-      for (const executionId of cancelledIds) {
-        this.audit?.logExecutionCanceled(request, { executionId, channel });
-      }
     } catch (error) {
       this.audit?.logExecutionCanceled(request, {
         workflowId,

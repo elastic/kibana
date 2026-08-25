@@ -1491,11 +1491,11 @@ export class WorkflowsExecutionEnginePlugin
       spaceId,
       workflowId,
       schedulingRequest,
+      onCancelled,
     }) => {
       await checkLicense(plugins.licensing);
       await this.initialize(coreStart);
 
-      const cancelledIds: string[] = [];
       let searchAfter: estypes.SortResults | undefined;
 
       do {
@@ -1517,7 +1517,7 @@ export class WorkflowsExecutionEnginePlugin
         outcomes.forEach((outcome, index) => {
           const executionId = page.results[index];
           if (outcome.status === 'fulfilled') {
-            cancelledIds.push(executionId);
+            onCancelled?.(executionId);
             return;
           }
           const message =
@@ -1529,8 +1529,6 @@ export class WorkflowsExecutionEnginePlugin
 
         searchAfter = page.nextSearchAfter;
       } while (searchAfter !== undefined);
-
-      return { cancelledIds };
     };
 
     const resumeWorkflowExecution: ResumeWorkflowExecution = async (
