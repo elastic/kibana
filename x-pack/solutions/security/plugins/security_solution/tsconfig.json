@@ -214,6 +214,7 @@
     "@kbn/cloud-security-posture-graph",
     "@kbn/siem-readiness",
     "@kbn/presentation-publishing",
+    "@kbn/entity-store",
     "@kbn/inference-plugin",
     "@kbn/core-saved-objects-server-mocks",
     "@kbn/core-security-server-mocks",
