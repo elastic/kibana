@@ -5,19 +5,32 @@
  * 2.0.
  */
 
-import { spawnSync } from 'child_process';
+import { spawnSync, type SpawnSyncReturns } from 'child_process';
 
 export const FLEET_SERVER_CONTAINER = 'scout-agent-e2e-fleet-server';
 export const SYNTHETICS_AGENT_CONTAINER = 'scout-agent-e2e-agent';
 
+const DOCKER_TIMEOUT_MS = 15 * 60 * 1000;
+const ERROR_TAIL_CHARS = 4000;
+
+const formatDockerFailure = (args: string[], result: SpawnSyncReturns<string>): string => {
+  const output = `${result.stderr || ''}\n${result.stdout || ''}`.trim();
+  const tailed = output.length > ERROR_TAIL_CHARS ? output.slice(-ERROR_TAIL_CHARS) : output;
+  const reason =
+    result.error?.message ?? (result.signal ? `signal ${result.signal}` : `exit ${result.status}`);
+  return `docker ${args.join(' ')} failed (${reason}): ${tailed}`;
+};
+
 const runDocker = (args: string[]): string => {
-  const result = spawnSync('docker', args, { encoding: 'utf8', timeout: 8 * 60 * 1000 });
+  const result = spawnSync('docker', args, { encoding: 'utf8', timeout: DOCKER_TIMEOUT_MS });
   if (result.status !== 0) {
-    throw new Error(
-      `docker ${args.join(' ')} failed (exit ${result.status}): ${result.stderr || result.stdout}`
-    );
+    throw new Error(formatDockerFailure(args, result));
   }
   return (result.stdout || '').trim();
+};
+
+export const pullImage = (image: string): void => {
+  runDocker(['pull', image]);
 };
 
 export const removeContainer = (name: string): void => {

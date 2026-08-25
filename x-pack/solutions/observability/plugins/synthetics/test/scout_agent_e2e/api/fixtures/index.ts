@@ -23,7 +23,7 @@ export const apiTest = baseApiTest.extend<{}, AgentE2eWorkerFixtures>({
       await use(stack);
       await stop();
     },
-    { scope: 'worker', timeout: 10 * 60 * 1000 },
+    { scope: 'worker', timeout: 30 * 60 * 1000 },
   ],
 });
 

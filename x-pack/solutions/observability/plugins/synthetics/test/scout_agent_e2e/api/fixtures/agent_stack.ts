@@ -14,6 +14,7 @@ import {
   SYNTHETICS_AGENT_CONTAINER,
   containerLogs,
   isDockerAvailable,
+  pullImage,
   removeContainer,
   startDetachedContainer,
 } from './docker';
@@ -162,6 +163,11 @@ export async function startAgentStack({
   };
 
   try {
+    log.info(`Pulling ${fleetServerImage}`);
+    pullImage(fleetServerImage);
+    log.info(`Pulling ${agentImage}`);
+    pullImage(agentImage);
+
     await apiServices.fleet.internal.setup();
     await apiServices.fleet.agent.setup();
     await advertiseDockerFleetServerHost(kbnClient);
@@ -234,13 +240,13 @@ export async function startAgentStack({
     }
 
     log.info(`Starting synthetics agent ${agentImage}`);
+    // CI runc rejects `--sysctl net.ipv4.ping_group_range=...` (invalid argument).
+    // NET_RAW is enough for ICMP; Docker Desktop already allows unprivileged ping.
     startDetachedContainer(SYNTHETICS_AGENT_CONTAINER, [
       ...DOCKER_HOST_GATEWAY,
       '--cap-add=NET_RAW',
       '--cap-add=SYS_ADMIN',
       '--security-opt=seccomp=unconfined',
-      '--sysctl',
-      'net.ipv4.ping_group_range=0 2147483647',
       '-e',
       'FLEET_ENROLL=1',
       '-e',
