@@ -232,18 +232,25 @@ export class EsqlQueryParser {
   }
 
   /**
-   * Bind dashboard ES|QL variables and time params, then spec `url.params`.
-   * Spec params are appended last so they take precedence on key collisions,
-   * matching pre-existing `_tstart` / `_tend` behavior.
+   * Bind dashboard ES|QL variables and time params, then leftover spec `url.params`.
    */
   private _injectNamedParams(query: string, url: InternalEsqlUrlObject): InjectedParams {
     const fixedQuery = fixESQLQueryWithVariables(query, this._esqlVariables ?? []);
     const params: Record<string, unknown>[] = [
       ...getNamedParams(fixedQuery, this._getTimeRange(), this._esqlVariables),
     ];
+    const boundKeys = new Set(params.flatMap((param) => Object.keys(param)));
 
+    // Static spec params remain an escape hatch; dashboard control keys win collisions.
     if (url.params && Array.isArray(url.params)) {
-      params.push(...url.params);
+      for (const specParam of url.params) {
+        const keys = Object.keys(specParam);
+        if (keys.some((key) => boundKeys.has(key))) {
+          continue;
+        }
+        params.push(specParam);
+        keys.forEach((key) => boundKeys.add(key));
+      }
     }
 
     return { query: fixedQuery, params };
