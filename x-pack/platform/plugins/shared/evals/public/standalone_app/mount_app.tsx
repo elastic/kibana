@@ -7,12 +7,12 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiPageTemplate } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppMountParameters, ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
-import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
 import { KibanaContextProvider, reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { PLUGIN_NAME } from '../../common';
 import type { EvalsStartDependencies } from '../types';
 import { EvalsApp } from '../application';
@@ -58,17 +58,19 @@ export const mountStandaloneApp = async ({
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
-          <EuiPageTemplate offset={0}>
-            <EuiPageTemplate.Section restrictWidth={false}>
-              <EvalsApp history={history} setBreadcrumbs={setBreadcrumbs} getHref={getHref} />
-            </EuiPageTemplate.Section>
-          </EuiPageTemplate>
+          <RedirectAppLinks coreStart={coreStart}>
+            <KibanaPageTemplate panelled restrictWidth={false}>
+              <KibanaPageTemplate.Section>
+                <EvalsApp history={history} setBreadcrumbs={setBreadcrumbs} getHref={getHref} />
+              </KibanaPageTemplate.Section>
+            </KibanaPageTemplate>
+          </RedirectAppLinks>
         </KibanaContextProvider>
       </I18nProvider>
     </QueryClientProvider>
   );
 
-  ReactDOM.render(wrapWithTheme(<App />, coreStart.theme), element);
+  ReactDOM.render(coreStart.rendering.addContext(<App />), element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(element);
