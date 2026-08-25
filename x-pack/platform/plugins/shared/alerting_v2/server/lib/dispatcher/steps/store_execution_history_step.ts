@@ -127,7 +127,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       });
     }
 
-    for (const summary of aggregateByPolicy(plan.throttled).values()) {
+    for (const summary of aggregateByPolicy(plan.throttled, DispatchOutcome.empty()).values()) {
       this.emitPolicySummary({
         timestamp,
         executionUuid,
@@ -137,10 +137,10 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       });
     }
 
-    // `unmatchedFrom` excludes every planned group — including fully-failed
+    // `plan.unmatched` excludes every planned group — including fully-failed
     // ones — so their episodes are not double-reported as `unmatched`. Those
     // episodes did match a policy; `dispatch_failed` already carries their ids.
-    const unmatched = aggregateUnmatchedBySubject(plan.unmatchedFrom(triage.dispatchable));
+    const unmatched = aggregateUnmatchedBySubject(plan.unmatched);
     for (const group of unmatched) {
       this.emitUnmatchedSummary({ timestamp, executionUuid, group });
     }
@@ -277,16 +277,15 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
  */
 function aggregateByPolicy(
   groups: readonly ActionGroup[],
-  outcome?: DispatchOutcome
+  outcome: DispatchOutcome
 ): Map<ActionPolicyId, PolicySummary> {
   const summaries = new Map<ActionPolicyId, PolicySummary>();
   for (const group of groups) {
-    // On the dispatched path (outcome provided), only destinations that
-    // actually delivered count. Groups with at least one destination but no
-    // delivered destinations (total failure) are skipped entirely — their
-    // episodes and rules are already captured in `dispatch_failed` events and
-    // must not appear in the `dispatched` summary.
-    const delivered = outcome ? outcome.deliveredDestinationsFor(group) : group.destinations;
+    // Groups with at least one destination but no delivered destinations
+    // (total failure) are skipped entirely — their episodes and rules are
+    // already captured in `dispatch_failed` events and must not appear in the
+    // `dispatched` summary.
+    const delivered = outcome.deliveredDestinationsFor(group);
 
     if (group.destinations.length > 0 && delivered.length === 0) {
       // All destinations failed — skip this group entirely for this summary.
@@ -310,7 +309,7 @@ function aggregateByPolicy(
     for (const destination of delivered) {
       summary.workflowIds.add(destination.id);
     }
-    for (const executionId of outcome?.executionIdsFor(group.id) ?? []) {
+    for (const executionId of outcome.executionIdsFor(group.id)) {
       summary.workflowExecutionIds.add(executionId);
     }
     for (const episode of group.episodes) {

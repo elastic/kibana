@@ -8,73 +8,63 @@
 import { suppressionEpisodeKey } from '../steps/utils/suppression_key';
 import type { ActionGroup, AlertEpisode } from '../types';
 
-// Memoizes unmatchedFrom per (plan, dispatchable reference): StoreActionsStep and
-// StoreExecutionHistoryStep both derive the unmatched set from the same triage
-// within a tick. Kept outside the instance so jest structural equality is unaffected.
-const unmatchedCache = new WeakMap<
-  DispatchPlan,
-  { source: readonly AlertEpisode[]; result: readonly AlertEpisode[] }
->();
-
 /**
  * The final delivery decision (ApplyThrottlingStep): action groups eligible to
- * dispatch now vs groups held back by throttling.
+ * dispatch now, groups held back by throttling, and the dispatchable episodes
+ * that landed in no group at all.
  */
 export class DispatchPlan {
+  private static readonly EMPTY = new DispatchPlan([], [], []);
+
   private constructor(
     public readonly toDispatch: readonly ActionGroup[],
-    public readonly throttled: readonly ActionGroup[]
+    public readonly throttled: readonly ActionGroup[],
+    /** Episodes that survived triage but matched no enabled action policy. */
+    public readonly unmatched: readonly AlertEpisode[]
   ) {}
 
   public static of({
     toDispatch,
     throttled,
+    dispatchable,
   }: {
     toDispatch: readonly ActionGroup[];
     throttled: readonly ActionGroup[];
+    /** Dispatchable episodes the plan was built from; those in no group become `unmatched`. */
+    dispatchable: readonly AlertEpisode[];
   }): DispatchPlan {
-    return new DispatchPlan(toDispatch, throttled);
+    return new DispatchPlan(
+      toDispatch,
+      throttled,
+      deriveUnmatched(toDispatch, throttled, dispatchable)
+    );
   }
 
   public static empty(): DispatchPlan {
-    return new DispatchPlan([], []);
+    return DispatchPlan.EMPTY;
   }
 
   public isEmpty(): boolean {
     return this.toDispatch.length === 0 && this.throttled.length === 0;
   }
+}
 
-  public dispatchEpisodeCount(): number {
-    return countEpisodes(this.toDispatch);
+function deriveUnmatched(
+  toDispatch: readonly ActionGroup[],
+  throttled: readonly ActionGroup[],
+  dispatchable: readonly AlertEpisode[]
+): readonly AlertEpisode[] {
+  if (toDispatch.length === 0 && throttled.length === 0) {
+    return dispatchable;
   }
 
-  public throttledEpisodeCount(): number {
-    return countEpisodes(this.throttled);
-  }
-
-  /**
-   * Episodes that survived triage but landed in no group — neither dispatched
-   * nor throttled. They matched no enabled action policy.
-   */
-  public unmatchedFrom(dispatchable: readonly AlertEpisode[]): readonly AlertEpisode[] {
-    const cached = unmatchedCache.get(this);
-    if (cached && cached.source === dispatchable) {
-      return cached.result;
-    }
-
-    const handledEpisodeKeys = new Set<string>();
-    for (const group of [...this.toDispatch, ...this.throttled]) {
+  const handledEpisodeKeys = new Set<string>();
+  for (const groups of [toDispatch, throttled]) {
+    for (const group of groups) {
       for (const episode of group.episodes) {
         handledEpisodeKeys.add(suppressionEpisodeKey(episode));
       }
     }
-    const result = dispatchable.filter((ep) => !handledEpisodeKeys.has(suppressionEpisodeKey(ep)));
-
-    unmatchedCache.set(this, { source: dispatchable, result });
-    return result;
   }
-}
-
-function countEpisodes(groups: readonly ActionGroup[]): number {
-  return groups.reduce((count, group) => count + group.episodes.length, 0);
+  return dispatchable.filter((episode) => !handledEpisodeKeys.has(suppressionEpisodeKey(episode)));
 }

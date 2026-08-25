@@ -13,42 +13,42 @@ describe('DispatchPlan', () => {
   const ep2 = createAlertEpisode({ rule_id: 'r2', group_hash: 'h2', episode_id: 'e2' });
   const ep3 = createAlertEpisode({ rule_id: 'r3', group_hash: 'h3', episode_id: 'e3' });
 
-  it('reports emptiness and per-bucket episode counts', () => {
+  it('reports emptiness', () => {
     const plan = DispatchPlan.of({
-      toDispatch: [createActionGroup({ id: 'g1', episodes: [ep1, ep2] })],
-      throttled: [createActionGroup({ id: 'g2', episodes: [ep3] })],
+      toDispatch: [createActionGroup({ id: 'g1', episodes: [ep1] })],
+      throttled: [createActionGroup({ id: 'g2', episodes: [ep2] })],
+      dispatchable: [ep1, ep2],
     });
 
     expect(plan.isEmpty()).toBe(false);
-    expect(plan.dispatchEpisodeCount()).toBe(2);
-    expect(plan.throttledEpisodeCount()).toBe(1);
     expect(DispatchPlan.empty().isEmpty()).toBe(true);
   });
 
-  describe('unmatchedFrom', () => {
-    it('returns dispatchable episodes that landed in no group', () => {
+  describe('unmatched', () => {
+    it('contains the dispatchable episodes that landed in no group', () => {
       const plan = DispatchPlan.of({
         toDispatch: [createActionGroup({ id: 'g1', episodes: [ep1] })],
         throttled: [createActionGroup({ id: 'g2', episodes: [ep2] })],
+        dispatchable: [ep1, ep2, ep3],
       });
 
-      expect(plan.unmatchedFrom([ep1, ep2, ep3])).toEqual([ep3]);
+      expect(plan.unmatched).toEqual([ep3]);
     });
 
-    it('returns everything when the plan is empty', () => {
-      expect(DispatchPlan.empty().unmatchedFrom([ep1, ep2])).toEqual([ep1, ep2]);
+    it('contains everything dispatchable when no groups were planned', () => {
+      const plan = DispatchPlan.of({ toDispatch: [], throttled: [], dispatchable: [ep1, ep2] });
+
+      expect(plan.unmatched).toEqual([ep1, ep2]);
     });
 
-    it('memoizes per dispatchable reference', () => {
+    it('is empty when every dispatchable episode is grouped', () => {
       const plan = DispatchPlan.of({
-        toDispatch: [createActionGroup({ id: 'g1', episodes: [ep1] })],
+        toDispatch: [createActionGroup({ id: 'g1', episodes: [ep1, ep2] })],
         throttled: [],
+        dispatchable: [ep1, ep2],
       });
-      const dispatchable = [ep1, ep2];
 
-      expect(plan.unmatchedFrom(dispatchable)).toBe(plan.unmatchedFrom(dispatchable));
-      // A different input array is recomputed, not served from the cache.
-      expect(plan.unmatchedFrom([ep1, ep3])).toEqual([ep3]);
+      expect(plan.unmatched).toEqual([]);
     });
   });
 });

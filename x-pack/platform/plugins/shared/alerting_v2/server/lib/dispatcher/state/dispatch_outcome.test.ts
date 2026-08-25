@@ -17,6 +17,7 @@ describe('DispatchOutcome', () => {
 
     expect(outcome.executionIdsFor('g1')).toEqual(['exec-1', 'exec-2']);
     expect(outcome.executionIdsFor('missing')).toEqual([]);
+    expect(outcome.scheduledGroupCount).toBe(1);
     expect(outcome.hasFailures()).toBe(false);
   });
 

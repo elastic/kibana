@@ -110,8 +110,14 @@ export function createDispatcherPipelineState(
       : {}),
     ...(rules ? { rules: RuleCatalog.of(rules) } : {}),
     ...(policies ? { policies: PolicyCatalog.of(policies) } : {}),
-    ...(dispatch || throttled
-      ? { plan: DispatchPlan.of({ toDispatch: dispatch ?? [], throttled: throttled ?? [] }) }
+    ...(dispatch || throttled || dispatchable
+      ? {
+          plan: DispatchPlan.of({
+            toDispatch: dispatch ?? [],
+            throttled: throttled ?? [],
+            dispatchable: dispatchable ?? [],
+          }),
+        }
       : {}),
     ...(dispatchedExecutions || dispatchFailures
       ? {

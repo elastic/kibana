@@ -37,9 +37,7 @@ export class StoreActionsStep implements DispatcherStep {
       policies = PolicyCatalog.empty(),
     } = state;
     const { suppressed } = triage;
-    const { toDispatch, throttled } = plan;
-
-    const unmatched = plan.unmatchedFrom(triage.dispatchable);
+    const { toDispatch, throttled, unmatched } = plan;
 
     if (suppressed.length === 0 && plan.isEmpty() && unmatched.length === 0) {
       return { type: 'halt', reason: 'no_actions' };
@@ -47,80 +45,80 @@ export class StoreActionsStep implements DispatcherStep {
 
     const now = new Date();
 
-    await this.storageService.bulkIndexDocs<AlertAction>({
-      index: ALERT_ACTIONS_DATA_STREAM,
-      docs: [
-        ...suppressed.map((episode) =>
+    // One doc per episode-scoped outcome; their count gates watermark advancement.
+    const episodeActions: AlertAction[] = [
+      ...suppressed.map((episode) =>
+        toAction({
+          episode,
+          actionType: 'suppress',
+          now,
+          reason: episode.reason,
+          spaceId: episode.space_id,
+        })
+      ),
+      ...throttled.flatMap((group) =>
+        group.episodes.map((episode) =>
           toAction({
             episode,
             actionType: 'suppress',
             now,
-            reason: episode.reason,
+            reason: `suppressed by throttled policy ${group.policyId}`,
             spaceId: episode.space_id,
           })
-        ),
-        ...throttled.flatMap((group) =>
-          group.episodes.map((episode) =>
-            toAction({
-              episode,
-              actionType: 'suppress',
-              now,
-              reason: `suppressed by throttled policy ${group.policyId}`,
-              spaceId: episode.space_id,
-            })
-          )
-        ),
-        ...toDispatch.flatMap((group) =>
-          group.episodes.map((episode) =>
-            toAction({
-              episode,
-              actionType: 'fire',
-              now,
-              reason: `dispatched by policy ${group.policyId}`,
-              spaceId: episode.space_id,
-            })
-          )
-        ),
-        ...toDispatch.map((group) => {
-          const groupingMode = policies.groupingModeOf(group.policyId);
-          const firstEpisode = group.episodes[0];
-          const spaceId = firstEpisode?.space_id ?? 'default';
-          const action: AlertAction = {
-            '@timestamp': now.toISOString(),
-            actor: 'system',
-            action_type: 'notified',
-            rule_id: firstEpisode?.rule_id ?? null,
-            group_hash: firstEpisode?.group_hash ?? 'unknown',
-            last_series_event_timestamp: now.toISOString(),
-            action_group_id: group.id,
-            source: firstEpisode?.source,
-            reason: `notified by policy ${group.policyId}`,
-            space_id: spaceId,
-          };
-          if (groupingMode === 'per_episode') {
-            action.episode_status = firstEpisode?.episode_status;
-          }
-          return action;
-        }),
-        ...unmatched.map((episode) =>
+        )
+      ),
+      ...toDispatch.flatMap((group) =>
+        group.episodes.map((episode) =>
           toAction({
             episode,
-            actionType: 'unmatched',
+            actionType: 'fire',
             now,
-            reason: 'no matching action policy',
+            reason: `dispatched by policy ${group.policyId}`,
             spaceId: episode.space_id,
           })
-        ),
-      ],
+        )
+      ),
+      ...unmatched.map((episode) =>
+        toAction({
+          episode,
+          actionType: 'unmatched',
+          now,
+          reason: 'no matching action policy',
+          spaceId: episode.space_id,
+        })
+      ),
+    ];
+
+    // One `notified` doc per dispatched group — group-scoped, so excluded from
+    // the recordedEpisodes tally.
+    const notifiedActions: AlertAction[] = toDispatch.map((group) => {
+      const groupingMode = policies.groupingModeOf(group.policyId);
+      const firstEpisode = group.episodes[0];
+      const spaceId = firstEpisode?.space_id ?? 'default';
+      const action: AlertAction = {
+        '@timestamp': now.toISOString(),
+        actor: 'system',
+        action_type: 'notified',
+        rule_id: firstEpisode?.rule_id ?? null,
+        group_hash: firstEpisode?.group_hash ?? 'unknown',
+        last_series_event_timestamp: now.toISOString(),
+        action_group_id: group.id,
+        source: firstEpisode?.source,
+        reason: `notified by policy ${group.policyId}`,
+        space_id: spaceId,
+      };
+      if (groupingMode === 'per_episode') {
+        action.episode_status = firstEpisode?.episode_status;
+      }
+      return action;
     });
 
-    const recordedEpisodes =
-      suppressed.length +
-      plan.throttledEpisodeCount() +
-      plan.dispatchEpisodeCount() +
-      unmatched.length;
+    await this.storageService.bulkIndexDocs<AlertAction>({
+      index: ALERT_ACTIONS_DATA_STREAM,
+      docs: [...episodeActions, ...notifiedActions],
+    });
 
-    return { type: 'continue', data: { recordedEpisodes } };
+    return { type: 'continue', data: { recordedEpisodes: episodeActions.length } };
   }
 }
 

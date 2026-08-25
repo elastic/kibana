@@ -190,7 +190,7 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | `policies`         | `PolicyCatalog`    | `FetchPoliciesStep`                                                                 | Enabled action policies keyed by id and grouped by space.                                                                                                       |
 | `matched`          | plain array        | `EvaluateMatchersStep`                                                              | Concrete `(episode, policy)` matches.                                                                                                                          |
 | `groups`           | plain array        | `BuildGroupsStep`                                                                   | Action groups to consider for delivery (transient — consumed by `ApplyThrottlingStep`).                                                                        |
-| `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`; derives the unmatched set via `unmatchedFrom(triage.dispatchable)`.                                            |
+| `plan`             | `DispatchPlan`     | `ApplyThrottlingStep`                                                               | Delivery decision: `toDispatch` vs `throttled`, plus the `unmatched` episodes that landed in no group.                                            |
 | `outcome`          | `DispatchOutcome`  | `DispatchStep`                                                                      | What happened: workflow execution ids per group and failed (group, destination) attempts; `deliveredDestinationsFor()` filters totally-failed groups.           |
 | `recordedEpisodes` | plain number       | `StoreActionsStep`                                                                  | Count of episodes that received an `.alert-actions` record this tick.                                                                                          |
 
@@ -288,12 +288,14 @@ export class MyNewStep implements DispatcherStep {
   constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    if (!state.scan || state.scan.isEmpty()) {
+    // Every state VO has an `empty()` null object, so steps never null-check state fields.
+    const { scan = EpisodeScan.empty() } = state;
+    if (scan.isEmpty()) {
       this.logger.debug({ message: `[${this.name}] No episodes available` });
       return { type: 'continue' };
     }
 
-    const myResult = await this.doSomething(state.scan.episodes);
+    const myResult = await this.doSomething(scan.episodes);
 
     return {
       type: 'continue',
