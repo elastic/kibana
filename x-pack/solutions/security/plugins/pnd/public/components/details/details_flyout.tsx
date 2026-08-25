@@ -27,6 +27,7 @@ export const ConversationDetailsFlyout = memo<ConversationDetailsFlyoutProps>(
       <EuiFlyout
         type="push"
         size="s"
+        paddingSize="m"
         onClose={onClose}
         aria-label={i18n.ariaLabel}
         ownFocus={false}

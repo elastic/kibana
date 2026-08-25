@@ -28,9 +28,12 @@ const getActionButtonColor = (investigation: Investigation): 'primary' | 'danger
 
 const getActionButtonIcon = (
   investigation: Investigation
-): 'flag' | 'gear' | 'lock' | 'external' => {
+): 'flag' | 'gear' | 'lock' | 'external' | 'cross' => {
   if (!investigation.recommendedAction) {
     return 'flag';
+  }
+  if (investigation.recommendedAction === 'contain' && investigation.severity === 'high') {
+    return 'cross';
   }
   return ACTION_ICONS_MAP[investigation.recommendedAction];
 };

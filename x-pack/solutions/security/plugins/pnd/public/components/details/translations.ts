@@ -12,9 +12,20 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
   ariaLabel: i18n.translate('xpack.pnd.detailsFlyout.ariaLabel', {
     defaultMessage: 'Conversation details',
   }),
+  tabs: {
+    overview: i18n.translate('xpack.pnd.detailsFlyout.tabs.overview', {
+      defaultMessage: 'Overview',
+    }),
+    attachments: i18n.translate('xpack.pnd.detailsFlyout.tabs.attachments', {
+      defaultMessage: 'Attachments',
+    }),
+    timeline: i18n.translate('xpack.pnd.detailsFlyout.tabs.timeline', {
+      defaultMessage: 'Timeline',
+    }),
+  },
   sections: {
     overview: i18n.translate('xpack.pnd.detailsFlyout.sections.situation', {
-      defaultMessage: 'What’s happened',
+      defaultMessage: "What's happened",
     }),
     impact: i18n.translate('xpack.pnd.detailsFlyout.sections.impact', {
       defaultMessage: 'Impact',
@@ -30,6 +41,40 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     }),
     timeline: i18n.translate('xpack.pnd.detailsFlyout.sections.timeline', {
       defaultMessage: 'Timeline',
+    }),
+  },
+  overview: {
+    showMore: i18n.translate('xpack.pnd.detailsFlyout.overview.showMore', {
+      defaultMessage: 'Show more',
+    }),
+    showLess: i18n.translate('xpack.pnd.detailsFlyout.overview.showLess', {
+      defaultMessage: 'Show less',
+    }),
+    triggerAlert: i18n.translate('xpack.pnd.detailsFlyout.overview.triggerAlert', {
+      defaultMessage: 'Trigger · Alert',
+    }),
+    fieldColumn: i18n.translate('xpack.pnd.detailsFlyout.overview.fieldColumn', {
+      defaultMessage: 'Field',
+    }),
+    tableCaption: i18n.translate('xpack.pnd.detailsFlyout.tabs.tableCaption', {
+      defaultMessage: 'Conversation overview tabs',
+    }),
+    valueColumn: i18n.translate('xpack.pnd.detailsFlyout.overview.valueColumn', {
+      defaultMessage: 'Value',
+    }),
+    compromised: i18n.translate('xpack.pnd.detailsFlyout.overview.compromised', {
+      defaultMessage: 'Compromised',
+    }),
+    severity: i18n.translate('xpack.pnd.detailsFlyout.overview.severity', {
+      defaultMessage: 'Severity',
+    }),
+  },
+  attachments: {
+    emptyTitle: i18n.translate('xpack.pnd.detailsFlyout.attachments.emptyTitle', {
+      defaultMessage: 'No attachments',
+    }),
+    emptyBody: i18n.translate('xpack.pnd.detailsFlyout.attachments.emptyBody', {
+      defaultMessage: 'Attachments will appear here.',
     }),
   },
   recommendedAction: {
