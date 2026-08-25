@@ -22,6 +22,7 @@ import {
   KBN_ARCHIVE_PATHS,
   LOGSTASH_IN_RANGE_DATES,
 } from './constants';
+import type { ImportedSavedObject } from './saved_object_helpers';
 
 export type PlaywrightPage = Parameters<typeof extendPlaywrightPage>[0]['page'];
 /**
@@ -309,10 +310,13 @@ export function createLogstashLensEditorSuiteSetup(options?: {
   const skipEmptyLensOpen = options?.skipEmptyLensOpen ?? false;
   let storedDataViewId: string | undefined;
 
-  const beforeAll = async ({ scoutSpace, apiServices }: LogstashSpaceSetupContext) => {
-    if (loadLensArchives) {
-      await scoutSpace.savedObjects.load(KBN_ARCHIVE_PATHS.LENS_BASIC);
-    }
+  const beforeAll = async ({
+    scoutSpace,
+    apiServices,
+  }: LogstashSpaceSetupContext): Promise<ImportedSavedObject[]> => {
+    const importedSavedObjects = loadLensArchives
+      ? await scoutSpace.savedObjects.load(KBN_ARCHIVE_PATHS.LENS_BASIC)
+      : [];
 
     // Name matches title so Lens data-view switcher rows resolve as `dataView-logstash-*`.
     const { data: dataView } = await apiServices.dataViews.create({
@@ -341,6 +345,8 @@ export function createLogstashLensEditorSuiteSetup(options?: {
         to: timeRange.to,
       }),
     });
+
+    return importedSavedObjects;
   };
 
   const beforeEach = async ({
