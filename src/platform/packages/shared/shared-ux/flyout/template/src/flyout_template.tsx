@@ -17,7 +17,8 @@ import type {
   FlyoutTemplateProps,
 } from './types';
 import { flyoutAssembly, partsOf } from './assembly';
-import { FlyoutTemplateConfigProvider } from './context';
+import { FlyoutHeaderCollapseProvider, FlyoutTemplateConfigProvider } from './context';
+import { useHeaderCollapse } from './use_header_collapse';
 import { Body, BodyZone, BODY_PART_NAME } from './body/body';
 import { Header, HeaderZone, HEADER_PART_NAME } from './header/header';
 import { Footer, FooterZone, FOOTER_PART_NAME } from './footer/footer';
@@ -92,6 +93,8 @@ const FlyoutTemplateRoot = ({
   };
   const hasMenuProps = Object.keys(mergedMenuProps).length > 0;
 
+  const collapseState = useHeaderCollapse({ enabled: !headerAttrs?.collapsed });
+
   return (
     <EuiFlyout
       onClose={onClose}
@@ -118,11 +121,13 @@ const FlyoutTemplateRoot = ({
       data-test-subj={dataTestSubj}
     >
       <FlyoutTemplateConfigProvider value={{ dataTestSubj, paddingSize }}>
-        {headerItem && (
-          <HeaderZone {...(headerAttrs as FlyoutHeaderProps)} flyoutTitleId={flyoutTitleId} />
-        )}
-        {bodyItem && <BodyZone {...(bodyItem.attributes as FlyoutBodyProps)} />}
-        {footerItem && <FooterZone {...(footerItem.attributes as FlyoutFooterProps)} />}
+        <FlyoutHeaderCollapseProvider value={collapseState}>
+          {headerItem && (
+            <HeaderZone {...(headerAttrs as FlyoutHeaderProps)} flyoutTitleId={flyoutTitleId} />
+          )}
+          {bodyItem && <BodyZone {...(bodyItem.attributes as FlyoutBodyProps)} />}
+          {footerItem && <FooterZone {...(footerItem.attributes as FlyoutFooterProps)} />}
+        </FlyoutHeaderCollapseProvider>
       </FlyoutTemplateConfigProvider>
     </EuiFlyout>
   );
