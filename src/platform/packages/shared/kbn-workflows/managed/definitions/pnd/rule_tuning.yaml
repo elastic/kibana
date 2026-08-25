@@ -41,6 +41,8 @@ consts:
   # Written onto every alert that reached a decision, and filtered out by the harvest,
   # so a later sweep cannot rediagnose the same alerts into the same proposal.
   reviewed_tag: detection-watch:tuning-reviewed
+  dismissed_tag: detection-watch:tuning-dismissed
+  applied_tag: detection-watch:tuning-applied
 steps:
   # Scoped to one space because the tag API writes to the space's own alerts index, so
   # a cross-space harvest would keep rediagnosing alerts it can never mark.
@@ -256,27 +258,39 @@ steps:
           rule_id: "{{ foreach.item.0 }}"
           note: Apply the approved proposal in the Detection Rules UI.
 
-      - name: classify_outcome
-        type: data.set
-        if: "${{ steps.review_tuning.output.response.approved != null }}"
-        with:
-          outcome_tag: "{% if steps.review_tuning.output.response.approved == false %}detection-watch:tuning-dismissed{% elsif steps.classify_proposal.output.can_apply == true %}detection-watch:tuning-applied{% else %}detection-watch:tuning-manual{% endif %}"
-
-      # Marking runs last so a failed PATCH aborts before the alerts are tagged and the
-      # next sweep can retry the rule. A tagging failure is tolerated for the same
-      # reason: rediagnosing beats losing the rest of the sweep.
-      #
-      # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
-      # harvest's KEEP projects: the alert_ids multivalue. `${{ }}` rather than `{{ }}`
-      # passes that list through as an array instead of stringifying it.
       - name: mark_alerts_reviewed
         type: security.setAlertTags
-        if: "${{ steps.review_tuning.output.response.approved != null }}"
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply == false }}
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add:
             - "{{ consts.reviewed_tag }}"
-            - "{{ steps.classify_outcome.output.outcome_tag }}"
+        on-failure:
+          continue: true
+
+      - name: mark_alerts_reviewed_dismissed
+        type: security.setAlertTags
+        if: "${{ steps.review_tuning.output.response.approved == false }}"
+        with:
+          alert_ids: "${{ foreach.item.5 }}"
+          tags_to_add:
+            - "{{ consts.reviewed_tag }}"
+            - "{{ consts.dismissed_tag }}"
+        on-failure:
+          continue: true
+
+      - name: mark_alerts_reviewed_applied
+        type: security.setAlertTags
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.classify_proposal.output.can_apply == true }}
+        with:
+          alert_ids: "${{ foreach.item.5 }}"
+          tags_to_add:
+            - "{{ consts.reviewed_tag }}"
+            - "{{ consts.applied_tag }}"
         on-failure:
           continue: true
 

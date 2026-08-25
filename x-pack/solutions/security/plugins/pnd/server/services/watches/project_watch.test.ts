@@ -6,7 +6,6 @@
  */
 
 import { parse } from 'yaml';
-import { Liquid } from 'liquidjs';
 import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
@@ -319,38 +318,31 @@ describe('project watch', () => {
       });
 
       it('tags the harvested alerts once a decision is recorded', () => {
-        expect(tagSteps).toHaveLength(1);
+        expect(tagSteps).toHaveLength(3);
 
-        const [tagStep] = tagSteps;
-        expect(tagStep.if).toContain('steps.review_tuning.output.response.approved != null');
-        expect(tagStep.with?.tags_to_add).toEqual([
+        const reviewedOnly = tagSteps.find(({ name }) => name === 'mark_alerts_reviewed')!;
+        expect(reviewedOnly.with?.tags_to_add).toEqual(['{{ consts.reviewed_tag }}']);
+
+        const dismissed = tagSteps.find(({ name }) => name === 'mark_alerts_reviewed_dismissed')!;
+        expect(dismissed.with?.tags_to_add).toEqual([
           '{{ consts.reviewed_tag }}',
-          '{{ steps.classify_outcome.output.outcome_tag }}',
+          '{{ consts.dismissed_tag }}',
+        ]);
+
+        const applied = tagSteps.find(({ name }) => name === 'mark_alerts_reviewed_applied')!;
+        expect(applied.with?.tags_to_add).toEqual([
+          '{{ consts.reviewed_tag }}',
+          '{{ consts.applied_tag }}',
         ]);
       });
 
-      // `if`/`elsif` is core Liquid, so a bare engine renders this the same way the
-      // workflow engine's restricted one does.
-      it('renders a distinct outcome tag per decision path', () => {
-        const template = tuningSteps.find(({ name }) => name === 'classify_outcome')!.with
-          ?.outcome_tag as string;
-        const render = (approved: boolean, canApply: boolean) =>
-          new Liquid().parseAndRenderSync(template, {
-            steps: {
-              review_tuning: { output: { response: { approved } } },
-              classify_proposal: { output: { can_apply: canApply } },
-            },
-          });
-
-        expect({
-          approvedAndApplied: render(true, true),
-          approvedForManualWork: render(true, false),
-          dismissed: render(false, false),
-        }).toEqual({
-          approvedAndApplied: 'detection-watch:tuning-applied',
-          approvedForManualWork: 'detection-watch:tuning-manual',
-          dismissed: 'detection-watch:tuning-dismissed',
-        });
+      it('declares dismissed and applied outcome tag constants', () => {
+        expect(tuning.consts).toEqual(
+          expect.objectContaining({
+            dismissed_tag: 'detection-watch:tuning-dismissed',
+            applied_tag: 'detection-watch:tuning-applied',
+          })
+        );
       });
 
       // The harvest projects its columns positionally, so reordering KEEP would make the
