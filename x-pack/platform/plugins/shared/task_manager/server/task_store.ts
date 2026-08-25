@@ -547,40 +547,50 @@ export class TaskStore {
 
     const soClient = this.getSoClientForCreate(options || {});
 
-    const objects = taskInstances.reduce(
-      (acc: Array<SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>>, taskInstance) => {
-        const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
-        const id = taskInstance.id || v4();
-        this.definitions.ensureHas(taskInstance.taskType);
-
-        try {
-          const validatedTaskInstance =
-            this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
-
-          return [
-            ...acc,
-            {
-              type: 'task',
-              attributes: {
-                ...taskInstanceToAttributes(validatedTaskInstance, id),
-                ...apiKeySOFields,
-                runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
-              },
-              id,
-            },
-          ];
-        } catch (e) {
-          this.logger.error(
-            `[TaskStore] An error occured. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
-          );
-          return acc;
-        }
-      },
-      []
-    );
-
+    // Tasks rejected during local preparation never reach `bulkCreate`, so they get no entry in
+    // the bulk response; collect their granted keys here so they are still invalidated below.
+    const omittedTaskApiKeys: Array<ApiKeySOFields | undefined> = [];
     let savedObjects;
     try {
+      const objects = taskInstances.reduce(
+        (
+          acc: Array<SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>>,
+          taskInstance
+        ) => {
+          const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
+          const id = taskInstance.id || v4();
+          this.definitions.ensureHas(taskInstance.taskType);
+
+          try {
+            const validatedTaskInstance =
+              this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+
+            return [
+              ...acc,
+              {
+                type: 'task',
+                attributes: {
+                  ...taskInstanceToAttributes(validatedTaskInstance, id),
+                  ...apiKeySOFields,
+                  runAt: getFirstRunAt({
+                    taskInstance: validatedTaskInstance,
+                    logger: this.logger,
+                  }),
+                },
+                id,
+              },
+            ];
+          } catch (e) {
+            this.logger.error(
+              `[TaskStore] An error occured. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
+            );
+            omittedTaskApiKeys.push(apiKeySOFieldsMap.get(taskInstance.id));
+            return acc;
+          }
+        },
+        []
+      );
+
       savedObjects = await soClient.bulkCreate<SerializedConcreteTaskInstance>(objects, {
         refresh: false,
         overwrite: true,
@@ -608,10 +618,13 @@ export class TaskStore {
       .filter(isSavedObjectErrorResult)
       .map(({ id }) => id);
 
-    if (failedTaskIds.length) {
-      await this.invalidateUnpersistedApiKeys(
-        failedTaskIds.map((taskId) => apiKeySOFieldsMap.get(taskId))
-      );
+    const unpersistedApiKeys = [
+      ...omittedTaskApiKeys,
+      ...failedTaskIds.map((taskId) => apiKeySOFieldsMap.get(taskId)),
+    ];
+
+    if (unpersistedApiKeys.length) {
+      await this.invalidateUnpersistedApiKeys(unpersistedApiKeys);
     }
 
     return savedObjects.saved_objects.map((so) => {
@@ -714,6 +727,9 @@ export class TaskStore {
     const apiKeySOFieldsMap = regenerateResult.apiKeySOFieldsMap || new Map();
     const { invalidationTargets } = regenerateResult;
 
+    // Docs rejected during local validation never reach `bulkUpdate`, so they get no entry in the
+    // bulk response; track them here so their regenerated keys are still invalidated below.
+    const omittedDocIds: string[] = [];
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
         try {
@@ -741,6 +757,7 @@ export class TaskStore {
           this.logger.error(
             `[TaskStore] An error occured. Task ${doc.id} will not be updated. Error: ${e.message}`
           );
+          omittedDocIds.push(doc.id);
         }
         return acc;
       },
@@ -765,6 +782,16 @@ export class TaskStore {
     }
 
     const allInvalidationTargets: InvalidationTarget[] = [];
+
+    for (const omittedDocId of omittedDocIds) {
+      // Same as the error-result branch below: the regenerated key never made it onto the task,
+      // but an omitted doc has no bulk response entry, so it has to be queued explicitly.
+      const granted = apiKeySOFieldsMap.get(omittedDocId);
+      if (granted) {
+        allInvalidationTargets.push(...this.apiKeyStrategy.getApiKeyIdsForInvalidation(granted));
+      }
+    }
+
     const updates = updatedSavedObjects.map((updatedSavedObject) => {
       if (isSavedObjectErrorResult(updatedSavedObject)) {
         // The regenerated key never made it onto the task, so nothing references it. Queue it

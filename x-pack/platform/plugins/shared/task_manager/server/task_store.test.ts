@@ -2161,6 +2161,64 @@ describe('TaskStore', () => {
       expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
     });
 
+    test('bulk update invalidates the regenerated API key of a doc omitted during local validation', async () => {
+      const mockScopedClient = {
+        bulkUpdate: jest.fn().mockResolvedValue({ saved_objects: [] }),
+      };
+      mockGetScopedClient.mockReturnValue(mockScopedClient);
+
+      const mockUpdatedApiKey = Buffer.from('apiKeyIdUpdated:apiKey').toString('base64');
+      const mockUpdatedUserScope = {
+        apiKeyId: 'apiKeyIdUpdated',
+        apiKeyCreatedByUser: false,
+        spaceId: 'testSpace',
+      };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task:324242', {
+        apiKey: mockUpdatedApiKey,
+        userScope: mockUpdatedUserScope,
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      // The doc fails local validation after the key was regenerated, so it never reaches the
+      // bulk update and gets no entry in the bulk response.
+      mockGetValidatedTaskInstanceForUpdating.mockImplementation(() => {
+        throw new Error('validation failed');
+      });
+
+      const result = await store.bulkUpdate(
+        [
+          {
+            ...bulkUpdateTask,
+            apiKey: mockApiKey,
+            userScope: mockUserScope,
+          },
+        ],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest, regenerateApiKey: true },
+        }
+      );
+
+      expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith([], { refresh: false });
+      expect(logger.error).toHaveBeenCalledWith(
+        '[TaskStore] An error occured. Task task:324242 will not be updated. Error: validation failed'
+      );
+
+      // The regenerated key never made it onto the task and must be invalidated. The old key
+      // must be left alone: the task still runs on it.
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'apiKeyIdUpdated', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+
+      expect(result).toEqual([]);
+    });
+
     test('bulk update task with no API key changes when api key, user scope are not available and request and regenerate api key flag are available', async () => {
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
@@ -4054,6 +4112,113 @@ describe('TaskStore', () => {
       expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
         {
           attributes: { apiKeyId: 'yawnApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
+    test('invalidates the granted API key of a task omitted during local preparation', async () => {
+      const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'yawn' };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', {
+        apiKey: Buffer.from('reportApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'reportApiKeyId', apiKeyCreatedByUser: false },
+      });
+      apiKeyAndUserScopeMap.set('task2', {
+        apiKey: Buffer.from('yawnApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'yawnApiKeyId', apiKeyCreatedByUser: false },
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      // task2 fails local validation, so it never reaches the bulk create.
+      mockGetValidatedTaskInstanceForUpdating.mockImplementation((task) => {
+        if ((task as TaskInstance).id === 'task2') {
+          throw new Error('validation failed');
+        }
+        return task;
+      });
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+      scopedSavedObjectsClient.bulkCreate.mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: 'task1',
+            type: 'task',
+            attributes: {
+              attempts: 0,
+              params: '{}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              status: 'idle',
+              taskType: 'report',
+              partition: 225,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      }));
+
+      const request = httpServerMock.createKibanaRequest();
+
+      const result = await store.bulkSchedule([task1, task2], { request });
+
+      expect(scopedSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+        [expect.objectContaining({ id: 'task1' })],
+        { overwrite: true, refresh: false }
+      );
+
+      // The omitted task has no entry in the bulk response, but the key granted for it never
+      // made it onto a task and must still be invalidated.
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'yawnApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+
+      expect(result).toHaveLength(1);
+    });
+
+    test('invalidates every granted API key when a task type is not supported', async () => {
+      const task1 = { id: 'task1', params: {}, state: { foo: 'bar' }, taskType: 'report' };
+      const task2 = { id: 'task2', params: {}, state: { foo: 'bar' }, taskType: 'unregistered' };
+
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', {
+        apiKey: Buffer.from('reportApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'reportApiKeyId', apiKeyCreatedByUser: false },
+      });
+      apiKeyAndUserScopeMap.set('task2', {
+        apiKey: Buffer.from('unregisteredApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'unregisteredApiKeyId', apiKeyCreatedByUser: false },
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(invalidationSoClientMock);
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task1, task2], { request })).rejects.toThrow(
+        'Unsupported task type "unregistered"'
+      );
+
+      // Nothing was written, so every key granted in this call must be invalidated.
+      expect(scopedSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'reportApiKeyId', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+        {
+          attributes: { apiKeyId: 'unregisteredApiKeyId', createdAt: expect.any(String) },
           type: 'api_key_to_invalidate',
         },
       ]);
