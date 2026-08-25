@@ -192,7 +192,7 @@ export function createToolUsageEvaluator() {
   return {
     name: 'UsedExpectedTools',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({
       output,
       expected,
@@ -223,7 +223,7 @@ export function createEditSuccessEvaluator() {
   return {
     name: 'EditToolSuccess',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
       const editResults = getWorkflowEditResultData(output);
 
@@ -271,7 +271,7 @@ export function createValidationPassEvaluator() {
   return {
     name: 'ValidationPass',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
       const editResults = getWorkflowEditResultData(output);
       const lastEditResult = editResults[editResults.length - 1];
@@ -311,7 +311,7 @@ export function createNoErrorsEvaluator() {
   return {
     name: 'NoErrors',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
       const hasErrors = output.errors && output.errors.length > 0;
       return {
@@ -330,7 +330,7 @@ export function createRejectionEvaluator() {
   return {
     name: 'Rejection',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({
       input,
       output,
@@ -392,7 +392,7 @@ export function createStructuralCorrectnessEvaluator() {
   return {
     name: 'StructuralCorrectness',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({
       output,
       expected,
@@ -508,7 +508,7 @@ export function createBulkOperationsShapeEvaluator() {
   return {
     name: 'BulkOperationsShape',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({
       output,
       expected,
@@ -640,7 +640,7 @@ export function createEditPreservationEvaluator() {
   return {
     name: 'EditPreservation',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({
       input,
       output,
@@ -898,7 +898,7 @@ export function createLiquidCorrectnessEvaluator() {
   return {
     name: 'LiquidCorrectness',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({
       output,
     }: {
@@ -991,7 +991,7 @@ export function createLiquidPresenceEvaluator() {
   return {
     name: 'LiquidPresence',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({
       output,
       expected,
@@ -1097,7 +1097,7 @@ export function createEfficiencyEvaluator() {
   return {
     name: 'Efficiency',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({
       output,
       expected,
@@ -1198,7 +1198,7 @@ export function createLatencyEvaluator({ maxSeconds = 60 }: { maxSeconds?: numbe
   return {
     name: 'Latency',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
       const { latencyMs } = output;
       if (latencyMs == null) {
@@ -1224,7 +1224,7 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
   return {
     name: 'Criteria',
     kind: 'LLM' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({
       input,
       output,
@@ -1343,7 +1343,7 @@ export function createSelfCorrectionEvaluator() {
   return {
     name: 'SelfCorrection',
     kind: 'CODE' as const,
-    direction: 'maximize',
+    direction: 'maximize' as const,
     evaluate: async ({
       input,
       output,
