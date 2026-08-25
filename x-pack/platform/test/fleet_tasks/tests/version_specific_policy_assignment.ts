@@ -474,9 +474,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
       // appear quickly. Give it a generous window for ES indexing to propagate.
       await retry.tryForTime(30000, async () => {
         const fleetPolicies = await getFleetPolicies(policyId);
-        const variantDocs = fleetPolicies.filter(
-          (p: any) => p.policy_id === outOfSetVariantId
-        );
+        const variantDocs = fleetPolicies.filter((p: any) => p.policy_id === outOfSetVariantId);
         const maxRevisionIdx = Math.max(...variantDocs.map((p: any) => p.revision_idx as number));
         // The variant must have been rewritten with a revision_idx higher than the initial 1,
         // proving that deployPolicies included '7.17' in the deploy set.
