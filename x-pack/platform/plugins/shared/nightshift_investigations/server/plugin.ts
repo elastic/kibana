@@ -17,7 +17,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
-import type { NightshiftInvestigationsConfig } from './config';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
@@ -35,12 +34,10 @@ export class NightshiftInvestigationsPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly initContext: PluginInitializerContext<NightshiftInvestigationsConfig>;
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
 
-  constructor(ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
-    this.initContext = ctx;
+  constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
   }
 
@@ -48,16 +45,8 @@ export class NightshiftInvestigationsPlugin
     core: CoreSetup<NightshiftInvestigationsStartDeps, NightshiftInvestigationsServerStart>,
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
+    // Core gates the plugin on xpack.nightshift_investigations.enabled.
     this.workflowsManagement = plugins.workflowsManagement;
-
-    const { enabled } = this.initContext.config.get<NightshiftInvestigationsConfig>();
-
-    if (!enabled) {
-      this.logger.info(
-        'nightshift_investigations is disabled via xpack.nightshift_investigations.enabled'
-      );
-      return;
-    }
 
     const getInvestigationsClient = (request: KibanaRequest, spaceId?: string) =>
       new NightshiftInvestigationsClient(

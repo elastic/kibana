@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const configSchema = schema.object({
+  // Reserved: Core skips loading this plugin entirely when false.
   enabled: schema.boolean({ defaultValue: false }),
 });
 
