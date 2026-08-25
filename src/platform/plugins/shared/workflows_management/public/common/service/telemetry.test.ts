@@ -1484,4 +1484,168 @@ describe('WorkflowsBaseTelemetry', () => {
       expect(eventData).not.toHaveProperty('origin');
     });
   });
+
+  describe('reportWorkflowExecutionsPageViewed', () => {
+    it('reports the executions page view', () => {
+      telemetry.reportWorkflowExecutionsPageViewed();
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsPageViewed,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsPageViewed],
+        })
+      );
+      expect(mockClient.reportEvent).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('reportWorkflowExecutionsFilterApplied', () => {
+    it('reports a filter with multiple active slots', () => {
+      telemetry.reportWorkflowExecutionsFilterApplied({
+        filterTypes: ['status', 'workflowId'],
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsFilterApplied,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsFilterApplied],
+          filterTypes: ['status', 'workflowId'],
+        })
+      );
+    });
+
+    it('reports a filter with a time range', () => {
+      telemetry.reportWorkflowExecutionsFilterApplied({
+        filterTypes: ['timeRange'],
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsFilterApplied,
+        expect.objectContaining({
+          filterTypes: ['timeRange'],
+        })
+      );
+    });
+
+    it('reports a filter with a KQL query', () => {
+      telemetry.reportWorkflowExecutionsFilterApplied({
+        filterTypes: ['query'],
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsFilterApplied,
+        expect.objectContaining({
+          filterTypes: ['query'],
+        })
+      );
+    });
+
+    it('reports a filter with no active slots', () => {
+      telemetry.reportWorkflowExecutionsFilterApplied({ filterTypes: [] });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsFilterApplied,
+        expect.objectContaining({
+          filterTypes: [],
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowExecutionsSearchUsed', () => {
+    it('reports search used when query is non-empty', () => {
+      telemetry.reportWorkflowExecutionsSearchUsed({ hasQuery: true });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsSearchUsed,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsSearchUsed],
+          hasQuery: true,
+        })
+      );
+    });
+
+    it('reports search used when query is empty', () => {
+      telemetry.reportWorkflowExecutionsSearchUsed({ hasQuery: false });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsSearchUsed,
+        expect.objectContaining({
+          hasQuery: false,
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowExecutionsDetailOpened', () => {
+    it('reports the execution ID when the detail flyout is opened', () => {
+      telemetry.reportWorkflowExecutionsDetailOpened({ executionId: 'exec-123' });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsDetailOpened,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsDetailOpened],
+          executionId: 'exec-123',
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowExecutionsStepExpanded', () => {
+    it('reports the step type when a step node is expanded', () => {
+      telemetry.reportWorkflowExecutionsStepExpanded({ stepType: 'http' });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsStepExpanded,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsStepExpanded],
+          stepType: 'http',
+        })
+      );
+    });
+
+    it('reports the step type for container nodes', () => {
+      telemetry.reportWorkflowExecutionsStepExpanded({ stepType: 'foreach-iteration' });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsStepExpanded,
+        expect.objectContaining({
+          stepType: 'foreach-iteration',
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowExecutionsOpenInEditorClicked', () => {
+    it('reports a click from the table row actions menu', () => {
+      telemetry.reportWorkflowExecutionsOpenInEditorClicked({
+        workflowId: 'wf-1',
+        origin: 'table_actions',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked],
+          workflowId: 'wf-1',
+          origin: 'table_actions',
+        })
+      );
+    });
+
+    it('reports a click from the flyout footer actions menu', () => {
+      telemetry.reportWorkflowExecutionsOpenInEditorClicked({
+        workflowId: 'wf-2',
+        origin: 'flyout_actions',
+      });
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked,
+        expect.objectContaining({
+          workflowId: 'wf-2',
+          origin: 'flyout_actions',
+        })
+      );
+    });
+  });
 });
