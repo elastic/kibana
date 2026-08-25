@@ -328,7 +328,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       expect(result.state.hasAlreadyDoneCleanup).toBe(true);
     });
 
-    it('should leave cleanup unfinished if post-cleanup sync fails', async () => {
+    it('should still mark cleanup done if post-cleanup sync fails after in-process retries', async () => {
       const taskInstance = getMockTaskInstance();
       jest.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
         performCleanupSync: true,
@@ -348,8 +348,21 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.error).toBeDefined();
-      expect(result.state.hasAlreadyDoneCleanup).toBe(false);
+      expect(result.state.hasAlreadyDoneCleanup).toBe(true);
     }, 30_000);
+
+    it('should mark cleanup done when there are no private locations to sync', async () => {
+      const taskInstance = getMockTaskInstance();
+      jest.spyOn(task, 'cleanUpDuplicatedPackagePolicies').mockResolvedValue({
+        performCleanupSync: true,
+      });
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
+
+      const result = await task.runTask({ taskInstance });
+
+      expect(result.error).toBeUndefined();
+      expect(result.state.hasAlreadyDoneCleanup).toBe(true);
+    });
   });
 
   describe('hasAnyDataChanged', () => {

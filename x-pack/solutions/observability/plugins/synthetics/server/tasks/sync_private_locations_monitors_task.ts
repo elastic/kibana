@@ -138,6 +138,7 @@ export class SyncPrivateLocationMonitorsTask {
 
       if (allPrivateLocations.length === 0) {
         this.debugLog(`No private locations found, skipping sync of private location monitors`);
+        taskState.hasAlreadyDoneCleanup = true;
         return { state: taskState, schedule: { interval } };
       }
       if (performCleanupSync) {
@@ -146,30 +147,35 @@ export class SyncPrivateLocationMonitorsTask {
             `locations count: ${allPrivateLocations.length}`
         );
 
-        if (allPrivateLocations.length > 1) {
-          for (const location of allPrivateLocations) {
-            await runTaskPerPrivateLocation({
-              server: this.serverSetup,
-              privateLocationId: location.id,
-            });
-          }
-        } else {
-          // Recreating missing policies can race Fleet/ESO; retry in-process
-          // because this task is maxAttempts: 1 and the next schedule is minutes out.
-          await pRetry(
-            async () => {
-              await this.deployPackagePolicies.syncAllPackagePolicies({
-                allPrivateLocations,
-                soClient,
-                encryptedSavedObjects,
+        try {
+          if (allPrivateLocations.length > 1) {
+            for (const location of allPrivateLocations) {
+              await runTaskPerPrivateLocation({
+                server: this.serverSetup,
+                privateLocationId: location.id,
               });
-            },
-            { retries: 3, minTimeout: 1000, factor: 2, randomize: false }
-          );
+            }
+          } else {
+            // Recreating missing policies can race Fleet/ESO; retry in-process
+            // because this task is maxAttempts: 1 and the next schedule is minutes out.
+            await pRetry(
+              async () => {
+                await this.deployPackagePolicies.syncAllPackagePolicies({
+                  allPrivateLocations,
+                  soClient,
+                  encryptedSavedObjects,
+                });
+              },
+              { retries: 3, minTimeout: 1000, factor: 2, randomize: false }
+            );
+          }
+          this.debugLog(`Completed post-cleanup sync`);
+        } finally {
+          // Always stop after this run's follow-up attempt so a permanent
+          // recreate failure cannot reschedule cleanup forever.
+          taskState.hasAlreadyDoneCleanup = true;
+          taskState.maxCleanUpRetries = 3;
         }
-        this.debugLog(`Completed post-cleanup sync`);
-        taskState.hasAlreadyDoneCleanup = true;
-        taskState.maxCleanUpRetries = 3;
         return defaultState;
       }
 
