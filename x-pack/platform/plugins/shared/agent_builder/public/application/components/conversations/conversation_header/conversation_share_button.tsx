@@ -117,9 +117,6 @@ const accessModeOptions = [
   },
 ];
 
-const getProfileDisplayName = (profile: UserProfileWithAvatar | undefined, fallback: string) =>
-  profile ? getUserDisplayName(profile.user) : fallback;
-
 const profileToOption = (profile: UserProfileWithAvatar): UserOption => ({
   label: getUserDisplayName(profile.user),
   value: profile.uid,
@@ -127,7 +124,7 @@ const profileToOption = (profile: UserProfileWithAvatar): UserOption => ({
   profile,
 });
 
-const MemberRow: React.FC<{
+const UserAccessRow: React.FC<{
   name: string;
   profile?: UserProfileWithAvatar;
   badge: string;
@@ -160,6 +157,7 @@ const MemberRow: React.FC<{
         <EuiFlexItem grow={false}>
           <EuiBadge>{badge}</EuiBadge>
         </EuiFlexItem>
+
         {onRemove ? (
           <EuiFlexItem grow={false}>
             <EuiToolTip content={labels.removeMember} disableScreenReaderOutput>
@@ -178,6 +176,26 @@ const MemberRow: React.FC<{
       </EuiFlexGroup>
     </EuiFlexItem>
   </EuiFlexGroup>
+);
+
+const OwnerRow: React.FC<{
+  profile: UserProfileWithAvatar;
+}> = ({ profile }) => (
+  <UserAccessRow name={getUserDisplayName(profile.user)} profile={profile} badge={labels.author} />
+);
+
+const MemberRow: React.FC<{
+  profile: UserProfileWithAvatar;
+  onRemove: () => void;
+  isDisabled: boolean;
+}> = ({ profile, onRemove, isDisabled }) => (
+  <UserAccessRow
+    name={getUserDisplayName(profile.user)}
+    profile={profile}
+    badge={labels.member}
+    onRemove={onRemove}
+    isDisabled={isDisabled}
+  />
 );
 
 export const ConversationShareButton: React.FC = () => {
@@ -204,7 +222,6 @@ export const ConversationShareButton: React.FC = () => {
   }, [conversation?.access_control]);
 
   const ownerId = conversation?.user.id;
-  const ownerFallbackName = conversation?.user.username ?? '';
   const profileUids = [ownerId, ...memberIds].filter((uid): uid is string => Boolean(uid));
   const { data: profiles = [] } = useConversationAccessControlProfiles({
     uids: profileUids,
@@ -318,7 +335,6 @@ export const ConversationShareButton: React.FC = () => {
   }
 
   const ownerProfile = ownerId ? profileByUid.get(ownerId) : undefined;
-  const ownerName = getProfileDisplayName(ownerProfile, ownerFallbackName);
   const isPublic = accessMode === ConversationAccessControlMode.Public;
 
   return (
@@ -433,18 +449,23 @@ export const ConversationShareButton: React.FC = () => {
           </EuiFormRow>
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            <EuiFlexItem>
-              <MemberRow name={ownerName} profile={ownerProfile} badge={labels.author} />
-            </EuiFlexItem>
+            {ownerProfile ? (
+              <EuiFlexItem>
+                <OwnerRow profile={ownerProfile} />
+              </EuiFlexItem>
+            ) : null}
+
             {memberIds.map((memberId) => {
               const memberProfile = profileByUid.get(memberId);
-              const memberName = getProfileDisplayName(memberProfile, memberId);
+
+              if (!memberProfile) {
+                return null;
+              }
+
               return (
                 <EuiFlexItem key={memberId}>
                   <MemberRow
-                    name={memberName}
                     profile={memberProfile}
-                    badge={labels.member}
                     isDisabled={isSaving}
                     onRemove={() => onRemoveUser(memberId)}
                   />

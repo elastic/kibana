@@ -11,8 +11,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
-  type Conversation,
 } from '@kbn/agent-builder-common';
+import type { ConversationWithPermissions } from '../../../../../common/http_api/conversations';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import {
   useConversation,
@@ -82,13 +82,18 @@ const baseConversation = {
     access_mode: ConversationAccessControlMode.Private,
     entries: [],
   },
-} as unknown as Conversation;
+  permissions: {
+    rename: false,
+    delete: false,
+    update_access_control: true,
+  },
+} as unknown as ConversationWithPermissions;
 
 const renderShareButton = ({
   conversation = baseConversation,
   canUpdateAccessControl = true,
 }: {
-  conversation?: Conversation;
+  conversation?: ConversationWithPermissions;
   canUpdateAccessControl?: boolean;
 } = {}) => {
   mockUseConversationId.mockReturnValue(conversation?.id);
@@ -98,7 +103,7 @@ const renderShareButton = ({
     isFetching: false,
     isFetched: true,
     isError: false,
-    error: undefined,
+    error: null,
   });
   mockUseHasPersistedConversation.mockReturnValue(Boolean(conversation));
   mockUseConversationPermissions.mockReturnValue({
