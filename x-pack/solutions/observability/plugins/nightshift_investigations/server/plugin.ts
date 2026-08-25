@@ -37,6 +37,7 @@ export class NightshiftInvestigationsPlugin
   private readonly logger: Logger;
   private workflowsManagement?: NightshiftInvestigationsSetupDeps['workflowsManagement'];
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
+  private agentBuilderConversations?: NightshiftInvestigationsStartDeps['agentBuilder'];
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
@@ -58,7 +59,8 @@ export class NightshiftInvestigationsPlugin
         this.workflowsManagement,
         this.spaces,
         this.logger,
-        spaceId
+        spaceId,
+        this.agentBuilderConversations
       );
 
     if (plugins.workflowsManagement) {
@@ -87,6 +89,7 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsStartDeps
   ): NightshiftInvestigationsServerStart {
     this.spaces = plugins.spaces;
+    this.agentBuilderConversations = plugins.agentBuilder;
 
     return {
       getInvestigationsClient: (request) =>
@@ -94,7 +97,9 @@ export class NightshiftInvestigationsPlugin
           request,
           this.workflowsManagement,
           this.spaces,
-          this.logger
+          this.logger,
+          undefined,
+          this.agentBuilderConversations
         ),
     };
   }

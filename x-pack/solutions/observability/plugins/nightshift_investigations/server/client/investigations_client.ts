@@ -11,6 +11,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   GetInvestigationResponse,
   InvestigationStatus,
@@ -116,7 +117,8 @@ export class NightshiftInvestigationsClient {
     private readonly logger: Logger,
     // Explicit override for contexts where the request cannot carry space info (e.g. workflow step
     // definitions using getFakeRequest). See https://github.com/elastic/kibana/issues/284786.
-    private readonly spaceIdOverride?: string
+    private readonly spaceIdOverride?: string,
+    private readonly conversationsStart?: AgentBuilderPluginStart
   ) {}
 
   private getSpaceId(): string {
@@ -300,6 +302,47 @@ export class NightshiftInvestigationsClient {
         conversation_title: undefined,
       };
     });
+
+    // Enrich with conversation titles. The investigate step stamps workflow_execution_id
+    // on each conversation as metadata; we look up conversation_id via step output, then
+    // fetch the title. Failures are silently swallowed — the title is cosmetic.
+    if (this.conversationsStart && results.length > 0) {
+      try {
+        const conversationsClient = await this.conversationsStart.conversations.getScopedClient({
+          request: this.request,
+        });
+
+        const executionDetails = await Promise.allSettled(
+          results.map((r) =>
+            this.workflowsManagement!.management.getWorkflowExecution(r.investigation_id, spaceId, {
+              includeOutput: true,
+            })
+          )
+        );
+
+        const titleFetches = executionDetails.map(async (detail, idx) => {
+          if (detail.status === 'rejected' || !detail.value) return;
+          const stepExecutions = detail.value.stepExecutions ?? [];
+          const stepWithConversation = stepExecutions.find(
+            (s) => typeof (s.output as Record<string, unknown>)?.conversation_id === 'string'
+          );
+          const conversationId = asString(
+            (stepWithConversation?.output as Record<string, unknown>)?.conversation_id
+          );
+          if (!conversationId) return;
+          try {
+            const conversation = await conversationsClient.get(conversationId);
+            results[idx].conversation_title = conversation.title;
+          } catch {
+            // title unavailable — keep undefined
+          }
+        });
+
+        await Promise.allSettled(titleFetches);
+      } catch {
+        // non-critical — list still returns without titles
+      }
+    }
 
     return { results, page: result.page, size: result.size, total: result.total };
   }
