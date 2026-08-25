@@ -43,6 +43,7 @@ export class LensWorkspace {
   readonly inlineEditor;
   readonly discardChangesModal;
   readonly autoApplyToggle;
+  readonly noResults;
 
   private readonly goBackToAppButton;
   private readonly confirmModalConfirmButton;
@@ -69,6 +70,9 @@ export class LensWorkspace {
     this.inlineEditor = this.page.getByTestId('customizeLens');
     this.discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
     this.autoApplyToggle = this.page.testSubj.locator('lnsToggleAutoApply');
+    this.noResults = this.page.testSubj
+      .locator('lnsVisualizationContainer')
+      .getByText('No results found', { exact: true });
 
     this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');

@@ -9,6 +9,7 @@ import { createLazyPageObject, LensApp, type ScoutPage } from '@kbn/scout';
 import { LensDatatable } from './lens_datatable';
 import { LensDimensions } from './lens_dimensions';
 import { LensDragDrop } from './lens_drag_drop';
+import { LensFields } from './lens_fields';
 import { LensLayers } from './lens_layers';
 import { LensMetric } from './lens_metric';
 import { LensStyle } from './lens_style';
@@ -29,6 +30,8 @@ export class LensEditorApp extends LensApp {
   public readonly metric: LensMetric;
   /** Datatable cell / header reading. */
   public readonly datatable: LensDatatable;
+  /** Data-panel field creation, editing, and removal. */
+  public readonly fields: LensFields;
   /** Workspace chrome: navigation, apply/discard, settings, tag cloud, formula. */
   public readonly workspace: LensWorkspace;
   /**
@@ -51,6 +54,9 @@ export class LensEditorApp extends LensApp {
     this.style = createLazyPageObject(LensStyle, page);
     this.metric = createLazyPageObject(LensMetric, page);
     this.datatable = createLazyPageObject(LensDatatable, page);
+    this.fields = createLazyPageObject(LensFields, page, {
+      getFieldListPanelFieldLocator: (field: string) => this.getFieldListPanelFieldLocator(field),
+    });
     this.workspace = createLazyPageObject(LensWorkspace, page, {
       closeDimensionEditorButton: this.closeDimensionEditorButton,
       waitForLensApp: () => this.waitForLensApp(),
