@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getOAuthProtectedResource } from '../../get_oauth_protected_resource';
 import type { RouteDefinitionParams } from '..';
+import { getOAuthProtectedResource } from '../../get_oauth_protected_resource';
 
 export function defineOAuthProtectedResourceRoute({
   router,
