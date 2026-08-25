@@ -37,13 +37,18 @@ absence rather than assume every KI has it. `attributes` is `flattened`, so extr
 with `FIELD_EXTRACT` before filtering or keeping it:
 
 ```esql
-FROM ai-index-* METADATA _id, _index, _score
+FROM ai-index-*
 | WHERE type == "detection"
 | EVAL esql = FIELD_EXTRACT(attributes, "esql")
 | WHERE esql IS NOT NULL
 | KEEP title, description, esql
 | LIMIT <n>
 ```
+
+When the KI stores an array of queries, the extracted value is multivalued: `IS NOT NULL`
+still filters correctly, but scalar comparisons like `==` skip multivalued rows. Add
+`| MV_EXPAND esql` after the `EVAL` to get one row per query when you need per-query
+filtering.
 
 ---
 

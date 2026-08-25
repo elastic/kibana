@@ -10,8 +10,8 @@ tags:
   - knowledge-indicators
 consts:
   # Context Engine AI index id; createKi registers the AI index if missing.
+  # Its backing index is ai-index-idx-{{ consts.ai_index_id }}.
   ai_index_id: ki-example
-  target_index: ai-index-idx-ki-example
   indices:
     - raw-cases-all
     - raw-articles-all
@@ -23,7 +23,7 @@ steps:
   - name: ensure_target_index
     type: elasticsearch.indices.create
     with:
-      index: "{{ consts.target_index }}"
+      index: "ai-index-idx-{{ consts.ai_index_id }}"
     on-failure:
       continue: true
   - name: loop_indices
@@ -143,7 +143,7 @@ steps:
               - when_to_use
               - access_patterns
         timeout: 120s
-      # Build the KI once so verify_ki and sink_index_ki see the same document.
+      # Build the KI once so verify_ki and the sink steps see the same document.
       # context-engine.createKi sets @timestamp and the document id.
       - name: build_ki
         type: data.set
@@ -154,7 +154,7 @@ steps:
             tags:
               - index-selection
             attributes:
-              # Stable dedup key: on re-runs look this up and switch to updateKi (see "KI upsert").
+              # Stable dedup key; find_existing_ki looks this up so re-runs update instead of append.
               slug: "{{ foreach.item }}"
               # Runnable ES|QL always goes in attributes.esql — the field the verifiers read.
               # Here: each access pattern's esql_example (?param templates stay in content).
@@ -187,11 +187,37 @@ steps:
         type: if
         condition: "${{ steps.verify_ki.output.passed }}"
         steps:
-          - name: sink_index_ki
-            type: context-engine.createKi
+          # Re-runs update the existing KI for this slug instead of appending a duplicate.
+          - name: find_existing_ki
+            type: elasticsearch.esql.query
             with:
-              ai_index_id: "{{ consts.ai_index_id }}"
-              ki: "${{ variables.ki }}"
+              query: |-
+                FROM ai-index-idx-{{ consts.ai_index_id }} METADATA _id
+                | WHERE FIELD_EXTRACT(attributes, "slug") == "{{ foreach.item }}"
+                | SORT @timestamp DESC
+                | LIMIT 1
+                | KEEP _id
+          - name: count_existing_ki
+            type: data.set
+            with:
+              existing_ki_count: "${{ steps.find_existing_ki.output.values | size | default: 0 }}"
+          - name: upsert_ki
+            type: if
+            condition: "${{ variables.existing_ki_count == 1 }}"
+            steps:
+              # The fresh profile supersedes the stored KI, so updateKi sends the full re-derived fields.
+              - name: update_index_ki
+                type: context-engine.updateKi
+                with:
+                  ai_index_id: "{{ consts.ai_index_id }}"
+                  ki_id: "{{ steps.find_existing_ki.output.values[0][0] }}"
+                  ki: "${{ variables.ki }}"
+            else:
+              - name: sink_index_ki
+                type: context-engine.createKi
+                with:
+                  ai_index_id: "{{ consts.ai_index_id }}"
+                  ki: "${{ variables.ki }}"
         else:
           - name: report_verification_failure
             type: console
