@@ -8,7 +8,10 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { createEsqlValidRuntimeVerifier, ESQL_VALID_RUNTIME_VERIFIER_ID } from './esql_valid_runtime';
+import {
+  createEsqlValidRuntimeVerifier,
+  ESQL_VALID_RUNTIME_VERIFIER_ID,
+} from './esql_valid_runtime';
 import type { KiVerifierContext, KnowledgeIndicator } from '../types';
 
 const VALID_QUERY = 'FROM logs-* | WHERE event.outcome == "failure" | LIMIT 10';
