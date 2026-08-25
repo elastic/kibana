@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
-  executeRuleOperations,
+  executeRuleOperations as executeRuleOperationsImpl,
   RuleOperationValidationError,
   type RuleOperation,
 } from './operations';
@@ -22,6 +25,36 @@ const createMockEsClient = () => {
   } as never);
   return esClient;
 };
+
+const createMockSoClient = (existingIds?: string[]): jest.Mocked<SavedObjectsClientContract> => {
+  const soClient = savedObjectsClientMock.create();
+  soClient.bulkGet.mockImplementation(async (objects) => ({
+    saved_objects: objects.map((obj) =>
+      existingIds === undefined || existingIds.includes(obj.id)
+        ? { id: obj.id, type: obj.type, attributes: {}, references: [] }
+        : {
+            id: obj.id,
+            type: obj.type,
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: `Saved object [dashboard/${obj.id}] not found`,
+            },
+            attributes: {},
+            references: [],
+          }
+    ),
+  }));
+  return soClient;
+};
+
+const executeRuleOperations = (
+  data: Partial<RuleAttachmentData>,
+  operations: RuleOperation[],
+  esClient?: IScopedClusterClient,
+  savedObjectsClient: SavedObjectsClientContract = createMockSoClient(),
+  options: { isNew?: boolean } = {}
+) => executeRuleOperationsImpl(data, operations, esClient, savedObjectsClient, options);
 
 describe('executeRuleOperations', () => {
   describe('set_query with ES|QL validation', () => {
@@ -442,6 +475,61 @@ describe('executeRuleOperations', () => {
     });
   });
 
+  describe('set_query no_data cross-field validation', () => {
+    it('throws when a no_data block is present but no_data_strategy is not set', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
+          },
+        },
+      ];
+
+      await expect(executeRuleOperations({}, ops)).rejects.toThrow(
+        'query.no_data is only allowed when no_data_strategy is set to a non-"none" value'
+      );
+    });
+
+    it('throws when a no_data_strategy is set but no no_data block is provided (standalone)', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+          },
+          no_data_strategy: 'last_known_status',
+        },
+      ];
+
+      const promise = executeRuleOperations({}, ops);
+      await expect(promise).rejects.toThrow('requires a no_data block in the query');
+      await expect(executeRuleOperations({}, ops)).rejects.toBeInstanceOf(
+        RuleOperationValidationError
+      );
+    });
+
+    it('passes when no_data_strategy is set and a no_data block is provided', async () => {
+      const ops: RuleOperation[] = [
+        {
+          operation: 'set_query',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
+            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
+          },
+          no_data_strategy: 'last_known_status',
+        },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+      expect(result.data.no_data_strategy).toBe('last_known_status');
+    });
+  });
+
   describe('set_grouping with column validation', () => {
     it('accepts grouping fields that exist in query columns', async () => {
       const esClient = createMockEsClient();
@@ -508,7 +596,9 @@ describe('executeRuleOperations', () => {
     it('throws when isNew is true and no name is provided', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_kind', kind: 'alert' }];
 
-      await expect(executeRuleOperations({}, ops, undefined, { isNew: true })).rejects.toThrow(
+      await expect(
+        executeRuleOperations({}, ops, undefined, createMockSoClient(), { isNew: true })
+      ).rejects.toThrow(
         'A rule name is required when creating a new rule. Use a set_metadata operation with a name.'
       );
     });
@@ -516,7 +606,9 @@ describe('executeRuleOperations', () => {
     it('does not throw when isNew is true and a name is provided', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule' }];
 
-      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.name).toBe('My Rule');
     });
@@ -526,7 +618,9 @@ describe('executeRuleOperations', () => {
     it('stamps the agent-builder tag on a newly created rule', async () => {
       const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule' }];
 
-      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
     });
@@ -536,7 +630,9 @@ describe('executeRuleOperations', () => {
         { operation: 'set_metadata', name: 'My Rule', tags: ['production', 'cpu'] },
       ];
 
-      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual(['production', 'cpu', AGENT_BUILDER_TAG]);
     });
@@ -546,7 +642,9 @@ describe('executeRuleOperations', () => {
         { operation: 'set_metadata', name: 'My Rule', tags: [AGENT_BUILDER_TAG] },
       ];
 
-      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual([AGENT_BUILDER_TAG]);
     });
@@ -555,7 +653,9 @@ describe('executeRuleOperations', () => {
       const maxTags = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
       const ops: RuleOperation[] = [{ operation: 'set_metadata', name: 'My Rule', tags: maxTags }];
 
-      const result = await executeRuleOperations({}, ops, undefined, { isNew: true });
+      const result = await executeRuleOperations({}, ops, undefined, createMockSoClient(), {
+        isNew: true,
+      });
 
       expect(result.data.metadata?.tags).toEqual(maxTags);
       expect(result.data.metadata?.tags).toHaveLength(20);
@@ -567,7 +667,9 @@ describe('executeRuleOperations', () => {
       };
       const ops: RuleOperation[] = [{ operation: 'set_metadata', description: 'updated' }];
 
-      const result = await executeRuleOperations(existing, ops, undefined, { isNew: false });
+      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), {
+        isNew: false,
+      });
 
       expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
     });
@@ -578,7 +680,9 @@ describe('executeRuleOperations', () => {
       };
       const ops: RuleOperation[] = [{ operation: 'set_metadata', tags: ['cpu'] }];
 
-      const result = await executeRuleOperations(existing, ops, undefined, { isNew: false });
+      const result = await executeRuleOperations(existing, ops, undefined, createMockSoClient(), {
+        isNew: false,
+      });
 
       expect(result.data.metadata?.tags).toEqual(['cpu', AGENT_BUILDER_TAG]);
     });
@@ -676,9 +780,13 @@ describe('executeRuleOperations', () => {
 
     it('wraps missing-name error on new rule', async () => {
       await expectValidationError(
-        executeRuleOperations({}, [{ operation: 'set_kind', kind: 'alert' }], undefined, {
-          isNew: true,
-        })
+        executeRuleOperations(
+          {},
+          [{ operation: 'set_kind', kind: 'alert' }],
+          undefined,
+          createMockSoClient(),
+          { isNew: true }
+        )
       );
     });
 
@@ -753,6 +861,23 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops);
 
       expect(result.data.metadata?.name).toBe('My Rule');
+    });
+
+    it('passes validation for a complete rule with dashboard artifacts', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1'] },
+        { operation: 'validate' },
+      ];
+
+      const result = await executeRuleOperations(validRule, ops);
+
+      expect(result.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboardId: 'dash-1' },
+        },
+      ]);
     });
 
     it('throws RuleOperationValidationError when kind is missing', async () => {
@@ -866,6 +991,159 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops);
 
       expect(result.data.schedule).toEqual({ every: '1m', lookback: '5m' });
+    });
+  });
+
+  describe('set_dashboards', () => {
+    it('stores dashboard IDs as dashboard artifacts matching the create/update API', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboardId: 'dash-1' },
+        },
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboardId: 'dash-2' },
+        },
+      ]);
+      expect(result.data.artifacts?.[0].id).not.toBe(result.data.artifacts?.[1].id);
+    });
+
+    it('replaces previously linked dashboards and preserves other artifacts', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+          { id: 'dashboard-old', type: 'dashboard', data: { dashboardId: 'old-dash' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: ['new-dash'] }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboardId: 'new-dash' },
+        },
+      ]);
+    });
+
+    it('reuses the existing artifact id when the same dashboard is already attached', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [{ id: 'dashboard-keep', type: 'dashboard', data: { dashboardId: 'dash-1' } }],
+      };
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'dashboard-keep', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboardId: 'dash-2' },
+        },
+      ]);
+    });
+
+    it('deduplicates dashboard IDs', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-1'] },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.artifacts).toHaveLength(1);
+      expect(result.data.artifacts?.[0].data).toEqual({ dashboardId: 'dash-1' });
+    });
+
+    it('unlinks all dashboards when passed an empty array', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+          { id: 'dashboard-old', type: 'dashboard', data: { dashboardId: 'old-dash' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: [] }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+      ]);
+    });
+
+    it('throws when merged artifacts would exceed the API cap', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: Array.from({ length: 99 }, (_, index) => ({
+          id: `runbook-${index}`,
+          type: 'runbook',
+          data: { content: `step ${index}` },
+        })),
+      };
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
+      ];
+
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(/at most 100 artifacts/);
+    });
+
+    it('rejects dashboard IDs that are not dashboard saved objects', async () => {
+      const soClient = createMockSoClient(['dash-1']);
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'missing-dash'] },
+      ];
+
+      await expect(executeRuleOperations({}, ops, undefined, soClient)).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations({}, ops, undefined, soClient)).rejects.toThrow(
+        /Dashboard saved object\(s\) not found: missing-dash/
+      );
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: 'dashboard', id: 'dash-1' },
+        { type: 'dashboard', id: 'missing-dash' },
+      ]);
+    });
+
+    it('accepts dashboard IDs that resolve to dashboard saved objects', async () => {
+      const soClient = createMockSoClient(['dash-1', 'dash-2']);
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
+      ];
+
+      const result = await executeRuleOperations({}, ops, undefined, soClient);
+
+      expect(result.data.artifacts).toHaveLength(2);
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        { type: 'dashboard', id: 'dash-1' },
+        { type: 'dashboard', id: 'dash-2' },
+      ]);
+    });
+
+    it('does not look up saved objects when unlinking all dashboards', async () => {
+      const soClient = createMockSoClient([]);
+      const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: [] }];
+
+      const result = await executeRuleOperations({}, ops, undefined, soClient);
+
+      expect(soClient.bulkGet).not.toHaveBeenCalled();
+      expect(result.data.artifacts).toEqual([]);
     });
   });
 });

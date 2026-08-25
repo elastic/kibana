@@ -8,7 +8,7 @@
 
 const { readFileSync, writeFileSync } = require('fs');
 const { fromRoot } = require('@kbn/repo-info');
-const { resolveTriageModelId } = require('./failure_context_helpers');
+const { TRIAGE_OPENROUTER_CONNECTOR_ID } = require('./failure_context_helpers');
 const { summarizeFailuresWithModel } = require('./summarize_failures_with_model');
 const { collectFailureContext } = require('./collect_failure_context');
 
@@ -129,9 +129,7 @@ function formatTriageError(error) {
 }
 
 async function main() {
-  const triageModelId = resolveTriageModelId() || 'unknown';
-
-  let triage = { modelId: triageModelId, groups: [] };
+  let triage = { modelId: TRIAGE_OPENROUTER_CONNECTOR_ID, groups: [] };
   try {
     console.error('--- Collecting failure context for triage summary');
     const context = collectFailureContext({
@@ -142,13 +140,13 @@ async function main() {
       buildUrl,
     });
 
-    console.error(`--- Generating triage summary (model: ${triageModelId})`);
+    console.error(`--- Generating triage summary (model: ${TRIAGE_OPENROUTER_CONNECTOR_ID})`);
     const { groups, modelId } = await summarizeFailuresWithModel(context);
     triage = { modelId, groups };
   } catch (error) {
     const message = formatTriageError(error);
     console.error(`--- Triage summary failed: ${message}`);
-    triage = { modelId: triageModelId, error: message };
+    triage = { modelId: TRIAGE_OPENROUTER_CONNECTOR_ID, error: message };
   }
 
   if (slackOutputPath) {
