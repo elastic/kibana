@@ -38,6 +38,7 @@ import type {
   SLOPublicStart,
 } from './types';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
+import { createUnwrappingSloClient } from './utils/unwrap_slo_client';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
 
 export class SLOPlugin
@@ -128,6 +129,11 @@ export class SLOPlugin
       if (hasPlatinumLicense) {
         const [coreStart, pluginsStart] = await core.getStartServices();
 
+        // Embeddables and their configuration flyouts don't render the ES query inspect
+        // flyout, so they need the inspection envelope (`_wrapped`/`_inspect`) stripped
+        // from route responses. See createUnwrappingSloClient.
+        const unwrappingSloClient = createUnwrappingSloClient(sloClient);
+
         pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           (serializedState?: SerializedPanelState<SloOverviewEmbeddableState>) => {
@@ -151,7 +157,11 @@ export class SLOPlugin
           const { getOverviewEmbeddableFactory } = await import(
             './embeddable/slo/overview/slo_embeddable_factory'
           );
-          return getOverviewEmbeddableFactory({ coreStart, pluginsStart, sloClient });
+          return getOverviewEmbeddableFactory({
+            coreStart,
+            pluginsStart,
+            sloClient: unwrappingSloClient,
+          });
         });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_ALERTS_EMBEDDABLE_ID, async () => {
@@ -159,7 +169,12 @@ export class SLOPlugin
             './embeddable/slo/alerts/slo_alerts_embeddable_factory'
           );
 
-          return getAlertsEmbeddableFactory({ coreStart, pluginsStart, sloClient, kibanaVersion });
+          return getAlertsEmbeddableFactory({
+            coreStart,
+            pluginsStart,
+            sloClient: unwrappingSloClient,
+            kibanaVersion,
+          });
         });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
@@ -169,7 +184,7 @@ export class SLOPlugin
           return getErrorBudgetEmbeddableFactory({
             coreStart,
             pluginsStart,
-            sloClient,
+            sloClient: unwrappingSloClient,
           });
         });
 
@@ -180,11 +195,11 @@ export class SLOPlugin
           return getBurnRateEmbeddableFactory({
             coreStart,
             pluginsStart,
-            sloClient,
+            sloClient: unwrappingSloClient,
           });
         });
 
-        registerSloUiActions(plugins.uiActions, coreStart, pluginsStart, sloClient);
+        registerSloUiActions(plugins.uiActions, coreStart, pluginsStart, unwrappingSloClient);
       }
     };
     registerEmbeddables();
