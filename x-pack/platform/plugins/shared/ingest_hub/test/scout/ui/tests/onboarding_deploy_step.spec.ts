@@ -114,10 +114,11 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
     // elb has identityFederationSupported=true → radio defaults to Identity Federation.
     // Switch to Access Keys so the static-keys form appears.
-    // Scope the getByLabel to the radio group to avoid false matches elsewhere on the page.
+    // EUI hides the real <input type="radio"> element for custom styling — click the
+    // visible label text instead so the change event fires.
     await page.testSubj
       .locator('managedIntegrationsSection-preferredMethodRadio')
-      .getByLabel('Access Keys')
+      .getByText('Access Keys')
       .click();
 
     // Wait for the lazy-loaded static-keys form to appear before filling.
