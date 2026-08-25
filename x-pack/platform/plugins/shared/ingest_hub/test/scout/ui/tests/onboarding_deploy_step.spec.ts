@@ -98,13 +98,6 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
       },
     });
 
-    // Intercept before clicking Deploy.
-    const deployRequestPromise = page.waitForRequest(
-      (req) =>
-        req.method() === 'POST' &&
-        /\/api\/fleet\/managed_integrations$/.test(new URL(req.url()).pathname)
-    );
-
     await page.route(
       (url) => /\/api\/fleet\/managed_integrations$/.test(url.pathname),
       (route) =>
@@ -117,17 +110,31 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
     // elb has identityFederationSupported=true → radio defaults to Identity Federation.
     // Switch to Access Keys so the static-keys form appears.
-    await page.getByLabel('Access Keys').click();
+    // Scope the getByLabel to the radio group to avoid false matches elsewhere on the page.
+    await page.testSubj
+      .locator('managedIntegrationsSection-preferredMethodRadio')
+      .getByLabel('Access Keys')
+      .click();
 
+    // Wait for the lazy-loaded static-keys form to appear before filling.
     const accessKeyField = page.testSubj.locator('awsStaticKeysForm-accessKeyId').locator('input');
     const secretKeyField = page.testSubj
       .locator('awsStaticKeysForm-secretAccessKey')
       .locator('input');
+    await expect(accessKeyField).toBeVisible();
     await accessKeyField.fill('AKIATEST');
     await secretKeyField.fill('secrettest');
 
-    await expect(page.testSubj.locator('managedIntegrationsSection-deployButton')).toBeEnabled();
-    await page.testSubj.locator('managedIntegrationsSection-deployButton').click();
+    const deployButton = page.testSubj.locator('managedIntegrationsSection-deployButton');
+    await expect(deployButton).toBeEnabled();
+
+    // Register waitForRequest just before clicking so the 10s window starts from the click.
+    const deployRequestPromise = page.waitForRequest(
+      (req) =>
+        req.method() === 'POST' &&
+        /\/api\/fleet\/managed_integrations$/.test(new URL(req.url()).pathname)
+    );
+    await deployButton.click();
 
     const deployRequest = await deployRequestPromise;
     const body = deployRequest.postDataJSON() as {
@@ -138,7 +145,10 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     expect(body.inputs['elb-aws-s3']).toBeDefined();
     expect(body.inputs['elb-aws-s3'].enabled).toBe(true);
 
-    // Success state renders after mocked response.
-    await expect(page.testSubj.locator('managedIntegrationsSection-successMessage')).toBeVisible();
+    // Success state: deploy button disappears and the Next button becomes enabled.
+    // (The success message is inside the collapsible section which closes on isDone,
+    // so we use the Next button — outside the section — as a stable indicator.)
+    await expect(deployButton).toBeHidden();
+    await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
   });
 });
