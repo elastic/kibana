@@ -1706,15 +1706,24 @@ describe('extract_iocs — Elastic-style end-to-end (Observations + GitHub IOC l
 describe('extract_iocs — mapping coverage guard', () => {
   // Exact set of keys declared in the extracted.iocs.properties block of
   // index_templates.ts. Must be kept in sync manually — that is the point.
-  const DECLARED_IOC_MAPPING_FIELDS = new Set<keyof ExtractedIoc>([
+  //
+  // The mapping is deliberately a superset of `ExtractedIoc`:
+  //   - `reference` / `block_index` are attached by the text-indicator-list
+  //     adapter after extraction, not emitted by `extractIocs`.
+  //   - `severity` is a reserved mapping field that nothing writes today. It is
+  //     listed here so the set still mirrors the mapping, but it is not on
+  //     `ExtractedIoc`, so the set is typed as strings rather than cast.
+  const DECLARED_IOC_MAPPING_FIELDS = new Set<string>([
     'type',
     'value',
     'defanged',
-    'severity' as keyof ExtractedIoc, // declared in mapping, optional on ExtractedIoc
+    'severity',
     'tier',
     'tier_heuristic',
     'tier_basis',
     'port',
+    'reference',
+    'block_index',
   ]);
 
   test('all ExtractedIoc fields are declared in the extracted.iocs mapping', () => {
@@ -1730,7 +1739,7 @@ describe('extract_iocs — mapping coverage guard', () => {
     };
 
     for (const key of Object.keys(fullIoc)) {
-      expect(DECLARED_IOC_MAPPING_FIELDS.has(key as keyof ExtractedIoc)).toBe(true);
+      expect(DECLARED_IOC_MAPPING_FIELDS.has(key)).toBe(true);
     }
   });
 

@@ -11,6 +11,7 @@ import {
   CREATE_SOURCE_API_PATH,
   GLOBAL_SPACE_ID,
   LIST_SOURCES_API_PATH,
+  MAX_URL_LENGTH,
   SOURCE_BY_ID_API_PATH,
   SOURCE_TYPES,
   THREAT_INTEL_SOURCES_INDEX,
@@ -300,6 +301,17 @@ const ingestibleAdapterTypes: readonly string[] = SOURCE_TYPES.filter(
   (type) => type !== 'manual' && type !== 'telemetry' && type !== 'email'
 );
 
+/**
+ * `schema.uri()` validates format but has no length bound, so bound it here to
+ * keep unbounded request input from reaching the index.
+ */
+const boundedUri = () =>
+  schema.uri({
+    scheme: ['http', 'https'],
+    validate: (value) =>
+      value.length > MAX_URL_LENGTH ? `must be ${MAX_URL_LENGTH} characters or fewer` : undefined,
+  });
+
 const createSourceBodySchema = schema.object({
   id: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
   name: schema.string({ minLength: 1, maxLength: 256 }),
@@ -310,14 +322,14 @@ const createSourceBodySchema = schema.object({
         ? undefined
         : `must be one of: ${ingestibleAdapterTypes.join(', ')}`,
   }),
-  url: schema.uri({ scheme: ['http', 'https'] }),
+  url: boundedUri(),
   tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 64 }), { maxSize: 32 })),
   enabled: schema.maybe(schema.boolean()),
 });
 
 const updateSourceBodySchema = schema.object({
   name: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
-  url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+  url: schema.maybe(boundedUri()),
   tags: schema.maybe(schema.arrayOf(schema.string({ maxLength: 64 }), { maxSize: 32 })),
   enabled: schema.maybe(schema.boolean()),
 });

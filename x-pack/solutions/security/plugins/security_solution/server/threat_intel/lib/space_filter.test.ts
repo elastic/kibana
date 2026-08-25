@@ -5,10 +5,40 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { GLOBAL_SPACE_ID } from '../../../common/threat_intel';
-import { buildSpaceFilterTerms, canMutateSourceInSpace } from './space_filter';
+import {
+  buildSpaceFilterTerms,
+  canMutateSourceInSpace,
+  resolveCurrentSpaceId,
+} from './space_filter';
 
 describe('space_filter', () => {
+  describe('resolveCurrentSpaceId', () => {
+    const request = {} as KibanaRequest;
+
+    it('defaults to the default space only when the spaces plugin is absent', () => {
+      expect(resolveCurrentSpaceId(undefined, request)).toBe('default');
+    });
+
+    it('delegates to the spaces service when installed', () => {
+      const spaces = {
+        getSpaceId: jest.fn().mockReturnValue('team-a'),
+      } as unknown as SpacesServiceStart;
+      expect(resolveCurrentSpaceId(spaces, request)).toBe('team-a');
+    });
+
+    it('fails closed: propagates errors from an installed spaces service', () => {
+      const spaces = {
+        getSpaceId: jest.fn(() => {
+          throw new Error('boom');
+        }),
+      } as unknown as SpacesServiceStart;
+      expect(() => resolveCurrentSpaceId(spaces, request)).toThrow('boom');
+    });
+  });
+
   describe('buildSpaceFilterTerms', () => {
     it('includes the current space and the global sentinel', () => {
       expect(buildSpaceFilterTerms('team-a')).toEqual({

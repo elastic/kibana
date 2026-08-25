@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import {
   CREATE_THREAT_REPORT_API_PATH,
+  MAX_URL_LENGTH,
   SEVERITY_LEVELS,
   type SeverityLevel,
 } from '../../../common/threat_intel';
@@ -25,7 +26,12 @@ const createThreatReportBodySchema = schema.object({
   body_text: schema.string({ minLength: 1, maxLength: 5_000_000 }),
   body_html: schema.maybe(schema.string({ maxLength: 10_000_000 })),
   source_name: schema.string({ minLength: 1, maxLength: 256 }),
-  source_url: schema.maybe(schema.uri()),
+  source_url: schema.maybe(
+    schema.uri({
+      validate: (value) =>
+        value.length > MAX_URL_LENGTH ? `must be ${MAX_URL_LENGTH} characters or fewer` : undefined,
+    })
+  ),
   severity: schema.maybe(
     schema.string({
       maxLength: 32,

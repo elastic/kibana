@@ -15,9 +15,11 @@ import { GLOBAL_SPACE_ID } from '../../../common/threat_intel';
  * `GLOBAL_SPACE_ID` sentinel so built-in / seeded rows stay visible. Writes
  * tag with the current space.
  *
- * Falls back to `'default'` if the spaces plugin is missing (e.g. legacy
- * setup or test bootstrap) so the rest of the plugin keeps working
- * without spaces installed.
+ * Falls back to `'default'` only when the spaces plugin is missing (e.g. legacy
+ * setup or test bootstrap) so the rest of the plugin keeps working without
+ * spaces installed. When Spaces *is* installed, a failure to resolve the space
+ * must fail the request rather than silently reading/writing default/global
+ * data — spaces are a security boundary, so this fails closed.
  */
 
 export const resolveCurrentSpaceId = (
@@ -25,11 +27,7 @@ export const resolveCurrentSpaceId = (
   request: KibanaRequest
 ): string => {
   if (!spaces) return 'default';
-  try {
-    return spaces.getSpaceId(request);
-  } catch {
-    return 'default';
-  }
+  return spaces.getSpaceId(request);
 };
 
 export const buildSpaceFilterTerms = (

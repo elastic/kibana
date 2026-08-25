@@ -8,6 +8,7 @@
 export type { SourceType, SeverityLevel, IocType, ThreatCategory, ThreatRegion } from './constants';
 export {
   GLOBAL_SPACE_ID,
+  MAX_URL_LENGTH,
   THREAT_REPORTS_INDEX,
   THREAT_REPORTS_INDEX_PATTERN,
   THREAT_INTEL_SOURCES_INDEX,

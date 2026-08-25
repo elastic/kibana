@@ -44,6 +44,13 @@ export const THREAT_INTEL_DIAMOND_INFERENCE_FEATURE_ID = 'threat_intel_diamond' 
 /** Visible from every space (seed catalog). */
 export const GLOBAL_SPACE_ID = '*' as const;
 
+/**
+ * Upper bound for user-supplied URLs on HTTP routes. `schema.uri()` validates
+ * format but carries no length bound, so without this a URL could grow to the
+ * body cap. Enforced via `validate` since `URIOptions` has no `maxLength`.
+ */
+export const MAX_URL_LENGTH = 2048;
+
 export const SOURCE_TYPES = [
   'rss',
   'stix',

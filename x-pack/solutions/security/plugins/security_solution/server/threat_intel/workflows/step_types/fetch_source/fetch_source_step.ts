@@ -51,7 +51,23 @@ export const buildFetchSourceStepDefinition = (deps: BuildFetchSourceStepDeps) =
       // the Zod runtime parsing is the engine's responsibility (see
       // `CustomStepImpl.createHandlerContext`); we re-narrow on access
       // here so the adapter contract sees a `SourceHit`.
-      const { source } = context.input as { source: SourceHit };
+      const { source } = context.input as { source: SourceHit | string };
+
+      // `fetchSourceInputSchema` accepts a string because `{{ foreach.item }}`
+      // (without the `$`) stringifies the hit instead of passing the object.
+      // That is schema-valid, so catch it here and return the fix rather than
+      // letting `source._source` throw a bare TypeError outside the try block.
+      if (typeof source === 'string') {
+        return {
+          error: new Error(
+            `threat_intel.fetch_source received "source" as a string ("${source.slice(
+              0,
+              80
+            )}"). Pass the hit as \${{ foreach.item }} so it stays an object; {{ foreach.item }} stringifies it.`
+          ),
+        };
+      }
+
       const stepLogger = deps.logger.get(
         'threatIntel',
         'fetch_source',

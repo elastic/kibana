@@ -474,13 +474,13 @@ interface DomainCandidate {
  * (their presence is informational, not inferential).
  */
 const longestMatchDomainDedup = (candidates: DomainCandidate[]): DomainCandidate[] => {
-  const domainSet = new Set(candidates.map((c) => c.domain));
+  // Materialised once: the set is static across the scan, so converting it per
+  // candidate would make this quadratic on the allocation path as well.
+  const domains = Array.from(new Set(candidates.map((c) => c.domain)));
   return candidates.filter((c) => {
     // Always keep reference/denied — they are observability entries, not anchors.
     if (c.tier === 'reference' || c.tier === 'denied') return true;
-    return !Array.from(domainSet).some(
-      (other) => other !== c.domain && other.endsWith(`.${c.domain}`)
-    );
+    return !domains.some((other) => other !== c.domain && other.endsWith(`.${c.domain}`));
   });
 };
 

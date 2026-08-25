@@ -129,7 +129,7 @@ export const kevAdapter: FetchAdapter = {
       headers: { 'User-Agent': BROWSER_USER_AGENT },
     });
 
-    if (response.status !== 200) {
+    if (response.status >= 400) {
       throw new Error(
         `KEV feed returned HTTP ${response.status} ${response.statusText} from ${feedUrl}`
       );
