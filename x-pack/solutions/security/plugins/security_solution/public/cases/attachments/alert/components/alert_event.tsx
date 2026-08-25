@@ -127,14 +127,19 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
     }
   }, [openFlyout, canReadRules, resolvedRuleId, resolvedRuleName, enableNewFlyout, openRuleFlyout]);
 
-  // refetchAlertData stays null permanently when hasAlertsRead=false (query is skipped).
-  // Also guard on loadingPrivileges (scoped to the live-fetch path): hasAlertsRead defaults
-  // to false while loading, so without this guard authorized users briefly see "Unknown rule"
-  // before privileges resolve. Attachments with a rule ID in metadata skip both checks.
+  // Only relevant when we need a live alert lookup (no rule ID in metadata).
+  // - waitingForPrivileges: hasAlertsRead defaults to false while loading; show spinner
+  //   until the check resolves so authorized users don't see "Unknown rule" prematurely.
+  // - waitingForFirstFetch: refetchAlertData is null until the first fetch completes
+  //   (see use_query.tsx), distinguishing "not fetched yet" from "fetched, no data".
+  const needsLiveFetch = !hasRuleIdFromMetadata;
+  const waitingForPrivileges = needsLiveFetch && loadingPrivileges;
+  const waitingForFirstFetch = needsLiveFetch && hasAlertsRead && refetchAlertData === null;
+
   if (
     loadingAlertData ||
-    (!hasRuleIdFromMetadata && loadingPrivileges) ||
-    (!hasRuleIdFromMetadata && hasAlertsRead && refetchAlertData === null) ||
+    waitingForPrivileges ||
+    waitingForFirstFetch ||
     firstFetchReturnedNoData
   ) {
     return <EuiLoadingSpinner size="m" />;
