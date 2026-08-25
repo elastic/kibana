@@ -206,6 +206,48 @@ describe('ConversationShareButton', () => {
     expect(screen.getByTestId('agentBuilderConversationSharingUserSearchIcon')).toBeInTheDocument();
   });
 
+  it('orders current members alphabetically by display name', async () => {
+    renderShareButton({
+      conversation: {
+        ...baseConversation,
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [
+            {
+              type: 'user',
+              id: 'member-3',
+              role: ConversationAccessControlRole.Member,
+              added_at: '2026-01-03T00:00:00.000Z',
+            },
+            {
+              type: 'user',
+              id: 'member-1',
+              role: ConversationAccessControlRole.Member,
+              added_at: '2026-01-01T00:00:00.000Z',
+            },
+            {
+              type: 'user',
+              id: 'member-2',
+              role: ConversationAccessControlRole.Member,
+              added_at: '2026-01-02T00:00:00.000Z',
+            },
+          ],
+        },
+      },
+    });
+
+    await openPopover();
+
+    expect(
+      screen.getAllByTestId('agentBuilderConversationShareMemberRow').map((row) => row.textContent)
+    ).toEqual([
+      expect.stringContaining('Ethan Smith'),
+      expect.stringContaining('Alex Kim'),
+      expect.stringContaining('Sam Delacroix'),
+      expect.stringContaining('Yuki Tanaka'),
+    ]);
+  });
+
   it('shows the latest shared member avatars in the invite trigger', () => {
     renderShareButton({
       inviteMembersSummary: {

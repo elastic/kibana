@@ -428,7 +428,12 @@ const ConversationSharePopover: React.FC<{
         profile: memberProfile,
       };
     })
-    .filter((member): member is { id: string; profile: UserProfileWithAvatar } => Boolean(member));
+    .filter((member): member is { id: string; profile: UserProfileWithAvatar } => Boolean(member))
+    .sort((firstMember, secondMember) =>
+      getUserDisplayName(firstMember.profile.user).localeCompare(
+        getUserDisplayName(secondMember.profile.user)
+      )
+    );
 
   return (
     <EuiPopover
