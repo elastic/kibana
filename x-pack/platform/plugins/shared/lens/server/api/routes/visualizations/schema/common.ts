@@ -18,15 +18,14 @@ const lensApiConfigLibItemSharedSchema = z.object({
   tags: getAsCodeTagsSchema('Tag IDs to associate with this visualization.'),
 });
 
-export type LensApiConfigLibItemNoESQL = LensApiConfigNoESQL &
-  z.output<typeof lensApiConfigLibItemSharedSchema>;
-
 /**
  * Schema for Lens API configs by reference library item, only supports DSL configs
  */
 export const lensApiConfigLibItemSchemaNoESQL = lensApiConfigSchemaNoESQL
   .and(lensApiConfigLibItemSharedSchema)
   .meta({ id: 'lensApiConfigLibItemNoESQL', title: 'Library Visualization Item' });
+
+export type LensApiConfigLibItemNoESQL = z.output<typeof lensApiConfigLibItemSchemaNoESQL>;
 
 /**
  * The Lens response item returned from the server
