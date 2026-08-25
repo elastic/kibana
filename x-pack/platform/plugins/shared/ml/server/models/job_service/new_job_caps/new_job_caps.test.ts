@@ -21,9 +21,10 @@ describe('job_service - job_caps', () => {
   let mlClusterClientNonRollupMock: any;
   let mlClusterClientRollupMock: any;
   let dataViews: any;
+  let asNonRollupMock: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
   beforeEach(() => {
-    const asNonRollupMock = elasticsearchServiceMock.createElasticsearchClient();
+    asNonRollupMock = elasticsearchServiceMock.createElasticsearchClient();
     asNonRollupMock.fieldCaps.mockResponse(farequoteFieldCaps);
 
     mlClusterClientNonRollupMock = {
@@ -55,6 +56,27 @@ describe('job_service - job_caps', () => {
       const { newJobCaps } = newJobCapsProvider(mlClusterClientNonRollupMock);
       const response = await newJobCaps(indexPattern, isRollup, dataViews);
       expect(response).toEqual(farequoteJobCaps);
+      expect(asNonRollupMock.fieldCaps).toHaveBeenCalledWith(
+        {
+          index: indexPattern,
+          fields: '*',
+        },
+        { maxRetries: 0 }
+      );
+    });
+
+    it('passes project_routing to fieldCaps when provided', async () => {
+      const indexPattern = 'farequote-*';
+      const { newJobCaps } = newJobCapsProvider(mlClusterClientNonRollupMock);
+      await newJobCaps(indexPattern, false, dataViews, '_alias:linked');
+      expect(asNonRollupMock.fieldCaps).toHaveBeenCalledWith(
+        {
+          index: indexPattern,
+          fields: '*',
+          project_routing: '_alias:linked',
+        },
+        { maxRetries: 0 }
+      );
     });
 
     it('can get rollup job caps for non rollup index pattern', async () => {

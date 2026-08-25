@@ -12,6 +12,8 @@ import useObservable from 'react-use/lib/useObservable';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFocusTrap,
   EuiPortal,
   EuiScreenReaderOnly,
@@ -200,7 +202,7 @@ export const EmbeddableConsole = ({
             <EuiScreenReaderOnly>
               <h2>{landmarkHeading}</h2>
             </EuiScreenReaderOnly>
-            <EuiThemeProvider colorMode={'dark'} wrapperProps={{ cloneElement: true }}>
+            <EuiThemeProvider wrapperProps={{ cloneElement: true }}>
               <div>
                 {isOpen && (
                   <EmbeddedConsoleResizeButton
@@ -209,31 +211,38 @@ export const EmbeddableConsole = ({
                   />
                 )}
 
-                <div css={styles.embeddableConsoleControls}>
-                  <EuiButtonEmpty
-                    color="text"
-                    iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
-                    onClick={toggleConsole}
-                    css={styles.embeddableConsoleControlsButton}
-                    data-test-subj="consoleEmbeddedControlBar"
-                    data-telemetry-id="console-embedded-controlbar-button"
-                    aria-label={i18n.translate('console.embeddableConsole.toggleButtonAriaLabel', {
-                      defaultMessage: 'Toggle console',
-                    })}
-                  >
-                    {i18n.translate('console.embeddableConsole.title', {
-                      defaultMessage: 'Console',
-                    })}
-                  </EuiButtonEmpty>
+                <EuiFlexGroup css={styles.embeddableConsoleControls} gutterSize="xs">
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      color="text"
+                      size="s"
+                      iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+                      onClick={toggleConsole}
+                      css={styles.embeddableConsoleControlsButton}
+                      data-test-subj="consoleEmbeddedControlBar"
+                      data-telemetry-id="console-embedded-controlbar-button"
+                      aria-label={i18n.translate(
+                        'console.embeddableConsole.toggleButtonAriaLabel',
+                        {
+                          defaultMessage: 'Toggle console',
+                        }
+                      )}
+                    >
+                      {i18n.translate('console.embeddableConsole.title', {
+                        defaultMessage: 'Console',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+
                   {alternateView && (
-                    <div css={styles.embeddableControlsAltViewButtonContainer}>
+                    <EuiFlexItem css={styles.embeddableControlsAltViewButtonContainer} grow={false}>
                       <alternateView.ActivationButton
                         activeView={showAlternateView}
                         onClick={clickAlternateViewActivateButton}
                       />
-                    </div>
+                    </EuiFlexItem>
                   )}
-                </div>
+                </EuiFlexGroup>
               </div>
             </EuiThemeProvider>
             {consoleState.consoleHasBeenOpened ? (

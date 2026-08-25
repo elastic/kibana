@@ -9,6 +9,10 @@ import omit from 'lodash/omit';
 
 import type { AgentPolicy, Output, DownloadSource, PackageInfo } from '../../types';
 import {
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+} from '../../../common/constants';
+import {
   createAppContextStartContractMock,
   createMessageSigningServiceMock,
   createSavedObjectClientMock,
@@ -119,6 +123,28 @@ jest.mock('../output', () => {
       type: 'elasticsearch',
       hosts: ['http://127.0.0.1:9201'],
       write_to_logs_streams: true,
+    },
+    'es-managed-bulk-agentless-output': {
+      id: 'es-managed-bulk-agentless-output',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Bulk output for managed integrations',
+      // @ts-ignore
+      type: 'elasticsearch',
+      hosts: ['https://managed-otlp.example.invalid:443/_es'],
+      is_internal: true,
+      is_preconfigured: true,
+    },
+    'es-managed-bulk-agentless-output-internal': {
+      id: 'es-managed-bulk-agentless-output-internal',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Bulk output for managed integrations (serverless)',
+      // @ts-ignore
+      type: 'elasticsearch',
+      hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
+      is_internal: true,
+      is_preconfigured: true,
     },
   };
   return {
@@ -1666,6 +1692,128 @@ describe('getFullAgentPolicy', () => {
         },
       },
     });
+  });
+
+  it('should emit only the apm applications block for the ECH managed bulk output', async () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.invalid' },
+    } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    } as any);
+
+    const bulkOutput = {
+      id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Bulk output for managed integrations',
+      type: 'elasticsearch' as const,
+      hosts: ['https://managed-otlp.example.invalid:443/_es'],
+    };
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [bulkOutput],
+      proxies: [],
+      dataOutput: bulkOutput,
+      monitoringOutput: bulkOutput,
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
+    mockAgentPolicy({
+      supports_agentless: true,
+      data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+    });
+
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy?.output_permissions).toEqual({
+      [ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID]: {
+        _managed_bulk_apm: {
+          applications: [{ application: 'apm', privileges: ['event:write'], resources: ['*'] }],
+        },
+      },
+    });
+    expect(
+      agentPolicy?.output_permissions?.[ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID]?._managed_bulk_apm
+    ).not.toHaveProperty('indices');
+  });
+
+  it('should emit only the apm applications block for the serverless managed bulk output, matched via the config-injected endpoint', async () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      outputs: [
+        {
+          id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+          name: 'Bulk output for managed integrations (serverless)',
+          type: 'elasticsearch' as const,
+          hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
+          is_default: false,
+          is_default_monitoring: false,
+          is_preconfigured: true,
+        },
+      ],
+    } as any);
+
+    const bulkOutput = {
+      id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Bulk output for managed integrations (serverless)',
+      type: 'elasticsearch' as const,
+      hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
+    };
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [bulkOutput],
+      proxies: [],
+      dataOutput: bulkOutput,
+      monitoringOutput: bulkOutput,
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
+    mockAgentPolicy({
+      supports_agentless: true,
+      data_output_id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+    });
+
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy?.output_permissions).toEqual({
+      [SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID]: {
+        _managed_bulk_apm: {
+          applications: [{ application: 'apm', privileges: ['event:write'], resources: ['*'] }],
+        },
+      },
+    });
+    expect(
+      agentPolicy?.output_permissions?.[SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID]
+        ?._managed_bulk_apm
+    ).not.toHaveProperty('indices');
   });
 
   it('should return a policy with advanced settings', async () => {
