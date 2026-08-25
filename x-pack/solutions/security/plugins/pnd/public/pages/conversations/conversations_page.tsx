@@ -29,7 +29,9 @@ import { type ConversationsActionsGroupProps } from '../../components/conversati
 import { type BaseActionsProps, type CardActionType } from '../../components/actions';
 import { BlastRadius } from '../../components/filters/blast_radius';
 import { AssignActionModal, BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
+import { ApprovalModal } from '../../components/modals/approval_modal';
 import { ConversationDetailsFlyout } from '../../components/details';
+import { getActionButtonIconProps } from '../../components/helpers';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -84,6 +86,22 @@ export const ConversationsPage: React.FC = () => {
   // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
   const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
 
+  const selectedRecommendedActionConversation = useMemo(
+    () =>
+      selectedIdForRecommendedAction
+        ? conversations.find((c) => c.recordId === selectedIdForRecommendedAction)
+        : undefined,
+    [conversations, selectedIdForRecommendedAction]
+  );
+
+  const recommendedActionIconProps = useMemo(
+    () =>
+      selectedRecommendedActionConversation
+        ? getActionButtonIconProps(selectedRecommendedActionConversation)
+        : { type: 'gear' as const, color: 'primary' as const },
+    [selectedRecommendedActionConversation]
+  );
+
   const sortedConversations = useMemo(
     () =>
       conversations.filter(isQueueRow).sort((a, b) => {
@@ -132,23 +150,20 @@ export const ConversationsPage: React.FC = () => {
         `,
       }}
     >
-      {selectedIdForRecommendedAction && (
-        <BaseActionModal
-          type="dismiss"
-          title={'Requires Approval'}
-          recordId={selectedIdForRecommendedAction}
-          onClose={() => setSelectedIdForRecommendedAction(undefined)}
-          rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
-          primaryAction={{
-            color: 'danger',
-            label:
-              sortedConversations.find((c) => c.recordId === selectedIdForRecommendedAction)
-                ?.primaryActionLabel ?? '',
-            onClick: () => {
-              // TODO: use dismiss action API call hook
-              setSelectedIdForRecommendedAction(undefined);
-            },
+      {selectedIdForRecommendedAction && selectedRecommendedActionConversation && (
+        <ApprovalModal
+          tone={recommendedActionIconProps.color === 'danger' ? 'danger' : 'primary'}
+          iconType={recommendedActionIconProps.type}
+          title={selectedRecommendedActionConversation.primaryActionLabel ?? ''}
+          blastRadius={{
+            variant: 'description',
+            description: selectedRecommendedActionConversation.summary,
           }}
+          onConfirm={() =>
+            // TODO: use action API call hook
+            setSelectedIdForRecommendedAction(undefined)
+          }
+          onClose={() => setSelectedIdForRecommendedAction(undefined)}
         />
       )}
 
