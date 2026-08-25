@@ -305,7 +305,7 @@ describe('EventLogStart', () => {
       await expect(
         eventLogClient.softDeleteByQuery({
           ...validParams,
-          field: field as any,
+          field,
         })
       ).rejects.toThrow(/\[field\]:/);
 

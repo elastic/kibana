@@ -193,7 +193,12 @@ describe('bulkDelete', () => {
       unsecuredSavedObjectsClient,
     });
 
-    expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({ ruleIds, spaceId: 'default', eventLogClient, logger });
+    expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({
+      ruleIds,
+      spaceId: 'default',
+      eventLogClient,
+      logger,
+    });
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(

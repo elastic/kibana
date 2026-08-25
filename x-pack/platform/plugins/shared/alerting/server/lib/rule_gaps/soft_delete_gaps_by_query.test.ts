@@ -36,7 +36,12 @@ describe('softDeleteGapsByQuery', () => {
   };
 
   test('calls softDeleteByQuery with the gap query and the gap.deleted field', async () => {
-    await softDeleteGapsByQuery({ ruleIds: ['rule-1', 'rule-2'], spaceId: 'default', eventLogClient, logger });
+    await softDeleteGapsByQuery({
+      ruleIds: ['rule-1', 'rule-2'],
+      spaceId: 'default',
+      eventLogClient,
+      logger,
+    });
 
     expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledTimes(1);
     expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledWith({
@@ -102,14 +107,24 @@ describe('softDeleteGapsByQuery', () => {
       new EsErrors.TimeoutError('Request timed out')
     );
 
-    await softDeleteGapsByQuery({ ruleIds: ['rule-1'], spaceId: 'default', eventLogClient, logger });
+    await softDeleteGapsByQuery({
+      ruleIds: ['rule-1'],
+      spaceId: 'default',
+      eventLogClient,
+      logger,
+    });
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('client timed out'));
     expect(logger.error).not.toHaveBeenCalled();
   });
 
   test('logs a debug summary on the happy path', async () => {
-    await softDeleteGapsByQuery({ ruleIds: ['rule-1'], spaceId: 'default', eventLogClient, logger });
+    await softDeleteGapsByQuery({
+      ruleIds: ['rule-1'],
+      spaceId: 'default',
+      eventLogClient,
+      logger,
+    });
 
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('updated=3'));
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('bulk_retries=0'));
@@ -125,7 +140,12 @@ describe('softDeleteGapsByQuery', () => {
       failures: [],
     } as estypes.UpdateByQueryResponse);
 
-    await softDeleteGapsByQuery({ ruleIds: ['rule-1'], spaceId: 'default', eventLogClient, logger });
+    await softDeleteGapsByQuery({
+      ruleIds: ['rule-1'],
+      spaceId: 'default',
+      eventLogClient,
+      logger,
+    });
 
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('noops=2'));
@@ -139,7 +159,12 @@ describe('softDeleteGapsByQuery', () => {
       failures: [],
     } as estypes.UpdateByQueryResponse);
 
-    await softDeleteGapsByQuery({ ruleIds: ['rule-1'], spaceId: 'default', eventLogClient, logger });
+    await softDeleteGapsByQuery({
+      ruleIds: ['rule-1'],
+      spaceId: 'default',
+      eventLogClient,
+      logger,
+    });
 
     expect(eventLogClient.softDeleteByQuery).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('timed_out=true'));
@@ -163,7 +188,12 @@ describe('softDeleteGapsByQuery', () => {
         } as estypes.UpdateByQueryResponse)
         .mockResolvedValueOnce(okResponse);
 
-      const pending = softDeleteGapsByQuery({ ruleIds: ['rule-1'], spaceId: 'default', eventLogClient, logger });
+      const pending = softDeleteGapsByQuery({
+        ruleIds: ['rule-1'],
+        spaceId: 'default',
+        eventLogClient,
+        logger,
+      });
       await jest.runAllTimersAsync();
       await pending;
 
@@ -178,7 +208,12 @@ describe('softDeleteGapsByQuery', () => {
         failures: [],
       } as estypes.UpdateByQueryResponse);
 
-      const pending = softDeleteGapsByQuery({ ruleIds: ['rule-1'], spaceId: 'default', eventLogClient, logger });
+      const pending = softDeleteGapsByQuery({
+        ruleIds: ['rule-1'],
+        spaceId: 'default',
+        eventLogClient,
+        logger,
+      });
       await jest.runAllTimersAsync();
       await pending;
 
@@ -193,7 +228,12 @@ describe('softDeleteGapsByQuery', () => {
         failures: [{ id: 'doc-1' }],
       } as unknown as estypes.UpdateByQueryResponse);
 
-      const pending = softDeleteGapsByQuery({ ruleIds: ['rule-1'], spaceId: 'default', eventLogClient, logger });
+      const pending = softDeleteGapsByQuery({
+        ruleIds: ['rule-1'],
+        spaceId: 'default',
+        eventLogClient,
+        logger,
+      });
       await jest.runAllTimersAsync();
       await pending;
 
