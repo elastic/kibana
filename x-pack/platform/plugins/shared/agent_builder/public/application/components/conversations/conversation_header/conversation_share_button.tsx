@@ -51,6 +51,7 @@ import {
   useConversationAccessControlProfiles,
   useUpdateConversationAccessControl,
 } from '../../../hooks/use_conversation_access_control';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 
 const SEARCH_DEBOUNCE_MS = 200;
 
@@ -164,10 +165,16 @@ const UserAccessRow: React.FC<{
 
 export const ConversationShareButton: React.FC = () => {
   const hasPersistedConversation = useHasPersistedConversation();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
   const { conversation } = useConversation();
 
-  if (!conversation || !hasPersistedConversation || !canUpdateAccessControl) {
+  if (
+    !conversation ||
+    !hasPersistedConversation ||
+    !canUpdateAccessControl ||
+    !isExperimentalFeaturesEnabled
+  ) {
     return null;
   }
 

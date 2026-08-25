@@ -13,7 +13,6 @@ import {
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
 import type { ConversationWithPermissions } from '../../../../../common/http_api/conversations';
-import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import {
   useConversation,
   useConversationPermissions,
@@ -24,11 +23,8 @@ import {
   useConversationAccessControlProfiles,
   useUpdateConversationAccessControl,
 } from '../../../hooks/use_conversation_access_control';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { ConversationShareButton } from './conversation_share_button';
-
-jest.mock('../../../context/conversation/use_conversation_id', () => ({
-  useConversationId: jest.fn(),
-}));
 
 jest.mock('../../../hooks/use_conversation', () => ({
   useConversation: jest.fn(),
@@ -45,13 +41,17 @@ jest.mock('../../../hooks/use_conversation_access_control', () => ({
   useUpdateConversationAccessControl: jest.fn(),
 }));
 
-const mockUseConversationId = jest.mocked(useConversationId);
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useExperimentalFeatures: jest.fn(),
+}));
+
 const mockUseConversation = jest.mocked(useConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
 const mockUseHasPersistedConversation = jest.mocked(useHasPersistedConversation);
 const mockUseSuggestUsers = jest.mocked(useSuggestUsers);
 const mockUseConversationAccessControlProfiles = jest.mocked(useConversationAccessControlProfiles);
 const mockUseUpdateConversationAccessControl = jest.mocked(useUpdateConversationAccessControl);
+const mockUseExperimentalFeatures = jest.mocked(useExperimentalFeatures);
 
 const mutate = jest.fn();
 let updateOptions: Parameters<typeof useUpdateConversationAccessControl>[0];
@@ -92,11 +92,12 @@ const baseConversation = {
 const renderShareButton = ({
   conversation = baseConversation,
   canUpdateAccessControl = true,
+  isExperimentalFeaturesEnabled = true,
 }: {
   conversation?: ConversationWithPermissions;
   canUpdateAccessControl?: boolean;
+  isExperimentalFeaturesEnabled?: boolean;
 } = {}) => {
-  mockUseConversationId.mockReturnValue(conversation?.id);
   mockUseConversation.mockReturnValue({
     conversation,
     isLoading: false,
@@ -111,6 +112,7 @@ const renderShareButton = ({
     delete: false,
     update_access_control: canUpdateAccessControl,
   });
+  mockUseExperimentalFeatures.mockReturnValue(isExperimentalFeaturesEnabled);
   mockUseSuggestUsers.mockReturnValue({ data: [], isFetching: false } as never);
   mockUseConversationAccessControlProfiles.mockReturnValue({
     data: [ownerProfile, memberProfile],
@@ -140,6 +142,12 @@ describe('ConversationShareButton', () => {
 
   it('does not render without access-control update permission', () => {
     renderShareButton({ canUpdateAccessControl: false });
+
+    expect(screen.queryByTestId('agentBuilderConversationInviteButton')).not.toBeInTheDocument();
+  });
+
+  it('does not render when experimental features are disabled', () => {
+    renderShareButton({ isExperimentalFeaturesEnabled: false });
 
     expect(screen.queryByTestId('agentBuilderConversationInviteButton')).not.toBeInTheDocument();
   });
