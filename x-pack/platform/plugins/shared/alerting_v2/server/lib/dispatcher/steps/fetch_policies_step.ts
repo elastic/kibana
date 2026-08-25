@@ -10,6 +10,7 @@ import type { ActionPolicySavedObjectServiceContract } from '../../services/acti
 import { ActionPolicySavedObjectServiceInternalToken } from '../../services/action_policy_saved_object_service/tokens';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
+import { PolicyCatalog } from '../state';
 import type {
   ActionPolicy,
   ActionPolicyId,
@@ -58,6 +59,6 @@ export class FetchPoliciesStep implements DispatcherStep {
       });
     }
 
-    return { type: 'continue', data: { policies } };
+    return { type: 'continue', data: { policies: PolicyCatalog.of(policies) } };
   }
 }

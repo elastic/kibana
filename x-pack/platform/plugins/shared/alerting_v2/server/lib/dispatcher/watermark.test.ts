@@ -6,7 +6,11 @@
  */
 
 import { computeNextWatermark } from './watermark';
-import { createDispatcherPipelineInput, createAlertEpisode } from './fixtures/test_utils';
+import {
+  createAlertEpisode,
+  createDispatcherPipelineInput,
+  createEpisodeScan,
+} from './fixtures/test_utils';
 import type { DispatcherPipelineResult } from './types';
 
 const BASE_INPUT = createDispatcherPipelineInput({
@@ -44,7 +48,9 @@ describe('computeNextWatermark', () => {
           haltReason: 'aborted',
           finalState: {
             input: BASE_INPUT,
-            episodes: [createAlertEpisode({ last_event_timestamp: '2026-01-22T07:34:00.000Z' })],
+            scan: createEpisodeScan({
+              episodes: [createAlertEpisode({ last_event_timestamp: '2026-01-22T07:34:00.000Z' })],
+            }),
             // recordedEpisodes still undefined — StoreActionsStep not reached
           },
         }),
@@ -103,7 +109,7 @@ describe('computeNextWatermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
-          finalState: { input: BASE_INPUT, episodes, truncated: true },
+          finalState: { input: BASE_INPUT, scan: createEpisodeScan({ episodes, truncated: true }) },
         }),
       });
 
@@ -114,7 +120,10 @@ describe('computeNextWatermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
-          finalState: { input: BASE_INPUT, episodes: [], truncated: true },
+          finalState: {
+            input: BASE_INPUT,
+            scan: createEpisodeScan({ episodes: [], truncated: true }),
+          },
         }),
       });
 
@@ -131,7 +140,7 @@ describe('computeNextWatermark', () => {
       const result = computeNextWatermark({
         input: BASE_INPUT,
         result: makeResult({
-          finalState: { input: BASE_INPUT, episodes, truncated: true },
+          finalState: { input: BASE_INPUT, scan: createEpisodeScan({ episodes, truncated: true }) },
         }),
       });
 
@@ -145,7 +154,11 @@ describe('computeNextWatermark', () => {
         input: BASE_INPUT,
         result: makeResult({
           completed: true,
-          finalState: { input: BASE_INPUT, episodes: [createAlertEpisode()], recordedEpisodes: 1 },
+          finalState: {
+            input: BASE_INPUT,
+            scan: createEpisodeScan({ episodes: [createAlertEpisode()] }),
+            recordedEpisodes: 1,
+          },
         }),
       });
 

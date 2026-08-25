@@ -45,7 +45,7 @@ import {
   createEpisodeDataResponse,
   createLastNotifiedTimestampsResponse,
 } from './fixtures/dispatcher';
-import { createAlertEpisode } from './fixtures/test_utils';
+import { createAlertEpisode, createEpisodeScan } from './fixtures/test_utils';
 import { getDispatchableAlertEventsQuery } from './queries';
 import {
   ApplyMaintenanceWindowStep,
@@ -991,7 +991,11 @@ describe('DispatcherService', () => {
       return {
         execute: jest.fn().mockResolvedValue({
           completed: true,
-          finalState: { input: mockInput, episodes, truncated: true, recordedEpisodes: 2 },
+          finalState: {
+            input: mockInput,
+            scan: createEpisodeScan({ episodes, truncated: true }),
+            recordedEpisodes: 2,
+          },
         }),
       };
     }
@@ -1053,7 +1057,11 @@ describe('DispatcherService', () => {
       const pipeline2: jest.Mocked<DispatcherPipelineContract> = {
         execute: jest.fn().mockResolvedValue({
           completed: true,
-          finalState: { input: tick2MockInput, episodes: [], recordedEpisodes: 0 },
+          finalState: {
+            input: tick2MockInput,
+            scan: createEpisodeScan(),
+            recordedEpisodes: 0,
+          },
         }),
       };
       const service2 = new DispatcherService(
@@ -1225,7 +1233,7 @@ describe('DispatcherService', () => {
                 haltReason: 'aborted',
                 finalState: {
                   input,
-                  episodes,
+                  scan: createEpisodeScan({ episodes }),
                   // recordedEpisodes absent → computeNextWatermark returns input.eventWatermark
                 },
               });

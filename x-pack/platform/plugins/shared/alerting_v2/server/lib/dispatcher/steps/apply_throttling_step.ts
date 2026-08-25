@@ -11,11 +11,11 @@ import type { LoggerServiceContract } from '../../services/logger_service/logger
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { getLastNotifiedTimestampsQueries } from '../queries';
+import { DispatchPlan, PolicyCatalog } from '../state';
 import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicy,
-  ActionPolicyId,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -35,17 +35,17 @@ export class ApplyThrottlingStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { groups = [], policies = new Map<ActionPolicyId, ActionPolicy>(), input } = state;
+    const { groups = [], policies = PolicyCatalog.empty(), input } = state;
 
     if (groups.length === 0) {
-      return { type: 'continue', data: { dispatch: [], throttled: [] } };
+      return { type: 'continue', data: { plan: DispatchPlan.empty() } };
     }
 
     const lastNotifiedMap = await this.fetchLastNotifiedTimestamps(groups.map((g) => g.id));
 
     const { dispatch, throttled } = applyThrottling(
       groups,
-      policies,
+      policies.byId,
       lastNotifiedMap,
       input.startedAt
     );
@@ -55,7 +55,10 @@ export class ApplyThrottlingStep implements DispatcherStep {
         `Applied throttling to ${throttled.length} groups and dispatched ${dispatch.length} groups`,
     });
 
-    return { type: 'continue', data: { dispatch, throttled } };
+    return {
+      type: 'continue',
+      data: { plan: DispatchPlan.of({ toDispatch: dispatch, throttled }) },
+    };
   }
 
   private async fetchLastNotifiedTimestamps(

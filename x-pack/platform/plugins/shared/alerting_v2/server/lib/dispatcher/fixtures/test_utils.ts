@@ -7,10 +7,22 @@
 
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import {
+  DispatchOutcome,
+  DispatchPlan,
+  EpisodeScan,
+  EpisodeTriage,
+  PolicyCatalog,
+  RuleCatalog,
+  SuppressionIndex,
+  type SuppressedEpisode,
+} from '../state';
 import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 import type {
   ActionGroup,
+  ActionGroupId,
   ActionPolicy,
+  ActionPolicyId,
   AlertEpisode,
   AlertEpisodeSuppression,
   DispatchFailure,
@@ -20,6 +32,7 @@ import type {
   DispatcherStepOutput,
   MatchedPair,
   Rule,
+  RuleId,
 } from '../types';
 
 export function createStepLogger(): LoggerServiceContract {
@@ -42,14 +55,129 @@ export function createDispatcherPipelineInput(
   };
 }
 
+/**
+ * Flat overrides for building a pipeline state: value-object fields may be
+ * given either directly (`scan`) or through their pre-VO source fields
+ * (`episodes`, `truncated`), which are folded into the VO here.
+ */
+export interface DispatcherPipelineStateOverrides
+  extends Omit<
+    Partial<DispatcherPipelineState>,
+    'input' | 'rules' | 'policies' | 'suppressions' | 'triage' | 'plan' | 'outcome'
+  > {
+  input?: DispatcherPipelineInput;
+  episodes?: AlertEpisode[];
+  truncated?: boolean;
+  suppressions?: AlertEpisodeSuppression[];
+  dispatchable?: AlertEpisode[];
+  suppressed?: SuppressedEpisode[];
+  triage?: EpisodeTriage;
+  rules?: Map<RuleId, Rule>;
+  policies?: Map<ActionPolicyId, ActionPolicy>;
+  dispatch?: ActionGroup[];
+  throttled?: ActionGroup[];
+  plan?: DispatchPlan;
+  dispatchedExecutions?: Map<ActionGroupId, string[]>;
+  dispatchFailures?: DispatchFailure[];
+  outcome?: DispatchOutcome;
+}
+
 export function createDispatcherPipelineState(
-  state: Partial<DispatcherPipelineState> = {}
+  state: DispatcherPipelineStateOverrides = {}
 ): DispatcherPipelineState {
-  const input = state.input ?? createDispatcherPipelineInput();
-  return {
-    ...state,
+  const {
+    episodes,
+    truncated,
+    scan,
+    suppressions,
+    dispatchable,
+    suppressed,
+    triage,
+    rules,
+    policies,
+    dispatch,
+    throttled,
+    plan,
+    dispatchedExecutions,
+    dispatchFailures,
+    outcome,
     input,
+    ...rest
+  } = state;
+  const resolvedScan =
+    scan ??
+    (episodes !== undefined || truncated !== undefined
+      ? createEpisodeScan({ episodes, truncated })
+      : undefined);
+  const resolvedTriage =
+    triage ??
+    (dispatchable !== undefined || suppressed !== undefined
+      ? createEpisodeTriage({ dispatchable, suppressed })
+      : undefined);
+  const resolvedPlan =
+    plan ??
+    (dispatch !== undefined || throttled !== undefined
+      ? createDispatchPlan({ toDispatch: dispatch, throttled })
+      : undefined);
+  const resolvedOutcome =
+    outcome ??
+    (dispatchedExecutions !== undefined || dispatchFailures !== undefined
+      ? createDispatchOutcome({
+          executionsByGroup: dispatchedExecutions,
+          failures: dispatchFailures,
+        })
+      : undefined);
+  return {
+    ...rest,
+    ...(resolvedScan ? { scan: resolvedScan } : {}),
+    ...(suppressions ? { suppressions: SuppressionIndex.of(suppressions) } : {}),
+    ...(resolvedTriage ? { triage: resolvedTriage } : {}),
+    ...(rules ? { rules: RuleCatalog.of(rules) } : {}),
+    ...(policies ? { policies: PolicyCatalog.of(policies) } : {}),
+    ...(resolvedPlan ? { plan: resolvedPlan } : {}),
+    ...(resolvedOutcome ? { outcome: resolvedOutcome } : {}),
+    input: input ?? createDispatcherPipelineInput(),
   };
+}
+
+export function createDispatchPlan({
+  toDispatch = [],
+  throttled = [],
+}: {
+  toDispatch?: ActionGroup[];
+  throttled?: ActionGroup[];
+} = {}): DispatchPlan {
+  return DispatchPlan.of({ toDispatch, throttled });
+}
+
+export function createDispatchOutcome({
+  executionsByGroup = new Map(),
+  failures = [],
+}: {
+  executionsByGroup?: Map<ActionGroupId, string[]>;
+  failures?: DispatchFailure[];
+} = {}): DispatchOutcome {
+  return DispatchOutcome.of({ executionsByGroup, failures });
+}
+
+export function createEpisodeTriage({
+  dispatchable = [],
+  suppressed = [],
+}: {
+  dispatchable?: AlertEpisode[];
+  suppressed?: SuppressedEpisode[];
+} = {}): EpisodeTriage {
+  return EpisodeTriage.of({ dispatchable, suppressed });
+}
+
+export function createEpisodeScan({
+  episodes = [],
+  truncated = false,
+}: {
+  episodes?: AlertEpisode[];
+  truncated?: boolean;
+} = {}): EpisodeScan {
+  return EpisodeScan.of({ episodes, truncated });
 }
 
 export function createAlertEpisode(overrides: Partial<AlertEpisode> = {}): AlertEpisode {

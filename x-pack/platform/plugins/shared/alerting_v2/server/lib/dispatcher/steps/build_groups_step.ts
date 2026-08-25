@@ -27,9 +27,9 @@ export class BuildGroupsStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { matched = [], rules = new Map<RuleId, Rule>() } = state;
+    const { matched = [], rules } = state;
 
-    const groups = buildActionGroups(matched, rules);
+    const groups = buildActionGroups(matched, rules?.byId);
 
     return { type: 'continue', data: { groups } };
   }
