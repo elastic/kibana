@@ -29,6 +29,16 @@ const toAssignedAgent = (meta: {
   host: meta.host,
   healthy: meta.agentStatus === 'online',
   agentVersion: meta.agentVersion,
+  enrolled: true,
+});
+
+/** Stamped assignment whose agent is no longer in Fleet's enrolled list. */
+const toMissingAssignedAgent = (agentId: string): MonitorAssignedAgent => ({
+  agentId,
+  host: '',
+  healthy: false,
+  agentVersion: null,
+  enrolled: false,
 });
 
 export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
@@ -75,16 +85,14 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
 
       const packagePolicies =
         shardedMonitorLocations.length > 0
-          ? await new PackagePolicyService(server)
-              .getByIds({
-                spaceId,
-                packagePolicyIds: shardedMonitorLocations.flatMap((location) => [
-                  `${monitorId}-${location.id}`,
-                  `${monitorId}-${location.id}-${spaceId}`,
-                ]),
-                fields: ['id', 'name', 'condition'],
-              })
-              .catch(() => [])
+          ? await new PackagePolicyService(server).getByIds({
+              spaceId,
+              packagePolicyIds: shardedMonitorLocations.flatMap((location) => [
+                `${monitorId}-${location.id}`,
+                `${monitorId}-${location.id}-${spaceId}`,
+              ]),
+              fields: ['id', 'name', 'condition'],
+            })
           : [];
 
       const enrolledByPolicyId = new Map<string, Awaited<ReturnType<typeof getEnrolledAgents>>>();
@@ -117,7 +125,13 @@ export const getMonitorAgentAssignment: SyntheticsRestApiRouteFactory<
             spaceId
           );
           const assigned = assignedAgentId ? enrolled.get(assignedAgentId) : undefined;
-          agents = assigned ? [toAssignedAgent(assigned)] : [];
+          if (assigned) {
+            agents = [toAssignedAgent(assigned)];
+          } else if (assignedAgentId) {
+            agents = [toMissingAssignedAgent(assignedAgentId)];
+          } else {
+            agents = [];
+          }
         } else {
           agents = [...enrolled.values()].map(toAssignedAgent);
         }

@@ -184,6 +184,11 @@ const AssignmentEntry = ({
                   data-test-subj="syntheticsAssignedAgentMwWarning"
                 />
               )}
+              {!agent.enrolled && (
+                <span data-test-subj="syntheticsAssignedAgentMissingFromFleet">
+                  <EuiIconTip type="warning" color="warning" content={MISSING_FROM_FLEET_TOOLTIP} />
+                </span>
+              )}
             </EuiHealth>
           );
         })
@@ -231,6 +236,13 @@ const UNASSIGNED_LABEL = i18n.translate(
   'xpack.synthetics.monitorDetails.assignedAgentUnassignedLabel',
   {
     defaultMessage: 'Not yet assigned',
+  }
+);
+
+const MISSING_FROM_FLEET_TOOLTIP = i18n.translate(
+  'xpack.synthetics.monitorDetails.assignedAgentMissingFromFleet',
+  {
+    defaultMessage: 'This agent is no longer enrolled on the location policy.',
   }
 );
 

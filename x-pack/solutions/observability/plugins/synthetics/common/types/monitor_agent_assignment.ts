@@ -14,6 +14,8 @@ export interface MonitorAssignedAgent {
   host: string;
   healthy: boolean;
   agentVersion: string | null;
+  /** False when the package policy is stamped but Fleet no longer lists this agent. */
+  enrolled: boolean;
 }
 
 export interface MonitorLocationAssignment {

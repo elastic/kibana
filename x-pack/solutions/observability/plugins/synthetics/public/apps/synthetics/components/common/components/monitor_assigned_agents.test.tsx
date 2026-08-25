@@ -36,8 +36,8 @@ const assignment = (
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Policy One',
   agents: [
-    { agentId: 'agent-1', host: 'host-a', healthy: true, agentVersion: '9.6.0' },
-    { agentId: 'agent-2', host: 'host-b', healthy: false, agentVersion: '9.5.0' },
+    { agentId: 'agent-1', host: 'host-a', healthy: true, agentVersion: '9.6.0', enrolled: true },
+    { agentId: 'agent-2', host: 'host-b', healthy: false, agentVersion: '9.5.0', enrolled: true },
   ],
   ...overrides,
 });
@@ -130,7 +130,15 @@ describe('MonitorAssignedAgents', () => {
       assignments: [
         assignment({
           isAgentSharding: true,
-          agents: [{ agentId: 'agent-2', host: 'host-b', healthy: true, agentVersion: '9.5.0' }],
+          agents: [
+            {
+              agentId: 'agent-2',
+              host: 'host-b',
+              healthy: true,
+              agentVersion: '9.5.0',
+              enrolled: true,
+            },
+          ],
         }),
       ],
       loading: false,
@@ -165,5 +173,37 @@ describe('MonitorAssignedAgents', () => {
 
     expect(screen.getByText('Assigned agent')).toBeInTheDocument();
     expect(screen.getByText(/not yet assigned/i)).toBeInTheDocument();
+  });
+
+  it('shows a missing-from-fleet warning when the assigned agent is no longer enrolled', () => {
+    mockUseAssignments.mockReturnValue({
+      assignments: [
+        assignment({
+          isAgentSharding: true,
+          agents: [
+            {
+              agentId: 'gone-agent',
+              host: '',
+              healthy: false,
+              agentVersion: null,
+              enrolled: false,
+            },
+          ],
+        }),
+      ],
+      loading: false,
+      error: false,
+    });
+
+    render(
+      <MonitorAssignedAgents
+        configId="mon-1"
+        monitorLocations={[{ id: 'loc-1', label: 'Local Docker PL', isServiceManaged: false }]}
+      />
+    );
+
+    expect(screen.getByText('gone-agent')).toBeInTheDocument();
+    expect(screen.queryByText(/not yet assigned/i)).not.toBeInTheDocument();
+    expect(screen.getByTestId('syntheticsAssignedAgentMissingFromFleet')).toBeInTheDocument();
   });
 });
