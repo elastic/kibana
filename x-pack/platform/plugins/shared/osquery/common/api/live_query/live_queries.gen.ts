@@ -41,7 +41,7 @@ export const OsqueryExportLiveQueryResultsRequestQuery = lazySchema(() =>
     /**
      * The output format of the exported file.
      */
-    format: ExportFormat,
+    format: ExportFormat.describe('The output format of the exported file.'),
   })
 );
 export type OsqueryExportLiveQueryResultsRequestQuery = z.infer<
@@ -56,11 +56,15 @@ export const OsqueryExportLiveQueryResultsRequestParams = lazySchema(() =>
     /**
      * The ID of the live query (parent action ID).
      */
-    id: z.string(),
+    id: z.string().describe('The ID of the live query (parent action ID).'),
     /**
      * The query action ID whose results are exported. Filters the export to rows for this specific per-agent action.
      */
-    actionId: z.string(),
+    actionId: z
+      .string()
+      .describe(
+        'The query action ID whose results are exported. Filters the export to rows for this specific per-agent action.'
+      ),
   })
 );
 export type OsqueryExportLiveQueryResultsRequestParams = z.infer<
@@ -91,23 +95,23 @@ export const OsqueryFindLiveQueriesRequestQuery = lazySchema(() =>
     /**
      * A KQL search string to filter live queries.
      */
-    kuery: KueryOrUndefined.optional(),
+    kuery: KueryOrUndefined.optional().describe('A KQL search string to filter live queries.'),
     /**
      * The page number to return.
      */
-    page: PageOrUndefined.optional(),
+    page: PageOrUndefined.optional().describe('The page number to return.'),
     /**
      * The number of results to return per page.
      */
-    pageSize: PageSizeOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional().describe('The number of results to return per page.'),
     /**
      * The field to sort results by.
      */
-    sort: SortOrUndefined.optional(),
+    sort: SortOrUndefined.optional().describe('The field to sort results by.'),
     /**
      * The sort order.
      */
-    sortOrder: SortOrderOrUndefined.optional(),
+    sortOrder: SortOrderOrUndefined.optional().describe('The sort order.'),
   })
 );
 export type OsqueryFindLiveQueriesRequestQuery = z.infer<typeof OsqueryFindLiveQueriesRequestQuery>;
@@ -123,7 +127,7 @@ export const OsqueryGetLiveQueryDetailsRequestParams = lazySchema(() =>
     /**
      * The ID of the live query.
      */
-    id: z.string(),
+    id: z.string().describe('The ID of the live query.'),
   })
 );
 export type OsqueryGetLiveQueryDetailsRequestParams = z.infer<
@@ -140,23 +144,23 @@ export const OsqueryGetLiveQueryResultsRequestQuery = lazySchema(() =>
     /**
      * A KQL search string to filter results.
      */
-    kuery: KueryOrUndefined.optional(),
+    kuery: KueryOrUndefined.optional().describe('A KQL search string to filter results.'),
     /**
      * The page number to return.
      */
-    page: PageOrUndefined.optional(),
+    page: PageOrUndefined.optional().describe('The page number to return.'),
     /**
      * The number of results to return per page.
      */
-    pageSize: PageSizeOrUndefined.optional(),
+    pageSize: PageSizeOrUndefined.optional().describe('The number of results to return per page.'),
     /**
      * The field to sort results by.
      */
-    sort: SortOrUndefined.optional(),
+    sort: SortOrUndefined.optional().describe('The field to sort results by.'),
     /**
      * The sort order.
      */
-    sortOrder: SortOrderOrUndefined.optional(),
+    sortOrder: SortOrderOrUndefined.optional().describe('The sort order.'),
   })
 );
 export type OsqueryGetLiveQueryResultsRequestQuery = z.infer<
@@ -171,11 +175,11 @@ export const OsqueryGetLiveQueryResultsRequestParams = lazySchema(() =>
     /**
      * The ID of the live query.
      */
-    id: z.string(),
+    id: z.string().describe('The ID of the live query.'),
     /**
      * The ID of the query action.
      */
-    actionId: z.string(),
+    actionId: z.string().describe('The ID of the query action.'),
   })
 );
 export type OsqueryGetLiveQueryResultsRequestParams = z.infer<

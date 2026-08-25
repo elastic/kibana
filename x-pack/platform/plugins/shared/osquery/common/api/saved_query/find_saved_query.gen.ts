@@ -34,40 +34,42 @@ export const FindSavedQueryResponse = lazySchema(() =>
     /**
      * The current page number.
      */
-    page: z.number().int(),
+    page: z.number().int().describe('The current page number.'),
     /**
      * The number of results per page.
      */
-    per_page: z.number().int(),
+    per_page: z.number().int().describe('The number of results per page.'),
     /**
      * The total number of saved queries.
      */
-    total: z.number().int(),
+    total: z.number().int().describe('The total number of saved queries.'),
     /**
      * An array of saved query objects.
      */
-    data: z.array(
-      z.object({
-        saved_object_id: z.string(),
-        id: SavedQueryId,
-        description: SavedQueryDescriptionOrUndefined.optional(),
-        query: Query.optional(),
-        interval: z.union([z.number().int(), z.string()]).optional(),
-        timeout: z.number().int().optional(),
-        snapshot: SnapshotOrUndefined.optional(),
-        removed: RemovedOrUndefined.optional(),
-        platform: PlatformOrUndefined.optional(),
-        ecs_mapping: ECSMappingOrUndefined.optional(),
-        created_at: z.string().datetime().optional(),
-        created_by: z.string().nullable().optional(),
-        created_by_profile_uid: z.string().optional(),
-        updated_at: z.string().datetime().optional(),
-        updated_by: z.string().nullable().optional(),
-        updated_by_profile_uid: z.string().optional(),
-        prebuilt: z.boolean().optional(),
-        version: z.union([z.number().int(), z.string()]).optional(),
-      })
-    ),
+    data: z
+      .array(
+        z.object({
+          saved_object_id: z.string(),
+          id: SavedQueryId,
+          description: SavedQueryDescriptionOrUndefined.optional(),
+          query: Query.optional(),
+          interval: z.union([z.number().int(), z.string()]).optional(),
+          timeout: z.number().int().optional(),
+          snapshot: SnapshotOrUndefined.optional(),
+          removed: RemovedOrUndefined.optional(),
+          platform: PlatformOrUndefined.optional(),
+          ecs_mapping: ECSMappingOrUndefined.optional(),
+          created_at: z.string().datetime().optional(),
+          created_by: z.string().nullable().optional(),
+          created_by_profile_uid: z.string().optional(),
+          updated_at: z.string().datetime().optional(),
+          updated_by: z.string().nullable().optional(),
+          updated_by_profile_uid: z.string().optional(),
+          prebuilt: z.boolean().optional(),
+          version: z.union([z.number().int(), z.string()]).optional(),
+        })
+      )
+      .describe('An array of saved query objects.'),
   })
 );
 export type FindSavedQueryResponse = z.infer<typeof FindSavedQueryResponse>;
