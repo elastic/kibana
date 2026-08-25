@@ -7,6 +7,7 @@
 
 import { MAX_USER_ACTIONS_PER_CASE, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { createUserActionServiceMock } from '../../services/mocks';
+import { mockCases } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { preflightWorkflowExecution, recordWorkflowExecution } from './record_workflow_execution';
 import {
@@ -26,13 +27,11 @@ const WORKFLOW_PAYLOAD = {
 
 const CASE_ORIGIN = { type: CASE_WORKFLOW_ORIGIN_TYPE, id: CASE_ID };
 
-/** Minimal saved-object shape returned by caseService.getCase. */
-const makeCaseSO = (owner = OWNER) => ({
+const caseSO = {
+  ...mockCases[0],
   id: CASE_ID,
-  type: 'cases' as const,
-  references: [],
-  attributes: { owner },
-});
+  attributes: { ...mockCases[0].attributes, owner: OWNER },
+};
 
 describe('preflightWorkflowExecution', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -75,7 +74,7 @@ describe('recordWorkflowExecution', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    clientArgs.services.caseService.getCase.mockResolvedValue(makeCaseSO());
+    clientArgs.services.caseService.getCase.mockResolvedValue(caseSO);
     clientArgs.authorization.ensureAuthorized.mockResolvedValue();
     userActionService.creator.createUserAction.mockResolvedValue(undefined as never);
   });
@@ -100,9 +99,14 @@ describe('recordWorkflowExecution', () => {
       clientArgs
     );
 
-    const [call] = clientArgs.authorization.ensureAuthorized.mock.calls;
-    expect(call[0].operation.action).toBe('case_workflow_run_authz');
-    expect(call[0].operation.ecsType).toBe('access');
+    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operation: expect.objectContaining({
+          action: 'case_workflow_run_authz',
+          ecsType: 'access',
+        }),
+      })
+    );
   });
 
   it('calls createUserAction with the correct payload and refresh', async () => {
