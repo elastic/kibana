@@ -32,9 +32,12 @@ const input = {
   confidence: 0.8,
 };
 
+const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
+
 const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
   const getScopedClients = jest.fn().mockResolvedValue({
     getEventClient: jest.fn().mockReturnValue({}),
+    getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     licensing: {},
   });
   return createEventsWriteTool({
@@ -48,11 +51,26 @@ const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
 describe('events_write tool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getFeatures.mockResolvedValue({ hits: [] });
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
   });
 
   it('enforces the batch bounds', () => {
-    expect(eventsWriteSchema.safeParse({ items: [] }).success).toBe(false);
+    const missingItems = eventsWriteSchema.safeParse({});
+    const emptyItems = eventsWriteSchema.safeParse({ items: [] });
+
+    expect(missingItems.success).toBe(false);
+    expect(emptyItems.success).toBe(false);
+    if (!missingItems.success) {
+      expect(missingItems.error.issues[0].message).toBe(
+        'Pass items as a non-empty array of event objects.'
+      );
+    }
+    if (!emptyItems.success) {
+      expect(emptyItems.error.issues[0].message).toBe(
+        'Pass items as a non-empty array of event objects.'
+      );
+    }
     expect(
       eventsWriteSchema.safeParse({
         items: Array.from({ length: MAX_BULK_WRITE_ITEMS + 1 }, () => input),
@@ -62,6 +80,195 @@ describe('events_write tool', () => {
 
   it('rejects input without an items array', () => {
     expect(eventsWriteSchema.safeParse(input).success).toBe(false);
+  });
+
+  it('rejects duplicate detection rules across event items', () => {
+    const signal = {
+      type: 'detection' as const,
+      stream_name: 'logs.test',
+      description: 'Found: error. Impact: requests failed.',
+      verdict: 'confirms',
+      evidence: { esql_query: 'FROM logs.test', result: 'found' },
+      metadata: {
+        rule_uuid: 'rule-1',
+        detection_id: 'detection-1',
+        change_point_type: 'spike' as const,
+        p_value: 0.01,
+      },
+    };
+
+    const result = eventsWriteSchema.safeParse({
+      items: [
+        { ...input, signals: [signal] },
+        { ...input, signals: [signal] },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.at(-1)?.message).toBe(
+        'Each detection rule UUID may appear in only one event item per write'
+      );
+    }
+  });
+
+  it('normalizes an empty event_id to an omitted event_id', () => {
+    const result = eventsWriteSchema.parse({
+      items: [{ ...input, event_id: '' }],
+    });
+
+    expect(result.items[0].event_id).toBeUndefined();
+  });
+
+  it('enriches causal features from their Knowledge Indicators', async () => {
+    getFeatures.mockImplementation((_streams, options) => {
+      const hits =
+        'featureIds' in (options ?? {})
+          ? [
+              {
+                id: 'checkout-api',
+                uuid: 'uuid-checkout',
+                stream_name: 'logs.test',
+                type: 'entity',
+                subtype: 'service',
+              },
+            ]
+          : [
+              {
+                id: 'other-api',
+                uuid: 'other-feature-uuid',
+                stream_name: 'logs.test',
+                type: 'technology',
+                subtype: 'web_server',
+              },
+            ];
+      return Promise.resolve({ hits });
+    });
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      {
+        index: 0,
+        event_uuid: 'uuid-1',
+        event_id: 'event-1',
+        status: 'open',
+        written: true,
+      },
+    ]);
+
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      {
+        items: [
+          {
+            ...input,
+            causal_features: [
+              {
+                feature_id: 'checkout-api',
+                name: 'Checkout API',
+                stream_name: 'logs.test',
+              },
+              {
+                feature_id: 'other-feature-uuid',
+                name: 'Other API',
+                stream_name: 'logs.test',
+              },
+            ],
+            blast_radius: [
+              {
+                type: 'entity' as const,
+                feature_id: 'checkout-api',
+                name: 'Checkout API',
+                stream_name: 'logs.test',
+              },
+            ],
+          },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(getFeatures).toHaveBeenCalledWith(['logs.test'], {
+      featureIds: ['checkout-api', 'other-feature-uuid'],
+      includeExcluded: true,
+      includeExpired: true,
+    });
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
+      eventClient: {},
+      inputs: [
+        expect.objectContaining({
+          causal_features: [
+            expect.objectContaining({ type: 'entity', subtype: 'service' }),
+            expect.objectContaining({ type: 'technology', subtype: 'web_server' }),
+          ],
+          blast_radius: [expect.objectContaining({ type: 'entity', subtype: 'service' })],
+        }),
+      ],
+    });
+  });
+
+  it('disambiguates stream-less causal features using the event streams', async () => {
+    getFeatures.mockResolvedValue({
+      hits: [
+        {
+          id: 'uuid-web',
+          uuid: 'uuid-web',
+          stream_name: 'logs.web',
+          type: 'entity',
+          subtype: 'service',
+        },
+        {
+          id: 'uuid-web',
+          uuid: 'uuid-batch',
+          stream_name: 'logs.batch',
+          type: 'technology',
+          subtype: 'web_server',
+        },
+      ],
+    });
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
+    ]);
+
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      {
+        items: [
+          {
+            ...input,
+            stream_names: ['logs.batch'],
+            causal_features: [{ feature_id: 'uuid-web', name: 'Ambiguous' }],
+          },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
+      eventClient: {},
+      inputs: [
+        expect.objectContaining({
+          causal_features: [expect.objectContaining({ type: 'technology', subtype: 'web_server' })],
+        }),
+      ],
+    });
+  });
+
+  it('writes unenriched causal features when the lookup fails', async () => {
+    getFeatures.mockRejectedValue(new Error('ki index unavailable'));
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
+    ]);
+    const causalFeatures = [{ feature_id: 'checkout-api', name: 'Checkout API' }];
+
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      { items: [{ ...input, causal_features: causalFeatures }] },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith({
+      eventClient: {},
+      inputs: [expect.objectContaining({ causal_features: causalFeatures })],
+    });
   });
 
   it('returns aligned results and tracks each item', async () => {

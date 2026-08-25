@@ -89,6 +89,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       security: plugins.security,
       telemetryEventsSender: this.telemetryEventsSender,
       licensing: plugins.licensing,
+      cpsEnabled:
+        (plugins.cps?.getCpsEnabled() ?? false) && experimentalFeatures.crossProjectSearch,
     };
 
     initSavedObjects(core.savedObjects);
@@ -134,7 +136,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     });
 
     if (plugins.cases) {
-      plugins.cases.attachmentFramework.registerUnified(osqueryUnifiedAttachment);
+      plugins.cases.attachmentFramework.registerAttachment(osqueryUnifiedAttachment);
     }
 
     return {

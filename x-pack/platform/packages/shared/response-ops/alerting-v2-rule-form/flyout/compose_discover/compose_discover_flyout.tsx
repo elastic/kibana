@@ -36,7 +36,11 @@ import type { FormValues, RuleNotificationsValue, RuleQuery } from '../../form/t
 import { getBreachQuery } from '../../form/utils/query_helpers';
 import { enterManualSplitQuery, exitManualSplitQuery } from './manual_split_query';
 import { parseYamlToFormValues, serializeFormToYaml } from '../../form/utils/yaml_form_utils';
-import { isNonRepresentableRule } from '../../form/utils/is_non_representable';
+import {
+  isNonRepresentableRule,
+  isNonRepresentableFormState,
+} from '../../form/utils/is_non_representable';
+import { DEFAULT_NO_DATA_STRATEGY } from '../../form/fields/no_data_strategy_select';
 import { ComposeDiscoverFooter } from './compose_discover_footer';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import {
@@ -58,7 +62,12 @@ import {
 import type { ComposeDiscoverAction, ComposeDiscoverMode, QueryTab, RecoveryType } from './types';
 import { isBuilderConditionStepId } from './types';
 import { validateStep, evaluateStepValidation } from './validate_step';
-import { getSandboxTabs, useComposeDiscoverState } from './use_compose_discover_state';
+import {
+  getSandboxTabs,
+  getStepIds,
+  getBuilderStepIds,
+  useComposeDiscoverState,
+} from './use_compose_discover_state';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import {
   guessRecoveryBlock,
@@ -125,8 +134,8 @@ const SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP = i18n.translate(
 );
 
 const EDIT_MODE_OPTIONS = [
-  { id: 'form', label: FORM_VIEW_LABEL, iconType: 'tableDensityNormal' },
-  { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'editorCodeBlock' },
+  { id: 'form', label: FORM_VIEW_LABEL, iconType: 'table' },
+  { id: 'yaml', label: YAML_VIEW_LABEL, iconType: 'code' },
 ];
 
 const getQuerySandboxTitle = (isBuilderMode: boolean) =>
@@ -231,7 +240,7 @@ const EMPTY_FORM_VALUES: FormValues = {
   query: { format: 'composed', base: '', breach: { segment: '' } },
   recoveryStrategy: 'no_breach',
   grouping: undefined,
-  noDataStrategy: 'last_known_status',
+  noDataStrategy: DEFAULT_NO_DATA_STRATEGY,
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -287,13 +296,15 @@ export function ComposeDiscoverFlyout({
     [initialQuery, inlineResult.query]
   );
 
-  const isDiscoverQueryComplete = Boolean(discoverComposedQuery?.breach.segment.trim());
+  const isDiscoverQueryPopulated = Boolean(
+    discoverComposedQuery && getBreachQuery(discoverComposedQuery).trim()
+  );
 
   const [uiState, rawDispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType,
-    isQueryPrePopulated: isDiscoverQueryComplete,
+    isQueryPrePopulated: isDiscoverQueryPopulated,
     forceYamlMode,
   });
 
@@ -477,6 +488,15 @@ export function ComposeDiscoverFlyout({
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });
+  const watchedRecoveryStrategy = useWatch({ control: methods.control, name: 'recoveryStrategy' });
+  const watchedNoDataStrategy = useWatch({ control: methods.control, name: 'noDataStrategy' });
+
+  const isFormStateNonRepresentable = isNonRepresentableFormState({
+    kind: isAlert ? 'alert' : 'signal',
+    query: watchedQuery,
+    recoveryStrategy: watchedRecoveryStrategy,
+    noDataStrategy: watchedNoDataStrategy,
+  });
 
   const timeFieldResolutionQuery = useMemo(
     () =>
@@ -540,7 +560,7 @@ export function ComposeDiscoverFlyout({
     methods.reset({ ...methods.getValues(), query: composedQuery });
     setSandboxQuery(composedQuery);
     dispatch({
-      type: composedQuery.breach.segment.trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY',
+      type: getBreachQuery(composedQuery).trim() ? 'COMMIT_QUERY' : 'INVALIDATE_QUERY',
     });
   }, [
     initialQuery,
@@ -608,13 +628,13 @@ export function ComposeDiscoverFlyout({
       if (kind === 'alert') {
         const full = getBreachQuery(methods.getValues('query'));
         /*
-         * A query with no alert condition (no_where) maps to a standalone breach
-         * query (every row is a breach); a real split yields a composed query.
+         * A query with no alert condition stays composed with an empty breach
+         * segment (rejected at save); a real split yields base + segment.
          */
         const alertQuery = splitResultToRuleQuery(full).query;
         setSandboxQuery(alertQuery);
         methods.setValue('query', alertQuery, { shouldDirty: true });
-        methods.setValue('noDataStrategy', 'last_known_status', { shouldDirty: true });
+        methods.setValue('noDataStrategy', DEFAULT_NO_DATA_STRATEGY, { shouldDirty: true });
         methods.setValue('recoveryStrategy', 'no_breach', { shouldDirty: true });
       } else {
         // Assemble from committed query — discards any unapplied sandbox edits cleanly.
@@ -801,15 +821,34 @@ export function ComposeDiscoverFlyout({
             hasBeenEditedRef.current = true;
           }
         }
-        /*
-         * No apply on parse-failure path: the debounced parse always calls
-         * applyYamlValuesToFormAndSandbox together, so RHF and sandbox state are already in
-         * sync at the last valid parse state. The current yamlText simply can't be applied.
-         */
+
+        const currentValues = methods.getValues();
+        if (isNonRepresentableFormState(currentValues)) {
+          /* Stay in YAML mode — the Form view has no editor for this shape. */
+          return;
+        }
+
+        /* Make sure step is realigned when switching back to the rule form from the yaml form */
+        const currentKindIsAlert = currentValues.kind === 'alert';
+        const stepCount = (
+          builderType ? getBuilderStepIds(currentKindIsAlert) : getStepIds(currentKindIsAlert)
+        ).length;
+        if (uiState.step > stepCount - 1) {
+          dispatch({ type: 'SET_STEP', step: stepCount - 1 });
+        }
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, applyYamlValuesToFormAndSandbox, dispatch, forceYamlMode]
+    [
+      cancelYamlParse,
+      methods,
+      yamlText,
+      applyYamlValuesToFormAndSandbox,
+      dispatch,
+      forceYamlMode,
+      builderType,
+      uiState.step,
+    ]
   );
 
   const handleSandboxApply = useCallback(() => {
@@ -831,6 +870,10 @@ export function ComposeDiscoverFlyout({
       const split = splitResultToRuleQuery(getBreachQuery(sandboxQuery)).query;
       queryToCommit = resolveUnifiedAlertApplyQuery(sandboxQuery, split);
     }
+    /*
+     * Manual split with an empty alert condition stays composed + empty segment —
+     * the request mapper omits the breach block at save; do not coerce to standalone.
+     */
     setSandboxQuery(queryToCommit);
 
     methods.setValue('query', queryToCommit, { shouldDirty: true });
@@ -964,7 +1007,7 @@ export function ComposeDiscoverFlyout({
       <EuiCallOut
         announceOnMount
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="ruleV2FlyoutValidationErrors"
         title={i18n.translate('xpack.alertingV2.ruleForm.validationErrors.title', {
           defaultMessage: 'Resolve issues before saving',
@@ -992,7 +1035,6 @@ export function ComposeDiscoverFlyout({
       return getSandboxTabs(isAlert, {
         step: uiState.step,
         recoveryType: uiState.recoveryType,
-        mode: uiState.mode,
         manualSplitEnabled: uiState.manualSplitEnabled,
       });
     }
@@ -1007,7 +1049,6 @@ export function ComposeDiscoverFlyout({
     uiState.yamlMode,
     uiState.recoveryType,
     uiState.step,
-    uiState.mode,
     uiState.manualSplitEnabled,
     sandboxQuery.format,
     isAlert,
@@ -1079,20 +1120,6 @@ export function ComposeDiscoverFlyout({
     dispatch({ type: 'DISABLE_MANUAL_SPLIT' });
   }, [sandboxQuery, dispatch]);
 
-  /*
-   * Triggered by the split-failed CTA on the form step (sandbox is closed).
-   * Opens the sandbox in manual split mode. When the heuristic cannot isolate a
-   * base, the full pipeline is placed in the base tab for the user to carve out
-   * the alert condition manually.
-   */
-  const handleManualSplitFromForm = useCallback(() => {
-    const committedQuery = methods.getValues('query');
-    setSandboxQuery(enterManualSplitQuery(committedQuery));
-    manualSplitUncommittedRef.current = true;
-    dispatch({ type: 'ENABLE_MANUAL_SPLIT' });
-    dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: uiState.step, isAlert });
-  }, [methods, dispatch, uiState.step, isAlert]);
-
   const handleSandboxClose = useCallback(() => {
     if (manualSplitUncommittedRef.current) {
       // Clear manual split before syncing so the next render sees manualSplitEnabled: false.
@@ -1138,10 +1165,15 @@ export function ComposeDiscoverFlyout({
   // Freeze the view toggle while the sandbox is open in FORM mode. In YAML mode the
   // sandbox stays open by design, so the toggle remains enabled (#623 gating table).
   const modeToggleSandboxLocked = uiState.childOpen && !uiState.yamlMode;
-  const modeToggleDisabled = forceYamlMode || modeToggleSandboxLocked;
+  /*
+   * Only traps the toggle while already in YAML mode — a non-representable
+   * form state reached from Form mode must still be able to open YAML to fix it.
+   */
+  const yamlLockedByFormState = uiState.yamlMode && isFormStateNonRepresentable;
+  const modeToggleDisabled = forceYamlMode || modeToggleSandboxLocked || yamlLockedByFormState;
 
   const getModeToggleTooltip = (): string | undefined => {
-    if (forceYamlMode) return YAML_ONLY_TOOLTIP;
+    if (forceYamlMode || yamlLockedByFormState) return YAML_ONLY_TOOLTIP;
     if (modeToggleSandboxLocked) return SANDBOX_OPEN_MODE_TOGGLE_TOOLTIP;
     return undefined;
   };
@@ -1257,9 +1289,6 @@ export function ComposeDiscoverFlyout({
                       isEditing={isEditing}
                       ruleId={ruleId}
                       builderType={builderType}
-                      onManualSplit={
-                        supportsUnifiedEditorToggle ? handleManualSplitFromForm : undefined
-                      }
                     />
                   </BuilderStateProvider>
                 </>

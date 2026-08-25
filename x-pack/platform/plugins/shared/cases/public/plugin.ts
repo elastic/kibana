@@ -27,8 +27,6 @@ import { getCasesContextLazy } from './client/ui/get_cases_context';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
 import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getUICapabilities } from './client/helpers/capabilities';
-import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import { UnifiedAttachmentTypeRegistry } from './client/attachment_framework/unified_attachment_registry';
 import { registerCaseFileKinds } from './files';
 import { registerInternalAttachments } from './components/attachments';
@@ -57,22 +55,16 @@ export class CasesUiPlugin
 {
   private readonly kibanaVersion: string;
   private readonly storage = new Storage(localStorage);
-  private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
-    this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-    this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
     this.unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
   }
 
   public setup(core: CoreSetup, plugins: CasesPublicSetupDependencies): CasesPublicSetup {
     const kibanaVersion = this.kibanaVersion;
     const storage = this.storage;
-    const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
-    const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
     const unifiedAttachmentTypeRegistry = this.unifiedAttachmentTypeRegistry;
 
     const config = this.initializerContext.config.get<CasesUiConfigType>();
@@ -110,8 +102,6 @@ export class CasesUiPlugin
             pluginsStart,
             storage,
             kibanaVersion,
-            externalReferenceAttachmentTypeRegistry,
-            persistableStateAttachmentTypeRegistry,
             unifiedAttachmentTypeRegistry,
           });
         },
@@ -125,20 +115,15 @@ export class CasesUiPlugin
     registerCasesSteps(
       plugins.workflowsExtensions,
       this.unifiedAttachmentTypeRegistry,
-      config.attachments?.enabled === true
+      config.attachments?.enabled === true,
+      config.templates?.enabled === true
     );
     registerCasesWorkflowTriggers(plugins.workflowsExtensions);
 
     return {
       attachmentFramework: {
-        registerExternalReference: (externalReferenceAttachmentType) => {
-          this.externalReferenceAttachmentTypeRegistry.register(externalReferenceAttachmentType);
-        },
-        registerPersistableState: (persistableStateAttachmentType) => {
-          this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
-        },
-        registerUnified: (unifiedAttachmentType) => {
-          this.unifiedAttachmentTypeRegistry.register(unifiedAttachmentType);
+        registerAttachment: (attachmentType) => {
+          this.unifiedAttachmentTypeRegistry.register(attachmentType);
         },
       },
     };
@@ -164,16 +149,12 @@ export class CasesUiPlugin
      * we get the component on start and provide the same component to all consumers.
      */
     const getCasesContext = getCasesContextLazy({
-      externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
       getFilesClient: plugins.files.filesClientFactory.asScoped,
     });
 
     registerActions(
       {
-        externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
-        persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
         getFilesClient: plugins.files.filesClientFactory.asScoped,
       },
@@ -201,6 +182,7 @@ export class CasesUiPlugin
         templatesEnabled: config?.templates?.enabled ?? false,
         attachmentsEnabled: config?.attachments?.enabled ?? false,
         chatEnabled: config?.chat?.enabled ?? false,
+        runWorkflowsEnabled: config?.runWorkflows?.enabled ?? false,
         casesRedesign: {
           list: config?.casesRedesign?.list ?? false,
           details: config?.casesRedesign?.details ?? false,
@@ -212,8 +194,6 @@ export class CasesUiPlugin
         getCases: (props) =>
           getCasesLazy({
             ...props,
-            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
-            persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
             unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
@@ -221,8 +201,6 @@ export class CasesUiPlugin
         getRecentCases: (props) =>
           getRecentCasesLazy({
             ...props,
-            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
-            persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
             unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),
@@ -230,8 +208,6 @@ export class CasesUiPlugin
         getAllCasesSelectorModal: (props) =>
           getAllCasesSelectorModalLazy({
             ...props,
-            externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
-            persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
             unifiedAttachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
             getFilesClient: plugins.files.filesClientFactory.asScoped,
           }),

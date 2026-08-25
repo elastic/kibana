@@ -11,7 +11,10 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import type { AgentStatusRecords } from '../../../../../../common/endpoint/types/agents';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
+import type {
+  EndpointAppContextService,
+  ScopedEndpointServices,
+} from '../../../../endpoint_app_context_services';
 import type { AgentStatusClientInterface } from './types';
 import { AgentStatusClientError, AgentStatusNotSupportedError } from '../errors';
 
@@ -21,6 +24,8 @@ export interface AgentStatusClientOptions {
   soClient: SavedObjectsClientContract;
   spaceId: string;
   connectorActionsClient?: ActionsClient;
+  /** Required for reads made on the caller's behalf to fan out under CPS; without it they are origin-only */
+  scoped?: ScopedEndpointServices;
 }
 
 export abstract class AgentStatusClient implements AgentStatusClientInterface {

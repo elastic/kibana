@@ -11,14 +11,18 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
-  significantEventSchema,
+  MAX_ASSESSMENT_NOTE_LENGTH,
   MAX_SIGNAL_DESCRIPTION_LENGTH,
+  MAX_SUMMARY_LENGTH,
+  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  significantEventSchema,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
+import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
@@ -48,40 +52,75 @@ export const eventsWriteItemSchema = significantEventSchema
     conversation_id: true,
   })
   .extend({
-    dedup_window: z
+    event_id: z
       .string()
-      .max(256)
       .optional()
+      .transform((v) => (v === '' ? undefined : v))
       .describe(
         dedent`
-          Deduplication window as an ES date math expression (e.g. "now-24h"). Mutually exclusive with event_id.
+          ID of an existing event to append a new version to (continuation/snapshot mode).
 
-          Provide this to write a new event candidate without an explicit event_id.
-          
-          If an active (status: pending or open) event with the same primary stream and detection rule UUIDs already exists within this window, the write is skipped and the existing event_id is returned (written: false). Otherwise a new event is created with status "pending".
+          Omit to trigger find-or-create: the handler scans all currently-active events for one
+          whose rule set contains the submitted rules (subset match) and shares at least one
+          stream name. If found, the write is skipped and the existing event_id is returned
+          (written: false, reason: existing_active_event). Otherwise a new event is created with
+          a generated event_id.
+          Otherwise a new event is created with a generated event_id.
         `
       ),
   })
   .partial({ event_id: true })
-  .refine((item) => !(item.dedup_window !== undefined && item.event_id !== undefined), {
-    message: 'dedup_window and event_id are mutually exclusive',
-  })
   .refine(
     (item) =>
       (item.signals ?? []).every((s) => s.description.length <= MAX_SIGNAL_DESCRIPTION_LENGTH),
     {
       message: `Signal descriptions must be at most ${MAX_SIGNAL_DESCRIPTION_LENGTH} characters for agent input`,
     }
+  )
+  .refine(
+    (item) =>
+      item.symptom_hypothesis === undefined ||
+      item.symptom_hypothesis.length <= MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+    {
+      message: `Symptom hypotheses must be at most ${MAX_SYMPTOM_HYPOTHESIS_LENGTH} characters for agent input`,
+    }
+  )
+  .refine((item) => item.summary.length <= MAX_SUMMARY_LENGTH, {
+    message: `Summaries must be at most ${MAX_SUMMARY_LENGTH} characters for agent input`,
+  })
+  .refine(
+    (item) =>
+      item.assessment_note === undefined ||
+      item.assessment_note.length <= MAX_ASSESSMENT_NOTE_LENGTH,
+    {
+      message: `Assessment notes must be at most ${MAX_ASSESSMENT_NOTE_LENGTH} characters for agent input`,
+    }
   );
 
+const ITEMS_REQUIRED_MESSAGE = 'Pass items as a non-empty array of event objects.';
+
 const eventsWriteItemsSchema = z
-  .array(eventsWriteItemSchema)
-  .min(1)
+  .array(eventsWriteItemSchema, { error: ITEMS_REQUIRED_MESSAGE })
+  .min(1, { error: ITEMS_REQUIRED_MESSAGE })
   .max(MAX_BULK_WRITE_ITEMS)
+  .refine(
+    (items) => {
+      const ruleUuids = items.flatMap((item) =>
+        (item.signals ?? [])
+          .filter((signal) => signal.type === 'detection')
+          .map((signal) => signal.metadata?.rule_uuid)
+          .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
+      );
+      return new Set(ruleUuids).size === ruleUuids.length;
+    },
+    {
+      message: 'Each detection rule UUID may appear in only one event item per write',
+    }
+  )
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
       defaultMessage:
-        'The significant event items to write. It must contain at least one item and no more than the maximum allowed.',
+        'Non-empty array of event objects. One call assigns every batch detection. Omit event_id for new events; supply the existing event_id for continuations. Each detection rule_uuid may appear in only one item.',
     })
   );
 
@@ -96,6 +135,94 @@ export const eventsWriteSchema = z
   );
 
 export type EventsWriteParams = z.infer<typeof eventsWriteSchema>;
+
+const enrichCausalFeatures = async (
+  items: EventsWriteParams['items'],
+  getKnowledgeIndicatorClient: () => Promise<KnowledgeIndicatorClient>,
+  logger: Logger
+): Promise<EventsWriteParams['items']> => {
+  const causalFeatures = items.flatMap(({ causal_features: features = [] }) => features);
+  const blastRadiusEntries = items.flatMap(({ blast_radius: entries = [] }) => entries);
+  if (causalFeatures.length === 0 && blastRadiusEntries.length === 0) {
+    return items;
+  }
+
+  try {
+    // Stored docs keep the derived uuid in their root `id`, so `id` matches uuid-style
+    // references and `featureIds` (feature.slug) matches slug-style ones.
+    const references = [...causalFeatures, ...blastRadiusEntries];
+    const featureIds = [...new Set(references.map(({ feature_id: featureId }) => featureId))];
+    const streamNames = [
+      ...new Set([
+        ...items.flatMap(({ stream_names: names }) => names),
+        ...references.flatMap(({ stream_name: streamName }) => streamName ?? []),
+      ]),
+    ];
+    const kiClient = await getKnowledgeIndicatorClient();
+    const hits = (
+      await Promise.all([
+        kiClient.getFeatures(streamNames, {
+          featureIds,
+          includeExcluded: true,
+          includeExpired: true,
+        }),
+        kiClient.getFeatures(streamNames, {
+          id: featureIds,
+          includeExcluded: true,
+          includeExpired: true,
+        }),
+      ])
+    ).flatMap(({ hits: featureHits }) => featureHits);
+    // Both lookups can return the same indicator; keep one entry per uuid.
+    const uniqueHits = [...new Map(hits.map((feature) => [feature.uuid, feature])).values()];
+    const featuresByReference = new Map(
+      uniqueHits.flatMap((feature) => [
+        [`${feature.stream_name}:${feature.id}`, feature] as const,
+        [`${feature.stream_name}:${feature.uuid}`, feature] as const,
+      ])
+    );
+
+    const resolveFeature = (
+      featureId: string,
+      explicitStream: string | undefined,
+      itemStreamNames: string[]
+    ) => {
+      if (explicitStream !== undefined) {
+        return featuresByReference.get(`${explicitStream}:${featureId}`);
+      }
+      // Without an explicit stream: an unambiguous match wins; otherwise restrict to the
+      // event's own streams so a shared slug on another stream cannot stamp the wrong
+      // classification.
+      const matches = uniqueHits.filter(({ id, uuid }) => id === featureId || uuid === featureId);
+      const scoped = matches.filter(({ stream_name }) => itemStreamNames.includes(stream_name));
+      return (scoped.length === 1 ? scoped : matches.length === 1 ? matches : [])[0];
+    };
+
+    return items.map((item) => ({
+      ...item,
+      causal_features: item.causal_features?.map((causalFeature) => {
+        const feature = resolveFeature(
+          causalFeature.feature_id,
+          causalFeature.stream_name,
+          item.stream_names
+        );
+        return feature
+          ? { ...causalFeature, type: feature.type, subtype: feature.subtype }
+          : causalFeature;
+      }),
+      // Blast radius rows carry their own row-shape discriminator in `type`; only the
+      // indicator's subtype is enriched.
+      blast_radius: item.blast_radius?.map((entry) => {
+        const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
+        return feature ? { ...entry, subtype: feature.subtype } : entry;
+      }),
+    }));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    logger.warn(`Failed to enrich causal features; writing them unenriched: ${message}`);
+    return items;
+  }
+};
 
 export function createEventsWriteTool({
   getScopedClients,
@@ -112,32 +239,46 @@ export function createEventsWriteTool({
     id: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Write a batch of significant events. Submit at most one item per event_id.
+      Write a batch of significant events. Call once with a populated items array.
 
-      **dedup_window** (e.g. "now-24h"), no event_id: write a new candidate. Skipped if an active
-      event with the same stream and rule UUIDs already exists in the window (written: false,
-      reason: duplicate_within_window); otherwise written with status "pending".
+      **With event_id**: append a version to an existing event with the supplied status.
+      Signals and topology are merged with prior versions. No-op if severity and status are
+      unchanged (written: false, reason: unchanged_outcome). Keep an open continuation at or
+      above the prior severity unless grounding shows reduced impact. When no new rule UUIDs are
+      introduced, title and symptom_hypothesis are frozen to the stored values and
+      narrative_preserved: true is returned.
 
-      **event_id**, no dedup_window: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions. Use status "open" when continuing an
-      existing event_id so it stays on the default read path; use dedup_window (without event_id)
-      for new candidates, which are written as "pending". Any settled status (open, closed, dismissed)
-      may be set directly on snapshot writes.
-
-      **neither**: a synthetic event_id is generated.
+      **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
+      set contains the submitted rules and shares at least one stream name. If found, returns it
+      without writing (written: false, reason: existing_active_event). Otherwise creates a new
+      event with a generated event_id.
     `,
+    annotations: {
+      title: 'Write Significant Events',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: eventsWriteSchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, licensing } = await getScopedClients({ request });
+        const { getEventClient, getKnowledgeIndicatorClient, licensing } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
+        const items = await enrichCausalFeatures(
+          toolParams.items,
+          getKnowledgeIndicatorClient,
+          logger
+        );
 
         const data = await eventsWriteBulkHandler({
           eventClient: getEventClient(),
-          inputs: toolParams.items,
+          inputs: items,
         });
 
         data.forEach((result) => {

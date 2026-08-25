@@ -36,7 +36,7 @@ import type {
   OutputSoKafkaAttributes,
   OutputSoRemoteElasticsearchAttributes,
   SecretReference,
-  OutputSoBaseAttributes,
+  BeatsSoBaseAttributes,
 } from '../types';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -714,6 +714,8 @@ class OutputService {
         data.username = undefined;
         data.password = undefined;
       }
+      // Kafka does not support proxies — clear any proxy_id silently (#267281)
+      data.proxy_id = null;
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -1034,9 +1036,9 @@ class OutputService {
         originalOutput.type === outputType.Elasticsearch ||
         originalOutput.type === outputType.RemoteElasticsearch
       ) {
-        (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams = null;
-        (updateData as Nullable<OutputSoBaseAttributes>).otel_exporter_config_yaml = null;
-        (updateData as Nullable<OutputSoBaseAttributes>).otel_disable_beatsauth = null;
+        (updateData as Nullable<BeatsSoBaseAttributes>).write_to_logs_streams = null;
+        (updateData as Nullable<BeatsSoBaseAttributes>).otel_exporter_config_yaml = null;
+        (updateData as Nullable<BeatsSoBaseAttributes>).otel_disable_beatsauth = null;
       }
 
       if (data.type === outputType.Logstash) {
@@ -1157,6 +1159,11 @@ class OutputService {
       updateData.hosts
     ) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
+    }
+
+    // Kafka does not support proxies — clear any proxy_id silently (#267281)
+    if (mergedType === outputType.Kafka) {
+      updateData.proxy_id = null;
     }
 
     if (

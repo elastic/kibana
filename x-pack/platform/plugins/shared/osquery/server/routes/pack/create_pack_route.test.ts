@@ -282,4 +282,77 @@ describe('createPackRoute', () => {
       expect(writtenPack.shard).toBe(75);
     });
   });
+
+  describe('per-query interval convergence on create', () => {
+    it('marker-less bare per-query interval is dropped when pack uses interval mode', async () => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const { mockClient } = setupRoute({
+        agentPolicies: [],
+        packagePolicies: [],
+        packagePolicyUpdate,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: false,
+          policy_ids: [],
+          schedule_type: 'interval',
+          interval: 60,
+          queries: {
+            q1: { query: 'SELECT 1', interval: 300 }, // marker-less — should be converged away
+          },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
+
+      const createCall = mockClient.create.mock.calls[0];
+      const createdAttributes = createCall[1];
+      // Queries are stored as an object keyed by id, not an array.
+      const writtenQuery = createdAttributes.queries.q1;
+      // Marker-less bare interval must not reach the SO.
+      expect(writtenQuery).not.toHaveProperty('interval');
+      expect(writtenQuery).not.toHaveProperty('schedule_type');
+    });
+
+    it('explicit schedule_type: interval override is preserved on create', async () => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const { mockClient } = setupRoute({
+        agentPolicies: [],
+        packagePolicies: [],
+        packagePolicyUpdate,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: false,
+          policy_ids: [],
+          schedule_type: 'interval',
+          interval: 60,
+          queries: {
+            q1: { query: 'SELECT 1', interval: 300, schedule_type: 'interval' }, // explicit — must be preserved
+          },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+
+      const createCall = mockClient.create.mock.calls[0];
+      const createdAttributes = createCall[1];
+      // Queries are stored as an object keyed by id, not an array.
+      const writtenQuery = createdAttributes.queries.q1;
+      // Explicit override must survive convergence.
+      expect(writtenQuery.interval).toBe(300);
+      expect(writtenQuery.schedule_type).toBe('interval');
+    });
+  });
 });

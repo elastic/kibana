@@ -12,20 +12,10 @@ import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getEsqlColumns } from '@kbn/esql-utils';
-import {
-  EuiButton,
-  EuiComboBox,
-  EuiFormRow,
-  EuiPanel,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { ComposeDiscoverAction, ComposeDiscoverState } from '../types';
 import type { FormValues } from '../../../form/types';
-import { QuerySummary } from '../query_summary';
-import { EsqlQuerySummarySection } from './esql_query_summary_section';
+import { EsqlQuerySummarySection, getEsqlSummaryState } from './esql_query_summary_section';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import { useComposeDiscoverTimeField } from '../use_compose_discover_time_field';
 import { getTimeFieldResolutionQuery } from '../get_time_field_resolution_query';
@@ -35,7 +25,6 @@ interface AlertConditionStepProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   isEditing: boolean;
-  onManualSplit?: () => void;
 }
 
 export function AlertConditionStep({
@@ -43,19 +32,17 @@ export function AlertConditionStep({
   dispatch,
   services,
   isEditing,
-  onManualSplit,
 }: AlertConditionStepProps) {
   const { setValue, watch } = useFormContext<FormValues>();
   // Rules are registered by always-mounted QueryFieldRules in ComposeDiscoverForm.
   const { errors } = useFormState<FormValues>({ name: 'query' });
   const queryError = errors.query;
-  const isAlert = watch('kind') === 'alert';
+  const kind = watch('kind');
+  const isAlert = kind === 'alert';
   const timeField = watch('timeField') ?? '@timestamp';
   const grouping = watch('grouping');
   const groupFields = grouping?.fields ?? [];
   const query = watch('query');
-
-  const fullQuery = query.format === 'standalone' ? query.breach.query : '';
 
   // Committed pipeline query for output-column lookup and STATS BY auto-populate.
   const committedQuery = useMemo(
@@ -64,6 +51,12 @@ export function AlertConditionStep({
   );
 
   const { timeFieldOptions, isTimeFieldResolved } = useComposeDiscoverTimeField();
+
+  // Time field and grouping depend on a resolved query. Disable them until a
+  // non-empty query is committed (no committed query, or committed-but-empty).
+  const summaryState = getEsqlSummaryState(state.queryCommitted, query);
+  const hasUsableQuery = summaryState !== 'before_apply' && summaryState !== 'empty';
+  const queryDependentFieldsDisabled = state.childOpen || !hasUsableQuery;
 
   // When the current field isn't on the index (no date fields, or a stored
   // `@timestamp` that doesn't exist), show a blank selection + invalid state so
@@ -130,62 +123,13 @@ export function AlertConditionStep({
       </EuiTitle>
       <EuiSpacer size="s" />
 
-      {isAlert ? (
-        <EsqlQuerySummarySection
-          query={query}
-          queryCommitted={state.queryCommitted}
-          isEditorOpen={state.childOpen}
-          onOpenEditor={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
-          onManualSplit={onManualSplit}
-        />
-      ) : !state.queryCommitted ? (
-        <>
-          <EuiPanel color="subdued" paddingSize="m">
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.alertingV2.composeDiscover.alertCondition.noQueryDescription"
-                defaultMessage="No query defined yet"
-              />
-            </EuiText>
-          </EuiPanel>
-          <EuiSpacer size="s" />
-          <EuiButton
-            iconType="editorCodeBlock"
-            isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
-            data-test-subj="composeDiscoverOpenEditor"
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.composeDiscover.alertCondition.openEditorButtonLabel"
-              defaultMessage="Open query editor"
-            />
-          </EuiButton>
-        </>
-      ) : (
-        <>
-          <QuerySummary
-            query={fullQuery}
-            emptyMessage={i18n.translate(
-              'xpack.alertingV2.composeDiscover.alertCondition.noQueryDefined',
-              { defaultMessage: 'No query defined' }
-            )}
-          />
-          <EuiSpacer size="s" />
-          <EuiButton
-            size="s"
-            color="text"
-            iconType="chevronLimitLeft"
-            isDisabled={state.childOpen}
-            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
-            data-test-subj="composeDiscoverEditQuery"
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.composeDiscover.alertCondition.editQueryButtonLabel"
-              defaultMessage="Edit query"
-            />
-          </EuiButton>
-        </>
-      )}
+      <EsqlQuerySummarySection
+        query={query}
+        queryCommitted={state.queryCommitted}
+        kind={kind}
+        isEditorOpen={state.childOpen}
+        onOpenEditor={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step, isAlert })}
+      />
 
       {queryError?.message ? (
         <>
@@ -227,7 +171,7 @@ export function AlertConditionStep({
           hasNoInitialSelection={!currentTimeFieldIsOption}
           isInvalid={!isTimeFieldResolved}
           onChange={(e) => setValue('timeField', e.target.value, { shouldDirty: true })}
-          disabled={state.childOpen}
+          disabled={queryDependentFieldsDisabled}
           data-test-subj="composeDiscoverTimeField"
         />
       </EuiFormRow>
@@ -241,6 +185,7 @@ export function AlertConditionStep({
         <EuiComboBox
           compressed
           fullWidth
+          isDisabled={queryDependentFieldsDisabled}
           options={outputColumns.map((name) => ({ label: name }))}
           selectedOptions={groupFields.map((f) => ({ label: f }))}
           onChange={(opts) =>

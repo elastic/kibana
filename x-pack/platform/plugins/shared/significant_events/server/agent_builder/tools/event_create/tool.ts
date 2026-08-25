@@ -50,8 +50,15 @@ export function createEventTool({
         defaultMessage: 'Create a significant event for one or more streams.',
       })}
     `,
+    annotations: {
+      title: 'Create Significant Event',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: createEventSchema,
-    tags: ['streams', 'significant_events'],
+    tags: ['streams', 'significant-events'],
     confirmation: {
       askUser: 'always',
       getConfirmation: async ({ toolParams }) => ({

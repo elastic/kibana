@@ -6,19 +6,24 @@
  */
 
 import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, PluginInitializerContext } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
+import { PluginInitializer } from '@kbn/core-di-server';
 import type { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { ExecutionContext } from '../../execution_context';
 import { createExecutionContext, isRuleExecutionCancellationError } from '../../execution_context';
+import type { PluginConfig } from '../../../config';
 
 export interface ExecuteQueryParams {
   query: EsqlQueryRequest['query'];
   filter?: EsqlQueryRequest['filter'];
   params?: EsqlQueryRequest['params'];
   abortSignal?: AbortSignal;
+  /** Maximum allowed response body size in bytes. Passed to the ES transport. */
+  maxResponseSize?: number;
 }
 
 export interface QueryServiceContract {
@@ -33,7 +38,9 @@ const DROP_NULL_COLUMNS = true;
 export class QueryService implements QueryServiceContract {
   constructor(
     private readonly esClient: ElasticsearchClient,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(PluginInitializer('config'))
+    private readonly pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {}
 
   async executeQuery({
@@ -41,6 +48,7 @@ export class QueryService implements QueryServiceContract {
     filter,
     params,
     abortSignal,
+    maxResponseSize,
   }: ExecuteQueryParams): Promise<EsqlQueryResponse> {
     this.logger.debug({
       message: () => `QueryService: Executing query - ${JSON.stringify({ query, filter, params })}`,
@@ -54,7 +62,7 @@ export class QueryService implements QueryServiceContract {
           filter,
           params,
         },
-        { signal: abortSignal }
+        { signal: abortSignal, ...(maxResponseSize !== undefined ? { maxResponseSize } : {}) }
       );
 
       this.logger.debug({
@@ -65,8 +73,7 @@ export class QueryService implements QueryServiceContract {
     } catch (error) {
       this.logger.error({
         error,
-        code: 'ESQL_QUERY_ERROR',
-        type: 'QueryServiceError',
+        code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
       });
 
       throw error;
@@ -78,16 +85,92 @@ export class QueryService implements QueryServiceContract {
     return this.toRows<T>(response);
   }
 
-  async *executeQueryStream<T = Record<string, unknown>>({
+  async *executeQueryStream<T = Record<string, unknown>>(
+    params: ExecuteQueryParams
+  ): AsyncIterable<T[]> {
+    const { responseFormat } = this.pluginConfigAccessor.get<PluginConfig>().esql;
+
+    if (responseFormat === 'arrow') {
+      yield* this.streamArrow<T>(params);
+      return;
+    }
+
+    yield* this.streamJson<T>(params);
+  }
+
+  /**
+   * Runs the single-shot JSON query and yields the full result set as one in-memory batch,
+   * preserving the `AsyncIterable<T[]>` contract. Cancellation is scoped to this
+   * rule-execution streaming boundary, mirroring the arrow path.
+   */
+  private async *streamJson<T>({
     query,
     filter,
     params,
     abortSignal,
+    maxResponseSize,
   }: ExecuteQueryParams): AsyncIterable<T[]> {
     const context = createExecutionContext(abortSignal ?? new AbortController().signal);
 
     this.logger.debug({
-      message: () => `QueryService: Executing streaming query`,
+      message: () => `QueryService: Executing streaming query (json)`,
+    });
+
+    try {
+      context.throwIfAborted();
+
+      const response = await this.esClient.esql.query(
+        {
+          query,
+          drop_null_columns: DROP_NULL_COLUMNS,
+          filter,
+          params,
+        },
+        { signal: context.signal, ...(maxResponseSize !== undefined ? { maxResponseSize } : {}) }
+      );
+
+      context.throwIfAborted();
+
+      const rows = this.toRows<T>(response);
+
+      this.logger.debug({
+        message: `QueryService: Streaming query completed successfully (json)`,
+      });
+
+      // Empty results return nothing, this mirrors the arrow path so callers
+      // relying on `withAtLeastOne` keep the same fallback behaviour.
+      if (rows.length === 0) {
+        return;
+      }
+
+      yield rows;
+    } catch (error) {
+      if (this.isCancellation(error, context)) {
+        this.logger.debug({
+          message: 'QueryService: Streaming query aborted (json)',
+        });
+      } else {
+        this.logger.error({
+          error,
+          code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
+        });
+      }
+
+      throw error;
+    }
+  }
+
+  private async *streamArrow<T>({
+    query,
+    filter,
+    params,
+    abortSignal,
+    maxResponseSize,
+  }: ExecuteQueryParams): AsyncIterable<T[]> {
+    const context = createExecutionContext(abortSignal ?? new AbortController().signal);
+
+    this.logger.debug({
+      message: () => `QueryService: Executing streaming query (arrow)`,
     });
 
     let reader: AsyncRecordBatchStreamReader | undefined;
@@ -95,6 +178,9 @@ export class QueryService implements QueryServiceContract {
     try {
       context.throwIfAborted();
 
+      // Note: Arrow streaming uses chunked transfer encoding so the transport's
+      // maxResponseSize guard (which checks Content-Length) will not fire.
+      // The per-run alerts.max row limit acts as the primary guardrail here.
       reader = await this.esClient.helpers
         .esql(
           {
@@ -103,7 +189,7 @@ export class QueryService implements QueryServiceContract {
             filter,
             params,
           },
-          { signal: context.signal }
+          { signal: context.signal, ...(maxResponseSize !== undefined ? { maxResponseSize } : {}) }
         )
         .toArrowReader();
 
@@ -114,18 +200,17 @@ export class QueryService implements QueryServiceContract {
       yield* this.iterateReader<T>(reader, context);
 
       this.logger.debug({
-        message: `QueryService: Streaming query completed successfully`,
+        message: `QueryService: Streaming query completed successfully (arrow)`,
       });
     } catch (error) {
-      if (isRuleExecutionCancellationError(error)) {
+      if (this.isCancellation(error, context)) {
         this.logger.debug({
-          message: 'QueryService: Streaming query aborted',
+          message: 'QueryService: Streaming query aborted (arrow)',
         });
       } else {
         this.logger.error({
           error,
-          code: 'ESQL_QUERY_ERROR',
-          type: 'QueryServiceError',
+          code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
         });
       }
 
@@ -172,6 +257,15 @@ export class QueryService implements QueryServiceContract {
       // Cleanup is best-effort; the primary error has already been
       // propagated through the iteration above.
     }
+  }
+
+  /**
+   * A mid-flight abort surfaces as a transport `RequestAbortedError`, so we also
+   * treat the error as a cancellation when our execution signal has fired. The
+   * `maxResponseSize` guard aborts internally without it, staying a real error.
+   */
+  private isCancellation(error: unknown, context: ExecutionContext): boolean {
+    return isRuleExecutionCancellationError(error) || context.signal.aborted;
   }
 
   private buildParseError(error: unknown): Error {

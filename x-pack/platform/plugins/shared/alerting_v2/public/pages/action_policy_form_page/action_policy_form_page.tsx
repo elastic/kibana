@@ -58,7 +58,7 @@ export const ActionPolicyFormPage = () => {
     <EuiFlexGroup justifyContent="flexStart">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          iconType="arrowLeft"
+          iconType="chevronSingleLeft"
           onClick={navigateToList}
           data-test-subj="returnButton"
           style={{ paddingInline: 0 }}
@@ -222,7 +222,7 @@ const ActionPolicyFormPageContent = ({
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             onClick={onCancel}
             data-test-subj="returnButton"
             style={{ paddingInline: 0 }}

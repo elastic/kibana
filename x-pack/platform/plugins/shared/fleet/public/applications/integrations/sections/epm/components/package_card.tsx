@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiBadge,
-  EuiButton,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,6 +41,7 @@ import {
   shouldShowInstallationStatus,
 } from './installation_status';
 import { wrapTitleWithDeprecated } from './utils';
+import { VariantCountBadge } from '../screens/home/components/variant_count_badge';
 
 export type PackageCardProps = IntegrationCardItem;
 
@@ -57,6 +57,7 @@ export function PackageCard({
   release,
   id,
   fromIntegrations,
+  fromCollection,
   isReauthorizationRequired,
   isUnverified,
   isUpdateAvailable,
@@ -69,6 +70,7 @@ export function PackageCard({
   installStatus,
   onCardClick: onClickProp = undefined,
   isCollectionCard = false,
+  groupMembers,
   titleLineClamp,
   titleBadge,
   titleSize = 'xs',
@@ -167,20 +169,14 @@ export function PackageCard({
     );
   }
 
-  let collectionButton: React.ReactNode | null = null;
-  if (isCollectionCard) {
-    collectionButton = (
-      <EuiFlexItem>
-        <EuiButton
-          color="text"
-          data-test-subj="xpack.fleet.packageCard.collectionButton"
-          iconType="package"
-        >
-          <FormattedMessage
-            id="xpack.fleet.packageCard.collectionButton.copy"
-            defaultMessage="View collection"
-          />
-        </EuiButton>
+  let collectionBadge: React.ReactNode | null = null;
+  if (isCollectionCard && groupMembers?.length) {
+    collectionBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <VariantCountBadge count={groupMembers.length} />
+        </span>
       </EuiFlexItem>
     );
   }
@@ -202,13 +198,15 @@ export function PackageCard({
     );
   }
 
-  const { application } = useStartServices();
+  const { application, http } = useStartServices();
 
   const onCardClick = () => {
-    if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
+    // Use basePath-prefixed comparison so this works with server.basePath or space-path prefixes.
+    const integrationsBase = http.basePath.prepend(INTEGRATIONS_BASE_PATH);
+    if (url.startsWith(integrationsBase)) {
       application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-        path: url.slice(INTEGRATIONS_BASE_PATH.length),
-        state: { fromIntegrations },
+        path: url.slice(integrationsBase.length),
+        state: { fromIntegrations, ...(fromCollection ? { fromCollection } : {}) },
       });
     } else if (url.startsWith('http') || url.startsWith('https')) {
       window.open(url, '_blank');
@@ -301,12 +299,6 @@ export function PackageCard({
             & > .euiFlexItem {
               min-width: 0;
             }
-
-            ${isCollectionCard
-              ? `& > .euiFlexItem:last-child {
-              min-width: auto;
-            }`
-              : ''}
           `}
         >
           {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
@@ -316,7 +308,7 @@ export function PackageCard({
           {contentBadge}
           {releaseBadge}
           {hasDeferredInstallationsBadge}
-          {collectionButton}
+          {collectionBadge}
           <InstallationStatus
             installStatus={installStatus}
             showInstallationStatus={showInstallationStatus}
