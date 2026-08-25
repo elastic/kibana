@@ -271,4 +271,20 @@ describe('getAuditStatus$', () => {
       await expect(getStatus(undefined)).resolves.toEqual(available);
     });
   });
+
+  describe('when the license does not allow audit logging', () => {
+    it('passes the derived status through without crashing', async () => {
+      // writeAccess$ exists (file appender + audit.enabled) but emits undefined because
+      // allowAuditLogging is false — sub-gold license or during the boot window before
+      // the license resolves. The non-null assertion was previously passing undefined
+      // into the stream and causing a TypeError on writeAccess.granted.
+      const status = await firstValueFrom(
+        getAuditStatus$({
+          writeAccess$: of(undefined),
+          derivedStatus$: of(available),
+        })
+      );
+      expect(status).toEqual(available);
+    });
+  });
 });

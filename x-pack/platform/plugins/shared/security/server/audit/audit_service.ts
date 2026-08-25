@@ -95,7 +95,7 @@ export class AuditService {
     );
 
     const writeAccess$ = auditLogPath
-      ? probed$.pipe(map(({ writeAccess }) => writeAccess!))
+      ? probed$.pipe(map(({ writeAccess }) => writeAccess))
       : undefined;
 
     // Report the plugin as degraded while the audit log cannot be written, so the lost audit
