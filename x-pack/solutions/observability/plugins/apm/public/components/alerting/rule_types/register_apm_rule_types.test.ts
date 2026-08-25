@@ -180,18 +180,21 @@ describe('registerApmRuleTypes formatters', () => {
     });
 
     describe('missing service.name', () => {
-      it.each(missingFieldValues)('does not throw when service.name is %s', (_label, serviceName) => {
-        const fields = {
-          [ALERT_REASON]: ALERT_REASON_VALUE,
-          [SERVICE_NAME]: serviceName,
-          [SERVICE_ENVIRONMENT]: SERVICE_ENVIRONMENT_VALUE,
-          [TRANSACTION_TYPE]: TRANSACTION_TYPE_VALUE,
-        };
+      it.each(missingFieldValues)(
+        'does not throw when service.name is %s',
+        (_label, serviceName) => {
+          const fields = {
+            [ALERT_REASON]: ALERT_REASON_VALUE,
+            [SERVICE_NAME]: serviceName,
+            [SERVICE_ENVIRONMENT]: SERVICE_ENVIRONMENT_VALUE,
+            [TRANSACTION_TYPE]: TRANSACTION_TYPE_VALUE,
+          };
 
-        for (const ruleTypeId of allRuleTypes) {
-          expect(() => formatAlert(getFormatter(ruleTypeId), fields)).not.toThrow();
+          for (const ruleTypeId of allRuleTypes) {
+            expect(() => formatAlert(getFormatter(ruleTypeId), fields)).not.toThrow();
+          }
         }
-      });
+      );
 
       it.each(missingFieldValues)(
         'does not truncate remaining fields when service.name is %s',
