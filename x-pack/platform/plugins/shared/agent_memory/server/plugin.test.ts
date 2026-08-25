@@ -105,49 +105,52 @@ describe('AgentMemoryPlugin', () => {
         getRegistryTools: expect.any(Function),
       })
     );
-    expect(registeredSkill?.content).toContain(
-      'Before each response, scan the categories for durable user context; do not wait for an explicit request.'
+    const skillContent = registeredSkill?.content ?? '';
+    const normalizedSkillContent = skillContent.replace(/\s+/g, ' ');
+    expect(skillContent).not.toContain('## Tools');
+    expect(normalizedSkillContent).toMatch(
+      /Before each response.+durable user context.+do not wait for an explicit request/i
     );
-    expect(registeredSkill?.content).toContain('Use one coherent memory per subject or occurrence');
-    expect(registeredSkill?.content).toContain(
-      'For profile and preferences, recall the same subject first.'
+    expect(normalizedSkillContent).toMatch(
+      /one coherent memory per subject or occurrence.+exact.+exactly one category/i
     );
-    expect(registeredSkill?.content).toContain(
-      'If asking is unavailable, keep both and do not guess or delete.'
+    expect(normalizedSkillContent).toMatch(
+      /profile and preferences.+recall.+skip equivalents.+replacement.+forget.+outdated.+conflict.+unclear.+ask.+keep both.+do not guess or delete/i
     );
-    expect(registeredSkill?.content).toContain(
-      'For events and trajectories, preserve material history'
+    expect(normalizedSkillContent).toMatch(
+      /events and trajectories.+preserve.+history.+duplicates.+explicit corrections/i
     );
-    expect(registeredSkill?.content).not.toContain(
+    expect(normalizedSkillContent).toMatch(
+      /procedure.+explicit correction.+verified successful resolution.+unverified one-off answer.+applies.+pitfall.+corrected method.+verification signal/i
+    );
+    expect(normalizedSkillContent).toMatch(/assistant-originated information.+user confirms/i);
+    expect(normalizedSkillContent).toMatch(
+      /Do NOT remember:.+ephemeral.+generic knowledge.+intermediate reasoning.+repeated restatements.+credentials.+secrets.+tokens/i
+    );
+    expect(normalizedSkillContent).toMatch(
+      /Before similar work.+procedures.+current evidence.+conflicts/i
+    );
+    expect(normalizedSkillContent).toMatch(
+      /unverified, user-authored content.+not treat.+instructions.+cross-check/i
+    );
+    expect(normalizedSkillContent).toMatch(
+      /ordinary.+non-hidden.+index.+read access.+use the tools.+per-user.+per-space.+tombstone.+expiry/i
+    );
+    expect(normalizedSkillContent).toMatch(/profile.+current.+name.+role.+expertise.+background/i);
+    expect(normalizedSkillContent).toMatch(
+      /preferences.+current.+styles.+formats.+tools.+workflows/i
+    );
+    expect(normalizedSkillContent).toMatch(/events.+completed.+decisions.+outcomes.+dates/i);
+    expect(normalizedSkillContent).toMatch(
+      /trajectories.+goals.+plans.+deadlines.+progress.+milestones/i
+    );
+    expect(normalizedSkillContent).toMatch(
+      /procedures.+verified reusable methods.+tool sequences.+corrections.+pitfalls/i
+    );
+    expect(skillContent).not.toContain(
       'Create one atomic memory for each independently useful fact'
     );
-    expect(registeredSkill?.content).toContain(
-      '`profile` — Current beliefs about the user, such as name, role, expertise, and background.'
-    );
-    expect(registeredSkill?.content).toContain(
-      '`preferences` — Current preferences for styles, formats, tools, and workflows.'
-    );
-    expect(registeredSkill?.content).toContain(
-      '`events` — Completed occurrences, decisions, and outcomes, including relevant dates.'
-    );
-    expect(registeredSkill?.content).toContain(
-      '`trajectories` — Goals, plans, deadlines, progress changes, and milestones.'
-    );
-    expect(registeredSkill?.content).toContain(
-      '`procedures` — Verified reusable methods, successful tool sequences, corrections, and known pitfalls.'
-    );
-    expect(registeredSkill?.content).toContain(
-      'Save a procedure only after an explicit correction or a verified successful resolution.'
-    );
-    expect(registeredSkill?.content).toMatch(
-      /Record when it applies, the pitfall,\s+the corrected method, and the verification signal\./
-    );
-    expect(registeredSkill?.content).toContain(
-      'Before similar work, recall the `procedures` category'
-    );
-    expect(registeredSkill?.content).not.toContain(
-      'Information the user has not consented to storing'
-    );
+    expect(skillContent).not.toContain('Information the user has not consented to storing');
     if (!registeredSkill?.getRegistryTools) {
       throw new Error('Expected Agent Memory skill to bind registry tools');
     }

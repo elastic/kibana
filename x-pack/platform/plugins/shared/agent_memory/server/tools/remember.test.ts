@@ -48,10 +48,16 @@ describe('createRememberTool', () => {
       getCoreSecurity,
     });
 
-    expect(tool.description.replace(/\s+/g, ' ')).toContain(
-      'When the user corrects or replaces stored information, identify related memories first ' +
-        '(recall if needed). Save the replacement, then call platform.memory.forget only for ' +
-        'memories that are clearly outdated or contradictory.'
+    const normalizedDescription = tool.description.replace(/\s+/g, ' ');
+    expect(normalizedDescription).toMatch(/store.+user.+future recall.+across conversations/i);
+    expect(normalizedDescription).toMatch(
+      /do not.+ephemeral context.+search results.+intermediate reasoning/i
+    );
+    expect(normalizedDescription).toMatch(
+      /corrects or replaces.+recall.+save the replacement.+forget.+outdated or contradictory/i
+    );
+    expect(normalizedDescription).toMatch(
+      /returns \{ id, revision, action \} where action is 'created' or 'updated'/i
     );
     expect(tool.confirmation?.askUser).toBe('always');
     const confirmation = await tool.confirmation?.getConfirmation?.({
