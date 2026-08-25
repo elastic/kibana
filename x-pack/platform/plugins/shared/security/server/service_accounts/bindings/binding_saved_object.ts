@@ -119,6 +119,30 @@ export const registerWorkloadBindingSavedObjectType = (
         spaceId: { type: 'keyword' },
         // Mapped now so bindings can later be reported on by age without a migration.
         attachedAt: { type: 'date' },
+        // The management UI groups a service account's workloads by operation and labels them by
+        // workload type, so both have to be filterable and aggregatable. Mapped now for the same
+        // reason as `spaceId`: adding them once bindings exist costs a model version.
+        operationType: { type: 'keyword' },
+        workloadType: { type: 'keyword' },
+        // A union of attacher variants flattened into one object: `type` selects which of the
+        // fields below a given document populates. `userProfileId` is the useful one — it is
+        // present on both the `user` and `api_key` variants, so "attached by this person"
+        // resolves regardless of which credential did the attaching. Note that
+        // `attachedBy.serviceAccountId` is the account that *attached* the workload, which is a
+        // different question from the top-level `serviceAccountId` the workload *runs as*.
+        attachedBy: {
+          // Explicit, so that adding a fourth variant is a deliberate mapping decision rather
+          // than something that starts indexing on its own.
+          dynamic: false,
+          properties: {
+            type: { type: 'keyword' },
+            username: { type: 'keyword' },
+            userProfileId: { type: 'keyword' },
+            apiKeyId: { type: 'keyword' },
+            variant: { type: 'keyword' },
+            serviceAccountId: { type: 'keyword' },
+          },
+        },
       },
     },
     management: { importableAndExportable: false },
