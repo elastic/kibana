@@ -191,17 +191,17 @@ const ConversationSharePopover: React.FC<{
   const [searchValue, setSearchValue] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-  const accessControl = normalizeConversationAccessControl(conversation?.access_control);
+  const accessControl = normalizeConversationAccessControl(conversation.access_control);
   const accessControlMemberIds = accessControl.entries.map((entry) => entry.id);
 
   useEffect(() => {
-    const nextAccessControl = normalizeConversationAccessControl(conversation?.access_control);
+    const nextAccessControl = normalizeConversationAccessControl(conversation.access_control);
 
     setAccessMode(nextAccessControl.access_mode);
     setMemberIds(nextAccessControl.entries.map((entry) => entry.id));
-  }, [conversation?.access_control]);
+  }, [conversation.access_control]);
 
-  const ownerId = conversation?.user.id;
+  const ownerId = conversation.user.id;
   const profileUids = [ownerId, ...memberIds].filter((uid): uid is string => Boolean(uid));
   const { data: profiles = [] } = useConversationAccessControlProfiles({
     uids: profileUids,
@@ -217,7 +217,7 @@ const ConversationSharePopover: React.FC<{
     }
   );
 
-  const excludedIds = new Set([conversation?.user.id, ...memberIds].filter(Boolean));
+  const excludedIds = new Set([conversation.user.id, ...memberIds].filter(Boolean));
   const suggestedProfileByUid = new Map(suggestedProfiles.map((profile) => [profile.uid, profile]));
   const userOptions = suggestedProfiles
     .filter((profile) => !excludedIds.has(profile.uid))
