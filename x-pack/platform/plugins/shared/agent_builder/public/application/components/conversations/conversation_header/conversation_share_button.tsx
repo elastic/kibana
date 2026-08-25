@@ -50,6 +50,7 @@ import {
 } from '../../../hooks/use_conversation';
 import { useSuggestUsers } from '../../../hooks/use_suggest_users';
 import {
+  hasInviteMembersSummary,
   useConversationAccessControlProfiles,
   useInviteMembersSummary,
   useUpdateConversationAccessControl,
@@ -64,6 +65,9 @@ const labels = {
   }),
   sharing: i18n.translate('xpack.agentBuilder.conversationSharing.title', {
     defaultMessage: 'Sharing',
+  }),
+  participants: i18n.translate('xpack.agentBuilder.conversationSharing.participantsTitle', {
+    defaultMessage: 'Participants',
   }),
   close: i18n.translate('xpack.agentBuilder.conversationSharing.close', {
     defaultMessage: 'Close sharing',
@@ -223,11 +227,16 @@ const UserSearchOption: React.FC<{
 
 const InviteMembersSummary: React.FC<{
   conversationId: string;
-}> = ({ conversationId }) => {
+  canUpdateAccessControl: boolean;
+}> = ({ conversationId, canUpdateAccessControl }) => {
   const { euiTheme } = useEuiTheme();
   const { profiles, extraCount, shouldShowSummary } = useInviteMembersSummary({ conversationId });
 
   if (!shouldShowSummary) {
+    if (!canUpdateAccessControl) {
+      return null;
+    }
+
     return (
       <span
         css={css`
@@ -299,22 +308,30 @@ export const ConversationShareButton: React.FC = () => {
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
   const { conversation } = useConversation();
+  const accessControl = normalizeConversationAccessControl(conversation?.access_control);
+  const canOpenSharePopover = canUpdateAccessControl || hasInviteMembersSummary(accessControl);
 
   if (
     !conversation ||
     !hasPersistedConversation ||
-    !canUpdateAccessControl ||
+    !canOpenSharePopover ||
     !isExperimentalFeaturesEnabled
   ) {
     return null;
   }
 
-  return <ConversationSharePopover conversation={conversation} />;
+  return (
+    <ConversationSharePopover
+      conversation={conversation}
+      canUpdateAccessControl={canUpdateAccessControl}
+    />
+  );
 };
 
 const ConversationSharePopover: React.FC<{
   conversation: Conversation;
-}> = ({ conversation }) => {
+  canUpdateAccessControl: boolean;
+}> = ({ conversation, canUpdateAccessControl }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [accessMode, setAccessMode] = useState(ConversationAccessControlMode.Private);
@@ -344,7 +361,10 @@ const ConversationSharePopover: React.FC<{
   const { data: suggestedProfiles = [], isFetching: isSearchingUsers } = useSuggestUsers(
     debouncedSearch,
     {
-      enabled: isPopoverOpen && accessMode === ConversationAccessControlMode.Private,
+      enabled:
+        canUpdateAccessControl &&
+        isPopoverOpen &&
+        accessMode === ConversationAccessControlMode.Private,
     }
   );
 
@@ -374,6 +394,10 @@ const ConversationSharePopover: React.FC<{
     nextAccessMode: ConversationAccessControlMode,
     nextMemberIds: string[]
   ) => {
+    if (!canUpdateAccessControl) {
+      return;
+    }
+
     updateAccessControl({
       access_mode: nextAccessMode,
       entries:
@@ -441,7 +465,7 @@ const ConversationSharePopover: React.FC<{
         <EuiButtonEmpty
           size="s"
           color="text"
-          aria-label={labels.invite}
+          aria-label={canUpdateAccessControl ? labels.invite : labels.sharing}
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
           data-test-subj="agentBuilderConversationInviteButton"
           {...getEbtProps({
@@ -450,14 +474,17 @@ const ConversationSharePopover: React.FC<{
             detail: 'conversation',
           })}
         >
-          <InviteMembersSummary conversationId={conversation.id} />
+          <InviteMembersSummary
+            conversationId={conversation.id}
+            canUpdateAccessControl={canUpdateAccessControl}
+          />
         </EuiButtonEmpty>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downRight"
-      aria-label={labels.sharing}
+      aria-label={canUpdateAccessControl ? labels.sharing : labels.participants}
     >
       <div
         css={css`
@@ -478,7 +505,7 @@ const ConversationSharePopover: React.FC<{
         >
           <EuiFlexItem>
             <EuiTitle size="xxxs">
-              <h2>{labels.sharing}</h2>
+              <h2>{canUpdateAccessControl ? labels.sharing : labels.participants}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -501,73 +528,81 @@ const ConversationSharePopover: React.FC<{
             padding-bottom: ${isPublic ? euiTheme.size.l : euiTheme.size.m};
           `}
         >
-          {errorMessage ? (
+          {canUpdateAccessControl && errorMessage ? (
             <>
               <EuiCallOut announceOnMount color="danger" size="s" title={errorMessage} />
               <EuiSpacer size="m" />
             </>
           ) : null}
-          <EuiFormRow label={labels.generalAccess} fullWidth>
-            <EuiSuperSelect<ConversationAccessControlMode>
-              fullWidth
-              valueOfSelected={accessMode}
-              options={accessModeOptions}
-              onChange={onAccessModeChange}
-              disabled={isSaving}
-              style={{
-                minHeight: euiTheme.size.xxxl,
-                lineHeight: 'normal',
-                paddingTop: euiTheme.size.xs,
-                paddingBottom: euiTheme.size.xs,
-              }}
-              popoverProps={{
-                panelPaddingSize: 'none',
-                anchorPosition: 'downRight',
-              }}
-              data-test-subj="agentBuilderConversationSharingAccessModeSelect"
-            />
-          </EuiFormRow>
+          {canUpdateAccessControl ? (
+            <EuiFormRow label={labels.generalAccess} fullWidth>
+              <EuiSuperSelect<ConversationAccessControlMode>
+                fullWidth
+                valueOfSelected={accessMode}
+                options={accessModeOptions}
+                onChange={onAccessModeChange}
+                disabled={isSaving}
+                style={{
+                  minHeight: euiTheme.size.xxxl,
+                  lineHeight: 'normal',
+                  paddingTop: euiTheme.size.xs,
+                  paddingBottom: euiTheme.size.xs,
+                }}
+                popoverProps={{
+                  panelPaddingSize: 'none',
+                  anchorPosition: 'downRight',
+                }}
+                data-test-subj="agentBuilderConversationSharingAccessModeSelect"
+              />
+            </EuiFormRow>
+          ) : null}
           {!isPublic ? (
             <>
-              <EuiSpacer size="l" />
-              <EuiFormRow label={labels.currentMembers} fullWidth>
-                <EuiComboBox<string>
-                  compressed
-                  fullWidth
-                  async
-                  placeholder={labels.searchUsers}
-                  aria-label={labels.searchUsers}
-                  options={userOptions}
-                  selectedOptions={[]}
-                  onChange={onAddUser}
-                  onSearchChange={setSearchValue}
-                  isLoading={isSearchingUsers}
-                  isDisabled={isSaving}
-                  isClearable={false}
-                  prepend={
-                    <EuiIcon
-                      type="magnify"
-                      color="subdued"
-                      data-test-subj="agentBuilderConversationSharingUserSearchIcon"
-                      aria-hidden={true}
+              {canUpdateAccessControl ? (
+                <>
+                  <EuiSpacer size="l" />
+                  <EuiFormRow label={labels.currentMembers} fullWidth>
+                    <EuiComboBox<string>
+                      compressed
+                      fullWidth
+                      async
+                      placeholder={labels.searchUsers}
+                      aria-label={labels.searchUsers}
+                      options={userOptions}
+                      selectedOptions={[]}
+                      onChange={onAddUser}
+                      onSearchChange={setSearchValue}
+                      isLoading={isSearchingUsers}
+                      isDisabled={isSaving}
+                      isClearable={false}
+                      prepend={
+                        <EuiIcon
+                          type="magnify"
+                          color="subdued"
+                          data-test-subj="agentBuilderConversationSharingUserSearchIcon"
+                          aria-hidden={true}
+                        />
+                      }
+                      singleSelection={{ asPlainText: true }}
+                      renderOption={(option) => {
+                        const profile = option.value
+                          ? suggestedProfileByUid.get(option.value)
+                          : undefined;
+
+                        if (!profile) {
+                          return null;
+                        }
+
+                        return (
+                          <UserSearchOption key={option.key ?? option.value} profile={profile} />
+                        );
+                      }}
+                      rowHeight={48}
+                      data-test-subj="agentBuilderConversationSharingUserSearch"
                     />
-                  }
-                  singleSelection={{ asPlainText: true }}
-                  renderOption={(option) => {
-                    const profile = option.value
-                      ? suggestedProfileByUid.get(option.value)
-                      : undefined;
-
-                    if (!profile) {
-                      return null;
-                    }
-
-                    return <UserSearchOption key={option.key ?? option.value} profile={profile} />;
-                  }}
-                  rowHeight={48}
-                  data-test-subj="agentBuilderConversationSharingUserSearch"
-                />
-              </EuiFormRow>
+                  </EuiFormRow>
+                </>
+              ) : null}
               <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
                 {ownerProfile ? (
                   <EuiFlexItem>
@@ -586,7 +621,7 @@ const ConversationSharePopover: React.FC<{
                         profile={profile}
                         hasBottomBorder={index < memberProfiles.length - 1}
                         isDisabled={isSaving}
-                        onRemove={() => onRemoveUser(id)}
+                        onRemove={canUpdateAccessControl ? () => onRemoveUser(id) : undefined}
                       />
                     </EuiFlexItem>
                   );

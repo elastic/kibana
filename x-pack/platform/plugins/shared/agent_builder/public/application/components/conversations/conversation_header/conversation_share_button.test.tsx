@@ -165,10 +165,56 @@ describe('ConversationShareButton', () => {
     jest.clearAllMocks();
   });
 
-  it('does not render without access-control update permission', () => {
+  it('does not render without access-control update permission or shared members', () => {
     renderShareButton({ canUpdateAccessControl: false });
 
     expect(screen.queryByTestId('agentBuilderConversationInviteButton')).not.toBeInTheDocument();
+  });
+
+  it('opens a read-only members popover without access-control update permission', async () => {
+    renderShareButton({
+      canUpdateAccessControl: false,
+      inviteMembersSummary: {
+        profiles: [memberProfile],
+        extraCount: 0,
+        shouldShowSummary: true,
+      },
+      conversation: {
+        ...baseConversation,
+        access_control: {
+          access_mode: ConversationAccessControlMode.Private,
+          entries: [
+            {
+              type: 'user',
+              id: 'member-1',
+              role: ConversationAccessControlRole.Member,
+              added_at: '2026-01-01T00:00:00.000Z',
+            },
+          ],
+        },
+      },
+    });
+
+    expect(screen.getByTestId('agentBuilderConversationInviteMembersSummary')).toBeInTheDocument();
+    expect(screen.queryByText('Invite')).not.toBeInTheDocument();
+
+    await openPopover();
+
+    expect(screen.getByTestId('agentBuilderConversationSharingPopover')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Participants' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Sharing' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Current members')).not.toBeInTheDocument();
+    expect(screen.getByText('Ethan Smith')).toBeInTheDocument();
+    expect(screen.getByText('Alex Kim')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('agentBuilderConversationSharingAccessModeSelect')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('agentBuilderConversationSharingUserSearch')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('agentBuilderConversationShareRemoveMember')
+    ).not.toBeInTheDocument();
   });
 
   it('does not render when experimental features are disabled', () => {
