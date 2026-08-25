@@ -56,6 +56,17 @@ Use only these action types and classifications:
 | \`set_asset_criticality\` | \`asset_criticality.set\` | Evidence shows an entity's current criticality is missing or inappropriate. |
 | \`analyze_exfiltration_ips\` | \`threat_hunting.exfil_ips\` | Network or exfiltration evidence identifies IPs that need scoped analysis. |
 
+When the discovery contains the concrete evidence needed to execute an action, add
+\`execution_params\`:
+- For \`kill_process\`, include at least one observed process identifier:
+  \`process_entity_id\`, \`pid\`, or \`process_name\`. Prefer \`process_entity_id\`, then \`pid\`.
+- For \`set_asset_criticality\`, include the evidence-supported \`criticality_level\`:
+  \`low_impact\`, \`medium_impact\`, \`high_impact\`, or \`extreme_impact\`.
+
+Do not infer a process identifier or criticality level. Omit \`execution_params\` when the discovery
+does not contain concrete evidence; the workflow will surface the recommendation without executing it.
+All other action types MUST omit \`execution_params\`.
+
 ### Type 2 — Analyst-manual (\`execution: "manual"\`)
 
 These have no Kibana API capability and MUST omit \`capability_ref\`:
@@ -86,6 +97,8 @@ Return an object with a single \`recommended_actions\` array. Every item MUST co
 - \`priority\`: \`immediate\`, \`investigation\`, or \`hardening\`
 - \`targets\`: an object containing all four arrays: \`hosts\`, \`users\`, \`ips\`, \`alert_ids\`
 - \`capability_ref\`: required for Type 1 and forbidden for Type 2
+- \`execution_params\`: optional and allowed only for \`kill_process\` and
+  \`set_asset_criticality\`, using the fields described above
 
 An empty \`recommended_actions\` array is valid when the discovery does not justify a catalog action.
 Never claim that a recommendation was executed or approved.`,

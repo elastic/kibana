@@ -49,4 +49,15 @@ describe('recommendedActionsSkill', () => {
     expect(recommendedActionsSkill.content).toContain('MUST NOT execute');
     expect(recommendedActionsSkill.content).toContain('recommended_actions');
   });
+
+  it('requires evidence-backed execution parameters for executable mutations', () => {
+    expect(recommendedActionsSkill.content).toContain('`execution_params`');
+    expect(recommendedActionsSkill.content).toContain('`process_entity_id`');
+    expect(recommendedActionsSkill.content).toContain('`pid`');
+    expect(recommendedActionsSkill.content).toContain('`process_name`');
+    expect(recommendedActionsSkill.content).toContain('`criticality_level`');
+    expect(recommendedActionsSkill.content).toContain(
+      'does not contain concrete evidence; the workflow will surface the recommendation'
+    );
+  });
 });

@@ -26,6 +26,13 @@ export const ATTACK_DISCOVERY_RECOMMENDED_ACTION_PRIORITIES = [
   'hardening',
 ] as const;
 
+export const ATTACK_DISCOVERY_ASSET_CRITICALITY_LEVELS = [
+  'low_impact',
+  'medium_impact',
+  'high_impact',
+  'extreme_impact',
+] as const;
+
 export type AttackDiscoveryKibanaActionType = keyof typeof ATTACK_DISCOVERY_ACTION_CAPABILITIES;
 export type AttackDiscoveryManualActionType = (typeof ATTACK_DISCOVERY_MANUAL_ACTION_TYPES)[number];
 export type AttackDiscoveryRecommendedActionType =
@@ -35,6 +42,38 @@ export type AttackDiscoveryRecommendedActionPriority =
   (typeof ATTACK_DISCOVERY_RECOMMENDED_ACTION_PRIORITIES)[number];
 export type AttackDiscoveryCapabilityRef =
   (typeof ATTACK_DISCOVERY_ACTION_CAPABILITIES)[AttackDiscoveryKibanaActionType];
+export type AttackDiscoveryAssetCriticalityLevel =
+  (typeof ATTACK_DISCOVERY_ASSET_CRITICALITY_LEVELS)[number];
+
+export type AttackDiscoveryKillProcessExecutionParams =
+  | {
+      process_entity_id: string;
+      process_name?: string;
+      pid?: number;
+    }
+  | {
+      process_entity_id?: never;
+      pid: number;
+      process_name?: string;
+    }
+  | {
+      process_entity_id?: never;
+      pid?: never;
+      process_name: string;
+    };
+
+export interface AttackDiscoverySetAssetCriticalityExecutionParams {
+  criticality_level: AttackDiscoveryAssetCriticalityLevel;
+}
+
+export interface AttackDiscoveryExecutionParamsByActionType {
+  isolate_host: never;
+  kill_process: AttackDiscoveryKillProcessExecutionParams;
+  hunt_process_persistence: never;
+  create_case: never;
+  set_asset_criticality: AttackDiscoverySetAssetCriticalityExecutionParams;
+  analyze_exfiltration_ips: never;
+}
 
 export interface AttackDiscoveryRecommendedActionTargets {
   hosts: string[];
@@ -55,6 +94,7 @@ export type AttackDiscoveryKibanaRecommendedAction = {
     action_type: ActionType;
     execution: 'kibana_api';
     capability_ref: (typeof ATTACK_DISCOVERY_ACTION_CAPABILITIES)[ActionType];
+    execution_params?: AttackDiscoveryExecutionParamsByActionType[ActionType];
   };
 }[AttackDiscoveryKibanaActionType];
 

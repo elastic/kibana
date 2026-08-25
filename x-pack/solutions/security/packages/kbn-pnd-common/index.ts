@@ -64,19 +64,24 @@ export {
 
 export {
   ATTACK_DISCOVERY_ACTION_CAPABILITIES,
+  ATTACK_DISCOVERY_ASSET_CRITICALITY_LEVELS,
   ATTACK_DISCOVERY_MANUAL_ACTION_TYPES,
   ATTACK_DISCOVERY_RECOMMENDED_ACTION_PRIORITIES,
 } from './recommended_actions';
 export type {
+  AttackDiscoveryAssetCriticalityLevel,
   AttackDiscoveryCapabilityRef,
+  AttackDiscoveryExecutionParamsByActionType,
   AttackDiscoveryKibanaActionType,
   AttackDiscoveryKibanaRecommendedAction,
+  AttackDiscoveryKillProcessExecutionParams,
   AttackDiscoveryManualActionType,
   AttackDiscoveryManualRecommendedAction,
   AttackDiscoveryRecommendedAction,
   AttackDiscoveryRecommendedActionPriority,
   AttackDiscoveryRecommendedActionTargets,
   AttackDiscoveryRecommendedActionType,
+  AttackDiscoverySetAssetCriticalityExecutionParams,
 } from './recommended_actions';
 
 export { CONVERSATION_QUEUE_CATEGORIES, CONVERSATION_QUEUE_LABELS } from './translations';

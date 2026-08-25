@@ -44,6 +44,12 @@ triggers:
           type: object
           additionalProperties: true
           description: Optional Elasticsearch DSL filter applied during alert retrieval.
+        execute_actions:
+          type: boolean
+          default: false
+          description: >
+            Safety kill-switch for analyst-approved Kibana API actions. When false,
+            recommendations can still be reviewed but no action is executed.
       additionalProperties: false
 # Declared in JSON Schema object format (not the legacy name/type array): the
 # legacy `array` type constrains items to string/number/boolean, so an array of
@@ -62,6 +68,35 @@ outputs:
       description: Structured recommended actions accumulated across discoveries.
       items:
         type: object
+        properties:
+          execution_params:
+            type: object
+            additionalProperties: false
+            properties:
+              process_entity_id:
+                type: string
+                maxLength: 256
+              process_name:
+                type: string
+                maxLength: 1024
+              pid:
+                type: integer
+                minimum: 1
+              criticality_level:
+                type: string
+                enum:
+                  - low_impact
+                  - medium_impact
+                  - high_impact
+                  - extreme_impact
+    executed_actions:
+      type: array
+      description: Results of analyst-approved action execution attempts.
+      items:
+        type: object
+consts:
+  # Liquid cannot express an empty array as a reliable filter fallback.
+  no_rows: []
 steps:
   # Run the full pipeline (retrieve -> generate -> validate -> persist) in sync
   # mode (the default), so the step blocks until the run is terminal and returns
@@ -85,6 +120,7 @@ steps:
     type: data.set
     with:
       recommended_actions: []
+      executed_actions: []
 
   # One investigation per discovered attack: loop over the discoveries returned
   # inline by the run step and draft a focused brief for each. Runs only on a
@@ -181,6 +217,26 @@ steps:
                         - asset_criticality.set
                         - threat_hunting.exfil_ips
                       description: Required for kibana_api actions and omitted for manual actions.
+                    execution_params:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        process_entity_id:
+                          type: string
+                          maxLength: 256
+                        process_name:
+                          type: string
+                          maxLength: 1024
+                        pid:
+                          type: integer
+                          minimum: 1
+                        criticality_level:
+                          type: string
+                          enum:
+                            - low_impact
+                            - medium_impact
+                            - high_impact
+                            - extreme_impact
                   required:
                     - action_type
                     - execution
@@ -198,6 +254,715 @@ steps:
             ${{ variables.recommended_actions
               | concat: steps.recommend_actions.output.structured_output.recommended_actions }}
 
+      - name: compute_action_flags
+        type: data.set
+        with:
+          has_kibana_actions: >-
+            ${{ steps.recommend_actions.output.structured_output.recommended_actions
+              | has: 'execution', 'kibana_api' }}
+          discovery_executed_actions: []
+
+      - name: review_actions
+        type: waitForInput
+        if: "${{ steps.compute_action_flags.output.has_kibana_actions == true }}"
+        timeout: "72h"
+        with:
+          message: |-
+            Review the recommended Kibana actions for "{{ foreach.item.title }}".
+            Set only the action-type toggles you approve to true. The workflow
+            executes only approved types when the execute_actions input is true.
+
+            {% assign kibana_actions = steps.recommend_actions.output.structured_output.recommended_actions | where: "execution", "kibana_api" %}
+            {% for action in kibana_actions %}
+            - {{ action.action_type }}: {{ action.title }}
+              Priority: {{ action.priority }}
+              Targets: {{ action.targets | json }}
+              Execution parameters: {{ action.execution_params | json }}
+              Rationale: {{ action.rationale }}
+            {% endfor %}
+
+            analyze_exfiltration_ips remains surfaced-only in this workflow even
+            when approved.
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              create_case:
+                type: boolean
+                default: false
+              set_asset_criticality:
+                type: boolean
+                default: false
+              isolate_host:
+                type: boolean
+                default: false
+              kill_process:
+                type: boolean
+                default: false
+              hunt_process_persistence:
+                type: boolean
+                default: false
+              analyze_exfiltration_ips:
+                type: boolean
+                default: false
+                description: Approval is recorded for review only; this workflow does not execute it.
+            required:
+              - create_case
+              - set_asset_criticality
+              - isolate_host
+              - kill_process
+              - hunt_process_persistence
+              - analyze_exfiltration_ips
+
+      - name: compute_approved_action_flags
+        type: data.set
+        with:
+          endpoint_action_approved: >-
+            ${{ steps.review_actions.output.response.isolate_host == true
+              or steps.review_actions.output.response.kill_process == true
+              or steps.review_actions.output.response.hunt_process_persistence == true }}
+
+      # Resolve the most recent Endpoint agent id for every named endpoint-action
+      # host. Each request below selects only ids belonging to its recommendation.
+      - name: resolve_endpoint_agent_ids
+        type: elasticsearch.esql.query
+        if: >-
+          ${{ inputs.execute_actions == true
+            and steps.compute_approved_action_flags.output.endpoint_action_approved == true }}
+        with:
+          format: json
+          query: |-
+            FROM metrics-endpoint.metadata_current_*
+            | WHERE host.name IN (
+                "__workflow_no_matching_host__"
+                {%- for action in steps.recommend_actions.output.structured_output.recommended_actions -%}
+                  {%- if action.action_type == "isolate_host" or action.action_type == "kill_process" or action.action_type == "hunt_process_persistence" -%}
+                    {%- for host in action.targets.hosts -%}
+                , {{ host | json }}
+                    {%- endfor -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              )
+            | KEEP agent.id, host.name
+            | LIMIT 1000
+        on-failure:
+          continue: true
+
+      - name: execute_create_case_actions
+        type: foreach
+        if: >-
+          ${{ inputs.execute_actions == true
+            and steps.review_actions.output.response.create_case == true }}
+        foreach: >-
+          ${{ steps.recommend_actions.output.structured_output.recommended_actions
+            | where: 'action_type', 'create_case' }}
+        steps:
+          - name: create_case
+            type: kibana.request
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/cases"
+              headers:
+                kbn-xsrf: string
+                elastic-api-version: "2023-10-31"
+                Content-Type: application/json
+              body:
+                title: "{{ foreach.item.title }}"
+                description: |-
+                  {{ foreach.item.rationale }}
+
+                  Recommended action targets:
+                  {{ foreach.item.targets | json }}
+                tags:
+                  - attack-discovery
+                  - recommended-action
+                owner: securitySolution
+                connector:
+                  id: none
+                  name: none
+                  type: .none
+                  fields: null
+                settings:
+                  syncAlerts: false
+                severity: high
+            on-failure:
+              continue: true
+
+          - name: build_create_case_success_record
+            type: data.set
+            if: "${{ steps.create_case.error == null }}"
+            with:
+              execution_record:
+                action_type: "{{ foreach.item.action_type }}"
+                title: "{{ foreach.item.title }}"
+                targets: "${{ foreach.item.targets }}"
+                status: succeeded
+                output: "${{ steps.create_case.output }}"
+
+          - name: record_create_case_success
+            type: data.set
+            if: "${{ steps.create_case.error == null }}"
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_create_case_success_record.output.execution_record }}
+
+          - name: build_create_case_failure_record
+            type: data.set
+            if: "${{ steps.create_case.error != null }}"
+            with:
+              execution_record:
+                action_type: "{{ foreach.item.action_type }}"
+                title: "{{ foreach.item.title }}"
+                targets: "${{ foreach.item.targets }}"
+                status: failed
+                error: "${{ steps.create_case.error }}"
+
+          - name: record_create_case_failure
+            type: data.set
+            if: "${{ steps.create_case.error != null }}"
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_create_case_failure_record.output.execution_record }}
+
+      - name: execute_set_asset_criticality_actions
+        type: foreach
+        if: >-
+          ${{ inputs.execute_actions == true
+            and steps.review_actions.output.response.set_asset_criticality == true }}
+        foreach: >-
+          ${{ steps.recommend_actions.output.structured_output.recommended_actions
+            | where: 'action_type', 'set_asset_criticality' }}
+        steps:
+          - name: capture_asset_criticality_action
+            type: data.set
+            with:
+              current_action: "${{ foreach.item }}"
+
+          - name: build_missing_asset_criticality_params_record
+            type: data.set
+            if: "${{ variables.current_action.execution_params.criticality_level == null }}"
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: skipped
+                error: missing execution_params.criticality_level
+
+          - name: record_missing_asset_criticality_params
+            type: data.set
+            if: "${{ variables.current_action.execution_params.criticality_level == null }}"
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_missing_asset_criticality_params_record.output.execution_record }}
+
+          - name: build_missing_asset_criticality_targets_record
+            type: data.set
+            if: >-
+              ${{ variables.current_action.execution_params.criticality_level != null
+                and variables.current_action.targets.hosts.size == 0
+                and variables.current_action.targets.users.size == 0 }}
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: skipped
+                error: missing host or user target
+
+          - name: record_missing_asset_criticality_targets
+            type: data.set
+            if: >-
+              ${{ variables.current_action.execution_params.criticality_level != null
+                and variables.current_action.targets.hosts.size == 0
+                and variables.current_action.targets.users.size == 0 }}
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_missing_asset_criticality_targets_record.output.execution_record }}
+
+          - name: set_host_asset_criticality_actions
+            type: foreach
+            if: "${{ variables.current_action.execution_params.criticality_level != null }}"
+            foreach: "${{ variables.current_action.targets.hosts }}"
+            steps:
+              - name: set_host_asset_criticality
+                type: kibana.request
+                with:
+                  method: POST
+                  path: "/s/{{ workflow.spaceId }}/api/asset_criticality"
+                  headers:
+                    kbn-xsrf: string
+                    elastic-api-version: "2023-10-31"
+                    Content-Type: application/json
+                  body:
+                    id_field: host.name
+                    id_value: "{{ foreach.item }}"
+                    criticality_level: "{{ variables.current_action.execution_params.criticality_level }}"
+                on-failure:
+                  continue: true
+
+              - name: build_host_asset_criticality_success_record
+                type: data.set
+                if: "${{ steps.set_host_asset_criticality.error == null }}"
+                with:
+                  execution_record:
+                    action_type: "{{ variables.current_action.action_type }}"
+                    title: "{{ variables.current_action.title }}"
+                    target:
+                      id_field: host.name
+                      id_value: "{{ foreach.item }}"
+                    status: succeeded
+                    output: "${{ steps.set_host_asset_criticality.output }}"
+
+              - name: record_host_asset_criticality_success
+                type: data.set
+                if: "${{ steps.set_host_asset_criticality.error == null }}"
+                with:
+                  discovery_executed_actions: >-
+                    ${{ variables.discovery_executed_actions
+                      | push: steps.build_host_asset_criticality_success_record.output.execution_record }}
+
+              - name: build_host_asset_criticality_failure_record
+                type: data.set
+                if: "${{ steps.set_host_asset_criticality.error != null }}"
+                with:
+                  execution_record:
+                    action_type: "{{ variables.current_action.action_type }}"
+                    title: "{{ variables.current_action.title }}"
+                    target:
+                      id_field: host.name
+                      id_value: "{{ foreach.item }}"
+                    status: failed
+                    error: "${{ steps.set_host_asset_criticality.error }}"
+
+              - name: record_host_asset_criticality_failure
+                type: data.set
+                if: "${{ steps.set_host_asset_criticality.error != null }}"
+                with:
+                  discovery_executed_actions: >-
+                    ${{ variables.discovery_executed_actions
+                      | push: steps.build_host_asset_criticality_failure_record.output.execution_record }}
+
+          - name: set_user_asset_criticality_actions
+            type: foreach
+            if: "${{ variables.current_action.execution_params.criticality_level != null }}"
+            foreach: "${{ variables.current_action.targets.users }}"
+            steps:
+              - name: set_user_asset_criticality
+                type: kibana.request
+                with:
+                  method: POST
+                  path: "/s/{{ workflow.spaceId }}/api/asset_criticality"
+                  headers:
+                    kbn-xsrf: string
+                    elastic-api-version: "2023-10-31"
+                    Content-Type: application/json
+                  body:
+                    id_field: user.name
+                    id_value: "{{ foreach.item }}"
+                    criticality_level: "{{ variables.current_action.execution_params.criticality_level }}"
+                on-failure:
+                  continue: true
+
+              - name: build_user_asset_criticality_success_record
+                type: data.set
+                if: "${{ steps.set_user_asset_criticality.error == null }}"
+                with:
+                  execution_record:
+                    action_type: "{{ variables.current_action.action_type }}"
+                    title: "{{ variables.current_action.title }}"
+                    target:
+                      id_field: user.name
+                      id_value: "{{ foreach.item }}"
+                    status: succeeded
+                    output: "${{ steps.set_user_asset_criticality.output }}"
+
+              - name: record_user_asset_criticality_success
+                type: data.set
+                if: "${{ steps.set_user_asset_criticality.error == null }}"
+                with:
+                  discovery_executed_actions: >-
+                    ${{ variables.discovery_executed_actions
+                      | push: steps.build_user_asset_criticality_success_record.output.execution_record }}
+
+              - name: build_user_asset_criticality_failure_record
+                type: data.set
+                if: "${{ steps.set_user_asset_criticality.error != null }}"
+                with:
+                  execution_record:
+                    action_type: "{{ variables.current_action.action_type }}"
+                    title: "{{ variables.current_action.title }}"
+                    target:
+                      id_field: user.name
+                      id_value: "{{ foreach.item }}"
+                    status: failed
+                    error: "${{ steps.set_user_asset_criticality.error }}"
+
+              - name: record_user_asset_criticality_failure
+                type: data.set
+                if: "${{ steps.set_user_asset_criticality.error != null }}"
+                with:
+                  discovery_executed_actions: >-
+                    ${{ variables.discovery_executed_actions
+                      | push: steps.build_user_asset_criticality_failure_record.output.execution_record }}
+
+      - name: execute_isolate_host_actions
+        type: foreach
+        if: >-
+          ${{ inputs.execute_actions == true
+            and steps.review_actions.output.response.isolate_host == true }}
+        foreach: >-
+          ${{ steps.recommend_actions.output.structured_output.recommended_actions
+            | where: 'action_type', 'isolate_host' }}
+        steps:
+          - name: prepare_isolate_host_action
+            type: data.set
+            with:
+              current_action: "${{ foreach.item }}"
+              endpoint_ids: >-
+                ${{ steps.resolve_endpoint_agent_ids.output.values | default: consts.no_rows
+                  | where_exp: 'row', 'foreach.item.targets.hosts contains row.1'
+                  | map: '0' | uniq }}
+
+          - name: isolate_host
+            type: kibana.request
+            if: "${{ variables.endpoint_ids.size > 0 }}"
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/endpoint/action/isolate"
+              headers:
+                kbn-xsrf: string
+                elastic-api-version: "2023-10-31"
+                Content-Type: application/json
+              body:
+                endpoint_ids: "${{ variables.endpoint_ids }}"
+                comment: "{{ variables.current_action.rationale }}"
+            on-failure:
+              continue: true
+
+          - name: build_isolate_host_success_record
+            type: data.set
+            if: "${{ variables.endpoint_ids.size > 0 and steps.isolate_host.error == null }}"
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: submitted
+                output: "${{ steps.isolate_host.output }}"
+
+          - name: record_isolate_host_success
+            type: data.set
+            if: "${{ variables.endpoint_ids.size > 0 and steps.isolate_host.error == null }}"
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_isolate_host_success_record.output.execution_record }}
+
+          - name: build_isolate_host_failure_record
+            type: data.set
+            if: "${{ variables.endpoint_ids.size > 0 and steps.isolate_host.error != null }}"
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: failed
+                error: "${{ steps.isolate_host.error }}"
+
+          - name: record_isolate_host_failure
+            type: data.set
+            if: "${{ variables.endpoint_ids.size > 0 and steps.isolate_host.error != null }}"
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_isolate_host_failure_record.output.execution_record }}
+
+          - name: build_isolate_host_missing_agent_record
+            type: data.set
+            if: "${{ variables.endpoint_ids.size == 0 }}"
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: skipped
+                error: no Endpoint agent id resolved for target hosts
+
+          - name: record_isolate_host_missing_agent
+            type: data.set
+            if: "${{ variables.endpoint_ids.size == 0 }}"
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_isolate_host_missing_agent_record.output.execution_record }}
+
+      - name: execute_kill_process_actions
+        type: foreach
+        if: >-
+          ${{ inputs.execute_actions == true
+            and steps.review_actions.output.response.kill_process == true }}
+        foreach: >-
+          ${{ steps.recommend_actions.output.structured_output.recommended_actions
+            | where: 'action_type', 'kill_process' }}
+        steps:
+          - name: prepare_kill_process_action
+            type: data.set
+            with:
+              current_action: "${{ foreach.item }}"
+              endpoint_ids: >-
+                ${{ steps.resolve_endpoint_agent_ids.output.values | default: consts.no_rows
+                  | where_exp: 'row', 'foreach.item.targets.hosts contains row.1'
+                  | map: '0' | uniq }}
+              kill_process_parameters: null
+
+          - name: use_process_entity_id
+            type: data.set
+            if: "${{ variables.current_action.execution_params.process_entity_id != null }}"
+            with:
+              kill_process_parameters:
+                entity_id: "{{ variables.current_action.execution_params.process_entity_id }}"
+
+          - name: use_process_pid
+            type: data.set
+            if: >-
+              ${{ variables.current_action.execution_params.process_entity_id == null
+                and variables.current_action.execution_params.pid != null }}
+            with:
+              kill_process_parameters:
+                pid: "${{ variables.current_action.execution_params.pid }}"
+
+          - name: use_process_name
+            type: data.set
+            if: >-
+              ${{ variables.current_action.execution_params.process_entity_id == null
+                and variables.current_action.execution_params.pid == null
+                and variables.current_action.execution_params.process_name != null }}
+            with:
+              kill_process_parameters:
+                process_name: "{{ variables.current_action.execution_params.process_name }}"
+
+          - name: kill_process
+            type: kibana.request
+            if: >-
+              ${{ variables.endpoint_ids.size > 0
+                and variables.kill_process_parameters != null }}
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/endpoint/action/kill_process"
+              headers:
+                kbn-xsrf: string
+                elastic-api-version: "2023-10-31"
+                Content-Type: application/json
+              body:
+                endpoint_ids: "${{ variables.endpoint_ids }}"
+                comment: "{{ variables.current_action.rationale }}"
+                parameters: "${{ variables.kill_process_parameters }}"
+            on-failure:
+              continue: true
+
+          - name: build_kill_process_success_record
+            type: data.set
+            if: >-
+              ${{ variables.endpoint_ids.size > 0
+                and variables.kill_process_parameters != null
+                and steps.kill_process.error == null }}
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: submitted
+                output: "${{ steps.kill_process.output }}"
+
+          - name: record_kill_process_success
+            type: data.set
+            if: >-
+              ${{ variables.endpoint_ids.size > 0
+                and variables.kill_process_parameters != null
+                and steps.kill_process.error == null }}
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_kill_process_success_record.output.execution_record }}
+
+          - name: build_kill_process_failure_record
+            type: data.set
+            if: >-
+              ${{ variables.endpoint_ids.size > 0
+                and variables.kill_process_parameters != null
+                and steps.kill_process.error != null }}
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: failed
+                error: "${{ steps.kill_process.error }}"
+
+          - name: record_kill_process_failure
+            type: data.set
+            if: >-
+              ${{ variables.endpoint_ids.size > 0
+                and variables.kill_process_parameters != null
+                and steps.kill_process.error != null }}
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_kill_process_failure_record.output.execution_record }}
+
+          - name: build_kill_process_missing_params_record
+            type: data.set
+            if: "${{ variables.kill_process_parameters == null }}"
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: skipped
+                error: missing process execution params
+
+          - name: record_kill_process_missing_params
+            type: data.set
+            if: "${{ variables.kill_process_parameters == null }}"
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_kill_process_missing_params_record.output.execution_record }}
+
+          - name: build_kill_process_missing_agent_record
+            type: data.set
+            if: >-
+              ${{ variables.kill_process_parameters != null
+                and variables.endpoint_ids.size == 0 }}
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: skipped
+                error: no Endpoint agent id resolved for target hosts
+
+          - name: record_kill_process_missing_agent
+            type: data.set
+            if: >-
+              ${{ variables.kill_process_parameters != null
+                and variables.endpoint_ids.size == 0 }}
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_kill_process_missing_agent_record.output.execution_record }}
+
+      - name: execute_hunt_process_persistence_actions
+        type: foreach
+        if: >-
+          ${{ inputs.execute_actions == true
+            and steps.review_actions.output.response.hunt_process_persistence == true }}
+        foreach: >-
+          ${{ steps.recommend_actions.output.structured_output.recommended_actions
+            | where: 'action_type', 'hunt_process_persistence' }}
+        steps:
+          - name: prepare_hunt_process_persistence_action
+            type: data.set
+            with:
+              current_action: "${{ foreach.item }}"
+              endpoint_ids: >-
+                ${{ steps.resolve_endpoint_agent_ids.output.values | default: consts.no_rows
+                  | where_exp: 'row', 'foreach.item.targets.hosts contains row.1'
+                  | map: '0' | uniq }}
+
+          - name: hunt_process_persistence
+            type: kibana.request
+            if: "${{ variables.endpoint_ids.size > 0 }}"
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/api/endpoint/action/running_procs"
+              headers:
+                kbn-xsrf: string
+                elastic-api-version: "2023-10-31"
+                Content-Type: application/json
+              body:
+                endpoint_ids: "${{ variables.endpoint_ids }}"
+                comment: "{{ variables.current_action.rationale }}"
+            on-failure:
+              continue: true
+
+          - name: build_hunt_process_persistence_success_record
+            type: data.set
+            if: >-
+              ${{ variables.endpoint_ids.size > 0
+                and steps.hunt_process_persistence.error == null }}
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: submitted
+                output: "${{ steps.hunt_process_persistence.output }}"
+
+          - name: record_hunt_process_persistence_success
+            type: data.set
+            if: >-
+              ${{ variables.endpoint_ids.size > 0
+                and steps.hunt_process_persistence.error == null }}
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_hunt_process_persistence_success_record.output.execution_record }}
+
+          - name: build_hunt_process_persistence_failure_record
+            type: data.set
+            if: >-
+              ${{ variables.endpoint_ids.size > 0
+                and steps.hunt_process_persistence.error != null }}
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: failed
+                error: "${{ steps.hunt_process_persistence.error }}"
+
+          - name: record_hunt_process_persistence_failure
+            type: data.set
+            if: >-
+              ${{ variables.endpoint_ids.size > 0
+                and steps.hunt_process_persistence.error != null }}
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_hunt_process_persistence_failure_record.output.execution_record }}
+
+          - name: build_hunt_process_persistence_missing_agent_record
+            type: data.set
+            if: "${{ variables.endpoint_ids.size == 0 }}"
+            with:
+              execution_record:
+                action_type: "{{ variables.current_action.action_type }}"
+                title: "{{ variables.current_action.title }}"
+                targets: "${{ variables.current_action.targets }}"
+                status: skipped
+                error: no Endpoint agent id resolved for target hosts
+
+          - name: record_hunt_process_persistence_missing_agent
+            type: data.set
+            if: "${{ variables.endpoint_ids.size == 0 }}"
+            with:
+              discovery_executed_actions: >-
+                ${{ variables.discovery_executed_actions
+                  | push: steps.build_hunt_process_persistence_missing_agent_record.output.execution_record }}
+
+      - name: collect_executed_actions
+        type: data.set
+        with:
+          executed_actions: >-
+            ${{ variables.executed_actions
+              | concat: variables.discovery_executed_actions }}
+
       - name: write_investigation
         type: ai.agent
         timeout: "10m"
@@ -210,8 +975,10 @@ steps:
             Include a "Recommended actions" section grouped into
             "Kibana-executable" and "Manual analyst actions". For every action,
             render its title, priority, rationale, targets, and capability ref
-            when present. These are recommendations only; do not claim that any
-            action was executed.
+            when present. Include a separate "Executed actions" section using the
+            execution results below. Distinguish successful API calls, submitted
+            Endpoint actions, failures, and skipped actions. Do not claim that a
+            recommendation without a matching result was executed.
 
             Title: {{ foreach.item.title }}
 
@@ -220,6 +987,9 @@ steps:
 
             Recommended actions:
             {{ steps.recommend_actions.output.structured_output.recommended_actions | json }}
+
+            Executed actions:
+            {{ variables.discovery_executed_actions | json }}
 
   # When the run succeeds but finds no attacks, create a single investigation that
   # tracks the clean run for the analyst timeline.
@@ -243,4 +1013,5 @@ steps:
       discovery_count: "${{ steps.run_attack_discovery.output.discovery_count | default: 0 }}"
       execution_uuid: "{{ steps.run_attack_discovery.output.execution_uuid }}"
       recommended_actions: "${{ variables.recommended_actions }}"
+      executed_actions: "${{ variables.executed_actions }}"
       status: "{{ steps.run_attack_discovery.output.status }}"
