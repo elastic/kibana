@@ -29,6 +29,11 @@ const setFieldPopularity = async (
   });
 };
 
+/**
+ *  Popularity tests need to select columns, which calls popularizeField. That
+ *  requires indexPatterns.save and persists counts on the data view; Security editor
+ *  lacks that capability, so they log in as admin. 
+ */
 const loginAndOpenDiscover = async (
   browserAuth: BrowserAuthFixture,
   discover: DiscoverPageObjects['discover'],
@@ -76,19 +81,11 @@ spaceTest.describe('Discover sidebar field groups', { tag: tags.deploymentAgnost
     expect(metaFields).toContain('_score');
   });
 
-  // The two popularity tests below select columns, which calls popularizeField. That
-  // requires indexPatterns.save and persists counts on the data view; Security editor
-  // lacks that capability, so they log in as admin. Each test performs its own login and
-  // navigation (there is no shared beforeEach) because API seeding must happen before
-  // the data view is loaded, and Scout's 60s per-test timeout includes hooks — a
-  // duplicated Discover load is enough to push a marginal test over budget.
   spaceTest(
     'tracks selected and popular fields across refresh',
     async ({ browserAuth, discoverScoutSpace, kbnClient, page, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
 
-      // Clear any popularity counts left behind by a previous attempt so the
-      // expected counts below hold on retries too.
       await setFieldPopularity(kbnClient, discoverScoutSpace, {
         extension: null,
         '@message': null,
