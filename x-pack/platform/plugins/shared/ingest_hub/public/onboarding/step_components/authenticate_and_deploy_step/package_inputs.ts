@@ -65,10 +65,16 @@ export function buildStreamVars(
     }
   }
 
-  // Backfill region from globalRegion when not explicitly set.
+  // Backfill region from globalRegion when not explicitly set — but only when
+  // the manifest actually defines the region field at stream level. Input-level
+  // region vars (e.g. aws_region for guardduty) must not be emitted in streams[].vars;
+  // Fleet rejects them as "not found".
   const regionField = getRegionFieldName(service, activeInput);
   if (regionField && !result[regionField] && globalRegion) {
-    result[regionField] = globalRegion;
+    const regionMeta = resolveFieldMeta(service, activeInput, regionField);
+    if (regionMeta) {
+      result[regionField] = globalRegion;
+    }
   }
 
   return result;

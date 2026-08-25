@@ -222,7 +222,13 @@ describe('buildStreamVars', () => {
   });
 
   it('falls back to globalRegion for single-region field when var is absent', () => {
-    const service = makeService({ requiredConfig: ['region'] });
+    // varDefsByInput must include the region field — the backfill only fires when
+    // resolveFieldMeta confirms it is a real stream-level var (prevents emitting
+    // input-level vars like aws_region for guardduty into stream vars).
+    const service = makeService({
+      requiredConfig: ['region'],
+      varDefsByInput: { 'aws-s3': { region: makeVarDef('region', 'text') } },
+    });
     const vars = buildStreamVars(
       service,
       { enabledInputs: ['aws-s3'], varsByInput: {} },
