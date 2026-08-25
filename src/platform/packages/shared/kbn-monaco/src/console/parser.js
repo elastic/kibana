@@ -88,7 +88,10 @@ export const createParser = () => {
       if (i < 0) {
         error(errorMessage || 'Expected \'' + upTo + '\'');
       }
-      reset(i + upTo.length);
+      const afterClosingDelimiter = i + upTo.length;
+      ch = text.charAt(afterClosingDelimiter);
+      at = afterClosingDelimiter + 1;
+
       return text.substring(currentAt, i);
     },
     peek = function (offset) {
