@@ -789,7 +789,7 @@ describe('updateAlertsStatus', () => {
       });
 
       await expect(alertService.ensureDocumentsExist({ alerts })).rejects.toThrow(
-        /Referenced document\(s\) not found: event-1/
+        /Referenced event\(s\) not found: event-1/
       );
     });
 
@@ -829,7 +829,7 @@ describe('updateAlertsStatus', () => {
       esClient.mget.mockRejectedValueOnce(new Error('boom'));
 
       await expect(alertService.ensureDocumentsExist({ alerts })).rejects.toThrow(
-        /Failed to verify referenced documents exist/
+        /Failed to verify referenced events exist/
       );
     });
   });

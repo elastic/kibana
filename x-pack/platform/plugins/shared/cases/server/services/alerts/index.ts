@@ -315,19 +315,19 @@ export class AlertService {
         return;
       }
 
-      this.rejectNonLocalIndices(nonEmptyAlerts, 'a document');
+      this.rejectNonLocalIndices(nonEmptyAlerts, 'an event');
 
       const results = await this.getAlerts(nonEmptyAlerts);
-      const missingDocIds = (results?.docs ?? [])
+      const missingEventIds = (results?.docs ?? [])
         .filter((doc) => !('found' in doc && doc.found))
         .map((doc) => doc._id);
 
-      if (missingDocIds.length > 0) {
-        throw Boom.badRequest(`Referenced document(s) not found: ${missingDocIds.join(', ')}`);
+      if (missingEventIds.length > 0) {
+        throw Boom.badRequest(`Referenced event(s) not found: ${missingEventIds.join(', ')}`);
       }
     } catch (error) {
       throw createCaseError({
-        message: `Failed to verify referenced documents exist: ${error}`,
+        message: `Failed to verify referenced events exist: ${error}`,
         error,
         logger: this.logger,
       });
