@@ -23,7 +23,11 @@ import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
-import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
+import {
+  getRunAgentStepDefinition,
+  registerConversationStepDefinitions,
+  rerankStepDefinition,
+} from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
 import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
@@ -134,6 +138,7 @@ export class AgentBuilderPlugin
       getRunAgentStepDefinition(this.serviceManager)
     );
     setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
+    registerConversationStepDefinitions(setupDeps.workflowsExtensions, this.serviceManager);
 
     registerAgentBuilderHandlerContext({ coreSetup });
 

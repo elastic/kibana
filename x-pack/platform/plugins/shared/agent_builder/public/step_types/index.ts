@@ -19,4 +19,21 @@ export function registerWorkflowSteps(
   workflowsExtensions.registerStepDefinition(() =>
     import('./rerank_step').then((m) => m.createRerankStepDefinition(core))
   );
+
+  // Conversation management steps
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversation_get').then((m) => m.conversationGetStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversation_list').then((m) => m.createConversationListStepDefinition(core))
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversation_create').then((m) => m.createConversationCreateStepDefinition(core))
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversation_update').then((m) => m.conversationUpdateStepDefinition)
+  );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./conversation_delete').then((m) => m.conversationDeleteStepDefinition)
+  );
 }
