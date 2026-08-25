@@ -4,6 +4,18 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+# Yarn cache is only needed during install. Drop it afterwards to reclaim disk.
+# Build steps that still run package installs afterwards can opt out with KEEP_INSTALL_CACHE=1.
+if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
+  echo "--- Clearing yarn cache"
+  du -sh /opt/buildkite-agent/.cache/yarn
+  echo 'Removing /opt/buildkite-agent/.cache/yarn' && rm -rf /opt/buildkite-agent/.cache/yarn
+  du -sh /opt/buildkite-agent/.yarn-local-mirror
+  echo 'Removing /opt/buildkite-agent/.yarn-local-mirror' && rm -rf /opt/buildkite-agent/.yarn-local-mirror
+  echo "Available disk space after clearing yarn cache:"
+  df -h . || echo "Failed to get disk space"
+fi
+
 echo "--- yarn install and bootstrap"
 
 BOOTSTRAP_PARAMS=()
@@ -35,8 +47,7 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   fi
 fi
 
-# TODO: revisit the double bootstrap per attempt after removing Bazel and changing package manager.
-if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
+if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"); then
   echo "bootstrap failed, trying again in 15 seconds"
   sleep 15
 
@@ -45,20 +56,9 @@ if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTS
   rm -rf node_modules
 
   echo "--- yarn install and bootstrap, attempt 2"
-  yarn kbn bootstrap --force-install || yarn kbn bootstrap
+  yarn kbn bootstrap --force-install
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
-fi
-
-# Yarn cache is only needed during install. Drop it afterwards to reclaim disk.
-# Build steps that still run package installs afterwards can opt out with KEEP_INSTALL_CACHE=1.
-if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
-  echo "--- Clearing yarn cache"
-  echo 'Removing /opt/buildkite-agent/.cache/yarn' && rm -rf /opt/buildkite-agent/.cache/yarn
-  echo 'Removing /opt/buildkite-agent/.yarn-local-mirror' && rm -rf /opt/buildkite-agent/.yarn-local-mirror
-  echo 'Removing ./.yarn-local-mirror' && rm -rf ./.yarn-local-mirror
-  echo "Available disk space after clearing yarn cache:"
-  df -h . || echo "Failed to get disk space"
 fi
