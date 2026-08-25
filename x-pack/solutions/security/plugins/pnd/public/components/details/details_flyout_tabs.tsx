@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { EuiTextTruncate } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,7 +47,9 @@ export const ConversationDetailsFlyoutTabs = memo<ConversationDetailsFlyoutHeade
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
             <EuiTitle size="s">
-              <h2>{title}</h2>
+              <h2>
+                <EuiTextTruncate text={title} />
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>

@@ -16,6 +16,7 @@ import {
   EuiBasicTable,
   EuiText,
   EuiTitle,
+  EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
@@ -109,7 +110,9 @@ export const OverviewTab = memo<{ investigation: Investigation }>(({ investigati
               </span>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="s">{title}</EuiText>
+              <EuiText size="s">
+                <EuiTextTruncate text={title} />
+              </EuiText>
               <EuiText size="xs" color="subdued">
                 <span>{i18n.overview.triggerAlert}</span>
               </EuiText>
