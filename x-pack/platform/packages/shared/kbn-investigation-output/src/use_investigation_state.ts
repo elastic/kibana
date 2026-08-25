@@ -200,7 +200,15 @@ export function useInvestigationState({
         // A timeout is reported on the engine's step_level_timeout wrapper, not on the ai.agent
         // step execution below, so any matching stepId is checked here regardless of stepType.
         const stepError = investigateStepExecutions?.find((step) => step.error)?.error;
-        if (stepError) {
+
+        // The ai.agent step occasionally fails with "Conversation {uuid} not found" during its
+        // finalization check even when the conversation was created and written to successfully.
+        // Extract the uuid so we can still read from conversation metadata before giving up.
+        const UUID_RE =
+          /Conversation ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}) not found/i;
+        const conversationIdFromStepError = stepError?.message?.match(UUID_RE)?.[1];
+
+        if (stepError && !conversationIdFromStepError) {
           applySettled({ status: 'failed', error: stepError.message });
           return;
         }
@@ -212,15 +220,18 @@ export function useInvestigationState({
         const output = stepExecution?.output as
           | { structured_output?: unknown; conversation_id?: string }
           | undefined;
-        if (output?.conversation_id) {
-          setConversationId(output.conversation_id);
+
+        const resolvedConversationId = output?.conversation_id ?? conversationIdFromStepError;
+
+        if (resolvedConversationId) {
+          setConversationId(resolvedConversationId);
         }
 
         // Try reading InvestigationState from conversation metadata first (new path: no structured_output).
-        if (output?.conversation_id) {
+        if (resolvedConversationId) {
           try {
             const conversation = await http.get<{ metadata?: Record<string, unknown> }>(
-              `/api/agent_builder/conversations/${output.conversation_id}`
+              `/api/agent_builder/conversations/${resolvedConversationId}`
             );
             const metadataParsed = investigationStateSchema.safeParse(conversation.metadata);
             if (metadataParsed.success) {

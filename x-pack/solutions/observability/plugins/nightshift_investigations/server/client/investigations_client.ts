@@ -226,12 +226,19 @@ export class NightshiftInvestigationsClient {
 
     const subject = recoverSubjectFromInput(rawInput);
 
+    const CONV_NOT_FOUND_RE =
+      /Conversation ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}) not found/i;
     const conversationStep = execution.stepExecutions?.find(
       (s) => isPlainObject(s.output) && typeof s.output.conversation_id === 'string'
     );
-    const conversationId = isPlainObject(conversationStep?.output)
-      ? (conversationStep!.output.conversation_id as string)
-      : undefined;
+    const conversationId =
+      (isPlainObject(conversationStep?.output)
+        ? (conversationStep!.output.conversation_id as string)
+        : undefined) ??
+      execution.stepExecutions
+        ?.map((s) => (s.error as { message?: string } | undefined)?.message)
+        .find((msg): msg is string => typeof msg === 'string')
+        ?.match(CONV_NOT_FOUND_RE)?.[1];
 
     return {
       investigation_id: investigationId,
@@ -320,15 +327,24 @@ export class NightshiftInvestigationsClient {
           )
         );
 
+        // Regex to recover a conversation_id from an ai.agent finalization error like
+        // "Conversation {uuid} not found" — the conversation was created but the step's
+        // own finalization check failed, so conversation_id is absent from the step output.
+        const CONV_NOT_FOUND_RE =
+          /Conversation ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}) not found/i;
+
         const titleFetches = executionDetails.map(async (detail, idx) => {
           if (detail.status === 'rejected' || !detail.value) return;
           const stepExecutions = detail.value.stepExecutions ?? [];
           const stepWithConversation = stepExecutions.find(
             (s) => typeof (s.output as Record<string, unknown>)?.conversation_id === 'string'
           );
-          const conversationId = asString(
-            (stepWithConversation?.output as Record<string, unknown>)?.conversation_id
-          );
+          const conversationId =
+            asString((stepWithConversation?.output as Record<string, unknown>)?.conversation_id) ??
+            stepExecutions
+              .map((s) => (s.error as { message?: string } | undefined)?.message)
+              .find((msg): msg is string => typeof msg === 'string')
+              ?.match(CONV_NOT_FOUND_RE)?.[1];
           if (!conversationId) return;
           try {
             const conversation = await conversationsClient.get(conversationId);
