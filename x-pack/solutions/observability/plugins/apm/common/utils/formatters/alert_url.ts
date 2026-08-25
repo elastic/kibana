@@ -11,9 +11,14 @@ const format = ({ pathname, query }: { pathname: string; query: Record<string, a
   return `${pathname}?${stringify(query)}`;
 };
 
-export const getAlertUrlErrorCount = (serviceName: string, serviceEnv: string | undefined) =>
+export const getAlertUrlErrorCount = (
+  serviceName: string | undefined,
+  serviceEnv: string | undefined
+) =>
   format({
-    pathname: `/app/apm/services/${encodeURIComponent(serviceName)}/errors`,
+    // String(undefined) is "undefined", matching encodeURIComponent's JS coercion so a
+    // missing service.name stays `/services/undefined/...` rather than an empty segment.
+    pathname: `/app/apm/services/${encodeURIComponent(String(serviceName))}/errors`,
     query: {
       environment: serviceEnv ?? ENVIRONMENT_ALL.value,
     },
@@ -35,13 +40,14 @@ export const getAlertUrlErrorDetails = (
 
 // This formatter is for TransactionDuration, TransactionErrorRate, and Anomaly.
 export const getAlertUrlTransaction = (
-  serviceName: string,
+  serviceName: string | undefined,
   serviceEnv: string | undefined,
-  transactionType: string
+  transactionType: string | undefined
 ) =>
   format({
-    pathname: `/app/apm/services/${encodeURIComponent(serviceName)}`,
+    pathname: `/app/apm/services/${encodeURIComponent(String(serviceName))}`,
     query: {
+      // Leave undefined so querystring.stringify emits `transactionType=` (empty value).
       transactionType,
       environment: serviceEnv ?? ENVIRONMENT_ALL.value,
     },

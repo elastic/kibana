@@ -27,6 +27,12 @@ describe('alert_url', () => {
       const url = getAlertUrlErrorCount('service name', 'serviceEnv');
       expect(url).toBe('/app/apm/services/service%20name/errors?environment=serviceEnv');
     });
+
+    it('encodes a missing service name as the path segment undefined', () => {
+      expect(getAlertUrlErrorCount(undefined, 'serviceEnv')).toBe(
+        '/app/apm/services/undefined/errors?environment=serviceEnv'
+      );
+    });
   });
 
   describe('getAlertUrlErrorDetail', () => {
@@ -67,6 +73,18 @@ describe('alert_url', () => {
       const url = getAlertUrlTransaction('service name', 'serviceEnv', 'transactionType');
       expect(url).toBe(
         '/app/apm/services/service%20name?transactionType=transactionType&environment=serviceEnv'
+      );
+    });
+
+    it('encodes a missing service name as the path segment undefined', () => {
+      expect(getAlertUrlTransaction(undefined, 'serviceEnv', 'transactionType')).toBe(
+        '/app/apm/services/undefined?transactionType=transactionType&environment=serviceEnv'
+      );
+    });
+
+    it('encodes a missing transaction type as an empty query value', () => {
+      expect(getAlertUrlTransaction('serviceName', 'serviceEnv', undefined)).toBe(
+        '/app/apm/services/serviceName?transactionType=&environment=serviceEnv'
       );
     });
   });
