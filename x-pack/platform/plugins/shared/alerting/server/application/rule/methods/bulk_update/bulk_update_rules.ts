@@ -22,15 +22,17 @@ import {
   MAX_RULES_NUMBER_FOR_BULK_OPERATION,
 } from '../../../../rules_client/common/constants';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RetryForConflictsAttempts } from '../../../../lib/retry_if_conflicts';
+import {
+  RetryForConflictsAttempts,
+  RetryForConflictsDelay,
+} from '../../../../lib/retry_if_conflicts';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
 import type { RawRule } from '../../../../types';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams } from '../../types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
-import type { ApiKeyEntry } from '../bulk_create/types';
-import { invalidateKeys } from '../bulk_create/utils';
+import { invalidateKeys, type ApiKeyEntry } from '../common_utils/invalidate_keys';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
 import type {
   BatchResult,
@@ -40,9 +42,7 @@ import type {
   Pending,
   PreparedUpdate,
 } from './types';
-import { loadRulesByIds, prepareUpdate, reloadPending, updateTaskSchedules } from './utils';
-
-const OCC_RETRY_DELAY_MS = 100;
+import { loadPending, prepareUpdate, updateTaskSchedules } from './utils';
 
 export async function bulkUpdateRules<Params extends RuleParams = never>(
   context: RulesClientContext,
@@ -65,7 +65,7 @@ export async function bulkUpdateRules<Params extends RuleParams = never>(
 
   const batchSize = params.batchSize ?? DEFAULT_BULK_UPDATE_BATCH_SIZE;
 
-  if (batchSize < MIN_BULK_UPDATE_BATCH_SIZE) {
+  if (Number.isNaN(batchSize) || batchSize < MIN_BULK_UPDATE_BATCH_SIZE) {
     throw Boom.badRequest(
       `bulkUpdateRules: batchSize ${batchSize} is below the minimum of ${MIN_BULK_UPDATE_BATCH_SIZE}.`
     );
@@ -138,33 +138,7 @@ async function runBatch<Params extends RuleParams>({
   const byId = new Map(batch.map((item) => [item.id, item]));
   const ids = [...byId.keys()];
 
-  const loaded = await withSpan(
-    {
-      name: 'bulkUpdateRules.runBatch.loadRulesByIds',
-      type: 'rules',
-      labels: { count: String(ids.length) },
-    },
-    () => loadRulesByIds(context, ids)
-  );
-  const loadedById = new Map(loaded.map((so) => [so.id, so]));
-
-  const toPrepare: Array<Pending<Params>> = [];
-
-  for (const id of ids) {
-    const item = byId.get(id);
-    if (!item) {
-      continue;
-    }
-    const original = loadedById.get(id);
-    if (!original) {
-      errors.push({
-        message: `Saved object [alert/${id}] not found`,
-        rule: { id, name: item.data.name ?? 'n/a' },
-      });
-      continue;
-    }
-    toPrepare.push({ item, original });
-  }
+  const toPrepare = await loadPending(context, byId, ids, errors);
 
   if (strict && errors.length > 0) {
     return { successfulIds: [], errors };
@@ -317,9 +291,9 @@ async function writeWithRetry<Params extends RuleParams>({
     }
 
     logger.debug(`bulkUpdateRules conflict, retrying ${attempt.conflicts.length} rule(s) ...`);
-    await new Promise((resolve) => setTimeout(resolve, OCC_RETRY_DELAY_MS));
+    await new Promise((resolve) => setTimeout(resolve, RetryForConflictsDelay));
     retries -= 1;
-    remaining = await reloadPending(context, byId, attempt.conflicts, errors);
+    remaining = await loadPending(context, byId, attempt.conflicts, errors);
   }
 
   return { successfulIds, errors };

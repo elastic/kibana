@@ -12,7 +12,7 @@ import type { BulkOperationError } from '../../../../rules_client/types';
 import type { RawRule } from '../../../../types';
 import type { RuleParams } from '../../types';
 import type { UpdateRuleData } from '../update/types';
-import type { ApiKeyEntry } from '../bulk_create/types';
+import type { ApiKeyEntry } from '../common_utils/invalidate_keys';
 
 export interface BulkUpdateRulesItem<Params extends RuleParams = never> {
   id: string;

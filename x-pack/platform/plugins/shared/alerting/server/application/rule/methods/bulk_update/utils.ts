@@ -40,7 +40,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { RawRule } from '../../../../types';
 import type { RuleParams } from '../../types';
 import { updateRuleDataSchema } from '../update/schemas';
-import type { ApiKeyEntry } from '../bulk_create/types';
+import type { ApiKeyEntry } from '../common_utils/invalidate_keys';
 import type { BulkUpdateRulesItem, Pending, PreparedUpdate } from './types';
 
 export const loadRulesByIds = async (
@@ -253,7 +253,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
   }
 };
 
-export const reloadPending = async <Params extends RuleParams>(
+export const loadPending = async <Params extends RuleParams>(
   context: RulesClientContext,
   byId: Map<string, BulkUpdateRulesItem<Params>>,
   ids: string[],
@@ -261,7 +261,7 @@ export const reloadPending = async <Params extends RuleParams>(
 ): Promise<Array<Pending<Params>>> => {
   const loaded = await withSpan(
     {
-      name: 'bulkUpdateRules.reloadPending.reloadRulesByIds',
+      name: 'bulkUpdateRules.loadPending.loadRulesByIds',
       type: 'rules',
       labels: { count: String(ids.length) },
     },
@@ -279,6 +279,7 @@ export const reloadPending = async <Params extends RuleParams>(
     if (!original) {
       errors.push({
         message: `Saved object [alert/${id}] not found`,
+        status: 404,
         rule: { id, name: item.data.name ?? 'n/a' },
       });
       continue;

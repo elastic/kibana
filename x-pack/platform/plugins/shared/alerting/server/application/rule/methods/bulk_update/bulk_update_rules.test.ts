@@ -346,6 +346,16 @@ describe('bulkUpdateRules', () => {
       expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
     });
 
+    test('throws 400 when batchSize is NaN', async () => {
+      await expect(
+        rulesClient.bulkUpdateRules({
+          rules: [item('id-1')],
+          batchSize: Number.NaN,
+        })
+      ).rejects.toThrow(`is below the minimum of ${MIN_BULK_UPDATE_BATCH_SIZE}`);
+      expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+    });
+
     test('splits rules across batches and concatenates results', async () => {
       mockPit(nSos(21));
 
@@ -372,6 +382,7 @@ describe('bulkUpdateRules', () => {
       expect(result.errors).toEqual([
         expect.objectContaining({
           message: 'Saved object [alert/id-1] not found',
+          status: 404,
           rule: { id: 'id-1', name: 'name-id-1' },
         }),
       ]);
@@ -650,6 +661,7 @@ describe('bulkUpdateRules', () => {
       expect(result.errors).toEqual([
         expect.objectContaining({
           message: 'Saved object [alert/id-2] not found',
+          status: 404,
           rule: { id: 'id-2', name: 'name-id-2' },
         }),
       ]);

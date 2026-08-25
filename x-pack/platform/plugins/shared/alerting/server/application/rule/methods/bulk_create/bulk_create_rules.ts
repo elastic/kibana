@@ -35,14 +35,14 @@ import type { RuleParams } from '../../types';
 import { createRuleDataSchema } from '../create/schemas';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import type {
-  ApiKeyEntry,
   BatchResult,
   BulkCreateRulesItem,
   BulkCreateRulesParams,
   BulkCreateRulesResult,
   PreparedRule,
 } from './types';
-import { invalidateKeys, prepareRule } from './utils';
+import { prepareRule } from './utils';
+import { invalidateKeys, type ApiKeyEntry } from '../common_utils/invalidate_keys';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
 import { reportRuleCreatedEvent } from '../common_utils/event_based_telemetry';
 
