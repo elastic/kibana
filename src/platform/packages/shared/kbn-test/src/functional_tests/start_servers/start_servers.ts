@@ -54,10 +54,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       );
     }
 
-    if (process.env.KIBANA_TEST_IPV6_ONLY === 'true') {
-      extraKbnOpts.push('--server.host=::1');
-    }
-
     await runKibanaServer({
       procs,
       config,

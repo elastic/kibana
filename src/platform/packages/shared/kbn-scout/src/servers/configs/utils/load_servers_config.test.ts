@@ -161,42 +161,6 @@ describe('loadServersConfig', () => {
     expect(result).toBe(mockConfigInstance);
   });
 
-  describe('KIBANA_TEST_IPV6_ONLY', () => {
-    const originalEnvValue = process.env.KIBANA_TEST_IPV6_ONLY;
-
-    afterEach(() => {
-      if (originalEnvValue === undefined) {
-        delete process.env.KIBANA_TEST_IPV6_ONLY;
-      } else {
-        process.env.KIBANA_TEST_IPV6_ONLY = originalEnvValue;
-      }
-    });
-
-    it('should override Kibana hostname to ::1 when KIBANA_TEST_IPV6_ONLY=true', async () => {
-      const configRootDir = '/mock/config/root/default/serverless';
-      (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
-      (loadRawServerConfig as jest.Mock).mockResolvedValue(structuredClone(mockRawConfig));
-      process.env.KIBANA_TEST_IPV6_ONLY = 'true';
-
-      await loadServersConfig(mockTestTarget, mockLog, configRootDir);
-
-      const rawConfigPassedToConstructor = (Config as unknown as jest.Mock).mock.calls[0][0];
-      expect(rawConfigPassedToConstructor.servers.kibana.hostname).toBe('::1');
-    });
-
-    it('should not override Kibana hostname when KIBANA_TEST_IPV6_ONLY is unset', async () => {
-      const configRootDir = '/mock/config/root/default/serverless';
-      (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
-      (loadRawServerConfig as jest.Mock).mockResolvedValue(structuredClone(mockRawConfig));
-      delete process.env.KIBANA_TEST_IPV6_ONLY;
-
-      await loadServersConfig(mockTestTarget, mockLog, configRootDir);
-
-      const rawConfigPassedToConstructor = (Config as unknown as jest.Mock).mock.calls[0][0];
-      expect(rawConfigPassedToConstructor.servers.kibana.hostname).toBe('localhost');
-    });
-  });
-
   it('should throw error when config file does not exist', async () => {
     const configRootDir = '/mock/config/root/custom/uiam_local/serverless';
     (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);

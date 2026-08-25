@@ -27,20 +27,16 @@ export async function runKibanaServer(options: {
 }
 
 export function getExtraKbnOpts(installDir: string | undefined, isServerless: boolean) {
-  const extraOpts: string[] = [];
-
-  if (!installDir) {
-    extraOpts.push(
-      '--dev',
-      '--no-dev-config',
-      '--no-dev-credentials',
-      `--server.versioned.versionResolution=${isServerless ? 'newest' : 'oldest'}`
-    );
+  if (installDir) {
+    return [];
   }
 
-  if (process.env.KIBANA_TEST_IPV6_ONLY === 'true') {
-    extraOpts.push('--server.host=::1');
-  }
-
-  return extraOpts;
+  return [
+    '--dev',
+    '--no-dev-config',
+    '--no-dev-credentials',
+    isServerless
+      ? '--server.versioned.versionResolution=newest'
+      : '--server.versioned.versionResolution=oldest',
+  ];
 }
