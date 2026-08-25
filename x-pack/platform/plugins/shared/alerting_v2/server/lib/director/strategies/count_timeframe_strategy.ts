@@ -135,17 +135,19 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
       return basicResult;
     }
 
-    let result: StateTransitionResult;
-
     // --- Handle pending count of 0: skip pending, go directly to active ---
     if (this.shouldSkipPending(stateTransition, basicResult.status)) {
-      result = { status: alertEpisodeStatus.active };
-    } else if (this.shouldSkipRecovering(stateTransition, basicResult.status)) {
-      // --- Handle recovering count of 0: skip recovering, go directly to inactive ---
-      result = { status: alertEpisodeStatus.inactive };
-    } else if (this.isPendingToActiveTransition(currentEpisodeStatus, basicResult.status)) {
-      // --- Pending → Active threshold ---
-      result = this.getNextStateTransition({
+      return { status: alertEpisodeStatus.active, statusCount: DEFAULT_STATUS_COUNT };
+    }
+
+    // --- Handle recovering count of 0: skip recovering, go directly to inactive ---
+    if (this.shouldSkipRecovering(stateTransition, basicResult.status)) {
+      return { status: alertEpisodeStatus.inactive };
+    }
+
+    // --- Pending → Active threshold ---
+    if (this.isPendingToActiveTransition(currentEpisodeStatus, basicResult.status)) {
+      return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
         operator: stateTransition.pending_operator ?? DEFAULT_OPERATOR,
@@ -154,9 +156,11 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
         successStatus: alertEpisodeStatus.active,
         stayStatus: alertEpisodeStatus.pending,
       });
-    } else if (this.isRecoveringToInactiveTransition(currentEpisodeStatus, basicResult.status)) {
-      // --- Recovering → Inactive threshold ---
-      result = this.getNextStateTransition({
+    }
+
+    // --- Recovering → Inactive threshold ---
+    if (this.isRecoveringToInactiveTransition(currentEpisodeStatus, basicResult.status)) {
+      return this.getNextStateTransition({
         currentStatusCount,
         elapsedMs,
         operator: stateTransition.recovering_operator ?? DEFAULT_OPERATOR,
@@ -165,37 +169,38 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
         successStatus: alertEpisodeStatus.inactive,
         stayStatus: alertEpisodeStatus.recovering,
       });
-    } else if (
+    }
+
+    // --- Changing to pending for the first time ---
+    if (
       this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.pending)
     ) {
-      // --- Changing to pending for the first time ---
-      result = { status: alertEpisodeStatus.pending, statusCount: DEFAULT_STATUS_COUNT };
-    } else if (
+      return { status: alertEpisodeStatus.pending, statusCount: DEFAULT_STATUS_COUNT };
+    }
+
+    // --- Changing to recovering for the first time ---
+    if (
       this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.recovering)
     ) {
-      // --- Changing to recovering for the first time ---
-      result = { status: alertEpisodeStatus.recovering, statusCount: DEFAULT_STATUS_COUNT };
-    } else {
-      result = basicResult;
+      return { status: alertEpisodeStatus.recovering, statusCount: DEFAULT_STATUS_COUNT };
     }
 
-    return this.withActiveStatusCount(result, currentEpisodeStatus, currentStatusCount);
-  }
-
-  private withActiveStatusCount(
-    result: StateTransitionResult,
-    currentEpisodeStatus: AlertEpisodeStatus | undefined | null,
-    currentStatusCount: number
-  ): StateTransitionResult {
-    if (result.status !== alertEpisodeStatus.active || result.statusCount != null) {
-      return result;
+    // --- Changing to active for the first time ---
+    if (
+      this.isChangingStatus(currentEpisodeStatus, basicResult.status, alertEpisodeStatus.active)
+    ) {
+      return { status: alertEpisodeStatus.active, statusCount: DEFAULT_STATUS_COUNT };
     }
 
-    const isNewActiveSpan = currentEpisodeStatus !== alertEpisodeStatus.active;
-    return {
-      status: alertEpisodeStatus.active,
-      statusCount: isNewActiveSpan ? DEFAULT_STATUS_COUNT : currentStatusCount + 1,
-    };
+    // --- Staying in the same status (inactive does not carry a count) ---
+    if (
+      basicResult.status === currentEpisodeStatus &&
+      basicResult.status !== alertEpisodeStatus.inactive
+    ) {
+      return { status: basicResult.status, statusCount: currentStatusCount + 1 };
+    }
+
+    return basicResult;
   }
 
   private getCurrentStatusCount(previousEpisode?: LatestAlertEventState): number {
@@ -265,7 +270,9 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     const config: ThresholdConfig = { operator, count, timeframeMs };
 
     if (isThresholdMet(nextCount, elapsedMs, config)) {
-      return { status: successStatus };
+      return successStatus === alertEpisodeStatus.inactive
+        ? { status: successStatus }
+        : { status: successStatus, statusCount: DEFAULT_STATUS_COUNT };
     }
 
     return { status: stayStatus, statusCount: nextCount };
