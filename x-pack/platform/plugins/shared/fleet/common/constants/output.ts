@@ -16,6 +16,7 @@ export const outputType = {
   Logstash: 'logstash',
   Kafka: 'kafka',
   RemoteElasticsearch: 'remote_elasticsearch',
+  Otlp: 'otlp',
 } as const;
 
 export const DEFAULT_OUTPUT_ID = 'fleet-default-output';
@@ -110,6 +111,24 @@ export const kafkaVerificationModes = {
   Certificate: 'certificate',
 } as const;
 
+export const otlpProtocol = {
+  Grpc: 'grpc',
+  HttpProtobuf: 'http/protobuf',
+} as const;
+
+export const otlpCompressionType = {
+  Gzip: 'gzip',
+  Snappy: 'snappy',
+  Zstd: 'zstd',
+  None: 'none',
+} as const;
+
+// snappy and zstd are gRPC-only; HTTP/protobuf only supports gzip and none
+export const OTLP_GRPC_ONLY_COMPRESSION_TYPES: ReadonlyArray<string> = [
+  otlpCompressionType.Snappy,
+  otlpCompressionType.Zstd,
+];
+
 export const kafkaSupportedVersions = [
   '0.8.2.0',
   '0.8.2.1',
@@ -184,9 +203,24 @@ export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.RemoteElasticsearch,
 ];
 
+// Beats-based output types available to standard (non-OTel) agent policies.
+// otlp is intentionally excluded — it is only valid for OTel-only policies.
+export const BEATS_OUTPUT_TYPES: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.Logstash,
+  outputType.Kafka,
+  outputType.RemoteElasticsearch,
+];
+
 export const OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT: Array<ValueOf<OutputType>> = [
   outputType.Elasticsearch,
   outputType.RemoteElasticsearch,
+];
+
+export const OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
+  outputType.Otlp,
 ];
 
 export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';
