@@ -211,7 +211,7 @@ I need to ask which AI connector to use before starting.`,
       );
     });
 
-    evaluate.describe('resume skips pre-flight (stopped migration)', () => {
+    evaluate.describe('RESUME a stopped migration', () => {
       let teardown: (() => Promise<void>) | undefined;
 
       evaluate.beforeAll(async ({ esClient, log }) => {
@@ -266,9 +266,8 @@ Please confirm you want to resume.`,
       );
     });
 
-    evaluate.describe(
-      'complete flow: reprocesses failed rules when all params supplied upfront',
-      () => {
+    evaluate.describe('complete flow: reprocess', () => {
+      evaluate.describe('reprocesses failed rules', () => {
         let teardownMigration: (() => Promise<void>) | undefined;
 
         evaluate.beforeAll(async ({ esClient, log }) => {
@@ -290,14 +289,14 @@ Please confirm you want to resume.`,
         });
 
         evaluate(
-          'reprocesses failed rules end-to-end when connector and proceed are specified in the first message',
+          'REPROCESSES failed rules',
           async ({ evaluateDataset }) => {
             await evaluateDataset({
               dataset: {
                 name: 'agent builder: automatic-migration-reprocess-end-to-end',
                 description: `Validates that when the user asks to reprocess failed rules and supplies
 the connector upfront, the start skill calls start_rule_migration with the correct
-retry settings in a single turn (via autoConfirm).`,
+retry settings in a single turn.`,
                 examples: [
                   {
                     input: {
@@ -320,12 +319,9 @@ using the Opus 4.6 connector. The reprocessing is running asynchronously.`,
             });
           }
         );
-      }
-    );
+      });
 
-    evaluate.describe(
-      'complete flow: reprocesses not_fully_translated rules when all params supplied upfront',
-      () => {
+      evaluate.describe('reprocesses not_fully_translated rules', () => {
         let teardownMigration: (() => Promise<void>) | undefined;
 
         evaluate.beforeAll(async ({ esClient, log }) => {
@@ -349,14 +345,14 @@ using the Opus 4.6 connector. The reprocessing is running asynchronously.`,
         });
 
         evaluate(
-          'reprocesses not_fully_translated rules end-to-end when connector and proceed are specified in the first message',
+          'REPROCESS not_fully_translated rules',
           async ({ evaluateDataset }) => {
             await evaluateDataset({
               dataset: {
                 name: 'agent builder: automatic-migration-reprocess-not-fully-translated-end-to-end',
                 description: `Validates that when the user asks to reprocess partially translated rules
 and supplies the connector upfront, the start skill calls start_rule_migration with
-retry: "not_fully_translated" in a single turn (via autoConfirm).
+retry: "not_fully_translated" in a single turn.
 The seeded migration has 2 partially translated and 1 untranslatable rule.`,
                 examples: [
                   {
@@ -381,12 +377,9 @@ The seeded migration has 2 partially translated and 1 untranslatable rule.`,
             });
           }
         );
-      }
-    );
+      });
 
-    evaluate.describe(
-      'complete flow: reprocesses selected rules by title when all params supplied upfront',
-      () => {
+      evaluate.describe('reprocesses selected rules by title', () => {
         let teardownMigration: (() => Promise<void>) | undefined;
 
         evaluate.beforeAll(async ({ esClient, log }) => {
@@ -415,7 +408,7 @@ The seeded migration has 2 partially translated and 1 untranslatable rule.`,
                 name: 'agent builder: automatic-migration-reprocess-selected-end-to-end',
                 description: `Validates that when the user names specific rules to reprocess, the start
 skill calls get_migration_rules to resolve titles to ids, then calls start_rule_migration
-with retry: "selected" and selection.ids in a single turn (via autoConfirm).
+with retry: "selected" and selection.ids in a single turn.
 The seeded migration has 3 completed and 2 failed rules with predictable titles.`,
                 examples: [
                   {
@@ -441,8 +434,8 @@ The reprocessing is running asynchronously.`,
             });
           }
         );
-      }
-    );
+      });
+    });
 
     evaluate.describe('complete flow: starts migration when all params supplied upfront', () => {
       let teardownMigration: (() => Promise<void>) | undefined;

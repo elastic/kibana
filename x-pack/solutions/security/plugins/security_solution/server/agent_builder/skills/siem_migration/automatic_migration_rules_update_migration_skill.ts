@@ -19,20 +19,21 @@ import {
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
 } from './rules/content';
+import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
 export const automaticMigrationRulesUpdateMigrationSkill = defineSkillType({
   id: 'automatic-migration-rules-update-migration',
   name: 'automatic-migration-rules-update-migration',
   basePath: 'skills/security/siem_migrations',
-  description: `Update an Automatic Rule Migration's name and/or default index pattern.
+  description: `Rename an Automatic Rule Migration.
 
-Prompts for the new values, confirms with the user, and applies the change. Use when the user wants to rename a migration or change the index pattern used for future translation runs.`,
+Prompts for the new name, confirms with the user, and applies the change. Use when the user wants to rename a migration.`,
   content: `
 # Update an Automatic Rule Migration
 
 ## When to use this skill
 
-- When the user wants to **rename** a migration or **change its default index pattern**.
+- When the user wants to **rename** a migration.
 - ${MIGRATION_TYPE_DISAMBIGUATION_BLOCK}
 
 ${AUTOMATIC_MIGRATION_GENERAL_GUIDELINES}
@@ -45,55 +46,52 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 ## Available Tools
 
-- \`security.siem_migration.get_all_rule_migration_stats\` — resolve a migration name to its id.
-- \`security.siem_migration.get_rule_migration_stats\` — fetch stats for a single migration by id;
+- \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` — resolve a migration name to its id.
+- \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` — fetch stats for a single migration by id;
   also used as a pasted-id fallback (see Name→ID block).
-- \`security.siem_migration.update_rule_migration\` — update \`name\` and/or \`index_pattern\`.
-  At least one field is required. Mutating; user confirmation is requested automatically.
+- \`${SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID}\` — update \`name\` only. Mutating; user
+  confirmation is required before the tool executes.
 
 ## Scope Limit — What This Skill Can and Cannot Update
 
-This skill calls \`PATCH /{migration_id}\`, which updates the **migration document's**
-\`name\` and/or \`index_pattern\` field only:
+This skill calls \`PATCH /{migration_id}\` to update the migration's **name** only:
 - ✅ Rename the migration: changes the display name everywhere.
-- ✅ Change the default index pattern: used by future translation runs as the fallback
-  index pattern when a rule does not specify one.
+- ❌ **Change the default index pattern** — not supported by this skill. Direct the user to the
+  Automatic Migration UI (**LaunchPad → Manage Automatic Migrations**).
 - ❌ **Rewriting \`MISSING_INDEX_PATTERN_PLACEHOLDER\` in already-translated rule queries** — that
-  is a separate operation (\`POST .../update_index_pattern\`) accessible only via the
-  Automatic Migration UI, not through Agent Builder today.
+  is a separate operation accessible only via the Automatic Migration UI, not through Agent Builder.
 
-If the user says "fix the index pattern in my translated rules" or "replace the placeholder in
-my rules", explain the distinction and direct them to the Automatic Migration UI
-(**LaunchPad → Manage Automatic Migrations**). Do NOT call \`update_rule_migration\` for that.
+If the user asks about index patterns (changing the migration's default or replacing the placeholder
+in translated rules), explain the distinction and direct them to the Automatic Migration UI.
+Do NOT call \`${SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID}\` for those requests.
 
 ## Example Flows
 
 | User intent | What to do |
 |---|---|
 | "Rename 'Splunk Q3' to 'Splunk Q3 - reviewed'" | Prompt if no new name provided → body \`{ name: 'Splunk Q3 - reviewed' }\` |
-| "For QRadar Prod, change the index pattern to \`logs-*,winlogbeat-*\`" | body \`{ index_pattern: 'logs-*,winlogbeat-*' }\` |
-| "Rename 'Splunk Legacy' to 'Splunk Legacy - archived' and set its index pattern to \`logs-archive-*\`" | body \`{ name: 'Splunk Legacy - archived', index_pattern: 'logs-archive-*' }\` |
 | "Fix the index patterns in the translated rules for my Splunk Q3 migration" | Scope-limit: explain this is UI-only, route to Automatic Migration UI |
 
 ## Workflow
 
-1. **Resolve the migration** by name using \`get_all_rule_migration_stats\` (Name→ID block).
-   If the user pastes an id, verify it with \`get_rule_migration_stats\`.
-2. **Gather fields**: prompt ONLY for fields the user has not already supplied.
-   - If no new name or index pattern was provided, ask what they want to change.
-   - If only one was provided, proceed without asking for the other.
-3. **Scope check**: if the user's intent is to rewrite placeholder patterns in translated rules,
-   route them to the Automatic Migration UI and stop — do not call the update tool.
-4. **Confirm**: state the migration name, the field(s) being changed, and the new value(s). The
-   platform will prompt for confirmation before the tool executes.
-5. **Execute**: call \`update_rule_migration\` with the resolved migration id and field(s).
-6. **Report**: confirm the change by name (e.g. "Migration 'Splunk Q3' has been renamed to
-   'Splunk Q3 - reviewed'"). Use the name you resolved in step 1; the tool returns only
-   \`{ ok: true, migration_id }\`.
+1. **Resolve the migration** by name using \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` (Name→ID block).
+   If the user pastes an id, verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
+2. **Gather the new name**: prompt ONLY if the user has not already supplied it.
+3. **Scope check**: if the user's intent is to change an index pattern or rewrite placeholder
+   patterns in translated rules, route them to the Automatic Migration UI and stop — do not call
+   the update tool.
+4. **State and pause**: echo the migration's **exact full name**, the field being changed, and the
+   new value. Then end your turn. Do NOT call \`${SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID}\` in the same turn — wait
+   for the user to explicitly confirm in their next message.
+5. **Execute (confirmed turn only)**: once the user affirms, call \`${SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID}\` with
+   the resolved migration id and the new \`name\`.
+6. **Report**: always echo the migration's full resolved name verbatim (e.g. "Migration 'Splunk Q3'
+   has been renamed to 'Splunk Q3 - reviewed'"). The tool returns only \`{ ok: true, migration_id }\`;
+   use the name from step 1, never the id.
 
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
-To check migration progress, route the user to the **automatic-migration-rules-summarize** skill.
+To check migration progress, route the user to the **${RULE_MIGRATION_SKILLS.SUMMARIZE}** skill.
 `,
   getRegistryTools: () => [
     SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,

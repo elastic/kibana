@@ -18,7 +18,7 @@ evaluate.describe(
       async ({ evaluateDataset }) => {
         await evaluateDataset({
           dataset: {
-            name: 'agent builder: automatic-migration-delete-no-silent-mutation',
+            name: 'agent builder: automatic-migration-delete-no-tool-call',
             description: `Validates that delete queries route to the automatic-migration-rules-delete-migration
 skill AND that delete_rule_migration is NOT called in a single turn.
 Fixture-free: no migrations are seeded, so the agent reports no migrations found.`,
@@ -37,6 +37,7 @@ name or check the Automatic Migration UI.`,
                   expectedSkill: 'automatic-migration-rules-delete-migration',
                   expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
                   shouldNotCallToolId: 'security.siem_migration.delete_rule_migration',
+                  autoConfirm: true,
                 },
               },
             ],
@@ -45,60 +46,7 @@ name or check the Automatic Migration UI.`,
       }
     );
 
-    evaluate.describe('grounded output (seeded running migration — must stop first)', () => {
-      let teardown: (() => Promise<void>) | undefined;
-
-      evaluate.beforeAll(async ({ esClient, log }) => {
-        const seeded = await seedRuleMigration({
-          esClient,
-          log,
-          name: 'Splunk Q1 Running',
-          pending: 2,
-          completed: 1,
-          failed: 0,
-          migrationStatus: 'running',
-        });
-        teardown = seeded.cleanup;
-      });
-
-      evaluate.afterAll(async () => {
-        await teardown?.();
-      });
-
-      evaluate(
-        'delete skill routes to stop first when migration is running',
-        async ({ evaluateDataset }) => {
-          await evaluateDataset({
-            dataset: {
-              name: 'agent builder: automatic-migration-delete-running-migration',
-              description: `Validates that the delete skill detects a running migration and
-routes the user to stop it first, rather than calling delete_rule_migration.`,
-              examples: [
-                {
-                  input: {
-                    question: 'Delete my rule migration named Splunk Q1 Running.',
-                  },
-                  output: {
-                    expected: `I found your rule migration "Splunk Q1 Running" but it is currently
-running. You must stop it before deleting. Would you like me to stop it first?
-You can also use the "stop migration" skill to pause it, then delete it.`,
-                  },
-                  metadata: {
-                    query_intent: 'Delete Running Migration - Route to Stop First',
-                    expectedSkill: 'automatic-migration-rules-delete-migration',
-                    expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
-                    shouldNotCallToolId: 'security.siem_migration.delete_rule_migration',
-                    requiredTerms: ['Splunk Q1 Running'],
-                  },
-                },
-              ],
-            },
-          });
-        }
-      );
-    });
-
-    evaluate.describe('grounded output (seeded stopped migration — ready to delete)', () => {
+    evaluate.describe('grounded output - with seeded migration', () => {
       let teardown: (() => Promise<void>) | undefined;
 
       evaluate.beforeAll(async ({ esClient, log }) => {

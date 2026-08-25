@@ -19,6 +19,7 @@ import {
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
 } from './rules/content';
+import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
 export const automaticMigrationRulesStopMigrationSkill = defineSkillType({
   id: 'automatic-migration-rules-stop-migration',
@@ -45,29 +46,29 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 ## Available Tools
 
-- \`security.siem_migration.get_all_rule_migration_stats\` — resolve a migration name to its id and
+- \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` — resolve a migration name to its id and
   check its current status.
-- \`security.siem_migration.get_rule_migration_stats\` — fetch stats for a single migration by id;
+- \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` — fetch stats for a single migration by id;
   also used as a pasted-id fallback (see Name→ID block).
-- \`security.siem_migration.stop_rule_migration\` — stop the migration. Mutating; user confirmation
+- \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` — stop the migration. Mutating; user confirmation
   is requested automatically before this tool executes.
 
 ## Workflow
 
-1. **Resolve the migration** by name using \`get_all_rule_migration_stats\` (Name→ID block).
-   If the user pastes an id, verify it with \`get_rule_migration_stats\`.
+1. **Resolve the migration** by name using \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` (Name→ID block).
+   If the user pastes an id, verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
 2. **Check status**: if the migration is not currently \`running\`, tell the user — there is nothing
-   to stop. Do NOT call \`stop_rule_migration\` on a non-running migration.
+   to stop. Do NOT call \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` on a non-running migration.
 3. **Confirm**: state the migration name and that the running translation will be paused. The
    platform will prompt the user for confirmation before the tool executes.
-4. **Execute**: call \`stop_rule_migration\` with the resolved migration id.
+4. **Execute**: call \`${SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID}\` with the resolved migration id.
 5. **Report**: show the returned \`{ stopped: boolean }\`. If \`stopped: false\`, tell the user the
    migration may have already finished or stopped on its own.
 
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
 To resume a stopped migration or check its progress, route the user to the
-**automatic-migration-rules-start-migration** or **automatic-migration-rules-summarize** sibling skill.
+**${RULE_MIGRATION_SKILLS.START}** or **${RULE_MIGRATION_SKILLS.SUMMARIZE}** sibling skill.
 `,
   getRegistryTools: () => [
     SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,

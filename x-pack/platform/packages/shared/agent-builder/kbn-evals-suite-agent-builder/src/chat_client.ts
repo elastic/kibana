@@ -104,7 +104,7 @@ export class AgentBuilderEvaluationChatClient {
       steps?: any[];
       traceId?: string;
     }> => {
-      const chatResponse = (await this.fetch('/api/agent_builder/converse', {
+      const chatResponseRaw = await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({
@@ -113,7 +113,8 @@ export class AgentBuilderEvaluationChatClient {
           conversation_id: conversationId,
           input: messages[messages.length - 1].message,
         }),
-      })) as AgentBuilderConverseApiResponse;
+      });
+      const chatResponse = chatResponseRaw as AgentBuilderConverseApiResponse;
 
       const {
         conversation_id: conversationIdFromResponse,
@@ -131,22 +132,16 @@ export class AgentBuilderEvaluationChatClient {
       //   - steps[]           → ask_user_question (unanswered)
       //   - response.prompts  → confirmation / authorization (tool pre-call gates)
       if (autoConfirm) {
+        // autoConfirm only handles tool confirmation gates — it does not auto-answer
+        // user questions or auto-authorize platform permissions.
         const collectPending = (
-          responseSteps: any[],
+          _responseSteps: any[],
           responseMsg: { prompts?: any[] }
         ): Record<string, unknown> => {
           const autoPrompts: Record<string, unknown> = {};
-          for (const step of responseSteps) {
-            if (step?.type === 'ask_user_question' && !step.answers && step.prompt_id) {
-              autoPrompts[step.prompt_id] = { answers: [{ choice: [0] }] };
-            }
-          }
           for (const prompt of responseMsg?.prompts ?? []) {
-            if (!prompt?.id) continue;
-            if (prompt.type === 'confirmation') {
+            if (prompt?.id && prompt.type === 'confirmation') {
               autoPrompts[prompt.id] = { allow: true };
-            } else if (prompt.type === 'authorization') {
-              autoPrompts[prompt.id] = { authorized: true };
             }
           }
           return autoPrompts;

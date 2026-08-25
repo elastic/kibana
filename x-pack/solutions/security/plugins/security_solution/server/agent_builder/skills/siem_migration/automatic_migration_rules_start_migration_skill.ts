@@ -23,6 +23,7 @@ import {
   MIGRATION_TYPE_DISAMBIGUATION_BLOCK,
   AUTOMATIC_MIGRATION_GENERAL_GUIDELINES,
 } from './rules/content';
+import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
 export const automaticMigrationRulesStartMigrationSkill = defineSkillType({
   id: 'automatic-migration-rules-start-migration',
@@ -49,25 +50,25 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 ## Available Tools
 
-- \`security.siem_migration.get_all_rule_migration_stats\` — resolve a migration name to its id.
-- \`security.siem_migration.get_rule_migration_stats\` — task status (ready / running / stopped /
+- \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` — resolve a migration name to its id.
+- \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` — task status (ready / running / stopped /
   interrupted / finished) and per-state item counts. Returns an empty zero-shape for no items.
-- \`security.siem_migration.get_rule_migration_translation_stats\` — translation counts (full /
+- \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\` — translation counts (full /
   partial / untranslatable / installable / failed). Returns an empty zero-shape for no items.
-- \`security.siem_migration.get_migration_rules\` — resolve rule **titles** to rule **item ids**
+- \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` — resolve rule **titles** to rule **item ids**
   for \`selection.ids\` (page is zero-based).
-- \`security.siem_migration.get_missing_rule_migration_resources\` — list resources the migration
+- \`${SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID}\` — list resources the migration
   is still missing (macros, lookups, reference sets, watchlists). Used as a pre-flight check on
   fresh STARTs (see Pre-flight section below).
-- \`security.siem_migration.start_rule_migration\` — the mutating action. See decision policy below.
-- \`platform.core.list_inference_endpoints\` — list available inference endpoints (AI connectors)
+- \`${SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID}\` — the mutating action. See decision policy below.
+- \`${platformCoreTools.listInferenceEndpoints}\` — list available inference endpoints (AI connectors)
   so the user can pick one.
 
 
 ## Vendor-specific resource terminology
 
   When displaying missing resources, use the vocabulary the user already knows for their vendor.
-  The migration's \`vendor\` is in the \`get_all_rule_migration_stats\` response.
+  The migration's \`vendor\` is in the \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` response.
 
   | Vendor | Internal \`type\` values | Display name for the user |
   |---|---|---|
@@ -102,11 +103,10 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 ### Pre-flight: Missing Resources
 
-> **Skip if already answered** — check the conversation history first. If the user has already responded to the missing-resources question, use their stated preference and proceed to the next check. Do not call \`get_missing_rule_migration_resources\` again.
+- Applicable only for **fresh START** (task status \`ready\`) and **REPROCESS**. Skip entirely on **RESUME**.
+- **Always call \`${SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID}\` on START or REPROCESS.** This call is unconditional — do not skip it before making it.
 
-- Applicable only for **fresh START** (task status \`ready\`) and **REPROCESS**. Skip this check on **RESUME**.
-
-Call \`get_missing_rule_migration_resources\` for the resolved migration id.
+> **Already answered**: if the user already replied to the missing-resources question earlier in this same conversation, use their answer and do not call the tool again.
 
 - **Empty array** → no missing resources; proceed silently to the next pre-flight check.
 - **Non-empty array** → group the results by \`type\` and show the user a summary, for example:
@@ -126,23 +126,23 @@ Call \`get_missing_rule_migration_resources\` for the resolved migration id.
 
 ### Pre-flight: Connector Selection
 
-> **Skip if already answered** — if the user has already chosen a connector in this conversation, use that choice directly without calling \`list_ai_connectors\` again.
+> **Skip if already answered** — if the user has already chosen a connector in this conversation, use that choice directly without calling \`${platformCoreTools.listInferenceEndpoints}\` again.
 
-- Applicable for **fresh START** and **REPROCESS** only. For **RESUME**, skip this check and use the connector from \`last_execution\` in \`get_rule_migration_stats\`.
+- Applicable for **fresh START** and **REPROCESS** only. For **RESUME**, skip this check and use the connector from \`last_execution\` in \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
 
-Call \`list_ai_connectors\` and present the options as a multiple-choice question. Do **not** choose one automatically.
+Call \`${platformCoreTools.listInferenceEndpoints}\` and present the options as a multiple-choice question. Do **not** choose one automatically.
 
 ### Pre-flight: Skip Prebuilt Rules Matching
 
 > **Skip if already answered** — if the user has already stated their preference in this conversation, use it directly.
 
-- Applicable for **fresh START** and **REPROCESS** only. For **RESUME**, skip this check and use the value from \`last_execution\` in \`get_rule_migration_stats\`.
+- Applicable for **fresh START** and **REPROCESS** only. For **RESUME**, skip this check and use the value from \`last_execution\` in \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
 
 ## Workflow
 
 1. **Resolve the migration**: get the migration id from the name (Name→ID block). If the user
-   pastes an id, verify it with \`get_rule_migration_stats\`.
-2. **Inspect state**: call \`get_rule_migration_stats\` and \`get_rule_migration_translation_stats\`
+   pastes an id, verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`.
+2. **Inspect state**: call \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` and \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\`
    to read the task status and translation counts. Use the decision matrix below to pick the
    request body.
 3. **Pre-flight checks** — for each check (missing resources → connector → skip-prebuilt), first
@@ -150,12 +150,12 @@ Call \`list_ai_connectors\` and present the options as a multiple-choice questio
    If all are already answered, proceed directly to step 4.
 4. **Report**: state exactly what you will do (START / REPROCESS / RESUME), which rules are
    affected, and that it consumes connector credits. Show the complete request body in a table before proceeding.
-5. **Execute**: call \`start_rule_migration\`.
+5. **Execute**: call \`${SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID}\`.
 
 ## START vs REPROCESS vs RESUME Decision Matrix
 
-If the \`status\` of the migration from \`get_rule_migration_stats\` and the translation counts from
-\`get_rule_migration_translation_stats\`. Both are single-source — do not cross-reference counts
+If the \`status\` of the migration from \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` and the translation counts from
+\`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\`. Both are single-source — do not cross-reference counts
 between them.
 
 | Task status | items.pending | Translation counts | Action | Request body |
@@ -175,16 +175,26 @@ between them.
 
 #### REPROCESS ( Also called retry)
 - Re-runs a subset of rules. By default, reuse the connector and skip_prebuilt_rules_matching
-  values from the last execution (available in \`last_execution\` from \`get_rule_migration_stats\`).
+  values from the last execution (available in \`last_execution\` from \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`).
   Only ask the user if they explicitly want to change them.
 - Pass \`retry: "failed"\` ONLY to retry only failed rules, or
   \`retry: "not_fully_translated"\` to retry partially translated rules. No selection.
 - **REPROCESS a specific subset**: if the user names specific rules to re-run, resolve their
-  **titles** to **rule item ids** via \`get_migration_rules\`. Use \`retry: "selected"\` with
+  **titles** to **rule item ids** via \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\`. Use \`retry: "selected"\` with
   \`selection: { ids }\` when the requested subset contains mixed statuses; the status-wide
   \`failed\` and \`not_fully_translated\` filters cannot represent that selection. A \`selection\`
   WITHOUT \`retry: "selected"\` is a no-op — always pair them and include the required
   \`settings\` object.
+
+**Step-by-step for REPROCESS selected:**
+1. \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` → migration id.
+2. \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` with \`{ migration_id, search_term: '<partial title>' }\` (paginate if
+   total > per_page) → collect the \`id\` field for every title the user named.
+3. \`${SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID}\` with:
+   \`{ settings: { connector_id, skip_prebuilt_rules_matching }, retry: "selected", selection: { ids: [<id1>, <id2>] } }\`
+4. Report the count of rules reprocessed; confirm it is running **asynchronously**.
+
+Never skip step 2 — you must resolve titles to item ids; titles are not accepted by the tool.
 
 #### RESUME
 - **RESUME** continues a stopped/interrupted run that still has pending items. It uses the SAME
@@ -192,9 +202,10 @@ between them.
 
 ## Interpreting the start response
 
-\`start_rule_migration\` returns \`{ started: boolean }\`:
-- \`started: true\` — the task was started/resumed. Tell the user it runs asynchronously; they can
-  re-check progress with the summarize skill.
+\`${SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID}\` returns \`{ started: boolean }\`:
+- \`started: true\` — the task was started/resumed. Your response MUST include the word
+  **asynchronously** (e.g. "The migration is running asynchronously"). Direct the user to the
+  \`${RULE_MIGRATION_SKILLS.SUMMARIZE}\` skill to track progress.
 - \`started: false\` — the task did not start (e.g. already running(\`status\` field in migration stats), or no matching items for the retry filter). Report this plainly and suggest re-inspecting the state.
 
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}

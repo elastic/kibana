@@ -19,7 +19,7 @@ evaluate.describe(
         await evaluateDataset({
           dataset: {
             name: 'agent builder: automatic-migration-update-no-silent-mutation',
-            description: `Validates that update queries route to the automatic-migration-rules-update-migration
+            description: `Validates that rename queries route to the automatic-migration-rules-update-migration
 skill AND that update_rule_migration is NOT called in a single turn.
 Fixture-free: no migrations are seeded, so the agent reports no migrations found.`,
             examples: [
@@ -36,71 +36,6 @@ name or check the Automatic Migration UI.`,
                   query_intent: 'Rename Rule Migration',
                   expectedSkill: 'automatic-migration-rules-update-migration',
                   expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
-                  shouldNotCallToolId: 'security.siem_migration.update_rule_migration',
-                },
-              },
-              {
-                input: {
-                  question:
-                    "For the 'QRadar Prod' migration, change the default index pattern to logs-*,winlogbeat-*.",
-                },
-                output: {
-                  expected: `I could not find a rule migration named "QRadar Prod".
-There are currently no rule migrations available.`,
-                },
-                metadata: {
-                  query_intent: 'Update Index Pattern',
-                  expectedSkill: 'automatic-migration-rules-update-migration',
-                  expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
-                  shouldNotCallToolId: 'security.siem_migration.update_rule_migration',
-                },
-              },
-            ],
-          },
-        });
-      }
-    );
-
-    evaluate(
-      'scope-limit: index-pattern rewrite in translated rules routes to UI, NOT update_rule_migration',
-      async ({ evaluateDataset }) => {
-        await evaluateDataset({
-          dataset: {
-            name: 'agent builder: automatic-migration-update-scope-limit',
-            description: `Validates that the update skill correctly identifies requests to rewrite
-MISSING_INDEX_PATTERN_PLACEHOLDER in already-translated rules as out of scope and
-directs the user to the Automatic Migration UI instead of calling update_rule_migration.`,
-            examples: [
-              {
-                input: {
-                  question:
-                    'Fix the index patterns in the translated rules for my Splunk Q1 migration.',
-                },
-                output: {
-                  expected: `Rewriting the index pattern placeholder in already-translated rules is
-not supported through Agent Builder today. This operation is only available in the
-Automatic Migration UI (LaunchPad → Manage Automatic Migrations). I can update the
-migration's default index pattern for future runs — would that help?`,
-                },
-                metadata: {
-                  query_intent: 'Index Pattern Rewrite - Scope Limit',
-                  expectedSkill: 'automatic-migration-rules-update-migration',
-                  shouldNotCallToolId: 'security.siem_migration.update_rule_migration',
-                },
-              },
-              {
-                input: {
-                  question:
-                    'Replace MISSING_INDEX_PATTERN_PLACEHOLDER in my Splunk Q1 migration rules with logs-*.',
-                },
-                output: {
-                  expected: `Replacing MISSING_INDEX_PATTERN_PLACEHOLDER in translated rules is a
-UI-only operation today. Please use LaunchPad → Manage Automatic Migrations to update
-the translated rule queries.`,
-                },
-                metadata: {
-                  query_intent: 'Placeholder Replace - Scope Limit',
-                  expectedSkill: 'automatic-migration-rules-update-migration',
                   shouldNotCallToolId: 'security.siem_migration.update_rule_migration',
                 },
               },

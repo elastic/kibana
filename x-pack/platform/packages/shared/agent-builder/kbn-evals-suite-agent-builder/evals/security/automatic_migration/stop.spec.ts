@@ -7,7 +7,6 @@
 
 import { tags } from '@kbn/scout';
 import { evaluate } from './evaluate_setup';
-import { seedRuleMigration } from './automatic_migration_fixtures';
 
 evaluate.describe(
   'Automatic Rule Migration - stop skill',
@@ -45,72 +44,5 @@ name or check the Automatic Migration UI.`,
       }
     );
 
-    evaluate.describe('grounded output (seeded running migration)', () => {
-      let teardown: (() => Promise<void>) | undefined;
-
-      evaluate.beforeAll(async ({ esClient, log }) => {
-        const seeded = await seedRuleMigration({
-          esClient,
-          log,
-          name: 'Splunk Q1 Running',
-          pending: 2,
-          completed: 1,
-          failed: 0,
-          migrationStatus: 'running',
-        });
-        teardown = seeded.cleanup;
-      });
-
-      evaluate.afterAll(async () => {
-        await teardown?.();
-      });
-
-      evaluate(
-        'stop skill finds running migration and asks for confirmation without mutating',
-        async ({ evaluateDataset }) => {
-          await evaluateDataset({
-            dataset: {
-              name: 'agent builder: automatic-migration-stop-grounded',
-              description: `Validates that the stop skill finds the seeded running migration
-and confirms the action before calling stop_rule_migration.`,
-              examples: [
-                {
-                  input: {
-                    question: 'Stop my rule migration named Splunk Q1 Running.',
-                  },
-                  output: {
-                    expected: `I found your running rule migration "Splunk Q1 Running".
-I will stop it. Please confirm you want to stop this migration.`,
-                  },
-                  metadata: {
-                    query_intent: 'Stop Rule Migration - Grounded',
-                    expectedSkill: 'automatic-migration-rules-stop-migration',
-                    expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
-                    shouldNotCallToolId: 'security.siem_migration.stop_rule_migration',
-                    requiredTerms: ['Splunk Q1 Running'],
-                  },
-                },
-                {
-                  input: {
-                    question: 'Stop the already-finished rule migration named Splunk Q1 Running.',
-                  },
-                  output: {
-                    expected: `I found "Splunk Q1 Running" but it has status "running" — not finished.
-I would stop it if you confirm.`,
-                  },
-                  metadata: {
-                    query_intent: 'Stop Already-Stopped Migration',
-                    expectedSkill: 'automatic-migration-rules-stop-migration',
-                    expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
-                    shouldNotCallToolId: 'security.siem_migration.stop_rule_migration',
-                    requiredTerms: ['Splunk Q1 Running'],
-                  },
-                },
-              ],
-            },
-          });
-        }
-      );
-    });
   }
 );

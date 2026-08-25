@@ -44,7 +44,8 @@ export const updateRuleMigrationTool = (
     confirmation: { askUser: 'always' },
     description: `Update a rule migration's name.
 
-Accepts { name }. Returns { ok: true, migration_id }.`,
+Accepts { name }. Returns { ok: true, migration_id }.
+Mutating — confirms with the user before executing.`,
 
     schema,
     tags: ['security', 'siem-migration', 'rules'],
