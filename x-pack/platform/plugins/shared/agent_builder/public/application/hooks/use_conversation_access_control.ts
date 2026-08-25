@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileAvatarData, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { Conversation } from '@kbn/agent-builder-common';
 import {
   normalizeConversationAccessControl,
@@ -19,32 +18,26 @@ import { mutationKeys } from '../mutation_keys';
 import { useKibana } from './use_kibana';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 
-const AVATAR_DATA_PATH = 'avatar';
-
 export const useConversationAccessControlProfiles = ({
   uids,
-  enabled = true,
+  enabled,
 }: {
   uids: string[];
-  enabled?: boolean;
+  enabled: boolean;
 }) => {
   const {
     services: { userProfile },
   } = useKibana();
 
-  const dedupedUids = useMemo(() => Array.from(new Set(uids)).sort(), [uids]);
+  const dedupedUids = Array.from(new Set(uids)).sort();
 
   return useQuery({
     queryKey: queryKeys.security.ownerProfiles(dedupedUids),
-    enabled: enabled && dedupedUids.length > 0 && Boolean(userProfile),
+    enabled: enabled && dedupedUids.length > 0,
     queryFn: async (): Promise<UserProfileWithAvatar[]> => {
-      if (!userProfile) {
-        return [];
-      }
-
-      return await userProfile.bulkGet<UserProfileWithAvatar['data']>({
+      return await userProfile.bulkGet<{ avatar?: UserProfileAvatarData }>({
         uids: new Set(dedupedUids),
-        dataPath: AVATAR_DATA_PATH,
+        dataPath: 'avatar',
       });
     },
   });
@@ -52,12 +45,10 @@ export const useConversationAccessControlProfiles = ({
 
 export const useUpdateConversationAccessControl = ({
   conversationId,
-  agentId,
   onSuccess,
   onError,
 }: {
   conversationId: string;
-  agentId?: string;
   onSuccess?: (accessControl: ConversationAccessControl) => void;
   onError?: (error: Error) => void;
 }) => {
@@ -82,9 +73,6 @@ export const useUpdateConversationAccessControl = ({
             : current
       );
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
-      if (agentId) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.conversations.byAgent(agentId) });
-      }
 
       onSuccess?.(normalizedAccessControl);
     },

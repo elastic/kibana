@@ -253,7 +253,6 @@ const ConversationSharePopover: React.FC<{
 
   const { mutate: updateAccessControl, isLoading: isSaving } = useUpdateConversationAccessControl({
     conversationId: conversation.id,
-    agentId: conversation.agent_id,
     onSuccess: () => {
       setErrorMessage(undefined);
     },
