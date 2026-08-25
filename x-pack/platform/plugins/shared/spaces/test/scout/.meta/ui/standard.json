@@ -1,5 +1,5 @@
 {
-  "sha1": "49332447fe97dc896d24180bbbdf4a0bf6227e78",
+  "sha1": "165136d6e7a28bd50dfd337d504513e1d99217e1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -307,6 +307,34 @@
       }
     },
     {
+      "id": "7bf445453bc0eb8-09afb294d1a4cfa",
+      "title": "last selected space recollection redirects to the last selected space when preference is already enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
+        "line": 29,
+        "column": 65
+      }
+    },
+    {
+      "id": "7bf445453bc0eb8-d355bdb76e00f2f",
+      "title": "last selected space recollection shows the space selector when remember last space is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
+        "line": 44,
+        "column": 9
+      }
+    },
+    {
       "id": "7cacc8ec845d94b-6ff53900e25cd70",
       "title": "Spaces Management: List of Spaces lists all the spaces populated",
       "expectedStatus": "passed",
@@ -575,28 +603,6 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts",
         "line": 54,
-        "column": 7
-      }
-    },
-    {
-      "id": "d5e6f7a8b9c0123-aaaaaaaaaaaaaaa1",
-      "title": "last selected space recollection redirects to the last selected space when preference is already enabled",
-      "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
-        "line": 40,
-        "column": 7
-      }
-    },
-    {
-      "id": "d5e6f7a8b9c0123-aaaaaaaaaaaaaaa2",
-      "title": "last selected space recollection shows the space selector when remember last space is disabled",
-      "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/last_selected_space_recollection.spec.ts",
-        "line": 65,
         "column": 7
       }
     }
