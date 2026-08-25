@@ -95,6 +95,47 @@ describe('rssAdapter', () => {
     expect(reports[0].content_fingerprint).not.toBe(reports[1].content_fingerprint);
   });
 
+  // The fingerprint used to be feed URL + guid + title only, so an advisory
+  // that kept its guid and title while revising the text deduped away forever.
+  describe('revision detection', () => {
+    const feedWith = ({ body = 'Body one', pubDate = 'Mon, 12 May 2025 09:30:00 GMT' } = {}) =>
+      `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel>
+  <title>Acme</title>
+  <item>
+    <title>Item one</title>
+    <guid>acme:1</guid>
+    <link>https://acme.example/1</link>
+    <pubDate>${pubDate}</pubDate>
+    <description>${body}</description>
+  </item>
+</channel></rss>`;
+
+    const fingerprintFor = async (feed: string) => {
+      const reports = await rssAdapter.run(
+        buildSource(),
+        buildContext(jest.fn().mockResolvedValue(okResponse(feed)))
+      );
+      return reports[0].content_fingerprint;
+    };
+
+    it('is stable when the item is unchanged', async () => {
+      expect(await fingerprintFor(feedWith())).toBe(await fingerprintFor(feedWith()));
+    });
+
+    it('changes when the body is revised under the same guid and title', async () => {
+      expect(await fingerprintFor(feedWith({ body: 'Revised body with new IOCs' }))).not.toBe(
+        await fingerprintFor(feedWith())
+      );
+    });
+
+    it('changes when only the publish timestamp moves', async () => {
+      expect(await fingerprintFor(feedWith({ pubDate: 'Wed, 14 May 2025 09:30:00 GMT' }))).not.toBe(
+        await fingerprintFor(feedWith())
+      );
+    });
+  });
+
   it('stamps space_id from the source when set', async () => {
     const fetchMock = jest.fn().mockResolvedValue(okResponse(FEED_BODY));
     const reports = await rssAdapter.run(

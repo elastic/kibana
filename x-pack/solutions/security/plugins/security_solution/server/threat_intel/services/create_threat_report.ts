@@ -97,36 +97,59 @@ export const createThreatReport = async (
     };
   }
 
-  const indexResponse = await esClient.index({
-    index: THREAT_REPORTS_INDEX,
-    document: {
-      '@timestamp': now,
-      content_fingerprint: fp,
-      space_id: spaceId,
-      source: {
-        type: 'manual',
-        name: sourceName,
-        url: sourceUrl,
-        adapter_id: 'manual:analyst-paste',
-      },
-      content: buildReportContent({ title, bodyText, bodyHtml, language }),
-      severity: {
-        level: severity,
-        score: severityScore(severity),
-      },
-      lineage: {
-        ingested_at: now,
-        extraction_method: 'pending',
-      },
-    },
-  });
+  // Deterministic id closes the race between the precheck above and the write:
+  // two concurrent identical submissions both see total === 0, but only one
+  // `create` can succeed — the loser gets a 409 and is reported as a duplicate.
+  // The id is space-scoped because dedup is per-space: the same advisory pasted
+  // into another space is a distinct report, so keying on the fingerprint alone
+  // would make space B collide with space A's document.
+  const reportId = `${spaceId}:${fp}`;
 
-  logger.debug(`create_threat_report indexed report_id=${indexResponse._id} fingerprint=${fp}`);
+  try {
+    await esClient.create({
+      index: THREAT_REPORTS_INDEX,
+      id: reportId,
+      document: {
+        '@timestamp': now,
+        content_fingerprint: fp,
+        space_id: spaceId,
+        source: {
+          type: 'manual',
+          name: sourceName,
+          url: sourceUrl,
+          adapter_id: 'manual:analyst-paste',
+        },
+        content: buildReportContent({ title, bodyText, bodyHtml, language }),
+        severity: {
+          level: severity,
+          score: severityScore(severity),
+        },
+        lineage: {
+          ingested_at: now,
+          extraction_method: 'pending',
+        },
+      },
+    });
+  } catch (err) {
+    if ((err as { statusCode?: number }).statusCode === 409) {
+      logger.debug(`create_threat_report lost dedup race fingerprint=${fp} report_id=${reportId}`);
+      return {
+        status: 'duplicate',
+        content_fingerprint: fp,
+        report_id: reportId,
+        message:
+          'Report content already ingested. Returning the canonical document id without writing a new copy.',
+      };
+    }
+    throw err;
+  }
+
+  logger.debug(`create_threat_report indexed report_id=${reportId} fingerprint=${fp}`);
 
   return {
     status: 'ingested',
     content_fingerprint: fp,
-    report_id: indexResponse._id,
+    report_id: reportId,
     message: 'Report ingested. enrich_threat_report will pick it up on the next workflow run.',
   };
 };

@@ -245,11 +245,17 @@ export const textIndicatorListAdapter: FetchAdapter = {
     const ingestedAt = context.now().toISOString();
     const spaceId = source._source.space_id ?? GLOBAL_SPACE_ID;
 
-    // Change-signal for the content fingerprint: body byte-length + first and last IOC value.
+    // Change-signal for the content fingerprint: a hash over the whole canonical
+    // IOC set. This used to be body length plus the first and last IOC, which
+    // collided whenever interior indicators were added, removed, replaced, or
+    // reordered while those three values held — the dedup gate then skipped a
+    // genuinely updated list and the indicator index went stale. Hashing the set
+    // (rather than the raw body) also avoids re-ingesting on cosmetic feed
+    // changes such as an updated header comment.
     const allIocs = [...dedupedIocs.values()];
-    const firstIoc = allIocs[0]?.value ?? '';
-    const lastIoc = allIocs[allIocs.length - 1]?.value ?? '';
-    const changeSignal = `${response.body.length}:${firstIoc}:${lastIoc}`;
+    const changeSignal = buildFingerprint(
+      allIocs.map((ioc) => `${ioc.type}=${ioc.value}@${ioc.reference ?? ''}`)
+    );
 
     const reports: NormalizedReport[] = [];
 

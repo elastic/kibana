@@ -73,7 +73,20 @@ const buildKevReport = (
 
   return {
     '@timestamp': ingestedAt,
-    content_fingerprint: buildFingerprint([vuln.cveID]),
+    // The CVE id alone is stable for the life of the entry, so fingerprinting on
+    // it would dedup away every later CISA revision. Include the mutable fields
+    // so a changed due date, required action, ransomware status, or description
+    // produces a new fingerprint and is re-ingested.
+    content_fingerprint: buildFingerprint([
+      vuln.cveID,
+      vuln.vulnerabilityName,
+      vuln.shortDescription,
+      vuln.requiredAction,
+      vuln.dueDate,
+      vuln.knownRansomwareCampaignUse,
+      vuln.notes,
+      (vuln.cwes ?? []).join(','),
+    ]),
     space_id: spaceId,
     source: {
       type: 'kev',

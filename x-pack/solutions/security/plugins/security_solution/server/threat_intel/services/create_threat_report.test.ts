@@ -10,6 +10,9 @@ import { createThreatReport } from './create_threat_report';
 
 const logger = loggingSystemMock.createLogger();
 
+/** `<spaceId>:<sha256 of title+body>` — deterministic, so dedup is race-free. */
+const REPORT_ID_PATTERN = /^[^:]+:[a-f0-9]{64}$/;
+
 const buildEsClient = ({ totalHits = 0 }: { totalHits?: number } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.search.mockResolvedValue({
@@ -22,16 +25,18 @@ const buildEsClient = ({ totalHits = 0 }: { totalHits?: number } = {}) => {
       hits: totalHits > 0 ? [{ _id: 'existing-id', _index: '.kibana-threat-reports' }] : [],
     },
   } as ReturnType<typeof esClient.search> extends Promise<infer T> ? T : never);
-  esClient.index.mockResolvedValue({
-    _id: 'new-report-id',
+  esClient.create.mockResolvedValue({
+    _id: 'ignored-the-id-is-deterministic',
     _index: '.kibana-threat-reports',
     result: 'created',
     _shards: { total: 1, successful: 1, failed: 0 },
     _seq_no: 0,
     _primary_term: 1,
-  } as ReturnType<typeof esClient.index> extends Promise<infer T> ? T : never);
+  } as ReturnType<typeof esClient.create> extends Promise<infer T> ? T : never);
   return esClient;
 };
+
+const conflictError = () => Object.assign(new Error('version conflict'), { statusCode: 409 });
 
 const BASE_PARAMS = {
   title: 'Test report',
@@ -41,12 +46,15 @@ const BASE_PARAMS = {
 } as const;
 
 describe('createThreatReport', () => {
-  it('returns ingested status and report_id on new report', async () => {
+  it('returns ingested status and a deterministic report_id on new report', async () => {
     const esClient = buildEsClient();
     const result = await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
     expect(result.status).toBe('ingested');
-    expect(result.report_id).toBe('new-report-id');
-    expect(esClient.index).toHaveBeenCalledTimes(1);
+    expect(result.report_id).toMatch(REPORT_ID_PATTERN);
+    expect(result.report_id.startsWith('default:')).toBe(true);
+    expect(esClient.create).toHaveBeenCalledTimes(1);
+    // The id written to ES is the one returned to the caller.
+    expect(esClient.create.mock.calls[0][0].id).toBe(result.report_id);
   });
 
   it('returns duplicate status when content fingerprint already exists', async () => {
@@ -54,7 +62,40 @@ describe('createThreatReport', () => {
     const result = await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
     expect(result.status).toBe('duplicate');
     expect(result.report_id).toBe('existing-id');
-    expect(esClient.index).not.toHaveBeenCalled();
+    expect(esClient.create).not.toHaveBeenCalled();
+  });
+
+  it('reports a duplicate when it loses the create race (409)', async () => {
+    // Both requests pass the precheck; only one create can win.
+    const esClient = buildEsClient();
+    esClient.create.mockRejectedValue(conflictError());
+
+    const result = await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
+
+    expect(result.status).toBe('duplicate');
+    // The deterministic id is the winner's id, so no extra lookup is needed.
+    expect(result.report_id).toBe(esClient.create.mock.calls[0][0].id);
+  });
+
+  it('rethrows non-conflict errors from create', async () => {
+    const esClient = buildEsClient();
+    esClient.create.mockRejectedValue(Object.assign(new Error('boom'), { statusCode: 500 }));
+
+    await expect(createThreatReport(esClient, logger, 'default', BASE_PARAMS)).rejects.toThrow(
+      'boom'
+    );
+  });
+
+  it('scopes the id per space so the same content in another space is not a conflict', async () => {
+    const esClient = buildEsClient();
+    const inDefault = await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
+    const inTeamA = await createThreatReport(esClient, logger, 'team-a', BASE_PARAMS);
+
+    expect(inDefault.report_id).not.toBe(inTeamA.report_id);
+    expect(inDefault.report_id.startsWith('default:')).toBe(true);
+    expect(inTeamA.report_id.startsWith('team-a:')).toBe(true);
+    // Same content, so the fingerprint half matches.
+    expect(inDefault.content_fingerprint).toBe(inTeamA.content_fingerprint);
   });
 
   it('stores content.body_html when body_html is provided', async () => {
@@ -62,8 +103,8 @@ describe('createThreatReport', () => {
     const html = '<h2>IOCs</h2><ul><li>evil.com</li></ul>';
     await createThreatReport(esClient, logger, 'default', { ...BASE_PARAMS, body_html: html });
 
-    const indexCall = esClient.index.mock.calls[0][0];
-    const doc = indexCall.document as Record<string, unknown>;
+    const createCall = esClient.create.mock.calls[0][0];
+    const doc = createCall.document as Record<string, unknown>;
     const content = doc.content as Record<string, unknown>;
     expect(content.body_html).toBe(html);
     // body_text remains the clean fallback
@@ -74,8 +115,8 @@ describe('createThreatReport', () => {
     const esClient = buildEsClient();
     await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
 
-    const indexCall = esClient.index.mock.calls[0][0];
-    const doc = indexCall.document as Record<string, unknown>;
+    const createCall = esClient.create.mock.calls[0][0];
+    const doc = createCall.document as Record<string, unknown>;
     const content = doc.content as Record<string, unknown>;
     expect(content).not.toHaveProperty('body_html');
   });

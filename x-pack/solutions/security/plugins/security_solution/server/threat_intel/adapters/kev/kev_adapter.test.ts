@@ -96,12 +96,33 @@ describe('kevAdapter', () => {
     }
   });
 
-  it('fingerprint is the cveID (stable across re-fetches)', async () => {
+  it('fingerprint is stable across re-fetches of unchanged entries', async () => {
     const reports = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
     const fps = reports.map((r) => r.content_fingerprint);
     // Run again — same fingerprints
     const reports2 = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
     expect(reports2.map((r) => r.content_fingerprint)).toEqual(fps);
+  });
+
+  // The fingerprint used to be the CVE id alone, so any later CISA revision of
+  // the same CVE deduped away and never reached the stored report.
+  it.each([
+    ['requiredAction', { requiredAction: 'Discontinue use of the product.' }],
+    ['dueDate', { dueDate: '2022-01-15' }],
+    ['knownRansomwareCampaignUse', { knownRansomwareCampaignUse: 'Unknown' }],
+    ['shortDescription', { shortDescription: 'Revised description.' }],
+    ['notes', { notes: 'https://example.com/new-advisory' }],
+  ])('re-fingerprints the same CVE when %s changes', async (_field, patch) => {
+    const [original] = await kevAdapter.run(makeSource(), makeContext(makeEnvelope([VULN_1])));
+    const [revised] = await kevAdapter.run(
+      makeSource(),
+      makeContext(makeEnvelope([{ ...VULN_1, ...patch }]))
+    );
+
+    expect(revised.extracted?.vulnerability?.cve_id).toBe(
+      original.extracted?.vulnerability?.cve_id
+    );
+    expect(revised.content_fingerprint).not.toBe(original.content_fingerprint);
   });
 
   it('fingerprints are distinct per CVE', async () => {

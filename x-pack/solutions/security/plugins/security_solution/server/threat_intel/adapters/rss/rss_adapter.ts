@@ -79,14 +79,24 @@ export const rssAdapter: FetchAdapter = {
     const reports: NormalizedReport[] = [];
     for (const entry of parsed.entries) {
       const title = collapseWhitespace(entry.title || parsed.feedTitle || source._source.name);
-      const bodyText = truncate(stripHtml(entry.bodyHtml ?? ''), BODY_TEXT_MAX_LENGTH);
-      // Per-item fingerprint seed: feed URL + stable item id + canonical
-      // title. Including the title means an upstream feed that re-uses
-      // the same `<guid>` for an updated advisory still produces a fresh
-      // row when the title changes (the `enrich_threat_report`
-      // workflow can then re-extract over the new revision). Re-fetches
-      // of the unchanged item collapse to one fingerprint.
-      const fingerprint = buildFingerprint([feedUrl, entry.id, title]);
+      // Keep the untruncated text for the fingerprint so a revision that only
+      // differs past the stored-body cap is still detected as a change.
+      const fullBodyText = stripHtml(entry.bodyHtml ?? '');
+      const bodyText = truncate(fullBodyText, BODY_TEXT_MAX_LENGTH);
+      // Per-item fingerprint seed: feed URL + stable item id + canonical title,
+      // plus the publish timestamp and a hash of the body. Advisories commonly
+      // keep their `<guid>` and title while revising the text and IOCs, so
+      // identity alone would dedup the revision away forever. Including the
+      // body means a re-fetch of the unchanged item still collapses to one
+      // fingerprint, while a revised item produces a fresh row for
+      // `enrich_threat_report` to re-extract over.
+      const fingerprint = buildFingerprint([
+        feedUrl,
+        entry.id,
+        title,
+        entry.publishedAt,
+        fullBodyText,
+      ]);
       reports.push({
         '@timestamp': ingestedAt,
         content_fingerprint: fingerprint,

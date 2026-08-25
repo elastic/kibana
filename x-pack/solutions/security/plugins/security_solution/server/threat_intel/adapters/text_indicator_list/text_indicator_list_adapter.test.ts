@@ -592,4 +592,44 @@ describe('textIndicatorListAdapter', () => {
     const allValues = reports.flatMap((r) => (r.extracted?.iocs ?? []).map((i) => i.value));
     expect(allValues.filter((v) => v === '1.1.1.1')).toHaveLength(1);
   });
+
+  // The change signal used to be body length + first IOC + last IOC, so two
+  // lists that held those three values but differed in the middle produced
+  // identical fingerprints and the dedup gate skipped the update.
+  describe('change signal', () => {
+    const fingerprintsFor = async (iocValues: string[]) => {
+      parseIndicatorListMock.mockReturnValue([
+        {
+          block_index: 0,
+          reference: 'https://example.com/ref',
+          reference_class: 'candidate',
+          iocs: iocValues.map((v) => makeIoc(v)),
+        },
+      ]);
+      const reports = await textIndicatorListAdapter.run(
+        makeSource('https://example.com/trail/signal.txt'),
+        makeContext(jest.fn().mockResolvedValue(okResponse()))
+      );
+      return reports.map((r) => r.content_fingerprint);
+    };
+
+    it('is stable when the list is unchanged', async () => {
+      expect(await fingerprintsFor(['1.1.1.1', '2.2.2.2', '9.9.9.9'])).toEqual(
+        await fingerprintsFor(['1.1.1.1', '2.2.2.2', '9.9.9.9'])
+      );
+    });
+
+    it('changes when an interior indicator is replaced', async () => {
+      // Same response body, same first and last IOC — only the middle differs.
+      expect(await fingerprintsFor(['1.1.1.1', '2.2.2.2', '9.9.9.9'])).not.toEqual(
+        await fingerprintsFor(['1.1.1.1', '3.3.3.3', '9.9.9.9'])
+      );
+    });
+
+    it('changes when interior indicators are reordered', async () => {
+      expect(await fingerprintsFor(['1.1.1.1', '2.2.2.2', '3.3.3.3', '9.9.9.9'])).not.toEqual(
+        await fingerprintsFor(['1.1.1.1', '3.3.3.3', '2.2.2.2', '9.9.9.9'])
+      );
+    });
+  });
 });
