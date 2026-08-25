@@ -19,6 +19,7 @@ import type { ServerlessVectordbConfig } from './config';
 import { registerCreateApiKeyRoute } from './routes/api_key';
 import { registerDeploymentStatsRoute } from './routes/deployment_stats';
 import { registerStarredDashboardsCountRoute } from './routes/starred_dashboards_count';
+import { registerSearchSkills } from './skills/register_search_skills';
 import type {
   ServerlessVectordbPluginSetup,
   ServerlessVectordbPluginStart,
@@ -44,8 +45,12 @@ export class ServerlessVectordbPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<StartDependencies>, { serverless }: SetupDependencies) {
+  public setup(
+    core: CoreSetup<StartDependencies>,
+    { serverless, agentBuilder }: SetupDependencies
+  ) {
     serverless.setupProjectSettings(VECTORDB_PROJECT_SETTINGS);
+    registerSearchSkills({ agentBuilder, logger: this.logger });
 
     const router = core.http.createRouter();
     registerDeploymentStatsRoute(router, this.logger);
