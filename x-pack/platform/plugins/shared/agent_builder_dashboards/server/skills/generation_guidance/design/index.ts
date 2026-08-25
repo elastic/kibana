@@ -16,3 +16,5 @@ import { gridLayoutPrompt } from './grid_layout';
 export const dashboardDesignGuidancePrompt = `${dashboardCompositionPrompt}
 
 ${gridLayoutPrompt}`;
+
+export { dashboardDesignReviewPrompt } from './review';

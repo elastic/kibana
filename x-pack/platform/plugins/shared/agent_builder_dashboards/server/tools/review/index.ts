@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { generateDashboardTool } from './generate';
-export { reviewDashboardTool } from './review';
+export { reviewDashboardTool } from './review_dashboard_tool';
