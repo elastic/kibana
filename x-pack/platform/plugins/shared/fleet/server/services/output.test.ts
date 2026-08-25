@@ -502,6 +502,7 @@ describe('Output Service', () => {
     mockedAgentPolicyService.getByIds.mockResolvedValue([]);
     mockedAgentPolicyService.list.mockClear();
     mockedPackagePolicyService.list.mockReset();
+    mockedPackagePolicyService.fetchAllItems.mockReset();
     mockedAgentPolicyService.hasAPMIntegration.mockClear();
     mockedAgentPolicyService.hasFleetServerIntegration.mockClear();
     mockedAgentPolicyService.hasSyntheticsIntegration.mockClear();
@@ -514,6 +515,7 @@ describe('Output Service', () => {
     mockedPackagePolicyService.list.mockResolvedValue({
       items: [],
     } as any);
+    mockedPackagePolicyService.fetchAllItems.mockResolvedValue((async function* () {})());
     mockedFindAgentlessPolicies.mockResolvedValue([]);
   });
 
@@ -2923,15 +2925,19 @@ describe('Output Service', () => {
       it('Should throw when updating an OTLP output used by a policy with non-OTel inputs', async () => {
         const soClient = getMockedSoClient({});
         mockedAgentPolicyService.list.mockResolvedValue({
-          items: [
-            {
-              id: 'mixed-policy',
-              name: 'Mixed Policy',
-              package_policies: [{ inputs: [{ type: 'logfile', enabled: true }] }],
-            },
-          ],
+          items: [{ id: 'mixed-policy', name: 'Mixed Policy' }],
         } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
         mockedAgentPolicyService.getByIds.mockResolvedValue([]);
+        mockedPackagePolicyService.fetchAllItems.mockResolvedValue(
+          (async function* () {
+            yield [
+              {
+                policy_ids: ['mixed-policy'],
+                inputs: [{ type: 'logfile', enabled: true }],
+              } as any,
+            ];
+          })()
+        );
 
         // is_default: true changes is_default, which triggers validateTypeChanges for the OTLP path
         await expect(

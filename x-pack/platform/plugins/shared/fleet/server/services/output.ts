@@ -28,8 +28,8 @@ import {
   outputYmlIncludesReservedPerformanceKey,
   isBeatsOutput,
   isOtlpOutput,
-  agentPolicyHasOnlyOtelInputs,
 } from '../../common/services/output_helpers';
+import { packagePolicyHasOnlyOtelInputs } from '../../common/services/otelcol_helpers';
 
 import type {
   NewOutput,
@@ -165,9 +165,9 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
 async function getAgentPoliciesPerOutput(
   outputId?: string,
   isDefault?: boolean,
-  options: { withPackagePolicies?: boolean } = {}
+  options: { fields?: string[] } = {}
 ) {
-  const { withPackagePolicies = false } = options;
+  const { fields } = options;
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
   let agentPoliciesKuery: string;
@@ -198,7 +198,7 @@ async function getAgentPoliciesPerOutput(
     kuery: agentPoliciesKuery,
     perPage: SO_SEARCH_LIMIT,
     spaceId: '*',
-    withPackagePolicies,
+    ...(fields ? { fields } : {}),
   });
   const directAgentPolicyIds = directAgentPolicies?.items.map((policy) => policy.id);
 
@@ -225,7 +225,7 @@ async function getAgentPoliciesPerOutput(
   const agentPoliciesFromPackagePolicies = await agentPolicyService.getByIds(
     internalSoClientWithoutSpaceExtension,
     agentPolicyIdsFromPackagePolicies.map((id) => ({ id, spaceId: '*' })),
-    { withPackagePolicies }
+    { ...(fields ? { fields } : {}) }
   );
 
   const agentPoliciesIndexedById = indexBy(
@@ -233,14 +233,14 @@ async function getAgentPoliciesPerOutput(
     [...directAgentPolicies.items, ...agentPoliciesFromPackagePolicies]
   );
 
-  // When withPackagePolicies is true all package policies are already hydrated above;
-  // otherwise bulk-fetch only restricted packages (fleet server, synthetics, APM) for
-  // the integration-conflict checks done by callers like validateLogstashOutputNotUsedInAPMPolicy.
-  if (!withPackagePolicies && Object.keys(agentPoliciesIndexedById).length) {
+  // Bulk-fetch restricted packages (fleet server, synthetics, APM) so callers like
+  // validateLogstashOutputNotUsedInAPMPolicy can detect integration conflicts.
+  if (Object.keys(agentPoliciesIndexedById).length) {
     const { items: packagePolicies } = await packagePolicyService.list(
       internalSoClientWithoutSpaceExtension,
       {
         fields: ['policy_ids', 'package.name'],
+        perPage: SO_SEARCH_LIMIT,
         kuery: [FLEET_APM_PACKAGE, FLEET_SYNTHETICS_PACKAGE, FLEET_SERVER_PACKAGE]
           .map((packageName) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageName}`)
           .join(' or '),
@@ -274,24 +274,38 @@ async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDef
   }
 }
 
+const OTLP_SCAN_POLICY_ID_CHUNK_SIZE = 100;
+
 async function validateOtlpOutputOnlyUsedInOtelPolicies(
   outputId: string,
   mergedIsDefault: boolean
 ) {
   const agentPolicies = await getAgentPoliciesPerOutput(outputId, mergedIsDefault, {
-    withPackagePolicies: true,
+    fields: ['name'],
   });
-
   if (!agentPolicies?.length) return;
 
-  for (const agentPolicy of agentPolicies) {
-    // Policies with no package policies are allowed; the constraint fires when a
-    // non-OTel package policy is later assigned to the policy.
-    const hasPackagePolicies = (agentPolicy.package_policies?.length ?? 0) > 0;
-    if (hasPackagePolicies && !agentPolicyHasOnlyOtelInputs(agentPolicy)) {
-      throw new OutputInvalidError(
-        `OTLP output cannot be used with agent policy "${agentPolicy.name}" because it contains non-OTel inputs.`
-      );
+  const policyNamesById = new Map(agentPolicies.map((p) => [p.id, p.name]));
+  const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
+  for (const ids of _.chunk([...policyNamesById.keys()], OTLP_SCAN_POLICY_ID_CHUNK_SIZE)) {
+    const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.policy_ids:(${ids
+      .map((id) => `"${escapeQuotes(id)}"`)
+      .join(' or ')})`;
+
+    for await (const packagePolicies of await packagePolicyService.fetchAllItems(soClient, {
+      kuery,
+      fields: ['policy_ids', 'inputs.type', 'inputs.enabled'],
+      spaceIds: ['*'],
+    })) {
+      for (const packagePolicy of packagePolicies) {
+        if (packagePolicyHasOnlyOtelInputs(packagePolicy.inputs)) continue;
+        const conflictingId = packagePolicy.policy_ids.find((id) => policyNamesById.has(id));
+        throw new OutputInvalidError(
+          `OTLP output cannot be used with agent policy "${policyNamesById.get(conflictingId!)}" ` +
+            `because it contains non-OTel inputs.`
+        );
+      }
     }
   }
 }
@@ -648,7 +662,9 @@ class OutputService {
 
     await validateOutputServerless(this, output, options?.id);
     const isPreconfigured =
-      options?.fromPreconfiguration || ('is_preconfigured' in output && output.is_preconfigured);
+      (options?.fromPreconfiguration ||
+        ('is_preconfigured' in output && output.is_preconfigured)) ??
+      false;
     this._runOutputValidators(output, isPreconfigured);
 
     const data: OutputSOAttributes = {
@@ -1109,7 +1125,7 @@ class OutputService {
 
     const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await validateOutputServerless(this, typedFullUpdateData, id);
-    const isPreconfigured = fromPreconfiguration || originalOutput.is_preconfigured;
+    const isPreconfigured = (fromPreconfiguration || originalOutput.is_preconfigured) ?? false;
     this._runOutputValidators(typedFullUpdateData, isPreconfigured);
 
     // type is always defined here after merging; ssl/secrets omitted at runtime but allowed on the type.
@@ -1336,9 +1352,9 @@ class OutputService {
     }
 
     if (
+      outputTypeSupportPresets(updateData) &&
       !updateData.preset &&
-      updateData.config_yaml !== undefined &&
-      outputTypeSupportPresets(updateData)
+      (updateData.config_yaml !== undefined || isTypeChanged)
     ) {
       updateData.preset = getDefaultPresetForEsOutput(updateData.config_yaml ?? '', parse);
     }
