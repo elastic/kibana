@@ -28,8 +28,15 @@ const createWrapper = () => {
 const mockDataView = { id: 'dv-1', title: 'logs-osquery_manager.result*' };
 
 describe('useOsqueryDataView', () => {
+  // react-query v4 delivers its state notifications on a setTimeout(0) macrotask; fake timers let
+  // waitFor drive them deterministically instead of depending on real timers that starve under CI.
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('returns a found data view', async () => {
@@ -50,8 +57,7 @@ describe('useOsqueryDataView', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.dataView).toBe(mockDataView);
+    await waitFor(() => expect(result.current.dataView).toBe(mockDataView));
   });
 
   it('creates and saves when find returns empty and user can save', async () => {
@@ -73,8 +79,7 @@ describe('useOsqueryDataView', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.dataView).toBe(createdDv);
+    await waitFor(() => expect(result.current.dataView).toBe(createdDv));
   });
 
   it('falls back to ad-hoc create when user cannot save', async () => {
@@ -96,8 +101,7 @@ describe('useOsqueryDataView', () => {
       wrapper: createWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
-    expect(result.current.dataView).toBe(adhocDv);
+    await waitFor(() => expect(result.current.dataView).toBe(adhocDv));
   });
 
   it('is disabled when skip is true', () => {
