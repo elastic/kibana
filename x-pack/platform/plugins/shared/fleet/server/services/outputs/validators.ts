@@ -97,8 +97,12 @@ export const validateOutputServerless = async (
     const privateOutput = await outputSvc.get(SERVERLESS_PRIVATE_OUTPUT_ID);
     if (
       privateOutput.type === outputType.Elasticsearch &&
+<<<<<<< HEAD
       deepEqual(output.hosts, privateOutput.hosts) &&
       outputId === SERVERLESS_PRIVATE_OUTPUT_ID
+=======
+      deepEqual(output.hosts, privateOutput.hosts)
+>>>>>>> 233fc3d08af5 (Move output validators into own file)
     ) {
       return;
     }

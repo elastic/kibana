@@ -53,8 +53,6 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,
   MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
-  SERVERLESS_DEFAULT_OUTPUT_ID,
-  SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../constants';
 import {
   SO_SEARCH_LIMIT,
@@ -70,11 +68,7 @@ import {
   FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
 import type { ValueOf } from '../../common/types';
-import {
-  normalizeHostsForAgents,
-  validateFleetSavedObjectId,
-  validateSslCertPath,
-} from '../../common/services';
+import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
@@ -666,11 +660,11 @@ class OutputService {
       throw new OutputInvalidError('OTLP output type is not enabled');
     }
 
-    await this._validateOutputServerless(output, options?.id);
+    await validateOutputServerless(this, output, options?.id);
     if (isBeatsOutput(output)) {
-      this._validateOutputSslPaths(output);
+      validateOutputSslPaths(output);
     }
-    this._ensureNoDuplicateSecrets(output);
+    ensureNoDuplicateSecrets(output);
 
     await validateOutputServerless(this, output);
     const isPreconfigured =
@@ -1564,102 +1558,6 @@ class OutputService {
     );
 
     return outputSO.updated_at;
-  }
-
-  private _validateOutputSslPaths(output: Partial<NewBeatsOutput>): void {
-    const paths = [
-      ...(output.ssl?.certificate_authorities ?? []),
-      output.ssl?.certificate,
-      output.ssl?.key,
-      output.secrets?.ssl?.key,
-    ];
-    for (const p of paths) {
-      if (!p || typeof p === 'object') continue;
-      const err = validateSslCertPath(p);
-      if (err) throw new OutputInvalidError(err);
-    }
-  }
-
-  private _ensureNoDuplicateSecrets(output: UpdateTypedOutput | NewOutput): void {
-    if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
-      throw new OutputInvalidError('Cannot specify both password and secrets.password');
-    }
-    if (isBeatsOutput(output) && output.ssl?.key && output.secrets?.ssl?.key) {
-      throw new OutputInvalidError('Cannot specify both ssl.key and secrets.ssl.key');
-    }
-    if (
-      output.type === outputType.RemoteElasticsearch &&
-      output.service_token &&
-      output.secrets?.service_token
-    ) {
-      throw new OutputInvalidError('Cannot specify both service_token and secrets.service_token');
-    }
-  }
-
-  private async _validateOutputServerless(
-    output: UpdateTypedOutput | NewOutput,
-    outputId?: string,
-    resolvedOriginalOutput?: Output
-  ): Promise<void> {
-    const cloudSetup = appContextService.getCloud();
-    if (!cloudSetup?.isServerlessEnabled) {
-      return;
-    }
-    // On update, skip serverless host check if hosts are not being changed.
-    if (outputId && !('hosts' in output)) {
-      return;
-    }
-    // Preconfigured outputs in serverless are authoritative
-    if (
-      ('is_preconfigured' in output && output.is_preconfigured) ||
-      resolvedOriginalOutput?.is_preconfigured
-    ) {
-      return;
-    }
-    let originalOutput = resolvedOriginalOutput;
-    if (outputId && !originalOutput && !output.type) {
-      originalOutput = await this.get(outputId);
-    }
-    const type = output.type || originalOutput?.type;
-    if (type !== outputType.Elasticsearch) {
-      return;
-    }
-    if (!('hosts' in output)) {
-      return;
-    }
-    let defaultOutput: Output;
-    try {
-      defaultOutput = await this.get(SERVERLESS_DEFAULT_OUTPUT_ID);
-    } catch (e) {
-      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw e;
-      }
-      appContextService.getLogger().debug(`Default ES output SO not found: ${e?.message ?? e}`);
-      return;
-    }
-    if (defaultOutput.type !== outputType.Elasticsearch) {
-      return;
-    }
-    if (deepEqual(output.hosts, defaultOutput.hosts)) {
-      return;
-    }
-    try {
-      const privateOutput = await this.get(SERVERLESS_PRIVATE_OUTPUT_ID);
-      if (
-        privateOutput.type === outputType.Elasticsearch &&
-        deepEqual(output.hosts, privateOutput.hosts)
-      ) {
-        return;
-      }
-    } catch (e) {
-      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw e;
-      }
-      appContextService.getLogger().debug(`Private ES output SO not found: ${e?.message ?? e}`);
-    }
-    throw new OutputInvalidError(
-      `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
-    );
   }
 }
 
