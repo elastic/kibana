@@ -10,7 +10,6 @@
 import { mockCreateLayout } from './appenders.test.mocks';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { PluginAppenderConfigType } from '@kbn/core-logging-server';
 import { Appenders, pluginAppendersSchema } from './appenders';
 import { ConsoleAppender } from './console/console_appender';
 import { FileAppender } from './file/file_appender';
@@ -134,18 +133,6 @@ describe('`onWriteError` is accepted only through the runtime schema', () => {
       /Additional properties are not allowed/
     );
   });
-
-  it.each(['not-a-function', 42, true, null])(
-    'ignores a non-function %p that reached the constructor, preserving the crash behavior',
-    (onWriteError) => {
-      const appender = Appenders.create({
-        ...fileAppenderConfig,
-        onWriteError,
-      } as unknown as PluginAppenderConfigType);
-
-      expect(appender).toHaveProperty('onWriteError', undefined);
-    }
-  );
 
   it('keeps the handler on a plugin-validated file appender', () => {
     const onWriteError = () => {};

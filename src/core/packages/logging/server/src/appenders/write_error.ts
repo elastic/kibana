@@ -24,9 +24,8 @@ export interface LogFileWriteError {
  * Called when a file-backed appender cannot write, instead of letting the failure reach the
  * process as an `uncaughtException`.
  *
- * Providing a handler opts that appender instance into surviving write failures: it reports the
- * error once and drops subsequent records until the logging config is reapplied. Without a
- * handler, write failures keep their default behavior of crashing the process.
+ * Providing a handler opts that appender instance into surviving write failures. Without one, write
+ * failures keep their default behavior of crashing the process.
  *
  * @public
  */

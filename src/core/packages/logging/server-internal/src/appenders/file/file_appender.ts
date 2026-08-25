@@ -40,8 +40,7 @@ export class FileAppender implements DisposableAppender {
    * Writable file stream to write formatted `LogRecord` to.
    */
   private outputStream?: WriteStream;
-  private writeFailed = false;
-  private readonly onWriteError?: LogFileWriteErrorHandler;
+  private readonly reportWriteError?: (error: unknown) => void;
 
   /**
    * Creates FileAppender instance with specified layout and file path.
@@ -55,7 +54,10 @@ export class FileAppender implements DisposableAppender {
     private readonly path: string,
     onWriteError?: LogFileWriteErrorHandler
   ) {
-    this.onWriteError = typeof onWriteError === 'function' ? onWriteError : undefined;
+    this.reportWriteError =
+      typeof onWriteError === 'function'
+        ? (error) => onWriteError(toLogFileWriteError(error, path))
+        : undefined;
   }
 
   /**
@@ -63,42 +65,19 @@ export class FileAppender implements DisposableAppender {
    * @param record `LogRecord` instance to be logged.
    */
   public append(record: LogRecord) {
-    if (this.writeFailed) {
-      return;
-    }
+    if (this.outputStream === undefined) {
+      this.ensureDirectory(this.path);
+      this.outputStream = createWriteStream(this.path, {
+        encoding: 'utf8',
+        flags: 'a',
+      });
 
-    const content = `${this.layout.format(record)}\n`;
-
-    try {
-      if (this.outputStream === undefined) {
-        this.ensureDirectory(this.path);
-        this.outputStream = createWriteStream(this.path, {
-          encoding: 'utf8',
-          flags: 'a',
-        });
-        if (this.onWriteError) {
-          this.outputStream.on('error', (error) => this.handleWriteError(error));
-        }
+      if (this.reportWriteError) {
+        this.outputStream.on('error', this.reportWriteError);
       }
-
-      this.outputStream.write(content);
-    } catch (error) {
-      if (!this.onWriteError) {
-        throw error;
-      }
-      this.handleWriteError(error);
     }
-  }
 
-  private handleWriteError(error: unknown) {
-    if (this.writeFailed) {
-      return;
-    }
-    this.writeFailed = true;
-    const stream = this.outputStream;
-    this.outputStream = undefined;
-    stream?.destroy();
-    this.onWriteError!(toLogFileWriteError(error, this.path));
+    this.outputStream.write(`${this.layout.format(record)}\n`);
   }
 
   /**

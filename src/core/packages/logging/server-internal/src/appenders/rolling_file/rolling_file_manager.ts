@@ -20,32 +20,23 @@ import type { RollingFileContext } from './rolling_file_context';
 export class RollingFileManager {
   private readonly filePath;
   private outputStream?: WriteStream;
-  private writeFailed = false;
-  private readonly onWriteError?: LogFileWriteErrorHandler;
+  private readonly reportWriteError?: (error: unknown) => void;
 
   constructor(
     private readonly context: RollingFileContext,
     onWriteError?: LogFileWriteErrorHandler
   ) {
     this.filePath = context.filePath;
-    this.onWriteError = typeof onWriteError === 'function' ? onWriteError : undefined;
+    this.reportWriteError =
+      typeof onWriteError === 'function'
+        ? (error) => onWriteError(toLogFileWriteError(error, context.filePath))
+        : undefined;
   }
 
   write(chunk: string) {
-    if (this.writeFailed) {
-      return;
-    }
-
-    try {
-      const stream = this.ensureStreamOpen();
-      this.context.currentFileSize += Buffer.byteLength(chunk, 'utf8');
-      stream.write(chunk);
-    } catch (error) {
-      if (!this.onWriteError) {
-        throw error;
-      }
-      this.handleWriteError(error);
-    }
+    const stream = this.ensureStreamOpen();
+    this.context.currentFileSize += Buffer.byteLength(chunk, 'utf8');
+    stream.write(chunk);
   }
 
   async closeStream() {
@@ -60,17 +51,6 @@ export class RollingFileManager {
     });
   }
 
-  private handleWriteError(error: unknown) {
-    if (this.writeFailed) {
-      return;
-    }
-    this.writeFailed = true;
-    const stream = this.outputStream;
-    this.outputStream = undefined;
-    stream?.destroy();
-    this.onWriteError!(toLogFileWriteError(error, this.filePath));
-  }
-
   private ensureStreamOpen() {
     if (this.outputStream === undefined) {
       this.ensureDirectory(this.filePath);
@@ -78,8 +58,9 @@ export class RollingFileManager {
         encoding: 'utf8',
         flags: 'a',
       });
-      if (this.onWriteError) {
-        this.outputStream.on('error', (error) => this.handleWriteError(error));
+
+      if (this.reportWriteError) {
+        this.outputStream.on('error', this.reportWriteError);
       }
       // refresh the file meta in case it was not initialized yet.
       this.context.refreshFileInfo();
