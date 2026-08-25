@@ -251,7 +251,10 @@ export function initializeLayoutManager(
       const child = children$.getValue()[uuid]; // preserve existing child API if it exists
       if (child) {
         if (sameType) {
-          child.applySerializedState(serializedState);
+          child.applySerializedState({
+            ...(currentChildState[uuid] ? currentChildState[uuid] : {}),
+            ...serializedState,
+          });
         } else {
           replacePanel(uuid, { serializedState, panelType: type });
         }
@@ -275,10 +278,7 @@ export function initializeLayoutManager(
             beside: uuid === first.embeddableId ? undefined : first.embeddableId,
           }
         );
-        currentChildState[uuid] = {
-          ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
-          ...serializedState,
-        };
+        currentChildState[uuid] = serializedState;
         layout$.next(updatedLayout);
       }
     }
