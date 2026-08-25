@@ -383,12 +383,23 @@ const findOpeningQuoteStartColumn = (lineContentBeforePosition: string): number 
   }
 };
 
+// Matches the boundary before a JSON value, e.g. the space before `-1` in `"value": -1`.
+const JSON_VALUE_BOUNDARY_PATTERN = String.raw`(?:^|[\s:[,])`;
+// Matches a complete or partial decimal, e.g. `12`, `0.`, or `.5`.
+const DECIMAL_PREFIX_PATTERN = String.raw`(?:\d+(?:\.\d*)?|\.\d*)`;
+// Matches an optional partial exponent, e.g. `e`, `e-`, or `E+2`.
+const OPTIONAL_EXPONENT_PREFIX_PATTERN = String.raw`(?:[eE][+-]?\d*)?`;
+// Matches a signed decimal and optional exponent, e.g. `-1e-` or `0.5`.
+const SIGNED_NUMBER_PREFIX_PATTERN = `-?${DECIMAL_PREFIX_PATTERN}${OPTIONAL_EXPONENT_PREFIX_PATTERN}`;
+// Captures the trailing primitive prefix, e.g. `1e-` in `"value": 1e-`.
+const UNQUOTED_PRIMITIVE_PREFIX_PATTERN = new RegExp(
+  `${JSON_VALUE_BOUNDARY_PATTERN}(${SIGNED_NUMBER_PREFIX_PATTERN}|-)$`
+);
+
 const findUnquotedPrimitiveValueStartColumn = (
   lineContentBeforePosition: string
 ): number | undefined => {
-  const primitivePrefixMatch = lineContentBeforePosition.match(
-    /(?:^|[\s:[,])(-?(?:(?:\d+(?:\.\d*)?|\.\d*)(?:[eE][+-]?\d*)?)|-)$/
-  );
+  const primitivePrefixMatch = lineContentBeforePosition.match(UNQUOTED_PRIMITIVE_PREFIX_PATTERN);
   const primitivePrefix = primitivePrefixMatch?.[1];
   return primitivePrefix
     ? lineContentBeforePosition.length - primitivePrefix.length + 1
