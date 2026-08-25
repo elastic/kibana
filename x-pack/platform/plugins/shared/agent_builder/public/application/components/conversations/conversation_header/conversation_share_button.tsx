@@ -343,11 +343,6 @@ const ConversationSharePopover: React.FC<{
 
   const isPublic = accessMode === ConversationAccessControlMode.Public;
   const ownerProfile = ownerId ? profileByUid.get(ownerId) : undefined;
-  const userSearchInputRef = (input: HTMLInputElement | null) => {
-    if (input) {
-      input.style.paddingInlineStart = euiTheme.size.xl;
-    }
-  };
   const memberProfiles = memberIds
     .map((memberId) => {
       const memberProfile = profileByUid.get(memberId);
@@ -461,59 +456,40 @@ const ConversationSharePopover: React.FC<{
             fullWidth
             helpText={isPublic ? labels.publicSearchHelp : undefined}
           >
-            <div
-              css={css`
-                position: relative;
-              `}
-            >
-              <EuiComboBox<string>
-                compressed
-                fullWidth
-                async
-                placeholder={labels.searchUsers}
-                aria-label={labels.searchUsers}
-                options={userOptions}
-                selectedOptions={[]}
-                onChange={onAddUser}
-                onSearchChange={setSearchValue}
-                inputRef={userSearchInputRef}
-                isLoading={isSearchingUsers}
-                isDisabled={isSaving || isPublic}
-                isClearable={false}
-                singleSelection={{ asPlainText: true }}
-                renderOption={(option) => {
-                  const profile = option.value
-                    ? suggestedProfileByUid.get(option.value)
-                    : undefined;
-
-                  if (!profile) {
-                    return null;
-                  }
-
-                  return <UserSearchOption key={option.key ?? option.value} profile={profile} />;
-                }}
-                rowHeight={48}
-                data-test-subj="agentBuilderConversationSharingUserSearch"
-              />
-              <span
-                css={css`
-                  position: absolute;
-                  inset-inline-start: ${euiTheme.size.s};
-                  top: 50%;
-                  z-index: ${euiTheme.levels.header};
-                  display: flex;
-                  transform: translateY(-50%);
-                  pointer-events: none;
-                `}
-              >
+            <EuiComboBox<string>
+              compressed
+              fullWidth
+              async
+              placeholder={labels.searchUsers}
+              aria-label={labels.searchUsers}
+              options={userOptions}
+              selectedOptions={[]}
+              onChange={onAddUser}
+              onSearchChange={setSearchValue}
+              isLoading={isSearchingUsers}
+              isDisabled={isSaving || isPublic}
+              isClearable={false}
+              prepend={
                 <EuiIcon
                   type="magnify"
                   color="subdued"
                   data-test-subj="agentBuilderConversationSharingUserSearchIcon"
                   aria-hidden={true}
                 />
-              </span>
-            </div>
+              }
+              singleSelection={{ asPlainText: true }}
+              renderOption={(option) => {
+                const profile = option.value ? suggestedProfileByUid.get(option.value) : undefined;
+
+                if (!profile) {
+                  return null;
+                }
+
+                return <UserSearchOption key={option.key ?? option.value} profile={profile} />;
+              }}
+              rowHeight={48}
+              data-test-subj="agentBuilderConversationSharingUserSearch"
+            />
           </EuiFormRow>
           <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
             {ownerProfile ? (
