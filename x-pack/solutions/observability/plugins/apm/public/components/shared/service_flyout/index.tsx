@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFlyoutBody, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import type { Environment } from '../../../../common/environment_rt';
@@ -22,6 +23,16 @@ import {
 import { useServiceFlyoutCapabilities } from './hooks/use_service_flyout_capabilities';
 import { useApmIndices } from './hooks/use_apm_indices';
 export type { ServiceFlyoutService } from './types';
+
+const SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS = [
+  'latencyChart',
+  'throughput',
+  'errorRate',
+  'transactionBreakdownChart',
+  'coldstartRate',
+]
+  .map((id) => `body [id^='echTooltipPortalMainTooltip__${id}']`)
+  .join(',\n  ');
 
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
@@ -72,6 +83,7 @@ export function ServiceFlyout({
   historyKey,
   contextActions,
 }: ServiceFlyoutProps) {
+  const { euiTheme } = useEuiTheme();
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
   const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
@@ -115,57 +127,66 @@ export function ServiceFlyout({
   };
 
   return (
-    <ServiceFlyoutContextProvider
-      value={{
-        deps,
-        contextActions,
-        service,
-        capabilities,
-        indices,
-        filters: {
-          environment: flyoutEnvironment,
-          setEnvironment: setFlyoutEnvironment,
-          rangeFrom: flyoutRange.rangeFrom,
-          rangeTo: flyoutRange.rangeTo,
-          setRange: setFlyoutRange,
-          refreshToken,
-          onRefresh: () => setRefreshToken(Date.now()),
-          transactionType: flyoutTransactionType,
-          setTransactionType: setFlyoutTransactionType,
-        },
-      }}
-    >
-      <TimeRangeMetadataContextProvider
-        uiSettings={deps.core.uiSettings}
-        start={start}
-        end={end}
-        kuery=""
-        useSpanName={false}
+    <>
+      <Global
+        styles={css`
+          ${SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS} {
+            z-index: ${Number(euiTheme.levels.flyout) - 1} !important;
+          }
+        `}
+      />
+      <ServiceFlyoutContextProvider
+        value={{
+          deps,
+          contextActions,
+          service,
+          capabilities,
+          indices,
+          filters: {
+            environment: flyoutEnvironment,
+            setEnvironment: setFlyoutEnvironment,
+            rangeFrom: flyoutRange.rangeFrom,
+            rangeTo: flyoutRange.rangeTo,
+            setRange: setFlyoutRange,
+            refreshToken,
+            onRefresh: () => setRefreshToken(Date.now()),
+            transactionType: flyoutTransactionType,
+            setTransactionType: setFlyoutTransactionType,
+          },
+        }}
       >
-        <ResponsiveFlyout
-          data-test-subj="serviceFlyout"
-          flyoutMenuDisplayMode="always"
-          onClose={onClose}
-          ownFocus={false}
-          size="m"
-          paddingSize="m"
-          resizable
-          minWidth={660}
-          session="start"
-          historyKey={historyKey}
-          flyoutMenuProps={{ title }}
-          aria-labelledby={titleId}
+        <TimeRangeMetadataContextProvider
+          uiSettings={deps.core.uiSettings}
+          start={start}
+          end={end}
+          kuery=""
+          useSpanName={false}
         >
-          <ServiceFlyoutHeader
-            title={title}
-            titleId={titleId}
-            selectedTabId={selectedTabId}
-            onSelectedTabIdChange={setSelectedTabId}
-          />
-          <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
-          <ServiceFlyoutFooter />
-        </ResponsiveFlyout>
-      </TimeRangeMetadataContextProvider>
-    </ServiceFlyoutContextProvider>
+          <ResponsiveFlyout
+            data-test-subj="serviceFlyout"
+            flyoutMenuDisplayMode="always"
+            onClose={onClose}
+            ownFocus={false}
+            size="m"
+            paddingSize="m"
+            resizable
+            minWidth={660}
+            session="start"
+            historyKey={historyKey}
+            flyoutMenuProps={{ title }}
+            aria-labelledby={titleId}
+          >
+            <ServiceFlyoutHeader
+              title={title}
+              titleId={titleId}
+              selectedTabId={selectedTabId}
+              onSelectedTabIdChange={setSelectedTabId}
+            />
+            <EuiFlyoutBody>{renderTabContent()}</EuiFlyoutBody>
+            <ServiceFlyoutFooter />
+          </ResponsiveFlyout>
+        </TimeRangeMetadataContextProvider>
+      </ServiceFlyoutContextProvider>
+    </>
   );
 }
