@@ -156,6 +156,8 @@ const TAB_PAGES: Record<StreamFlyoutTabId, (props: StreamFlyoutPageProps) => Rea
   ),
 };
 
+const streamKey = Symbol('stream');
+
 function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
   const { loading, definition } = useStreamFlyoutDetail();
   const { push } = useStreamsAppRouter();
@@ -299,14 +301,15 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
 
   return (
     <EuiFlyout
-      size="m"
+      size="l"
+      maxWidth={1600}
       aria-labelledby={headerId}
       onClose={onClose}
       data-test-subj="streamsCanvasFlyout"
       paddingSize="none"
-      session="start"
       flyoutMenuProps={{
         customActions,
+        titleId: headerId,
       }}
     >
       <EuiFlyoutHeader hasBorder>

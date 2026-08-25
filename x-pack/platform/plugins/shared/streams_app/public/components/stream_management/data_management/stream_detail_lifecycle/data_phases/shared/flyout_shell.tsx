@@ -85,8 +85,8 @@ export const FlyoutShell = ({
 
   return (
     <EuiFlyout
-      type="push"
-      size={canvas.enabled ? 'fill' : 400}
+      type={canvas.enabled ? 'overlay' : 'push'}
+      size={400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}

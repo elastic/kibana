@@ -52,8 +52,8 @@ export const LifecycleFlyout = ({
 
   return (
     <EuiFlyout
-      size={canvas.enabled ? 'fill' : 400}
-      type="push"
+      size={400}
+      type={canvas.enabled ? 'overlay' : 'push'}
       ownFocus={ownFocus}
       paddingSize={paddingSize}
       aria-labelledby={titleId}
