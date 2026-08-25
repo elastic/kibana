@@ -132,7 +132,8 @@
     "@types/react": "18.2.79",
     "@types/react-dom": "18.2.25",
     "apache-arrow": "20.x - 21.x",
-    "globby/fast-glob": "3.3.3"
+    "globby/fast-glob": "3.3.3",
+    "jest-environment-jsdom/**/nwsapi": "2.2.2"
   },
   "dependencies": {
     "@a2a-js/sdk": "0.3.4",
