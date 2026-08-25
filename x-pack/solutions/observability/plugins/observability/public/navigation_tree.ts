@@ -296,7 +296,7 @@ function createNavTree({
       },
       {
         link: EVALS_APP_ID,
-        icon: 'beaker',
+        icon: 'flask',
       },
       {
         id: 'machine_learning-landing',

@@ -59,6 +59,7 @@ describe('EvalsPublicPlugin', () => {
       expect.objectContaining({
         id: 'evals',
         appRoute: '/app/evals',
+        euiIconType: 'flask',
       })
     );
     expect(management.sections.section.ai.registerApp).toHaveBeenCalledTimes(1);
@@ -83,6 +84,7 @@ describe('EvalsPublicPlugin', () => {
       expect.objectContaining({
         id: 'evals',
         appRoute: '/app/evals',
+        euiIconType: 'flask',
       })
     );
   });

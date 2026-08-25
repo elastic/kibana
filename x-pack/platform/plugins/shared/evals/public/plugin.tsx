@@ -57,7 +57,7 @@ export class EvalsPublicPlugin
         defaultMessage: PLUGIN_NAME,
       }),
       appRoute: APP_PATH,
-      euiIconType: 'beaker',
+      euiIconType: 'flask',
       category: DEFAULT_APP_CATEGORIES.kibana,
       visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
       keywords: [...MANAGEMENT_KEYWORDS],

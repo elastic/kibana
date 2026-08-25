@@ -280,7 +280,7 @@ export const createNavigationTree = ({
       },
       {
         link: EVALS_APP_ID,
-        icon: 'beaker',
+        icon: 'flask',
       },
       ...filterForFeatureAvailability(
         {
