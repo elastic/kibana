@@ -277,7 +277,7 @@ const InviteMembersSummary: React.FC<{
         <EuiFlexItem
           grow={false}
           css={css`
-            margin-inline-start: -${avatarOverlap};
+            margin-inline-start: calc(-${avatarOverlap} + 1px);
           `}
         >
           <EuiAvatar
