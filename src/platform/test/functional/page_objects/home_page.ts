@@ -200,6 +200,8 @@ export class HomePageObject extends FtrService {
     await this.addSampleDataSet(id);
     await this.toasts.dismissIfExists();
     await this.retry.try(async () => {
+      // The accordion is uncontrolled and may be collapsed; re-open it before each attempt.
+      await this.openSampleDataAccordion();
       await this.testSubjects.click(`launchSampleDataSet${id}`);
       await this.find.byCssSelector(
         `.euiPopover-isOpen[data-test-subj="launchSampleDataSet${id}"]`
