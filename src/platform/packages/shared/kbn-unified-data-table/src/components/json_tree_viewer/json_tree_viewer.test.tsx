@@ -34,6 +34,18 @@ describe('JsonTreeViewer', () => {
     expect(screen.getByTestId(rowTestId('count'))).toHaveTextContent('5');
   });
 
+  it('renders an empty-object placeholder when there are no visible fields', () => {
+    render(<JsonTreeViewer json={{}} />);
+
+    expect(screen.getByTestId('jsonTreeViewerEmpty')).toHaveTextContent('{0 fields}');
+  });
+
+  it('renders an empty-array placeholder when there are no visible items', () => {
+    render(<JsonTreeViewer json={[]} />);
+
+    expect(screen.getByTestId('jsonTreeViewerEmpty')).toHaveTextContent('[0 items]');
+  });
+
   // In-table search and virtual scrolling remounts every cell, which would collapse all nodes in the tree.
   // The host persists the state and seeds a fresh instance with it; these tests prove a remounted instance comes up already expanded.
   it('restores an expanded node on a fresh instance seeded with the persisted state', async () => {

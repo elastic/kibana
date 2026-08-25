@@ -405,12 +405,40 @@ const NodeLabel = memo(function NodeLabel({
       <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
         <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
         <span css={styles.bracket}>{open}</span>
-        <span css={styles.count}>{collectionCountLabel(node)}</span>
+        <span css={styles.count}>
+          {collectionCountLabel(node.collectionType, node.children.length)}
+        </span>
         <span css={styles.bracket}>{close}</span>
         {trailingComma && <Comma />}
       </span>
       <SubtreeCopyButton node={node} />
     </span>
+  );
+});
+
+/** Root placeholder when the document has no visible fields (e.g. hide-nulls left an empty object). */
+export const EmptyRootPlaceholder = memo(function EmptyRootPlaceholder({
+  collectionType,
+}: {
+  collectionType: CollectionType;
+}) {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      css={styles.row}
+      style={{ paddingInlineStart: rowPaddingInlineStart(euiTheme, 0) }}
+      data-test-subj="jsonTreeViewerEmpty"
+    >
+      <span css={styles.caret} aria-hidden />
+      <span css={styles.label}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
+          <span css={styles.bracket}>{OPEN_BRACKET[collectionType]}</span>
+          <span css={styles.count}>{collectionCountLabel(collectionType, 0)}</span>
+          <span css={styles.bracket}>{CLOSE_BRACKET[collectionType]}</span>
+        </span>
+      </span>
+    </div>
   );
 });
 
@@ -443,9 +471,8 @@ const pagerButtonKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
 };
 
 // ---- i18n labels ----
-const collectionCountLabel = (node: CollectionNode) => {
-  const count = node.children.length;
-  return node.collectionType === 'array'
+const collectionCountLabel = (collectionType: CollectionType, count: number) =>
+  collectionType === 'array'
     ? i18n.translate('unifiedDataTable.jsonTreeViewer.itemCount', {
         defaultMessage: '{count, plural, one {# item} other {# items}}',
         values: { count },
@@ -454,7 +481,6 @@ const collectionCountLabel = (node: CollectionNode) => {
         defaultMessage: '{count, plural, one {# field} other {# fields}}',
         values: { count },
       });
-};
 
 const showMoreLabel = (collectionType: CollectionType, count: number) =>
   collectionType === 'array'

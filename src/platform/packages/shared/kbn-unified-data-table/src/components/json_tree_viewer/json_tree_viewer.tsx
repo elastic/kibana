@@ -23,7 +23,13 @@ import {
   useTreeExpansion,
   type TreeExpansionState,
 } from './use_tree_interaction';
-import { ClosingBracketRow, NodeRowView, PagerRowView, treeStyles } from './tree_rows';
+import {
+  ClosingBracketRow,
+  EmptyRootPlaceholder,
+  NodeRowView,
+  PagerRowView,
+  treeStyles,
+} from './tree_rows';
 
 export type { FormatValue, JsonValue } from './tree_model';
 export type { TreeExpansionState } from './use_tree_interaction';
@@ -135,37 +141,41 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
           })}
           data-test-subj="jsonTreeViewer"
         >
-          {rows.map((row) => {
-            if (row.kind === 'closing') {
-              return <ClosingBracketRow key={row.id} row={row} />;
-            }
-            if (row.kind === 'pager') {
+          {rows.length === 0 ? (
+            <EmptyRootPlaceholder collectionType={rootType} />
+          ) : (
+            rows.map((row) => {
+              if (row.kind === 'closing') {
+                return <ClosingBracketRow key={row.id} row={row} />;
+              }
+              if (row.kind === 'pager') {
+                return (
+                  <PagerRowView
+                    key={row.id}
+                    row={row}
+                    isActive={row.id === activeRowId}
+                    rowRef={registerRow(row.id)}
+                    onShowMore={() => revealMore(row.collectionId)}
+                    onShowFewer={() => showFewer(row.collectionId)}
+                    onFocus={() => setActive(row.id)}
+                    onKeyDown={(event) => onRowKeyDown(event, row)}
+                  />
+                );
+              }
               return (
-                <PagerRowView
-                  key={row.id}
+                <NodeRowView
+                  key={row.node.id}
                   row={row}
-                  isActive={row.id === activeRowId}
-                  rowRef={registerRow(row.id)}
-                  onShowMore={() => revealMore(row.collectionId)}
-                  onShowFewer={() => showFewer(row.collectionId)}
-                  onFocus={() => setActive(row.id)}
+                  isActive={row.node.id === activeRowId}
+                  rowRef={registerRow(row.node.id)}
+                  onActivate={() => row.hasChildren && toggle(row.node.id)}
+                  onFocus={() => setActive(row.node.id)}
                   onKeyDown={(event) => onRowKeyDown(event, row)}
+                  formatValue={formatValue}
                 />
               );
-            }
-            return (
-              <NodeRowView
-                key={row.node.id}
-                row={row}
-                isActive={row.node.id === activeRowId}
-                rowRef={registerRow(row.node.id)}
-                onActivate={() => row.hasChildren && toggle(row.node.id)}
-                onFocus={() => setActive(row.node.id)}
-                onKeyDown={(event) => onRowKeyDown(event, row)}
-                formatValue={formatValue}
-              />
-            );
-          })}
+            })
+          )}
         </div>
       </div>
     </>
