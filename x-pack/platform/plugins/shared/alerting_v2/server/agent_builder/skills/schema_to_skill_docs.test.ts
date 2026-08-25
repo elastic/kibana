@@ -11,8 +11,10 @@ import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispat
 import {
   generateApiSchemaDoc,
   generateOperationsDoc,
+  generateOperationsUsageList,
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
+  generateRuleOperationsUsageList,
   generateRuleKindDoc,
   generateEpisodeLifecycleDoc,
   generateStateTransitionDoc,
@@ -190,6 +192,52 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
+  describe('generateOperationsUsageList', () => {
+    const exampleOperationSchema = z.discriminatedUnion('operation', [
+      z
+        .object({
+          operation: z.literal('set_name'),
+          name: z.string(),
+        })
+        .describe('Use `set_name` to name the resource.'),
+      z
+        .object({
+          operation: z.literal('validate'),
+        })
+        .describe('Use `validate` as the last operation to confirm the resource is ready to save.'),
+    ]);
+
+    it('renders each operation .describe() as a bullet', () => {
+      const doc = generateOperationsUsageList({
+        title: 'Example Operations',
+        schema: exampleOperationSchema,
+      });
+
+      expect(doc).toBe(
+        [
+          '- Use `set_name` to name the resource.',
+          '- Use `validate` as the last operation to confirm the resource is ready to save.',
+        ].join('\n')
+      );
+    });
+
+    it('throws when an operation variant is missing a top-level describe', () => {
+      const schema = z.discriminatedUnion('operation', [
+        z.object({
+          operation: z.literal('set_name'),
+          name: z.string(),
+        }),
+      ]);
+
+      expect(() =>
+        generateOperationsUsageList({
+          title: 'Missing Describe',
+          schema,
+        })
+      ).toThrow(/Missing \.describe\(\) on operation variant\(s\): set_name/);
+    });
+  });
+
   describe('getDescribedEnumValues', () => {
     it('returns each literal value with its .describe() copy', () => {
       const schema = z.union([
@@ -240,6 +288,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('set_query');
       expect(doc).toContain('set_grouping');
       expect(doc).toContain('set_state_transition');
+      expect(doc).toContain('set_dashboards');
       expect(doc).toContain('validate');
     });
 
@@ -255,6 +304,20 @@ describe('schema_to_skill_docs', () => {
         'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
       );
       expect(doc).toContain("Use `set_kind` to choose a rule kind matching the user's goal");
+    });
+  });
+
+  describe('generateRuleOperationsUsageList', () => {
+    it('includes every manage_rule operation describe', () => {
+      const doc = generateRuleOperationsUsageList();
+      expect(doc).toContain('Use `set_metadata`');
+      expect(doc).toContain('Use `set_kind`');
+      expect(doc).toContain('Use `set_schedule`');
+      expect(doc).toContain('Use `set_query`');
+      expect(doc).toContain('Use `set_grouping`');
+      expect(doc).toContain('Use `set_state_transition`');
+      expect(doc).toContain('Use `set_dashboards`');
+      expect(doc).toContain('Use `validate`');
     });
   });
 
@@ -652,6 +715,7 @@ describe('schema_to_skill_docs', () => {
       ['zodToJsonSchema via generateRuleSchemaDoc', generateRuleSchemaDoc],
       ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],
       ['manage_rule operation .describe()', generateRuleOperationsDoc],
+      ['manage_rule operation usage list', generateRuleOperationsUsageList],
       ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
       ['generateEnumTable (episode status from spec)', generateEpisodeLifecycleDoc],
       ['generateEnumTable (no-data strategy from spec)', generateNoDataStrategyDoc],
