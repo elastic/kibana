@@ -78,11 +78,16 @@ describe('buildOwnedByFilter', () => {
     expect(node).toMatchObject({ type: 'function', function: 'or' });
   });
 
+  it('returns undefined when the identity has neither an id nor a username', () => {
+    expect(buildOwnedByFilter({})).toBeUndefined();
+  });
+
+  it('builds only the id clause when the current user has no username', () => {
+    const node = buildOwnedByFilter({ id: 'profile-123', username: undefined });
+    expect(node).toMatchObject({ type: 'function', function: 'is' });
+  });
+
   it('excludes documents with a stored createdById via a wildcard-`is`-under-`not`, not a bare exists node', () => {
-    // A bare `exists` node is not rewritten by the saved-objects filter validator (which only
-    // special-cases `is`/`range`/`nested`), so it would silently query `attributes.createdById`
-    // instead of the top-level field. Wrapping a wildcard `is` in `not` keeps this an `is` node,
-    // which the validator does rewrite. This shape is required, not stylistic.
     const node = buildOwnedByFilter({ id: undefined, username: 'somebody' });
     // arguments[1] is the "createdById does not exist" clause of the `and`.
     const notClause = (node as unknown as { arguments: unknown[] }).arguments[1] as {
@@ -95,8 +100,6 @@ describe('buildOwnedByFilter', () => {
   });
 
   it('matches a username containing KQL special characters exactly rather than parsing them as syntax', () => {
-    // nodeBuilder.is builds literal nodes for both the field and the value, so this asserts no
-    // KQL-injection path exists for usernames (or realm-qualified ids) containing `"`, `*`, `[`, `]`.
     const weirdUsername = 'weird"user*[name]';
     const node = buildOwnedByFilter({ id: undefined, username: weirdUsername });
     const createdByClause = (node as unknown as { arguments: unknown[] }).arguments[0];

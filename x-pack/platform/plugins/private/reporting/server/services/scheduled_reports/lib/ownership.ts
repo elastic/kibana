@@ -17,12 +17,9 @@ const CREATED_BY_ID_FIELD = `${SCHEDULED_REPORT_SAVED_OBJECT_TYPE}.attributes.cr
 /**
  * Checks whether the current principal owns a scheduled report.
  *
- * Stable ids are preferred when the report stored a `createdById` (profile uid or realm-qualified
- * id). Username matching is kept only for legacy documents that never stored an id, so those
- * owners are not orphaned after upgrade. That legacy path cannot distinguish same-username
- * principals across realms, which is exactly the vulnerability this id fixes - see `isAgentOwner`
- * in `x-pack/platform/plugins/shared/agent_builder/server/services/agents/access_control/authorization.ts`
- * for the precedent this mirrors.
+ * Username matching applies only to legacy documents that never stored a `createdById`, so their
+ * owners are not orphaned after upgrade. It cannot distinguish same-username principals across
+ * realms, so it must never be reached for a document that does have an id.
  */
 export const isScheduledReportOwner = ({
   report,
@@ -41,22 +38,34 @@ export const isScheduledReportOwner = ({
  * Builds the saved-objects `find` filter restricting results to reports owned by `currentUser`:
  * `createdById == id` OR (`createdBy == username` AND `createdById` is absent).
  *
- * Uses `nodeBuilder.is`, which builds literal nodes for both the field and the value, so values
- * containing `"`, `[`, `]`, or `*` (as realm-qualified ids do) are matched exactly rather than
- * parsed as KQL syntax.
+ * Returns `undefined` when the identity has neither an id nor a username, so callers fail closed
+ * instead of running an unfiltered search.
  */
-export const buildOwnedByFilter = ({ id, username }: ReportingUserIdentity): KueryNode => {
-  const legacyClause = nodeBuilder.and([
-    nodeBuilder.is(CREATED_BY_FIELD, username ?? ''),
-    nodeTypes.function.buildNode(
-      'not',
-      nodeBuilder.is(CREATED_BY_ID_FIELD, nodeTypes.wildcard.buildNode('*'))
-    ),
-  ]);
+export const buildOwnedByFilter = ({
+  id,
+  username,
+}: ReportingUserIdentity): KueryNode | undefined => {
+  const clauses: KueryNode[] = [];
 
-  if (id === undefined) {
-    return legacyClause;
+  if (id !== undefined) {
+    clauses.push(nodeBuilder.is(CREATED_BY_ID_FIELD, id));
   }
 
-  return nodeBuilder.or([nodeBuilder.is(CREATED_BY_ID_FIELD, id), legacyClause]);
+  if (username !== undefined) {
+    clauses.push(
+      nodeBuilder.and([
+        nodeBuilder.is(CREATED_BY_FIELD, username),
+        // `nodeBuilder.exists` cannot be used here: the saved-objects filter validator only
+        // rewrites `is`/`range`/`nested` nodes to top-level field names, so an `exists` node
+        // would silently query `attributes.createdById`. Negating a wildcard `is` keeps the
+        // node type the validator rewrites.
+        nodeTypes.function.buildNode(
+          'not',
+          nodeBuilder.is(CREATED_BY_ID_FIELD, nodeTypes.wildcard.buildNode('*'))
+        ),
+      ])
+    );
+  }
+
+  return clauses.length > 0 ? nodeBuilder.or(clauses) : undefined;
 };

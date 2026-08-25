@@ -72,9 +72,7 @@ export const ReportSchedulesTable = () => {
     return capabilities.manageReporting.show === true;
   }, [capabilities]);
 
-  // Cosmetic only: the server is the authority on ownership (realm-aware `createdById` when
-  // available, username otherwise - see ScheduledReportsService). A non-admin only ever receives
-  // reports they own, so this always evaluates true for rows in `data`.
+  // Cosmetic: the server already filters non-admins to reports they own.
   const canManageSchedule = useCallback(
     (item: ScheduledReportApiJSON) => {
       if (hasManageReportingPrivilege) return true;

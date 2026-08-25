@@ -11,5 +11,5 @@ export { PassThroughStream } from './passthrough_stream';
 export { ReportingStore, IlmPolicyManager } from './store';
 export { startTrace } from './trace';
 export { retryOnError } from './retry_on_error';
-export { getReportingUserIdentity, toStableUserId, resolveApiKeyOwner } from './user_identity';
+export { getReportingUserIdentity } from './user_identity';
 export type { ReportingUserIdentity } from './user_identity';

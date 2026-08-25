@@ -10,10 +10,9 @@ import type { ElasticsearchClient, IClusterClient, KibanaRequest } from '@kbn/co
 import type { ReportingUser } from '../types';
 
 /**
- * A stable, realm-aware identity for authorization checks on scheduled reports.
- *
- * `username` is kept for display, logging, and matching saved objects created before this
- * identity existed. `id` is the value new ownership comparisons should prefer.
+ * A stable, realm-aware identity for authorization checks on scheduled reports. Ownership
+ * comparisons should prefer `id`; `username` is for display, logging, and matching saved objects
+ * created before `id` existed.
  */
 export interface ReportingUserIdentity {
   id?: string;
@@ -35,9 +34,8 @@ interface ApiKeyOwner {
 }
 
 /**
- * Inlined from `extractApiKeyIdFromAuthzHeader` (`@kbn/core-security-server`), which is not
- * available on all branches this fix backports to. Keep in sync with
- * `src/core/packages/security/server/src/authentication/api_keys/utils.ts`.
+ * Copied from `@kbn/core-security-server`, which does not export this on 9.3. Delete this copy and
+ * import it once 9.3 is out of support.
  */
 const extractApiKeyIdFromAuthzHeader = (
   authorizationHeader: string | string[] | undefined
@@ -58,11 +56,10 @@ const extractApiKeyIdFromAuthzHeader = (
 /**
  * Resolves the creator of an API key via Elasticsearch, when available.
  *
- * `getCurrentUser` for API-key auth often omits `profile_uid`, and its `authentication_realm` is
- * the same synthetic realm for every key, so it cannot be used to distinguish principals. Looking
- * up the key itself recovers the creator's profile uid, or failing that their real realm and
- * username, so ownership can match the creator's interactive sessions. Older keys, or creators
- * without an activated profile or resolvable realm, fall back to username matching.
+ * `getCurrentUser` for API-key auth often omits `profile_uid`, and reports the same synthetic
+ * `_es_api_key` realm for every key, so neither can distinguish principals. Looking up the key
+ * itself recovers the creator's profile uid, or failing that their real realm and username, so
+ * ownership matches the creator's interactive sessions.
  */
 export const resolveApiKeyOwner = async ({
   request,
@@ -108,10 +105,6 @@ export const resolveApiKeyOwner = async ({
  * with the username so same-username principals in different realms remain distinct.
  *
  * The `realm:` prefix keeps synthetic ids distinguishable from profile uids.
- *
- * Adapted from `toStableUserId` in
- * `x-pack/platform/plugins/shared/agent_builder/server/services/utils.ts` (PR #280890), which
- * fixed the same bug class for Agent Builder ownership.
  */
 export const toStableUserId = async ({
   authUser,
@@ -155,7 +148,8 @@ export const toStableUserId = async ({
 };
 
 /**
- * Resolves the acting principal's identity for a request, once per request.
+ * Resolves the acting principal's identity for a request. Not cached: for API-key auth this
+ * queries Elasticsearch, so callers making repeated ownership checks should resolve it once.
  */
 export const getReportingUserIdentity = async ({
   user,

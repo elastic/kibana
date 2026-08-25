@@ -10,8 +10,7 @@ import { rawScheduledReportSchema as rawScheduledReportSchemaV5 } from './v5';
 export * from './v5';
 
 export const rawScheduledReportSchema = rawScheduledReportSchemaV5.extends({
-  // Stable, realm-qualified principal id of the creator (profile uid, or `realm:[type,name,username]`).
-  // Optional: documents created before this version only have `createdBy` (username) and fall
-  // back to username matching until they are next written.
+  // Stable id of the creator: a profile uid, or `realm:[type,name,username]`. Absent on documents
+  // created before this version.
   createdById: schema.maybe(schema.string()),
 });

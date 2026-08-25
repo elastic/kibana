@@ -8,6 +8,7 @@
 import type {
   AuditLogger,
   IClusterClient,
+  IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
@@ -21,6 +22,7 @@ import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY } from '@kbn/reporting-server';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { KueryNode } from '@kbn/es-query';
 import { partition } from 'lodash';
 import type { ReportingCore } from '../..';
 import type {
@@ -125,7 +127,7 @@ export class ScheduledReportsService {
 
     const { authorized, upgradeCreatedById } = await this._canUpdateReport({ id, user });
     if (!authorized) {
-      await this._throw404({ user, id, action: ScheduledReportAuditAction.UPDATE });
+      throw await this._buildNotFoundError({ user, id, action: ScheduledReportAuditAction.UPDATE });
     }
 
     try {
@@ -174,11 +176,12 @@ export class ScheduledReportsService {
     try {
       const identity = await this._getIdentity(user);
 
-      // Security is disabled (no authenticated user) and this caller has no elevated
-      // reporting privileges: there is no principal to own anything, so return nothing
-      // rather than build a filter that could otherwise match unowned/legacy documents.
-      if (!this.userCanManageReporting && identity.id === undefined && !identity.username) {
-        return this._getEmptyListApiResponse(page, size);
+      let filter: KueryNode | undefined;
+      if (!this.userCanManageReporting) {
+        filter = buildOwnedByFilter(identity);
+        if (!filter) {
+          return this._getEmptyListApiResponse(page, size);
+        }
       }
 
       const response = await this.savedObjectsClient.find<ScheduledReportType>({
@@ -187,7 +190,7 @@ export class ScheduledReportsService {
         perPage: size,
         search,
         searchFields: ['title', 'created_by'],
-        ...(!this.userCanManageReporting ? { filter: buildOwnedByFilter(identity) } : {}),
+        ...(filter ? { filter } : {}),
       });
 
       if (!response) {
@@ -532,10 +535,9 @@ export class ScheduledReportsService {
   }
 
   /**
-   * Checks whether `user` may update the scheduled report `id`, and whether the report is a
-   * legacy (pre-realm-aware) document owned by `user` via username only. When both are true, the
-   * caller should stamp `createdById` on the update so future requests use the stable id -
-   * mirroring the lazy-upgrade pattern in `isAgentOwner`'s callers in Agent Builder.
+   * Checks whether `user` may update the scheduled report `id`. `upgradeCreatedById` is set when
+   * the report is a legacy document matched by username alone, and must be written back on the
+   * update so subsequent requests match on the stable id instead.
    */
   private async _canUpdateReport({
     user,
@@ -684,8 +686,6 @@ export class ScheduledReportsService {
     const scheduledReportSavedObjectsToUpdate: Array<SavedObject<ScheduledReportType>> = [];
     const identity = await this._getIdentity(user);
     const updatedScheduledReportIds: Set<string> = new Set();
-    // Legacy (pre-realm-aware) documents owned via username only are stamped with the stable id
-    // on this write, mirroring the lazy-upgrade pattern in Agent Builder's `isAgentOwner` callers.
     const createdByIdUpgrades: Map<string, string> = new Map();
 
     for (const so of scheduledReportSavedObjects) {
@@ -783,7 +783,7 @@ export class ScheduledReportsService {
     };
   }
 
-  private async _throw404({
+  private async _buildNotFoundError({
     user,
     id,
     action,
@@ -791,7 +791,7 @@ export class ScheduledReportsService {
     user: ReportingUser;
     id: string;
     action: ScheduledReportAuditAction;
-  }): Promise<never> {
+  }): Promise<IKibanaResponse> {
     const identity = await this._getIdentity(user);
     this.logger.warn(
       `User "${identity.username}" attempted to update scheduled report "${id}" without sufficient privileges.`
@@ -801,7 +801,7 @@ export class ScheduledReportsService {
       id,
       error: new Error('Not found.'),
     });
-    throw this.responseFactory.customError({
+    return this.responseFactory.customError({
       statusCode: 404,
       body: 'Not found.',
     });
