@@ -35,7 +35,7 @@ describe('project watch', () => {
           watch_policy: {
             mandate: 'Deep investigation & hunts',
             handoff: 'records',
-            ui: { color: '#8b5cf6', icon: 'console', order: 40 },
+            ui: { color: '#8b5cf6', icon: 'commandLine', order: 40 },
           },
         },
         steps: [{ name: 'stub', type: 'console', with: { message: 'hi' } }],
@@ -44,7 +44,7 @@ describe('project watch', () => {
       expect(extractWatchPolicy(definition)).toMatchObject({
         mandate: 'Deep investigation & hunts',
         handoff: 'records',
-        ui: { color: '#8b5cf6', icon: 'console', order: 40 },
+        ui: { color: '#8b5cf6', icon: 'commandLine', order: 40 },
       });
     });
   });
