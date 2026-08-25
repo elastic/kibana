@@ -26,11 +26,8 @@ describe('createDarkWatchSettingsRegistration', () => {
       tier2When: 'on_hits',
       candidateLimit: 10,
       fanOutMax: 10,
-      scheduleEveryMinutes: 240,
+      huntCooldownMinutes: 240,
       targetTechnology: 'aws_iam',
-      leadPollIntervalMinutes: 60,
-      leadMinPriority: 7,
-      intelEventTriggerEnabled: false,
     });
   });
 
@@ -77,11 +74,8 @@ describe('createDarkWatchSettingsRegistration', () => {
         tier2When: 'on_hits',
         candidateLimit: 10,
         fanOutMax: 10,
-        scheduleEveryMinutes: 240,
+        huntCooldownMinutes: 240,
         targetTechnology: 'aws_iam',
-        leadPollIntervalMinutes: 60,
-        leadMinPriority: 7,
-        intelEventTriggerEnabled: false,
         scheduleId: 'dark-overnight-sweep',
         allowManualRun: true,
         scopes: [

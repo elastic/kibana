@@ -263,11 +263,8 @@ components:
         - tier2When
         - candidateLimit
         - fanOutMax
-        - scheduleEveryMinutes
+        - huntCooldownMinutes
         - targetTechnology
-        - leadPollIntervalMinutes
-        - leadMinPriority
-        - intelEventTriggerEnabled
         - scheduleId
         - allowManualRun
         - scopes
@@ -288,23 +285,14 @@ components:
           minimum: 1
           maximum: 20
           description: Concurrent report branches. Bounded by the parallel concurrency ceiling.
-        scheduleEveryMinutes:
+        huntCooldownMinutes:
           type: integer
           minimum: 1
           maximum: 10080
-          description: Hunt cooldown / soft sweep cadence in minutes.
+          description: >-
+            How long a report is skipped after a hunt pass, as a lookback on last_hunted_at.
         targetTechnology:
           $ref: '#/components/schemas/DarkWatchTargetTechnology'
-        leadPollIntervalMinutes:
-          type: integer
-          minimum: 1
-          maximum: 10080
-        leadMinPriority:
-          type: integer
-          minimum: 0
-          maximum: 100
-        intelEventTriggerEnabled:
-          type: boolean
         scheduleId:
           type: string
           minLength: 1

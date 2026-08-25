@@ -72,11 +72,8 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     tier2When: 'on_hits',
     candidateLimit: 10,
     fanOutMax: 10,
-    scheduleEveryMinutes: 240,
+    huntCooldownMinutes: 240,
     targetTechnology: 'aws_iam',
-    leadPollIntervalMinutes: 60,
-    leadMinPriority: 7,
-    intelEventTriggerEnabled: false,
   },
   [PND_WATCH_DEEP_WORKFLOW_ID]: {
     settingsVersion: 1,
@@ -162,7 +159,7 @@ function createContentFingerprint(content: string): string {
 it.each([
   [PND_WATCH_FLOOR_WORKFLOW_ID, WATCH_FLOOR_YAML, '1:29aa5f25'],
   [PND_WATCH_OFFICER_WORKFLOW_ID, WATCH_OFFICER_YAML, '1:9b3f3d18'],
-  [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '1:7e5f8865'],
+  [PND_WATCH_DARK_WORKFLOW_ID, WATCH_DARK_YAML, '1:32f5ae18'],
   [PND_WATCH_DEEP_WORKFLOW_ID, WATCH_DEEP_YAML, '1:79b46054'],
   [PND_WATCH_DETECTION_WORKFLOW_ID, WATCH_DETECTION_YAML, '1:c23724c4'],
 ] as const)(

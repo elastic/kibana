@@ -130,22 +130,12 @@ paths:
                       type: integer
                       minimum: 1
                       maximum: 20
-                    scheduleEveryMinutes:
+                    huntCooldownMinutes:
                       type: integer
                       minimum: 1
                       maximum: 10080
                     targetTechnology:
                       $ref: '../components/watch_settings.schema.yaml#/components/schemas/DarkWatchTargetTechnology'
-                    leadPollIntervalMinutes:
-                      type: integer
-                      minimum: 1
-                      maximum: 10080
-                    leadMinPriority:
-                      type: integer
-                      minimum: 0
-                      maximum: 100
-                    intelEventTriggerEnabled:
-                      type: boolean
                     scheduleId:
                       type: string
                       minLength: 1

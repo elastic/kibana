@@ -24,11 +24,8 @@ const renderPndWatchDarkYaml = ({
   tier2When,
   candidateLimit,
   fanOutMax,
-  scheduleEveryMinutes,
+  huntCooldownMinutes,
   targetTechnology,
-  leadPollIntervalMinutes,
-  leadMinPriority,
-  intelEventTriggerEnabled,
 }: DarkWatchTemplateValues): string =>
   WATCH_DARK_YAML.replaceAll('__WATCH_SETTINGS_VERSION__', String(settingsVersion))
     .replaceAll('__WATCH_AUTONOMY_LEVEL__', autonomyLevel)
@@ -39,11 +36,8 @@ const renderPndWatchDarkYaml = ({
     .replaceAll('__WATCH_TIER2_WHEN__', tier2When)
     .replaceAll('__WATCH_CANDIDATE_LIMIT__', String(candidateLimit))
     .replaceAll('__WATCH_FAN_OUT_MAX__', String(fanOutMax))
-    .replaceAll('__WATCH_SCHEDULE_EVERY_MINUTES__', String(scheduleEveryMinutes))
-    .replaceAll('__WATCH_TARGET_TECHNOLOGY__', targetTechnology)
-    .replaceAll('__WATCH_LEAD_POLL_INTERVAL_MINUTES__', String(leadPollIntervalMinutes))
-    .replaceAll('__WATCH_LEAD_MIN_PRIORITY__', String(leadMinPriority))
-    .replaceAll('__WATCH_INTEL_EVENT_TRIGGER_ENABLED__', String(intelEventTriggerEnabled));
+    .replaceAll('__WATCH_HUNT_COOLDOWN_MINUTES__', String(huntCooldownMinutes))
+    .replaceAll('__WATCH_TARGET_TECHNOLOGY__', targetTechnology);
 
 export const PND_WATCH_DARK_WORKFLOW = {
   billable: false,

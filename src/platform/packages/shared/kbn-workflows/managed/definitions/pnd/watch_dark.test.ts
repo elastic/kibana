@@ -23,11 +23,8 @@ const values: DarkWatchTemplateValues = {
   tier2When: 'on_hits',
   candidateLimit: 10,
   fanOutMax: 10,
-  scheduleEveryMinutes: 240,
+  huntCooldownMinutes: 240,
   targetTechnology: 'aws_iam',
-  leadPollIntervalMinutes: 60,
-  leadMinPriority: 7,
-  intelEventTriggerEnabled: false,
 };
 
 describe('PND_WATCH_DARK_WORKFLOW', () => {
@@ -117,7 +114,7 @@ describe('PND_WATCH_DARK_WORKFLOW', () => {
                 {
                   range: {
                     last_hunted_at: {
-                      lte: `now-${values.scheduleEveryMinutes}m`,
+                      lte: `now-${values.huntCooldownMinutes}m`,
                     },
                   },
                 },

@@ -35,9 +35,6 @@ export interface DarkWatchTemplateValues extends CommonWatchTemplateValues {
   tier2When: 'on_hits' | 'always';
   candidateLimit: number;
   fanOutMax: number;
-  scheduleEveryMinutes: number;
+  huntCooldownMinutes: number;
   targetTechnology: 'aws_iam' | 'fortigate';
-  leadPollIntervalMinutes: number;
-  leadMinPriority: number;
-  intelEventTriggerEnabled: boolean;
 }
