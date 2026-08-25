@@ -775,7 +775,9 @@ describe('autocomplete_utils', () => {
           buildModel(editorLines, { startColumn: 16, word: '1' }),
           position,
           1,
-          mockEditor
+          mockEditor,
+          1,
+          { isInsideTripleQuotedString: true }
         );
 
         expect(items.find((item) => item.label === '-1')).toBeUndefined();
@@ -797,7 +799,9 @@ describe('autocomplete_utils', () => {
           buildModel(editorLines, { startColumn: lineContentBeforePosition.length, word: '1' }),
           position,
           1,
-          mockEditor
+          mockEditor,
+          1,
+          { isInsideTripleQuotedString: true }
         );
 
         expect(items.find((item) => item.label === '-1')).toBeUndefined();
@@ -814,7 +818,9 @@ describe('autocomplete_utils', () => {
           buildModel(editorLines, { startColumn: 2, word: '1' }),
           position,
           1,
-          mockEditor
+          mockEditor,
+          1,
+          { isInsideTripleQuotedString: true }
         );
 
         expect(items.find((item) => item.label === '-1')).toBeUndefined();
