@@ -208,7 +208,7 @@
     {
       "path": "/api/detection_engine/rules/preview",
       "method": "post",
-      "reason": "False-positive: the request body's `anyOf` members are untitled, so oasdiff identifies them by resolved content rather than by name. All 8 members embed `MaxSignals` via the shared `BaseCreateProps`, so removing its `default: 100` changes every member's resolved shape and oasdiff reports the whole list as removed and re-added. The `anyOf` list itself is byte-identical to the base spec and no subschema was removed. The underlying change stops Zod v4 from materializing `max_signals` on PATCH; rule creation still defaults to 100 via RULE_DEFAULTS, so no request payload that validated before is rejected now.",
+      "reason": "Removed a default value for `max_signals` in the shared schema. However, the value is still defaulted in code, so there's no real user-facing change.",
       "approvedBy": "@elastic/security-detection-engineering",
       "oasdiffId": "request-body-any-of-removed",
       "prUrl": "https://github.com/elastic/kibana/pull/286518"
