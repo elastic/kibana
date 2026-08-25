@@ -13,7 +13,6 @@ import type { FakeRawRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { asSpaceId } from '@kbn/core-spaces-common';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
 import {
@@ -245,6 +244,7 @@ describe('#asScoped', () => {
 
     const fakeRawRequest: FakeRawRequest = {
       headers: {},
+      path: '/',
     };
     const request = kibanaRequestFactory(fakeRawRequest);
 
@@ -273,41 +273,6 @@ describe('#asScoped', () => {
         roles: ['admin'],
       },
     });
-    audit.stop();
-  });
-
-  it('logs space_id from a fake request that carries a spaceId', async () => {
-    const audit = new AuditService(logger);
-    const auditSetup = audit.setup({
-      license,
-      config,
-      logging,
-      status,
-      http,
-      getCurrentUser,
-      // Mirror real wiring (spacesService.getSpaceId) by sourcing the space id
-      // directly from the request.
-      getSpaceId: (req) => req.spaceId,
-      getSID: () => Promise.resolve(undefined),
-      recordAuditLoggingUsage,
-    });
-
-    const fakeRawRequest: FakeRawRequest = {
-      headers: {},
-      spaceId: asSpaceId('my-space'),
-    };
-    const request = kibanaRequestFactory(fakeRawRequest);
-
-    await auditSetup.asScoped(request).log({
-      message: 'MESSAGE',
-      event: { action: 'ACTION' },
-    });
-    expect(logger.info).toHaveBeenLastCalledWith(
-      'MESSAGE',
-      expect.objectContaining({
-        kibana: expect.objectContaining({ space_id: 'my-space' }),
-      })
-    );
     audit.stop();
   });
 
