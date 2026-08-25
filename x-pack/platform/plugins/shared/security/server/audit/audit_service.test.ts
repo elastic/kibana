@@ -6,13 +6,14 @@
  */
 
 import type { Socket } from 'net';
-import { lastValueFrom, Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
 import {
@@ -38,6 +39,7 @@ const createAuditConfig = (settings: Partial<ConfigType['audit']>) => {
 
 const config = createAuditConfig({ enabled: true });
 const { logging } = coreMock.createSetup();
+const status = statusServiceMock.createSetupContract();
 const http = httpServiceMock.createSetupContract();
 const getCurrentUser = jest
   .fn()
@@ -62,6 +64,7 @@ describe('#setup', () => {
         license,
         config,
         logging,
+        status,
         http,
         getCurrentUser,
         getSpaceId,
@@ -96,6 +99,7 @@ describe('#setup', () => {
         },
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -123,6 +127,7 @@ describe('#setup', () => {
         },
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -147,6 +152,7 @@ describe('#setup', () => {
         appender: undefined,
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -167,6 +173,7 @@ describe('#setup', () => {
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -185,6 +192,7 @@ describe('#asScoped', () => {
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -196,7 +204,11 @@ describe('#asScoped', () => {
       headers: {
         'x-forwarded-for': '1.1.1.1, 2.2.2.2',
       },
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+      kibanaRequestState: {
+        requestId: 'REQUEST_ID',
+        requestUuid: 'REQUEST_UUID',
+        startTime: Date.now(),
+      },
     });
 
     await auditSetup.asScoped(request).log({
@@ -223,6 +235,7 @@ describe('#asScoped', () => {
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId: () => undefined,
@@ -232,7 +245,6 @@ describe('#asScoped', () => {
 
     const fakeRawRequest: FakeRawRequest = {
       headers: {},
-      path: '/',
     };
     const request = kibanaRequestFactory(fakeRawRequest);
 
@@ -264,6 +276,41 @@ describe('#asScoped', () => {
     audit.stop();
   });
 
+  it('logs space_id from a fake request that carries a spaceId', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      status,
+      http,
+      getCurrentUser,
+      // Mirror real wiring (spacesService.getSpaceId) by sourcing the space id
+      // directly from the request.
+      getSpaceId: (req) => req.spaceId,
+      getSID: () => Promise.resolve(undefined),
+      recordAuditLoggingUsage,
+    });
+
+    const fakeRawRequest: FakeRawRequest = {
+      headers: {},
+      spaceId: asSpaceId('my-space'),
+    };
+    const request = kibanaRequestFactory(fakeRawRequest);
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+    });
+    expect(logger.info).toHaveBeenLastCalledWith(
+      'MESSAGE',
+      expect.objectContaining({
+        kibana: expect.objectContaining({ space_id: 'my-space' }),
+      })
+    );
+    audit.stop();
+  });
+
   it('does not log to audit logger if event matches ignore filter', async () => {
     const audit = new AuditService(logger);
     const auditSetup = audit.setup({
@@ -280,6 +327,7 @@ describe('#asScoped', () => {
         ignore_filters: [{ actions: ['ACTION'] }],
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -287,7 +335,11 @@ describe('#asScoped', () => {
       recordAuditLoggingUsage,
     });
     const request = httpServerMock.createKibanaRequest({
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+      kibanaRequestState: {
+        requestId: 'REQUEST_ID',
+        requestUuid: 'REQUEST_UUID',
+        startTime: Date.now(),
+      },
     });
 
     await auditSetup.asScoped(request).log({ message: 'MESSAGE', event: { action: 'ACTION' } });
@@ -311,6 +363,7 @@ describe('#asScoped', () => {
         ignore_filters: [{ actions: ['ACTION'] }],
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -318,7 +371,11 @@ describe('#asScoped', () => {
       recordAuditLoggingUsage,
     });
     const request = httpServerMock.createKibanaRequest({
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+      kibanaRequestState: {
+        requestId: 'REQUEST_ID',
+        requestUuid: 'REQUEST_UUID',
+        startTime: Date.now(),
+      },
     });
 
     await auditSetup.asScoped(request).log(undefined);
@@ -334,6 +391,7 @@ describe('#asScoped', () => {
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -345,7 +403,11 @@ describe('#asScoped', () => {
       headers: {
         'x-forwarded-for': '1.1.1.1, 2.2.2.2',
       },
-      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+      kibanaRequestState: {
+        requestId: 'REQUEST_ID',
+        requestUuid: 'REQUEST_UUID',
+        startTime: Date.now(),
+      },
     });
 
     await auditSetup.asScoped(request).log({
@@ -369,6 +431,7 @@ describe('#withoutRequest', () => {
       license,
       config,
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -399,6 +462,7 @@ describe('#withoutRequest', () => {
         ignore_filters: [{ actions: ['ACTION'] }],
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -427,6 +491,7 @@ describe('#withoutRequest', () => {
         ignore_filters: [{ actions: ['ACTION'] }],
       },
       logging,
+      status,
       http,
       getCurrentUser,
       getSpaceId,
@@ -441,25 +506,19 @@ describe('#withoutRequest', () => {
 });
 
 describe('#createLoggingConfig', () => {
-  test('sets log level to `info` when audit logging is enabled and appender is defined', async () => {
-    const features$ = of({
-      allowAuditLogging: true,
-    });
+  test('sets log level to `info` when audit logging is enabled and appender is defined', () => {
+    const features = { allowAuditLogging: true };
 
-    const loggingConfig = await features$
-      .pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'console',
-            layout: {
-              type: 'pattern',
-            },
-          },
-        })
-      )
-      .toPromise();
+    const loggingConfig = createLoggingConfig({
+      enabled: true,
+      include_saved_object_names: false,
+      appender: {
+        type: 'console',
+        layout: {
+          type: 'pattern',
+        },
+      },
+    })(features);
 
     expect(loggingConfig).toMatchInlineSnapshot(`
       Object {
@@ -484,51 +543,40 @@ describe('#createLoggingConfig', () => {
     `);
   });
 
-  test('sets log level to `off` when audit logging is disabled', async () => {
-    const features$ = of({
-      allowAuditLogging: true,
-    });
+  test('sets log level to `off` when audit logging is disabled', () => {
+    const features = { allowAuditLogging: true };
 
-    const loggingConfig = await lastValueFrom(
-      features$.pipe(
-        createLoggingConfig({
-          enabled: false,
-          include_saved_object_names: false,
-          appender: {
-            type: 'console',
-            layout: {
-              type: 'pattern',
-            },
-          },
-        })
-      )
-    );
+    const loggingConfig = createLoggingConfig({
+      enabled: false,
+      include_saved_object_names: false,
+      appender: {
+        type: 'console',
+        layout: {
+          type: 'pattern',
+        },
+      },
+    })(features);
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });
 
-  test('sets log level to `off` when license does not allow audit logging', async () => {
-    const features$ = of({
-      allowAuditLogging: false,
-    });
+  test('sets log level to `off` when license does not allow audit logging', () => {
+    const features = { allowAuditLogging: false };
 
-    const loggingConfig = await lastValueFrom(
-      features$.pipe(
-        createLoggingConfig({
-          enabled: true,
-          include_saved_object_names: false,
-          appender: {
-            type: 'console',
-            layout: {
-              type: 'pattern',
-            },
-          },
-        })
-      )
-    );
+    const loggingConfig = createLoggingConfig({
+      enabled: true,
+      include_saved_object_names: false,
+      appender: {
+        type: 'console',
+        layout: {
+          type: 'pattern',
+        },
+      },
+    })(features);
 
     expect(loggingConfig.loggers![0].level).toEqual('off');
   });
+
 });
 
 describe('#getForwardedFor', () => {
