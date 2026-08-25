@@ -144,7 +144,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
 }
 
 /**
- * Builds a predicate matching outputs that route through HOTel's managed `_bulk` gateway.
+ * Builds a predicate matching outputs that route through the managed `_bulk` endpoint.
  */
 export const createManagedBulkOutputMatcher = (config?: FleetConfigType) => {
   const managedBulkUrls = new Set(
