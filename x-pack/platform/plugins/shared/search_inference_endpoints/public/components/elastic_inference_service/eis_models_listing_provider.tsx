@@ -27,14 +27,14 @@ interface EisModelsListingProviderProps {
 }
 
 const LABELS = {
-  entity: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.entity', {
+  entity: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.entity', {
     defaultMessage: 'model',
   }),
-  entityPlural: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.entityPlural', {
+  entityPlural: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.entityPlural', {
     defaultMessage: 'models',
   }),
   searchPlaceholder: i18n.translate(
-    'xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder',
+    'xpack.searchInferenceEndpoints.eisModelsPage.searchPlaceholder',
     { defaultMessage: 'Search Elastic Inference Service models...' }
   ),
 };
@@ -42,13 +42,13 @@ const LABELS = {
 const SORT_FIELDS = [
   {
     field: EIS_NAME_SORT_FIELD,
-    name: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.sort.model', {
+    name: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.sort.model', {
       defaultMessage: 'Model',
     }),
   },
   {
     field: EIS_PROVIDER_FILTER_ID,
-    name: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.sort.provider', {
+    name: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.sort.provider', {
       defaultMessage: 'Provider',
     }),
   },
@@ -61,10 +61,7 @@ export const EisModelsListingProvider = ({
 }: EisModelsListingProviderProps) => {
   const dataSource = useMemo(() => ({ findItems: createEisFindItems(models) }), [models]);
   const fields = useMemo(() => createEisFieldDefinitions(models), [models]);
-  const modelFamilyOptions = useMemo(
-    () => getProviderOptions(models).map(({ key, label }) => ({ key, label })),
-    [models]
-  );
+  const modelFamilyOptions = useMemo(() => getProviderOptions(models), [models]);
 
   const features = useMemo(
     () => ({

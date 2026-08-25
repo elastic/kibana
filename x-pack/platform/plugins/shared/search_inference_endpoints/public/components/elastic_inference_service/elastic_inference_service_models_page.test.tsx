@@ -158,15 +158,18 @@ describe('ElasticInferenceServiceModelsPage', () => {
   });
 
   it('renders the table view when the view mode is switched', async () => {
-    const { getByTestId, getByRole, getByText, queryByText } = await renderPopulatedPage();
+    const { getByTestId, getByText, queryByText } = await renderPopulatedPage();
 
-    fireEvent.click(getByRole('button', { name: 'Table view' }));
+    fireEvent.click(getByTestId('eisModelsViewModeSelector-table'));
 
     await waitFor(() => expect(getByTestId('content-list-table')).toBeInTheDocument());
     expect(getByText('Model')).toBeInTheDocument();
     expect(getByText('Provider')).toBeInTheDocument();
     expect(getByText('Type')).toBeInTheDocument();
     expect(queryByText('Supported tasks')).not.toBeInTheDocument();
+
+    fireEvent.click(getByText('Jina Reranker v2'));
+    expect(getByTestId('modelDetailFlyout')).toBeInTheDocument();
   });
 
   it('opens model detail flyout when clicking a card with valid model_id', async () => {
@@ -192,7 +195,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
     });
   });
 
-  it('does not open model detail flyout when endpoint has empty model_id', async () => {
+  it('does not open model detail flyout for an empty model_id in either view', async () => {
     const endpointWithoutModelId: EisInferenceEndpoint = {
       inference_id: 'no-model-id-endpoint',
       task_type: 'chat_completion',
@@ -204,10 +207,15 @@ describe('ElasticInferenceServiceModelsPage', () => {
       isLoading: false,
       isError: false,
     });
-    const { container, getByTestId, queryByTestId } = renderPage();
+    const { container, getByTestId, getByText, queryByTestId } = renderPage();
     await waitFor(() => expect(countCards(container)).toBe(1));
 
     fireEvent.click(getByTestId('eisModelCard-no-model-id-endpoint'));
+    expect(queryByTestId('modelDetailFlyout')).not.toBeInTheDocument();
+
+    fireEvent.click(getByTestId('eisModelsViewModeSelector-table'));
+    await waitFor(() => expect(getByTestId('content-list-table')).toBeInTheDocument());
+    fireEvent.click(getByText('no-model-id-endpoint'));
 
     expect(queryByTestId('modelDetailFlyout')).not.toBeInTheDocument();
   });

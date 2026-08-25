@@ -15,6 +15,8 @@ import {
   StandardFilterOption,
   useFieldQueryFilter,
 } from '@kbn/content-list-toolbar';
+import { EventType } from '../../analytics/constants';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { TASK_TYPE_FILTERS } from '../../utils/eis_utils';
 import { EIS_CATEGORY_FILTER_ID, EIS_PROVIDER_FILTER_ID } from '../../utils/eis_content_list_utils';
 
@@ -34,12 +36,21 @@ export const ModelFamilyOptionsProvider = ModelFamilyOptionsContext.Provider;
 
 const ModelFamilyFilterControl = ({ query, onChange }: FilterControlProps) => {
   const options = useContext(ModelFamilyOptionsContext);
+  const usageTracker = useUsageTracker();
 
   return (
     <SelectableFilterPopover
       fieldName={EIS_PROVIDER_FILTER_ID}
       title={MODEL_FAMILY_FILTER_TITLE}
-      {...{ query, onChange, options }}
+      query={query}
+      onChange={(nextQuery) => {
+        usageTracker.count([
+          EventType.FILTER_APPLIED,
+          `${EventType.FILTER_APPLIED}_modelFamilyFilterMultiselect`,
+        ]);
+        onChange?.(nextQuery);
+      }}
+      options={options}
       renderOption={(option, { isActive }) => (
         <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
       )}

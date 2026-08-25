@@ -31,15 +31,17 @@ interface EisModelsListingProps {
 const VIEW_MODE_OPTIONS: EisViewModeOption[] = [
   {
     id: 'card',
+    'data-test-subj': 'eisModelsViewModeSelector-card',
     iconType: 'grid',
-    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.cardView', {
+    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.cardView', {
       defaultMessage: 'Card view',
     }),
   },
   {
     id: 'table',
+    'data-test-subj': 'eisModelsViewModeSelector-table',
     iconType: 'list',
-    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.tableView', {
+    label: i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.tableView', {
       defaultMessage: 'Table view',
     }),
   },
@@ -64,7 +66,7 @@ export const EisModelsListing = ({ onViewModelDetails }: EisModelsListingProps) 
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
-            legend={i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.viewMode', {
+            legend={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.viewMode', {
               defaultMessage: 'View mode',
             })}
             options={VIEW_MODE_OPTIONS}
