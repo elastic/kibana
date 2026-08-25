@@ -22,6 +22,7 @@ import type {
   StartInvestigationResponse,
 } from '../../common';
 
+import { buildInvestigationMessage } from './build_investigation_message';
 import { InvestigationNotFoundError } from './errors';
 export { InvestigationNotFoundError };
 
@@ -150,7 +151,7 @@ export class NightshiftInvestigationsClient {
     }
 
     const inputs = {
-      message: `Investigation requested for ${subject.type} ${subject.id}`,
+      message: buildInvestigationMessage(subject, context),
       ...(concurrency_key ? { concurrency_key } : {}),
       context: {
         ...context,
