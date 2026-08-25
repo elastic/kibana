@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
+import { ReorderProvider } from '@kbn/dom-drag-drop';
 import type { FieldsGroupNames } from '../../types';
 import { type FieldListItem, type RenderFieldItemParams } from '../../types';
 
@@ -44,6 +45,7 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   extraAction: React.ReactNode;
   showExistenceFetchError?: boolean;
   showExistenceFetchTimeout?: boolean;
+  isReorderable?: boolean;
 }
 
 function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
@@ -66,6 +68,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   showExistenceFetchError,
   showExistenceFetchTimeout,
   extraAction,
+  isReorderable,
 }: FieldsAccordionProps<T>) {
   const styles = useMemoCss(componentStyles);
 
@@ -158,21 +161,24 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
         (!!fieldsCount ? (
           <>
             {extraAction}
-            <ul>
-              {paginatedFields &&
-                paginatedFields.map((field, index) => (
-                  <Fragment key={getFieldKey(field)}>
-                    {renderFieldItem({
-                      field,
-                      itemIndex: index,
-                      groupIndex,
-                      groupName,
-                      hideDetails,
-                      fieldSearchHighlight,
-                    })}
-                  </Fragment>
-                ))}
-            </ul>
+            {renderList(
+              <ul>
+                {paginatedFields &&
+                  paginatedFields.map((field, index) => (
+                    <Fragment key={getFieldKey(field)}>
+                      {renderFieldItem({
+                        field,
+                        itemIndex: index,
+                        groupIndex,
+                        groupName,
+                        hideDetails,
+                        fieldSearchHighlight,
+                      })}
+                    </Fragment>
+                  ))}
+              </ul>,
+              isReorderable
+            )}
           </>
         ) : (
           renderCallout()
@@ -180,6 +186,9 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
     </EuiAccordion>
   );
 }
+
+const renderList = (list: JSX.Element, isReorderable?: boolean): JSX.Element =>
+  isReorderable ? <ReorderProvider>{list}</ReorderProvider> : list;
 
 export const FieldsAccordion = React.memo(InnerFieldsAccordion) as typeof InnerFieldsAccordion;
 
