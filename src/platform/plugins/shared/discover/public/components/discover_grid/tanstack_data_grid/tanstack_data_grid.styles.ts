@@ -177,6 +177,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     boxSizing: 'border-box',
     '&:hover': {
       backgroundColor: euiTheme.components.dataGridRowBackgroundHover,
+      // Keep the pinned leading columns in sync with the row hover background.
+      '& .tsg-sticky-cell': {
+        backgroundColor: euiTheme.components.dataGridRowBackgroundHover,
+      },
     },
   }),
 
@@ -188,6 +192,9 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
 
   rowExpanded: css({
     backgroundColor: euiTheme.components.dataGridRowBackgroundSelect,
+    '& .tsg-sticky-cell': {
+      backgroundColor: euiTheme.components.dataGridRowBackgroundSelect,
+    },
     '&:hover': {
       backgroundColor: euiTheme.components.dataGridRowBackgroundSelect,
     },
@@ -235,6 +242,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     flexShrink: 0,
     borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
     boxSizing: 'border-box',
+    position: 'sticky',
+    left: SELECT_COL_WIDTH,
+    zIndex: 2,
+    backgroundColor: euiTheme.components.dataGridRowBackground,
   }),
 
   controlHeaderCell: css({
@@ -244,6 +255,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     flexShrink: 0,
     borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
     boxSizing: 'border-box',
+    position: 'sticky',
+    left: SELECT_COL_WIDTH,
+    zIndex: 3,
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
   }),
 
   summaryCell: css({
@@ -291,6 +306,20 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
 
   timestampCell: css({
     fontFamily: euiTheme.font.familyCode,
+  }),
+
+  // -- Pinned (frozen) leading time column; `left` offset is set inline since it
+  // depends on the dynamic width of the leading control columns. --
+  stickyColumnCell: css({
+    position: 'sticky',
+    zIndex: 2,
+    backgroundColor: euiTheme.components.dataGridRowBackground,
+  }),
+
+  stickyColumnHeaderCell: css({
+    position: 'sticky',
+    zIndex: 3,
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
   }),
 
   loadingOverlay: css({
@@ -404,6 +433,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
     width: SELECT_COL_WIDTH,
     boxSizing: 'border-box',
+    position: 'sticky',
+    left: 0,
+    zIndex: 2,
+    backgroundColor: euiTheme.components.dataGridRowBackground,
   }),
 
   selectHeaderCell: css({
@@ -414,10 +447,17 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.components.dataGridVerticalLineBorderColor}`,
     width: SELECT_COL_WIDTH,
     boxSizing: 'border-box',
+    position: 'sticky',
+    left: 0,
+    zIndex: 3,
+    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
   }),
 
   selectedRow: css({
     backgroundColor: `${euiTheme.colors.primary}10`,
+    '& .tsg-sticky-cell': {
+      backgroundColor: `${euiTheme.colors.primary}10`,
+    },
   }),
 
   // -- Column drag reorder --

@@ -119,6 +119,8 @@ declare module '@tanstack/react-table' {
     isSelect?: boolean;
     isSummary?: boolean;
     isTimestamp?: boolean;
+    // Only the leftmost time column is frozen; a manually reordered time column is not.
+    isPinnedColumn?: boolean;
     fieldName?: string;
     formatValue?: (value: unknown) => string;
   }
@@ -215,11 +217,17 @@ const MAX_SELECTED_DOCS_FOR_COMPARE = 100;
 
 const scrollPositionCache = new Map<string, number>();
 
-const formatCellValue = (value: unknown): string => {
-  if (value === null || value === undefined) return '-';
-  if (Array.isArray(value)) return value.join(', ');
-  return String(value);
+// Mirrors the classic grid's formatReactArray: unwrap single-element arrays and
+// bracket/comma-join multi-value ones, instead of JSON.stringify-style quoting.
+const formatArrayAwareValue = (value: unknown, formatSingle: (v: unknown) => string): string => {
+  if (!Array.isArray(value)) return formatSingle(value);
+  if (value.length === 0) return '';
+  if (value.length === 1) return formatSingle(value[0]);
+  return `[${value.map(formatSingle).join(', ')}]`;
 };
+
+const formatCellValue = (value: unknown): string =>
+  formatArrayAwareValue(value, (v) => (v === null || v === undefined ? '-' : String(v)));
 
 const formatTimestamp = (value: unknown): string => {
   if (value === null || value === undefined) return '-';
@@ -725,6 +733,7 @@ const VirtualRow = React.memo(
       findTerm?: string;
       findActiveMatch?: FindMatch | null;
       getColumnStyle: TanStackColumnLayout['getColumnStyle'];
+      pinnedColumnLeft: number;
     }
   >(function VirtualRow(
     {
@@ -743,6 +752,7 @@ const VirtualRow = React.memo(
       findTerm,
       findActiveMatch,
       getColumnStyle,
+      pinnedColumnLeft,
     },
     ref
   ) {
@@ -782,6 +792,7 @@ const VirtualRow = React.memo(
               rowIndex={virtualRow.index}
               getColumnStyle={getColumnStyle}
               isRowSelected={isSelected}
+              pinnedColumnLeft={pinnedColumnLeft}
             />
           ))}
         </div>
@@ -805,6 +816,7 @@ const VirtualCell = React.memo(
     rowIndex,
     getColumnStyle,
     isRowSelected,
+    pinnedColumnLeft,
   }: {
     cell: Cell<DataTableRecord, unknown>;
     styles: ReturnType<typeof getTanStackDataGridStyles>;
@@ -819,6 +831,7 @@ const VirtualCell = React.memo(
     rowIndex?: number;
     getColumnStyle: TanStackColumnLayout['getColumnStyle'];
     isRowSelected: boolean;
+    pinnedColumnLeft: number;
   }) => {
     const isControl = cell.column.columnDef.meta?.isControl;
     const isSelect = cell.column.columnDef.meta?.isSelect;
@@ -833,6 +846,7 @@ const VirtualCell = React.memo(
       return (
         <div
           css={[isSelect ? styles.selectCell : styles.controlCell, isFocused && styles.focusedCell]}
+          className="tsg-sticky-cell"
           style={{
             width: isSelect ? SELECT_COL_WIDTH : cell.column.getSize(),
             flexShrink: 0,
@@ -886,6 +900,7 @@ const VirtualCell = React.memo(
     const value = cell.getValue();
     const colId = cell.column.id;
     const rowId = cell.row.original.id;
+    const isPinnedColumn = cell.column.columnDef.meta?.isPinnedColumn;
     const formatted = cell.column.columnDef.meta?.formatValue?.(value) ?? formatCellValue(value);
     const isActiveHighlight =
       findTerm &&
@@ -911,8 +926,10 @@ const VirtualCell = React.memo(
           styles.cellWithActions,
           styles.expandableCell,
           isFocused && styles.focusedCell,
+          isPinnedColumn && styles.stickyColumnCell,
         ]}
-        style={columnStyle}
+        className={isPinnedColumn ? 'tsg-sticky-cell' : undefined}
+        style={isPinnedColumn ? { ...columnStyle, left: pinnedColumnLeft } : columnStyle}
         role="gridcell"
         data-row-id={rowId}
         data-col-id={colId}
@@ -1672,13 +1689,17 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
       if (isSummaryMode) {
         if (showTimeCol && timeFieldName) {
-          const timeField = dataView.getFieldByName(timeFieldName);
-          const formatTimeValue = (value: unknown) => {
-            const timeValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
-            return timeField && fieldFormats
-              ? formatFieldValueText({ value: timeValue, fieldFormats, dataView, field: timeField })
-              : formatTimestamp(timeValue);
-          };
+          const timeField = getDataViewFieldOrCreateFromColumnMeta({
+            dataView,
+            fieldName: timeFieldName,
+            columnMeta: columnsMeta?.[timeFieldName],
+          });
+          const formatTimeValue = (value: unknown) =>
+            formatArrayAwareValue(value, (v) =>
+              timeField && fieldFormats
+                ? formatFieldValueText({ value: v, fieldFormats, dataView, field: timeField })
+                : formatTimestamp(v)
+            );
           defs.push({
             id: timeFieldName,
             accessorFn: (r) => r.flattened[timeFieldName],
@@ -1686,7 +1707,12 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             size: getTimeColumnWidth(timeFieldName, columnSizing, settings),
             minSize: MIN_COL_WIDTH,
             enableSorting: false,
-            meta: { isTimestamp: true, fieldName: timeFieldName, formatValue: formatTimeValue },
+            meta: {
+              isTimestamp: true,
+              isPinnedColumn: true,
+              fieldName: timeFieldName,
+              formatValue: formatTimeValue,
+            },
             cell: ({ getValue }) => (
               <span css={styles.timestampCell}>{formatTimeValue(getValue())}</span>
             ),
@@ -1701,20 +1727,18 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             continue;
           }
           const isTimeField = colId === timeFieldName;
-          const dataViewField = dataView.getFieldByName(colId);
-          const formatValue = (value: unknown) => {
-            const fieldValue =
-              isTimeField && Array.isArray(value) && value.length === 1 ? value[0] : value;
-            if (dataViewField && fieldFormats) {
-              return formatFieldValueText({
-                value: fieldValue,
-                fieldFormats,
-                dataView,
-                field: dataViewField,
-              });
-            }
-            return isTimeField ? formatTimestamp(fieldValue) : formatCellValue(fieldValue);
-          };
+          const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+            dataView,
+            fieldName: colId,
+            columnMeta: columnsMeta?.[colId],
+          });
+          const formatValue = (value: unknown) =>
+            formatArrayAwareValue(value, (v) => {
+              if (dataViewField && fieldFormats) {
+                return formatFieldValueText({ value: v, fieldFormats, dataView, field: dataViewField });
+              }
+              return isTimeField ? formatTimestamp(v) : formatCellValue(v);
+            });
           const columnSchema = getSchemaByKbnType(dataViewField?.type);
           const columnIsSortable =
             isSortEnabled &&
@@ -1734,7 +1758,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               : settings?.columns?.[colId]?.width ?? DEFAULT_COL_WIDTH,
             minSize: MIN_COL_WIDTH,
             enableSorting: columnIsSortable,
-            meta: { isTimestamp: isTimeField, fieldName: colId, formatValue },
+            meta: {
+              isTimestamp: isTimeField,
+              // Only freeze the time column when it leads the column list (its default position).
+              isPinnedColumn: isTimeField && colId === effectiveColumns[0],
+              fieldName: colId,
+              formatValue,
+            },
             cell: function DataCell({ getValue }) {
               const val = getValue();
               const formatted = formatValue(val);
@@ -2686,6 +2716,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                       'summary'
                     );
                     const columnIndex = effectiveColumns.indexOf(colId);
+                    const isPinnedColumn = header.column.columnDef.meta?.isPinnedColumn;
 
                     const headerColumnStyle =
                       isSelect || isControl
@@ -2693,11 +2724,14 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                             width: isSelect ? SELECT_COL_WIDTH : header.column.getSize(),
                             flexShrink: 0,
                           }
-                        : getColumnStyle({
-                            id: colId,
-                            isSummary,
-                            isTimestamp: header.column.columnDef.meta?.isTimestamp,
-                          });
+                        : {
+                            ...getColumnStyle({
+                              id: colId,
+                              isSummary,
+                              isTimestamp: header.column.columnDef.meta?.isTimestamp,
+                            }),
+                            ...(isPinnedColumn && { left: SELECT_COL_WIDTH + actionsColumnWidth }),
+                          };
 
                     if (isSelect) {
                       return (
@@ -2727,6 +2761,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                           isDraggable && styles.headerCellDraggable,
                           isDragging && styles.headerCellDragging,
                           isDragOver && styles.headerCellDragOver,
+                          isPinnedColumn && styles.stickyColumnHeaderCell,
                         ]}
                         style={headerColumnStyle}
                         role="columnheader"
@@ -2893,6 +2928,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                         findTerm={findTerm}
                         findActiveMatch={findActiveMatch}
                         getColumnStyle={getColumnStyle}
+                        pinnedColumnLeft={SELECT_COL_WIDTH + actionsColumnWidth}
                       />
                     );
                   })}
