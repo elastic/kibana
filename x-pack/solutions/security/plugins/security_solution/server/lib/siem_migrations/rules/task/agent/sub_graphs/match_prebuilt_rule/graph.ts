@@ -8,7 +8,7 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { BaseMessage } from '@langchain/core/messages';
-import { AIMessage } from '@langchain/core/messages';
+import { AIMessage, ToolMessage } from '@langchain/core/messages';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
@@ -73,14 +73,18 @@ const matchPrebuiltRuleRouter = (state: MatchPrebuiltRuleState) => {
   if (hasToolCalls && searchCount <= maxSearches) {
     return 'tools';
   }
-  // Route back to the agent for an automatic retry when the model returned an explicit no-match
-  // verdict and the search budget still allows it. The agent node detects this path by checking
-  // that the last message is the no-match AIMessage (not a ToolMessage) and injects a nudge
-  // prompting a different keyword angle. `searchCount < maxSearches` prevents a retry after the
-  // last allowed search so the final verdict always routes to `finalize`.
+  // Retry once more from a different keyword angle when the model found candidates but none matched.
+  // Skip when the last search was empty — the agent node already handles that via the query prompt.
   const matchResult = state.match_prebuilt_rules_result;
   if (matchResult !== undefined && !matchResult.match?.trim() && searchCount < maxSearches) {
-    return 'agent';
+    const lastToolMessage = [...messages].reverse().find(ToolMessage.isInstance);
+    const lastSearchHadCandidates =
+      lastToolMessage !== undefined &&
+      Array.isArray(lastToolMessage.artifact) &&
+      lastToolMessage.artifact.length > 0;
+    if (lastSearchHadCandidates) {
+      return 'agent';
+    }
   }
   return 'finalize';
 };

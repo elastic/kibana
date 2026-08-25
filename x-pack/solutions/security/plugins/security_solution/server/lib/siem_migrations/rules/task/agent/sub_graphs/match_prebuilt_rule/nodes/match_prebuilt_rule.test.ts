@@ -134,25 +134,20 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
     // alone doesn't justify another search — scope mismatch in particular means an empty match,
     // since no reworded query can produce a differently-scoped rule that isn't in the catalog.
     expect(String(invokedMessages.at(-1)?.content)).toContain(
-      'Search again only if you can name a defect in the query you just issued'
+      'Search again only if you can name a specific defect in the query you just issued'
     );
     expect(String(invokedMessages.at(-1)?.content)).toContain(
-      'A scope difference is not a query defect'
+      'A scope difference alone is not a query defect'
     );
 
     // The cap is stated once, statically, and interpolated from MAX_TOOL_CALL_ATTEMPTS so the two
     // can't drift. The model tracks it against the query list rather than counting its own turns.
     expect(String(invokedMessages.at(-1)?.content)).toContain(
-      `You may call searchPrebuiltRules at most ${MAX_TOOL_CALL_ATTEMPTS - 1} times in total`
+      `You may call searchPrebuiltRules at most ${MAX_TOOL_CALL_ATTEMPTS} times in total`
     );
 
-    // An empty "match" is about the verdict, not about whether the search returned candidates — a
-    // model that reasons its way to "no confident match" must not still name the closest candidate,
-    // which `finalize` would otherwise resolve into a full elastic_rule. Both the positive and the
-    // negative answer shape are demonstrated, so naming a rule isn't the only worked example.
-    expect(String(invokedMessages.at(-1)?.content)).toContain(
-      'Never name a rule your own summary describes as not a confident match'
-    );
+    // Both the positive and the negative answer shape are demonstrated, so naming a rule isn't
+    // the only worked example — an empty "match" is a valid and expected outcome.
     expect(String(invokedMessages.at(-1)?.content)).toContain('<example_response_no_match>');
     expect(String(invokedMessages.at(-1)?.content)).toContain('"match": ""');
 
@@ -190,7 +185,7 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
       'Queries already tried: "office macro child process", "office document macro execution", "winword child process sysmon"'
     );
     expect(content).toContain(
-      `You may call searchPrebuiltRules at most ${MAX_TOOL_CALL_ATTEMPTS - 1} times in total`
+      `You may call searchPrebuiltRules at most ${MAX_TOOL_CALL_ATTEMPTS} times in total`
     );
     // the prompt is identical on every evaluation turn — no turn-dependent injection
     expect(content).not.toContain('This is your final turn');
@@ -274,14 +269,14 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
 
   it.each<{
     vendor: MatchPrebuiltRuleState['original_rule']['vendor'];
-    shouldIncludeScopeGuideline: boolean;
+    shouldUseGenericBullets: boolean;
   }>([
-    { vendor: 'splunk', shouldIncludeScopeGuideline: false },
-    { vendor: 'qradar', shouldIncludeScopeGuideline: true },
-    { vendor: 'microsoft-sentinel', shouldIncludeScopeGuideline: true },
+    { vendor: 'splunk', shouldUseGenericBullets: false },
+    { vendor: 'qradar', shouldUseGenericBullets: true },
+    { vendor: 'microsoft-sentinel', shouldUseGenericBullets: true },
   ])(
-    'injects the $vendor-branched match prompt (scope guideline included: $shouldIncludeScopeGuideline)',
-    async ({ vendor, shouldIncludeScopeGuideline }) => {
+    'injects the $vendor-branched match prompt (generic bullets: $shouldUseGenericBullets)',
+    async ({ vendor, shouldUseGenericBullets }) => {
       const priorMessages = [
         new SystemMessage('system'),
         new HumanMessage('human'),
@@ -299,9 +294,10 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
       const [invokedMessages] = mockInvoke.mock.calls[0];
       // the match prompt is the only message injected on an evaluation turn with candidates
       const matchMessage = invokedMessages.at(-1);
-      expect(String(matchMessage.content).includes('consider the scope of both the rules')).toBe(
-        shouldIncludeScopeGuideline
-      );
+      // generic (qradar/sentinel) prompt uses broader threat-category criteria; splunk uses "almost identical"
+      expect(
+        String(matchMessage.content).includes('threat category or security objective')
+      ).toBe(shouldUseGenericBullets);
     }
   );
 });
