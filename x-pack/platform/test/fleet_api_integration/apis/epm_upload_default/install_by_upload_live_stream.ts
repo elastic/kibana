@@ -72,7 +72,6 @@ export default function (providerContext: FtrProviderContext) {
         includeDatasetVar: true,
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 10000));
       await supertest
         .post(`/api/fleet/epm/packages`)
         .set('kbn-xsrf', 'xxxx')
