@@ -56,8 +56,6 @@ jest.mock('../../app_context', () => ({
   },
 }));
 
-jest.mock('../registry', () => ({}));
-
 jest.mock('fs/promises', () => ({
   readFile: jest.fn(),
 }));

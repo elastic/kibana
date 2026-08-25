@@ -7,7 +7,7 @@
 
 import { readFile } from 'fs/promises';
 
-import * as openpgp from 'openpgp';
+import type * as openpgp from 'openpgp';
 import type { Logger } from '@kbn/logging';
 
 import type { PackageVerificationResult } from '../../../types';
@@ -16,6 +16,10 @@ import * as Registry from '../registry';
 
 import { appContextService } from '../../app_context';
 import type { Installation } from '../../../types';
+
+// OpenPGP's Node CJS entrypoint calls createRequire() with a document.baseURI-derived URL when document exists.
+// Load it lazily so JSDOM suites that transitively import Fleet do not evaluate it.
+const loadOpenPgp = () => import('openpgp');
 
 interface VerificationResult {
   isVerified: boolean;
@@ -57,6 +61,7 @@ export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
   }
   let key;
   try {
+    const openpgp = await loadOpenPgp();
     key = await openpgp.readKey({
       armoredKey: buffer.toString(),
     });
@@ -123,6 +128,7 @@ async function _verifyPackageSignature({
   verificationKey: openpgp.Key;
   logger: Logger;
 }): Promise<VerificationResult> {
+  const openpgp = await loadOpenPgp();
   const signature = await openpgp.readSignature({
     armoredSignature: pkgArchiveSignature,
   });
