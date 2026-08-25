@@ -3576,7 +3576,8 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
           skipUniqueNameVerification?: boolean | undefined;
         }
       | undefined,
-    context?: RequestHandlerContext
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
       fleetAuthz: {
@@ -3584,7 +3585,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       },
     });
 
-    return super.update(soClient, esClient, id, packagePolicyUpdate, options, context);
+    return super.update(soClient, esClient, id, packagePolicyUpdate, options, context, request);
   }
 
   async create(
