@@ -33,6 +33,7 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   normalizeConversationAccessControl,
+  type Conversation,
 } from '@kbn/agent-builder-common';
 import {
   getUserDisplayName,
@@ -45,7 +46,6 @@ import {
   useConversationPermissions,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
-import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useSuggestUsers } from '../../../hooks/use_suggest_users';
 import {
   useConversationAccessControlProfiles,
@@ -163,12 +163,21 @@ const UserAccessRow: React.FC<{
 );
 
 export const ConversationShareButton: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
-  const conversationId = useConversationId();
   const hasPersistedConversation = useHasPersistedConversation();
   const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
   const { conversation } = useConversation();
 
+  if (!conversation || !hasPersistedConversation || !canUpdateAccessControl) {
+    return null;
+  }
+
+  return <ConversationSharePopover conversation={conversation} />;
+};
+
+const ConversationSharePopover: React.FC<{
+  conversation: Conversation;
+}> = ({ conversation }) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [accessMode, setAccessMode] = useState(ConversationAccessControlMode.Private);
   const [memberIds, setMemberIds] = useState<string[]>([]);
@@ -197,10 +206,7 @@ export const ConversationShareButton: React.FC = () => {
   const { data: suggestedProfiles = [], isFetching: isSearchingUsers } = useSuggestUsers(
     debouncedSearch,
     {
-      enabled:
-        isPopoverOpen &&
-        canUpdateAccessControl &&
-        accessMode === ConversationAccessControlMode.Private,
+      enabled: isPopoverOpen && accessMode === ConversationAccessControlMode.Private,
     }
   );
 
@@ -215,8 +221,8 @@ export const ConversationShareButton: React.FC = () => {
     }));
 
   const { mutate: updateAccessControl, isLoading: isSaving } = useUpdateConversationAccessControl({
-    conversationId: conversationId ?? '',
-    agentId: conversation?.agent_id,
+    conversationId: conversation.id,
+    agentId: conversation.agent_id,
     onSuccess: () => {
       setErrorMessage(undefined);
     },
@@ -231,10 +237,6 @@ export const ConversationShareButton: React.FC = () => {
     nextAccessMode: ConversationAccessControlMode,
     nextMemberIds: string[]
   ) => {
-    if (!conversationId) {
-      return;
-    }
-
     updateAccessControl({
       access_mode: nextAccessMode,
       entries:
@@ -301,10 +303,6 @@ export const ConversationShareButton: React.FC = () => {
       </EuiFlexGroup>
     );
   };
-
-  if (!conversation || !conversationId || !hasPersistedConversation || !canUpdateAccessControl) {
-    return null;
-  }
 
   const isPublic = accessMode === ConversationAccessControlMode.Public;
   const ownerProfile = ownerId ? profileByUid.get(ownerId) : undefined;
