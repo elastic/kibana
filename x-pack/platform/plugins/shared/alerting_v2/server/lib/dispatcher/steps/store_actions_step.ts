@@ -17,8 +17,7 @@ import type {
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
-import { EpisodeTriage, PolicyCatalog } from '../state';
-import { getUnmatchedEpisodes } from './utils/unmatched_episodes';
+import { DispatchPlan, EpisodeTriage, PolicyCatalog } from '../state';
 
 @injectable()
 export class StoreActionsStep implements DispatcherStep {
@@ -34,20 +33,15 @@ export class StoreActionsStep implements DispatcherStep {
   ): Promise<DispatcherStepOutput> {
     const {
       triage = EpisodeTriage.empty(),
-      throttled = [],
-      dispatch = [],
+      plan = DispatchPlan.empty(),
       policies = PolicyCatalog.empty(),
     } = state;
     const { suppressed } = triage;
+    const { toDispatch, throttled } = plan;
 
-    const unmatched = getUnmatchedEpisodes(triage.dispatchable, dispatch, throttled);
+    const unmatched = plan.unmatchedFrom(triage.dispatchable);
 
-    if (
-      suppressed.length === 0 &&
-      throttled.length === 0 &&
-      dispatch.length === 0 &&
-      unmatched.length === 0
-    ) {
+    if (suppressed.length === 0 && plan.isEmpty() && unmatched.length === 0) {
       return { type: 'halt', reason: 'no_actions' };
     }
 
@@ -76,7 +70,7 @@ export class StoreActionsStep implements DispatcherStep {
             })
           )
         ),
-        ...dispatch.flatMap((group) =>
+        ...toDispatch.flatMap((group) =>
           group.episodes.map((episode) =>
             toAction({
               episode,
@@ -87,7 +81,7 @@ export class StoreActionsStep implements DispatcherStep {
             })
           )
         ),
-        ...dispatch.map((group) => {
+        ...toDispatch.map((group) => {
           const groupingMode = policies.groupingModeOf(group.policyId);
           const firstEpisode = group.episodes[0];
           const spaceId = firstEpisode?.space_id ?? 'default';
@@ -122,8 +116,8 @@ export class StoreActionsStep implements DispatcherStep {
 
     const recordedEpisodes =
       suppressed.length +
-      throttled.reduce((n, g) => n + g.episodes.length, 0) +
-      dispatch.reduce((n, g) => n + g.episodes.length, 0) +
+      plan.throttledEpisodeCount() +
+      plan.dispatchEpisodeCount() +
       unmatched.length;
 
     return { type: 'continue', data: { recordedEpisodes } };

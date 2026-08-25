@@ -24,12 +24,12 @@ import { DispatchStep } from './dispatch_step';
 const API_KEY = 'dGVzdC1pZDp0ZXN0LWtleQ==';
 
 const getFailures = (result: Awaited<ReturnType<DispatchStep['execute']>>): DispatchFailure[] =>
-  result.type === 'continue' ? result.data?.dispatchFailures ?? [] : [];
+  result.type === 'continue' ? [...(result.data?.outcome?.failures ?? [])] : [];
 
 const getExecutions = (
   result: Awaited<ReturnType<DispatchStep['execute']>>
-): Map<string, string[]> | undefined =>
-  result.type === 'continue' ? result.data?.dispatchedExecutions : undefined;
+): ReadonlyMap<string, readonly string[]> | undefined =>
+  result.type === 'continue' ? result.data?.outcome?.executionsByGroup : undefined;
 
 const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> =>
   ({
@@ -628,10 +628,10 @@ describe('DispatchStep', () => {
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
 
-    const executionIds = result.data?.dispatchedExecutions;
+    const executionIds = result.data?.outcome?.executionsByGroup;
     expect(executionIds?.get('g1')).toBeUndefined();
     expect(executionIds?.get('g2')).toBeUndefined();
-    expect(result.data?.dispatchFailures).toHaveLength(0);
+    expect(result.data?.outcome?.failures).toHaveLength(0);
     expect(mockWfm.getWorkflowsByIds).not.toHaveBeenCalled();
     expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
   });
