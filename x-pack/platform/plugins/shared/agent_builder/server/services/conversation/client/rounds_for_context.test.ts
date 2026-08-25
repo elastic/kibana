@@ -7,6 +7,7 @@
 
 import type { Conversation, ConversationRound, TimelineEvent } from '@kbn/agent-builder-common';
 import {
+  CONVERSATION_SCHEMA_VERSION,
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
@@ -63,9 +64,12 @@ const conversationWith = (parts: Partial<Conversation>): Conversation =>
   } as Conversation);
 
 describe('roundsForContext', () => {
-  it('derives context rounds from events, not from the stored rounds, when events are present', () => {
-    // rounds is empty/stale on purpose — if the helper read rounds it would return [].
-    const conversation = conversationWith({ events: roundTrio(), rounds: [] });
+  it('derives context rounds from the timeline, not the stored rounds, for an events-native conversation', () => {
+    const conversation = conversationWith({
+      events: roundTrio(),
+      rounds: [],
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+    });
 
     const rounds = roundsForContext(conversation);
 
@@ -79,9 +83,20 @@ describe('roundsForContext', () => {
     );
   });
 
-  it('falls back to stored rounds when the conversation has no events', () => {
+  it('uses the stored rounds for a legacy conversation, despite it carrying derived events', () => {
     const storedRound = { id: 'r-legacy' } as unknown as ConversationRound;
-    const conversation = conversationWith({ events: [], rounds: [storedRound] });
+    const conversation = conversationWith({ events: roundTrio(), rounds: [storedRound] });
+
+    expect(roundsForContext(conversation)).toEqual([storedRound]);
+  });
+
+  it('falls back to stored rounds when an events-native conversation has an empty timeline', () => {
+    const storedRound = { id: 'r-legacy' } as unknown as ConversationRound;
+    const conversation = conversationWith({
+      events: [],
+      rounds: [storedRound],
+      schema_version: CONVERSATION_SCHEMA_VERSION,
+    });
 
     expect(roundsForContext(conversation)).toEqual([storedRound]);
   });

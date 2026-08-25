@@ -292,6 +292,7 @@ export {
   type ConversationListOptions,
   CONVERSATION_SCHEMA_VERSION,
   MIN_EVENTS_NATIVE_SCHEMA_VERSION,
+  isEventsNativeVersion,
   EventActorType,
   TimelineTriggerType,
   TimelineEventType,

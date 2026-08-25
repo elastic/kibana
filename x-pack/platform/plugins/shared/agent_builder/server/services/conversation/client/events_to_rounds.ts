@@ -18,12 +18,15 @@ import {
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
+  isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
 import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from './rounds_to_events';
 
 /** Rounds derived from events timeline with a fallback to rounds if no events are present. */
 export const roundsForContext = (conversation: Conversation): ConversationRound[] =>
-  conversation.events && conversation.events.length > 0
+  isEventsNativeVersion(conversation.schema_version) &&
+  conversation.events &&
+  conversation.events.length > 0
     ? eventsToRounds(conversation.events)
     : conversation.rounds;
 

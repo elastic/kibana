@@ -17,6 +17,7 @@ import {
   MIN_EVENTS_NATIVE_SCHEMA_VERSION,
   TimelineEventType,
   ToolOrigin,
+  isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
@@ -30,7 +31,6 @@ import {
   fromEs,
   toEs,
   createRequestToEs,
-  isEventsNativeVersion,
   updateConversation,
   type Document as ConversationDocument,
 } from './converters';
