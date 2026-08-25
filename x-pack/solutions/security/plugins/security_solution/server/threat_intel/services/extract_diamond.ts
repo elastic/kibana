@@ -349,6 +349,8 @@ export const extractDiamond = async (
 
   let fallbackInputTokens = 0;
   let fallbackOutputTokens = 0;
+  let succeededVertices = 0;
+  let lastVertexError: Error | undefined;
   const fallbackT0 = Date.now();
   for (const vertex of VERTICES) {
     try {
@@ -356,10 +358,12 @@ export const extractDiamond = async (
         buildVertexPrompt(vertex, truncated)
       )) as RawResult<DiamondVertexResult>;
       vertices[vertex] = vertexResult.parsed;
+      succeededVertices += 1;
       const usage = extractUsageFromMetadata(vertexResult.raw.response_metadata ?? {});
       fallbackInputTokens += usage.inputTokens;
       fallbackOutputTokens += usage.outputTokens;
     } catch (vertexErr) {
+      lastVertexError = vertexErr as Error;
       logger.debug(
         `extract_diamond per-vertex ${vertex} failed: ` +
           `${(vertexErr as Error).message} report_id=${reportId}`
@@ -379,6 +383,19 @@ export const extractDiamond = async (
     metadata: fallbackMetadata,
     wallMs: fallbackWallMs,
   });
+
+  // Every vertex starts at the fabricated NONE default, so a total outage is
+  // indistinguishable from a report that genuinely has no adversary signal.
+  // Returning success here made the route answer 200 and the workflow record
+  // the extraction as complete, so a model outage or parse failure was never
+  // retried. One successful call is enough to trust the NONE values that
+  // remain.
+  if (succeededVertices === 0) {
+    throw new Error(
+      `extract_diamond failed: the single call and all ${VERTICES.length} per-vertex fallbacks ` +
+        `failed${lastVertexError ? ` (last error: ${lastVertexError.message})` : ''}`
+    );
+  }
 
   const fallbackOutput: DiamondLlmOutput = vertices;
   logger.debug(
