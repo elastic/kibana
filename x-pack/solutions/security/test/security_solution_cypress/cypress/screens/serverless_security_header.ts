@@ -151,9 +151,14 @@ export const showMoreItems = () => {
   // TODO: more menu item is flaky in security because of initial rendering and heigh measurement
   // so we really try to get a stable reference here before proceeding
   // https://github.com/elastic/kibana/issues/239331
-  cy.get('[data-test-subj~="nav-item"]').should('exist');
-  cy.get('[data-test-subj="globalLoadingIndicator-hidden"]').should('exist');
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  // Serverless-only chrome settling waits: the "More" overflow is a serverless SideNav concept, and
+  // on ESS pages with background polling (SIEM migrations) globalLoadingIndicator never settles, so
+  // these would hang the same way clickWhenVisibleElseOpenMore did before it was scoped.
+  if (Cypress.env('IS_SERVERLESS')) {
+    cy.get('[data-test-subj~="nav-item"]').should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator-hidden"]').should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  }
 
   // TODO: https://github.com/elastic/kibana/issues/239331
   // eslint-disable-next-line cypress/no-unnecessary-waiting
