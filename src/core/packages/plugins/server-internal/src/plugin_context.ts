@@ -316,6 +316,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerSecurityDelegate: (api) => deps.security.registerSecurityDelegate(api),
       fips: deps.security.fips,
       acquireFakeRequestEnricher: () => deps.security.acquireFakeRequestEnricher(),
+      serviceAccounts: {
+        registerOperation: (registration) =>
+          deps.security.serviceAccounts.registerOperation(registration),
+      },
     },
     userProfile: {
       registerUserProfileDelegate: (delegate) =>
