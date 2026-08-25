@@ -150,15 +150,43 @@ const getBucketResultColumnForField = (
 };
 
 const preserveColumnInKeepCommands = (commands: ESQLCommand[], columnName: string): void => {
+  let currentName = columnName;
   for (const command of commands) {
+    currentName = applyRenameCommandToColumn(command, currentName);
     if (
       command.name === 'keep' &&
-      !command.args.some((arg) => isColumn(arg) && arg.name === columnName)
+      !command.args.some((arg) => isColumn(arg) && arg.name === currentName)
     ) {
-      command.args.push(Builder.expression.column(columnName));
+      command.args.push(Builder.expression.column(currentName));
     }
   }
 };
+
+/**
+ * Applies a single RENAME command to a column name, returning the resulting
+ * name. Handles both `RENAME old AS new` and `RENAME new = old` forms.
+ */
+const applyRenameCommandToColumn = (command: ESQLCommand, columnName: string): string => {
+  if (command.name !== 'rename') return columnName;
+  let currentName = columnName;
+  for (const arg of command.args) {
+    if (Array.isArray(arg) || !isFunctionExpression(arg)) continue;
+    const [left, right] = arg.args;
+    if (Array.isArray(left) || Array.isArray(right) || !isColumn(left) || !isColumn(right)) {
+      continue;
+    }
+    if (arg.name === 'as' && left.name === currentName) {
+      currentName = right.name;
+    } else if (arg.name === '=' && right.name === currentName) {
+      currentName = left.name;
+    }
+  }
+  return currentName;
+};
+
+/** Resolves the final column name after all RENAME commands in the list. */
+const applyRenamesToColumn = (commands: ESQLCommand[], columnName: string): string =>
+  commands.reduce((name, command) => applyRenameCommandToColumn(command, name), columnName);
 
 /**
  * Appends a BUCKET time-bucketing clause to an ES|QL query for trendline use.
@@ -302,10 +330,47 @@ export const buildTrendlineQueryWithMetricFieldMap = (
       !sourceQueryHasStats ? groupByFields : undefined
     ),
     metricFieldMap,
-    timeField: tsStatsCommand
-      ? getTbucketResultColumn(tsStatsCommand) ?? buildTrendlineTbucketExpression()
-      : (tbucketStatsCommand && getTbucketResultColumn(tbucketStatsCommand)) ??
-        (statsCommand && getBucketResultColumnForField(statsCommand, timeField)) ??
-        buildTrendlineBucketExpression(timeField),
+    timeField: resolveTimeResultColumn({
+      commands: root.commands,
+      tsStatsCommand,
+      tbucketStatsCommand,
+      statsCommand,
+      timeField,
+    }),
   };
+};
+
+/**
+ * Resolves the final time result column of the trendline query, tracking the
+ * bucket column through RENAME commands after the aggregating STATS command.
+ */
+const resolveTimeResultColumn = ({
+  commands,
+  tsStatsCommand,
+  tbucketStatsCommand,
+  statsCommand,
+  timeField,
+}: {
+  commands: ESQLCommand[];
+  tsStatsCommand: ESQLCommand<'stats'> | undefined;
+  tbucketStatsCommand: ESQLCommand<'stats'> | undefined;
+  statsCommand: ESQLCommand<'stats'> | undefined;
+  timeField: string;
+}): string => {
+  const bucketStatsCommand = tsStatsCommand ?? tbucketStatsCommand ?? statsCommand;
+  const bucketColumn = tsStatsCommand
+    ? getTbucketResultColumn(tsStatsCommand)
+    : (tbucketStatsCommand && getTbucketResultColumn(tbucketStatsCommand)) ??
+      (statsCommand && getBucketResultColumnForField(statsCommand, timeField));
+
+  if (bucketColumn && bucketStatsCommand) {
+    return applyRenamesToColumn(
+      commands.slice(commands.indexOf(bucketStatsCommand) + 1),
+      bucketColumn
+    );
+  }
+
+  return tsStatsCommand
+    ? buildTrendlineTbucketExpression()
+    : buildTrendlineBucketExpression(timeField);
 };

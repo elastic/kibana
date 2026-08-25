@@ -115,6 +115,20 @@ const QUERY_CASES: QueryCase[] = [
     expectedMetricFields: ['avg_bytes'],
   },
   {
+    description: 'TS query with renamed TBUCKET column',
+    sourceQuery: `TS ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(AVG_OVER_TIME(bytes_gauge)) BY bucket = TBUCKET(100) | RENAME bucket AS time`,
+    expectedQuery: `TS ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(AVG_OVER_TIME(bytes_gauge)) BY bucket = TBUCKET(100) | RENAME bucket AS time`,
+    expectedTimeField: 'time',
+    expectedMetricFields: ['avg_bytes'],
+  },
+  {
+    description: 'FROM query with renamed BUCKET column and KEEP',
+    sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 hour) | RENAME bucket AS time | KEEP avg_bytes`,
+    expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 hour) | RENAME bucket AS time | KEEP avg_bytes, time`,
+    expectedTimeField: 'time',
+    expectedMetricFields: ['avg_bytes'],
+  },
+  {
     description: 'raw query with multiple metric fields',
     sourceQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX}`,
     expectedQuery: `FROM ${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX} | STATS AVG(bytes), AVG(phpmemory) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,

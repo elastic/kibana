@@ -219,6 +219,16 @@ describe('appendTimeBucketToEsqlQuery', () => {
     );
   });
 
+  it('keeps the renamed bucket column in a KEEP after RENAME', () => {
+    const result = appendTimeBucketToEsqlQuery(
+      'FROM index | STATS a = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | RENAME b AS time | KEEP a',
+      '@timestamp'
+    );
+    expect(result).toBe(
+      'FROM index | STATS a = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | RENAME b AS time | KEEP a, time'
+    );
+  });
+
   it('preserves an existing TBUCKET in a FROM query without adding a regular BUCKET', () => {
     const query = 'FROM kibana_sample_data_logstsdb | STATS AVG(bytes) BY TBUCKET(100)';
     const result = appendTimeBucketToEsqlQuery(query, '@timestamp');
@@ -332,6 +342,33 @@ describe('buildTrendlineQueryWithMetricFieldMap', () => {
 
     expect(result.query).toBe(query);
     expect(result.timeField).toBe('TBUCKET(100)');
+  });
+
+  it('resolves the time result column through RENAME after STATS for a TS query', () => {
+    const query =
+      'TS metrics-* | STATS avg_cpu = AVG(cpu) BY bucket = TBUCKET(100) | RENAME bucket AS time';
+    const result = buildTrendlineQueryWithMetricFieldMap(query, '@timestamp');
+
+    expect(result.query).toBe(query);
+    expect(result.timeField).toBe('time');
+  });
+
+  it('resolves the time result column through the RENAME assignment form', () => {
+    const query =
+      'FROM index | STATS avg_bytes = AVG(bytes) BY bucket = TBUCKET(100) | RENAME time = bucket';
+    const result = buildTrendlineQueryWithMetricFieldMap(query, '@timestamp');
+
+    expect(result.query).toBe(query);
+    expect(result.timeField).toBe('time');
+  });
+
+  it('resolves an aliased BUCKET through chained RENAME commands', () => {
+    const query =
+      'FROM index | STATS a = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | RENAME b AS c | RENAME c AS d';
+    const result = buildTrendlineQueryWithMetricFieldMap(query, '@timestamp');
+
+    expect(result.query).toBe(query);
+    expect(result.timeField).toBe('d');
   });
 
   it('returns the user-defined BUCKET alias as the time result column for a FROM query', () => {
