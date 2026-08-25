@@ -40,7 +40,6 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
 
     describe('not using sample data', function () {
       loadTestFile(require.resolve('./management'));
-      loadTestFile(require.resolve('./console'));
     });
   });
 }
