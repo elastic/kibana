@@ -31,10 +31,10 @@ const buildRegistry = () => {
   const registry = new UnifiedAttachmentTypeRegistry();
   registry.register({
     id: 'security.alert',
-    displayName: 'Alerts',
-    icon: 'bell',
-    getAttachmentViewObject: () => ({ event: 'added an alert' }),
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => 'Alerts',
+    getIcon: () => 'bell',
+    getCreationActivity: () => ({ event: 'added an alert' }),
+    getAttachmentList: () => ({
       children: () => <div data-test-subj="test-alerts-table">{'Alerts'}</div>,
     }),
     schema: z.object({}),
@@ -43,10 +43,10 @@ const buildRegistry = () => {
   // comments — files are counted via the file stats API instead.
   registry.register({
     id: 'file',
-    displayName: 'Files',
-    icon: 'document',
-    getAttachmentViewObject: () => ({ event: 'added a file' }),
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => 'Files',
+    getIcon: () => 'document',
+    getCreationActivity: () => ({ event: 'added a file' }),
+    getAttachmentList: () => ({
       children: () => <div />,
     }),
     schema: z.object({}),

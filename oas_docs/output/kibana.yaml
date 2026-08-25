@@ -3316,6 +3316,10 @@ paths:
                 input:
                   description: The user input message to send to the agent.
                   type: string
+                project_routing:
+                  description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
+                  maxLength: 2048
+                  type: string
                 prompts:
                   additionalProperties:
                     anyOf:
@@ -3788,6 +3792,10 @@ paths:
                   type: string
                 input:
                   description: The user input message to send to the agent.
+                  type: string
+                project_routing:
+                  description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
+                  maxLength: 2048
                   type: string
                 prompts:
                   additionalProperties:
@@ -82278,7 +82286,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve details of a single workflow execution by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve details of a single workflow execution by its ID.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid
       parameters:
         - description: Workflow execution ID
@@ -82439,7 +82447,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve child workflow executions spawned by sub-workflow steps within a parent execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve child workflow executions spawned by sub-workflow steps within a parent execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid-children
       parameters:
         - description: Workflow execution ID
@@ -82502,7 +82510,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve paginated logs for a workflow execution. Optionally filter by a specific step execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve paginated logs for a workflow execution. Optionally filter by a specific step execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid-logs
       parameters:
         - description: Workflow execution ID
@@ -82697,7 +82705,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve details of a single step execution within a workflow execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve details of a single step execution within a workflow execution.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
       operationId: get-workflows-executions-executionid-step-stepexecutionid
       parameters:
         - description: Workflow execution ID.
@@ -84215,7 +84223,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of executions for a specific workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve a paginated list of executions for a specific workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
       operationId: get-workflows-workflow-workflowid-executions
       parameters:
         - description: Workflow ID
@@ -84460,7 +84468,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of step-level execution records for a specific workflow. Optionally filter by step ID and include input or output data.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve a paginated list of step-level execution records for a specific workflow. Optionally filter by step ID and include input or output data.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
       operationId: get-workflows-workflow-workflowid-executions-steps
       parameters:
         - description: Workflow ID
@@ -84592,7 +84600,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Search across all workflow executions.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Search across all workflow executions.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read AND workflowsManagement:readExecution. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:readExecution.
       operationId: get-workflows-workflow-executions
       parameters:
         - description: KQL query string to filter executions.
@@ -96195,11 +96203,11 @@ components:
           type: string
         breach:
           additionalProperties: false
-          description: Breach detection configuration (required).
+          description: Breach detection configuration. Omit to treat every base row as a breach.
           type: object
           properties:
             segment:
-              description: Appendable ES|QL segment for breach detection (required).
+              description: A clause appended to the end of the rule's ES|QL query. Required in breach blocks.
               maxLength: 10000
               minLength: 1
               type: string
@@ -96224,7 +96232,6 @@ components:
       required:
         - format
         - base
-        - breach
     Kibana_HTTP_APIs_alerting_deactivate_alert_action:
       additionalProperties: false
       type: object
@@ -97560,12 +97567,13 @@ components:
           description: The parameters for the APM anomaly rule. These parameters are appropriate when `rule_type_id` is `apm.anomaly"`.
           properties:
             anomalyDetectorTypes:
-              description: The types of anomalies that are detected. For example, detect abnormal latency, throughput, or failed transaction rates.
+              description: The types of anomalies that are detected. For example, detect abnormal latency, throughput, failed transaction rates, or low transaction count.
               items:
                 enum:
                   - txLatency
                   - txThroughput
                   - txFailureRate
+                  - txLowCount
                 type: string
               minItems: 1
               type: array
@@ -103126,7 +103134,6 @@ components:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_numericFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_byteFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_durationFormat'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyDurationFormat'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_customFormat'
       description: Number display format for the dimension value.
       title: Format Type
@@ -104253,6 +104260,11 @@ components:
                 type: object
                 properties:
                   description:
+                    type: string
+                  engine:
+                    enum:
+                      - v1
+                      - v2
                     type: string
                   service:
                     type: string
@@ -109302,29 +109314,6 @@ components:
         - palette
         - shift
       title: Legacy color by value (absolute)
-      type: object
-    Kibana_HTTP_APIs_legacyDurationFormat:
-      additionalProperties: false
-      description: Legacy duration format used when the `asCode.useGASchemas` feature flag is disabled. Accepts free-form unit strings (no enum validation) to preserve pre-GA behavior.
-      properties:
-        from:
-          description: Source time unit for conversion, for example `milliseconds`, `seconds`, `minutes`, `hours`, or `days`.
-          type: string
-        suffix:
-          description: Suffix appended to the formatted value.
-          type: string
-        to:
-          description: Display time unit after conversion, for example `seconds`, `minutes`, `hours`, or `days`.
-          type: string
-        type:
-          enum:
-            - duration
-          type: string
-      required:
-        - type
-        - from
-        - to
-      title: Duration Format (Legacy)
       type: object
     Kibana_HTTP_APIs_legacyMetricChart:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyMetricNoESQL'

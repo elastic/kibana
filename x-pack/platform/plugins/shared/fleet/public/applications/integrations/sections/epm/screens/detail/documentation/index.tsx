@@ -16,8 +16,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiLink,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -77,7 +77,7 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
             <Inputs packageInfo={packageInfo} integration={integration} />
           </>
         ) : (
-          <EuiCallOut
+          <KbnInfoCallout
             announceOnMount
             title={
               <FormattedMessage
