@@ -249,34 +249,32 @@ export function initializeLayoutManager(
       const sameType = existingPanel?.type === type;
 
       const child = children$.getValue()[uuid]; // preserve existing child API if it exists
-      if (child && sameType) {
-        child.applySerializedState(serializedState);
+      if (child) {
+        if (sameType) {
+          child.applySerializedState(serializedState);
+        } else {
+          replacePanel(uuid, { serializedState, panelType: type });
+        }
       } else {
-        const updatedLayout = existingPanel
-          ? {
-              ...layout$.value,
-              panels: {
-                ...layout$.value.panels,
-                [uuid]: { grid: existingPanel.grid, type },
+        const updatedLayout = runPanelPlacementStrategy(
+          PlacementStrategy.findTopLeftMostOpenSpace,
+          {
+            currentLayout: layout$.value,
+            newPanel: {
+              uuid,
+              type,
+              grid: {
+                w: size?.width ?? DEFAULT_PANEL_WIDTH,
+                h: size?.height ?? DEFAULT_PANEL_HEIGHT,
               },
-            }
-          : runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
-              currentLayout: layout$.value,
-              newPanel: {
-                uuid,
-                type,
-                grid: {
-                  w: size?.width ?? DEFAULT_PANEL_WIDTH,
-                  h: size?.height ?? DEFAULT_PANEL_HEIGHT,
-                },
-              },
-              /**
-               * We can assume that all panels being sent as a single package are related; so,
-               * place them close together by grouping them around the first embeddable.
-               */
-              beside: uuid === first.embeddableId ? undefined : first.embeddableId,
-            });
-
+            },
+            /**
+             * We can assume that all panels being sent as a single package are related; so,
+             * place them close together by grouping them around the first embeddable.
+             */
+            beside: uuid === first.embeddableId ? undefined : first.embeddableId,
+          }
+        );
         currentChildState[uuid] = {
           ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
           ...serializedState,

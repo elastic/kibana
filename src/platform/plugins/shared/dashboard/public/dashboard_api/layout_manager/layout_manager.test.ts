@@ -9,6 +9,7 @@
 
 import { pick } from 'lodash';
 import { BehaviorSubject, of, Subject } from 'rxjs';
+import { waitFor } from '@testing-library/react';
 
 import {
   ControlValuesSource,
@@ -174,7 +175,7 @@ describe('layout manager', () => {
     expect(layoutManager.api.children$.getValue()[PANEL_ONE_ID]).toBeDefined();
   });
 
-  test('should append incoming embeddables to existing panels', () => {
+  test('should append incoming embeddables to existing panels', async () => {
     const incomingEmbeddables = [
       {
         embeddableId: 'panelTwo',
@@ -199,17 +200,19 @@ describe('layout manager', () => {
         type: 'anotherPanelType',
       },
     ];
+    const historyUpdated$ = new Subject<void>();
     const layoutManager = initializeLayoutManager(
       viewModeManagerMock,
       incomingEmbeddables,
       [panel1],
       [],
       trackPanelMock,
-      new Subject<void>()
+      historyUpdated$
     );
 
+    historyUpdated$.next();
+    await waitFor(() => expect(Object.keys(layoutManager.api.layout$.value.panels).length).toBe(3));
     const layout = layoutManager.api.layout$.value;
-    expect(Object.keys(layout.panels).length).toBe(3);
     expect(layout.panels.panelTwo).toEqual({
       grid: {
         h: 1,
