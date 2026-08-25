@@ -22,8 +22,6 @@ export const DETECTION_COVERAGE_VERDICTS = [
   'no_coverage',
 ] as const;
 
-export type DetectionCoverageVerdict = (typeof DETECTION_COVERAGE_VERDICTS)[number];
-
 /**
  * A thin orchestrator. It owns one intent: "I need detection for a behavior". It decides the
  * route and hands off. It brings no search tools of its own: it loads `find-security-rules`

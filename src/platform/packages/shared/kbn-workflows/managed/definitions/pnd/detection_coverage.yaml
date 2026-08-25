@@ -1,0 +1,232 @@
+version: "1"
+name: Detection Coverage Worker
+description: >
+  Checks whether a reported detection gap is already covered, then closes it by the
+  cheapest route: enable a disabled rule, install a prebuilt rule, or dispatch rule
+  creation. Every action sits behind a human approval gate.
+enabled: true
+tags:
+  - security
+  - detection-coverage
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        technique:
+          type: string
+          maxLength: 32
+          description: MITRE ATT&CK technique id for the gap, when known.
+        gap_description:
+          type: string
+          maxLength: 2000
+          description: Detection gap the coverage check should close.
+        evidence:
+          type: string
+          maxLength: 4000
+          description: Hunt findings or event examples supporting the gap.
+        confidence:
+          type: number
+          description: Confidence in the detection gap from 0 to 1.
+        preview_invocation_count:
+          type: number
+          default: 2
+          description: Rule executions the creation backtest simulates.
+      additionalProperties: false
+outputs:
+  - name: verdict
+    type: string
+  - name: existing_rule
+    type: string
+  - name: rule_enabled
+    type: boolean
+  - name: rule_installed
+    type: boolean
+  - name: rule_created
+    type: boolean
+  - name: created_rule_name
+    type: string
+  - name: enable_approved_not_applied
+    type: boolean
+  - name: install_approved_not_applied
+    type: boolean
+  - name: check_error
+    type: string
+steps:
+  # A new rule is the last resort. Reported gaps are often already covered by a
+  # disabled rule or by a prebuilt rule nobody installed, and drafting over those
+  # produces duplicates the analyst then has to reconcile.
+  - name: coverage_check
+    type: ai.agent
+    timeout: "10m"
+    # A failed check must not kill the run: with no verdict, the switch matches no
+    # case and the default arm reports it. Never fall through into an action.
+    on-failure:
+      continue: true
+    create-conversation: true
+    with:
+      message: |-
+        Use the [/detection-coverage](skill://detection-coverage) skill to decide
+        whether this detection gap is already covered. The supplied context is
+        sufficient; do not ask a follow-up question and do not draft a rule.
+
+        ATT&CK technique: {{ inputs.technique }}
+        Detection gap: {{ inputs.gap_description }}
+        Evidence: {{ inputs.evidence }}
+        Confidence: {{ inputs.confidence }}
+
+        Report one verdict. Take every rule name and id from a tool result.
+      schema:
+        type: object
+        properties:
+          verdict:
+            type: string
+            enum:
+              - covered_enabled
+              - covered_disabled
+              - prebuilt_available
+              - no_coverage
+          rule_id:
+            type: string
+          rule_name:
+            type: string
+          prebuilt_version:
+            type: number
+            description: Version of the matched prebuilt rule; 0 unless verdict is prebuilt_available.
+          rationale:
+            type: string
+        required: [verdict, rule_id, rule_name, prebuilt_version, rationale]
+
+  # One switch on the verdict, one case per automated action. A broken or missing
+  # verdict matches no case and lands in the default arm, never in creation.
+  - name: handle_verdict
+    type: switch
+    expression: "{{ steps.coverage_check.output.structured_output.verdict }}"
+    cases:
+      - match: no_coverage
+        steps:
+          - name: run_rule_creation
+            type: workflow.execute
+            with:
+              workflow-id: system-security-rule-creation
+              inputs:
+                technique: "{{ inputs.technique }}"
+                gap_description: "{{ inputs.gap_description }}"
+                evidence: "{{ inputs.evidence }}"
+                confidence: "${{ inputs.confidence }}"
+                preview_invocation_count: "${{ inputs.preview_invocation_count }}"
+      - match: covered_disabled
+        steps:
+          - name: review_enable
+            type: waitForApproval
+            timeout: "72h"
+            with:
+              approveLabel: Enable rule
+              rejectLabel: Dismiss
+              message: |-
+                This gap is already covered by a rule that is turned off.
+
+                Rule: {{ steps.coverage_check.output.structured_output.rule_name }}
+                Why it matches: {{ steps.coverage_check.output.structured_output.rationale }}
+
+                Detection gap: {{ inputs.gap_description }}
+
+                Review the check: /app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }}
+
+          - name: enable_existing_rule
+            type: kibana.request
+            on-failure:
+              continue: true
+            if: >-
+              ${{ steps.review_enable.output.response.approved == true
+                and steps.coverage_check.output.structured_output.rule_id != '' }}
+            with:
+              method: PATCH
+              path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
+              headers:
+                kbn-xsrf: string
+                elastic-api-version: "2023-10-31"
+                Content-Type: application/json
+              body:
+                id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+                enabled: true
+      - match: prebuilt_available
+        steps:
+          - name: review_install
+            type: waitForApproval
+            timeout: "72h"
+            with:
+              approveLabel: Install rule
+              rejectLabel: Dismiss
+              message: |-
+                An Elastic prebuilt rule covers this gap and is not installed.
+
+                Rule: {{ steps.coverage_check.output.structured_output.rule_name }}
+                Why it matches: {{ steps.coverage_check.output.structured_output.rationale }}
+
+                Detection gap: {{ inputs.gap_description }}
+
+                Approving installs the rule (it arrives disabled by default and can be
+                enabled from the Rules page). Review the check:
+                /app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }}
+
+          - name: install_prebuilt_rule
+            type: kibana.request
+            on-failure:
+              continue: true
+            if: >-
+              ${{ steps.review_install.output.response.approved == true
+                and steps.coverage_check.output.structured_output.rule_id != ''
+                and steps.coverage_check.output.structured_output.prebuilt_version > 0 }}
+            with:
+              method: POST
+              path: "/s/{{ workflow.spaceId }}/internal/detection_engine/prebuilt_rules/installation/_perform"
+              headers:
+                kbn-xsrf: string
+                elastic-api-version: "1"
+                x-elastic-internal-origin: kibana
+                Content-Type: application/json
+              body:
+                mode: SPECIFIC_RULES
+                rules:
+                  - rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+                    version: "${{ steps.coverage_check.output.structured_output.prebuilt_version }}"
+
+    default:
+      # Only covered_enabled (nothing to do) and unexpected verdicts land here.
+      - name: report_only
+        type: data.set
+        with:
+          note: >-
+            Verdict {{ steps.coverage_check.output.structured_output.verdict }}:
+            no automated action. See the run output.
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      verdict: "{{ steps.coverage_check.output.structured_output.verdict }}"
+      existing_rule: "{{ steps.coverage_check.output.structured_output.rule_name }}"
+      # Each flag asserts EVIDENCE OF THE MUTATION from the API response, never
+      # `error == null`. A step whose `if` was false is skipped, and a skipped step has no
+      # error, so an `error == null` check reports success for work that never ran. A
+      # skipped step also has no output, so these read false.
+      rule_enabled: "${{ steps.enable_existing_rule.output.enabled == true }}"
+      rule_installed: "${{ steps.install_prebuilt_rule.output.summary.succeeded > 0 }}"
+      # An action the analyst approved but the guards then declined is the state a caller
+      # must never read as done. One field per action: an `or` chain across steps that did
+      # not run in this branch evaluates to null and swallows the true case, and naming the
+      # action tells the caller which approval went unhonoured.
+      enable_approved_not_applied: >-
+        ${{ steps.review_enable.output.response.approved == true
+          and steps.enable_existing_rule.output.enabled != true }}
+      install_approved_not_applied: >-
+        ${{ steps.review_install.output.response.approved == true
+          and steps.install_prebuilt_rule.output.summary.succeeded == null }}
+      # Empty when the check produced a verdict; set when it failed or returned nothing, so
+      # upstream automation can tell "no gap found" from "no decision made".
+      check_error: >-
+        {% if steps.coverage_check.output.structured_output.verdict == null or steps.coverage_check.output.structured_output.verdict == '' %}coverage_check produced no verdict{% endif %}
+      # Outcome of the creation worker on the no_coverage path, so a caller can tell a
+      # created rule from a dismissed proposal or a failed draft.
+      rule_created: "${{ steps.run_rule_creation.output.created == true }}"
+      created_rule_name: "{{ steps.run_rule_creation.output.rule_name }}"

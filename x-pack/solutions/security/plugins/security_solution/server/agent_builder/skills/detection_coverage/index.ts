@@ -9,4 +9,3 @@ export {
   createDetectionCoverageSkill,
   DETECTION_COVERAGE_VERDICTS,
 } from './detection_coverage_skill';
-export type { DetectionCoverageVerdict } from './detection_coverage_skill';

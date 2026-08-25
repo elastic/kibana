@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import DETECTION_COVERAGE_YAML from './detection_coverage.yaml';
 import RULE_CREATION_YAML from './rule_creation.yaml';
 import RULE_PREVIEW_YAML from './rule_preview.yaml';
 import RULE_TUNING_YAML from './rule_tuning.yaml';
@@ -25,6 +26,7 @@ export const PND_WATCH_DETECTION_WORKFLOW_ID = 'system-security-watch-detection'
 export const PND_RULE_PREVIEW_WORKFLOW_ID = 'system-security-rule-preview';
 export const PND_RULE_TUNING_WORKFLOW_ID = 'system-security-rule-tuning';
 export const PND_RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
+export const PND_DETECTION_COVERAGE_WORKFLOW_ID = 'system-security-detection-coverage';
 
 const MANAGEMENT = {
   enablement: 'restorable',
@@ -32,6 +34,8 @@ const MANAGEMENT = {
   versionStrategy: 'auto',
 } as const;
 
+// Reinstall note: managed definitions reconcile by content hash on plugin start; a
+// yaml-only edit does not restart the dev server, so touch this file to reload.
 const PLUGIN_ID = 'pnd';
 
 /** Discoverable in Watch catalog / WorkflowSelector surfaces that opt into `watch`. */
@@ -90,7 +94,7 @@ export const PND_WATCH_DETECTION_WORKFLOW = {
   id: PND_WATCH_DETECTION_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 7,
+  version: 8,
   visibility: VISIBILITY,
   yaml: WATCH_DETECTION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
@@ -115,12 +119,22 @@ export const PND_RULE_TUNING_WORKFLOW = {
   yaml: RULE_TUNING_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
+export const PND_DETECTION_COVERAGE_WORKFLOW = {
+  billable: false,
+  id: PND_DETECTION_COVERAGE_WORKFLOW_ID,
+  management: MANAGEMENT,
+  pluginId: PLUGIN_ID,
+  version: 1,
+  visibility: WORKER_VISIBILITY,
+  yaml: DETECTION_COVERAGE_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
 export const PND_RULE_CREATION_WORKFLOW = {
   billable: false,
   id: PND_RULE_CREATION_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 7,
+  version: 8,
   visibility: WORKER_VISIBILITY,
   yaml: RULE_CREATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
@@ -142,4 +156,5 @@ export const PND_WATCH_WORKFLOW_IDS = [
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
   PND_RULE_CREATION_WORKFLOW_ID,
+  PND_DETECTION_COVERAGE_WORKFLOW_ID,
 ] as const;

@@ -11,7 +11,7 @@ settings:
   # Keyed by technique so a pending creation approval cannot block the sweep, and two
   # gaps for different techniques can be worked at once.
   concurrency:
-    key: "detection-watch-{{ inputs.technique | default: 'sweep' }}"
+    key: "detection-watch-{{ inputs.technique | default: inputs.gap_description | default: 'sweep' | slice: 0, 48 }}"
     strategy: drop
     max: 1
 triggers:
@@ -26,14 +26,17 @@ triggers:
           description: Producing workflow execution id.
         technique:
           type: string
+          maxLength: 32
           description: >
             MITRE ATT&CK technique id for a new rule. Supplying it switches the run
             from rule tuning to rule creation.
         gap_description:
           type: string
+          maxLength: 2000
           description: Detection gap the new rule should cover.
         evidence:
           type: string
+          maxLength: 4000
           description: Hunt findings or event examples supporting the gap.
         confidence:
           type: number
@@ -78,12 +81,12 @@ consts:
         gated: true
         enabled: true
 steps:
-  # A supplied technique means a caller wants one rule drafted; anything else is
-  # the tuning sweep. Exactly one worker runs per execution.
+  # A supplied technique or gap description means a caller reports a gap; anything
+  # else is the tuning sweep. Exactly one worker runs per execution.
   - name: select_worker
     type: data.set
     with:
-      worker: "{% if inputs.technique and inputs.technique != '' %}creation{% else %}tuning{% endif %}"
+      worker: "{% if inputs.technique and inputs.technique != '' %}coverage{% elsif inputs.gap_description and inputs.gap_description != '' %}coverage{% else %}tuning{% endif %}"
 
   # An explicit branch, so the two workers cannot both run even if one condition is
   # ever authored wrong.
@@ -99,10 +102,14 @@ steps:
             min_fp_count: "${{ consts.watch_policy.config.minFpCountPerRule }}"
             preview_invocation_count: "${{ consts.watch_policy.config.previewInvocationCount }}"
     else:
-      - name: run_rule_creation
+      # The whole coverage capability lives in one worker: check, verdict switch,
+      # approval gates, and actions. The watch only dispatches and reports.
+      # The worker owns the whole coverage story: verdict, gates, actions, and its own
+      # outputs. Read results on the worker's execution, as with the tuning branch.
+      - name: run_coverage
         type: workflow.execute
         with:
-          workflow-id: system-security-rule-creation
+          workflow-id: system-security-detection-coverage
           inputs:
             technique: "{{ inputs.technique }}"
             gap_description: "{{ inputs.gap_description }}"
