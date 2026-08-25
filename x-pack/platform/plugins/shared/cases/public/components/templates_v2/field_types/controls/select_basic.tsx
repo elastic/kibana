@@ -19,7 +19,10 @@ import type {
 import { FIELD_REQUIRED } from '../../translations';
 import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type SelectBasicProps = z.infer<typeof SelectBasicFieldSchema> & ConditionRenderProps;
+type SelectBasicProps = z.infer<typeof SelectBasicFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 export const SelectBasic = ({
   label,
@@ -31,6 +34,7 @@ export const SelectBasic = ({
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }: SelectBasicProps) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -57,7 +61,8 @@ export const SelectBasic = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
     <Controller

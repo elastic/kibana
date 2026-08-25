@@ -108,7 +108,7 @@ export class NavigationCustomizationService {
       this.reporter.reportLoadedOnce({
         analytics: core.analytics,
         getCurrentUser: () => core.security.authc.getCurrentUser(),
-        savedCustomization: core.userStorage.get<NavigationCustomization>(
+        savedCustomization: core.userStorage.peek<NavigationCustomization>(
           NAV_CUSTOMIZATION_STORAGE_KEY
         ),
       });
@@ -140,7 +140,7 @@ export class NavigationCustomizationService {
 
       const { items, defaultItemIds } = await this.getNavigationItems(chrome);
 
-      const savedCustomization = core.userStorage.get<NavigationCustomization>(
+      const savedCustomization = core.userStorage.peek<NavigationCustomization>(
         NAV_CUSTOMIZATION_STORAGE_KEY
       );
 

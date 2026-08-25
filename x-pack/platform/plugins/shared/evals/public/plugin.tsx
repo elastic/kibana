@@ -108,7 +108,7 @@ export class EvalsPublicPlugin
       const {
         label = DEFAULT_ADD_TO_DATASET_LABEL,
         ariaLabel = label,
-        iconType = 'beaker',
+        iconType = 'flask',
         stopPropagation = false,
         onBeforeOpen,
         ...options

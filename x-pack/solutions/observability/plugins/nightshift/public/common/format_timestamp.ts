@@ -13,7 +13,7 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 export const formatTimestamp = (timestamp: string, dateFormat: string): string => {
   const parsed = moment(timestamp);
   if (!parsed.isValid()) {
-    return i18n.translate('xpack.observability.nightshift.invalidTimestamp', {
+    return i18n.translate('xpack.nightshift.invalidTimestamp', {
       defaultMessage: 'Unknown time',
     });
   }
@@ -23,7 +23,7 @@ export const formatTimestamp = (timestamp: string, dateFormat: string): string =
 export const formatShortTime = (timestamp: string): string => {
   const parsed = moment(timestamp);
   if (!parsed.isValid()) {
-    return i18n.translate('xpack.observability.nightshift.invalidTimestamp', {
+    return i18n.translate('xpack.nightshift.invalidTimestamp', {
       defaultMessage: 'Unknown time',
     });
   }

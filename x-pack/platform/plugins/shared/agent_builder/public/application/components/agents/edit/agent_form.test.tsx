@@ -43,6 +43,12 @@ jest.mock('../../../hooks/agents/use_agent_edit', () => ({
   useAgentEdit: jest.fn(),
 }));
 
+// The settings tab's AI indices section reads a ui setting this test's Kibana context does not
+// provide. Off keeps the section out of the way; it has its own tests.
+jest.mock('../../../hooks/use_is_context_engine_enabled', () => ({
+  useIsContextEngineEnabled: () => false,
+}));
+
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {

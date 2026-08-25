@@ -114,7 +114,7 @@ export const CreatedByCell = memo(({ createdBy, managed }: CreatedByCellProps) =
         data-test-subj={CONTENT_LIST_TEST_SUBJECTS.createdByNoCreator}
       >
         <EuiToolTip content={NO_CREATOR_USER_LABEL} position="top">
-          <EuiAvatar name={NO_CREATOR_USER_LABEL} size="s" iconType="userAvatar" color="subdued" />
+          <EuiAvatar name={NO_CREATOR_USER_LABEL} size="s" iconType="user" color="subdued" />
         </EuiToolTip>
       </span>
     );

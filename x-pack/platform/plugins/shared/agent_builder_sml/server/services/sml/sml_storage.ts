@@ -25,7 +25,8 @@ const SEMANTIC_MULTI_FIELD = {
  */
 const smlStorageSchemaProperties = {
   id: types.keyword({}),
-  type: types.keyword({}),
+  /** Normalized to lowercase so the @ menu's `prefix` query is case-insensitive. */
+  type: types.keyword({ normalizer: 'lowercase' }),
   title: types.text({ fields: SEMANTIC_MULTI_FIELD }),
   origin: types.object({
     properties: {
@@ -35,30 +36,6 @@ const smlStorageSchemaProperties = {
   content: types.text({ fields: SEMANTIC_MULTI_FIELD }),
   description: types.text({ fields: SEMANTIC_MULTI_FIELD }),
   tags: types.keyword({ normalizer: 'lowercase' }),
-  /**
-   * Autocomplete surface. The indexer auto-prepends two entries on every record:
-   *   { value: entry.title, kind: 'title' }
-   *   { value: entry.type,  kind: 'type'  }
-   * plus any entries the producer provides (taglines, nicknames, categories, etc.).
-   * The @ menu queries `discovery_labels.value` with `multi_match bool_prefix`
-   * (SAYT's native query type) and reads `inner_hits` to render which entry
-   * matched, with `kind`-driven UI badging.
-   *
-   * `discovery_labels.value` is `search_as_you_type`. ES auto-generates the
-   * `_2gram`, `_3gram`, and `_index_prefix` subfields used by `bool_prefix`.
-   *
-   * Known limitation: ES does not produce useful highlight snippets for
-   * SAYT + `bool_prefix` queries in a nested context (bug
-   * elastic/elasticsearch#53744, open since 2020). `matched_discovery_labels`
-   * entries are returned without `highlighted`; the UI falls back to rendering
-   * plain `value` for those entries.
-   */
-  discovery_labels: types.nested({
-    properties: {
-      value: types.search_as_you_type({}),
-      kind: types.keyword({}),
-    },
-  }),
   references: types.object({
     properties: {
       uri: types.keyword({}),

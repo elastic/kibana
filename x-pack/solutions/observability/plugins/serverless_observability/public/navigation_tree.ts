@@ -48,7 +48,7 @@ export const createNavigationTree = ({
     body: [
       ...filterForFeatureAvailability(
         {
-          link: 'observability-overview:nightshift' as const,
+          link: 'nightshift' as const,
           icon: NightshiftNavigationIcon,
         },
         significantEventsAvailable
@@ -154,7 +154,12 @@ export const createNavigationTree = ({
                 sideNavStatus: 'hidden',
               },
               { link: 'apm:traces' },
-              { link: 'apm:dependencies' },
+              {
+                link: 'apm:dependencies',
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return pathNameSerialized.startsWith(prepend('/app/apm/dependencies'));
+                },
+              },
               { link: 'apm:settings', sideNavStatus: 'hidden' },
             ],
           },
@@ -268,6 +273,10 @@ export const createNavigationTree = ({
         },
         !showAiAssistant
       ),
+      {
+        icon: 'sparkles',
+        link: 'context_engine',
+      },
       ...filterForFeatureAvailability(
         {
           id: 'machine_learning-landing',

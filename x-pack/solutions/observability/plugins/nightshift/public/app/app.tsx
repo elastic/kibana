@@ -25,28 +25,29 @@ import { useKibana } from '../hooks/use_kibana';
 import { buildNewSignificantEventChatOptions } from '../chat/open_significant_event_in_chat';
 import {
   byCriticalityAndUpdatedAtDesc,
+  getLatestInvestigation,
   getNeedsActionEvents,
   getResolvedEvents,
 } from '../event/significant_event_status';
+import { useFetchEventById } from '../hooks/use_fetch_event_by_id';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
+import { useFetchInvestigationStatuses } from '../hooks/use_fetch_investigation_statuses';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
 import {
-  buildBlastRadiusChips,
-  filterEventsByBlastRadiusChip,
-} from '../landing/blast_radius_chips';
-import { BlastRadiusEntities } from '../landing/blast_radius_entities';
+  buildImpactedServiceChips,
+  filterEventsByImpactedServiceChip,
+} from '../landing/impacted_services_chips';
+import { ImpactedServices } from '../landing/impacted_services';
 import { SignificantEventList } from '../landing/significant_event_list';
 import { SignificantEventStatuses } from '../landing/significant_event_statuses';
 import { EventFlyout } from '../event/event_flyout';
 import { NightshiftHeader } from './header';
 import { NightshiftEmptyState } from './empty_state';
 import {
-  BLAST_RADIUS_QUERY_PARAM,
-  clearNightshiftEventSelectionParams,
-  getNightshiftEventSelectionFromSearch,
-  NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
-  NIGHTSHIFT_EVENT_UUID_QUERY_PARAM,
-  setNightshiftEventSelectionParams,
+  clearNightshiftEventIdParam,
+  getNightshiftEventIdFromSearch,
+  IMPACTED_SERVICES_QUERY_PARAM,
+  setNightshiftEventIdParam,
 } from '../common/url_params';
 
 const COMPACT_APP_HEADER_HEIGHT_PX = 48;
@@ -78,29 +79,6 @@ const setElementInert = (element: HTMLDivElement | null): void => {
   element?.setAttribute('inert', '');
 };
 
-const resolveSelectedEvent = ({
-  events,
-  eventIdFromUrl,
-  eventUuidFromUrl,
-}: {
-  events: SignificantEvent[];
-  eventIdFromUrl?: string;
-  eventUuidFromUrl?: string;
-}): SignificantEvent | undefined => {
-  if (eventUuidFromUrl) {
-    const byUuid = events.find(({ event_uuid: eventUuid }) => eventUuid === eventUuidFromUrl);
-    if (byUuid) {
-      return byUuid;
-    }
-  }
-
-  if (eventIdFromUrl) {
-    return events.find(({ event_id: eventId }) => eventId === eventIdFromUrl);
-  }
-
-  return undefined;
-};
-
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application } = useKibana().services;
@@ -116,25 +94,49 @@ export function NightshiftApp(): React.ReactElement {
 
   const events = useMemo(() => data?.hits ?? [], [data]);
 
+  const investigationExecutionIds = useMemo(
+    () =>
+      events
+        .map((event) => getLatestInvestigation(event)?.workflow_execution_id)
+        .filter((executionId): executionId is string => Boolean(executionId)),
+    [events]
+  );
+  const { data: investigationStatuses } = useFetchInvestigationStatuses(investigationExecutionIds);
+  const selectedEventIdFromUrl = useMemo(() => getNightshiftEventIdFromSearch(search), [search]);
+
   // Derived from the freshest fetched list (not a click-time snapshot), so
   // background refetches keep the open flyout current.
-  const { eventId: selectedEventIdFromUrl, eventUuid: selectedEventUuid } = useMemo(
-    () => getNightshiftEventSelectionFromSearch(search),
-    [search]
+  const eventFromList = useMemo(
+    () => events.find(({ event_id: eventId }) => eventId === selectedEventIdFromUrl),
+    [events, selectedEventIdFromUrl]
   );
-  const selectedEvent = useMemo(
-    () =>
-      resolveSelectedEvent({
-        events,
-        eventIdFromUrl: selectedEventIdFromUrl,
-        eventUuidFromUrl: selectedEventUuid,
-      }),
-    [events, selectedEventIdFromUrl, selectedEventUuid]
-  );
-  const [eventNotFound, setEventNotFound] = useState(false);
 
-  const selectedBlastRadiusKey = useMemo(
-    () => new URLSearchParams(search).get(BLAST_RADIUS_QUERY_PARAM) ?? undefined,
+  const shouldFetchById = Boolean(selectedEventIdFromUrl) && !eventFromList && !isLoading;
+  const eventByIdQuery = useFetchEventById(selectedEventIdFromUrl, { enabled: shouldFetchById });
+  const selectedEvent = eventFromList ?? eventByIdQuery.data;
+
+  const [notFoundEventId, setNotFoundEventId] = useState<string>();
+
+  useEffect(() => {
+    if (!selectedEventIdFromUrl || isLoading) {
+      return;
+    }
+    if (selectedEvent) {
+      setNotFoundEventId(undefined);
+      return;
+    }
+    if (!eventByIdQuery.isFetched) {
+      return;
+    }
+
+    setNotFoundEventId(selectedEventIdFromUrl);
+    const params = new URLSearchParams(history.location.search);
+    clearNightshiftEventIdParam(params);
+    history.replace({ search: params.toString() });
+  }, [eventByIdQuery.isFetched, history, isLoading, selectedEvent, selectedEventIdFromUrl]);
+
+  const selectedImpactedServiceKey = useMemo(
+    () => new URLSearchParams(search).get(IMPACTED_SERVICES_QUERY_PARAM) ?? undefined,
     [search]
   );
 
@@ -159,21 +161,17 @@ export function NightshiftApp(): React.ReactElement {
 
   const handleEventClick = useCallback(
     (event: SignificantEvent) => {
-      setEventNotFound(false);
+      setNotFoundEventId(undefined);
       const params = new URLSearchParams(history.location.search);
-      setNightshiftEventSelectionParams(params, {
-        eventId: event.event_id,
-        eventUuid: event.event_uuid,
-      });
+      setNightshiftEventIdParam(params, event.event_id);
       history.replace({ search: params.toString() });
     },
     [history]
   );
 
   const handleFlyoutClose = useCallback(() => {
-    setEventNotFound(false);
     const params = new URLSearchParams(history.location.search);
-    clearNightshiftEventSelectionParams(params);
+    clearNightshiftEventIdParam(params);
     history.replace({ search: params.toString() });
   }, [history]);
 
@@ -193,77 +191,38 @@ export function NightshiftApp(): React.ReactElement {
     [needsActionEvents, resolvedEvents]
   );
 
-  // Blast radius pills come from each event's `blast_radius[]` (stream_names only when absent).
-  const blastRadius = useMemo(() => buildBlastRadiusChips(needsActionEvents), [needsActionEvents]);
+  // Chips cover every event on the page, resolved included, so filtering by a service that only
+  // appears in resolved events is still reachable.
+  const impactedServiceChips = useMemo(() => buildImpactedServiceChips(shownEvents), [shownEvents]);
 
-  const activeBlastRadiusChip = blastRadius.some(({ key }) => key === selectedBlastRadiusKey)
-    ? selectedBlastRadiusKey
+  const activeImpactedServiceChip = impactedServiceChips.some(
+    ({ key }) => key === selectedImpactedServiceKey
+  )
+    ? selectedImpactedServiceKey
     : undefined;
 
-  const handleBlastRadiusSelect = useCallback(
+  const handleImpactedServiceSelect = useCallback(
     (chipKey: string) => {
       const params = new URLSearchParams(history.location.search);
-      const nextKey = activeBlastRadiusChip === chipKey ? undefined : chipKey;
+      const nextKey = activeImpactedServiceChip === chipKey ? undefined : chipKey;
       if (nextKey) {
-        params.set(BLAST_RADIUS_QUERY_PARAM, nextKey);
+        params.set(IMPACTED_SERVICES_QUERY_PARAM, nextKey);
       } else {
-        params.delete(BLAST_RADIUS_QUERY_PARAM);
+        params.delete(IMPACTED_SERVICES_QUERY_PARAM);
       }
       history.replace({ search: params.toString() });
     },
-    [activeBlastRadiusChip, history]
+    [activeImpactedServiceChip, history]
   );
 
   const visibleNeedsActionEvents = useMemo(
-    () => filterEventsByBlastRadiusChip(needsActionEvents, activeBlastRadiusChip),
-    [needsActionEvents, activeBlastRadiusChip]
+    () => filterEventsByImpactedServiceChip(needsActionEvents, activeImpactedServiceChip),
+    [needsActionEvents, activeImpactedServiceChip]
   );
   const visibleResolvedEvents = useMemo(
-    () => filterEventsByBlastRadiusChip(resolvedEvents, activeBlastRadiusChip),
-    [resolvedEvents, activeBlastRadiusChip]
+    () => filterEventsByImpactedServiceChip(resolvedEvents, activeImpactedServiceChip),
+    [resolvedEvents, activeImpactedServiceChip]
   );
-
-  const selectedEventVisible = useMemo(() => {
-    if (!selectedEvent) {
-      return false;
-    }
-    return (
-      needsActionEvents.some(
-        ({ event_uuid: eventUuid }) => eventUuid === selectedEvent.event_uuid
-      ) ||
-      resolvedEvents.some(({ event_uuid: eventUuid }) => eventUuid === selectedEvent.event_uuid)
-    );
-  }, [needsActionEvents, resolvedEvents, selectedEvent]);
-
-  useEffect(() => {
-    const hasSelectionInUrl = Boolean(selectedEventUuid || selectedEventIdFromUrl);
-    if (hasSelectionInUrl && !selectedEvent && !isLoading) {
-      setEventNotFound(true);
-      const params = new URLSearchParams(history.location.search);
-      if (
-        params.has(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM) ||
-        params.has(NIGHTSHIFT_EVENT_ID_QUERY_PARAM)
-      ) {
-        clearNightshiftEventSelectionParams(params);
-        history.replace({ search: params.toString() });
-      }
-      return;
-    }
-    if (selectedEvent) {
-      setEventNotFound(false);
-      if (
-        selectedEventUuid !== selectedEvent.event_uuid ||
-        selectedEventIdFromUrl !== selectedEvent.event_id
-      ) {
-        const params = new URLSearchParams(history.location.search);
-        setNightshiftEventSelectionParams(params, {
-          eventId: selectedEvent.event_id,
-          eventUuid: selectedEvent.event_uuid,
-        });
-        history.replace({ search: params.toString() });
-      }
-    }
-  }, [history, isLoading, selectedEvent, selectedEventIdFromUrl, selectedEventUuid]);
 
   const scrollToSection = (sectionRef: React.RefObject<HTMLElement>) => {
     sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -329,8 +288,8 @@ export function NightshiftApp(): React.ReactElement {
       value2: needsActionEvents.length,
       key3: 'resolved_event_count',
       value3: resolvedEvents.length,
-      key4: 'blast_radius_filter_active',
-      value4: activeBlastRadiusChip ? 1 : 0,
+      key4: 'impacted_services_filter_active',
+      value4: activeImpactedServiceChip ? 1 : 0,
     },
     meta: {
       description:
@@ -340,13 +299,14 @@ export function NightshiftApp(): React.ReactElement {
 
   const sharedListProps = {
     closingEventUuid,
+    investigationStatuses,
     onChatClick,
     onCloseClick: handleCloseSignificantEvent,
     onEventClick: handleEventClick,
     selectedEventUuid: selectedEvent?.event_uuid,
   };
 
-  const eventNotFoundCallout = eventNotFound ? (
+  const eventNotFoundCallout = notFoundEventId ? (
     <div
       css={css`
         margin-top: ${euiTheme.size.m};
@@ -358,12 +318,13 @@ export function NightshiftApp(): React.ReactElement {
         color="warning"
         iconType="warning"
         size="s"
-        title={i18n.translate('xpack.observability.nightshift.eventNotFoundTitle', {
-          defaultMessage: 'Significant Event not found',
+        title={i18n.translate('xpack.nightshift.eventNotFoundTitle', {
+          defaultMessage: 'Significant Event {eventId} not found',
+          values: { eventId: notFoundEventId },
         })}
       >
         <EuiText size="s">
-          {i18n.translate('xpack.observability.nightshift.eventNotFoundDescription', {
+          {i18n.translate('xpack.nightshift.eventNotFoundDescription', {
             defaultMessage:
               'The event in this link is no longer in the current results. The URL has been cleared.',
           })}
@@ -439,7 +400,7 @@ export function NightshiftApp(): React.ReactElement {
                 color="warning"
                 iconType="warning"
                 size="s"
-                title={i18n.translate('xpack.observability.nightshift.refreshWarningTitle', {
+                title={i18n.translate('xpack.nightshift.refreshWarningTitle', {
                   defaultMessage: 'Showing the last loaded results; refreshing failed.',
                 })}
               >
@@ -451,7 +412,7 @@ export function NightshiftApp(): React.ReactElement {
                   onClick={() => refetch()}
                   size="s"
                 >
-                  {i18n.translate('xpack.observability.nightshift.retryButtonText', {
+                  {i18n.translate('xpack.nightshift.retryButtonText', {
                     defaultMessage: 'Retry',
                   })}
                 </EuiButtonEmpty>
@@ -468,10 +429,10 @@ export function NightshiftApp(): React.ReactElement {
             resolvedCount={resolvedEvents.length}
           />
 
-          <BlastRadiusEntities
-            entities={blastRadius}
-            onSelect={handleBlastRadiusSelect}
-            selectedEntityKey={activeBlastRadiusChip}
+          <ImpactedServices
+            services={impactedServiceChips}
+            onSelect={handleImpactedServiceSelect}
+            selectedServiceKey={activeImpactedServiceChip}
           />
 
           <EuiFlexItem
@@ -485,15 +446,15 @@ export function NightshiftApp(): React.ReactElement {
                   <SignificantEventList
                     {...sharedListProps}
                     events={visibleNeedsActionEvents}
-                    filterActive={Boolean(activeBlastRadiusChip)}
+                    filterActive={Boolean(activeImpactedServiceChip)}
                     onClearFilter={
-                      activeBlastRadiusChip
-                        ? () => handleBlastRadiusSelect(activeBlastRadiusChip)
+                      activeImpactedServiceChip
+                        ? () => handleImpactedServiceSelect(activeImpactedServiceChip)
                         : undefined
                     }
                     sectionRef={needsActionSectionRef}
                     statusColor="danger"
-                    title={i18n.translate('xpack.observability.nightshift.list.needActionTitle', {
+                    title={i18n.translate('xpack.nightshift.list.needActionTitle', {
                       defaultMessage: 'Need Action',
                     })}
                   />
@@ -503,15 +464,15 @@ export function NightshiftApp(): React.ReactElement {
                 <SignificantEventList
                   {...sharedListProps}
                   events={visibleResolvedEvents}
-                  filterActive={Boolean(activeBlastRadiusChip && resolvedEvents.length > 0)}
+                  filterActive={Boolean(activeImpactedServiceChip && resolvedEvents.length > 0)}
                   onClearFilter={
-                    activeBlastRadiusChip && resolvedEvents.length > 0
-                      ? () => handleBlastRadiusSelect(activeBlastRadiusChip)
+                    activeImpactedServiceChip && resolvedEvents.length > 0
+                      ? () => handleImpactedServiceSelect(activeImpactedServiceChip)
                       : undefined
                   }
                   sectionRef={resolvedSectionRef}
                   statusColor="success"
-                  title={i18n.translate('xpack.observability.nightshift.list.resolvedTitle', {
+                  title={i18n.translate('xpack.nightshift.list.resolvedTitle', {
                     defaultMessage: 'Resolved',
                   })}
                 />
@@ -551,7 +512,7 @@ export function NightshiftApp(): React.ReactElement {
         </div>
       )}
 
-      {selectedEvent && selectedEventVisible && (
+      {selectedEvent && (
         <EventFlyout
           key={selectedEvent.event_id}
           event={selectedEvent}
@@ -570,7 +531,7 @@ function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactE
       color="danger"
       iconType="warning"
       announceOnMount
-      title={i18n.translate('xpack.observability.nightshift.loadingErrorTitle', {
+      title={i18n.translate('xpack.nightshift.loadingErrorTitle', {
         defaultMessage: 'Unable to load significant events',
       })}
       css={css`
@@ -584,7 +545,7 @@ function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactE
         onClick={onRetry}
         size="s"
       >
-        {i18n.translate('xpack.observability.nightshift.retryButtonText', {
+        {i18n.translate('xpack.nightshift.retryButtonText', {
           defaultMessage: 'Retry',
         })}
       </EuiButton>

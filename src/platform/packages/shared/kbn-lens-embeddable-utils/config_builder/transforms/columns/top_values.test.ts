@@ -102,6 +102,20 @@ describe('Top Values Transforms', () => {
       expect(result.params.excludeIsRegex).toBe(false);
     });
 
+    it('should preserve numeric includes and excludes verbatim', () => {
+      const input: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['destination.port'],
+        limit: 5,
+        includes: { as_regex: false, values: [443] },
+        excludes: { as_regex: false, values: [22, 23, 53] },
+      };
+
+      const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
+      expect(result.params.include).toEqual([443]);
+      expect(result.params.exclude).toEqual([22, 23, 53]);
+    });
+
     it('should handle orderBy column type', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
@@ -388,6 +402,35 @@ describe('Top Values Transforms', () => {
         as_regex: false,
         values: ['inactive'],
       });
+    });
+
+    it('should emit numeric includes and excludes without stringifying them', () => {
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'destination.port',
+        customLabel: false,
+        label: 'Top 5 values for destination.port',
+        isBucketed: true,
+        dataType: 'number',
+        params: {
+          secondaryFields: [],
+          size: 5,
+          accuracyMode: false,
+          include: [443],
+          includeIsRegex: false,
+          exclude: [22, 23, 53],
+          excludeIsRegex: false,
+          otherBucket: false,
+          missingBucket: false,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+          parentFormat: { id: 'terms' },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.includes).toEqual({ as_regex: false, values: [443] });
+      expect(result.excludes).toEqual({ as_regex: false, values: [22, 23, 53] });
     });
 
     it('should handle orderBy column type', () => {

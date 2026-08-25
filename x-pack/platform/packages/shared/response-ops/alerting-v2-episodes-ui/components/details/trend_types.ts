@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/** Pixel height of the trend chart canvas, shared with its loading skeleton. */
+export const TREND_CHART_HEIGHT = 240;
+
 export interface TrendPoint {
   /** Epoch milliseconds for the bucket. */
   x: number;

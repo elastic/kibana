@@ -60,7 +60,7 @@ describe('action policy events queries', () => {
       );
     });
 
-    it('matches both dispatched and throttled when outcomes is omitted', () => {
+    it('matches dispatched, throttled, and dispatch_failed when outcomes is omitted', () => {
       const filters = filtersOf(buildShared());
       expect(filters).toEqual(
         expect.arrayContaining([
@@ -69,6 +69,7 @@ describe('action policy events queries', () => {
               'event.action': [
                 ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
                 ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
+                ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED,
               ],
             },
           },

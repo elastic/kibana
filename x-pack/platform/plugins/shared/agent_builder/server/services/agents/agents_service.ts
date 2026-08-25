@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core/server';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type { AgentAvailabilityConfig, AgentTypeRegistry } from '@kbn/agent-builder-server/agents';
-import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAiIndexId, chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { createConfigurationResolver } from './resolve_configuration';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -67,7 +67,10 @@ export class AgentsService {
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
     this.setupDeps = setupDeps;
 
-    this.typeRegistry.register({ id: chatAgentTypeId, baseConfiguration: {} });
+    this.typeRegistry.register({
+      id: chatAgentTypeId,
+      baseConfiguration: { ai_indices: [agentBuilderDefaultAiIndexId] },
+    });
 
     return {
       register: (agent) => {
@@ -165,11 +168,19 @@ export class AgentsService {
       request,
     }) => {
       const spaceId = getCurrentSpaceId({ request, spaces });
-      return configurationResolver({
+      return configurationResolver.resolveConfig({
         agentType: agent.type,
         configuration: agent.configuration,
         ctx: { request, spaceId },
       });
+    };
+
+    const resolveAgentBaseConfiguration: AgentsServiceStart['resolveAgentBaseConfiguration'] = ({
+      agentType,
+      request,
+    }) => {
+      const spaceId = getCurrentSpaceId({ request, spaces });
+      return configurationResolver.resolveBase(agentType, { request, spaceId });
     };
 
     const removeToolRefsFromAgents = async ({
@@ -224,6 +235,7 @@ export class AgentsService {
       getRegistry,
       ensure,
       resolveAgentConfiguration,
+      resolveAgentBaseConfiguration,
       removeToolRefsFromAgents,
       getAgentsUsingTools,
       removePluginRefsFromAgents,

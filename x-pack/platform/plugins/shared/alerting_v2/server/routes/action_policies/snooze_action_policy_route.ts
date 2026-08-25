@@ -90,7 +90,7 @@ export class SnoozeActionPolicyRoute extends BaseAlertingRoute {
   protected async execute() {
     const result = await this.actionPolicyClient.snoozeActionPolicy({
       id: this.request.params.id,
-      snoozedUntil: this.request.body.snoozedUntil,
+      snoozedUntil: this.request.body.snoozed_until,
     });
 
     return this.ctx.response.ok({ body: result });

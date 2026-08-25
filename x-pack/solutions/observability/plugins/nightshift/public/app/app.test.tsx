@@ -7,16 +7,20 @@
 
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { usePageReady } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftApp } from './app';
+import { useFetchEventById } from '../hooks/use_fetch_event_by_id';
 import { useFetchSignificantEvents } from '../hooks/use_fetch_significant_events';
+import { useFetchInvestigationStatuses } from '../hooks/use_fetch_investigation_statuses';
 import { useCloseSignificantEvent } from '../hooks/use_close_significant_event';
 import { useKibana } from '../hooks/use_kibana';
 
+jest.mock('../hooks/use_fetch_event_by_id');
 jest.mock('../hooks/use_fetch_significant_events');
+jest.mock('../hooks/use_fetch_investigation_statuses');
 jest.mock('../hooks/use_close_significant_event');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
@@ -33,10 +37,20 @@ jest.mock('../event/event_flyout', () => ({
   ),
 }));
 
+const mockUseFetchEventById = useFetchEventById as jest.Mock;
 const mockUseFetchSignificantEvents = useFetchSignificantEvents as jest.Mock;
+const mockUseFetchInvestigationStatuses = useFetchInvestigationStatuses as jest.Mock;
 const mockUseCloseSignificantEvent = useCloseSignificantEvent as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
+
+const impactedService = (name: string, streamName = 'logs.app') => ({
+  type: 'entity' as const,
+  subtype: 'service',
+  feature_id: `feat-${name}`,
+  name,
+  stream_name: streamName,
+});
 
 const openChat = jest.fn();
 const scrollIntoView = jest.fn();
@@ -79,6 +93,19 @@ function setEvents({
     isLoading,
     refetch: jest.fn(),
   });
+  mockUseFetchInvestigationStatuses.mockReturnValue({ data: undefined });
+}
+
+function setEventById({
+  event,
+  isFetched = true,
+}: { event?: SignificantEvent; isFetched?: boolean } = {}) {
+  mockUseFetchEventById.mockReturnValue({ data: event, isFetched, isError: false });
+}
+
+function LocationProbe() {
+  const { search } = useLocation();
+  return <span data-test-subj="locationProbe">{search}</span>;
 }
 
 function renderWithIntl(
@@ -141,6 +168,7 @@ describe('NightshiftApp', () => {
       },
     });
     setEvents();
+    setEventById();
   });
 
   it('renders hero message when events need action', () => {
@@ -265,64 +293,113 @@ describe('NightshiftApp', () => {
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
   });
 
-  it('renders blast radius badges from stream_names', () => {
-    const streamNames = Array.from({ length: 10 }, (_, index) => `service-${index}`);
+  it('renders impacted service chips', () => {
+    const services = Array.from({ length: 10 }, (_, index) => impactedService(`service-${index}`));
     setEvents({
       events: [
-        mockEvent({ event_id: '1', stream_names: streamNames }),
-        mockEvent({ event_id: '2', stream_names: ['service-0'] }),
+        mockEvent({ event_id: '1', blast_radius: services }),
+        mockEvent({ event_id: '2', blast_radius: [impactedService('service-0')] }),
       ],
     });
     const { container } = renderWithIntl();
     expect(screen.getAllByText('service-0').length).toBeGreaterThan(0);
-    expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(10);
-    expect(screen.queryByTestId('blast-radius-show-more')).not.toBeInTheDocument();
+    expect(container.querySelectorAll('[data-test-subj="impacted-services-chip"]')).toHaveLength(
+      10
+    );
+    expect(screen.queryByTestId('impacted-services-show-more')).not.toBeInTheDocument();
   });
 
-  it('collapses blast radius chips after ten with a show-more control', () => {
-    const streamNames = Array.from({ length: 12 }, (_, index) => `service-${index}`);
-    setEvents({
-      events: [mockEvent({ event_id: '1', stream_names: streamNames })],
-    });
+  it('renders no impacted service chips when no service qualifies', () => {
+    setEvents({ events: [mockEvent({ event_id: '1', stream_names: ['service-a', 'service-b'] })] });
     const { container } = renderWithIntl();
 
-    expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(10);
-    const showMoreButton = screen.getByTestId('blast-radius-show-more');
-    expect(showMoreButton).toHaveTextContent('+2 more');
-    expect(showMoreButton).toHaveAttribute('data-ebt-action', 'expandBlastRadius');
-    expect(showMoreButton).toHaveAttribute('data-ebt-element', 'nightshiftBlastRadius');
-
-    fireEvent.click(showMoreButton);
-    expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(12);
+    expect(container.querySelectorAll('[data-test-subj="impacted-services-chip"]')).toHaveLength(0);
+    expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
   });
 
-  it('only builds blast radius chips from need-action entities, not resolved ones', () => {
+  it('merges causal features into impacted services without duplicate labels', () => {
     setEvents({
       events: [
-        mockEvent({ event_id: '1', status: 'open', stream_names: ['service-active'] }),
-        mockEvent({ event_id: '2', status: 'closed', stream_names: ['service-resolved'] }),
+        mockEvent({
+          blast_radius: [impactedService('checkout-api')],
+          causal_features: [
+            impactedService('Checkout-API'),
+            impactedService('payments-api', 'logs.payments'),
+          ],
+        }),
       ],
     });
     const { container } = renderWithIntl();
 
-    expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(1);
-    expect(screen.getByRole('button', { name: /service-active/i })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /service-resolved/i })).not.toBeInTheDocument();
+    expect(container.querySelectorAll('[data-test-subj="impacted-services-chip"]')).toHaveLength(2);
+    expect(screen.getByText('checkout-api')).toBeInTheDocument();
+    expect(screen.getByText('payments-api')).toBeInTheDocument();
   });
 
-  it('filters significant events by blast radius', () => {
+  it('collapses impacted service chips after ten with a show-more control', () => {
+    const services = Array.from({ length: 12 }, (_, index) => impactedService(`service-${index}`));
+    setEvents({
+      events: [mockEvent({ event_id: '1', blast_radius: services })],
+    });
+    const { container } = renderWithIntl();
+
+    expect(container.querySelectorAll('[data-test-subj="impacted-services-chip"]')).toHaveLength(
+      10
+    );
+    const showMoreButton = screen.getByTestId('impacted-services-show-more');
+    expect(showMoreButton).toHaveTextContent('+2 more');
+    expect(showMoreButton).toHaveAttribute('data-ebt-action', 'expandImpactedServices');
+    expect(showMoreButton).toHaveAttribute('data-ebt-element', 'nightshiftImpactedServices');
+
+    fireEvent.click(showMoreButton);
+    expect(container.querySelectorAll('[data-test-subj="impacted-services-chip"]')).toHaveLength(
+      12
+    );
+  });
+
+  it('builds impacted service chips from resolved events as well as need-action ones', () => {
     setEvents({
       events: [
-        mockEvent({ event_id: '1', stream_names: ['service-a'], title: 'Service A event' }),
-        mockEvent({ event_id: '2', stream_names: ['service-b'], title: 'Service B event' }),
+        mockEvent({
+          event_id: '1',
+          status: 'open',
+          blast_radius: [impactedService('service-active')],
+        }),
+        mockEvent({
+          event_id: '2',
+          status: 'closed',
+          blast_radius: [impactedService('service-resolved')],
+        }),
+      ],
+    });
+    const { container } = renderWithIntl();
+
+    expect(container.querySelectorAll('[data-test-subj="impacted-services-chip"]')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: /service-active/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /service-resolved/i })).toBeInTheDocument();
+  });
+
+  it('filters significant events by impacted service', () => {
+    setEvents({
+      events: [
+        mockEvent({
+          event_id: '1',
+          blast_radius: [impactedService('service-a')],
+          title: 'Service A event',
+        }),
+        mockEvent({
+          event_id: '2',
+          blast_radius: [impactedService('service-b')],
+          title: 'Service B event',
+        }),
       ],
     });
     renderWithIntl();
 
-    const blastRadiusButton = screen.getByRole('button', { name: /service-b/i });
-    expect(blastRadiusButton).toHaveAttribute('data-ebt-action', 'filterByBlastRadius');
-    expect(blastRadiusButton).toHaveAttribute('data-ebt-detail', 'stream');
-    fireEvent.click(blastRadiusButton);
+    const impactedServiceButton = screen.getByRole('button', { name: /service-b/i });
+    expect(impactedServiceButton).toHaveAttribute('data-ebt-action', 'filterByImpactedServices');
+    expect(impactedServiceButton).toHaveAttribute('data-ebt-detail', 'entity');
+    fireEvent.click(impactedServiceButton);
 
     expect(screen.getByText('Service B event')).toBeInTheDocument();
     expect(screen.queryByText('Service A event')).not.toBeInTheDocument();
@@ -330,11 +407,19 @@ describe('NightshiftApp', () => {
     expect(screen.getByRole('heading', { name: 'Need Action' })).toBeInTheDocument();
   });
 
-  it('clears the blast radius filter when the selected chip is clicked again', () => {
+  it('clears the impacted service filter when the selected chip is clicked again', () => {
     setEvents({
       events: [
-        mockEvent({ event_id: '1', stream_names: ['service-a'], title: 'Service A event' }),
-        mockEvent({ event_id: '2', stream_names: ['service-b'], title: 'Service B event' }),
+        mockEvent({
+          event_id: '1',
+          blast_radius: [impactedService('service-a')],
+          title: 'Service A event',
+        }),
+        mockEvent({
+          event_id: '2',
+          blast_radius: [impactedService('service-b')],
+          title: 'Service B event',
+        }),
       ],
     });
     renderWithIntl();
@@ -342,9 +427,12 @@ describe('NightshiftApp', () => {
     fireEvent.click(screen.getByRole('button', { name: /service-b/i }));
     expect(screen.queryByText('Service A event')).not.toBeInTheDocument();
 
-    const selectedBlastRadiusButton = screen.getByRole('button', { name: /service-b/i });
-    expect(selectedBlastRadiusButton).toHaveAttribute('data-ebt-action', 'clearBlastRadiusFilter');
-    fireEvent.click(selectedBlastRadiusButton);
+    const selectedImpactedServiceButton = screen.getByRole('button', { name: /service-b/i });
+    expect(selectedImpactedServiceButton).toHaveAttribute(
+      'data-ebt-action',
+      'clearImpactedServicesFilter'
+    );
+    fireEvent.click(selectedImpactedServiceButton);
     expect(screen.getByText('Service A event')).toBeInTheDocument();
     expect(screen.getByText('Service B event')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Need action: 2' })).toBeInTheDocument();
@@ -356,13 +444,13 @@ describe('NightshiftApp', () => {
         mockEvent({
           event_id: '1',
           status: 'open',
-          stream_names: ['service-a'],
+          blast_radius: [impactedService('service-a')],
           title: 'Active event',
         }),
         mockEvent({
           event_id: '2',
           status: 'dismissed',
-          stream_names: ['service-z'],
+          blast_radius: [impactedService('service-z')],
           title: 'Dismissed event',
         }),
       ],
@@ -374,8 +462,8 @@ describe('NightshiftApp', () => {
     expect(screen.getByRole('button', { name: 'Need action: 1' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Resolved: 1' })).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Resolved' })).toBeInTheDocument();
-    // Blast radius is built from need-action events only, so the dismissed event's stream has no chip.
-    expect(screen.queryByRole('button', { name: /service-z/i })).not.toBeInTheDocument();
+    // Chips cover every shown event, so the dismissed event's service is filterable too.
+    expect(screen.getByRole('button', { name: /service-z/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /service-a/i })).toBeInTheDocument();
   });
 
@@ -458,7 +546,7 @@ describe('NightshiftApp', () => {
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
         newConversation: true,
-        autoSendInitialMessage: true,
+        autoSendInitialMessage: false,
         initialMessage: 'Explain this significant event: Test significant event',
         attachments: [expect.objectContaining({ id: event.event_uuid, origin: event.event_id })],
       })
@@ -494,31 +582,61 @@ describe('NightshiftApp', () => {
     expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
   });
 
-  it('restores the open flyout from the eventUuid URL parameter', () => {
+  it('restores the open flyout from the eventId URL parameter without fetching by id', () => {
     setEvents({
-      events: [mockEvent({ event_uuid: 'evt-uuid-1', title: 'Deep linked event' })],
+      events: [mockEvent({ event_id: 'evt-1', title: 'Deep linked event' })],
     });
-    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventUuid=evt-uuid-1'] });
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-1'] });
 
     expect(screen.getByText('Flyout: Deep linked event')).toBeInTheDocument();
+    expect(mockUseFetchEventById).toHaveBeenCalledWith('evt-1', { enabled: false });
   });
 
-  it('restores the open flyout from a superseded eventUuid using eventId', () => {
-    setEvents({
-      events: [
-        mockEvent({
-          event_id: 'evt-1',
-          event_uuid: 'evt-uuid-current',
-          title: 'Lineage linked event',
-        }),
-      ],
-    });
-    renderWithIntl(<NightshiftApp />, {
-      initialEntries: ['/?eventUuid=evt-uuid-stale&eventId=evt-1'],
+  it('opens the flyout for a deep-linked event that is not on the landing list', () => {
+    setEvents({ events: [mockEvent({ event_id: 'evt-listed', title: 'Listed event' })] });
+    setEventById({
+      event: mockEvent({ event_id: 'evt-low', severity: '20-low', title: 'Low severity event' }),
     });
 
-    expect(screen.getByText('Flyout: Lineage linked event')).toBeInTheDocument();
-    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-low'] });
+
+    expect(screen.getByText('Flyout: Low severity event')).toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
+  });
+
+  it('does not show the not-found callout while the by-id lookup is in flight', () => {
+    setEvents({ events: [mockEvent({ event_id: 'evt-listed' })] });
+    setEventById({ isFetched: false });
+
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-pending'] });
+
+    expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
+  });
+
+  it('names the unresolved event in the callout and clears the id from the URL', () => {
+    setEvents({ events: [mockEvent({ event_id: 'evt-listed' })] });
+
+    renderWithIntl(
+      <>
+        <NightshiftApp />
+        <LocationProbe />
+      </>,
+      { initialEntries: ['/?eventId=evt-unknown'] }
+    );
+
+    expect(screen.getByText('Significant Event evt-unknown not found')).toBeInTheDocument();
+    expect(screen.getByTestId('locationProbe')).not.toHaveTextContent('eventId=evt-unknown');
+  });
+
+  it('ignores a legacy eventUuid parameter', () => {
+    setEvents({ events: [mockEvent({ event_id: 'evt-1', event_uuid: 'evt-uuid-1' })] });
+
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventUuid=evt-uuid-1'] });
+
+    expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
+    expect(mockUseFetchEventById).toHaveBeenCalledWith(undefined, { enabled: false });
   });
 
   it('keeps the flyout open when a refetch returns a newer event version', () => {
@@ -535,7 +653,7 @@ describe('NightshiftApp', () => {
     });
     setEvents({ events: [initialEvent] });
     const { rerender } = renderWithIntl(<NightshiftApp />, {
-      initialEntries: ['/?eventUuid=evt-uuid-1&eventId=evt-1'],
+      initialEntries: ['/?eventId=evt-1'],
     });
 
     expect(screen.getByText('Flyout: Investigating event')).toBeInTheDocument();
@@ -558,42 +676,46 @@ describe('NightshiftApp', () => {
     });
     rerender(
       <I18nProvider>
-        <MemoryRouter initialEntries={['/?eventUuid=evt-uuid-1&eventId=evt-1']}>
+        <MemoryRouter initialEntries={['/?eventId=evt-1']}>
           <NightshiftApp />
         </MemoryRouter>
       </I18nProvider>
     );
 
     expect(screen.getByText('Flyout: Investigated event')).toBeInTheDocument();
-    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
   });
 
   it('keeps the not-found warning visible until a valid event is selected', () => {
-    setEvents({ events: [mockEvent({ event_uuid: 'evt-uuid-1' })] });
-    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventUuid=evt-unknown'] });
+    setEvents({ events: [mockEvent({ event_id: 'evt-1' })] });
+    renderWithIntl(<NightshiftApp />, { initialEntries: ['/?eventId=evt-unknown'] });
 
     expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
-    expect(screen.getByText('Significant Event not found')).toBeInTheDocument();
+    expect(screen.getByText('Significant Event evt-unknown not found')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('nightshiftSignificantEventItem'));
 
-    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+    expect(screen.queryByText(/Significant Event .* not found/)).not.toBeInTheDocument();
     expect(screen.getByTestId('stubEventFlyout')).toBeInTheDocument();
   });
 
-  it('ranks blast radius chips by event count descending', () => {
+  it('ranks impacted service chips by event count descending', () => {
     setEvents({
       events: [
-        mockEvent({ event_id: '1', severity: '20-low', stream_names: ['busy'] }),
-        mockEvent({ event_id: '2', severity: '20-low', stream_names: ['busy'] }),
-        mockEvent({ event_id: '3', severity: '20-low', stream_names: ['busy'] }),
-        mockEvent({ event_id: '4', severity: '80-critical', stream_names: ['critical'] }),
+        mockEvent({ event_id: '1', severity: '20-low', blast_radius: [impactedService('busy')] }),
+        mockEvent({ event_id: '2', severity: '20-low', blast_radius: [impactedService('busy')] }),
+        mockEvent({ event_id: '3', severity: '20-low', blast_radius: [impactedService('busy')] }),
+        mockEvent({
+          event_id: '4',
+          severity: '80-critical',
+          blast_radius: [impactedService('critical')],
+        }),
       ],
     });
     const { container } = renderWithIntl();
 
     const chipLabels = Array.from(
-      container.querySelectorAll('[data-test-subj="blast-radius-chip"]')
+      container.querySelectorAll('[data-test-subj="impacted-services-chip"]')
     ).map((chip) => chip.getAttribute('aria-label'));
 
     expect(chipLabels).toEqual(['busy: 3', 'critical: 1']);

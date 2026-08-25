@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { Suspense, lazy, type ComponentType } from 'react';
-import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
+import React, { type ComponentType, lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type {
-  CommonAttachmentTabViewProps,
+  CommonAttachmentListViewProps,
   UnifiedReferenceAttachmentViewProps,
 } from '@kbn/cases-plugin/public';
 import { defineAttachment } from '@kbn/cases-plugin/public';
 import {
+  type AlertAttachmentMetadata,
   AttachmentActionType,
   CASE_VIEW_PAGE_TABS,
-  SECURITY_ALERT_ATTACHMENT_TYPE,
   getNonEmptyField,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
   toStringArray,
-  type AlertAttachmentMetadata,
 } from '@kbn/cases-plugin/common';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { SecurityAlertAttachmentPayloadSchema } from '../../../../common/cases/attachments/alert';
 import * as i18n from './translations';
 
@@ -43,7 +44,7 @@ const AlertTabContent = lazy(async () => {
   return { default: Component };
 });
 
-const AlertTabContentWrapper: ComponentType<CommonAttachmentTabViewProps> = (props) => (
+const AlertTabContentWrapper: ComponentType<CommonAttachmentListViewProps> = (props) => (
   <Suspense fallback={<EuiLoadingSpinner size="l" />}>
     <AlertTabContent {...props} />
   </Suspense>
@@ -51,43 +52,37 @@ const AlertTabContentWrapper: ComponentType<CommonAttachmentTabViewProps> = (pro
 
 type SecurityAlertViewProps = UnifiedReferenceAttachmentViewProps<AlertAttachmentMetadata>;
 
-const getAttachmentViewObject = (props: SecurityAlertViewProps) => {
+const getCreationActivity = (props: SecurityAlertViewProps) => {
   const { savedObjectId, attachmentId, metadata } = props;
   const alertIds = toStringArray(attachmentId);
   const totalAlerts = alertIds.length;
   const isSingleAlert = totalAlerts === 1;
   const index = getNonEmptyField(metadata?.index);
   const alertId = getNonEmptyField(alertIds[0]);
+  const isRemoteAlert = isNonLocalIndexName(index ?? '');
   return {
     event: (
       <Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <AlertEvent
+          key={savedObjectId}
           alertId={alertId ?? ''}
           totalAlerts={totalAlerts}
           savedObjectId={savedObjectId}
           rule={metadata?.rule}
+          isRemoteAlert={isRemoteAlert}
         />
       </Suspense>
     ),
-    timelineAvatar: (
-      <EuiAvatar
-        name="alert"
-        color="subdued"
-        iconType="bell"
-        aria-label={i18n.ALERT_AVATAR_ARIA_LABEL}
-      />
-    ),
-    deleteSuccessTitle: i18n.DELETE_ALERTS_SUCCESS_TITLE(Math.max(totalAlerts, 1)),
-    getActions: (actionProps: SecurityAlertViewProps) => {
-      const actions = [];
-      actions.push({
+    deleteSuccessToast: i18n.DELETE_ALERTS_SUCCESS_TOAST(Math.max(totalAlerts, 1)),
+    getActions: () => [
+      {
         type: AttachmentActionType.CUSTOM as const,
         isPrimary: true,
         render: () => (
           <Suspense fallback={<EuiLoadingSpinner size="m" />}>
             {isSingleAlert && alertId && index ? (
               <ShowAlertButton
-                id={actionProps.savedObjectId}
+                id={savedObjectId}
                 alertId={alertId}
                 index={index}
                 ruleName={metadata?.rule?.name}
@@ -97,13 +92,12 @@ const getAttachmentViewObject = (props: SecurityAlertViewProps) => {
             )}
           </Suspense>
         ),
-      });
-      return actions;
-    },
+      },
+    ],
   };
 };
 
-const getAttachmentRemovalObject = (props: SecurityAlertViewProps) => {
+const getRemovalActivity = (props: SecurityAlertViewProps) => {
   const alertIds = toStringArray(props.attachmentId);
   if (alertIds.length <= 1) {
     return { event: i18n.REMOVED_ALERT_LABEL_TITLE };
@@ -117,11 +111,11 @@ const getAttachmentRemovalObject = (props: SecurityAlertViewProps) => {
 export const getSecurityAlertType = () =>
   defineAttachment({
     id: SECURITY_ALERT_ATTACHMENT_TYPE,
-    displayName: i18n.ALERT_DISPLAY_NAME,
-    icon: 'bell',
-    getAttachmentViewObject,
-    getAttachmentRemovalObject,
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => i18n.ALERT_DISPLAY_NAME,
+    getIcon: () => 'bell',
+    getCreationActivity,
+    getRemovalActivity,
+    getAttachmentList: () => ({
       children: AlertTabContentWrapper,
     }),
     schema: SecurityAlertAttachmentPayloadSchema,

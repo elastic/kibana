@@ -46,11 +46,11 @@ spec:
         everyone:
           access_level: BUILD_AND_READ
       schedules:
-        Trigger ES forward compatibility tests 9.3:
+        Trigger ES forward compatibility tests 9.x:
           cronline: 0 5 * * *
-          message: Trigger ES forward compatibility tests 9.3
+          message: Trigger ES forward compatibility tests 9.x
           env:
-            TRIGGER_PIPELINE_SET: es-forward-9-dot-3
+            TRIGGER_PIPELINE_SET: es-forward-9-dot-x
         Trigger artifact staging builds:
           cronline: 0 7 * * * America/New_York
           message: Trigger artifact staging builds

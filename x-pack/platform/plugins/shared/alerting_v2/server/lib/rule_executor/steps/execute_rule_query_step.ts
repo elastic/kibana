@@ -9,20 +9,17 @@ import { inject, injectable } from 'inversify';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { appendLimitToQuery } from '@kbn/esql-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import { isEsqlUserError } from '../../errors/esql_user_error';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { getQueryPayload } from '../get_query_payload';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceScopedSpaceRoutingToken } from '../../services/query_service/tokens';
 import { guardedExpandStep, withAtLeastOne } from '../stream_utils';
-import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
-import type { PluginConfig } from '../../../config';
+import { RULE_EXECUTION_COUNTERS, type RuleExecutionCounter } from '../metrics/counters';
+import { type PluginConfig, getQueryRowLimit } from '../../../config';
 
 type EsqlRowBatch = Record<string, unknown>[];
 
@@ -30,16 +27,18 @@ type EsqlRowBatch = Record<string, unknown>[];
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public readonly name = 'execute_rule_query';
 
-  private readonly maxAlertsPerRun: number;
+  private readonly queryRowLimit: number;
+  private readonly maxQueryResponseSize: number;
 
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(QueryServiceScopedSpaceRoutingToken)
     private readonly queryService: QueryServiceContract,
     @inject(PluginInitializer('config'))
     pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
   ) {
-    this.maxAlertsPerRun = pluginConfigAccessor.get<PluginConfig>().rules.run.alerts.max;
+    const config = pluginConfigAccessor.get<PluginConfig>();
+    this.queryRowLimit = getQueryRowLimit(config);
+    this.maxQueryResponseSize = config.rules.run.query.maxResponseSize;
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
@@ -47,6 +46,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
     return guardedExpandStep(streamState, ['rule'], async function* (state) {
       const { input, rule } = state;
+      const logger = state.logger.withLabels({ step: step.name });
 
       const effectiveQuery = getBreachEsqlQuery(rule.query);
       const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
@@ -58,15 +58,11 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         lookbackWindow,
       });
 
-      const boundedQuery = appendLimitToQuery(effectiveQuery, step.maxAlertsPerRun);
+      const boundedQuery = appendLimitToQuery(effectiveQuery, step.queryRowLimit);
 
-      step.logger.debug({
-        message: () =>
-          `[${step.name}] Executing ES|QL query for rule ${input.ruleId} - ${JSON.stringify({
-            query: boundedQuery,
-            filter: queryPayload.filter,
-            params: queryPayload.params,
-          })}`,
+      logger.debug({
+        message: 'Executing ES|QL query',
+        labels: { rule_id: input.ruleId, step: step.name },
       });
 
       try {
@@ -75,21 +71,36 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
           filter: queryPayload.filter,
           params: queryPayload.params,
           abortSignal: input.executionContext.signal,
+          maxResponseSize: step.maxQueryResponseSize,
         });
 
+        let totalRows = 0;
+        let loggedRowsDropped = false;
+
         for await (const batch of withAtLeastOne<EsqlRowBatch>(esqlRowBatchStream, [])) {
+          totalRows += batch.length;
+
+          const counters: Partial<Record<RuleExecutionCounter, number>> = {
+            [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
+          };
+
+          if (!loggedRowsDropped && totalRows >= step.queryRowLimit) {
+            loggedRowsDropped = true;
+            counters[RULE_EXECUTION_COUNTERS.rowsDroppedByLimit] = 1;
+            logger.debug({
+              message: `ES|QL query results truncated at the ${step.queryRowLimit}-row limit; some rows may have been dropped`,
+              labels: { rule_id: input.ruleId, step: step.name },
+            });
+          }
+
           yield {
             type: 'continue',
             state: { ...state, queryPayload, esqlRowBatch: batch },
-            meta: {
-              counters: {
-                [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: batch.length,
-              },
-            },
+            meta: { counters },
           };
         }
       } catch (error) {
-        if (isEsqlUserError(error)) {
+        if (isMaximumResponseSizeExceededError(error) || isEsqlUserError(error)) {
           throw createTaskRunError(error as Error, TaskErrorSource.USER);
         }
         throw error;

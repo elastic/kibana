@@ -11,11 +11,9 @@ import { combineReducers } from 'redux-v4';
 import type { DataTableState } from '@kbn/securitysolution-data-table';
 import { dataTableReducer } from '@kbn/securitysolution-data-table';
 import { enableMapSet } from 'immer-v9';
-import { PageScope } from '../../data_view_manager/constants';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
-import { sourcererModel, sourcererReducer } from '../../sourcerer/store';
 
 import type { HostsPluginReducer } from '../../explore/hosts/store';
 import type { NetworkPluginReducer } from '../../explore/network/store';
@@ -26,10 +24,7 @@ import type { SecuritySubPlugins } from '../../app/types';
 import type { ManagementPluginReducer } from '../../management';
 import type { State } from './types';
 import type { AppAction } from './actions';
-import type { SourcererModel } from '../../sourcerer/store/model';
-import { initDataView } from '../../sourcerer/store/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
 import { groupsReducer } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
@@ -56,19 +51,11 @@ export type SubPluginsInitReducer = HostsPluginReducer &
 export const createInitialState = (
   pluginsInitState: Omit<
     SecuritySubPlugins['store']['initialState'],
-    'app' | 'dragAndDrop' | 'inputs' | 'sourcerer' | 'globalUrlParam'
+    'app' | 'dragAndDrop' | 'inputs' | 'globalUrlParam'
   >,
   {
-    defaultDataView,
-    kibanaDataViews,
-    signalIndexName,
-    signalIndexMappingOutdated,
     enableExperimental,
   }: {
-    defaultDataView: SourcererModel['defaultDataView'];
-    kibanaDataViews: SourcererModel['kibanaDataViews'];
-    signalIndexName: SourcererModel['signalIndexName'];
-    signalIndexMappingOutdated: SourcererModel['signalIndexMappingOutdated'];
     enableExperimental: ExperimentalFeatures;
   },
   dataTableState: DataTableState,
@@ -76,57 +63,11 @@ export const createInitialState = (
   analyzerState: AnalyzerState,
   notesState: NotesState
 ): State => {
-  const initialPatterns = {
-    [PageScope.default]: getScopePatternListSelection(
-      defaultDataView,
-      PageScope.default,
-      signalIndexName,
-      true
-    ),
-    [PageScope.alerts]: getScopePatternListSelection(
-      defaultDataView,
-      PageScope.alerts,
-      signalIndexName,
-      true
-    ),
-    [PageScope.timeline]: getScopePatternListSelection(
-      defaultDataView,
-      PageScope.timeline,
-      signalIndexName,
-      true
-    ),
-  };
-
   const preloadedState: State = {
     ...pluginsInitState,
     app: { ...initialAppState, enableExperimental },
     dragAndDrop: initialDragAndDropState,
     inputs: createInitialInputsState(),
-    sourcerer: {
-      ...sourcererModel.initialSourcererState,
-      sourcererScopes: {
-        ...sourcererModel.initialSourcererState.sourcererScopes,
-        [PageScope.default]: {
-          ...sourcererModel.initialSourcererState.sourcererScopes.default,
-          selectedDataViewId: defaultDataView.id,
-          selectedPatterns: initialPatterns[PageScope.default],
-        },
-        [PageScope.alerts]: {
-          ...sourcererModel.initialSourcererState.sourcererScopes.alerts,
-          selectedDataViewId: defaultDataView.id,
-          selectedPatterns: initialPatterns[PageScope.alerts],
-        },
-        [PageScope.timeline]: {
-          ...sourcererModel.initialSourcererState.sourcererScopes.timeline,
-          selectedDataViewId: defaultDataView.id,
-          selectedPatterns: initialPatterns[PageScope.timeline],
-        },
-      },
-      defaultDataView,
-      kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
-      signalIndexName,
-      signalIndexMappingOutdated,
-    },
     globalUrlParam: initialGlobalUrlParam,
     dataTable: dataTableState.dataTable,
     groups: groupsState.groups,
@@ -153,7 +94,6 @@ export const createReducer: (
     app: appReducer,
     dragAndDrop: dragAndDropReducer,
     inputs: inputsReducer,
-    sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,
     dataTable: dataTableReducer,
     groups: groupsReducer,

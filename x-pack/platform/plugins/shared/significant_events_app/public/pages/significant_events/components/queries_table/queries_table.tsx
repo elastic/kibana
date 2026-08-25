@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -56,6 +57,7 @@ import {
   CHART_TITLE,
   DELETE_QUERY_ERROR_TOAST_TITLE,
   DETAILS_BUTTON_ARIA_LABEL,
+  DETECTION_SCOPE_HELP_TEXT,
   IMPACT_COLUMN,
   LAST_OCCURRED_COLUMN,
   NO_ITEMS_MESSAGE,
@@ -93,13 +95,14 @@ export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
-      start: { share },
+      start: { cps, share },
     },
     core: {
       notifications: { toasts },
     },
   } = useKibana();
   const { timeState } = useTimefilter();
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
   const [searchQuery, setSearchQuery] = useState('');
 
   const [pagination, setPagination] = useState<{
@@ -358,8 +361,13 @@ export function QueriesTable() {
     return (
       <EuiEmptyPrompt
         aria-live="polite"
-        titleSize="xs"
-        icon={<AssetImage type="significantEventsEmptyState" />}
+        color="plain"
+        css={css`
+          && {
+            max-width: 400px;
+          }
+        `}
+        icon={<AssetImage type="significantEventsEmptyState" size={140} />}
         title={
           <h2>
             {i18n.translate('xpack.significantEventsApp.queriesTable.emptyState.title', {
@@ -393,6 +401,17 @@ export function QueriesTable() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
+      {isCpsMultiProject && (
+        <EuiFlexItem grow={false}>
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj="significant_events_detection_scope_help_text"
+          >
+            <p>{DETECTION_SCOPE_HELP_TEXT}</p>
+          </EuiText>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <SignificantEventsSearchBar
           isLoading={queriesLoading}
@@ -510,6 +529,7 @@ export function QueriesTable() {
       )}
       {selectedQuery && (
         <QueryDetailsFlyout
+          key={selectedQuery.query.id}
           item={selectedQuery}
           onClose={closeQueryFlyout}
           onDelete={(queryId, streamName) =>
