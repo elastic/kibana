@@ -202,7 +202,7 @@ describe('uninstallElasticsearchAssets', () => {
 
     expect(deleteIndex).toHaveBeenCalledTimes(4);
     expect(deleteDataStream).toHaveBeenCalledTimes(4);
-    expect(deleteIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(deleteIndexTemplate).toHaveBeenCalledTimes(2);
     expect(deleteComponentTemplate).toHaveBeenCalledTimes(ALL_ENTITY_TYPES.length);
   });
 });
