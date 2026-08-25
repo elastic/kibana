@@ -144,7 +144,7 @@ describe('validateVariables', () => {
         endColumn: 10,
         hoverMessage: null,
         owner: 'variable-validation',
-        ruleId: 'undefinedVariable',
+        ruleId: 'invalidVariableReference',
       })
       .mockReturnValueOnce({
         id: 'error-2',
@@ -157,7 +157,7 @@ describe('validateVariables', () => {
         endColumn: 10,
         hoverMessage: null,
         owner: 'variable-validation',
-        ruleId: 'undefinedVariable',
+        ruleId: 'invalidVariableReference',
       });
 
     const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
@@ -184,7 +184,7 @@ describe('validateVariables', () => {
       message: 'Variable var2 is invalid',
       severity: 'error',
       owner: 'variable-validation',
-      ruleId: 'undefinedVariable',
+      ruleId: 'invalidVariableReference',
       hoverMessage: null,
     };
 
@@ -251,7 +251,7 @@ describe('validateVariables', () => {
         endColumn: 10,
         hoverMessage: null,
         owner: 'variable-validation',
-        ruleId: 'undefinedVariable',
+        ruleId: 'invalidVariableReference',
       })
       .mockReturnValueOnce({
         id: 'valid2',
@@ -276,7 +276,7 @@ describe('validateVariables', () => {
         endColumn: 10,
         hoverMessage: 'Type info',
         owner: 'variable-validation',
-        ruleId: 'undefinedVariable',
+        ruleId: 'invalidVariableReference',
       });
 
     const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
@@ -353,7 +353,7 @@ describe('validateVariables', () => {
       endColumn: 10,
       hoverMessage: '<pre>(property) items: array</pre>',
       owner: 'variable-validation',
-      ruleId: 'undefinedVariable',
+      ruleId: 'invalidVariableReference',
     });
 
     const result = validateVariables([foreachVariable], mockWorkflowGraph, mockWorkflowDefinition);
@@ -446,7 +446,7 @@ describe('validateVariables', () => {
       endColumn: 20,
       hoverMessage: 'Hover info',
       owner: 'variable-validation',
-      ruleId: 'undefinedVariable',
+      ruleId: 'invalidVariableReference',
     });
 
     const result = validateVariables([variable], mockWorkflowGraph, mockWorkflowDefinition);
@@ -461,7 +461,7 @@ describe('validateVariables', () => {
       endColumn: 20,
       hoverMessage: 'Hover info',
       owner: 'variable-validation',
-      ruleId: 'undefinedVariable',
+      ruleId: 'invalidVariableReference',
     });
   });
 });

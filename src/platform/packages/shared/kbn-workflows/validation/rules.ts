@@ -49,11 +49,6 @@ export interface WorkflowValidationRules {
   };
 
   // -- variables ----------------------------------------------------------------
-  undefinedVariable: {
-    owner: 'variable-validation';
-    defaultSeverity: 'error';
-    values: Record<string, never>;
-  };
   /** A foreach item whose element type is only known at runtime. */
   foreachItemRuntimeType: {
     owner: 'variable-validation';
@@ -250,7 +245,6 @@ export const WORKFLOW_VALIDATION_RULES: {
 
   graphBuildError: { owner: 'graph-build-validation', defaultSeverity: 'error' },
 
-  undefinedVariable: { owner: 'variable-validation', defaultSeverity: 'error' },
   foreachItemRuntimeType: { owner: 'variable-validation', defaultSeverity: 'warning' },
   invalidVariablePath: { owner: 'variable-validation', defaultSeverity: 'error' },
   variablePathParseError: { owner: 'variable-validation', defaultSeverity: 'error' },

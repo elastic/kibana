@@ -928,7 +928,7 @@ describe('useAgentBuilderIntegration', () => {
           severity: 'warning' as const,
           message: 'Missing field',
           owner: 'variable-validation' as const,
-          ruleId: 'undefinedVariable' as const,
+          ruleId: 'invalidVariableReference' as const,
           hoverMessage: null,
           startLineNumber: 2,
           startColumn: 1,

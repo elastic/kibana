@@ -29,6 +29,8 @@ export interface ConnectorIdItem extends BaseItem {
 }
 
 export interface VariableItem extends BaseItem {
+  /** Never null: the regex `key` group always participates in a match. */
+  key: string;
   type: 'regexp' | 'foreach';
   offset?: number;
 }

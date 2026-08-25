@@ -25,17 +25,6 @@ export function validateVariable(
 ): YamlValidationResult {
   const { key, type } = variableItem;
 
-  if (!key) {
-    return {
-      ...variableItem,
-      message: 'Variable is not defined',
-      severity: 'error',
-      owner: 'variable-validation',
-      ruleId: 'undefinedVariable',
-      hoverMessage: null,
-    };
-  }
-
   const parsedPath = parseVariablePath(key);
 
   if (type === 'foreach') {

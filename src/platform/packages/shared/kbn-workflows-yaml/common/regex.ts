@@ -12,6 +12,32 @@ export const VARIABLE_REGEX_GLOBAL = new RegExp(VARIABLE_REGEX.source, 'g');
 export const UNFINISHED_VARIABLE_REGEX_GLOBAL =
   /\{\{\s*(?<key>[\w.\s|()\[\],"']*?[\w.\s|()\[\],"']?)\s*$/g;
 
+/**
+ * A match of a mustache-variable pattern above. The `key` group is unconditional in each
+ * of them, so it always participates in a successful match and is never `undefined`.
+ * `UNFINISHED_VARIABLE_REGEX_GLOBAL` makes its final character optional, so an unfinished
+ * `key` can be the empty string.
+ */
+export type VariableMatch = RegExpMatchArray & { groups: { key: string } };
+
+/** The first complete `{{ … }}` expression in `text`, or `null`. */
+export const matchVariable = (text: string): VariableMatch | null =>
+  VARIABLE_REGEX.exec(text) as VariableMatch | null;
+
+/** Every complete `{{ … }}` expression in `text`, in source order. */
+export const matchAllVariables = (text: string): VariableMatch[] =>
+  Array.from(text.matchAll(VARIABLE_REGEX_GLOBAL)) as VariableMatch[];
+
+/** The last complete `{{ … }}` expression in `text`, or `null`. */
+export const matchLastVariable = (text: string): VariableMatch | null =>
+  matchAllVariables(text).pop() ?? null;
+
+/** The last unterminated `{{ …` expression in `text`, or `null`. */
+export const matchLastUnfinishedVariable = (text: string): VariableMatch | null => {
+  const matches = Array.from(text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)) as VariableMatch[];
+  return matches.pop() ?? null;
+};
+
 export const ALLOWED_KEY_REGEX =
   /^[a-zA-Z_$][a-zA-Z0-9_$]*(?:\.[a-zA-Z_$][a-zA-Z0-9_$]*|\[\s*(?:\d+|"[^"]*"|'[^']*')\s*\])*(?:\s*\|.*)?$/;
 

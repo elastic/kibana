@@ -16,7 +16,7 @@ import {
   MAP_BINDING_IDENTIFIER_REGEX,
   MAP_DIRECTIVE,
 } from '@kbn/workflows-extensions/common';
-import { inferZodType, VARIABLE_REGEX } from '@kbn/workflows-yaml';
+import { inferZodType, matchVariable } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
@@ -58,7 +58,7 @@ function getDataMapItemSchema(
     return z.unknown();
   }
 
-  const variableKey = items.match(VARIABLE_REGEX)?.groups?.key;
+  const variableKey = matchVariable(items)?.groups.key;
   if (!variableKey) {
     return z.unknown();
   }

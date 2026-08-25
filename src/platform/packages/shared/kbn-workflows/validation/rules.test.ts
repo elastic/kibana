@@ -41,7 +41,6 @@ describe('workflow validation rules registry', () => {
         "schemaViolation",
         "targetWorkflowNotFound",
         "unboundedParallelFanOut",
-        "undefinedVariable",
         "unknownInputKey",
         "unknownVariableType",
         "variablePathParseError",

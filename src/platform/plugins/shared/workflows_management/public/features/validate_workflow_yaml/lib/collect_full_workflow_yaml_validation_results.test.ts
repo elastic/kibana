@@ -12,7 +12,7 @@ import { monaco } from '@kbn/code-editor';
 const structuralResult: YamlValidationResult = {
   id: 'structural-error',
   owner: 'variable-validation',
-  ruleId: 'undefinedVariable',
+  ruleId: 'invalidVariableReference',
   severity: 'error',
   message: 'Structural error',
   startLineNumber: 1,

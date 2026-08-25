@@ -12,7 +12,7 @@ import { visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { getPathFromAncestors } from '@kbn/workflows/common/utils/yaml';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { VARIABLE_REGEX_GLOBAL } from '@kbn/workflows-yaml';
+import { matchAllVariables } from '@kbn/workflows-yaml';
 import type { VariableItem } from '../model/types';
 
 interface ScalarEntry {
@@ -77,7 +77,7 @@ export function collectAllVariables(
   const scalarIndex = getScalarIndex(yamlDocument);
   const variableItems: VariableItem[] = [];
 
-  for (const match of yamlString.matchAll(VARIABLE_REGEX_GLOBAL)) {
+  for (const match of matchAllVariables(yamlString)) {
     const startOffset = match.index ?? 0;
     const entry = findScalarAtOffset(scalarIndex, startOffset);
     if (entry) {
@@ -88,14 +88,12 @@ export function collectAllVariables(
       const type =
         yamlPath.length > 1 && yamlPath[yamlPath.length - 1] === 'foreach' ? 'foreach' : 'regexp';
       variableItems.push({
-        id: `${match.groups?.key ?? null}-${startPosition.lineNumber}-${startPosition.column}-${
-          endPosition.lineNumber
-        }-${endPosition.column}`,
+        id: `${match.groups.key}-${startPosition.lineNumber}-${startPosition.column}-${endPosition.lineNumber}-${endPosition.column}`,
         startLineNumber: startPosition.lineNumber,
         startColumn: startPosition.column,
         endLineNumber: endPosition.lineNumber,
         endColumn: endPosition.column,
-        key: match.groups?.key ?? null,
+        key: match.groups.key,
         type,
         yamlPath,
         offset: startOffset,

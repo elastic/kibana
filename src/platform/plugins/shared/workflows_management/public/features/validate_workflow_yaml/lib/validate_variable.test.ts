@@ -53,20 +53,6 @@ describe('validateVariable', () => {
     }),
   }) as any;
 
-  it('should return error when variable key is not defined', () => {
-    const variableItem = createVariableItem({ key: null });
-
-    const result = validateVariable(variableItem, mockContext);
-
-    expect(result).toMatchObject({
-      message: 'Variable is not defined',
-      severity: 'error',
-      owner: 'variable-validation',
-      ruleId: 'undefinedVariable',
-      hoverMessage: null,
-    });
-  });
-
   it('should return error when variable path cannot be parsed', () => {
     const variableItem = createVariableItem({ key: 'invalid.path' });
     mockParseVariablePath.mockReturnValue(null);
