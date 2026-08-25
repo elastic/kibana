@@ -19,6 +19,7 @@ import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/to
 import {
   buildLensConfig,
   buildVegaConfig,
+  selectDefaultTimeRange,
   type VisualizationConfig,
 } from '@kbn/agent-builder-visualizations-server';
 
@@ -206,27 +207,34 @@ Ground first: make sure the target index exists and every field you reference is
           const existingConfig = parsedExistingConfig
             ? JSON.stringify(parsedExistingConfig)
             : undefined;
-          const { selectedChartType, validatedConfig, esqlQuery, timeRange } =
-            await buildLensConfig({
-              nlQuery,
-              index,
-              chartType,
-              esql,
-              existingConfig,
-              parsedExistingConfig,
-              modelProvider,
-              logger,
-              events,
-              esClient,
-            });
+          const { selectedChartType, validatedConfig, esqlQuery } = await buildLensConfig({
+            nlQuery,
+            index,
+            chartType,
+            esql,
+            existingConfig,
+            parsedExistingConfig,
+            modelProvider,
+            logger,
+            events,
+            esClient,
+          });
           visualizationData = {
             renderer: 'lens',
             query: nlQuery,
             visualization: validatedConfig,
             chart_type: selectedChartType,
             esql: esqlQuery,
-            ...(timeRange && { time_range: timeRange }),
           };
+        }
+
+        const timeRange = await selectDefaultTimeRange({
+          esqlQueries: visualizationData.esql ? [visualizationData.esql] : [],
+          esClient,
+          logger,
+        });
+        if (timeRange) {
+          visualizationData.time_range = { from: timeRange.from, to: timeRange.to };
         }
 
         // Step 4: Persist as an attachment so the agent can render it inline

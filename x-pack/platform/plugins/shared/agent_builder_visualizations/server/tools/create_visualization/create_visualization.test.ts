@@ -8,16 +8,22 @@
 import type { Logger } from '@kbn/core/server';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
-import { buildLensConfig, buildVegaConfig } from '@kbn/agent-builder-visualizations-server';
+import {
+  buildLensConfig,
+  buildVegaConfig,
+  selectDefaultTimeRange,
+} from '@kbn/agent-builder-visualizations-server';
 import { createVisualizationTool } from './create_visualization';
 
 jest.mock('@kbn/agent-builder-visualizations-server', () => ({
   buildLensConfig: jest.fn(),
   buildVegaConfig: jest.fn(),
+  selectDefaultTimeRange: jest.fn(),
 }));
 
 const mockBuildLens = buildLensConfig as jest.Mock;
 const mockBuildVega = buildVegaConfig as jest.Mock;
+const mockSelectDefaultTimeRange = selectDefaultTimeRange as jest.Mock;
 
 const createLogger = (): Logger =>
   ({
@@ -103,11 +109,15 @@ describe('createVisualizationTool handler', () => {
       selectedChartType: SupportedChartType.XY,
       validatedConfig: { title: 'Errors over time' },
       esqlQuery: 'FROM logs | STATS count() BY @timestamp',
-      timeRange: { from: 'now-15m', to: 'now' },
     });
     mockBuildVega.mockResolvedValue({
       spec: '{"$schema":"vega-lite"}',
       esqlQuery: 'FROM logs | STATS count() BY host',
+    });
+    mockSelectDefaultTimeRange.mockResolvedValue({
+      from: 'now-15m',
+      to: 'now',
+      mode: 'relative',
     });
   });
 
@@ -149,7 +159,24 @@ describe('createVisualizationTool handler', () => {
     expect(data.visualization).toEqual({ spec: '{"$schema":"vega-lite"}' });
     expect(data.esql).toBe('FROM logs | STATS count() BY host');
     expect(data.chart_type).toBeUndefined();
+    expect(data.time_range).toEqual({ from: 'now-15m', to: 'now' });
     expect(data.query).toBeUndefined();
+  });
+
+  it('omits time_range when selectDefaultTimeRange returns undefined', async () => {
+    mockSelectDefaultTimeRange.mockResolvedValue(undefined);
+
+    const { result, attachments } = await runHandler({
+      query: 'errors over time',
+      chartType: SupportedChartType.XY,
+    });
+
+    expect(result.results[0].data.time_range).toBeUndefined();
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.not.objectContaining({ time_range: expect.anything() }),
+      })
+    );
   });
 
   it('keeps the existing renderer when updating by attachment id', async () => {
