@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { screen, act } from '@testing-library/react';
+import { screen, act, within } from '@testing-library/react';
 import type { UserEvent } from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import './mocks';
+import { getFollowerIndexMock } from './fixtures/follower_index';
+import { getAutoFollowPatternMock } from './fixtures/auto_follow_pattern';
 import { setupEnvironment, pageHelpers } from './helpers';
 
 const { setup } = pageHelpers.home;
@@ -24,6 +27,7 @@ const getSelectedTabText = () => {
 
 describe('<CrossClusterReplicationHome />', () => {
   let httpRequestsMockHelpers: SetupEnvironmentReturn['httpRequestsMockHelpers'];
+  let httpSetup: SetupEnvironmentReturn['httpSetup'];
   let user: UserEvent;
 
   beforeAll(() => {
@@ -36,7 +40,7 @@ describe('<CrossClusterReplicationHome />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    ({ httpRequestsMockHelpers } = setupEnvironment());
+    ({ httpRequestsMockHelpers, httpSetup } = setupEnvironment());
     // Set "default" mock responses by not providing any arguments
     httpRequestsMockHelpers.setLoadFollowerIndicesResponse();
   });
@@ -51,8 +55,9 @@ describe('<CrossClusterReplicationHome />', () => {
     });
 
     test('should set the correct app title', () => {
-      expect(screen.getByTestId('appTitle')).toBeInTheDocument();
-      expect(screen.getByTestId('appTitle').textContent).toEqual('Cross-Cluster Replication');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Cross-Cluster Replication'
+      );
     });
 
     test('should have 2 tabs to switch between "Follower indices" & "Auto-follow patterns"', () => {
@@ -73,6 +78,45 @@ describe('<CrossClusterReplicationHome />', () => {
         screen.queryByTestId('createFollowerIndexButton') !== null ||
           screen.queryByTestId('followerIndexListTable') !== null
       ).toBe(true);
+    });
+
+    test('should keep the create action in the empty prompt, not the header', () => {
+      const emptyPrompt = screen.getByTestId('emptyPrompt');
+      expect(within(emptyPrompt).getByTestId('createFollowerIndexButton')).toBeInTheDocument();
+    });
+  });
+
+  describe('while follower indices are loading', () => {
+    beforeEach(() => {
+      httpSetup.get.mockImplementation(() => new Promise(() => {}));
+      ({ user } = setup());
+    });
+
+    test('should keep the app header mounted and hide the header create action', () => {
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Cross-Cluster Replication'
+      );
+      expect(screen.getByTestId('sectionLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('createFollowerIndexButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when there are follower indices', () => {
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadFollowerIndicesResponse({
+        indices: [getFollowerIndexMock({ name: 'ccr-follower' })],
+      });
+      ({ user } = setup());
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+    });
+
+    test('should show create a follower index as the header primary action', () => {
+      expect(screen.queryByTestId('emptyPrompt')).not.toBeInTheDocument();
+      expect(screen.getByTestId('createFollowerIndexButton')).toHaveTextContent(
+        'Create a follower index'
+      );
     });
   });
 
@@ -100,6 +144,22 @@ describe('<CrossClusterReplicationHome />', () => {
           screen.queryByTestId('autoFollowPatternListTable') !== null ||
           screen.queryByTestId('emptyPrompt') !== null
       ).toBe(true);
+    });
+
+    test('should show create an auto-follow pattern as the header primary action when patterns exist', async () => {
+      httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({
+        patterns: [getAutoFollowPatternMock({ name: 'ccr-pattern' })],
+      });
+      await user.click(screen.getByTestId('autoFollowPatternsTab'));
+
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
+
+      expect(screen.queryByTestId('emptyPrompt')).not.toBeInTheDocument();
+      expect(screen.getByTestId('createAutoFollowPatternButton')).toHaveTextContent(
+        'Create an auto-follow pattern'
+      );
     });
   });
 });
