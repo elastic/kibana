@@ -25,10 +25,10 @@ export function TutorialDirectoryBackLink({
     return null;
   }
   return (
-    <div>
+    <span css={{ display: 'block' }}>
       <EuiButtonEmpty iconType="chevronSingleLeft" size="xs" flush="left" href={backLink.href}>
         {backLink.text}
       </EuiButtonEmpty>
-    </div>
+    </span>
   );
 }

@@ -145,7 +145,7 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
           pageTitle={
             <>
               {showCreateBackLink && returnParams ? (
-                <div>
+                <span css={{ display: 'block' }}>
                   <EuiButtonEmpty
                     iconType="chevronSingleLeft"
                     size="xs"
@@ -155,7 +155,7 @@ const IntegrationManagementContents: React.FC<IntegrationManagementContentsProps
                   >
                     {getCreateBackLinkLabel()}
                   </EuiButtonEmpty>
-                </div>
+                </span>
               ) : null}
               {pageTitle}
             </>
