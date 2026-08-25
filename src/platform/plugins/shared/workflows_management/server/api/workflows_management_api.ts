@@ -905,7 +905,7 @@ export class WorkflowsManagementApi {
       }
     } catch (error) {
       this.audit?.logExecutionCanceled(request, {
-        executionId: workflowId,
+        workflowId,
         channel,
         error,
       });
@@ -924,7 +924,7 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { channel?: string; stepExecutionId?: string }
   ): Promise<ResumeWorkflowExecutionResponseDto> {
-    const channel = options?.channel ?? 'inbox';
+    const channel = options?.channel;
     try {
       const stepExecutionId =
         options?.stepExecutionId ??
@@ -974,15 +974,53 @@ export class WorkflowsManagementApi {
   }
 
   public async resumeWorkflowExecutionExternallyViaGet(
-    params: ExternalResumeViaGetParams
+    params: ExternalResumeViaGetParams & { request: KibanaRequest }
   ): Promise<ResumeWorkflowExecutionResponseDto> {
-    return resumeWorkflowExecutionExternallyViaGet(this.workflowsService, params);
+    const { request, ...resumeParams } = params;
+    try {
+      const result = await resumeWorkflowExecutionExternallyViaGet(
+        this.workflowsService,
+        resumeParams
+      );
+      this.audit?.logExecutionResumed(request, {
+        executionId: resumeParams.executionId,
+        resumedBy: result.resumedBy,
+        channel: 'external',
+      });
+      return result;
+    } catch (error) {
+      this.audit?.logExecutionResumed(request, {
+        executionId: resumeParams.executionId,
+        channel: 'external',
+        error,
+      });
+      throw error;
+    }
   }
 
   public async resumeWorkflowExecutionExternallyWithInput(
-    params: ExternalResumeWorkflowExecutionWithInputParams
+    params: ExternalResumeWorkflowExecutionWithInputParams & { request: KibanaRequest }
   ): Promise<ResumeWorkflowExecutionResponseDto> {
-    return resumeWorkflowExecutionExternallyWithInput(this.workflowsService, params);
+    const { request, ...resumeParams } = params;
+    try {
+      const result = await resumeWorkflowExecutionExternallyWithInput(
+        this.workflowsService,
+        resumeParams
+      );
+      this.audit?.logExecutionResumed(request, {
+        executionId: resumeParams.executionId,
+        resumedBy: result.resumedBy,
+        channel: 'external',
+      });
+      return result;
+    } catch (error) {
+      this.audit?.logExecutionResumed(request, {
+        executionId: resumeParams.executionId,
+        channel: 'external',
+        error,
+      });
+      throw error;
+    }
   }
 
   public async getExternalResumeFormPage(params: ExternalResumeFormPageParams): Promise<string> {
@@ -1013,7 +1051,7 @@ export class WorkflowsManagementApi {
   public async markStepAsResponded(
     stepExecutionId: string,
     request: KibanaRequest,
-    channel: string,
+    channel: string | undefined,
     spaceId: string
   ): Promise<boolean> {
     return this.workflowsService.markStepAsResponded(stepExecutionId, request, channel, spaceId);

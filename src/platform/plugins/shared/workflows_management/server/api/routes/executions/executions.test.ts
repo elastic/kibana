@@ -895,6 +895,7 @@ describe('Execution Routes', () => {
           token: 'resume-token',
           approved: 'true',
         },
+        request: expect.any(Object),
       });
       expect(result).toMatchObject({
         type: 'ok',
@@ -999,6 +1000,7 @@ describe('Execution Routes', () => {
         stepId: 'step-exec-1',
         spaceId: 'default',
         input: { severity: 'high' },
+        request: expect.any(Object),
       });
       expect(result).toMatchObject({
         type: 'ok',

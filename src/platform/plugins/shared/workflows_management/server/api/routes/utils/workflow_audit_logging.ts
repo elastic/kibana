@@ -444,15 +444,34 @@ export class WorkflowManagementAuditLog {
 
   logExecutionCanceled(
     request: KibanaRequest | undefined,
-    params: { executionId: string; error?: unknown; channel?: string }
+    params: {
+      executionId?: string;
+      /** Used for bulk-cancel failures where no single execution id applies. */
+      workflowId?: string;
+      error?: unknown;
+      channel?: string;
+    }
   ): void {
-    const { executionId, error, channel } = params;
+    const { executionId, workflowId, error, channel } = params;
     const actor = this.getActor(request);
     const channelPart = channel !== undefined ? ` [channel=${channel}]` : '';
-    const message =
-      error !== undefined
-        ? `${actor} failed to cancel workflow execution [executionId=${executionId}]${channelPart}`
-        : `${actor} canceled workflow execution [executionId=${executionId}]${channelPart}`;
+
+    let targetPart = '';
+    if (executionId !== undefined) {
+      targetPart = `[executionId=${executionId}]`;
+    } else if (workflowId !== undefined) {
+      targetPart = `[workflowId=${workflowId}]`;
+    }
+
+    let message: string;
+    if (error !== undefined && executionId === undefined) {
+      message = `${actor} failed to cancel all active workflow executions ${targetPart}${channelPart}`;
+    } else if (error !== undefined) {
+      message = `${actor} failed to cancel workflow execution ${targetPart}${channelPart}`;
+    } else {
+      message = `${actor} canceled workflow execution ${targetPart}${channelPart}`;
+    }
+
     this.log(
       request,
       createEvent(WorkflowManagementAuditActions.CANCEL_EXECUTION, 'change', message, error)

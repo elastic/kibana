@@ -36,8 +36,17 @@ export type HitlLifecycleAuditor = (event: HitlLifecycleEvent) => void;
 
 let hitlLifecycleAuditor: HitlLifecycleAuditor | undefined;
 
-export const registerHitlLifecycleAuditor = (auditor: HitlLifecycleAuditor): void => {
+/**
+ * Registers the late-bound HITL lifecycle auditor. Returns a disposer that
+ * clears the registration only if this auditor is still the active one.
+ */
+export const registerHitlLifecycleAuditor = (auditor: HitlLifecycleAuditor): (() => void) => {
   hitlLifecycleAuditor = auditor;
+  return () => {
+    if (hitlLifecycleAuditor === auditor) {
+      hitlLifecycleAuditor = undefined;
+    }
+  };
 };
 
 export const emitHitlLifecycle = (event: HitlLifecycleEvent): void => {

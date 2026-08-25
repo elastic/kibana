@@ -57,6 +57,7 @@ export class WorkflowsPlugin
   private api: WorkflowsManagementApi | null = null;
   private workflowsService: WorkflowsService | null = null;
   private audit: WorkflowManagementAuditLog | null = null;
+  private unregisterHitlLifecycleAuditor: (() => void) | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -143,7 +144,7 @@ export class WorkflowsPlugin
 
     if (this.audit) {
       const audit = this.audit;
-      registerHitlLifecycleAuditor((event) => {
+      this.unregisterHitlLifecycleAuditor = registerHitlLifecycleAuditor((event) => {
         switch (event.type) {
           case 'waiting':
             audit.logHitlWaiting(undefined, {
@@ -196,6 +197,8 @@ export class WorkflowsPlugin
   }
 
   public stop() {
+    this.unregisterHitlLifecycleAuditor?.();
+    this.unregisterHitlLifecycleAuditor = null;
     this.workflowsService?.setStopping(true);
     this.availabilityUpdater?.stop();
   }

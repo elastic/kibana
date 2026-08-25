@@ -18,10 +18,28 @@ import {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 import { z } from '@kbn/zod/v4';
+import {
+  resumeWorkflowExecutionExternallyViaGet,
+  resumeWorkflowExecutionExternallyWithInput,
+} from './external_resume/external_resume_service';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
+
+jest.mock('./external_resume/external_resume_service', () => ({
+  ...jest.requireActual('./external_resume/external_resume_service'),
+  resumeWorkflowExecutionExternallyViaGet: jest.fn(),
+  resumeWorkflowExecutionExternallyWithInput: jest.fn(),
+}));
+
+const mockResumeExternallyViaGet = resumeWorkflowExecutionExternallyViaGet as jest.MockedFunction<
+  typeof resumeWorkflowExecutionExternallyViaGet
+>;
+const mockResumeExternallyWithInput =
+  resumeWorkflowExecutionExternallyWithInput as jest.MockedFunction<
+    typeof resumeWorkflowExecutionExternallyWithInput
+  >;
 
 describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;
@@ -1508,7 +1526,7 @@ steps:
       expect(result).toEqual({ resumedBy: 'user' });
     });
 
-    it('resolves the waiting step and defaults the channel to "inbox" when none is supplied', async () => {
+    it('resolves the waiting step and leaves channel unset when none is supplied', async () => {
       (mockWorkflowsService.getWaitingStepExecutionId as jest.Mock).mockResolvedValue(
         'step-exec-9'
       );
@@ -1522,7 +1540,7 @@ steps:
       expect(mockWorkflowsService.markStepAsResponded).toHaveBeenCalledWith(
         'step-exec-9',
         mockRequest,
-        'inbox',
+        undefined,
         'default'
       );
     });
@@ -1647,6 +1665,79 @@ steps:
       expect(audit.logExecutionCanceled).toHaveBeenNthCalledWith(2, mockRequest, {
         executionId: 'run-b',
         channel: 'kibana_execution_view',
+      });
+    });
+
+    it('emits bulk-cancel failure audit with workflowId, not executionId', async () => {
+      const audit = {
+        logExecutionResumed: jest.fn(),
+        logExecutionCanceled: jest.fn(),
+      };
+      api.setAuditLog(audit as any);
+      mockWorkflowsService.getWorkflow.mockResolvedValue({ id: 'wf-1' } as WorkflowDetailDto);
+      const boom = new Error('bulk cancel failed');
+      mockWorkflowsExecutionEngine.cancelAllActiveWorkflowExecutions.mockRejectedValueOnce(boom);
+
+      await expect(
+        api.cancelAllActiveWorkflowExecutions('wf-1', 'default', mockRequest, {
+          channel: 'kibana_execution_view',
+        })
+      ).rejects.toThrow(boom);
+
+      expect(audit.logExecutionCanceled).toHaveBeenCalledWith(mockRequest, {
+        workflowId: 'wf-1',
+        channel: 'kibana_execution_view',
+        error: boom,
+      });
+    });
+  });
+
+  describe('external resume API-owned audit', () => {
+    it('emits resume audit with channel=external on success and failure', async () => {
+      const audit = {
+        logExecutionResumed: jest.fn(),
+        logExecutionCanceled: jest.fn(),
+      };
+      api.setAuditLog(audit as any);
+
+      mockResumeExternallyWithInput.mockResolvedValueOnce({
+        resumedBy: 'external_resume:step-1',
+      });
+
+      const result = await api.resumeWorkflowExecutionExternallyWithInput({
+        token: 'tok',
+        executionId: 'run-1',
+        stepId: 'step-1',
+        spaceId: 'default',
+        input: { approved: true },
+        request: mockRequest,
+      });
+
+      expect(result).toEqual({ resumedBy: 'external_resume:step-1' });
+      expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        resumedBy: 'external_resume:step-1',
+        channel: 'external',
+      });
+
+      audit.logExecutionResumed.mockClear();
+      mockResumeExternallyViaGet.mockRejectedValueOnce(new Error('external resume failed'));
+
+      await expect(
+        api.resumeWorkflowExecutionExternallyViaGet({
+          token: 'tok',
+          executionId: 'run-1',
+          stepId: 'step-1',
+          spaceId: 'default',
+          query: { approved: true },
+          request: mockRequest,
+        })
+      ).rejects.toThrow('external resume failed');
+
+      expect(audit.logExecutionResumed).toHaveBeenCalledWith(mockRequest, {
+        executionId: 'run-1',
+        channel: 'external',
+        error: expect.any(Error),
       });
     });
   });

@@ -392,6 +392,18 @@ describe('WorkflowManagementAuditLog', () => {
       expect(l2.mock.calls[0][0].event.action).toBe(
         WorkflowManagementAuditActions.CANCEL_EXECUTION
       );
+
+      const { audit: a3, request: r3, log: l3 } = await createAuditHarness();
+      a3.logExecutionCanceled(r3, {
+        workflowId: 'wf-1',
+        channel: 'kibana_execution_view',
+        error: err,
+      });
+      expect(l3.mock.calls[0][0].message).toContain('[workflowId=wf-1]');
+      expect(l3.mock.calls[0][0].message).toContain(
+        'failed to cancel all active workflow executions'
+      );
+      expect(l3.mock.calls[0][0].message).not.toContain('[executionId=');
     });
 
     it('logExecutionResumed (success and failure)', async () => {

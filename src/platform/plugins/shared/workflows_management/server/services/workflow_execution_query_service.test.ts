@@ -1326,7 +1326,9 @@ describe('WorkflowExecutionQueryService', () => {
       expect(args.script.source).toContain('ctx._source.hitl.respondedAt != null');
       expect(args.script.source).toContain('ctx._source.hitl.respondedBy = params.respondedBy');
       expect(args.script.source).toContain('ctx._source.hitl.respondedAt = params.respondedAt');
-      expect(args.script.source).toContain('ctx._source.hitl.channel = params.channel');
+      expect(args.script.source).toContain(
+        'if (params.channel != null) { ctx._source.hitl.channel = params.channel; }'
+      );
       expect(args.script.source).toContain('ctx._source.input.remove(params.tokenHashField)');
       expect(args.script.source).toContain('ctx._source.input.remove(params.tokenExpiresAtField)');
       expect(args.script.params).toEqual({
