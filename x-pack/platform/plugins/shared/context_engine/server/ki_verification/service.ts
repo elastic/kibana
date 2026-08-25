@@ -31,11 +31,15 @@ export class KiVerificationService {
       return { passed: true, results: [] };
     }
 
-    const allowlist = verifiers && verifiers.length > 0 ? new Set(verifiers) : null;
+    if (!verifiers || verifiers.length === 0) {
+      return { passed: true, results: [] };
+    }
+
+    const allowlist = new Set(verifiers);
     const results: KiVerifierResult[] = [];
 
     for (const verifier of this.registry.getAll()) {
-      if (allowlist && !allowlist.has(verifier.id)) {
+      if (!allowlist.has(verifier.id)) {
         continue;
       }
 

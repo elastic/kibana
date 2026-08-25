@@ -31,11 +31,21 @@ describe('KiVerificationService', () => {
     };
   });
 
+  const run = (...verifierIds: string[]) => service.verifyKi({}, { ...context, verifiers: verifierIds });
+
+  it('runs no verification when verifiers is not specified', async () => {
+    registry.register(makeVerifier('a', { passed: false, reason: 'x' }));
+
+    const summary = await service.verifyKi({}, context);
+
+    expect(summary).toEqual({ passed: true, results: [] });
+  });
+
   it('passes when every applicable verifier passes', async () => {
     registry.register(makeVerifier('a', { passed: true }));
     registry.register(makeVerifier('b', { passed: true }));
 
-    const summary = await service.verifyKi({}, context);
+    const summary = await run('a', 'b');
 
     expect(summary.passed).toBe(true);
     expect(summary.results).toEqual([
@@ -50,7 +60,7 @@ describe('KiVerificationService', () => {
     registry.register(first);
     registry.register(second);
 
-    const summary = await service.verifyKi({}, context);
+    const summary = await run('first', 'second');
 
     expect(second.verify).toHaveBeenCalledTimes(1);
     expect(summary.passed).toBe(false);
@@ -64,7 +74,7 @@ describe('KiVerificationService', () => {
     registry.register(makeVerifier('pass', { passed: true }));
     registry.register(makeVerifier('fail', { passed: false, reason: 'nope' }));
 
-    const summary = await service.verifyKi({}, context);
+    const summary = await run('pass', 'fail');
 
     expect(summary.passed).toBe(false);
   });
@@ -75,7 +85,7 @@ describe('KiVerificationService', () => {
     registry.register(applies);
     registry.register(skips);
 
-    const summary = await service.verifyKi({}, context);
+    const summary = await run('applies', 'skips');
 
     expect(applies.verify).toHaveBeenCalledTimes(1);
     expect(skips.verify).not.toHaveBeenCalled();
@@ -95,7 +105,7 @@ describe('KiVerificationService', () => {
     registry.register(thrower);
     registry.register(after);
 
-    const summary = await service.verifyKi({}, context);
+    const summary = await run('thrower', 'after');
 
     expect(after.verify).toHaveBeenCalledTimes(1);
     expect(summary.passed).toBe(false);
@@ -118,7 +128,7 @@ describe('KiVerificationService', () => {
     registry.register(thrower);
     registry.register(after);
 
-    const summary = await service.verifyKi({}, context);
+    const summary = await run('applies-thrower', 'after');
 
     expect(thrower.verify).not.toHaveBeenCalled();
     expect(after.verify).toHaveBeenCalledTimes(1);
@@ -135,24 +145,32 @@ describe('KiVerificationService', () => {
   it('stamps the result with the verifier id from the registry', async () => {
     registry.register(makeVerifier('real-id', { passed: true }));
 
-    const summary = await service.verifyKi({}, context);
+    const summary = await run('real-id');
 
     expect(summary.results).toEqual([{ verifier: 'real-id', passed: true }]);
   });
 
-  it('passes with no results when no verifier applies', async () => {
+  it('passes with no results when no listed verifier applies', async () => {
     registry.register(makeVerifier('skips', { passed: false, reason: 'x' }, false));
 
-    const summary = await service.verifyKi({}, context);
+    const summary = await run('skips');
 
     expect(summary).toEqual({ passed: true, results: [] });
+  });
+
+  it('ignores unknown verifier ids silently', async () => {
+    registry.register(makeVerifier('a', { passed: true }));
+
+    const summary = await run('a', 'nonexistent');
+
+    expect(summary.results).toEqual([{ verifier: 'a', passed: true }]);
   });
 
   it('is a no-op that passes with no results when the feature flag is disabled', async () => {
     const verifier = makeVerifier('a', { passed: false, reason: 'x' });
     registry.register(verifier);
 
-    const summary = await service.verifyKi({}, { ...context, isEnabled: false });
+    const summary = await service.verifyKi({}, { ...context, isEnabled: false, verifiers: ['a'] });
 
     expect(verifier.verify).not.toHaveBeenCalled();
     expect(summary).toEqual({ passed: true, results: [] });

@@ -65,13 +65,29 @@ describe('verify_ki workflow step', () => {
     return output;
   };
 
-  it('passes a KI with valid ES|QL', async () => {
+  const ALL_ESQL_VERIFIERS = [ESQL_VALID_SYNTAX_VERIFIER_ID, ESQL_VALID_RUNTIME_VERIFIER_ID];
+
+  it('runs no verification when verifiers is not specified', async () => {
     setContextEngineEnabled(true);
 
     const output = await runHandler({
-      type: 'detection',
-      attributes: { esql: 'FROM logs-* | WHERE event.outcome == "failure" | LIMIT 10' },
+      attributes: { esql: 'FROM logs-* | LIMIT 10' },
     });
+
+    expect(output).toEqual({ passed: true, results: [] });
+    expect(esClient.esql.query).not.toHaveBeenCalled();
+  });
+
+  it('passes a KI with valid ES|QL', async () => {
+    setContextEngineEnabled(true);
+
+    const output = await runHandler(
+      {
+        type: 'detection',
+        attributes: { esql: 'FROM logs-* | WHERE event.outcome == "failure" | LIMIT 10' },
+      },
+      { verifiers: ALL_ESQL_VERIFIERS }
+    );
 
     expect(output.passed).toBe(true);
     expect(output.results).toEqual([
@@ -83,7 +99,10 @@ describe('verify_ki workflow step', () => {
   it('hands the scoped Elasticsearch client to the verifiers that need one', async () => {
     setContextEngineEnabled(true);
 
-    await runHandler({ attributes: { esql: 'FROM logs-* | LIMIT 10' } });
+    await runHandler(
+      { attributes: { esql: 'FROM logs-* | LIMIT 10' } },
+      { verifiers: [ESQL_VALID_RUNTIME_VERIFIER_ID] }
+    );
 
     expect(esClient.esql.query).toHaveBeenCalledTimes(1);
   });
@@ -91,9 +110,10 @@ describe('verify_ki workflow step', () => {
   it('fails a KI with invalid ES|QL and reports the reason', async () => {
     setContextEngineEnabled(true);
 
-    const output = await runHandler({
-      attributes: { esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)' },
-    });
+    const output = await runHandler(
+      { attributes: { esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)' } },
+      { verifiers: ALL_ESQL_VERIFIERS }
+    );
 
     expect(output.passed).toBe(false);
     expect(output.results).toEqual([
@@ -116,7 +136,7 @@ describe('verify_ki workflow step', () => {
           aggregation_query: 'FROM logs-* | STATS c = COUNT(*)',
         },
       },
-      { esqlAttributes: ['aggregation_query'] }
+      { esqlAttributes: ['aggregation_query'], verifiers: ALL_ESQL_VERIFIERS }
     );
 
     expect(output.passed).toBe(true);
@@ -128,7 +148,7 @@ describe('verify_ki workflow step', () => {
 
     const output = await runHandler(
       { attributes: { esql: 'FROM logs-* | LIMIT 1' } },
-      { esqlAttributes: ['aggregation_query'] }
+      { esqlAttributes: ['aggregation_query'], verifiers: ALL_ESQL_VERIFIERS }
     );
 
     expect(output).toEqual({ passed: true, results: [] });
@@ -138,12 +158,15 @@ describe('verify_ki workflow step', () => {
   it('skips KIs with no applicable verifiers', async () => {
     setContextEngineEnabled(true);
 
-    const output = await runHandler({ title: 'no esql here' });
+    const output = await runHandler(
+      { title: 'no esql here' },
+      { verifiers: ALL_ESQL_VERIFIERS }
+    );
 
     expect(output).toEqual({ passed: true, results: [] });
   });
 
-  it('runs only the verifiers listed in the verifiers allowlist', async () => {
+  it('runs only the listed verifier when a subset is specified', async () => {
     setContextEngineEnabled(true);
 
     const output = await runHandler(

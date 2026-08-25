@@ -32,7 +32,7 @@ export const VerifyKiInputSchema = z.object({
     .max(MAX_VERIFIER_IDS)
     .optional()
     .describe(
-      'Verifier ids to run. When omitted, all applicable verifiers run. Unknown ids are silently ignored.'
+      'Verifier ids to run. Required: no verifiers listed means no verification runs. Unknown ids are silently ignored.'
     ),
 });
 
