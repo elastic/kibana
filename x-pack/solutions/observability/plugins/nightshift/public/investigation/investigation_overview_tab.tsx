@@ -15,13 +15,21 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EvidenceList, type InvestigationDiscoverParams } from '@kbn/investigation-output';
+import {
+  EvidenceList,
+  buildEvidenceDiscoverParams,
+  buildCodeReferenceUrl,
+  formatCodeReferenceLabel,
+  formatCodeReferenceDetail,
+  type InvestigationDiscoverParams,
+} from '@kbn/investigation-output';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { InvestigationHypothesis, InvestigationBlindSpot, InvestigationRecommendation } from '@kbn/significant-events-schema';
+import type { InvestigationHypothesis, InvestigationBlindSpot, InvestigationRecommendation, InvestigationEvidence } from '@kbn/significant-events-schema';
 import type { ConversationTemplateTabRenderProps } from '@kbn/agent-builder-browser';
 import { BlindSpotsTable } from './blind_spots_table';
 import { InvestigationFormattedText } from './investigation_formatted_text';
@@ -151,6 +159,38 @@ export const InvestigationOverviewTab: React.FC<ConversationTemplateTabRenderPro
     [discoverLocator]
   );
 
+  const allEvidence = useMemo(
+    () => (hypotheses ?? []).flatMap((h) => h.evidence ?? []) as InvestigationEvidence[],
+    [hypotheses]
+  );
+
+  const keyDiscoverLinks = useMemo(
+    () =>
+      allEvidence.flatMap((ev) => {
+        const params = buildEvidenceDiscoverParams(ev);
+        if (!params) return [];
+        const href = getQueryHref(params);
+        if (!href) return [];
+        return [{ href, label: ev.description }];
+      }),
+    [allEvidence, getQueryHref]
+  );
+
+  const keyCodeLinks = useMemo(
+    () =>
+      allEvidence.flatMap((ev) => {
+        if (!ev.code) return [];
+        const href = buildCodeReferenceUrl(ev.code);
+        if (!href) return [];
+        return [{
+          href,
+          label: formatCodeReferenceLabel(ev.code),
+          tooltip: formatCodeReferenceDetail(ev.code),
+        }];
+      }),
+    [allEvidence]
+  );
+
   if (!hasContent) {
     return (
       <EuiText color="subdued" size="s">
@@ -209,6 +249,45 @@ export const InvestigationOverviewTab: React.FC<ConversationTemplateTabRenderPro
           <EuiBadgeGroup gutterSize="xs">
             {affectedServices!.map((svc) => (
               <EuiBadge key={svc}>{svc}</EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+        </EuiFlexItem>
+      )}
+
+      {(keyDiscoverLinks.length > 0 || keyCodeLinks.length > 0) && (
+        <EuiFlexItem grow={false}>
+          <FlyoutSectionTitle>
+            {i18n.translate('xpack.nightshift.investigation.overview.keyEvidenceTitle', {
+              defaultMessage: 'Key Evidence',
+            })}
+          </FlyoutSectionTitle>
+          <EuiSpacer size="s" />
+          <EuiBadgeGroup gutterSize="xs">
+            {keyDiscoverLinks.map((link, i) => (
+              <EuiBadge
+                key={`discover-${i}`}
+                color="hollow"
+                iconType="discoverApp"
+                href={link.href}
+                target="_blank"
+                title={link.label}
+                data-test-subj="nightshiftKeyEvidenceDiscoverLink"
+              >
+                {link.label.length > 50 ? `${link.label.slice(0, 47)}…` : link.label}
+              </EuiBadge>
+            ))}
+            {keyCodeLinks.map((link, i) => (
+              <EuiToolTip key={`code-${i}`} content={link.tooltip}>
+                <EuiBadge
+                  color="hollow"
+                  iconType="editorCodeBlock"
+                  href={link.href}
+                  target="_blank"
+                  data-test-subj="nightshiftKeyEvidenceCodeLink"
+                >
+                  {link.label}
+                </EuiBadge>
+              </EuiToolTip>
             ))}
           </EuiBadgeGroup>
         </EuiFlexItem>

@@ -15,12 +15,14 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
+import { FormattedRelative } from '@kbn/i18n-react';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { useInvestigationState } from '@kbn/investigation-output';
 import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
@@ -108,6 +110,22 @@ export function NightshiftApp(): React.ReactElement {
   const [pendingRecentInvestigationId, setPendingRecentInvestigationId] = useState<string | null>(
     null
   );
+
+  const [activeChatConversationId, setActiveChatConversationId] = useState<string | null>(null);
+  // Maps investigation_id → conversation_id, populated when a conversation is opened
+  const [investigationConversationMap, setInvestigationConversationMap] = useState<
+    Record<string, string>
+  >({});
+  // Maps event_uuid → conversation_id, populated when a conversation is opened
+  const [eventConversationMap, setEventConversationMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!agentBuilder) return;
+    const subscription = agentBuilder.events.ui.activeConversation$.subscribe((active) => {
+      setActiveChatConversationId(active?.id ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, [agentBuilder]);
 
   const { data, error: eventsError, isFetching, isLoading, refetch } = useFetchSignificantEvents();
   const { data: investigationsData } = useFetchInvestigations();
@@ -321,6 +339,14 @@ export function NightshiftApp(): React.ReactElement {
     return () => window.clearTimeout(transitionTimeout);
   }, [eventsError, hasEvents, isLoading]);
 
+  useEffect(() => {
+    if (!agentBuilder) return;
+    const subscription = agentBuilder.events.ui.activeConversation$.subscribe((active) => {
+      setActiveChatConversationId(active?.id ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, [agentBuilder]);
+
   usePageReady({
     isReady: !isLoading && !eventsError,
     isRefreshing: isFetching && !isLoading,
@@ -340,13 +366,23 @@ export function NightshiftApp(): React.ReactElement {
     },
   });
 
+  const activeChatEventUuid = activeChatConversationId
+    ? Object.entries(eventConversationMap).find(([, cid]) => cid === activeChatConversationId)?.[0]
+    : undefined;
+
+  const activeChatInvestigationId = activeChatConversationId
+    ? Object.entries(investigationConversationMap).find(
+        ([, cid]) => cid === activeChatConversationId
+      )?.[0]
+    : undefined;
+
   const sharedListProps = {
     closingEventUuid,
     investigationStatuses,
     onChatClick,
     onCloseClick: handleCloseSignificantEvent,
     onEventClick: handleEventClick,
-    selectedEventUuid: selectedEvent?.event_uuid,
+    selectedEventUuid: selectedEvent?.event_uuid ?? activeChatEventUuid,
   };
 
   const eventNotFoundCallout = notFoundEventId ? (
@@ -545,46 +581,40 @@ export function NightshiftApp(): React.ReactElement {
                   })}
                 </h3>
               </EuiText>
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="xs"
-                responsive={false}
+              <EuiPanel
+                hasBorder
+                hasShadow={false}
+                paddingSize="none"
                 css={css`
+                  border-radius: ${euiTheme.size.s};
                   margin-top: ${euiTheme.size.s};
+                  overflow: hidden;
                 `}
               >
-                {investigationsData.results.map((item) => (
-                  <EuiFlexItem key={item.investigation_id}>
-                    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color={INVESTIGATION_STATUS_BADGE_COLORS[item.status]}>
-                          {item.status}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="s" color="subdued">
-                          {item.started_at
-                            ? new Date(item.started_at).toLocaleString()
-                            : '—'}
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          size="s"
-                          onClick={() =>
-                            setPendingRecentInvestigationId(item.investigation_id)
-                          }
-                        >
-                          {i18n.translate(
-                            'xpack.nightshift.recentInvestigations.openChatButton',
-                            { defaultMessage: 'Open chat' }
-                          )}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
+                <ol css={css`list-style: none; margin: 0; padding: 0;`}>
+                  {investigationsData.results.map((item, index) => {
+                    const convId = investigationConversationMap[item.investigation_id];
+                    const isSelected =
+                      (Boolean(convId) && convId === activeChatConversationId) ||
+                      item.investigation_id === activeChatInvestigationId;
+                    const isLast = index === investigationsData.results.length - 1;
+                    return (
+                      <li
+                        key={item.investigation_id}
+                        css={css`
+                          ${!isLast ? `border-bottom: ${euiTheme.border.thin};` : ''}
+                        `}
+                      >
+                        <InvestigationCard
+                          item={item}
+                          isSelected={isSelected}
+                          onClick={() => setPendingRecentInvestigationId(item.investigation_id)}
+                        />
+                      </li>
+                    );
+                  })}
+                </ol>
+              </EuiPanel>
             </EuiFlexItem>
           ) : null}
         </div>
@@ -631,6 +661,12 @@ export function NightshiftApp(): React.ReactElement {
             setPendingChatEvent(null);
             openEventFlyout(evt);
           }}
+          onConversationOpened={(cid) =>
+            setEventConversationMap((prev) => ({
+              ...prev,
+              [pendingChatEvent.event_uuid]: cid,
+            }))
+          }
         />
       )}
 
@@ -649,6 +685,12 @@ export function NightshiftApp(): React.ReactElement {
           investigationId={pendingRecentInvestigationId}
           agentBuilder={agentBuilder}
           onOpened={() => setPendingRecentInvestigationId(null)}
+          onConversationOpened={(cid) =>
+            setInvestigationConversationMap((prev) => ({
+              ...prev,
+              [pendingRecentInvestigationId]: cid,
+            }))
+          }
         />
       )}
 
@@ -672,11 +714,13 @@ function InvestigationChatOpener({
   agentBuilder,
   onOpened,
   onFallback,
+  onConversationOpened,
 }: {
   event: SignificantEvent;
   agentBuilder: NonNullable<ReturnType<typeof useKibana>['services']['agentBuilder']>;
   onOpened: () => void;
   onFallback: () => void;
+  onConversationOpened?: (conversationId: string) => void;
 }): null {
   const { http } = useKibana().services;
   const workflowExecutionId = getLatestInvestigation(event)?.workflow_execution_id;
@@ -690,6 +734,8 @@ function InvestigationChatOpener({
   onOpenedRef.current = onOpened;
   const onFallbackRef = useRef(onFallback);
   onFallbackRef.current = onFallback;
+  const onConversationOpenedRef = useRef(onConversationOpened);
+  onConversationOpenedRef.current = onConversationOpened;
 
   useEffect(() => {
     if (!workflowExecutionId) {
@@ -699,6 +745,7 @@ function InvestigationChatOpener({
 
   useEffect(() => {
     if (conversationId) {
+      onConversationOpenedRef.current?.(conversationId);
       agentBuilder.openChat({ conversationId });
       onOpenedRef.current();
     }
@@ -756,10 +803,12 @@ function RecentInvestigationOpener({
   investigationId,
   agentBuilder,
   onOpened,
+  onConversationOpened,
 }: {
   investigationId: string;
   agentBuilder: NonNullable<ReturnType<typeof useKibana>['services']['agentBuilder']>;
   onOpened: () => void;
+  onConversationOpened?: (conversationId: string) => void;
 }): null {
   const { http } = useKibana().services;
   const { conversationId, status } = useInvestigationState({
@@ -770,9 +819,12 @@ function RecentInvestigationOpener({
 
   const onOpenedRef = useRef(onOpened);
   onOpenedRef.current = onOpened;
+  const onConversationOpenedRef = useRef(onConversationOpened);
+  onConversationOpenedRef.current = onConversationOpened;
 
   useEffect(() => {
     if (conversationId) {
+      onConversationOpenedRef.current?.(conversationId);
       agentBuilder.openChat({ conversationId });
       onOpenedRef.current();
     }
@@ -785,6 +837,69 @@ function RecentInvestigationOpener({
   }, [status]);
 
   return null;
+}
+
+function InvestigationCard({
+  item,
+  isSelected,
+  onClick,
+}: {
+  item: ListInvestigationItem;
+  isSelected: boolean;
+  onClick: () => void;
+}): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      css={css`
+        cursor: pointer;
+        padding: ${euiTheme.size.m};
+        background: ${isSelected
+          ? euiTheme.colors.backgroundBaseInteractiveSelect
+          : euiTheme.colors.backgroundBasePlain};
+        transition: background 150ms ease-in-out;
+        &:hover {
+          background: ${isSelected
+            ? euiTheme.colors.backgroundBaseInteractiveSelect
+            : euiTheme.colors.backgroundBaseSubdued};
+        }
+        &:focus-visible {
+          outline: 2px solid ${euiTheme.colors.primary};
+          outline-offset: -2px;
+        }
+      `}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={INVESTIGATION_STATUS_BADGE_COLORS[item.status]}>
+            {item.status}
+          </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s" color="subdued">
+            {item.started_at ? <FormattedRelative value={item.started_at} /> : '—'}
+          </EuiText>
+        </EuiFlexItem>
+        {item.executed_by && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {item.executed_by}
+            </EuiText>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </div>
+  );
 }
 
 function LoadingErrorCallout({ onRetry }: { onRetry: () => void }): React.ReactElement {
