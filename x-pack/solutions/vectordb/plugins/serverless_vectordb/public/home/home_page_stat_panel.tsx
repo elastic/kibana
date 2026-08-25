@@ -23,6 +23,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { i18n } from '@kbn/i18n';
 
 export interface HomePageStatPanelMetric {
@@ -34,7 +35,7 @@ export interface HomePageStatPanelMetric {
 
 export interface HomePageStatPanelAction {
   key: string;
-  iconType?: string;
+  iconType?: EuiIconType;
   label: string;
   onClick: () => void;
   testSubj?: string;
@@ -42,7 +43,7 @@ export interface HomePageStatPanelAction {
 }
 
 export interface HomePageStatPanelProps {
-  iconType: string;
+  iconType: EuiIconType;
   title: string;
   testSubj: string;
   metrics: HomePageStatPanelMetric[];
