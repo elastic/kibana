@@ -10,6 +10,3 @@ export const CUSTOM_CONTENT_CSP_META =
   '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\';">';
 
 export const ADD_CUSTOM_CONTENT_ACTION_ID = 'ADD_CUSTOM_CONTENT_PANEL';
-
-/** Must match the tag in `open_dashboard_chat_action.ts`; drift silently splits chat history. */
-export const CUSTOM_CONTENT_CHAT_SESSION_TAG = 'dashboard';
