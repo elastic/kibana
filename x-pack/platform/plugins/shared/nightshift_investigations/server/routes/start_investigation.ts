@@ -47,9 +47,14 @@ const freeFormContextSchema = z
   .record(z.string().max(128), z.unknown())
   .refine((v) => Object.keys(v).length <= 50, { message: 'context exceeds 50 key limit' });
 
-const alertContextSchema = z.object({
-  alerts: z.array(alertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
-});
+// Extra keys pass through rather than being stripped: the workflow gates its significant-event
+// attach steps on `context.event_uuid`, so an alert investigation has to be able to carry the
+// same context the free-form branch can.
+const alertContextSchema = z
+  .object({
+    alerts: z.array(alertSnapshotSchema).min(1).max(MAX_ALERTS_PER_INVESTIGATION),
+  })
+  .catchall(z.unknown());
 
 export const startInvestigationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/investigations',

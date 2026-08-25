@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AlertSnapshot, InvestigationSubject } from '../../common';
+import type {
+  AlertSnapshot,
+  AlertSnapshotEvaluation,
+  AlertSnapshotGroup,
+  InvestigationSubject,
+} from '../../common';
 
 /**
  * The investigation workflow prompts the agent with `{{ inputs.message }}`, so this string is
@@ -15,11 +20,12 @@ import type { AlertSnapshot, InvestigationSubject } from '../../common';
  */
 
 /**
- * `kibana.alert.grouping` mirrors the rule's group-by fields, which are a handful of levels deep
- * at most. Deeper input is malformed or hostile, and the recursion below is reachable straight
- * from a request body, so it needs a bound rather than a stack overflow.
+ * `kibana.alert.grouping` mirrors the rule's group-by fields and `rule_parameters` describes one
+ * rule's condition, so both are a handful of levels deep at most. Deeper input is malformed or
+ * hostile, and both are walked recursively from a request body, so they need a bound rather than
+ * a stack overflow.
  */
-const MAX_GROUPING_DEPTH = 10;
+const MAX_NESTING_DEPTH = 10;
 
 const FENCE_OPEN = '<alert_data>';
 const FENCE_CLOSE = '</alert_data>';
@@ -35,18 +41,69 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
  * neutralise anything resembling the fence markers that delimit the untrusted block.
  */
 function sanitize(value: string): string {
-  return value
-    .replace(/\s+/g, ' ')
-    .replace(/<\s*\/?\s*alert_data\s*>/gi, '[alert_data]')
-    .trim();
+  return (
+    value
+      // JS `\s` covers neither NEL nor the zero-width and bidi characters, all of which can hide a
+      // line break or an instruction from a reader while the model still sees it.
+      .replace(/[\s\u0085\u200b-\u200f\u2028\u2029\ufeff]+/g, ' ')
+      .replace(/<\s*\/?\s*alert_data\s*\/?\s*>/gi, '[alert_data]')
+      .trim()
+  );
 }
 
-function isAlertSnapshot(value: unknown): value is AlertSnapshot {
+const REQUIRED_STRINGS = [
+  'id',
+  'rule_id',
+  'rule_name',
+  'rule_type_id',
+  'rule_category',
+  'reason',
+  'status',
+  'start',
+] as const;
+
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every(isString);
+}
+
+function isGroupList(value: unknown): value is AlertSnapshotGroup[] {
   return (
-    isPlainObject(value) &&
-    typeof value.id === 'string' &&
-    typeof value.rule_name === 'string' &&
-    typeof value.reason === 'string'
+    Array.isArray(value) &&
+    value.every((entry) => isPlainObject(entry) && isString(entry.field) && isString(entry.value))
+  );
+}
+
+function isEvaluation(value: unknown): value is AlertSnapshotEvaluation {
+  if (!isPlainObject(value)) return false;
+  const valueOk = value.value == null || isString(value.value) || typeof value.value === 'number';
+  return valueOk && (value.threshold == null || typeof value.threshold === 'number');
+}
+
+function absentOr(value: unknown, check: (v: unknown) => boolean): boolean {
+  return value == null || check(value);
+}
+
+/**
+ * Every field `describeAlert` reads is checked here, not just the ones that identify a snapshot.
+ * A partial snapshot used to satisfy this guard and then throw a TypeError further down, on the
+ * same non-route paths the guard exists to protect.
+ */
+function isAlertSnapshot(value: unknown): value is AlertSnapshot {
+  if (!isPlainObject(value)) return false;
+  if (!REQUIRED_STRINGS.every((key) => isString(value[key]))) return false;
+  if (typeof value.flapping !== 'boolean') return false;
+  return (
+    absentOr(value.url, isString) &&
+    absentOr(value.index_pattern, isString) &&
+    absentOr(value.rule_tags, isStringArray) &&
+    absentOr(value.grouping, isPlainObject) &&
+    absentOr(value.group, isGroupList) &&
+    absentOr(value.evaluation, isEvaluation) &&
+    absentOr(value.rule_parameters, isPlainObject)
   );
 }
 
@@ -54,7 +111,32 @@ export function getAlertSnapshots(context: unknown): AlertSnapshot[] | undefined
   if (!isPlainObject(context)) return undefined;
   const { alerts } = context;
   if (!Array.isArray(alerts) || alerts.length === 0) return undefined;
-  return alerts.every(isAlertSnapshot) ? alerts : undefined;
+
+  // Narrowed one at a time: `Array.prototype.every` does not narrow the array it was called on,
+  // so the previous form returned an unchecked `AlertSnapshot[]`.
+  const snapshots: AlertSnapshot[] = [];
+  for (const candidate of alerts) {
+    if (!isAlertSnapshot(candidate)) return undefined;
+    snapshots.push(candidate);
+  }
+  return snapshots;
+}
+
+/**
+ * Depth-bound a value before `JSON.stringify` walks it. Recursion here is capped by construction,
+ * unlike stringify's own.
+ */
+function bounded(value: unknown, depth = 0): unknown {
+  if (Array.isArray(value)) {
+    return depth >= MAX_NESTING_DEPTH ? '[nested]' : value.map((v) => bounded(v, depth + 1));
+  }
+  if (isPlainObject(value)) {
+    if (depth >= MAX_NESTING_DEPTH) return '[nested]';
+    return Object.fromEntries(
+      Object.entries(value).map(([key, v]) => [key, bounded(v, depth + 1)])
+    );
+  }
+  return value;
 }
 
 /**
@@ -66,7 +148,7 @@ function flattenGrouping(grouping: Record<string, unknown>, prefix = '', depth =
   return Object.entries(grouping).flatMap(([key, value]) => {
     const path = prefix ? `${prefix}.${sanitize(key)}` : sanitize(key);
     if (isPlainObject(value)) {
-      return depth >= MAX_GROUPING_DEPTH ? [] : flattenGrouping(value, path, depth + 1);
+      return depth >= MAX_NESTING_DEPTH ? [] : flattenGrouping(value, path, depth + 1);
     }
     if (value == null) return [];
     return [`${path}: ${sanitize(String(value))}`];
@@ -125,7 +207,7 @@ function describeAlert(alert: AlertSnapshot): string {
   }
 
   if (alert.rule_parameters) {
-    lines.push(`Rule parameters: ${sanitize(JSON.stringify(alert.rule_parameters))}`);
+    lines.push(`Rule parameters: ${sanitize(JSON.stringify(bounded(alert.rule_parameters)))}`);
   }
 
   return lines.join('\n');

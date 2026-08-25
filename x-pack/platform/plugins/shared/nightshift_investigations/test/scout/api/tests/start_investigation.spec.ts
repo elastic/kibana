@@ -59,10 +59,46 @@ apiTest.describe(
         const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: { subject: { type: 'alert', id: 'x'.repeat(501) } },
+          // Context has to be valid, or this passes on the missing snapshots instead of the id.
+          body: {
+            subject: { type: 'alert', id: 'x'.repeat(501) },
+            context: { alerts: [alertSnapshot] },
+          },
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(400);
+      }
+    );
+
+    // Without this, every negative test above would still pass if the alert branch rejected
+    // every body it was given. Which success code comes back depends on whether the workflow is
+    // installed in this environment, so this asserts only that validation let the body through.
+    apiTest('accepts a well-formed alert body', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+      const response = await apiClient.post(START_PATH, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        body: {
+          subject: { type: 'alert', id: 'alert-uuid-1' },
+          context: { alerts: [alertSnapshot] },
+        },
+        responseType: 'json',
+      });
+      expect(response.statusCode).not.toBe(400);
+    });
+
+    apiTest(
+      'keeps context keys the workflow needs alongside the alerts',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const response = await apiClient.post(START_PATH, {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          body: {
+            subject: { type: 'alert', id: 'alert-uuid-1' },
+            context: { alerts: [alertSnapshot], event_uuid: 'sig-event-uuid-1' },
+          },
+          responseType: 'json',
+        });
+        expect(response.statusCode).not.toBe(400);
       }
     );
 
