@@ -22,9 +22,9 @@ inputs:
     investigation_id:
       description: Conversation id of the report's Investigation.
       type: string
-    connector_id:
+    inference_endpoint_id:
       description: >
-        Inference connector id for Tier 2 (from Dark orchestrator watch_settings).
+        Inference endpoint id for Tier 2 (from Dark orchestrator watch_settings).
         Empty string degrades to Tier 1 only.
       type: string
     tier2_when:
@@ -46,7 +46,7 @@ steps:
         path: /internal/pnd/threat_intel/hunt_coordinator
         body:
           report_id: "{{ inputs.report_id }}"
-          connector_id: "{{ inputs.connector_id }}"
+          inference_endpoint_id: "{{ inputs.inference_endpoint_id }}"
           tier2_when: "{{ inputs.tier2_when }}"
           target_technology: "{{ inputs.target_technology }}"
 

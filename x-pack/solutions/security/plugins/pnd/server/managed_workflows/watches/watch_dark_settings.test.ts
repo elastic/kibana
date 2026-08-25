@@ -22,7 +22,7 @@ describe('createDarkWatchSettingsRegistration', () => {
         { name: 'Edge / VPN', access: 'full', label: 'Read + monitor' },
         { name: 'Customer data', access: 'denied', label: 'No access' },
       ],
-      connectorId: '',
+      inferenceEndpointId: '',
       tier2When: 'on_hits',
       candidateLimit: 10,
       fanOutMax: 10,
@@ -50,7 +50,7 @@ describe('createDarkWatchSettingsRegistration', () => {
       autonomyLevel: 'manual',
       triggers: { scheduleId: 'dark-custom-sweep', allowManualRun: false },
       dark: {
-        connectorId: 'my-inference-connector',
+        inferenceEndpointId: 'my-inference-endpoint',
         tier2When: 'always',
         candidateLimit: 5,
       },
@@ -62,7 +62,7 @@ describe('createDarkWatchSettingsRegistration', () => {
       autonomyLevel: 'manual',
       scheduleId: 'dark-custom-sweep',
       allowManualRun: false,
-      connectorId: 'my-inference-connector',
+      inferenceEndpointId: 'my-inference-endpoint',
       tier2When: 'always',
       candidateLimit: 5,
     });
@@ -73,7 +73,7 @@ describe('createDarkWatchSettingsRegistration', () => {
       watchId: SYSTEM_SECURITY_WATCH_DARK_ID,
       autonomy: 'supervised',
       dark: {
-        connectorId: '',
+        inferenceEndpointId: '',
         tier2When: 'on_hits',
         candidateLimit: 10,
         fanOutMax: 10,

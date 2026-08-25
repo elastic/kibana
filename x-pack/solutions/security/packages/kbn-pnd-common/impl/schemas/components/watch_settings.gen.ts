@@ -247,9 +247,9 @@ export type DarkWatchScope = z.infer<typeof DarkWatchScope>;
 export const DarkWatchSettings = lazySchema(() =>
   z.object({
     /**
-     * Inference connector id for Tier 2; empty string degrades to Tier 1 only.
+     * Inference endpoint id for Tier 2; empty string degrades to Tier 1 only.
      */
-    connectorId: z.string().max(256),
+    inferenceEndpointId: z.string().max(256),
     tier2When: DarkWatchTier2When,
     /**
      * Reports selected per sweep. Bounded by the parallel fan-out ceiling.
