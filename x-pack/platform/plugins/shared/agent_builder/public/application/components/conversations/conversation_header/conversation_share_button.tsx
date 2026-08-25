@@ -52,10 +52,6 @@ import {
   useUpdateConversationAccessControl,
 } from '../../../hooks/use_conversation_access_control';
 
-interface UserOption extends EuiComboBoxOptionOption<string> {
-  profile: UserProfileWithAvatar;
-}
-
 const SEARCH_DEBOUNCE_MS = 200;
 
 const labels = {
@@ -116,13 +112,6 @@ const accessModeOptions = [
     text: labels.public,
   },
 ];
-
-const profileToOption = (profile: UserProfileWithAvatar): UserOption => ({
-  label: getUserDisplayName(profile.user),
-  value: profile.uid,
-  key: profile.uid,
-  profile,
-});
 
 const UserAccessRow: React.FC<{
   profile: UserProfileWithAvatar;
@@ -235,9 +224,14 @@ export const ConversationShareButton: React.FC = () => {
   );
 
   const excludedIds = new Set([conversation?.user.id, ...memberIds].filter(Boolean));
+  const suggestedProfileByUid = new Map(suggestedProfiles.map((profile) => [profile.uid, profile]));
   const userOptions = suggestedProfiles
     .filter((profile) => !excludedIds.has(profile.uid))
-    .map((profile) => profileToOption(profile));
+    .map((profile) => ({
+      label: getUserDisplayName(profile.user),
+      value: profile.uid,
+      key: profile.uid,
+    }));
 
   const { mutate: updateAccessControl, isLoading: isSaving } = useUpdateConversationAccessControl({
     conversationId: conversationId ?? '',
@@ -283,8 +277,7 @@ export const ConversationShareButton: React.FC = () => {
   };
 
   const onAddUser = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    const selected = selectedOptions[0] as UserOption | undefined;
-    const nextId = selected?.value;
+    const nextId = selectedOptions[0]?.value;
     if (!nextId || memberIds.includes(nextId)) {
       return;
     }
@@ -302,7 +295,11 @@ export const ConversationShareButton: React.FC = () => {
   };
 
   const renderOption = (option: EuiComboBoxOptionOption<string>) => {
-    const { profile } = option as UserOption;
+    const profile = option.value ? suggestedProfileByUid.get(option.value) : undefined;
+    if (!profile) {
+      return option.label;
+    }
+
     const displayName = getUserDisplayName(profile.user);
     const secondary = profile.user.email ?? profile.user.username;
     const showSecondary = secondary && secondary !== displayName;
