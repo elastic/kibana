@@ -10,6 +10,10 @@ import { EuiBadge, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
+import {
+  ALERTING_V2_SECTION_ID,
+  ALERTING_V2_RULE_LIBRARY_APP_ID,
+} from '@kbn/alerting-v2-constants';
 
 import { useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
@@ -48,9 +52,15 @@ const getAlertingEngineBadge = (engine?: AlertingEngine): { label: string; ariaL
   return { label: ALERTING_ENGINE_CLASSIC_BADGE, ariaLabel: ALERTING_ENGINE_CLASSIC_ARIA_LABEL };
 };
 
+const ALERTING_V2_RULE_LIBRARY_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULE_LIBRARY_APP_ID}`;
+
 const getAlertingAssetTitleHref = (
-  asset: Pick<AlertingAsset, 'attributes' | 'appLink'>
-): string | undefined => (isV2AlertingAsset(asset) ? undefined : asset.appLink);
+  asset: Pick<AlertingAsset, 'id' | 'attributes' | 'appLink'>,
+  type: DisplayedAssetType
+): string | undefined =>
+  type === KibanaAssetType.alertingRuleTemplate && isV2AlertingAsset(asset)
+    ? `${ALERTING_V2_RULE_LIBRARY_BASE_PATH}?templateId=${encodeURIComponent(asset.id)}`
+    : asset.appLink;
 
 const listAlertingAssets = (
   savedObjects: AlertingAsset[],
@@ -172,7 +182,7 @@ export const AlertingAssetsAccordion: React.FunctionComponent<{
           ? (asset) => <AlertingEngineBadge engine={asset.attributes?.engine} />
           : undefined
       }
-      getTitleHref={getAlertingAssetTitleHref}
+      getTitleHref={(asset) => getAlertingAssetTitleHref(asset, type)}
     />
   );
 };

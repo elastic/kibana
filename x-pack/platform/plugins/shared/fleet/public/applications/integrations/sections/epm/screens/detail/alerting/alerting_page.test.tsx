@@ -180,9 +180,10 @@ describe('AlertingPage', () => {
     expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('Alerting v2');
     expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent('Classic Alerting');
     expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('link', { name: '[System] Metrics template' })
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '[System] Metrics template' })).toHaveAttribute(
+      'href',
+      '/mock/app/management/alertingV2/rule_library?templateId=template-2'
+    );
     expect(screen.queryByText('[System] Logs template')).not.toBeInTheDocument();
     expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v2')).toHaveTextContent('v2');
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v1')).not.toBeInTheDocument();
