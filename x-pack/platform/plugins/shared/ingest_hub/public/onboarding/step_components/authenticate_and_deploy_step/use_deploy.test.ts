@@ -238,6 +238,26 @@ describe('buildStreamVars', () => {
     expect(vars.region).toBe('us-east-1');
   });
 
+  it('does not backfill region when the field is absent from varDefsByInput (input-level var)', () => {
+    // Regression: services like guardduty have aws_region as an input-level manifest var,
+    // not a stream-level one. getRegionFieldName returns 'aws_region' (it is in requiredConfig),
+    // but resolveFieldMeta returns undefined because varDefsByInput has no entry for it.
+    // Without the guard the backfill emits aws_region into streams[].vars and Fleet rejects
+    // the policy with "Variable ... aws_region not found".
+    const service = makeService({
+      requiredConfig: ['aws_region'],
+      // varDefsByInput intentionally omits 'aws_region' — simulates an input-level var
+      varDefsByInput: {},
+    });
+    const vars = buildStreamVars(
+      service,
+      { enabledInputs: ['aws-s3'], varsByInput: {} },
+      'us-east-1',
+      'aws-s3'
+    );
+    expect(vars).not.toHaveProperty('aws_region');
+  });
+
   it('does not override existing region var with globalRegion', () => {
     const service = makeService({ requiredConfig: ['region'] });
     const vars = buildStreamVars(
