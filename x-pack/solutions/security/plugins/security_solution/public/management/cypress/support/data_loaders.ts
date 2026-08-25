@@ -8,7 +8,7 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common';
-import execa from 'execa';
+import { execa } from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';

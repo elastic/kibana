@@ -10,7 +10,7 @@ import Fsp from 'fs/promises';
 
 import dedent from 'dedent';
 import normalize from 'normalize-path';
-import execa from 'execa';
+import { execa } from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createFailError } from '@kbn/dev-cli-errors';

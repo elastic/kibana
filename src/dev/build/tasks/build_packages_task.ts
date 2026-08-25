@@ -20,8 +20,7 @@ import { makeMatcher } from '@kbn/picomatcher';
 import { PackageFileMap } from '@kbn/repo-file-maps';
 import { getRepoFiles } from '@kbn/get-repo-files';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { StdioOption } from 'execa';
-import execa from 'execa';
+import { execa } from 'execa';
 import type { Task } from '../lib';
 import { deleteAll, scanCopy, write } from '../lib';
 import type { Record } from '../lib/fs_records';
@@ -360,9 +359,9 @@ export async function buildWebpackBundles({
     dist ? ['--dist'] : [],
     noCache ? ['--no-cache'] : [],
   ].flat();
-  const stdio: StdioOption[] = quiet
-    ? ['ignore', 'pipe', 'pipe']
-    : ['inherit', 'inherit', 'inherit'];
+  const stdio = quiet
+    ? (['ignore', 'pipe', 'pipe'] as const)
+    : (['inherit', 'inherit', 'inherit'] as const);
 
   await execa('yarn', ['kbn', 'build-shared', ...options], { cwd: REPO_ROOT, stdio });
 }

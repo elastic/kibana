@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StdioOption } from 'execa';
-import execa from 'execa';
+import { execa } from 'execa';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { TaskContext } from '../task_context';
@@ -16,9 +15,9 @@ import type { TaskContext } from '../task_context';
 export async function buildWebpackPackages({ log, quiet, dist }: TaskContext) {
   log.info('building required artifacts for the optimizer');
 
-  const stdio: StdioOption[] = quiet
-    ? ['ignore', 'pipe', 'pipe']
-    : ['inherit', 'inherit', 'inherit'];
+  const stdio = quiet
+    ? (['ignore', 'pipe', 'pipe'] as const)
+    : (['inherit', 'inherit', 'inherit'] as const);
 
   const args = ['kbn', 'build-shared'];
   if (quiet) args.push('--quiet');

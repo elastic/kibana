@@ -11,7 +11,7 @@ import Os from 'os';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import execa from 'execa';
+import { execa } from 'execa';
 import { GCS_BUCKET_URI } from '../constants';
 import { getTarCreateArgs, getTarPlatformOptions, resolveTarEnvironment } from './utils';
 import { AbstractFileSystem } from './abstract_file_system';

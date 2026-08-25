@@ -56,7 +56,7 @@ jest.mock('./detect_stale_artifacts', () => ({
 
 // Mock execa to simulate a fresh checkout (no existing build artifacts)
 // and prevent actual git/gcloud commands from running during tests.
-jest.mock('execa', () => jest.fn().mockResolvedValue({ stdout: '' }));
+jest.mock('execa', () => ({ execa: jest.fn().mockResolvedValue({ stdout: '' }) }));
 
 const mockedBuildCandidateShaList = buildCandidateShaList as jest.MockedFunction<
   typeof buildCandidateShaList
@@ -400,7 +400,7 @@ describe('resolveRestoreStrategy', () => {
   });
 
   describe('Phase 1.5 — cache-invalidation file detection', () => {
-    const mockedExeca = jest.requireMock('execa') as jest.Mock;
+    const mockedExeca = jest.requireMock('execa').execa as jest.Mock;
 
     it('cleans artifacts and resets state when invalidation files changed', async () => {
       accessSpy.mockResolvedValue(undefined);
@@ -569,7 +569,7 @@ describe('resolveRestoreStrategy', () => {
   });
 
   describe('GCS archive node_modules safety check', () => {
-    const mockedExeca = jest.requireMock('execa') as jest.Mock;
+    const mockedExeca = jest.requireMock('execa').execa as jest.Mock;
 
     it('skips restore when no local artifacts exist but archive has a node_modules change', async () => {
       // Default beforeEach: no local artifacts, GCS has 'ancestor-sha'.

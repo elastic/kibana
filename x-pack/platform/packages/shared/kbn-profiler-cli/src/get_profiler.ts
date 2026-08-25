@@ -9,8 +9,8 @@ import { promises as Fs } from 'fs';
 import Os from 'os';
 import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
 import getPort from 'get-port';
+import { runCommand } from './run_command_string';
 import { getNodeProcesses } from './get_node_processes';
 
 class InspectorSessionConflictError extends Error {
@@ -113,7 +113,7 @@ export async function getProfiler({
 
     log.info(`Wrote profile to ${profileFilePath}`);
 
-    await execa.command(`npx speedscope ${profileFilePath}`);
+    await runCommand(`npx speedscope ${profileFilePath}`);
 
     log.info(`Opened Speedscope`);
   };

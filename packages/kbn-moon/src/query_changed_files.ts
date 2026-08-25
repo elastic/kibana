@@ -56,7 +56,7 @@ export const getMoonChangedFiles = async ({
   base,
   head,
 }: GetMoonChangedFilesOptions): Promise<string[]> => {
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   const moonExec = await getMoonExecutablePath();
   const args = buildChangedFilesArgs({ scope, base, head });
 

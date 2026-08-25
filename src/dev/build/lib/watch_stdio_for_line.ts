@@ -8,7 +8,7 @@
  */
 
 import { Transform } from 'stream';
-import type { ExecaChildProcess } from 'execa';
+import type { Subprocess } from 'execa';
 
 import { createPromiseFromStreams, createSplitStream, createMapStream } from '@kbn/utils';
 
@@ -35,7 +35,7 @@ function skipLastEmptyLineStream() {
 }
 
 export async function watchStdioForLine(
-  proc: ExecaChildProcess,
+  proc: Subprocess,
   logFn: (line: string) => void,
   exitAfter?: RegExp
 ) {

@@ -8,7 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { execa, parseCommandString, type Options } from 'execa';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -36,6 +36,10 @@ const CODE_SCENARIO_STATE_PATH = path.join(
   'demo_environments',
   'code_scenario_state.json'
 );
+const runCommand = (command: string, options?: Options) => {
+  const [file, ...args] = parseCommandString(command);
+  return execa(file, args, options);
+};
 
 interface SeedCodeSearchOptions {
   elasticsearch: ElasticsearchConfig;
@@ -72,7 +76,7 @@ function rewriteToDockerHost(url: string): string {
  */
 async function resolveScsRunner(log: ToolingLog): Promise<ScsRunner> {
   try {
-    await execa.command('scs --version');
+    await runCommand('scs --version');
     log.info('Using scs from PATH.');
     return {
       run: async (args, env) => {

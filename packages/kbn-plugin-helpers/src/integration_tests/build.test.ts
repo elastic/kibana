@@ -11,7 +11,7 @@ import Path from 'path';
 import Fs from 'fs';
 import { loadJsonFile } from '@kbn/utils';
 
-import execa from 'execa';
+import { execa } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 import extract from 'extract-zip';

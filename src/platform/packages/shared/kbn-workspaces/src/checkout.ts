@@ -8,7 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { execa } from 'execa';
 import { commitExists } from './utils/commit_exists';
 
 interface CheckoutOptions {

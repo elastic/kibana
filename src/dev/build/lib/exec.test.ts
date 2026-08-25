@@ -93,7 +93,7 @@ describe('exec', () => {
     } catch (error) {
       expect(error).toBeTruthy();
       expect(error.message).toMatchInlineSnapshot(
-        `"Command failed with exit code 1: <nodedir>/node -e process.exit(1)"`
+        `"Command failed with exit code 1: <nodedir>/node -e 'process.exit(1)'"`
       );
     }
   });

@@ -8,7 +8,7 @@
  */
 
 import Url from 'url';
-import execa from 'execa';
+import { execa, execaSync } from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -118,11 +118,11 @@ export class DockerServersService {
 
     lifecycle.cleanup.add(() => {
       try {
-        execa.sync('docker', ['kill', containerId]);
+        execaSync('docker', ['kill', containerId]);
         // we don't remove the containers on CI because removing them causes the
         // network list to be updated and aborts all in-flight requests in Chrome
         if (!process.env.CI) {
-          execa.sync('docker', ['rm', containerId]);
+          execaSync('docker', ['rm', containerId]);
         }
       } catch (error) {
         if (

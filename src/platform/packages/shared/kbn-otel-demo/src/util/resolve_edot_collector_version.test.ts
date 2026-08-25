@@ -8,25 +8,26 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
+import { execa, type Result } from 'execa';
 import { resolveEdotCollectorVersion } from './resolve_edot_collector_version';
 
 jest.mock('execa', () => ({
-  command: jest.fn(),
+  execa: jest.fn(),
+  parseCommandString: (command: string) => command.split(' '),
 }));
 
 jest.mock('@kbn/repo-info', () => ({
   kibanaPackageJson: { version: '9.1.0-SNAPSHOT' },
 }));
 
-const mockExecaCommand = execa.command as jest.MockedFunction<typeof execa.command>;
+const mockExeca = execa as jest.MockedFunction<typeof execa>;
 
 const mockLog: jest.Mocked<Pick<ToolingLog, 'debug' | 'warning'>> = {
   debug: jest.fn(),
   warning: jest.fn(),
 };
 
-const mockExecaResult = {} as execa.ExecaReturnValue<Buffer>;
+const mockExecaResult = {} as Result;
 
 describe('resolveEdotCollectorVersion', () => {
   beforeEach(() => {
@@ -34,20 +35,21 @@ describe('resolveEdotCollectorVersion', () => {
   });
 
   it('should return the current Kibana version when the image exists', async () => {
-    mockExecaCommand.mockResolvedValueOnce(mockExecaResult);
+    mockExeca.mockResolvedValueOnce(mockExecaResult);
 
     const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
 
     expect(version).toBe('9.1.0');
-    expect(mockExecaCommand).toHaveBeenCalledTimes(1);
-    expect(mockExecaCommand).toHaveBeenCalledWith(
-      'docker manifest inspect docker.elastic.co/elastic-agent/elastic-otel-collector:9.1.0',
+    expect(mockExeca).toHaveBeenCalledTimes(1);
+    expect(mockExeca).toHaveBeenCalledWith(
+      'docker',
+      ['manifest', 'inspect', 'docker.elastic.co/elastic-agent/elastic-otel-collector:9.1.0'],
       expect.objectContaining({ timeout: 10000 })
     );
   });
 
   it('should walk back patch versions', async () => {
-    mockExecaCommand
+    mockExeca
       .mockRejectedValueOnce(new Error('not found')) // 9.1.0
       .mockResolvedValueOnce(mockExecaResult); // 9.0.0
 
@@ -59,7 +61,7 @@ describe('resolveEdotCollectorVersion', () => {
     const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
 
     expect(version).toBe('9.0.0');
-    expect(mockExecaCommand).toHaveBeenCalledTimes(2);
+    expect(mockExeca).toHaveBeenCalledTimes(2);
   });
 
   it('should walk back minor versions when patch is 0', async () => {
@@ -68,7 +70,7 @@ describe('resolveEdotCollectorVersion', () => {
       kibanaPackageJson: { version: '9.2.0-SNAPSHOT' },
     }));
 
-    mockExecaCommand
+    mockExeca
       .mockRejectedValueOnce(new Error('not found')) // 9.2.0
       .mockRejectedValueOnce(new Error('not found')) // 9.1.0
       .mockResolvedValueOnce(mockExecaResult); // 9.0.0
@@ -76,7 +78,7 @@ describe('resolveEdotCollectorVersion', () => {
     const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
 
     expect(version).toBe('9.0.0');
-    expect(mockExecaCommand).toHaveBeenCalledTimes(3);
+    expect(mockExeca).toHaveBeenCalledTimes(3);
   });
 
   it('should cross major boundary with minor set to 20', async () => {
@@ -85,7 +87,7 @@ describe('resolveEdotCollectorVersion', () => {
       kibanaPackageJson: { version: '10.0.0-SNAPSHOT' },
     }));
 
-    mockExecaCommand
+    mockExeca
       .mockRejectedValueOnce(new Error('not found')) // 10.0.0
       .mockRejectedValueOnce(new Error('not found')) // 9.20.0
       .mockResolvedValueOnce(mockExecaResult); // 9.19.0
@@ -93,10 +95,11 @@ describe('resolveEdotCollectorVersion', () => {
     const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
 
     expect(version).toBe('9.19.0');
-    expect(mockExecaCommand).toHaveBeenCalledTimes(3);
-    expect(mockExecaCommand).toHaveBeenNthCalledWith(
+    expect(mockExeca).toHaveBeenCalledTimes(3);
+    expect(mockExeca).toHaveBeenNthCalledWith(
       2,
-      expect.stringContaining(':9.20.0'),
+      'docker',
+      ['manifest', 'inspect', 'docker.elastic.co/elastic-agent/elastic-otel-collector:9.20.0'],
       expect.anything()
     );
   });
@@ -107,13 +110,14 @@ describe('resolveEdotCollectorVersion', () => {
       kibanaPackageJson: { version: '9.1.0-SNAPSHOT' },
     }));
 
-    mockExecaCommand.mockResolvedValueOnce(mockExecaResult);
+    mockExeca.mockResolvedValueOnce(mockExecaResult);
 
     const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
 
     expect(version).toBe('9.1.0');
-    expect(mockExecaCommand).toHaveBeenCalledWith(
-      expect.not.stringContaining('SNAPSHOT'),
+    expect(mockExeca).toHaveBeenCalledWith(
+      'docker',
+      ['manifest', 'inspect', 'docker.elastic.co/elastic-agent/elastic-otel-collector:9.1.0'],
       expect.anything()
     );
   });
@@ -124,7 +128,7 @@ describe('resolveEdotCollectorVersion', () => {
       kibanaPackageJson: { version: '1.0.0' },
     }));
 
-    mockExecaCommand.mockRejectedValue(new Error('not found'));
+    mockExeca.mockRejectedValue(new Error('not found'));
 
     const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
 
@@ -138,7 +142,7 @@ describe('resolveEdotCollectorVersion', () => {
       kibanaPackageJson: { version: '9.1.2' },
     }));
 
-    mockExecaCommand
+    mockExeca
       .mockRejectedValueOnce(new Error('not found')) // 9.1.2
       .mockRejectedValueOnce(new Error('not found')) // 9.1.1
       .mockResolvedValueOnce(mockExecaResult); // 9.1.0
@@ -146,6 +150,6 @@ describe('resolveEdotCollectorVersion', () => {
     const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
 
     expect(version).toBe('9.1.0');
-    expect(mockExecaCommand).toHaveBeenCalledTimes(3);
+    expect(mockExeca).toHaveBeenCalledTimes(3);
   });
 });

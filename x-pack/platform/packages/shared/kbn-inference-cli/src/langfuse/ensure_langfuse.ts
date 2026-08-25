@@ -6,10 +6,10 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
 import Path from 'path';
 import chalk from 'chalk';
 import { mapValues } from 'lodash';
+import { runCommand } from '../util/run_command';
 import { assertDockerAvailable } from '../util/assert_docker_available';
 import { sparseCheckout } from '../util/sparse_checkout';
 import { untilContainerReady } from '../util/until_container_ready';
@@ -22,9 +22,7 @@ const LOCAL_PUBLIC_KEY = 'langfuse-dev-public-key';
 const LOCAL_SECRET_KEY = 'langfuse-dev-secret-key';
 
 async function down(dockerComposeFilePath: string, cleanup: boolean = true) {
-  await execa
-    .command(`docker compose -f ${dockerComposeFilePath} down`, { cleanup })
-    .catch(() => {});
+  await runCommand(`docker compose -f ${dockerComposeFilePath} down`, { cleanup }).catch(() => {});
 }
 
 export async function ensureLangfuse({ log, signal }: { log: ToolingLog; signal: AbortSignal }) {
@@ -106,7 +104,7 @@ export async function ensureLangfuse({ log, signal }: { log: ToolingLog; signal:
       log.error(error);
     });
 
-  await execa.command(`docker compose -f ${dockerComposeFilePath} up`, {
+  await runCommand(`docker compose -f ${dockerComposeFilePath} up`, {
     stdio: 'inherit',
     cleanup: true,
     env,

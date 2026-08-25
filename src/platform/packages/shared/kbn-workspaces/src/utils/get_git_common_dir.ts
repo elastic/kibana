@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import execa from 'execa';
+import { execa } from 'execa';
 
 /**
  * Resolve the shared git object store for a checkout, including worktrees.

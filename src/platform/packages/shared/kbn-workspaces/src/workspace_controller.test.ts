@@ -17,11 +17,55 @@ import { ensureClonedRepo } from './ensure_cloned_repo';
 import { SourceRepoWorkspace } from './source_repo_workspace';
 import { WorktreeWorkspace } from './worktree_workspace';
 import { getSha } from './utils/get_sha';
+jest.mock('execa', () => {
+  const { spawn } = jest.requireActual('child_process') as typeof import('child_process');
+  const execa = (
+    file: string,
+    args: string[] = [],
+    options: {
+      cwd?: string;
+      env?: NodeJS.ProcessEnv;
+      stdio?: 'pipe' | 'inherit' | 'ignore' | Array<'pipe' | 'inherit' | 'ignore'>;
+    } = {}
+  ) => {
+    const nodeChildProcess = spawn(file, args, {
+      cwd: options.cwd,
+      env: { ...process.env, ...options.env },
+      stdio: options.stdio ?? 'pipe',
+    });
+    let stdout = '';
+    let stderr = '';
+    nodeChildProcess.stdout?.on('data', (chunk) => {
+      stdout += chunk;
+    });
+    nodeChildProcess.stderr?.on('data', (chunk) => {
+      stderr += chunk;
+    });
+    const result = new Promise((resolve, reject) => {
+      nodeChildProcess.on('error', reject);
+      nodeChildProcess.on('close', (exitCode) => {
+        if (exitCode === 0) {
+          resolve({ stdout, stderr, exitCode });
+        } else {
+          reject(Object.assign(new Error(stderr), { stdout, stderr, exitCode }));
+        }
+      });
+    });
+    return Object.assign(result, {
+      nodeChildProcess,
+      stdin: nodeChildProcess.stdin,
+      stdout: nodeChildProcess.stdout,
+      stderr: nodeChildProcess.stderr,
+      kill: nodeChildProcess.kill.bind(nodeChildProcess),
+    });
+  };
+  return { execa };
+});
 
 // Helper to init a temporary git repo with an initial commit
 async function initGitRepo(dir: string) {
   await Fs.mkdir(dir, { recursive: true });
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   await execa('git', ['init'], { cwd: dir });
   await execa('git', ['config', 'user.email', 'you@example.com'], { cwd: dir });
   await execa('git', ['config', 'user.name', 'Your Name'], { cwd: dir });
@@ -72,7 +116,7 @@ describe('@kbn/workspaces controller', () => {
 
     // modify a file
     await Fs.writeFile(Path.join(source.getDir(), 'README.md'), '# temp repo modified\n');
-    const execa = (await import('execa')).default;
+    const { execa } = await import('execa');
     await execa('git', ['add', 'README.md'], { cwd: source.getDir() });
     const k2 = await (source as any).getCacheKey();
 
@@ -101,7 +145,7 @@ describe('@kbn/workspaces controller', () => {
     const firstKey = (wt as any).getCacheKey ? await (wt as any).getCacheKey() : 'none';
 
     // create new commit in base clone so ref advances
-    const execa = (await import('execa')).default;
+    const { execa } = await import('execa');
     await Fs.writeFile(Path.join(context.baseCloneDir, 'NEW.txt'), 'hello');
     await execa('git', ['add', '.'], { cwd: context.baseCloneDir });
     // use inline git config to avoid relying on global/local git identity in CI

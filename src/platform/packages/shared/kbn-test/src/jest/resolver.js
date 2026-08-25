@@ -24,6 +24,7 @@ const CSS_MODULE_MOCK = Path.resolve(__dirname, 'mocks/css_module_mock.js');
 const STYLE_MOCK = Path.resolve(__dirname, 'mocks/style_mock.js');
 const FILE_MOCK = Path.resolve(__dirname, 'mocks/file_mock.js');
 const WORKER_MOCK = Path.resolve(__dirname, 'mocks/worker_module_mock.js');
+const EXECA_ROOT = Path.resolve(REPO_ROOT, 'node_modules/execa');
 
 const STATIC_FILE_EXT =
   `jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga`
@@ -97,7 +98,13 @@ module.exports = (request, options) => {
       extensions: options.extensions,
     });
   }
+  if (options.basedir.startsWith(EXECA_ROOT) && request === 'unicorn-magic') {
+    return Path.resolve(REPO_ROOT, 'node_modules/unicorn-magic/node.js');
+  }
 
+  if (options.basedir.startsWith(EXECA_ROOT) && request === 'get-stream') {
+    return options.defaultResolver(request, options);
+  }
   if (request === `elastic-apm-node`) {
     return APM_AGENT_MOCK;
   }

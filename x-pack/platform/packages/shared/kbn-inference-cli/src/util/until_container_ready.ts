@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { backOff } from 'exponential-backoff';
-import execa from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { runCommand } from './run_command';
 
 export async function untilContainerReady({
   containerName,
@@ -23,18 +23,18 @@ export async function untilContainerReady({
 }) {
   async function isContainerReady() {
     log.debug(`Checking container is ready`);
-    const { stdout: globalScopeContainerName } = await execa.command(
+    const { stdout: globalScopeContainerName } = await runCommand(
       `docker compose -f ${dockerComposeFilePath} ps -q ${containerName}`
     );
 
     const [field, value] = condition;
 
-    const { stdout } = await execa
-      .command(`docker inspect --format='{{${field}}}' ${globalScopeContainerName}`)
-      .catch((error) => {
-        log.debug(`Error retrieving container status: ${error.stderr.split('\n')[0]}`);
-        throw error;
-      });
+    const { stdout } = await runCommand(
+      `docker inspect --format='{{${field}}}' ${globalScopeContainerName}`
+    ).catch((error) => {
+      log.debug(`Error retrieving container status: ${error.stderr.split('\n')[0]}`);
+      throw error;
+    });
 
     log.debug(`Container status: ${stdout}`);
 

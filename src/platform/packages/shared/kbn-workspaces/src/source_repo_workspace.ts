@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { createHash } from 'crypto';
-import execa from 'execa';
+import { execa } from 'execa';
 import { AbstractWorkspace } from './abstract_workspace';
 import type { SourceRepoWorkspaceState, WorkspaceGlobalContext, WorkspaceState } from './types';
 import { getRef } from './utils/get_ref';

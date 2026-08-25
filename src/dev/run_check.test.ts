@@ -71,7 +71,7 @@ jest.mock('fs', () => ({
 }));
 
 const mockExecaFn = jest.fn();
-jest.mock('execa', () => ({ __esModule: true, default: mockExecaFn }));
+jest.mock('execa', () => ({ execa: mockExecaFn }));
 
 const mockRun = jest.requireMock('@kbn/dev-cli-runner').run as jest.Mock;
 const mockReadValidationRunFlags = jest.requireMock('@kbn/dev-validation-runner')

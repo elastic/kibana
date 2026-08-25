@@ -38,10 +38,6 @@ module.exports = {
   // An array of file extensions your modules use
   moduleFileExtensions: ['ts', 'tsx', 'js', 'mjs', 'json', 'node'],
 
-  moduleNameMapper: {
-    // do not use these, they're so slow. We have a custom resolver that can handle resolving different types of requests.
-  },
-
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   modulePathIgnorePatterns: ['__fixtures__/', 'target/'],
 
@@ -125,9 +121,10 @@ module.exports = {
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   transformIgnorePatterns: [
-    // ignore all node_modules except monaco-editor, monaco-yaml, monaco-promql which requires babel transforms to handle dynamic import()
-    // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](@apidevtools/json-schema-ref-parser|byte-size|monaco-editor|monaco-yaml|monaco-promql|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|date-fns|react-day-picker|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush|zod/v4|vega-interpreter|vega-util|vega-tooltip|@modelcontextprotocol|pkce-challenge|ansi-styles|just-bash|react-monaco-editor|msw|@bundled-es-modules|until-async|rettime|@open-draft/deferred-promise|react-markdown|@ungap/structured-clone|bail|ccount|character-entities[^/\\\\]*|character-reference-invalid|comma-separated-tokens|decode-named-character-reference|devlop|escape-string-regexp|estree-util-[^/\\\\]*|hast-util-[^/\\\\]*|html-url-attributes|html-void-elements|hastscript|inversify|@inversifyjs|is-alphabetical|is-alphanumerical|is-decimal|is-hexadecimal|is-plain-obj|longest-streak|markdown-table|mdast-util-[^/\\\\]*|micromark[^/\\\\]*|parse-entities|parse5|property-information|rehype-raw|rehype-sanitize|remark-gfm|remark-parse|remark-rehype|space-separated-tokens|stringify-entities|trim-lines|trough|unified|unist-util-[^/\\\\]*|uuid|vfile[^/\\\\]*|web-namespaces|zwitch|@faker-js|globby|unicorn-magic|is-path-inside|slash|@sindresorhus/merge-streams))[/\\\\].+\\.m?js$',
+    // Ignore node_modules except packages requiring Babel transforms because Jest does not natively support ESM.
+    // https://github.com/facebook/jest/issues/4842
+    '[/\\\\]node_modules(?![\\/\\\\](@apidevtools/json-schema-ref-parser|byte-size|monaco-editor|monaco-yaml|monaco-promql|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|date-fns|react-day-picker|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush|zod/v4|vega-interpreter|vega-util|vega-tooltip|@modelcontextprotocol|pkce-challenge|ansi-styles|just-bash|react-monaco-editor|msw|@bundled-es-modules|until-async|rettime|@open-draft/deferred-promise|react-markdown|@ungap/structured-clone|bail|ccount|character-entities[^/\\\\]*|character-reference-invalid|comma-separated-tokens|decode-named-character-reference|devlop|escape-string-regexp|estree-util-[^/\\\\]*|hast-util-[^/\\\\]*|html-url-attributes|html-void-elements|hastscript|inversify|@inversifyjs|is-alphabetical|is-alphanumerical|is-decimal|is-hexadecimal|is-plain-obj|longest-streak|markdown-table|mdast-util-[^/\\\\]*|micromark[^/\\\\]*|parse-entities|parse5|property-information|rehype-raw|rehype-sanitize|remark-gfm|remark-parse|remark-rehype|space-separated-tokens|stringify-entities|trim-lines|trough|unified|unist-util-[^/\\\\]*|uuid|vfile[^/\\\\]*|web-namespaces|zwitch|@faker-js|globby|unicorn-magic|is-path-inside|slash|@sindresorhus/merge-streams|@sec-ant/readable-stream|execa|figures|get-stream|human-signals|is-stream|is-unicode-supported|npm-run-path|parse-ms|path-key|pretty-ms|signal-exit|strip-final-newline|which-command|yoctocolors))[/\\\\].+\\.m?js$',
+
     'packages/kbn-pm/dist/index.js',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/util/[/\\\\].+\\.js$',

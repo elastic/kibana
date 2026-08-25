@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
+import { execa } from 'execa';
 import { filtersMatch } from './filters_match';
 
-jest.mock('execa', () => jest.fn());
+jest.mock('execa', () => ({ execa: jest.fn() }));
 
 const mockedExeca = execa as jest.MockedFunction<typeof execa>;
 

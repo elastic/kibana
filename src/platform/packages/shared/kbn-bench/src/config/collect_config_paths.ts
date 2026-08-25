@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import Path from 'path';
-import execa from 'execa';
+import { execa } from 'execa';
 import { minimatch } from 'minimatch';
 
 export async function collectConfigPaths({

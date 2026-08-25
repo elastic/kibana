@@ -6,7 +6,7 @@
  */
 
 import Path from 'path';
-import { node } from 'execa';
+import { execaNode } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutTestConfig } from '@kbn/scout';
 import type { Moment } from 'moment';
@@ -60,7 +60,7 @@ export async function indexSynthtraceScenario({
       : `--scenarioOpts.${key}="${value}"`
   );
 
-  await node(
+  await execaNode(
     require.resolve(synthtraceScript),
     [scenario, ...getSynthtraceArgs({ config, from, to }), ...optsArgs],
     { stdio: 'inherit' }

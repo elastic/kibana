@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import Fs from 'fs/promises';
-import execa, { type ExecaChildProcess } from 'execa';
+import { execa, type Subprocess } from 'execa';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getBuildDir } from './get_build_dir';
 
@@ -19,7 +19,7 @@ async function waitForStdout({
   search,
 }: {
   log: ToolingLog;
-  proc: ExecaChildProcess;
+  proc: Subprocess;
   search: string | RegExp;
 }): Promise<string> {
   return await new Promise<string>((resolve, reject) => {
@@ -36,11 +36,15 @@ async function waitForStdout({
 
     proc.stdout?.on('data', handleData);
 
-    proc.on('exit', (code) =>
-      reject(new Error(`Process "${proc.spawnargs.join(' ')}" exited early with code ${code}`))
+    const { nodeChildProcess } = proc;
+    nodeChildProcess.on('exit', (code) =>
+      reject(
+        new Error(
+          `Process "${nodeChildProcess.spawnargs.join(' ')}" exited early with code ${code}`
+        )
+      )
     );
-
-    proc.on('error', reject);
+    nodeChildProcess.on('error', reject);
   });
 }
 
@@ -54,7 +58,7 @@ async function startEs({
   log: ToolingLog;
   args?: string[];
   basePath?: string;
-}): Promise<{ proc: ExecaChildProcess; port: number }> {
+}): Promise<{ proc: Subprocess; port: number }> {
   const log = parentLog.withContext('es-start');
 
   log.info('Starting Elasticsearch');
@@ -62,7 +66,7 @@ async function startEs({
   const [file, ...cmdArgs] = ['node', 'scripts/es.js', 'snapshot', ...args];
   log.debug(`Spawning "${file} ${cmdArgs.join(' ')}"`);
 
-  const proc: ExecaChildProcess = execa(file, cmdArgs, {
+  const proc: Subprocess = execa(file, cmdArgs, {
     cwd,
     env: basePath ? { ...process.env, KBN_ES_BASE_PATH: basePath } : undefined,
   });
@@ -110,7 +114,7 @@ async function startKibana({
   esUsername?: string;
   esPassword?: string;
   args?: string[];
-}): Promise<{ proc: ExecaChildProcess }> {
+}): Promise<{ proc: Subprocess }> {
   // Discover the built distribution directory dynamically so we don't have to
   // know the version/platform ahead of time.
 
@@ -149,7 +153,7 @@ async function startKibana({
     }, pid=${process.pid}`
   );
 
-  const proc: ExecaChildProcess = execa(file, cmdArgs, { cwd: distDir });
+  const proc: Subprocess = execa(file, cmdArgs, { cwd: distDir });
 
   await waitForStdout({
     proc,
@@ -169,7 +173,7 @@ async function startKibana({
 }
 
 export async function stopGracefully(
-  proc: ExecaChildProcess,
+  proc: Subprocess,
   {
     name,
     timeoutMs = 15000,
@@ -180,7 +184,7 @@ export async function stopGracefully(
     log: ToolingLog;
   }
 ) {
-  if (proc.exitCode !== null) {
+  if (proc.nodeChildProcess.exitCode !== null) {
     return;
   }
 
@@ -204,7 +208,7 @@ export async function stopGracefully(
   }
 
   // Already exited?
-  if (proc.exitCode !== null) return;
+  if (proc.nodeChildProcess.exitCode !== null) return;
 
   if (await sendAndWait('SIGINT', 30000)) {
     log.debug('Gracefully exited after SIGINT');

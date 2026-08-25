@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import execa from 'execa';
 import inquirer from 'inquirer';
+import { runCommand } from './run_command_string';
 import { getNodeProcesses } from './get_node_processes';
 
 class ProcessNotFoundError extends Error {
@@ -15,8 +15,7 @@ class ProcessNotFoundError extends Error {
 }
 
 async function getProcessIdAtPort(port: number) {
-  return await execa
-    .command(`lsof -ti :${port}`)
+  return await runCommand(`lsof -ti :${port}`)
     .then(({ stdout }) => {
       return parseInt(stdout.trim().split('\n')[0], 10);
     })

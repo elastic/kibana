@@ -10,7 +10,7 @@ import assert from 'assert';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
-import execa from 'execa';
+import { execa } from 'execa';
 import { stringify } from 'yaml';
 import {
   fetchFleetServerUrl,

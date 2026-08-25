@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import objectHash from 'object-hash';
-import type { ExecaReturnValue } from 'execa';
+import type { Result } from 'execa';
 import { bootstrap } from './bootstrap';
 import type { BuildOptions } from './build';
 import { build } from './build';
@@ -90,11 +90,9 @@ export abstract class AbstractWorkspace implements IWorkspace {
 
   async ensureCheckout(): Promise<void> {}
 
-  exec(file: string, args: string[], options: ExecOptions): Promise<ExecaReturnValue<string>>;
-  exec(command: string, options: ExecOptions): Promise<ExecaReturnValue<string>>;
-  exec(
-    ...args: [string, ExecOptions] | [string, string[], ExecOptions]
-  ): Promise<ExecaReturnValue<string>> {
+  exec(file: string, args: string[], options: ExecOptions): Promise<Result>;
+  exec(command: string, options: ExecOptions): Promise<Result>;
+  exec(...args: [string, ExecOptions] | [string, string[], ExecOptions]): Promise<Result> {
     if (args.length === 3) {
       return exec(args[0], args[1], {
         ...args[2],
@@ -112,6 +110,9 @@ export abstract class AbstractWorkspace implements IWorkspace {
       log: this.context.log,
       cwd: this.getDir(),
     });
+    if (typeof stdout !== 'string') {
+      throw new Error('Expected git show output to be text');
+    }
     return stdout;
   }
 }

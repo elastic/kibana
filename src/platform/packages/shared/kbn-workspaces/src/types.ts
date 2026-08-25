@@ -8,7 +8,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { ExecaReturnValue } from 'execa';
+import type { Result } from 'execa';
 
 // User-provided settings controlling where workspaces are created and limits.
 export interface WorkspaceSettings {
@@ -84,6 +84,6 @@ export interface ExecOptions {
 }
 
 export interface Exec {
-  (command: string, options: ExecOptions): Promise<ExecaReturnValue<string>>;
-  (file: string, args: string[], options: ExecOptions): Promise<ExecaReturnValue<string>>;
+  (command: string, options: ExecOptions): Promise<Result>;
+  (file: string, args: string[], options: ExecOptions): Promise<Result>;
 }

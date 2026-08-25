@@ -90,7 +90,7 @@ export const getMoonExecutablePath = async () => {
     return moonExecutablePath;
   }
 
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   const { stdout } = await execa('yarn', ['--silent', 'which', 'moon'], {
     cwd: REPO_ROOT,
     stdin: 'ignore',
@@ -194,7 +194,7 @@ export const getAffectedMoonProjectsFromChangedFiles = async ({
   changedFilesJson: string;
   downstream?: MoonDownstreamMode;
 }): Promise<MoonProject[]> => {
-  const execa = (await import('execa')).default;
+  const { execa } = await import('execa');
   const moonExec = await getMoonExecutablePath();
 
   const projectArgs = ['query', 'projects', '--affected'];

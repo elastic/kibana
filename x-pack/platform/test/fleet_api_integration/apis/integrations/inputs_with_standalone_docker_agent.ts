@@ -11,7 +11,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { tmpdir } from 'os';
 import { writeFile } from 'fs/promises';
 import { v4 as uuid } from 'uuid';
-import execa from 'execa';
+import { execa, execaSync } from 'execa';
 import path from 'path';
 import expect from '@kbn/expect';
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
@@ -175,11 +175,11 @@ async function startAgent({
     name: hostName,
     log: () => {
       // eslint-disable-next-line no-console
-      console.log(execa.sync('docker', ['logs', agentContainerId]));
+      console.log(execaSync('docker', ['logs', agentContainerId]));
     },
     stop: () => {
       try {
-        execa.sync('docker', ['kill', agentContainerId]);
+        execaSync('docker', ['kill', agentContainerId]);
       } catch (err) {
         log.info(`error killing agent docker container ${err.message}`);
       }
