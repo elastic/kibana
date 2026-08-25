@@ -167,6 +167,10 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
+  // Adaptive UI (literal ids; `agent-builder-common` cannot depend on the plugin).
+  'render_view',
+  'get_authoring_context',
+  'request_registered_view',
 ];
 
 /**
