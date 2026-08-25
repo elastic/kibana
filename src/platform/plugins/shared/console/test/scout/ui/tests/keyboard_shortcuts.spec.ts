@@ -103,5 +103,7 @@ test.describe('Console keyboard shortcuts', { tag: tags.deploymentAgnostic }, ()
 
     await expect.poll(() => pageObjects.console.getModelLineCount()).toBe(2);
     await expect(pageObjects.console.outputPanelEmptyState).toBeVisible();
+
+    await pageObjects.console.setKeyboardShortcutsEnabled(true);
   });
 });
