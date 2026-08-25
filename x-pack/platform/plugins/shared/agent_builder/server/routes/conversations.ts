@@ -11,13 +11,14 @@ import { validate as uuidValidate } from 'uuid';
 import {
   CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
   CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
+  CONVERSATION_ID_MAX_LENGTH,
+  CONVERSATION_TITLE_MAX_LENGTH,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   agentBuilderDefaultAgentId,
   isAgentNotFoundError,
   isAgentUnavailableError,
   isConversationAlreadyExistsError,
-  type Conversation,
 } from '@kbn/agent-builder-common';
 import { createConversationPublicClient } from '../services/conversation/conversation_public_client';
 import type { RouteDependencies } from './types';
@@ -274,7 +275,7 @@ export function registerConversationRoutes({
               ),
               conversation_id: schema.maybe(
                 schema.string({
-                  maxLength: 256,
+                  maxLength: CONVERSATION_ID_MAX_LENGTH,
                   validate: (v) =>
                     uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID',
                   meta: {
@@ -285,7 +286,7 @@ export function registerConversationRoutes({
               ),
               title: schema.maybe(
                 schema.string({
-                  maxLength: 500,
+                  maxLength: CONVERSATION_TITLE_MAX_LENGTH,
                   meta: {
                     description: 'Title for the conversation. Defaults to "New conversation".',
                   },
@@ -328,9 +329,9 @@ export function registerConversationRoutes({
         ]);
         const publicClient = createConversationPublicClient({ client, agentRegistry });
 
-        let created: Conversation;
+        let conversation: CreateConversationResponse;
         try {
-          created = await publicClient.create({
+          conversation = await publicClient.create({
             agentId,
             id: conversationId,
             title,
@@ -351,10 +352,6 @@ export function registerConversationRoutes({
           }
           throw e;
         }
-
-        // publicClient.create() returns Conversation (no permissions). Fetch via get()
-        // to return ConversationWithPermissions — consistent with GET /conversations/{id}.
-        const conversation = await client.get(created.id);
 
         return response.ok<CreateConversationResponse>({ body: conversation });
       })
@@ -386,7 +383,7 @@ export function registerConversationRoutes({
           request: {
             params: schema.object({
               conversation_id: schema.string({
-                maxLength: 256,
+                maxLength: CONVERSATION_ID_MAX_LENGTH,
                 meta: {
                   description:
                     'The unique identifier of the conversation whose access control to update.',

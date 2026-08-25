@@ -445,7 +445,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-cypress-test-helper/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-dev-utils/src/axios/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-mcp-dev-server/**/*.{js,mjs,ts,tsx}',
   'x-pack/examples/alerting_example/server/rule_types/**/*.{js,mjs,ts,tsx}',
   'x-pack/packages/kbn-synthetics-private-location/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/packages/shared/kbn-data-forge/**/*.{js,mjs,ts,tsx}',
@@ -3105,7 +3104,14 @@ module.exports = {
         'no-restricted-imports': [
           'error',
           {
-            patterns: ['@kbn/*', '!@kbn/i18n', '!@kbn/i18n-react', '!@kbn/ui-chrome-layout'],
+            patterns: [
+              '@kbn/*',
+              '!@kbn/i18n',
+              '!@kbn/i18n-react',
+              '!@kbn/ui-chrome-layout',
+              '!@kbn/ui-app-menu',
+              '!@kbn/ui-favorite-button',
+            ],
           },
         ],
       },
