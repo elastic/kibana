@@ -15,6 +15,7 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
+      "actions",
       "agentBuilder"
     ],
     "requiredBundles": [],

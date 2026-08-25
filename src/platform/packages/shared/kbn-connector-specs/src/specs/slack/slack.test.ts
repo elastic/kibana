@@ -200,6 +200,34 @@ describe('Slack', () => {
       expect(result).toEqual(mockResponse.data);
     });
 
+    it('should send Block Kit blocks with the text as fallback', async () => {
+      const mockResponse = {
+        data: { ok: true, channel: 'C123', ts: '1234567890.123456' },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const blocks = [
+        { type: 'header', text: { type: 'plain_text', text: 'Open cases' } },
+        { type: 'section', text: { type: 'mrkdwn', text: '*3 cases*' } },
+      ];
+
+      await Slack.actions.sendMessage.handler(mockContext, {
+        channel: 'C123',
+        text: 'Open cases',
+        blocks,
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/chat.postMessage',
+        {
+          channel: 'C123',
+          text: 'Open cases',
+          blocks,
+        },
+        expect.any(Object)
+      );
+    });
+
     it('should throw error when Slack API returns error', async () => {
       const mockResponse = { data: { ok: false, error: 'invalid_auth' } };
       mockClient.post.mockResolvedValue(mockResponse);
@@ -1611,6 +1639,154 @@ describe('Slack', () => {
           `${name} is not available through the Elastic Slack app`
         );
       }
+    });
+  });
+
+  describe('uploadFile action', () => {
+    const pngBase64 = Buffer.from('fake-png-bytes').toString('base64');
+    const uploadUrl = 'https://files.slack.com/upload/v1/ABC123';
+
+    const mockReservation = (data: Record<string, unknown> = {}) => ({
+      data: { ok: true, upload_url: uploadUrl, file_id: 'F123', ...data },
+    });
+    const mockFileReady = (data: Record<string, unknown> = {}) => ({
+      data: { ok: true, file: { mimetype: 'image/png' }, ...data },
+    });
+
+    it('should not be exposed as a tool', () => {
+      expect(Slack.actions.uploadFile.isTool).toBe(false);
+    });
+
+    it('should reserve an upload URL, post the bytes, complete, and return the file id', async () => {
+      mockClient.get
+        .mockResolvedValueOnce(mockReservation())
+        .mockResolvedValueOnce(mockFileReady());
+      mockClient.post.mockResolvedValueOnce({ data: {} }).mockResolvedValueOnce({
+        data: { ok: true, files: [{ id: 'F123' }] },
+      });
+
+      const result = await Slack.actions.uploadFile.handler(mockContext, {
+        filename: 'chart.png',
+        file: pngBase64,
+      });
+
+      expect(mockClient.get).toHaveBeenNthCalledWith(
+        1,
+        'https://slack.com/api/files.getUploadURLExternal',
+        { params: { filename: 'chart.png', length: 14 } }
+      );
+      expect(mockClient.post).toHaveBeenNthCalledWith(1, uploadUrl, expect.any(FormData));
+      expect(mockClient.post).toHaveBeenNthCalledWith(
+        2,
+        'https://slack.com/api/files.completeUploadExternal',
+        { files: [{ id: 'F123', title: 'chart.png' }] },
+        expect.any(Object)
+      );
+      expect(result).toEqual({ ok: true, fileId: 'F123', files: [{ id: 'F123' }] });
+    });
+
+    it('should use the supplied title and share into a channel when provided', async () => {
+      mockClient.get
+        .mockResolvedValueOnce(mockReservation())
+        .mockResolvedValueOnce(mockFileReady());
+      mockClient.post
+        .mockResolvedValueOnce({ data: {} })
+        .mockResolvedValueOnce({ data: { ok: true } });
+
+      await Slack.actions.uploadFile.handler(mockContext, {
+        filename: 'chart.png',
+        file: pngBase64,
+        title: 'Risk distribution',
+        channel: 'C123',
+      });
+
+      expect(mockClient.post).toHaveBeenNthCalledWith(
+        2,
+        'https://slack.com/api/files.completeUploadExternal',
+        { files: [{ id: 'F123', title: 'Risk distribution' }], channel_id: 'C123' },
+        expect.any(Object)
+      );
+    });
+
+    describe('readiness polling', () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('should wait for the file to become ready before returning', async () => {
+        mockClient.get
+          .mockResolvedValueOnce(mockReservation())
+          // Slack reports the file before processing finishes; referencing it now
+          // would fail the eventual message with `invalid_blocks`.
+          .mockResolvedValueOnce({ data: { ok: true, file: {} } })
+          .mockResolvedValueOnce(mockFileReady());
+        mockClient.post
+          .mockResolvedValueOnce({ data: {} })
+          .mockResolvedValueOnce({ data: { ok: true } });
+
+        const upload = Slack.actions.uploadFile.handler(mockContext, {
+          filename: 'chart.png',
+          file: pngBase64,
+        });
+        await jest.advanceTimersByTimeAsync(500);
+        await upload;
+
+        expect(mockClient.get).toHaveBeenCalledTimes(3);
+        expect(mockClient.get).toHaveBeenLastCalledWith('https://slack.com/api/files.info', {
+          params: { file: 'F123' },
+        });
+      });
+
+      it('should still return the file id when files:read is unavailable', async () => {
+        mockClient.get
+          .mockResolvedValueOnce(mockReservation())
+          .mockResolvedValueOnce({ data: { ok: false, error: 'missing_scope' } });
+        mockClient.post
+          .mockResolvedValueOnce({ data: {} })
+          .mockResolvedValueOnce({ data: { ok: true } });
+
+        const upload = Slack.actions.uploadFile.handler(mockContext, {
+          filename: 'chart.png',
+          file: pngBase64,
+        });
+        await jest.advanceTimersByTimeAsync(2000);
+
+        expect(await upload).toMatchObject({ ok: true, fileId: 'F123' });
+        expect(mockClient.get).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('should throw when the content does not decode to any bytes', async () => {
+      await expect(
+        Slack.actions.uploadFile.handler(mockContext, { filename: 'chart.png', file: '=' })
+      ).rejects.toThrow('did not decode to any bytes');
+
+      expect(mockClient.get).not.toHaveBeenCalled();
+    });
+
+    it('should throw when the upload URL cannot be reserved', async () => {
+      mockClient.get.mockResolvedValueOnce({ data: { ok: false, error: 'missing_scope' } });
+
+      await expect(
+        Slack.actions.uploadFile.handler(mockContext, { filename: 'chart.png', file: pngBase64 })
+      ).rejects.toThrow('Slack uploadFile error: missing_scope');
+
+      expect(mockClient.post).not.toHaveBeenCalled();
+    });
+
+    it('should throw when completing the upload fails', async () => {
+      mockClient.get.mockResolvedValueOnce(mockReservation());
+      mockClient.post
+        .mockResolvedValueOnce({ data: {} })
+        .mockResolvedValueOnce({ data: { ok: false, error: 'invalid_arguments' } });
+
+      await expect(
+        Slack.actions.uploadFile.handler(mockContext, { filename: 'chart.png', file: pngBase64 })
+      ).rejects.toThrow('Slack uploadFile error: invalid_arguments');
     });
   });
 

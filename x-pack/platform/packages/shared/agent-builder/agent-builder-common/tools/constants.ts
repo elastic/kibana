@@ -171,6 +171,7 @@ export const defaultAgentToolIds = [
   'render_view',
   'get_authoring_context',
   'request_registered_view',
+  'post_view_to_slack',
 ];
 
 /**
