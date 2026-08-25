@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { Liquid } from 'liquidjs';
 import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
@@ -125,6 +126,7 @@ describe('project watch', () => {
       type: string;
       if?: string;
       condition?: string;
+      with?: Record<string, unknown>;
       steps?: NestedStep[];
       else?: NestedStep[];
     }
@@ -286,6 +288,87 @@ describe('project watch', () => {
           expect(expr).toContain(`steps.${gate.name}.output.response.approved`);
         }
       }
+    });
+
+    describe('rule tuning alert marking', () => {
+      const tuning = parse(
+        getManagedWorkflowDefinition(PND_RULE_TUNING_WORKFLOW_ID)!.yaml!
+      ) as WorkflowYaml;
+      const tuningSteps = flattenSteps(tuning.steps as unknown as NestedStep[]);
+      const harvest = tuningSteps.find(({ name }) => name === 'harvest_fp_alerts_by_rule')!;
+      const harvestQuery = String(harvest.with?.query);
+      const reviewedTag = (tuning.consts as Record<string, string>).reviewed_tag;
+      const tagSteps = tuningSteps.filter(({ type }) => type === 'security.setAlertTags');
+
+      it('filters the reviewed tag out of the harvest', () => {
+        expect(reviewedTag).toEqual(expect.any(String));
+        expect(harvestQuery).toContain('NOT MV_CONTAINS(`kibana.alert.workflow_tags`');
+        expect(harvestQuery).toContain('{{ consts.reviewed_tag }}');
+      });
+
+      // The tag API writes to the alerts index of the space it runs in, so anything the
+      // harvest reads outside that space could never be marked.
+      it('harvests only the space it can tag in', () => {
+        expect(harvestQuery).toContain('FROM .alerts-security.alerts-{{ workflow.spaceId }}');
+      });
+
+      // A partial aggregation returns a short alert_ids list, so alerts that drove an
+      // approved change would stay untagged and come back on the next sweep.
+      it('refuses partial harvest results', () => {
+        expect(harvest.with?.allow_partial_results).toBe(false);
+      });
+
+      it('tags the harvested alerts once a decision is recorded', () => {
+        expect(tagSteps).toHaveLength(1);
+
+        const [tagStep] = tagSteps;
+        expect(tagStep.if).toContain('steps.review_tuning.output.response.approved != null');
+        expect(tagStep.with?.tags_to_add).toEqual([
+          '{{ consts.reviewed_tag }}',
+          '{{ steps.classify_outcome.output.outcome_tag }}',
+        ]);
+      });
+
+      // `if`/`elsif` is core Liquid, so a bare engine renders this the same way the
+      // workflow engine's restricted one does.
+      it('renders a distinct outcome tag per decision path', () => {
+        const template = tuningSteps.find(({ name }) => name === 'classify_outcome')!.with
+          ?.outcome_tag as string;
+        const render = (approved: boolean, canApply: boolean) =>
+          new Liquid().parseAndRenderSync(template, {
+            steps: {
+              review_tuning: { output: { response: { approved } } },
+              classify_proposal: { output: { can_apply: canApply } },
+            },
+          });
+
+        expect({
+          approvedAndApplied: render(true, true),
+          approvedForManualWork: render(true, false),
+          dismissed: render(false, false),
+        }).toEqual({
+          approvedAndApplied: 'detection-watch:tuning-applied',
+          approvedForManualWork: 'detection-watch:tuning-manual',
+          dismissed: 'detection-watch:tuning-dismissed',
+        });
+      });
+
+      // The harvest projects its columns positionally, so reordering KEEP would make the
+      // tag step read some other column as the alert ids.
+      it('reads the alert ids from the column position KEEP assigns them', () => {
+        const keepClause = harvestQuery
+          .split('\n')
+          .find((line) => line.trimStart().startsWith('| KEEP'))!;
+        const columns = keepClause
+          .replace('| KEEP', '')
+          .split(',')
+          .map((column) => column.trim().replace(/`/g, ''));
+
+        expect(columns).toContain('alert_ids');
+        expect(tagSteps[0].with?.alert_ids).toContain(
+          `foreach.item.${columns.indexOf('alert_ids')}`
+        );
+      });
     });
 
     it('keeps the skills and the preview worker inside the workers themselves', () => {

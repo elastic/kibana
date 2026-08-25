@@ -90,7 +90,7 @@ export const PND_WATCH_DETECTION_WORKFLOW = {
   id: PND_WATCH_DETECTION_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 7,
+  version: 8,
   visibility: VISIBILITY,
   yaml: WATCH_DETECTION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
@@ -110,7 +110,7 @@ export const PND_RULE_TUNING_WORKFLOW = {
   id: PND_RULE_TUNING_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 9,
+  version: 10,
   visibility: WORKER_VISIBILITY,
   yaml: RULE_TUNING_YAML,
 } as const satisfies ManagedWorkflowDefinition;

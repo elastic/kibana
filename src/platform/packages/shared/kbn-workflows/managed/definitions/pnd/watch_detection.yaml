@@ -59,7 +59,7 @@ consts:
         label: Read + act
       - name: Security alerts
         access: full
-        label: Read
+        label: Read + tag
     config:
       minFpCountPerRule: 1
       previewInvocationCount: 2
