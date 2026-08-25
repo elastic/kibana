@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RUM_CANONICAL_SESSION_ID_FIELD } from '../../common/rum_sessions';
+import { RUM_SESSION_GROUP_FIELD } from '../../common/rum_sessions';
 import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
 import {
   buildRumSessionsTransformBody,
@@ -16,10 +16,10 @@ import {
 } from './rum_sessions_spec';
 
 describe('rumSessionsTransformBody', () => {
-  it('groups by canonical keyword fields instead of Painless scripts', () => {
+  it('groups by rotated attributes.session.id instead of Painless scripts', () => {
     const { group_by: groupBy } = rumSessionsTransformBody.pivot;
     expect(groupBy['session.id']).toEqual({
-      terms: { field: RUM_CANONICAL_SESSION_ID_FIELD },
+      terms: { field: RUM_SESSION_GROUP_FIELD },
     });
     expect(groupBy).not.toHaveProperty('service.name');
   });
@@ -60,7 +60,7 @@ describe('rumSessionsTransformBody', () => {
         { field: 'resource.attributes.user.email' },
       ])
     );
-    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 5 }));
+    expect(rumSessionsTransformBody._meta).toEqual(expect.objectContaining({ spec: 6 }));
   });
 
   it('defaults sync delay to 5m and accepts an override', () => {
@@ -71,6 +71,9 @@ describe('rumSessionsTransformBody', () => {
   it('keeps 90d of session history for long-range analytics', () => {
     expect(rumSessionsTransformBody.source.query.bool.filter[0]).toEqual({
       range: { '@timestamp': { gte: 'now-90d/d' } },
+    });
+    expect(rumSessionsTransformBody.source.query.bool.filter[1]).toEqual({
+      exists: { field: RUM_SESSION_GROUP_FIELD },
     });
     expect(rumSessionsTransformBody.retention_policy.time.max_age).toBe('93d');
   });

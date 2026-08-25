@@ -7,7 +7,7 @@
 
 export const RUM_SESSIONS_VERSION = 3;
 /** Pivot / dest-pipeline revision. Replace transform when this changes; dest stays. */
-export const RUM_SESSIONS_SPEC = 5;
+export const RUM_SESSIONS_SPEC = 6;
 /**
  * Transform dest only persists the first `top_metrics` hit (ES #74420).
  * Size 1 is the only value that lands on the session index.
@@ -21,6 +21,11 @@ export const RUM_SESSIONS_TEMPLATE_NAME = 'ux-rum-sessions';
 export const RUM_SESSIONS_PIPELINE_NAME = 'ux-rum-sessions-dest';
 export const RUM_NORMALIZE_PIPELINE_NAME = 'ux-rum-normalize';
 export const RUM_CANONICAL_SESSION_ID_FIELD = 'resource.attributes.session.id';
+/**
+ * Pivot / list grouping. Resource `session.id` is frozen at SDK start; the
+ * processors re-stamp the rotated id on `attributes.session.id`.
+ */
+export const RUM_SESSION_GROUP_FIELD = 'attributes.session.id';
 /** Dest list default is start_time desc. Sort is create-time only. */
 export const RUM_SESSIONS_INDEX_SORT_FIELD = ['start_time', 'session.id'] as const;
 export const RUM_SESSIONS_INDEX_SORT_ORDER = ['desc', 'asc'] as const;

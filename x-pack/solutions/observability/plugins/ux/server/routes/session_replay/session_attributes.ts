@@ -14,6 +14,7 @@ import type {
 import { makeErrorGroupKey } from '../../../common/rum_app';
 
 export interface OtelHit {
+  _id?: string;
   _source?: Record<string, unknown>;
 }
 
@@ -251,7 +252,7 @@ export const collectSessionSignals = (hits: OtelHit[]): SessionSignalCollections
 
 export const isErrorHit = (source: Record<string, unknown>): boolean => {
   const name = docName(source);
-  if (name === 'exception') {
+  if (name === 'exception' || name === 'error') {
     return true;
   }
   return (

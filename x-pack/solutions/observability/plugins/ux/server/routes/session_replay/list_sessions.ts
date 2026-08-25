@@ -15,6 +15,7 @@ import {
   querySessionIndexSessions,
 } from '../../transforms/rum_sessions_query';
 import {
+  isHeartbeatOnlySession,
   RUM_SESSION_SOURCE_INDEX,
   SESSION_REPLAY_INDEX,
   type RumSessionSummary,
@@ -561,7 +562,7 @@ const queryRawSessions = async (
     });
   }
 
-  const all = [...sessionsById.values()];
+  const all = [...sessionsById.values()].filter((session) => !isHeartbeatOnlySession(session));
 
   // Unprefixed remainder only — structured path/click/error/user already ran in ES.
   const term = (find.text ?? '').trim().toLowerCase().slice(0, 200);

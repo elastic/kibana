@@ -36,6 +36,7 @@ import {
   type SessionListStats,
   type SessionSortField,
 } from '../../common/session_replay';
+import { fillSessionListSparklines } from './session_list_sparklines';
 
 export {
   mergeFunnelResponses,
@@ -277,6 +278,19 @@ export const sessionIndexHasReplayQuery = (): object => ({
   },
 });
 
+/** Hide dest rows that are only resource-timing heartbeats (no page/click/error/replay). */
+export const sessionIndexActivityFilter = (): object => ({
+  bool: {
+    should: [
+      { range: { page_view_count: { gt: 0 } } },
+      { range: { click_count: { gt: 0 } } },
+      { range: { error_count: { gt: 0 } } },
+      { term: { has_replay: true } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
 const facetBuckets = (agg: unknown): Array<{ key: string; count: number }> => {
   const buckets = (agg as { buckets?: Array<{ key?: string; doc_count?: number }> } | undefined)
     ?.buckets;
@@ -374,6 +388,7 @@ export const buildSessionIndexFilters = ({
 }: SessionIndexFilterParams): object[] => {
   const filters: object[] = [
     sessionIndexTimeFilter(rangeFrom, rangeTo, watermark ?? undefined),
+    sessionIndexActivityFilter(),
     ...serviceFilter(serviceName),
   ];
   const browserClause = facetTerm('browser.name', browser);
@@ -699,8 +714,11 @@ export const querySessionIndexSessions = async ({
   const total =
     typeof result.hits.total === 'number' ? result.hits.total : result.hits.total?.value ?? 0;
   const aggs = (result.aggregations ?? {}) as Record<string, unknown>;
-  const sessions = result.hits.hits.map((hit) =>
-    toSummary((hit._source as Record<string, unknown>) ?? {}, String(hit._id))
+  const sessions = await fillSessionListSparklines(
+    client,
+    result.hits.hits.map((hit) =>
+      toSummary((hit._source as Record<string, unknown>) ?? {}, String(hit._id))
+    )
   );
   const facets: SessionListFacets = {
     browsers: facetBuckets(aggs.browsers),

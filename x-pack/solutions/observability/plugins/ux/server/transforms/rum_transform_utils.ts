@@ -10,7 +10,7 @@ import {
   approximateCheckpointWatermark,
   emptyRumRollupStatus,
   parseLookbackDays,
-  RUM_CANONICAL_SESSION_ID_FIELD,
+  RUM_SESSION_GROUP_FIELD,
   RUM_SESSIONS_SYNC_DELAY,
   sessionsRetentionMaxAge,
   sessionsSourceLookback,
@@ -114,7 +114,7 @@ export const transformSourceWindowUpdate = ({
       bool: {
         filter: [
           { range: { '@timestamp': { gte: lookbackGte } } },
-          { exists: { field: RUM_CANONICAL_SESSION_ID_FIELD } },
+          { exists: { field: RUM_SESSION_GROUP_FIELD } },
         ],
       },
     },

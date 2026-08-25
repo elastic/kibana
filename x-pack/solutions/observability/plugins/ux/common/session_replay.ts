@@ -16,6 +16,18 @@ export const SESSION_ID_FIELDS = [
   'attributes.rum.session.id',
 ] as const;
 
+/** Dest/raw rows with no page, click, error, or replay — typically resource-timing heartbeats. */
+export const isHeartbeatOnlySession = (session: {
+  pageCount: number;
+  actionCount: number;
+  errorCount: number;
+  hasReplay: boolean;
+}): boolean =>
+  session.pageCount === 0 &&
+  session.actionCount === 0 &&
+  session.errorCount === 0 &&
+  !session.hasReplay;
+
 export interface SessionUser {
   id: string | null;
   email: string | null;

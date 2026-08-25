@@ -10,6 +10,7 @@ import {
   actionFromHit,
   countDeadAndErrorClicks,
   errorGroupFromHit,
+  isErrorHit,
   userFromHits,
 } from './session_attributes';
 
@@ -41,6 +42,14 @@ describe('activitySearchTokens', () => {
 
   it('falls back to the raw label', () => {
     expect(activitySearchTokens('  Custom CTA  ')).toEqual(['Custom CTA']);
+  });
+});
+
+describe('isErrorHit', () => {
+  it('treats OTel event_name error as an error', () => {
+    expect(isErrorHit({ event_name: 'error', attributes: { 'event.name': 'error' } })).toBe(true);
+    expect(isErrorHit({ name: 'exception' })).toBe(true);
+    expect(isErrorHit({ name: 'documentLoad' })).toBe(false);
   });
 });
 

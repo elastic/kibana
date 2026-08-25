@@ -10,11 +10,11 @@ import {
   RUM_CANONICAL_BROWSER_NAME_FIELD,
   RUM_CANONICAL_ERROR_GROUP_FIELD,
   RUM_CANONICAL_SERVICE_NAME_FIELD,
-  RUM_CANONICAL_SESSION_ID_FIELD,
   RUM_CANONICAL_URL_PATH_GROUPED_FIELD,
   RUM_CLICK_TARGET_FIELD,
   RUM_HAS_REPLAY_FIELD,
   RUM_SEQUENCE_TOP_SIZE,
+  RUM_SESSION_GROUP_FIELD,
   RUM_SESSIONS_INDEX,
   RUM_SESSIONS_INDEX_PATTERN,
   RUM_SESSIONS_INDEX_SORT_FIELD,
@@ -40,7 +40,7 @@ export const SERVICE_NAME_SCRIPT = `
   return '';
 `;
 
-const EXCEPTION_FILTER = {
+export const EXCEPTION_FILTER = {
   bool: {
     should: [
       { term: { event_name: 'exception' } },
@@ -52,7 +52,7 @@ const EXCEPTION_FILTER = {
   },
 };
 
-const CLICK_FILTER = {
+export const CLICK_FILTER = {
   bool: {
     should: [
       { term: { name: 'click' } },
@@ -579,7 +579,7 @@ export const buildRumSessionsTransformBody = (
       bool: {
         filter: [
           { range: { '@timestamp': { gte: sessionsSourceLookback(lookbackDays) } } },
-          { exists: { field: RUM_CANONICAL_SESSION_ID_FIELD } },
+          { exists: { field: RUM_SESSION_GROUP_FIELD } },
         ],
       },
     },
@@ -613,7 +613,7 @@ export const buildRumSessionsTransformBody = (
   pivot: {
     group_by: {
       'session.id': {
-        terms: { field: RUM_CANONICAL_SESSION_ID_FIELD },
+        terms: { field: RUM_SESSION_GROUP_FIELD },
       },
     },
     aggregations: {

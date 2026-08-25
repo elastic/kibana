@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sessionUserFromKey } from './session_replay';
+import { isHeartbeatOnlySession, sessionUserFromKey } from './session_replay';
 
 describe('sessionUserFromKey', () => {
   it('treats an email key as email so the table can show it', () => {
@@ -26,5 +26,27 @@ describe('sessionUserFromKey', () => {
 
   it('returns an empty user when the session rollup has no key', () => {
     expect(sessionUserFromKey(null)).toEqual({ id: null, email: null, name: null });
+  });
+});
+
+describe('isHeartbeatOnlySession', () => {
+  const heartbeat = {
+    pageCount: 0,
+    actionCount: 0,
+    errorCount: 0,
+    hasReplay: false,
+  };
+
+  it('hides rows with no page, click, error, or replay', () => {
+    expect(isHeartbeatOnlySession(heartbeat)).toBe(true);
+  });
+
+  it('keeps replay-only rows', () => {
+    expect(isHeartbeatOnlySession({ ...heartbeat, hasReplay: true })).toBe(false);
+  });
+
+  it('keeps rows with a click or error', () => {
+    expect(isHeartbeatOnlySession({ ...heartbeat, actionCount: 1 })).toBe(false);
+    expect(isHeartbeatOnlySession({ ...heartbeat, errorCount: 2 })).toBe(false);
   });
 });

@@ -7,6 +7,7 @@
 
 import {
   buildSessionIndexFilters,
+  sessionIndexActivityFilter,
   sessionIndexHasReplayQuery,
   sessionIndexParamsFromQuery,
   sessionTrendsAggregation,
@@ -25,6 +26,14 @@ describe('sessionIndexHasReplayQuery', () => {
 });
 
 describe('buildSessionIndexFilters', () => {
+  it('drops heartbeat-only dest rows', () => {
+    const filters = buildSessionIndexFilters({
+      rangeFrom: 'now-30d',
+      rangeTo: 'now',
+    });
+    expect(filters).toEqual(expect.arrayContaining([sessionIndexActivityFilter()]));
+  });
+
   it('applies service, browser, and frustration on session fields', () => {
     const filters = buildSessionIndexFilters({
       rangeFrom: 'now-30d',

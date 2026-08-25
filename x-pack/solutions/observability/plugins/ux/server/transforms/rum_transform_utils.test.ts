@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { RUM_CANONICAL_SESSION_ID_FIELD } from '../../common/rum_sessions';
+import { RUM_SESSION_GROUP_FIELD } from '../../common/rum_sessions';
 import {
   esStatusCode,
   installedRetentionMaxAge,
@@ -27,7 +27,7 @@ const current = {
           bool: {
             filter: [
               { range: { '@timestamp': { gte: 'now-30d' } } },
-              { exists: { field: RUM_CANONICAL_SESSION_ID_FIELD } },
+              { exists: { field: RUM_SESSION_GROUP_FIELD } },
             ],
           },
         },
@@ -58,7 +58,7 @@ describe('transform source window helpers', () => {
           bool: {
             filter: [
               { range: { '@timestamp': { gte: 'now-90d' } } },
-              { exists: { field: RUM_CANONICAL_SESSION_ID_FIELD } },
+              { exists: { field: RUM_SESSION_GROUP_FIELD } },
             ],
           },
         },
