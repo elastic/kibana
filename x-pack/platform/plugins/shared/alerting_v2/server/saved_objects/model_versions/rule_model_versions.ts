@@ -78,11 +78,10 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '5': {
-    // Add optional `metadata.source` — a framework-agnostic { id?, type, data }
-    // envelope tracking the originating spec or content pack. `source.id` and
-    // `source.type` are indexed so rules can be filtered by spec or source
-    // type. `id` is optional. No backfill: pre-existing user-authored rules
-    // have no source.
+    // Add optional `metadata.source` — a framework-agnostic { type, data }
+    // envelope tracking the originating spec or content pack. `source.type` is
+    // indexed so rules can be filtered by source type. No backfill: pre-existing
+    // user-authored rules have no source.
     changes: [
       {
         type: 'mappings_addition',
@@ -91,7 +90,6 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
             properties: {
               source: {
                 properties: {
-                  id: { type: 'keyword', ignore_above: 256 },
                   type: { type: 'keyword', ignore_above: 256 },
                 },
               },

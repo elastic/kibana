@@ -1117,27 +1117,6 @@ describe('createRuleDataSchema', () => {
         ...validCreateData,
         metadata: {
           name: 'test rule',
-          source: { id: 'spec-1', type: 'prebuilt_rule', data: { rule_id: 'abc', version: 1 } },
-        },
-      });
-
-      expect(result.metadata.source).toEqual({
-        id: 'spec-1',
-        type: 'prebuilt_rule',
-        data: { rule_id: 'abc', version: 1 },
-      });
-    });
-
-    it('accepts a rule without source (optional)', () => {
-      const result = createRuleDataSchema.parse(validCreateData);
-      expect(result.metadata.source).toBeUndefined();
-    });
-
-    it('accepts source without id (optional)', () => {
-      const result = createRuleDataSchema.parse({
-        ...validCreateData,
-        metadata: {
-          name: 'test rule',
           source: { type: 'prebuilt_rule', data: { rule_id: 'abc', version: 1 } },
         },
       });
@@ -1148,48 +1127,15 @@ describe('createRuleDataSchema', () => {
       });
     });
 
-    it('accepts source with an id of 256 characters', () => {
-      const id = 'a'.repeat(256);
-      const result = createRuleDataSchema.parse({
-        ...validCreateData,
-        metadata: { name: 'test rule', source: { id, type: 'prebuilt_rule', data: {} } },
-      });
-      expect(result.metadata.source?.id).toBe(id);
-    });
-
-    it('rejects source with an empty id', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        metadata: { name: 'test rule', source: { id: '', type: 'prebuilt_rule', data: {} } },
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([expect.objectContaining({ path: ['metadata', 'source', 'id'] })])
-        );
-      }
-    });
-
-    it('rejects source with an id exceeding 256 characters', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        metadata: {
-          name: 'test rule',
-          source: { id: 'a'.repeat(257), type: 'prebuilt_rule', data: {} },
-        },
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([expect.objectContaining({ path: ['metadata', 'source', 'id'] })])
-        );
-      }
+    it('accepts a rule without source (optional)', () => {
+      const result = createRuleDataSchema.parse(validCreateData);
+      expect(result.metadata.source).toBeUndefined();
     });
 
     it('rejects source with an empty type', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        metadata: { name: 'test rule', source: { id: 'spec-1', type: '', data: {} } },
+        metadata: { name: 'test rule', source: { type: '', data: {} } },
       });
       expect(result.success).toBe(false);
     });
@@ -1197,7 +1143,7 @@ describe('createRuleDataSchema', () => {
     it('rejects source with a type exceeding 128 characters', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        metadata: { name: 'test rule', source: { id: 'spec-1', type: 'a'.repeat(129), data: {} } },
+        metadata: { name: 'test rule', source: { type: 'a'.repeat(129), data: {} } },
       });
       expect(result.success).toBe(false);
     });
@@ -1544,51 +1490,6 @@ describe('updateRuleDataSchema', () => {
         type: 'prebuilt_rule',
         data: { rule_id: 'abc', version: 2 },
       });
-    });
-
-    it('accepts source with id in update payload', () => {
-      const result = updateRuleDataSchema.parse({
-        metadata: {
-          source: { id: 'spec-1', type: 'prebuilt_rule', data: { rule_id: 'abc', version: 2 } },
-        },
-      });
-      expect(result.metadata?.source).toEqual({
-        id: 'spec-1',
-        type: 'prebuilt_rule',
-        data: { rule_id: 'abc', version: 2 },
-      });
-    });
-
-    it('accepts source with an id of 256 characters in update', () => {
-      const id = 'a'.repeat(256);
-      const result = updateRuleDataSchema.parse({
-        metadata: { source: { id, type: 'prebuilt_rule', data: {} } },
-      });
-      expect(result.metadata?.source?.id).toBe(id);
-    });
-
-    it('rejects source with an empty id in update', () => {
-      const result = updateRuleDataSchema.safeParse({
-        metadata: { source: { id: '', type: 'prebuilt_rule', data: {} } },
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([expect.objectContaining({ path: ['metadata', 'source', 'id'] })])
-        );
-      }
-    });
-
-    it('rejects source with an id exceeding 256 characters in update', () => {
-      const result = updateRuleDataSchema.safeParse({
-        metadata: { source: { id: 'a'.repeat(257), type: 'prebuilt_rule', data: {} } },
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([expect.objectContaining({ path: ['metadata', 'source', 'id'] })])
-        );
-      }
     });
 
     it('clears source with an explicit null', () => {

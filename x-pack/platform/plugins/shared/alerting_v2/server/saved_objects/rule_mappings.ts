@@ -23,7 +23,6 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         tags: { type: 'keyword', ignore_above: 128 },
         source: {
           properties: {
-            id: { type: 'keyword', ignore_above: 256 },
             type: { type: 'keyword', ignore_above: 256 },
           },
         },

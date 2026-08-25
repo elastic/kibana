@@ -358,12 +358,6 @@ describe('rule template create-rule schema coupling', () => {
                   },
                   "type": "object",
                 },
-                "id": Object {
-                  "description": "Optional stable identifier of the originating spec, e.g. a prebuilt rule id or template id. Use to filter by source id.",
-                  "maxLength": 256,
-                  "minLength": 1,
-                  "type": "string",
-                },
                 "type": Object {
                   "description": "Source type discriminator, e.g. \\"prebuilt_rule\\", \\"content_pack\\". Namespaced by convention.",
                   "maxLength": 128,
