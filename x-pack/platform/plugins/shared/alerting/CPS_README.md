@@ -82,7 +82,7 @@ Both keys are stored as encrypted attributes on the rule saved object:
 
 #### Missing UIAM API Key Tagging
 
-Rules that should have a UIAM key but don't are tagged with `Missing Elastic Cloud API Key` (the `MISSING_UIAM_API_KEY_TAG`) when the `alerting.rules.provisionUiamApiKeys` feature flag is enabled.
+On serverless, rules that should have a UIAM key but don't (system-created key without a `uiamApiKey`) are tagged with `Missing Elastic Cloud API Key` (the `MISSING_UIAM_API_KEY_TAG`) on create, update, and enable.
 
 #### Invalidation
 
@@ -101,10 +101,6 @@ Both ES and UIAM keys are queued for invalidation during rule create, update, en
 | `xpack.alerting.rules.apiKeyType` | `'es'` \| `'uiam'` | `'es'` | Which API key type to use for the fake request during rule execution |
 | `xpack.alerting.invalidateApiKeysTask.interval` | duration | `'5m'` | How often the API key invalidation task runs |
 | `xpack.alerting.invalidateApiKeysTask.removalDelay` | duration | `'1h'` | Minimum age before a pending API key is invalidated |
-
-| Feature Flag | Description |
-|-------------|-------------|
-| `alerting.rules.provisionUiamApiKeys` | Enables missing-key tagging for rules that should have a UIAM key (serverless only) |
 
 ## Structured Log Tags
 

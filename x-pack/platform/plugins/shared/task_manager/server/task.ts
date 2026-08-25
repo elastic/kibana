@@ -609,12 +609,6 @@ export interface ApiKeyOptions {
    * such as workflows.
    */
   cloneApiKey?: boolean;
-  /**
-   * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
-   * tests and narrow internal flows (e.g. exercising UIAM provisioning on tasks that have ES
-   * credentials only).
-   */
-  onEsKey?: boolean;
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;

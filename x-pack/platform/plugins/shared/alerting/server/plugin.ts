@@ -706,7 +706,6 @@ export class AlertingPlugin {
       securityService: core.security,
       shouldGrantUiam,
       isServerless: this.isServerless,
-      featureFlags: core.featureFlags,
       analytics: core.analytics,
     });
 

@@ -16,7 +16,6 @@ import {
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
   securityServiceMock,
-  coreFeatureFlagsMock,
   analyticsServiceMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -121,7 +120,6 @@ describe('RulesClientFactory', () => {
       getAlertIndicesAlias: jest.fn(),
       alertsService: null,
       shouldGrantUiam: false,
-      featureFlags: coreFeatureFlagsMock.createStart(),
       isServerless: false,
       analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };

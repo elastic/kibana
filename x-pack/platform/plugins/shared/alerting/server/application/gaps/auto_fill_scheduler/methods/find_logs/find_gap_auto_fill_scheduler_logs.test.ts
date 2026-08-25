@@ -28,8 +28,6 @@ import { ReadOperations, AlertingAuthorizationEntity } from '../../../../../auth
 import { ConnectorAdapterRegistry } from '../../../../../connector_adapters/connector_adapter_registry';
 import { GapAutoFillSchedulerAuditAction } from '../../../../../rules_client/common/audit_events';
 import type { FindGapAutoFillSchedulerLogsParams } from './types';
-import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
-
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -129,7 +127,6 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       isSystemAction: jest.fn(),
       connectorAdapterRegistry: new ConnectorAdapterRegistry(),
       uiSettings: uiSettingsServiceMock.createStartContract(),
-      featureFlags: coreFeatureFlagsMock.createStart(),
       isServerless: false,
     });
 
