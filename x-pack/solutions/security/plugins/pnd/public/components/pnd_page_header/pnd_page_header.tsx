@@ -13,7 +13,6 @@ import {
   EuiIcon,
   EuiPageHeader,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
