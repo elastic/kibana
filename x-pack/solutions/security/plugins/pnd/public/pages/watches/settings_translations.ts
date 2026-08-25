@@ -23,7 +23,7 @@ import {
 } from '@kbn/pnd-common';
 
 /* -------------------------------------------------------------------------- */
-/* Header and metrics                                                         */
+/* Header                                                                     */
 /* -------------------------------------------------------------------------- */
 
 export const ENABLED_BADGE = i18n.translate('xpack.pnd.watches.settings.enabledBadge', {
@@ -36,18 +36,6 @@ export const DISABLED_BADGE = i18n.translate('xpack.pnd.watches.settings.disable
 
 export const ENABLED_SWITCH_LABEL = i18n.translate('xpack.pnd.watches.settings.enabledSwitch', {
   defaultMessage: 'Enabled',
-});
-
-export const METRIC_INCIDENTS_7D = i18n.translate('xpack.pnd.watches.settings.metric.incidents7d', {
-  defaultMessage: 'Incidents / 7d',
-});
-
-export const METRIC_ACCEPTED = i18n.translate('xpack.pnd.watches.settings.metric.accepted', {
-  defaultMessage: 'Accepted',
-});
-
-export const METRIC_TIME_SAVED = i18n.translate('xpack.pnd.watches.settings.metric.timeSaved', {
-  defaultMessage: 'Time saved',
 });
 
 /* -------------------------------------------------------------------------- */

@@ -26,7 +26,6 @@ import { useUpdateWatch, useWatch } from '../../hooks/use_watches_api';
 import { ApprovalGatesTable } from './components/approval_gates_table';
 import { AutonomySlider } from './components/autonomy_slider';
 import { SettingsSection } from './components/settings_section';
-import { WatchMetricsStrip } from './components/watch_metrics_strip';
 import { WatchRunsLedger } from './components/watch_runs_ledger';
 import { WatchScopeRoutingSection } from './components/watch_scope_routing_section';
 import { WatchSkillsTable } from './components/watch_skills_table';
@@ -284,10 +283,6 @@ export const WatchDetailPage: React.FC = () => {
             </EuiText>
           </EuiFlexItem>
         ) : null}
-
-        <EuiFlexItem grow={false}>
-          <WatchMetricsStrip watch={watch} />
-        </EuiFlexItem>
 
         {sections.map(({ key, node }) => (
           <EuiFlexItem key={key} grow={false}>
