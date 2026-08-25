@@ -64,7 +64,6 @@ import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
-import { conversationIndexName } from '../../conversation/client/storage';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -244,21 +243,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const conversationId = conversation?.id;
   const updateConversationMetadata =
     conversationId && conversation?.template_id
-      ? async (updates: Record<string, SerializedMetadataValue>) => {
-          // Painless script merge — preserves any metadata keys written by concurrent tool
-          // calls in the same run that a doc-replace update would silently discard.
-          await context.esClient.asInternalUser.update({
-            index: conversationIndexName,
-            id: conversationId,
-            script: {
-              lang: 'painless',
-              source:
-                'if (ctx._source.metadata == null) { ctx._source.metadata = params.updates; } else { ctx._source.metadata.putAll(params.updates); }',
-              params: { updates },
-            },
-            retry_on_conflict: 3,
-          });
-        }
+      ? (updates: Record<string, SerializedMetadataValue>) =>
+          conversationClient.unsafeMergeMetadata(conversationId, updates)
       : undefined;
 
   const conversationTemplate = conversation?.template_id

@@ -1689,6 +1689,140 @@ describe('ConversationClient', () => {
     });
   });
 
+  describe('unsafeMergeMetadata', () => {
+    const mockEsUpdate = jest.fn();
+
+    const createClientForMerge = ({
+      onMetadataPatched,
+    }: { onMetadataPatched?: jest.Mock } = {}) =>
+      createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: { update: mockEsUpdate } as never,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { id: 'user-1', username: 'test-user', isAdmin: false },
+        onMetadataPatched,
+      });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockEsUpdate.mockResolvedValue({});
+    });
+
+    it('calls esClient.update with the Painless merge script', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocumentWithTemplate({ templateId: 'tmpl-a' })] },
+      });
+
+      await createClientForMerge().unsafeMergeMetadata('conversation-1', { status: 'open' });
+
+      expect(mockEsUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conversation-1',
+          script: expect.objectContaining({ lang: 'painless', params: { updates: { status: 'open' } } }),
+          retry_on_conflict: 3,
+        })
+      );
+    });
+
+    it('fires onMetadataPatched with only the changed fields', async () => {
+      const onMetadataPatched = jest.fn();
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: 'tmpl-a',
+              metadata: { status: 'open', severity: 'low' },
+            }),
+          ],
+        },
+      });
+
+      await createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
+        status: 'closed', // changed
+        severity: 'low', // same — should be excluded
+      });
+
+      expect(onMetadataPatched).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+        templateId: 'tmpl-a',
+        parentId: undefined,
+        changedFields: ['status'],
+      });
+    });
+
+    it('does not fire onMetadataPatched when no fields changed (no-op suppression)', async () => {
+      const onMetadataPatched = jest.fn();
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: 'tmpl-a',
+              metadata: { status: 'open' },
+            }),
+          ],
+        },
+      });
+
+      await createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
+        status: 'open',
+      });
+
+      expect(onMetadataPatched).not.toHaveBeenCalled();
+    });
+
+    it('includes parentId when the conversation has a parent', async () => {
+      const onMetadataPatched = jest.fn();
+      const docWithParent = createConversationDocumentWithTemplate({ templateId: 'tmpl-a' });
+      (docWithParent._source as unknown as Record<string, unknown>).parent_conversation = {
+        id: 'parent-conv-1',
+        relation: 'subagent',
+      };
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [docWithParent] } });
+
+      await createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
+        status: 'closed',
+      });
+
+      expect(onMetadataPatched).toHaveBeenCalledWith(
+        expect.objectContaining({ parentId: 'parent-conv-1' })
+      );
+    });
+
+    it('falls back to all update keys as changed when the pre-read fails', async () => {
+      const onMetadataPatched = jest.fn();
+      mockEsClient.search.mockRejectedValue(new Error('ES unavailable'));
+
+      await createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
+        status: 'closed',
+        severity: 'high',
+      });
+
+      expect(mockEsUpdate).toHaveBeenCalled();
+      expect(onMetadataPatched).toHaveBeenCalledWith(
+        expect.objectContaining({ changedFields: ['status', 'severity'] })
+      );
+    });
+
+    it('does not fire onMetadataPatched when the update throws', async () => {
+      const onMetadataPatched = jest.fn();
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [createConversationDocumentWithTemplate({ templateId: 'tmpl-a' })],
+        },
+      });
+      mockEsUpdate.mockRejectedValue(new Error('write failed'));
+
+      await expect(
+        createClientForMerge({ onMetadataPatched }).unsafeMergeMetadata('conversation-1', {
+          status: 'closed',
+        })
+      ).rejects.toThrow('write failed');
+
+      expect(onMetadataPatched).not.toHaveBeenCalled();
+    });
+  });
+
   describe('create with template', () => {
     beforeEach(() => {
       jest.clearAllMocks();

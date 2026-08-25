@@ -71,6 +71,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
     updateAccessControl: jest.fn(),
     applyTemplate: jest.fn(),
     patchMetadata: jest.fn(),
+    unsafeMergeMetadata: jest.fn(),
   };
 };
 

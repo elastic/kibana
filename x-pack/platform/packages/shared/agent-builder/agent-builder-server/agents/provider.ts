@@ -21,6 +21,7 @@ import type {
   ExecutionStatus,
   InteractivityConfig,
   SerializedExecutionError,
+  SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
@@ -56,6 +57,14 @@ import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
+  /**
+   * Applies `updates` atomically via a Painless merge script.
+   * Updates must already be serialized; callers are responsible for validation.
+   */
+  unsafeMergeMetadata(
+    conversationId: string,
+    updates: Record<string, SerializedMetadataValue>
+  ): Promise<void>;
 }
 
 export type AgentHandlerFn = (

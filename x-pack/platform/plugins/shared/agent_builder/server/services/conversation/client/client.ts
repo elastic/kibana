@@ -61,7 +61,7 @@ import type {
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
-import { createStorage } from './storage';
+import { createStorage, conversationIndexName } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
@@ -159,6 +159,16 @@ export interface ConversationClient {
     conversationId: string,
     updates: Record<string, unknown>
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
+  /**
+   * Applies `updates` atomically via a Painless merge script, then fires `onMetadataPatched`.
+   * Use instead of `patchMetadata` when multiple concurrent writes may race (e.g. parallel agent
+   * tool calls in the same run). Updates must already be serialized; no template validation is
+   * performed here — callers are responsible for validating before calling.
+   */
+  unsafeMergeMetadata(
+    conversationId: string,
+    updates: Record<string, SerializedMetadataValue>
+  ): Promise<void>;
 }
 
 /**
@@ -188,6 +198,7 @@ export const createClient = ({
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
     storage,
+    esClient,
     user,
     space,
     agentRegistry,
@@ -199,6 +210,7 @@ export const createClient = ({
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
+  private readonly esClient: ElasticsearchClient;
   private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
@@ -206,6 +218,7 @@ class ConversationClientImpl implements ConversationClient {
 
   constructor({
     storage,
+    esClient,
     user,
     space,
     agentRegistry,
@@ -213,6 +226,7 @@ class ConversationClientImpl implements ConversationClient {
     onMetadataPatched,
   }: {
     storage: ConversationStorage;
+    esClient: ElasticsearchClient;
     user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
@@ -220,6 +234,7 @@ class ConversationClientImpl implements ConversationClient {
     onMetadataPatched?: (payload: ConversationMetadataPatchedPayload) => void;
   }) {
     this.storage = storage;
+    this.esClient = esClient;
     this.user = user;
     this.space = space;
     this.agentRegistry = agentRegistry;
@@ -617,9 +632,7 @@ class ConversationClientImpl implements ConversationClient {
         const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
 
         // Track which fields actually changed to suppress no-op trigger events.
-        changedFields = Object.keys(serialized).filter(
-          (k) => JSON.stringify(storedMetadata[k]) !== JSON.stringify(serialized[k])
-        );
+        changedFields = ConversationClientImpl.computeChangedFields(serialized, storedMetadata);
 
         return { metadata: { ...storedMetadata, ...serialized } };
       },
@@ -635,6 +648,43 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return { conversation: withDeserializedMetadata(result), changedFields };
+  }
+
+  async unsafeMergeMetadata(
+    conversationId: string,
+    updates: Record<string, SerializedMetadataValue>
+  ): Promise<void> {
+    // Best-effort read to compute changedFields for the trigger payload.
+    // If the read fails we fall back to treating all written keys as changed.
+    let changedFields = Object.keys(updates);
+    let templateId: string | undefined;
+    let parentId: string | undefined;
+
+    try {
+      const doc = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
+      const stored = (doc._source?.metadata ?? {}) as Record<string, SerializedMetadataValue>;
+      changedFields = ConversationClientImpl.computeChangedFields(updates, stored);
+      templateId = doc._source?.template_id;
+      parentId = doc._source?.parent_conversation?.id;
+    } catch {
+      // proceed — changedFields defaults to all keys
+    }
+
+    await this.esClient.update({
+      index: conversationIndexName,
+      id: conversationId,
+      script: {
+        lang: 'painless',
+        source:
+          'if (ctx._source.metadata == null) { ctx._source.metadata = params.updates; } else { ctx._source.metadata.putAll(params.updates); }',
+        params: { updates },
+      },
+      retry_on_conflict: 3,
+    });
+
+    if (changedFields.length > 0 && this.onMetadataPatched) {
+      this.onMetadataPatched({ conversationId, templateId, parentId, changedFields });
+    }
   }
 
   private toResponseConversation(document: Document): ConversationWithPermissions {
@@ -777,6 +827,15 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     return document;
+  }
+
+  private static computeChangedFields(
+    updates: Record<string, SerializedMetadataValue>,
+    stored: Record<string, SerializedMetadataValue>
+  ): string[] {
+    return Object.keys(updates).filter(
+      (k) => JSON.stringify(stored[k]) !== JSON.stringify(updates[k])
+    );
   }
 
   /**
