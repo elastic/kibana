@@ -29,6 +29,7 @@ const mockAgent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   lastCheckinMessage: null,
   platform: null,
   tags: [],
+  monitorsAssigned: null,
   ...overrides,
 });
 
@@ -42,6 +43,7 @@ const mockLocationStats = (
     locationLabel: locationId,
     agentPolicyId: `policy-${locationId}`,
     agentPolicyName: `Policy ${locationId}`,
+    isAgentSharding: false,
     agents,
   },
 ];

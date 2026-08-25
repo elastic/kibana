@@ -23,7 +23,7 @@ describe('DefaultSLODefinitionRepository', () => {
   });
 
   describe('legacy backfill', () => {
-    it('backfills preventCrossProjectSearch to false when absent from stored settings', async () => {
+    it('preserves absence of preventCrossProjectSearch and projectRoutings', async () => {
       soClient.find.mockResolvedValueOnce({
         saved_objects: [
           {
@@ -71,7 +71,9 @@ describe('DefaultSLODefinitionRepository', () => {
 
       const slo = await repository.findById('test-slo-12345678');
 
-      expect(slo.settings.preventCrossProjectSearch).toBe(false);
+      expect(slo.settings.preventCrossProjectSearch).toBeUndefined();
+      expect(slo.settings.projectRoutings).toBeUndefined();
+      expect(slo.settings.preventInitialBackfill).toBe(false);
     });
   });
 });
