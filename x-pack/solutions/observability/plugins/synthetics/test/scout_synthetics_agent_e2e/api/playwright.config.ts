@@ -9,7 +9,7 @@ import { createPlaywrightConfig } from '@kbn/scout-oblt';
 
 /**
  * Real Elastic Agent suite. Boot Kibana with the matching server config set:
- *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet agent_e2e
+ *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet synthetics_agent_e2e
  */
 export default createPlaywrightConfig({
   testDir: './tests',

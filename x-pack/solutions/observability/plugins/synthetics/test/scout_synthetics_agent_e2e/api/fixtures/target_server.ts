@@ -17,7 +17,7 @@ export interface TargetServer {
 export async function startTargetServer(): Promise<TargetServer> {
   const server = http.createServer((_req, res) => {
     res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-    res.end('<html><body><h1>scout-agent-e2e</h1></body></html>');
+    res.end('<html><body><h1>scout-synthetics-agent-e2e</h1></body></html>');
   });
 
   await new Promise<void>((resolve, reject) => {

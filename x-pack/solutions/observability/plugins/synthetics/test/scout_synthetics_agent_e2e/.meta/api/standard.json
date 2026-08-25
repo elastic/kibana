@@ -12,7 +12,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_agent_e2e/api/tests/monitor_types.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
         "line": 56,
         "column": 29
       }
@@ -25,7 +25,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_agent_e2e/api/tests/monitor_types.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
         "line": 56,
         "column": 29
       }
@@ -38,7 +38,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_agent_e2e/api/tests/monitor_types.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
         "line": 56,
         "column": 29
       }
@@ -51,7 +51,7 @@
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_agent_e2e/api/tests/monitor_types.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/tests/monitor_types.spec.ts",
         "line": 56,
         "column": 29
       }

@@ -151,7 +151,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
-    - test/scout_agent_e2e/**/*
+    - test/scout_synthetics_agent_e2e/**/*
     - test/scenarios/**/*
     - '!target/**/*'
   jest-config:

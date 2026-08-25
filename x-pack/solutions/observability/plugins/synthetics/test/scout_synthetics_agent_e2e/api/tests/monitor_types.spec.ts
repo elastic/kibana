@@ -32,9 +32,9 @@ const MONITOR_TYPES: SyntheticsMonitorType[] = ['http', 'tcp', 'icmp', 'browser'
  * Real Elastic Agent + Fleet Server E2E: create each monitor type on a private
  * location, trigger test-now, and wait for the agent-written check document.
  *
- * Requires Docker and the `agent_e2e` Scout server config:
- *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet agent_e2e
- *   node scripts/scout run-tests --arch stateful --domain classic --config x-pack/solutions/observability/plugins/synthetics/test/scout_agent_e2e/api/playwright.config.ts
+ * Requires Docker and the `synthetics_agent_e2e` Scout server config:
+ *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet synthetics_agent_e2e
+ *   node scripts/scout run-tests --arch stateful --domain classic --config x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/playwright.config.ts
  */
 apiTest.describe(
   'Synthetics real-agent monitor types',

@@ -136,4 +136,4 @@ excluded_configs:
 # Run on PR pipelines only (skipped on on-merge / scheduled Scout). PR selective
 # testing still limits these to affected modules — e.g. synthetics source or this suite.
 pr_only_configs:
-  - x-pack/solutions/observability/plugins/synthetics/test/scout_agent_e2e/api/playwright.config.ts
+  - x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/playwright.config.ts

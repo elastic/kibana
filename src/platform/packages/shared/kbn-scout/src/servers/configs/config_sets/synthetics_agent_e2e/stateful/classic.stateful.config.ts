@@ -22,10 +22,10 @@ import { defaultConfig } from '../../default/stateful/base.config';
  * maps it to the docker0 gateway (`172.17.0.1`), which refuses connections
  * unless ES listens there too.
  *
- * Specs must live under `test/scout_agent_e2e/` so `detectCustomConfigDir`
+ * Specs must live under `test/scout_synthetics_agent_e2e/` so `detectCustomConfigDir`
  * resolves to this set.
  *
- *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet agent_e2e
+ *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet synthetics_agent_e2e
  */
 const replacePrefixedArg = (args: string[], prefix: string, next: string): string[] =>
   args.map((arg) => (arg.startsWith(prefix) ? next : arg));

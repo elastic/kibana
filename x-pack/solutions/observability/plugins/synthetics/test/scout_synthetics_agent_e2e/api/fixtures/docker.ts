@@ -7,8 +7,8 @@
 
 import { spawnSync, type SpawnSyncReturns } from 'child_process';
 
-export const FLEET_SERVER_CONTAINER = 'scout-agent-e2e-fleet-server';
-export const SYNTHETICS_AGENT_CONTAINER = 'scout-agent-e2e-agent';
+export const FLEET_SERVER_CONTAINER = 'scout-synthetics-agent-e2e-fleet-server';
+export const SYNTHETICS_AGENT_CONTAINER = 'scout-synthetics-agent-e2e-agent';
 
 const DOCKER_TIMEOUT_MS = 15 * 60 * 1000;
 const ERROR_TAIL_CHARS = 4000;

@@ -133,7 +133,7 @@ export async function startAgentStack({
 }): Promise<{ stack: AgentStack; stop: () => Promise<void> }> {
   if (!isDockerAvailable()) {
     throw new Error(
-      'Docker is required for scout_agent_e2e (Fleet Server + elastic-agent-complete)'
+      'Docker is required for scout_synthetics_agent_e2e (Fleet Server + elastic-agent-complete)'
     );
   }
 
@@ -179,11 +179,11 @@ export async function startAgentStack({
     });
 
     const { data: fleetServerPolicy } = await apiServices.fleet.agent_policies.create({
-      policyName: `scout-agent-e2e-fleet-server-${Date.now()}`,
+      policyName: `scout-synthetics-agent-e2e-fleet-server-${Date.now()}`,
       policyNamespace: 'default',
       sysMonitoring: false,
       params: {
-        description: 'Fleet Server policy for synthetics scout_agent_e2e',
+        description: 'Fleet Server policy for scout_synthetics_agent_e2e',
         monitoring_enabled: [],
         has_fleet_server: true,
       },
@@ -223,7 +223,7 @@ export async function startAgentStack({
     }
 
     const { id: syntheticsPolicyId } = await apiServices.syntheticsPrivateLocations.addFleetPolicy(
-      `scout-agent-e2e-synthetics-${Date.now()}`
+      `scout-synthetics-agent-e2e-${Date.now()}`
     );
     const [privateLocation] = await apiServices.syntheticsPrivateLocations.setTestLocations([
       syntheticsPolicyId,
