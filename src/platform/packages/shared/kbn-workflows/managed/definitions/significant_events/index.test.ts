@@ -9,7 +9,7 @@
 
 import { parse } from 'yaml';
 import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW } from '.';
-import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from './investigation';
+import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from '../nightshift_investigations/investigation';
 
 interface WorkflowStep {
   name: string;

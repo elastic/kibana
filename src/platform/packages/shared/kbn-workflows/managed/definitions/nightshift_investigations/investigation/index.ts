@@ -15,7 +15,7 @@ export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID =
 
 export const SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID,
-  pluginId: 'significantEvents',
+  pluginId: 'nightshiftInvestigations',
   version: 7,
   billable: false,
   yaml: INVESTIGATION_WORKFLOW_YAML,
