@@ -24,11 +24,9 @@ import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '../../types';
-import { DeferredDataClient } from '../deferred_data_client';
 
 export class PlainIndexDataClientBundle implements DataClientBundle {
-  private initPromise!: Promise<ElasticsearchClient>;
-  private started = false;
+  private esClient!: ElasticsearchClient;
   private stopped = false;
 
   constructor(private readonly deps: CreateDataClientDeps) {}
@@ -38,9 +36,7 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
   async initStart(coreStart: CoreStart): Promise<void> {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const { logger } = this.deps;
-
-    this.initPromise = this.init(esClient, logger);
-    this.started = true;
+    this.esClient = await this.init(esClient, logger);
   }
 
   async stop(): Promise<void> {
@@ -48,36 +44,19 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
-    if (!this.started) {
-      throw new Error('initStart must be called before creating data clients');
-    }
-    return new DeferredDataClient(() =>
-      this.initPromise.then(
-        (esClient) =>
-          new PlainIndexDataClient<EsWorkflowExecution>({
-            esClient,
-            logger: this.deps.logger,
-            indexName: WORKFLOWS_EXECUTIONS_INDEX,
-          })
-      )
-    );
+    return new PlainIndexDataClient<EsWorkflowExecution>({
+      esClient: this.esClient,
+      logger: this.deps.logger,
+      indexName: WORKFLOWS_EXECUTIONS_INDEX,
+    });
   }
 
   createStepDataClient(): StepExecutionsDataClient {
-    if (!this.started) {
-      throw new Error('initStart must be called before creating data clients');
-    }
-
-    return new DeferredDataClient(() =>
-      this.initPromise.then(
-        (esClient) =>
-          new PlainIndexDataClient<EsWorkflowStepExecution>({
-            esClient,
-            logger: this.deps.logger,
-            indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-          })
-      )
-    );
+    return new PlainIndexDataClient<EsWorkflowStepExecution>({
+      esClient: this.esClient,
+      logger: this.deps.logger,
+      indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+    });
   }
 
   private async init(esClient: ElasticsearchClient, logger: Logger): Promise<ElasticsearchClient> {
