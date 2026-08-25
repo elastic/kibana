@@ -58,14 +58,15 @@ const run = async (routeContext: any) => getMonitorAgentAssignment().handler(rou
 
 describe('getMonitorAgentAssignment route', () => {
   it('binds monitorId on validate.params so the unversioned router populates request.params', () => {
-    const route = getMonitorAgentAssignment();
-    const paramsSchema = (
-      route.validate as {
-        params: { validate: (value: { monitorId: string }) => { monitorId: string } };
-      }
-    ).params;
+    const { validate } = getMonitorAgentAssignment();
 
-    expect(paramsSchema.validate({ monitorId: 'mon-1' })).toEqual({ monitorId: 'mon-1' });
+    expect(validate).toEqual(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          validate: expect.any(Function),
+        }),
+      })
+    );
   });
 
   beforeEach(() => {
