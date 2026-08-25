@@ -146,7 +146,9 @@ describe('createCommonUpdateUserActionBuilder ', () => {
 
       expect(screen.getByTestId('extra-action')).toBeInTheDocument();
       expect(renderUserActionExtraActions).toHaveBeenCalledWith(
-        expect.objectContaining({ userAction: expect.objectContaining({ type: UserActionTypes.workflow }) })
+        expect.objectContaining({
+          userAction: expect.objectContaining({ type: UserActionTypes.workflow }),
+        })
       );
     });
 

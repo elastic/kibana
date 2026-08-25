@@ -25,7 +25,10 @@ import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
 import type { CasesFeatures, CasesPermissions } from '../../../common/ui/types';
 import type { ReleasePhase } from '../../components/types';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import type { CasesContextProps, RenderUserActionExtraActions } from '../../components/cases_context';
+import type {
+  CasesContextProps,
+  RenderUserActionExtraActions,
+} from '../../components/cases_context';
 import { CasesProvider } from '../../components/cases_context';
 import { createStartServicesMock } from '../lib/kibana/kibana_react.mock';
 import { allCasesPermissions } from './permissions';
