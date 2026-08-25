@@ -45,6 +45,7 @@ import {
 } from '../sections/create_transform/components/step_define/common/types';
 
 const SOURCE_INDICES_UNAVAILABLE_ERROR = 'Source indices have been deleted or closed.';
+const INDEX_NOT_FOUND_ERROR = 'index_not_found_exception';
 
 export const sourceIndexUnavailableMessage = i18n.translate(
   'xpack.transform.preview.sourceIndexUnavailableMessage',
@@ -55,7 +56,9 @@ export const sourceIndexUnavailableMessage = i18n.translate(
 );
 
 export const isSourceIndexUnavailableError = (error: unknown): boolean =>
-  getErrorMessage(error).includes(SOURCE_INDICES_UNAVAILABLE_ERROR);
+  [SOURCE_INDICES_UNAVAILABLE_ERROR, INDEX_NOT_FOUND_ERROR].some((message) =>
+    getErrorMessage(error).includes(message)
+  );
 
 export const isProjectScopedSourceIndexUnavailableError = (
   error: unknown,
