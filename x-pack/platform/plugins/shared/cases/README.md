@@ -17,6 +17,7 @@ This plugin provides cases management in Kibana
 
 - [Cases API](#cases-api)
 - [Cases UI](#cases-ui)
+- [Attachment framework](public/client/attachment_framework/README.md)
 
 ## Cases API
 
