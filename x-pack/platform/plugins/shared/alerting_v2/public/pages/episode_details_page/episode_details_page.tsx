@@ -26,6 +26,7 @@ import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
@@ -42,7 +43,6 @@ import { AlertEpisodeTimelineHeatmapsSection } from '@kbn/alerting-v2-episodes-u
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
 import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/components/details/runbook_section';
-import { parseEpisodeDataJson } from '@kbn/alerting-v2-episodes-ui/utils/episode_grouping_data';
 import { css } from '@emotion/react';
 import { useHistory, useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -51,6 +51,7 @@ import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
+import { useEpisodeAutoAttach } from '../../agent_builder/use_episode_auto_attach';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
@@ -130,10 +131,15 @@ export function EpisodeDetailsPage() {
   const episodeData = parseEpisodeDataJson(episode?.episode_data);
   const episodeDataRuleName =
     typeof episodeData.rule_name === 'string' ? episodeData.rule_name : undefined;
-  const episodeBreadcrumbTitle =
-    showRuleDependentUi && ruleState.rule.metadata.name
-      ? ruleState.rule.metadata.name
-      : episodeDataRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+  const loadedRuleName = showRuleDependentUi ? ruleState.rule.metadata.name : undefined;
+  const episodeRuleName = loadedRuleName ?? episodeDataRuleName;
+  const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+  const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
+
+  useEpisodeAutoAttach(episode, {
+    ruleName: episodeRuleName,
+    groupingFields,
+  });
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 

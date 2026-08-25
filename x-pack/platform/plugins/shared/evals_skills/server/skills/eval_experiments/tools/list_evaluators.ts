@@ -24,7 +24,7 @@ export const listEvaluatorsTool = (
   id: evalsTools.listEvaluators,
   type: ToolType.builtin,
   description:
-    'List available evaluators (name, version, kind, description). `llm` evaluators require a judge connector_id (needsJudgeConnector=true); `code` evaluators do not.',
+    'List the evaluators available in this space (name, version, kind, origin, description), both built-in and user-defined. `llm` evaluators require a judge connector_id (needsJudgeConnector=true); `code` evaluators do not.',
   schema,
   handler: async (_args, { request, spaceId }) => {
     try {
@@ -41,7 +41,7 @@ export const listEvaluatorsTool = (
         );
       }
 
-      const evaluators = evals.listEvaluators();
+      const evaluators = await evals.listEvaluators({ spaceId });
       return otherResult({ total: evaluators.length, evaluators });
     } catch (error) {
       return toErrorResult(error, 'Failed to list evaluators');

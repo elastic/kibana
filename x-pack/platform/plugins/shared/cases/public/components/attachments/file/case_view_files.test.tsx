@@ -11,40 +11,16 @@ import userEvent from '@testing-library/user-event';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { CaseUI } from '../../../../common';
-import { AttachmentType, ExternalReferenceStorageType } from '../../../../common/types/domain';
-import type { AttachmentUIV2 } from '../../../../common/ui/types';
 
-import { alertCommentWithIndices, basicCase, elasticUser } from '../../../containers/mock';
+import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
 import { CaseViewFiles, DEFAULT_CASE_FILES_FILTERING_OPTIONS } from './case_view_files';
 import { renderWithTestingProviders } from '../../../common/mock';
+import { makeFileComment } from './test_helpers';
 
 jest.mock('../../../containers/use_get_case_files');
 
 const useGetCaseFilesMock = useGetCaseFiles as jest.Mock;
-
-export const makeFileComment = (
-  id: string,
-  attachmentId: string | string[],
-  owner: string
-): AttachmentUIV2 =>
-  ({
-    type: AttachmentType.externalReference,
-    id,
-    externalReferenceId: 'ext',
-    externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
-    externalReferenceAttachmentTypeId: '.files',
-    externalReferenceMetadata: { files: [] },
-    attachmentId,
-    createdAt: '2024-01-01T00:00:00.000Z',
-    createdBy: elasticUser,
-    owner,
-    pushedAt: null,
-    pushedBy: null,
-    updatedAt: null,
-    updatedBy: null,
-    version: 'v',
-  } as unknown as AttachmentUIV2);
 
 const makeFile = (id: string, name = id): Partial<FileJSON> => ({
   id,

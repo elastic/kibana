@@ -14,6 +14,7 @@ import {
 } from '@kbn/es';
 import { servers as uiamConfig } from '../../uiam_local/serverless/observability_logs_essentials.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
+import { withoutSecurityTestEndpoints } from './utils';
 
 // Same CPS local wiring as the `observability_complete` variant, but on the
 // `logs_essentials` tier, which is NOT eligible for cross-project search. Use
@@ -36,7 +37,7 @@ export const servers: ScoutServerConfig = {
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
     serverArgs: [
-      ...uiamConfig.kbnTestServer.serverArgs,
+      ...withoutSecurityTestEndpoints(uiamConfig.kbnTestServer.serverArgs),
       '--cps.cpsEnabled=true',
       '--xpack.alerting.rules.apiKeyType=uiam',
     ],

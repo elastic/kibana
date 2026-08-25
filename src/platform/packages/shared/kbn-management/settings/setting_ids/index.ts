@@ -72,6 +72,9 @@ export const AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID = 'agentBuilder:tracing
 export const AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID = 'agentBuilder:tracing:includeRealIds';
 export const AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID = 'agentBuilder:tracing:includeUserData';
 
+// Alerting settings
+export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
+
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
 
@@ -85,6 +88,12 @@ export const BANNERS_TEXT_CONTENT_ID = 'banners:textContent';
 export const BANNERS_TEXT_COLOR_ID = 'banners:textColor';
 export const BANNERS_LINK_COLOR_ID = 'banners:linkColor';
 export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
+
+// Custom branding settings
+export const XPACK_CUSTOM_BRANDING_LOGO_ID = 'xpackCustomBranding:logo';
+export const XPACK_CUSTOM_BRANDING_CUSTOMIZED_LOGO_ID = 'xpackCustomBranding:customizedLogo';
+export const XPACK_CUSTOM_BRANDING_FAVICON_PNG_ID = 'xpackCustomBranding:faviconPNG';
+export const XPACK_CUSTOM_BRANDING_FAVICON_SVG_ID = 'xpackCustomBranding:faviconSVG';
 
 // Discover settings
 export const CONTEXT_DEFAULT_SIZE_ID = 'context:defaultSize';
