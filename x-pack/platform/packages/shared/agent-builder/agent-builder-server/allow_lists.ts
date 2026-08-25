@@ -280,6 +280,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'connector',
   'connector_setup',
   'skill',
+  'image',
 
   // Platform – Visualizations
   'visualization',

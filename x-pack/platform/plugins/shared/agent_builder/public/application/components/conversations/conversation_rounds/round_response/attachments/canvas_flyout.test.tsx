@@ -36,6 +36,7 @@ jest.mock('../../../../../context/conversation/use_conversation_id', () => ({
 jest.mock('../../../../../context/conversation/conversation_context', () => ({
   useConversationContext: () => ({
     conversationActions: { invalidateConversation: jest.fn() },
+    upsertAttachments: jest.fn(),
   }),
 }));
 
@@ -50,6 +51,12 @@ jest.mock('../../../../../hooks/use_agent_builder_service', () => ({
   useAgentBuilderServices: () => ({
     openSidebarConversation: mockOpenSidebarConversation,
   }),
+}));
+
+const mockSubmitMessage = jest.fn();
+
+jest.mock('../../../../../hooks/use_submit_message', () => ({
+  useSubmitMessage: () => mockSubmitMessage,
 }));
 
 const mockAttachmentsService = {
@@ -163,6 +170,28 @@ describe('CanvasFlyout', () => {
       expect.objectContaining({
         isCanvas: true,
         closeCanvas: mockCloseCanvas,
+      })
+    );
+  });
+
+  it('forwards submitMessage and addAttachment to renderCanvasContent callbacks', () => {
+    const renderCanvasContent = jest.fn().mockReturnValue(<div>canvas body</div>);
+    mockAttachmentsService.getAttachmentUiDefinition.mockReturnValue({
+      getLabel: () => 'Test attachment',
+      renderCanvasContent,
+    });
+    mockCanvasState = {
+      attachment: { id: 'attachment-1', type: 'test', data: {} },
+      isSidebar: false,
+    };
+
+    render(<CanvasFlyout attachmentsService={mockAttachmentsService} />);
+
+    expect(renderCanvasContent).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        submitMessage: mockSubmitMessage,
+        addAttachment: expect.any(Function),
       })
     );
   });

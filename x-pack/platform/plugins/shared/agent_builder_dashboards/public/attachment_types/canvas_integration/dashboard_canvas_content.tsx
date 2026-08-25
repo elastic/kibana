@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import type { ActionButton, AttachmentRenderProps } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DashboardLocatorParams, DashboardState } from '@kbn/dashboard-plugin/common';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
@@ -15,6 +16,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UseEuiTheme } from '@elastic/eui';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { FilesStart } from '@kbn/files-plugin/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { SavedObjectStatus } from './use_register_canvas_action_buttons';
 import { useDashboardPreviewUnifiedSearch } from './use_dashboard_preview_unified_search';
@@ -52,23 +54,29 @@ export const DashboardCanvasContent = ({
   registerActionButtons,
   updateOrigin,
   closeCanvas,
+  submitMessage,
+  addAttachment,
   openSidebarConversation,
   dashboardLocator,
   searchBarComponent: SearchBar,
   data,
   checkSavedDashboardExist,
   canWriteDashboards,
+  files,
 }: AttachmentRenderProps<DashboardAttachment> & {
   dashboardState: DashboardState;
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: string) => Promise<unknown>;
   closeCanvas: () => void;
+  submitMessage?: (message: string) => void;
+  addAttachment?: (attachment: AttachmentInput) => void;
   dashboardLocator?: DashboardRendererProps['locator'];
   openSidebarConversation?: () => void;
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   data: DataPublicPluginStart;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   canWriteDashboards: boolean;
+  files: FilesStart;
 }) => {
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
@@ -145,6 +153,9 @@ export const DashboardCanvasContent = ({
     dashboardLocatorParams,
     getExistingDashboardId,
     closeCanvas,
+    submitMessage,
+    addAttachment,
+    files,
   });
 
   return (

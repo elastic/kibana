@@ -17,6 +17,7 @@ export const createGenerateConfigPrompt = ({
   chartType,
   schema,
   existingConfig,
+  additionalChartConfigInstructions,
   additionalContext,
 }: {
   nlQuery: string;
@@ -24,6 +25,7 @@ export const createGenerateConfigPrompt = ({
   chartType: SupportedChartType;
   schema: object;
   existingConfig?: string;
+  additionalChartConfigInstructions?: string;
   additionalContext?: string;
 }): BaseMessageLike[] => {
   const esqlQueryJson = JSON.stringify(esqlQuery);
@@ -50,6 +52,7 @@ ${existingConfig}
     numberFormatRulesPromptContent,
     getColorPalettesPromptContent(chartType),
     getChartTypeConfigPromptContent(chartType),
+    additionalChartConfigInstructions ?? '',
     `Your task is to generate a ${chartType} visualization configuration based on the following information:
 
 <user_query>

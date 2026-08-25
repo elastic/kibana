@@ -20,6 +20,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
+import {
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  MAX_IMAGE_BYTES,
+  SUPPORTED_IMAGE_MIME_TYPES,
+} from '@kbn/agent-builder-common/attachments';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
@@ -96,6 +101,8 @@ export class AgentBuilderPlugin
     addAttachment: (attachment: AttachmentInput) => void;
     removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
+  private sidebarSubmitMessage: ((message: string) => void) | undefined;
+  private pendingSubmitMessage: string | undefined;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
   private isEarsExperimentalEnabled = false;
@@ -116,6 +123,12 @@ export class AgentBuilderPlugin
     this.setupServices = { navigationService, usageCollection: deps.usageCollection };
     this.isEarsEnabled = deps.actions.isEarsEnabled;
     this.isEarsExperimentalEnabled = deps.actions.isEarsExperimentalEnabled;
+
+    deps.files.registerFileKind({
+      id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
+      maxSizeBytes: MAX_IMAGE_BYTES,
+    });
 
     registerApp({
       core,
@@ -208,6 +221,7 @@ export class AgentBuilderPlugin
         onClose: () => {
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
+          this.sidebarSubmitMessage = undefined;
           clearSidebarRuntimeContext();
         },
       });
@@ -219,6 +233,7 @@ export class AgentBuilderPlugin
           sidebar.close();
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
+          this.sidebarSubmitMessage = undefined;
           clearSidebarRuntimeContext();
         },
       };
@@ -250,6 +265,14 @@ export class AgentBuilderPlugin
       isEarsExperimentalEnabled: this.isEarsExperimentalEnabled,
       openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
         return openSidebarInternal(options);
+      },
+      registerSidebarSubmitMessage: (submitMessage) => {
+        this.sidebarSubmitMessage = submitMessage;
+        if (submitMessage && this.pendingSubmitMessage !== undefined) {
+          const pending = this.pendingSubmitMessage;
+          this.pendingSubmitMessage = undefined;
+          submitMessage(pending);
+        }
       },
     };
 
@@ -338,9 +361,18 @@ export class AgentBuilderPlugin
           this.sidebarCallbacks.removeAttachmentById(attachmentId);
         }
       },
+      submitMessage: (message: string) => {
+        if (this.sidebarSubmitMessage) {
+          this.sidebarSubmitMessage(message);
+          return;
+        }
+        this.pendingSubmitMessage = message;
+        // Ensure the sidebar is open so Conversation can register a submit handler.
+        openSidebarInternal();
+      },
       setChatConfig: (config: EmbeddableConversationProps) => {
-        // Set config until sidebar is next opened
-        this.conversationActiveConfig = config;
+        // Merge into active config so partial updates (e.g. browserApiTools only) are safe.
+        this.conversationActiveConfig = { ...this.conversationActiveConfig, ...config };
         // If there is already an active sidebar, update its props
         if (this.activeSidebarRef && this.sidebarCallbacks) {
           this.sidebarCallbacks.updateProps(config);
@@ -364,6 +396,7 @@ export class AgentBuilderPlugin
           // synchronously invoke our onClose callback.
           this.activeSidebarRef = null;
           this.sidebarCallbacks = null;
+          this.sidebarSubmitMessage = undefined;
           sidebarRef.close();
           return;
         }

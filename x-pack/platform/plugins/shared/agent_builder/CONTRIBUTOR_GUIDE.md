@@ -239,6 +239,47 @@ agentBuilder.tools.register({
 });
 ```
 
+## Browser API tools (one-way vs two-way)
+
+Browser API tools run in the user's browser (not on the Kibana server). Embedders pass full definitions (including handlers) via `openChat` / `setChatConfig` / embeddable `browserApiTools`; only serializable metadata is sent to the server.
+
+Tool ids must match `^[a-zA-Z0-9_-]+$` (use underscores, not dots). The LLM sees them prefixed as `browser_<id>`.
+
+### One-way (default)
+
+Omit `returnsResult` (or set it `false`). The server immediately returns a stub tool result and streams a `browser_tool_call` event; the client runs the handler as a fire-and-forget side effect. Handler return values are ignored. Use this for UI mutations that the model does not need to observe.
+
+### Two-way (`returnsResult: true`)
+
+The server interrupts the round with a silent `browser_tool_result` prompt (same HITL pause/resume spine as `ask_user_question`, but no confirmation UI). After the stream ends, the client executes the handler, then auto-resumes with `{ ok, results?, image?, error? }`.
+
+- Return `{ results: ToolResult[] }` from the handler for structured data the model should read.
+- Optionally include `image: ImageAttachmentData` (png/jpeg/webp base64) for multimodal vision on the continuing turn (injected as a synthetic `HumanMessage` with `image_url` parts; ToolMessages stay text).
+- Do not call two-way browser tools in parallel with other tools.
+
+Example (dashboard screenshot):
+
+```ts
+browserApiTools: [{
+  id: 'capture_dashboard_screenshot',
+  returnsResult: true,
+  description: 'Capture the current dashboard viewport for visual validation',
+  schema: z.object({
+    settle_ms: z.number().int().min(0).max(5000).optional(),
+  }),
+  handler: async ({ settle_ms }) => {
+    const image = await captureAppMainScreenshot();
+    if (!image) {
+      return { results: [{ type: ToolResultType.error, data: { message: 'Capture failed' } }] };
+    }
+    return {
+      results: [{ type: ToolResultType.other, data: { message: 'Screenshot captured' } }],
+      image,
+    };
+  },
+}]
+```
+
 ## Registering built-in agents
 
 ### Registering the agent

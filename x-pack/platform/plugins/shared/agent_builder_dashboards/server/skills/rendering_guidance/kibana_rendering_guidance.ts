@@ -12,17 +12,23 @@ import type { DashboardGuidanceModule } from '../guidance_module';
 
 const guidance = `## Kibana Workflow
 
-In Kibana, a dashboard request follows three stages: resolve inputs, generate (which also persists), then render.
+In Kibana, a dashboard request follows: resolve inputs → draft/generate + visual QA from attached context → persist once → render.
 
 1. **Resolve inputs**:
    - To work with a saved dashboard, search for it with \`platform.core.sml_search\`, then attach it with \`platform.core.sml_attach\` using the exact \`entry_id\` from the search result. The attached \`${DASHBOARD_ATTACHMENT_TYPE}\` attachment is your editable working copy; pass its \`attachment_id\` to generation as \`dashboardAttachmentId\`.
    - To put an existing visualization onto a dashboard, read that visualization attachment's content with \`${attachmentTools.read}\` and pass its configuration as a \`source: "config"\` panel input (with panel \`type: "vis"\` and \`config\`). The generation core never reads attachments itself, so the visualization config must be passed by value here.
-2. **Generate** (persists automatically):
-   - Call ${dashboardTools.generateDashboard} with \`dashboardAttachmentId\` set to the dashboard you are editing (omit it for a new dashboard) and your batched \`operations\`. The tool reads the current payload from that reference, applies the operations, and persists the result as a \`${DASHBOARD_ATTACHMENT_TYPE}\` attachment for you.
-   - It returns \`data.attachment_id\`, \`data.version\`, a compact \`data.dashboard\` summary whose panels carry a one-sentence \`authoring_note\` for the charts authored in this call, and optional \`data.failures\`. Do **not** pass the dashboard payload back into any tool — reference \`data.attachment_id\` instead.
-3. **Render**:
-   - Render the persisted attachment inline with a render-attachment tag using the returned \`attachment_id\` and \`version\`:
+2. **Generate as a draft** (while iterating):
+   - Call ${dashboardTools.generateDashboard} with \`persistAttachment: false\`, \`dashboardAttachmentId\` set to the dashboard you are editing (omit it for a new dashboard), and your batched \`operations\`. The live dashboard updates mid-round; a hidden draft is kept — **no user-visible attachment is published yet**.
+   - It returns \`data.draft_id\`, \`data.persisted: false\`, a compact \`data.dashboard\` summary (panels may include \`authoring_note\`), and optional \`data.failures\`. On follow-up draft calls, pass \`data.draft_id\` as \`dashboardAttachmentId\`. Do **not** pass the dashboard payload back into any tool. Do **not** \`render_attachment\` until after persist.
+3. **Visual context**:
+   - If a dashboard screenshot image is attached to this conversation (typical for Prettify), it is already included as visual input on the user turn. Use it to assess overlap, empty/broken charts, cramped titles, and uneven composition.
+   - Do **not** capture another screenshot and do **not** call a browser screenshot tool.
+   - Fix issues with another ${dashboardTools.generateDashboard} call still using \`persistAttachment: false\` and the \`draft_id\`.
+4. **Persist once**, then **render**:
+   - When the dashboard looks good, call ${dashboardTools.generateDashboard} with \`persistAttachment: true\` and \`dashboardAttachmentId\` set to the \`draft_id\` (operations may be empty). This publishes a **single** user-visible \`${DASHBOARD_ATTACHMENT_TYPE}\` attachment.
+   - Only then render inline with the returned \`attachment_id\` and \`version\`:
      \`<render_attachment id="{attachment_id}" version="{version}" />\`
+   - One-shot creates may omit \`persistAttachment\` (defaults to true).
 
 ## Discovering Dashboards
 
@@ -33,7 +39,7 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 
 ## After Rendering
 
-- Render only the final dashboard attachment inline, as the last part of your response, after any text. Never render individual visualization attachments during dashboard composition.
+- Render only the final persisted dashboard attachment inline, as the last part of your response, after any text. Never render drafts or individual visualization attachments during dashboard composition.
 - Remember the dashboard's \`attachment_id\`. On later updates, pass the same \`attachment_id\` back as \`dashboardAttachmentId\` so generation edits the existing dashboard in place.
 - Use returned panel \`id\` values for future panel removals, and section \`id\` values for future section-targeted changes.
 - Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results.
@@ -43,7 +49,6 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 
 - If the user asks to update a dashboard but no \`attachment_id\` is available in conversation context, ask which dashboard they mean or offer to create a new one.
 - If generation fails, surface the returned error message rather than retrying blindly.`;
-
 export const kibanaRendering: DashboardGuidanceModule = {
   guidance,
 };

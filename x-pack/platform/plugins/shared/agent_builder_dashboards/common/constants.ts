@@ -24,3 +24,17 @@ const dashboardTool = (toolName: string) => {
 export const dashboardTools = {
   generateDashboard: dashboardTool('generate_dashboard'),
 } as const;
+
+/**
+ * `tool_ui` custom event name emitted by {@link dashboardTools.generateDashboard}
+ * after a draft or persisted dashboard payload is ready. The dashboard app listens
+ * and applies the payload to the live UI so in-round generation is visible immediately.
+ */
+export const DASHBOARD_APPLY_UI_EVENT = 'dashboard_apply' as const;
+
+export interface DashboardApplyUiEventData {
+  /** Draft or persisted attachment id associated with this apply. */
+  attachment_id: string;
+  /** Full dashboard attachment payload (same shape as the attachment data). */
+  data: Record<string, unknown>;
+}

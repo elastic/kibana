@@ -11,6 +11,7 @@ import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
 
 jest.mock('./attachment_types', () => ({
+  createIdGenerator: jest.fn(() => ({ current: 'draft-id', next: jest.fn() })),
   registerDashboardAttachmentUiDefinition: jest.fn(() => jest.fn()),
 }));
 
@@ -32,7 +33,10 @@ describe('AgentBuilderDashboardsPlugin', () => {
   const createStartDependencies = () =>
     ({
       agentBuilder: { openChat },
-      dashboard: {},
+      dashboard: {
+        registerAppMenuItemGenerator: jest.fn(() => jest.fn()),
+      },
+      files: {},
       share: {
         url: {
           locators: {

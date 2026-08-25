@@ -47,4 +47,9 @@ export interface AgentBuilderInternalService {
   isEarsEnabled: boolean;
   isEarsExperimentalEnabled: boolean;
   openSidebarConversation: (options?: OpenSidebarInternalOptions) => OpenConversationSidebarReturn;
+  /**
+   * Register (or clear) the active sidebar conversation's submitMessage handler.
+   * Used so hosts can send a message into the open chat without reaching into React.
+   */
+  registerSidebarSubmitMessage: (submitMessage: ((message: string) => void) | undefined) => void;
 }

@@ -14,7 +14,8 @@ import type {
   AgentBuilderDashboardsPluginPublicSetupDependencies,
   AgentBuilderDashboardsPluginPublicStartDependencies,
 } from './types';
-import { registerDashboardAttachmentUiDefinition } from './attachment_types';
+import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
+import { registerPrettifyAppMenuItem } from './attachment_types/register_prettify_app_menu_item';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -26,6 +27,7 @@ export class AgentBuilderDashboardsPlugin
     >
 {
   private cleanupAttachmentUi?: () => void;
+  private cleanupPrettifyMenuItem?: () => void;
 
   constructor(_initContext: PluginInitializerContext) {}
 
@@ -43,6 +45,8 @@ export class AgentBuilderDashboardsPlugin
     core: CoreStart,
     plugins: AgentBuilderDashboardsPluginPublicStartDependencies
   ): AgentBuilderDashboardsPluginPublicStart {
+    const draftAttachmentId = createIdGenerator();
+
     this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
       agentBuilder: plugins.agentBuilder,
       chrome: core.chrome,
@@ -51,6 +55,15 @@ export class AgentBuilderDashboardsPlugin
       unifiedSearch: plugins.unifiedSearch,
       data: plugins.data,
       dashboardPlugin: plugins.dashboard,
+      draftAttachmentId,
+      files: plugins.files,
+    });
+
+    this.cleanupPrettifyMenuItem = registerPrettifyAppMenuItem({
+      dashboard: plugins.dashboard,
+      agentBuilder: plugins.agentBuilder,
+      draftAttachmentId,
+      files: plugins.files,
     });
 
     if (core.application.capabilities.agentBuilder?.show === true) {
@@ -67,5 +80,6 @@ export class AgentBuilderDashboardsPlugin
 
   public stop() {
     this.cleanupAttachmentUi?.();
+    this.cleanupPrettifyMenuItem?.();
   }
 }

@@ -69,7 +69,10 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   useEffect(() => {
     if (onRegisterCallbacks) {
       onRegisterCallbacks({
-        updateProps: (newProps) => setCurrentProps(newProps),
+        // Merge so callers can set `browserApiTools` (or other fields) without wiping
+        // agentId / attachments / sessionTag already present on the sidebar.
+        updateProps: (newProps) =>
+          setCurrentProps((prevProps) => ({ ...prevProps, ...newProps })),
         resetBrowserApiTools: () =>
           setCurrentProps((prevProps) => ({ ...prevProps, browserApiTools: undefined })),
         addAttachment: (attachment) =>

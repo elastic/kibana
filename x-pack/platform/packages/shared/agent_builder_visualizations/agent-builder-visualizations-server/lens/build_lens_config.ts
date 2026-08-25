@@ -5,30 +5,16 @@
  * 2.0.
  */
 
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
 import { createVisualizationGraph } from './graph_lens';
+import { getChartTypeFromLensConfig } from './lens_config_helpers';
 import { getSchemaForChartType } from './schemas';
 import type { VisualizationConfig } from './types';
-
-const SUPPORTED_CHART_TYPES = new Set<string>(Object.values(SupportedChartType));
-
-const getExistingChartType = (
-  existingConfig: VisualizationConfig | null
-): SupportedChartType | undefined => {
-  if (!existingConfig || !('type' in existingConfig)) {
-    return undefined;
-  }
-
-  const { type } = existingConfig;
-  return typeof type === 'string' && SUPPORTED_CHART_TYPES.has(type)
-    ? (type as SupportedChartType)
-    : undefined;
-};
 
 export interface BuildLensConfigParams {
   nlQuery: string;
@@ -38,6 +24,7 @@ export interface BuildLensConfigParams {
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
   includeTimeRange?: boolean;
+  additionalChartConfigInstructions?: string;
   modelProvider: ModelProvider;
   logger: Logger;
   events: ToolEventEmitter;
@@ -60,12 +47,13 @@ export const buildLensConfig = async ({
   existingConfig,
   parsedExistingConfig = null,
   includeTimeRange = true,
+  additionalChartConfigInstructions,
   modelProvider,
   logger,
   events,
   esClient,
 }: BuildLensConfigParams): Promise<BuildLensConfigResult> => {
-  const selectedChartType = chartType ?? getExistingChartType(parsedExistingConfig);
+  const selectedChartType = chartType ?? getChartTypeFromLensConfig(parsedExistingConfig);
   if (!selectedChartType) {
     throw new Error(
       'A supported chart type is required when creating a Lens visualization or editing one without a supported existing chart type.'
@@ -78,7 +66,8 @@ export const buildLensConfig = async ({
     logger,
     events,
     esClient,
-    includeTimeRange
+    includeTimeRange,
+    additionalChartConfigInstructions
   );
 
   // If the user provides ES|QL, use it only when validation says it is safe.

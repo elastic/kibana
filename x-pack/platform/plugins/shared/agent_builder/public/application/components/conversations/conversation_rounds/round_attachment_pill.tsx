@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,9 +17,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { UnknownAttachment, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { getVersion } from '@kbn/agent-builder-common/attachments';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useOptionalCanvasContext } from './round_response/attachments/canvas_context';
 
 const MAX_PILL_WIDTH = 320;
 const DEFAULT_ICON = 'document';
@@ -41,6 +43,8 @@ export const RoundAttachmentPill: React.FC<RoundAttachmentPillProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { attachmentsService } = useAgentBuilderServices();
+  const { isEmbeddedContext } = useConversationContext();
+  const canvasContext = useOptionalCanvasContext();
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
 
   const versionData = getVersion(attachment, version);
@@ -56,11 +60,48 @@ export const RoundAttachmentPill: React.FC<RoundAttachmentPillProps> = ({
 
   const fallbackTitle = attachment.description || attachment.type;
   const title = versionTitle || fallbackTitle;
+  const canOpenCanvas = Boolean(uiDefinition?.renderCanvasContent && canvasContext && versionData);
+
+  const openAttachmentCanvas = useCallback(() => {
+    if (!canvasContext || !versionData || !uiDefinition?.renderCanvasContent) {
+      return;
+    }
+    const canvasAttachment: UnknownAttachment = {
+      id: attachment.id,
+      type: attachment.type,
+      data: versionData.data,
+      hidden: attachment.hidden,
+      origin: attachment.origin,
+      ...(attachment.description !== undefined ? { description: attachment.description } : {}),
+      versionData: {
+        version,
+        versionCount: attachment.versions.length,
+        createdAt: versionData.created_at,
+        originSyncedAt: attachment.origin_snapshot_at,
+      },
+    };
+    canvasContext.openCanvas(canvasAttachment, isEmbeddedContext);
+  }, [
+    attachment,
+    canvasContext,
+    isEmbeddedContext,
+    uiDefinition?.renderCanvasContent,
+    version,
+    versionData,
+  ]);
 
   const pillStyles = css`
     padding: ${euiTheme.size.xxs} ${euiTheme.size.xs};
     border-radius: ${euiTheme.border.radius.small};
     max-inline-size: ${MAX_PILL_WIDTH}px;
+    ${canOpenCanvas
+      ? `
+      cursor: pointer;
+      &:hover {
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+      }
+    `
+      : ''}
   `;
 
   return (
@@ -73,6 +114,20 @@ export const RoundAttachmentPill: React.FC<RoundAttachmentPillProps> = ({
         grow={false}
         css={pillStyles}
         data-test-subj="agentBuilderRoundAttachmentReferencePill"
+        onClick={canOpenCanvas ? openAttachmentCanvas : undefined}
+        role={canOpenCanvas ? 'button' : undefined}
+        tabIndex={canOpenCanvas ? 0 : undefined}
+        onKeyDown={
+          canOpenCanvas
+            ? (event: React.KeyboardEvent) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  openAttachmentCanvas();
+                }
+              }
+            : undefined
+        }
+        aria-label={canOpenCanvas ? title : undefined}
       >
         <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>

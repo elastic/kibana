@@ -9,7 +9,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { getEsqlDataSourceCarriers } from '@kbn/agent-builder-visualizations-server';
+import { getEsqlQueriesFromLensConfig } from '@kbn/agent-builder-visualizations-server';
 import { isSection, type DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import { getErrorMessage } from '../core';
 import type { DatasetTimeRange } from './select_time_range';
@@ -19,22 +19,6 @@ const DEFAULT_TIME_FIELD = '@timestamp';
 export const LOG_PREFIX = '[default-time-range]';
 
 /**
- * Extract ES|QL queries from every `data_source` carrier in a Lens config.
- *
- * Some Lens configs store the query on the root config, while layered charts
- * store one query per layer.
- */
-const getEsqlQueriesFromConfig = (config: unknown): string[] => {
-  const queries: string[] = [];
-  for (const { data_source: dataSource } of getEsqlDataSourceCarriers(config)) {
-    if (dataSource?.type === 'esql' && dataSource.query) {
-      queries.push(dataSource.query);
-    }
-  }
-  return queries;
-};
-
-/**
  * Distinct ES|QL queries backing the dashboard's Lens panels, including panels
  * nested inside sections. Markdown and any non-ES|QL Lens panels carry no query
  * and are ignored.
@@ -42,7 +26,7 @@ const getEsqlQueriesFromConfig = (config: unknown): string[] => {
 export const extractEsqlQueries = (panels: DashboardAttachmentData['panels']): string[] => {
   const queries = new Set<string>();
   const collect = (config: unknown) => {
-    for (const query of getEsqlQueriesFromConfig(config)) {
+    for (const query of getEsqlQueriesFromLensConfig(config)) {
       queries.add(query);
     }
   };

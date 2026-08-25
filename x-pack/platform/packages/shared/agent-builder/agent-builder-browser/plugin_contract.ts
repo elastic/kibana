@@ -94,10 +94,14 @@ export interface EmbeddableConversationProps {
    * Browser API tools that the agent can use to interact with the page.
    * Tools are executed browser-side when the LLM requests them.
    *
+   * One-way (default): fire-and-forget UI side effects; the LLM sees a stub result.
+   * Two-way (`returnsResult: true`): the round pauses until the client resumes with
+   * the handler return value (optional `image` for multimodal injection).
+   *
    * Example:
    * ```typescript
    * browserApiTools: [{
-   *   id: 'dashboard.config.update_title',
+   *   id: 'update_dashboard_title',
    *   description: 'Update the dashboard title',
    *   schema: z.object({
    *     title: z.string().describe('The new title')
@@ -246,6 +250,12 @@ export interface AgentBuilderPluginStart {
    * @param attachmentId - The id of the attachment to remove
    */
   removeAttachment: (attachmentId: string) => void;
+  /**
+   * Send a user message in the active conversation sidebar.
+   * Opens the sidebar if needed and queues the message until the conversation
+   * is ready to accept it.
+   */
+  submitMessage: (message: string) => void;
   /**
    * Updates the origin of an attachment in a conversation.
    * Use this after saving a by-value attachment to link it to its persistent store.

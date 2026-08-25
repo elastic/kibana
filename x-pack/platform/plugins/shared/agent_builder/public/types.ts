@@ -30,6 +30,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { FilesSetup } from '@kbn/files-plugin/public';
 
 export type {
   AgentBuilderPluginSetup,
@@ -53,6 +54,7 @@ export interface AgentBuilderSetupDependencies {
   actions: ActionsPublicPluginSetup;
   lens: LensPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
+  files: FilesSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   management: ManagementSetup;
   share: SharePluginSetup;

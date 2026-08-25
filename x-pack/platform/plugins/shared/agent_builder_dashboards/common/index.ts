@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { dashboardTools } from './constants';
+export {
+  dashboardTools,
+  DASHBOARD_APPLY_UI_EVENT,
+  type DashboardApplyUiEventData,
+} from './constants';

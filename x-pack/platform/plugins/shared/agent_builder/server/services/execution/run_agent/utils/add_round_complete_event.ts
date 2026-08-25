@@ -31,7 +31,10 @@ import type {
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
+import {
+  isAskUserQuestionPrompt,
+  isBrowserToolResultPrompt,
+} from '@kbn/agent-builder-common/agents/prompts';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import {
@@ -607,9 +610,12 @@ const buildRoundState = ({
     return undefined;
   }
 
-  // ask_user_question prompts don't need a node-state snapshot as they are stored as steps.
+  // ask_user_question / browser_tool_result prompts don't need a node-state snapshot:
+  // they resume from pending_prompts + prompt responses, not from execute_tool tool state.
+  // Browser tools also never emit a ToolCallStep (only browser_tool_call events).
   const toolCallPromptRequests = promptRequestEvents.filter(
-    (event) => !isAskUserQuestionPrompt(event.prompt)
+    (event) =>
+      !isAskUserQuestionPrompt(event.prompt) && !isBrowserToolResultPrompt(event.prompt)
   );
 
   const nodes = toolCallPromptRequests.map((promptRequest) => {

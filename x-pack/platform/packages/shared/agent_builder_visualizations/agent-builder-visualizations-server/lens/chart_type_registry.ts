@@ -45,6 +45,11 @@ interface ChartTypeRegistryEntry<T extends z.ZodType> {
        */
       coloringRules?: string[];
       /**
+       * Chart-specific rules appended only during prettify passes.
+       * These are added on top of (and may override) `rules`.
+       */
+      prettifyRules?: string[];
+      /**
        * Structured config-generation options consumed by specialized prompt
        * builders.
        */
@@ -98,6 +103,12 @@ export const chartTypeRegistry: ChartTypeRegistry = {
       selection:
         'Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.',
       config: {
+        rules: [
+          'Prefer right-aligned metric values. Use left/center only when the user asks.',
+        ],
+        prettifyRules: [
+          'Omit `color` on primary metrics unless you are intentionally setting a custom color — `{ "type": "auto" }` is the default and has no effect when set explicitly.',
+        ],
         coloringRules: [
           'Metric placement: set `apply_color_to: "value"` only together with a color config; do not color the background unless the user asks. When not coloring, omit both `color` and `apply_color_to` — `apply_color_to` without a color makes Lens tint the value with a default green.',
           'For clearly bounded metrics, use explicit 3-band `steps` by default. Examples: percent, ratio, CPU/memory/disk utilization, error rate, success rate, or SLO compliance.',
@@ -146,11 +157,16 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         rules: [
           'For horizontal bars, use type: "bar_horizontal" with x = category field and y = metric field. Example: "top OS by count as horizontal bar" → type: "bar_horizontal", x: { column: "OS" }, y: [{ column: "Count" }]. Do NOT put the metric on x.',
           'Do NOT set axis titles. Rely on the visualization title and column labels to convey meaning. Set axis title visibility to false (e.g. { visible: false }) for both X and Y axes.',
+          "Hide the legend when the chart plots a single series (one layer, one 'y' metric, no 'breakdown_by') — it would only repeat the metric's label. Keep it visible otherwise.",
+          'Default visible legends to outside the chart at the bottom with the list layout (not grid); deviate only when the user asks.',
         ],
         coloringRules: [
           'For new XY charts, omit explicit `color` properties and let Lens apply its current default palettes. Only add colors when the user explicitly requests them.',
           'When editing an existing XY chart, preserve its existing explicit colors unless the user asks to change them; do not introduce new color overrides.',
           'Never introduce or switch to legacy palette IDs (`eui_amsterdam`, `kibana_v7_legacy`, or `elastic_brand_2023`).',
+        ],
+        prettifyRules: [
+          'Strip all explicit color overrides from layers and breakdown_by fields so Lens applies its current default palette. This overrides the preserved-colors rule that applies to regular edits.',
         ],
       },
     },
@@ -237,3 +253,13 @@ export const chartTypeRegistry: ChartTypeRegistry = {
 };
 
 export type VisualizationConfig = z.output<ChartTypeRegistry[SupportedChartType]['schema']>;
+
+const prettifyBaseInstructions =
+  'This is a cleanup pass over the existing configuration, not a redesign. Change only what is needed to satisfy the rules stated in this prompt; keep everything else exactly as it is in the existing configuration. Do not introduce features the existing configuration does not already have (reference lines, annotations, markers, extra styling) unless a stated rule requires them. If the existing configuration already satisfies the rules, return it unchanged. Keep the provided ES|QL query unchanged. The "authoring_note" must be one factual sentence describing only what changed from the existing chart configuration.';
+
+export const getPrettifyConfigInstructions = (chartType: SupportedChartType): string => {
+  const prettifyRules = chartTypeRegistry[chartType].prompt.config?.prettifyRules ?? [];
+  return prettifyRules.length > 0
+    ? `${prettifyBaseInstructions} ${prettifyRules.join(' ')}`
+    : prettifyBaseInstructions;
+};

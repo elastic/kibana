@@ -51,8 +51,8 @@ Always set \`x\` and \`y\` so panels tile with **no gaps**:
 
 ### Reflow after removals
 
-- If removing a panel leaves a gap in a row, shift the affected neighboring panels left by re-adding them with updated \`x\` values.
-- If removing a panel leaves later rows with unnecessary empty space above them, re-add the affected panels with updated \`y\` values.
+- If removing a panel leaves a gap in a row, use \`update_panel_layouts\` to shift the affected neighboring panels left with updated \`x\` values.
+- If removing a panel leaves later rows with unnecessary empty space above them, use \`update_panel_layouts\` to move the affected panels upward with updated \`y\` values.
 
 ### Section grid rules
 

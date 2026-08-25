@@ -22,6 +22,7 @@ import type {
   AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
 import type { AppHeaderShareAction } from '@kbn/app-header';
+import { getAppMenuItemGenerators$, getRegisteredAppMenuItems } from './app_menu_item_registry';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
@@ -72,6 +73,14 @@ export const useDashboardMenuItems = ({
         user: dashboardApi.user,
       }),
     [accessControl, accessControlClient, dashboardApi.createdBy, dashboardApi.user]
+  );
+  // Re-render when external plugins register/unregister App Menu item generators.
+  const appMenuItemGenerators = useObservable(getAppMenuItemGenerators$(), []);
+  const registeredAppMenuItems = useMemo(
+    () => getRegisteredAppMenuItems({ viewMode }),
+    // appMenuItemGenerators identity changes when the registry emits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [viewMode, appMenuItemGenerators]
   );
 
   const isEditButtonDisabled = useMemo(() => {
@@ -458,6 +467,7 @@ export const useDashboardMenuItems = ({
     const { storeSearchSession } = getDashboardCapabilities();
 
     const items: AppMenuItemType[] = [
+      ...registeredAppMenuItems,
       menuItems.add,
       menuItems.switchToViewMode,
       menuItems.settings,
@@ -491,6 +501,7 @@ export const useDashboardMenuItems = ({
     menuItems.backgroundSearch,
     menuItems.save,
     menuItems.add,
+    registeredAppMenuItems,
     hasExportMenuItems,
     shareAction,
   ]);

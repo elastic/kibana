@@ -32,7 +32,7 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart, startDeps: PluginStartDependencies): AgentBuilderPlatformPluginStart {
-    const { agentBuilder, share, triggersActionsUi } = startDeps;
+    const { agentBuilder, share, triggersActionsUi, files } = startDeps;
 
     registerAttachmentUiDefinitions({
       attachments: agentBuilder.attachments,
@@ -40,6 +40,7 @@ export class AgentBuilderPlatformPlugin
       locators: share.url.locators,
       core: coreStart,
       triggersActionsUi,
+      files,
     });
 
     registerConversationTemplateTabs({

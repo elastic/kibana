@@ -6,7 +6,12 @@
  */
 
 import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
-import type { AIMessage, ToolMessage, BaseMessageLike } from '@langchain/core/messages';
+import type {
+  AIMessage,
+  ToolMessage,
+  BaseMessage,
+  BaseMessageLike,
+} from '@langchain/core/messages';
 import { AgentActionType } from '../../actions';
 import type {
   ResearchAgentAction,
@@ -258,6 +263,172 @@ describe('formatResearcherActionHistory', () => {
 
       expect(toolMessageById(messages, 'c1')!.content).toContain(bigContent);
     });
+  });
+});
+
+describe('image injection', () => {
+  const makeImageToolResult = (overrides: {
+    toolCallId: string;
+    attachmentId: string;
+    mimeType?: string;
+    name?: string;
+  }) => ({
+    toolCallId: overrides.toolCallId,
+    content: 'ignored',
+    artifact: {
+      results: [
+        {
+          tool_result_id: `r-${overrides.attachmentId}`,
+          type: ToolResultType.image,
+          data: {
+            attachment_id: overrides.attachmentId,
+            mime_type: overrides.mimeType ?? 'image/png',
+            name: overrides.name,
+            description: 'an image',
+          },
+        },
+      ],
+    },
+  });
+
+  it('does not inject anything when no imageResolver is provided', async () => {
+    const actions: ResearchAgentAction[] = [
+      makeToolCallAction([{ toolCallId: 'c1', toolName: 'attachment_read' }]),
+      makeExecuteToolAction([makeImageToolResult({ toolCallId: 'c1', attachmentId: 'img-1' })]),
+    ];
+
+    const messages = await formatResearcherActionHistory({ actions, cycleLimit: 100 });
+
+    expect(messages.filter((m) => isHumanMessage(m as any))).toHaveLength(0);
+  });
+
+  it('appends a HumanMessage with the attachment_image envelope and an image_url part', async () => {
+    const actions: ResearchAgentAction[] = [
+      makeToolCallAction([{ toolCallId: 'c1', toolName: 'attachment_read' }]),
+      makeExecuteToolAction([makeImageToolResult({ toolCallId: 'c1', attachmentId: 'img-1' })]),
+    ];
+    const imageResolver = jest.fn().mockResolvedValue({ base64: 'AAA', mimeType: 'image/png' });
+
+    const messages = await formatResearcherActionHistory({
+      actions,
+      cycleLimit: 100,
+      imageResolver,
+    });
+
+    expect(imageResolver).toHaveBeenCalledWith({ attachmentId: 'img-1' });
+    const humanMessages = messages.filter((m) => isHumanMessage(m as any));
+    expect(humanMessages).toHaveLength(1);
+    const content = (humanMessages[0] as any).content;
+    expect(content[0].type).toBe('text');
+    expect(content[0].text).toContain('<attachment_image attachment_id="img-1"');
+    expect(content[1]).toEqual({
+      type: 'image_url',
+      image_url: { url: 'data:image/png;base64,AAA' },
+    });
+  });
+
+  it('carries multiple images from one action in a single HumanMessage', async () => {
+    const actions: ResearchAgentAction[] = [
+      makeToolCallAction([
+        { toolCallId: 'c1', toolName: 'attachment_read' },
+        { toolCallId: 'c2', toolName: 'attachment_read' },
+      ]),
+      makeExecuteToolAction([
+        makeImageToolResult({ toolCallId: 'c1', attachmentId: 'img-1' }),
+        makeImageToolResult({ toolCallId: 'c2', attachmentId: 'img-2', mimeType: 'image/jpeg' }),
+      ]),
+    ];
+    const imageResolver = jest
+      .fn()
+      .mockImplementation(async ({ attachmentId }: { attachmentId: string }) => ({
+        base64: `data-${attachmentId}`,
+        mimeType: attachmentId === 'img-1' ? 'image/png' : 'image/jpeg',
+      }));
+
+    const messages = await formatResearcherActionHistory({
+      actions,
+      cycleLimit: 100,
+      imageResolver,
+    });
+
+    const humanMessages = messages.filter((m) => isHumanMessage(m as any));
+    expect(humanMessages).toHaveLength(1);
+    const content = (humanMessages[0] as any).content;
+    const imageParts = content.filter((part: any) => part.type === 'image_url');
+    expect(imageParts).toHaveLength(2);
+    expect(imageParts[0].image_url.url).toBe('data:image/png;base64,data-img-1');
+    expect(imageParts[1].image_url.url).toBe('data:image/jpeg;base64,data-img-2');
+  });
+
+  it('pushes a system-notice HumanMessage and no image part when the resolver returns undefined', async () => {
+    const actions: ResearchAgentAction[] = [
+      makeToolCallAction([{ toolCallId: 'c1', toolName: 'attachment_read' }]),
+      makeExecuteToolAction([
+        makeImageToolResult({ toolCallId: 'c1', attachmentId: 'img-1', name: 'screenshot.png' }),
+      ]),
+    ];
+    const imageResolver = jest.fn().mockResolvedValue(undefined);
+
+    const messages = await formatResearcherActionHistory({
+      actions,
+      cycleLimit: 100,
+      imageResolver,
+    });
+
+    const humanMessages = messages.filter((m) => isHumanMessage(m as any));
+    expect(humanMessages).toHaveLength(1);
+    expect((humanMessages[0] as any).content).toContain('<system-notice>');
+    expect((humanMessages[0] as any).content).toContain('screenshot.png');
+    expect((humanMessages[0] as any).content).toContain('could not be loaded');
+  });
+
+  it('excludes the image from the final output for a compacted cycle', async () => {
+    const bigContent = 'x'.repeat(60_000);
+    const mockToolManager = {
+      getToolIdMapping: () => new Map<string, string>(),
+    } as unknown as ToolManager;
+    const resultTransformer: ToolCallResultTransformer = jest.fn(async () => [
+      { type: ToolResultType.other, tool_result_id: 'sum', data: { summary: 'compacted' } },
+    ]);
+    const imageResolver = jest.fn().mockResolvedValue({ base64: 'AAA', mimeType: 'image/png' });
+
+    const makeBigCycle = (n: number): ResearchAgentAction[] => [
+      makeToolCallAction([{ toolCallId: `c${n}`, toolName: 'search' }], undefined, n),
+      makeExecuteToolAction(
+        [{ toolCallId: `c${n}`, content: bigContent, artifact: { results: [] } }],
+        n
+      ),
+    ];
+
+    // maxCycle=5, cutoff=5-PRESERVED_RECENT_CYCLES(2)=3 -> cycle 1 (image) falls at or
+    // below the cutoff and is compacted away in the final output. Four big cycles keep
+    // the raw-pass estimate safely over IN_FLIGHT_TOKEN_THRESHOLD so real compaction runs.
+    const actions: ResearchAgentAction[] = [
+      makeToolCallAction([{ toolCallId: 'c1', toolName: 'attachment_read' }], undefined, 1),
+      makeExecuteToolAction([makeImageToolResult({ toolCallId: 'c1', attachmentId: 'img-1' })], 1),
+      ...makeBigCycle(2),
+      ...makeBigCycle(3),
+      ...makeBigCycle(4),
+      ...makeBigCycle(5),
+    ];
+
+    const messages = await formatResearcherActionHistory({
+      actions,
+      cycleLimit: 100,
+      resultTransformer,
+      toolManager: mockToolManager,
+      imageResolver,
+    });
+
+    // The final (compacted) messages must never carry image_url content for a
+    // compacted cycle, even though the resolver may have fired once during the
+    // uncompacted sizing pass that formatResearcherActionHistory runs first —
+    // that fetch is memoized and its result is thrown away here.
+    const imageParts = messages
+      .filter((m): m is BaseMessage => isHumanMessage(m as any))
+      .flatMap((m) => (Array.isArray(m.content) ? m.content : []))
+      .filter((part: any) => part.type === 'image_url');
+    expect(imageParts).toHaveLength(0);
   });
 });
 

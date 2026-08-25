@@ -61,6 +61,7 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
+import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
@@ -348,6 +349,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }
   }
 
+  const imageResolver = createImageResolver({
+    attachmentStateManager: context.attachmentStateManager,
+    attachments,
+    request,
+    spaceId: context.spaceId,
+    logger,
+  });
+
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
@@ -361,6 +370,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     relevantSkillsEnabled,
     relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
+    imageResolver,
     conversationTemplates: context.conversationTemplates,
   });
 
@@ -385,12 +395,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
 
   const eventStream = agentGraph.streamEvents(
-    createInitializerCommand({
+    await createInitializerCommand({
       conversation: processedConversation,
       agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
       cycleLimit: CYCLE_LIMIT,
       promptManager,
       eventEmitter,
+      attachments: context.attachmentStateManager,
     }),
     {
       version: 'v2',
@@ -511,19 +522,21 @@ const getConversationState = ({
   };
 };
 
-const createInitializerCommand = ({
+const createInitializerCommand = async ({
   conversation,
   cycleLimit,
   agentBuilderToLangchainIdMap,
   promptManager,
   eventEmitter,
+  attachments,
 }: {
   conversation: ProcessedConversation;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
   promptManager: PromptManager;
   eventEmitter: AgentEventEmitterFn;
-}): Command => {
+  attachments?: AgentHandlerContext['attachmentStateManager'];
+}): Promise<Command> => {
   const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
 
@@ -532,19 +545,20 @@ const createInitializerCommand = ({
     : undefined;
 
   if (lastRound?.status === ConversationRoundStatus.awaitingPrompt) {
-    const { actions, consumedPromptIds } = buildPendingRoundActions({
+    const { actions, consumedPromptIds } = await buildPendingRoundActions({
       round: lastRound,
       promptState: promptManager.dump(),
       toolIdMapping: agentBuilderToLangchainIdMap,
       eventEmitter,
+      attachments,
     });
     initialState.mainActions = actions;
-    // on-resume cleanup: ask_user_question responses are consumed once per round.
+    // on-resume cleanup: HITL / browser-tool responses are consumed once per round.
     for (const id of consumedPromptIds) {
       promptManager.delete(id);
     }
     // If any tool-call step is still pending (empty results), executeTool must run it.
-    // Otherwise the only thing that was paused was ask_user_question - so we go straight to the agent loop
+    // Otherwise the pause was ask_user / browser_tool_result — go straight to the agent loop.
     const hasPendingToolCall = lastRound.steps.some(
       (step) => isToolCallStep(step) && step.results.length === 0
     );

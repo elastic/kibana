@@ -8,16 +8,22 @@
 import { useEffect } from 'react';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useLatest from 'react-use/lib/useLatest';
+import type { FilesStart } from '@kbn/files-plugin/public';
 import { handleEditInDashboard } from '../handle_edit_in_dashboard';
+import { submitPrettifyWithScreenshotInConversation } from '../submit_prettify_with_screenshot';
 
 export type SavedObjectStatus =
   | { status: 'idle' }
   | { status: 'loading' }
   | { status: 'resolved'; exists: boolean };
+
+/** User message submitted when the Prettify canvas action is clicked. */
+export const PRETTIFY_DASHBOARD_PROMPT = 'Prettify this dashboard';
 
 interface UseRegisterCanvasActionButtonsParams {
   dashboardApi: DashboardApi | undefined;
@@ -27,7 +33,10 @@ interface UseRegisterCanvasActionButtonsParams {
   getExistingDashboardId: () => string | undefined;
   closeCanvas: () => void;
   openSidebarConversation?: () => void;
+  submitMessage?: (message: string) => void;
+  addAttachment?: (attachment: AttachmentInput) => void;
   canWriteDashboards: boolean;
+  files: FilesStart;
 }
 
 export const useRegisterCanvasActionButtons = ({
@@ -36,13 +45,18 @@ export const useRegisterCanvasActionButtons = ({
   updateOrigin,
   closeCanvas,
   openSidebarConversation,
+  submitMessage,
+  addAttachment,
   canWriteDashboards,
   dashboardLocatorParams,
   getExistingDashboardId,
+  files,
 }: UseRegisterCanvasActionButtonsParams) => {
   const dashboardLocatorParamsRef = useLatest(dashboardLocatorParams);
   const getExistingDashboardIdRef = useLatest(getExistingDashboardId);
   const openSidebarConversationRef = useLatest(openSidebarConversation);
+  const submitMessageRef = useLatest(submitMessage);
+  const addAttachmentRef = useLatest(addAttachment);
 
   const missingDashboardWriteControlsReason = i18n.translate(
     'xpack.agentBuilderDashboards.attachments.dashboard.canvasWriteControlsDisabledReason',
@@ -139,6 +153,29 @@ export const useRegisterCanvasActionButtons = ({
         }
       },
     });
+
+    if (submitMessage) {
+      buttons.push({
+        label: i18n.translate(
+          'xpack.agentBuilderDashboards.attachments.dashboard.canvasPrettifyActionLabel',
+          {
+            defaultMessage: 'Prettify',
+          }
+        ),
+        icon: 'brush',
+        type: ActionButtonType.SECONDARY,
+        handler: async () => {
+          await submitPrettifyWithScreenshotInConversation({
+            addAttachment: addAttachmentRef.current,
+            submitMessage: submitMessageRef.current,
+            files,
+          });
+          closeCanvas();
+          openSidebarConversationRef.current?.();
+        },
+      });
+    }
+
     registerActionButtons(buttons);
   }, [
     dashboardApi,
@@ -146,11 +183,15 @@ export const useRegisterCanvasActionButtons = ({
     updateOrigin,
     closeCanvas,
     openSidebarConversationRef,
+    submitMessage,
+    submitMessageRef,
+    addAttachmentRef,
     dashboardLocatorParamsRef,
     getExistingDashboardIdRef,
     canWriteDashboards,
     missingDashboardWriteControlsReason,
     managedDashboardDisabledReason,
     readOnlyDashboardDisabledReason,
+    files,
   ]);
 };

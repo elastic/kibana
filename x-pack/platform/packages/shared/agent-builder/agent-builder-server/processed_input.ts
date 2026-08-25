@@ -35,6 +35,17 @@ export interface ProcessedAttachmentVersionRef extends AttachmentVersionRef {
 }
 
 /**
+ * Image attachment referenced on a round. Bytes are resolved lazily at prompt-build
+ * time via the Files plugin — never stored inline on the processed conversation.
+ */
+export interface ProcessedImagePart {
+  /** Attachment id */
+  attachmentId: string;
+  /** Optional version pin; omitted means current */
+  version?: number;
+}
+
+/**
  * Processed input for a single conversation round (message + processed attachments).
  */
 export interface ProcessedRoundInput {
@@ -46,4 +57,8 @@ export interface ProcessedRoundInput {
   attachment_context?: string;
   /** Author attributed to this input */
   author?: ConversationRoundAuthor;
+  /**
+   * Image attachments for this round. Resolved to multimodal content at prompt-build time.
+   */
+  image_parts?: ProcessedImagePart[];
 }

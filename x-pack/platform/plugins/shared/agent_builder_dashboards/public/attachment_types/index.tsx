@@ -22,6 +22,7 @@ import type {
 } from '@kbn/dashboard-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { FilesStart } from '@kbn/files-plugin/public';
 import type { DashboardCanvasAttachmentProps } from './async_services';
 
 export interface IdGenerator {
@@ -29,7 +30,7 @@ export interface IdGenerator {
   next: () => string;
 }
 
-const createIdGenerator = (): IdGenerator => {
+export const createIdGenerator = (): IdGenerator => {
   let id = uuidv4();
   return {
     get current() {
@@ -58,6 +59,8 @@ export const registerDashboardAttachmentUiDefinition = ({
   data,
   dashboardPlugin,
   canWriteDashboards,
+  draftAttachmentId = createIdGenerator(),
+  files,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   chrome: ChromeStart;
@@ -66,9 +69,11 @@ export const registerDashboardAttachmentUiDefinition = ({
   data: DataPublicPluginStart;
   dashboardPlugin: DashboardStart;
   canWriteDashboards: boolean;
+  /** Shared with Prettify so draft dashboard attachments use a stable id. */
+  draftAttachmentId?: IdGenerator;
+  files: FilesStart;
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
-  const draftAttachmentId = createIdGenerator();
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
   const checkSavedDashboardExist = async (dashboardId: string) => {
     const findDashboardsService = await findDashboardsServicePromise;
@@ -133,6 +138,7 @@ export const registerDashboardAttachmentUiDefinition = ({
           data={data}
           checkSavedDashboardExist={checkSavedDashboardExist}
           canWriteDashboards={canWriteDashboards}
+          files={files}
         />
       </React.Suspense>
     ),

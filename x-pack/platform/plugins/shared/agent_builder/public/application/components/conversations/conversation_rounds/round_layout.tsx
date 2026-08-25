@@ -276,6 +276,9 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
                   </EuiFlexItem>
                 </React.Fragment>
               );
+            case AgentPromptType.browser_tool_result:
+              // Silent auto-resume — client executes the browser tool and resumes without UI.
+              return null;
           }
         })}
 
