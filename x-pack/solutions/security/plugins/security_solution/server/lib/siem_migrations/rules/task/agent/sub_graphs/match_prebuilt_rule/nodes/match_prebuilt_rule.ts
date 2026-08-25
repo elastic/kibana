@@ -26,11 +26,15 @@ import {
   MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2,
   MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2,
   MATCH_PREBUILT_RULE_SYSTEM_PROMPT_V2,
+  formatPreviousQueriesPrompt,
+  formatRetrySearchNudgePrompt,
+  formatSearchInstructionsPrompt,
 } from '../prompts';
 import {
   NO_MATCH_SUMMARY,
   type MatchPrebuiltRuleState,
   type MatchPrebuiltRulesResult,
+  type PreviousSearchAttempt,
 } from '../state';
 
 interface GetMatchPrebuiltRuleAgentNodeParams {
@@ -115,48 +119,68 @@ export const getMatchPrebuiltRuleAgentNode = ({
   };
 
   return async (state: MatchPrebuiltRuleState): Promise<Partial<MatchPrebuiltRuleState>> => {
-    const messages = state.match_prebuilt_rules_messages;
+    const matchPrebuiltRulesMessages = state.match_prebuilt_rules_messages;
     // Splunk has no nl_query, so we use the raw title/description/query.
     const ruleContext =
       state.nl_query ||
       `Title: ${state.original_rule.title}\nDescription: ${state.original_rule.description}\nQuery: ${state.original_rule.query}`;
     const techniqueIds = state.original_rule.annotations?.mitre_attack?.join(',') ?? '';
-    // Rendered on every turn, because every turn can end in a search: the first one, and each retry
-    // the model decides on after rejecting the candidates it just saw. Carrying
-    // `previousSearchAttempts` here — rather than on the match prompt — keeps the failed queries in
-    // the same message as the instructions for inventing the next one. Empty on the first turn,
-    // since the conversation holds no tool calls yet.
-    const queryMessages = await CREATE_PREBUILT_RULE_SEMANTIC_QUERY_PROMPT_V2.formatMessages({
-      ruleContext,
-      vendor: state.original_rule.vendor,
-      mitreAttackIds: techniqueIds,
-      previousSearchAttempts: getPreviousSearchAttempts(messages),
-    });
+    const previousSearchAttempts = getPreviousSearchAttempts(matchPrebuiltRulesMessages);
+    // Needed on the first turn, and again only when a search comes back empty — the two cases where
+    // the model has nothing to judge and must produce a query. Deferred rather than rendered up
+    // front so an evaluation turn with candidates doesn't build a message it won't send.
+    const formatCreateSemanticQueryMessages = () =>
+      CREATE_PREBUILT_RULE_SEMANTIC_QUERY_PROMPT_V2.formatMessages({
+        ruleContext,
+        vendor: state.original_rule.vendor,
+        mitreAttackIds: techniqueIds,
+        searchInstructions: formatSearchInstructionsPrompt(previousSearchAttempts),
+      });
 
-    if (messages.length > 0) {
+    if (matchPrebuiltRulesMessages.length > 0) {
       const matchPrompt =
         state.original_rule.vendor === 'splunk'
           ? MATCH_PREBUILT_RULE_PROMPT_SPLUNK_V2
           : MATCH_PREBUILT_RULE_PROMPT_GENERIC_V2;
-      // Evaluate the candidates first, then the query instructions the model needs only if it
-      // rejects them all and searches again.
-      const injectedMessages = [...(await matchPrompt.formatMessages({})), ...queryMessages];
+
+      // Router re-invoked this node after a no-match verdict: the last message in the conversation
+      // is the model's no-match AIMessage (not a ToolMessage from a fresh search). Inject the retry
+      // nudge so the model tries a different keyword angle. The router's `turnCount` cap prevents
+      // this path from repeating more than `MAX_TOOL_CALL_ATTEMPTS - 1` times total.
+      const lastMessage = matchPrebuiltRulesMessages.at(-1);
+      const isRetryAfterNoMatch =
+        AIMessage.isInstance(lastMessage) && !lastMessage.tool_calls?.length;
+
+      // With candidates in hand the model's only job is to judge them, so the match prompt goes in
+      // alone: the source rule and the query guidelines are already earlier in this conversation, so
+      // re-injecting the query prompt would re-send them and end the turn on a "call the tool"
+      // directive over candidates the model hasn't rejected yet. It still needs the queries already
+      // tried, which ride along compactly on the match prompt. An empty search is the inverse —
+      // nothing to judge — so the query prompt goes in instead.
+      const injectedMessages = isRetryAfterNoMatch
+        ? [new HumanMessage(formatRetrySearchNudgePrompt(previousSearchAttempts))]
+        : hasCandidatesToEvaluate(matchPrebuiltRulesMessages)
+        ? await matchPrompt.formatMessages({
+            previousQueries: formatPreviousQueriesPrompt(previousSearchAttempts),
+          })
+        : await formatCreateSemanticQueryMessages();
+
       const { aiMessage, matchResult } = await invokeAndValidateFinalAnswer([
-        ...messages,
+        ...matchPrebuiltRulesMessages,
         ...injectedMessages,
       ]);
-      // Later turn (after a search). Only the two injected prompts and the model's reply are
-      // appended — the prior history is already in state. Either the model finished:
+      // Later turn (after a search or after a retry nudge). Only the injected prompt and the
+      // model's reply are appended — the prior history is already in state. Either the model
+      // finished:
       // { match_prebuilt_rules_messages: [
       //     HumanMessage { content: '<matching_guidelines>\nEvaluate the candidates returned...' },
-      //     HumanMessage { content: 'Source rule context:...\n<previous_search_attempts>\n- Query: ...' },
       //     AIMessage { content: '```json\n{"match":"Suspicious MS Office Child Process",...}\n```' },
       //   ],
       //   match_prebuilt_rules_result: { match: 'Suspicious MS Office Child Process',
       //     summary: '## Prebuilt Rule...' } }
-      // ...or it wants another search (routes back to `tools`):
-      // { match_prebuilt_rules_messages: [HumanMessage { content: '<matching_guidelines>...' },
-      //     HumanMessage { content: '...<previous_search_attempts>\n- Query: "office macro child process"...' },
+      // ...or it wants another search (routes back to `tools` or to `agent` via retry):
+      // { match_prebuilt_rules_messages: [
+      //     HumanMessage { content: '<matching_guidelines>...\nQueries already tried: "office macro child process".' },
       //     AIMessage { content: '', tool_calls: [{ name: 'searchPrebuiltRules',
       //       args: { query: 'office document macro execution sysmon' } }] }],
       //   match_prebuilt_rules_result: undefined }
@@ -168,11 +192,11 @@ export const getMatchPrebuiltRuleAgentNode = ({
 
     const prompt = [
       ...(await MATCH_PREBUILT_RULE_SYSTEM_PROMPT_V2.formatMessages({})),
-      ...queryMessages,
+      ...(await formatCreateSemanticQueryMessages()),
     ];
 
     const { aiMessage, matchResult } = await invokeAndValidateFinalAnswer(prompt);
-    // First turn — seeds the conversation and issues the initial search, e.g. for the Splunk rule
+    // First turn — starts the conversation and issues the initial search, e.g. for the Splunk rule
     // 'Office Document Executing Macro Code':
     // { match_prebuilt_rules_messages: [
     //     SystemMessage { content: 'You are an expert assistant in Cybersecurity...' },
@@ -245,7 +269,22 @@ const getLatestCandidates = (messages: BaseMessage[]): RuleSemanticSearchResult[
   return [];
 };
 
-const getPreviousSearchAttempts = (messages: BaseMessage[]): string => {
+/**
+ * Whether the search that just ran returned anything for the model to judge, which is what decides
+ * between injecting the match prompt and the query prompt. Deliberately looks at the last message
+ * only, unlike `getLatestCandidates` above: an empty or errored search must read as "no candidates"
+ * rather than falling back to an earlier search's hits.
+ */
+const hasCandidatesToEvaluate = (messages: BaseMessage[]): boolean => {
+  const lastMessage = messages.at(-1);
+  return (
+    ToolMessage.isInstance(lastMessage) &&
+    Array.isArray(lastMessage.artifact) &&
+    lastMessage.artifact.length > 0
+  );
+};
+
+const getPreviousSearchAttempts = (messages: BaseMessage[]): PreviousSearchAttempt[] => {
   const toolResultsByCallId = new Map<string, RuleSemanticSearchResult[]>();
   messages.forEach((message) => {
     if (ToolMessage.isInstance(message) && message.name === 'searchPrebuiltRules') {
@@ -256,27 +295,23 @@ const getPreviousSearchAttempts = (messages: BaseMessage[]): string => {
     }
   });
 
-  const attempts = messages.filter(AIMessage.isInstance).flatMap((message) =>
+  // One entry per query already issued, in call order, e.g. after two searches:
+  // [{ query: 'office macro child process', candidateNames: ['wrong-name'] },
+  //  { query: 'office document macro execution sysmon', candidateNames: [] }]
+  // `[]` on the first turn, when the conversation holds no tool calls yet.
+  return messages.filter(AIMessage.isInstance).flatMap((message) =>
     (message.tool_calls ?? [])
       .filter(
         (toolCall) =>
           toolCall.name === 'searchPrebuiltRules' && typeof toolCall.args.query === 'string'
       )
-      .map((toolCall) => {
-        const candidates = toolCall.id ? toolResultsByCallId.get(toolCall.id) ?? [] : [];
-        const candidateNames =
-          candidates.length > 0 ? candidates.map(({ name }) => `"${name}"`).join(', ') : 'none';
-
-        return `- Query: "${toolCall.args.query}"\n  Candidates: ${candidateNames}`;
-      })
+      .map((toolCall) => ({
+        query: toolCall.args.query as string,
+        candidateNames: (toolCall.id ? toolResultsByCallId.get(toolCall.id) ?? [] : []).map(
+          ({ name }) => name
+        ),
+      }))
   );
-
-  // One line per query already tried, injected into the match prompt so the model doesn't repeat
-  // itself if it decides to search again. e.g. after two searches:
-  // '- Query: "office macro child process"\n  Candidates: "wrong-name"\n
-  //  - Query: "office document macro execution sysmon"\n  Candidates: none'
-  // '' on the first evaluation turn's history if no tool call was ever made.
-  return attempts.join('\n');
 };
 
 const buildMatchResult = (

@@ -13,11 +13,7 @@ import type { RunnableConfig } from '@langchain/core/runnables';
 import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import type { SearchPrebuiltRulesTool } from '../../tools/prebuilt_rules_search';
-import {
-  matchPrebuiltRuleState,
-  MAX_TOOL_CALL_ATTEMPTS,
-  type MatchPrebuiltRuleState,
-} from './state';
+import { matchPrebuiltRuleState, type MatchPrebuiltRuleState } from './state';
 import { getFinalizeMatchNode, getMatchPrebuiltRuleAgentNode } from './nodes';
 
 interface GetMatchPrebuiltRuleGraphParams {
@@ -50,6 +46,7 @@ export const getMatchPrebuiltRuleGraph = ({
     .addEdge(START, 'agent')
     .addConditionalEdges('agent', matchPrebuiltRuleRouter, {
       tools: 'tools',
+      agent: 'agent',
       finalize: 'finalize',
     })
     .addEdge('tools', 'agent')
@@ -62,9 +59,28 @@ export const getMatchPrebuiltRuleGraph = ({
 
 const matchPrebuiltRuleRouter = (state: MatchPrebuiltRuleState) => {
   const messages = state.match_prebuilt_rules_messages;
-  const turnCount = messages.filter((message) => AIMessage.isInstance(message)).length;
+  // Count only tool-calling turns (actual searches), not verdict turns. Verdict turns used to count
+  // toward the old `turnCount` cap, which caused the retry path to exhaust the budget prematurely
+  // — e.g. 2 searches + 2 verdicts = 4 turns would hit MAX_TOOL_CALL_ATTEMPTS (4) even though only
+  // 2 of the allowed 3 searches had been issued.
+  const searchCount = messages.filter(
+    (message) => AIMessage.isInstance(message) && Boolean(message.tool_calls?.length)
+  ).length;
   const lastMessage = messages.at(-1);
   const hasToolCalls = AIMessage.isInstance(lastMessage) && Boolean(lastMessage.tool_calls?.length);
+  const maxSearches = 3;
 
-  return hasToolCalls && turnCount < MAX_TOOL_CALL_ATTEMPTS ? 'tools' : 'finalize';
+  if (hasToolCalls && searchCount <= maxSearches) {
+    return 'tools';
+  }
+  // Route back to the agent for an automatic retry when the model returned an explicit no-match
+  // verdict and the search budget still allows it. The agent node detects this path by checking
+  // that the last message is the no-match AIMessage (not a ToolMessage) and injects a nudge
+  // prompting a different keyword angle. `searchCount < maxSearches` prevents a retry after the
+  // last allowed search so the final verdict always routes to `finalize`.
+  const matchResult = state.match_prebuilt_rules_result;
+  if (matchResult !== undefined && !matchResult.match?.trim() && searchCount < maxSearches) {
+    return 'agent';
+  }
+  return 'finalize';
 };

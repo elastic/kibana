@@ -7,7 +7,7 @@
 
 import { AIMessage, HumanMessage, SystemMessage, ToolMessage } from '@langchain/core/messages';
 import { getFinalizeMatchNode, getMatchPrebuiltRuleAgentNode } from './match_prebuilt_rule';
-import type { MatchPrebuiltRuleState } from '../state';
+import { MAX_TOOL_CALL_ATTEMPTS, type MatchPrebuiltRuleState } from '../state';
 
 const mockRule = {
   rule_id: 'test-rule',
@@ -71,25 +71,33 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
     jest.clearAllMocks();
   });
 
-  it('seeds the conversation from the prompt template on the first turn (empty messages)', async () => {
+  it('builds the conversation from the prompt template on the first turn (empty messages)', async () => {
     const aiMessage = toolCallMessage('office macro child process');
     mockInvoke.mockResolvedValueOnce(aiMessage);
 
     const result = await node(baseState);
 
     expect(mockInvoke).toHaveBeenCalledTimes(1);
-    // system + human seed messages, plus the model's first AIMessage
-    const seededMessages = mockInvoke.mock.calls[0][0];
-    expect(seededMessages).toHaveLength(2);
-    expect(SystemMessage.isInstance(seededMessages[0])).toBe(true);
-    expect(HumanMessage.isInstance(seededMessages[1])).toBe(true);
+    // system + human first-turn messages, plus the model's first AIMessage
+    const firstTurnMessages = mockInvoke.mock.calls[0][0];
+    expect(firstTurnMessages).toHaveLength(2);
+    expect(SystemMessage.isInstance(firstTurnMessages[0])).toBe(true);
+    expect(HumanMessage.isInstance(firstTurnMessages[1])).toBe(true);
+    expect(String(firstTurnMessages[1].content)).not.toContain('<previous_search_attempts>');
+    // nothing to evaluate yet, so the first turn gets the unconditional "call the tool" directive
+    expect(String(firstTurnMessages[1].content)).toContain(
+      'Call the searchPrebuiltRules tool with your best query'
+    );
+    expect(String(firstTurnMessages[1].content)).not.toContain(
+      'Your most recent search returned no candidates'
+    );
     expect(result.match_prebuilt_rules_messages).toHaveLength(3);
     expect(result.match_prebuilt_rules_messages?.at(-1)).toBe(aiMessage);
     // still searching — nothing to parse yet
     expect(result.match_prebuilt_rules_result).toBeUndefined();
   });
 
-  it('injects the match-evaluation and query prompts and re-invokes the model with the accumulated history on later turns', async () => {
+  it('injects only the match prompt when the search returned candidates to evaluate', async () => {
     const priorMessages = [
       new SystemMessage('system'),
       new HumanMessage('human'),
@@ -102,33 +110,119 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
     const result = await node({ ...baseState, match_prebuilt_rules_messages: priorMessages });
 
     const [invokedMessages] = mockInvoke.mock.calls[0];
-    // prior history unchanged, plus the match-evaluation prompt and the query prompt
-    expect(invokedMessages).toHaveLength(priorMessages.length + 2);
+    // prior history unchanged, plus the match-evaluation prompt only
+    expect(invokedMessages).toHaveLength(priorMessages.length + 1);
     expect(invokedMessages.slice(0, priorMessages.length)).toEqual(priorMessages);
-    expect(HumanMessage.isInstance(invokedMessages.at(-2))).toBe(true);
-    expect(String(invokedMessages.at(-2)?.content)).toContain('<matching_guidelines>');
-
-    // the failed queries belong to the query prompt, not the match prompt
     expect(HumanMessage.isInstance(invokedMessages.at(-1))).toBe(true);
-    expect(String(invokedMessages.at(-1)?.content)).toContain(
-      'Query: "office macro child process"'
-    );
-    expect(String(invokedMessages.at(-1)?.content)).toContain(
-      'Candidates: "Suspicious MS Office Child Process"'
-    );
-    expect(String(invokedMessages.at(-2)?.content)).not.toContain(
-      'Query: "office macro child process"'
+    expect(String(invokedMessages.at(-1)?.content)).toContain('<matching_guidelines>');
+
+    // The query prompt is not re-sent: its source rule and query guidelines are already in the
+    // history above, and its closing "call the tool" directive would push the model to search again
+    // over candidates it has not rejected yet.
+    expect(String(invokedMessages.at(-1)?.content)).not.toContain('<previous_search_attempts>');
+    expect(String(invokedMessages.at(-1)?.content)).not.toContain('<query_guidelines>');
+    expect(String(invokedMessages.at(-1)?.content)).not.toContain(
+      'Call the searchPrebuiltRules tool with your best query'
     );
 
-    // both injected prompts, plus the model's final answer
-    expect(result.match_prebuilt_rules_messages).toHaveLength(3);
+    // ...but the queries already tried ride along compactly, so a re-search doesn't repeat one
+    expect(String(invokedMessages.at(-1)?.content)).toContain(
+      'Queries already tried: "office macro child process"'
+    );
+
+    // Answering is the default and re-searching needs a named query defect, so an unmet match bar
+    // alone doesn't justify another search — scope mismatch in particular means an empty match,
+    // since no reworded query can produce a differently-scoped rule that isn't in the catalog.
+    expect(String(invokedMessages.at(-1)?.content)).toContain(
+      'Search again only if you can name a defect in the query you just issued'
+    );
+    expect(String(invokedMessages.at(-1)?.content)).toContain(
+      'A scope difference is not a query defect'
+    );
+
+    // The cap is stated once, statically, and interpolated from MAX_TOOL_CALL_ATTEMPTS so the two
+    // can't drift. The model tracks it against the query list rather than counting its own turns.
+    expect(String(invokedMessages.at(-1)?.content)).toContain(
+      `You may call searchPrebuiltRules at most ${MAX_TOOL_CALL_ATTEMPTS - 1} times in total`
+    );
+
+    // An empty "match" is about the verdict, not about whether the search returned candidates — a
+    // model that reasons its way to "no confident match" must not still name the closest candidate,
+    // which `finalize` would otherwise resolve into a full elastic_rule. Both the positive and the
+    // negative answer shape are demonstrated, so naming a rule isn't the only worked example.
+    expect(String(invokedMessages.at(-1)?.content)).toContain(
+      'Never name a rule your own summary describes as not a confident match'
+    );
+    expect(String(invokedMessages.at(-1)?.content)).toContain('<example_response_no_match>');
+    expect(String(invokedMessages.at(-1)?.content)).toContain('"match": ""');
+
+    // the single injected prompt, plus the model's final answer
+    expect(result.match_prebuilt_rules_messages).toHaveLength(2);
     expect(HumanMessage.isInstance(result.match_prebuilt_rules_messages?.[0])).toBe(true);
-    expect(HumanMessage.isInstance(result.match_prebuilt_rules_messages?.[1])).toBe(true);
     expect(result.match_prebuilt_rules_messages?.at(-1)).toBe(aiMessage);
     // the model's final answer, parsed
     expect(result.match_prebuilt_rules_result).toEqual(
       matchResult('Suspicious MS Office Child Process')
     );
+  });
+
+  it('lists every query tried so the model can measure its own usage against the stated cap', async () => {
+    // On the last allowed turn the query list has MAX_TOOL_CALL_ATTEMPTS - 1 entries, so the model
+    // can see the cap is reached by comparing the list to the number in the guidelines — no turn
+    // counting required, and nothing in the node has to detect this turn specially.
+    const priorMessages = [
+      new SystemMessage('system'),
+      new HumanMessage('human'),
+      toolCallMessage('office macro child process'),
+      searchToolMessage([mockOtherRule]),
+      toolCallMessage('office document macro execution'),
+      searchToolMessage([mockOtherRule]),
+      toolCallMessage('winword child process sysmon'),
+      searchToolMessage([mockRule]),
+    ];
+    mockInvoke.mockResolvedValueOnce(finalMessage('Suspicious MS Office Child Process'));
+
+    await node({ ...baseState, match_prebuilt_rules_messages: priorMessages });
+
+    const [invokedMessages] = mockInvoke.mock.calls[0];
+    const content = String(invokedMessages.at(-1)?.content);
+    expect(content).toContain(
+      'Queries already tried: "office macro child process", "office document macro execution", "winword child process sysmon"'
+    );
+    expect(content).toContain(
+      `You may call searchPrebuiltRules at most ${MAX_TOOL_CALL_ATTEMPTS - 1} times in total`
+    );
+    // the prompt is identical on every evaluation turn — no turn-dependent injection
+    expect(content).not.toContain('This is your final turn');
+  });
+
+  it('injects the query prompt instead of the match prompt when the search returned nothing', async () => {
+    const priorMessages = [
+      new SystemMessage('system'),
+      new HumanMessage('human'),
+      toolCallMessage('office macro child process'),
+      searchToolMessage([]),
+    ];
+    mockInvoke.mockResolvedValueOnce(toolCallMessage('office document macro execution sysmon'));
+
+    const result = await node({ ...baseState, match_prebuilt_rules_messages: priorMessages });
+
+    const [invokedMessages] = mockInvoke.mock.calls[0];
+    expect(invokedMessages).toHaveLength(priorMessages.length + 1);
+    // nothing came back, so there is nothing to evaluate and no match prompt is injected
+    expect(String(invokedMessages.at(-1)?.content)).not.toContain('<matching_guidelines>');
+    expect(String(invokedMessages.at(-1)?.content)).toContain('<previous_search_attempts>');
+    expect(String(invokedMessages.at(-1)?.content)).toContain(
+      'Query: "office macro child process"'
+    );
+    expect(String(invokedMessages.at(-1)?.content)).toContain('Candidates: none');
+    // every listed query really did fail in this branch, so saying so is accurate here
+    expect(String(invokedMessages.at(-1)?.content)).toContain(
+      'Your most recent search returned no candidates'
+    );
+
+    expect(result.match_prebuilt_rules_messages).toHaveLength(2);
+    expect(result.match_prebuilt_rules_result).toBeUndefined();
   });
 
   it('retries with a corrective message when the final answer is not valid JSON, then returns the parsed retry', async () => {
@@ -152,7 +246,7 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
 
     // only the winning AIMessage is persisted to state — the invalid attempt and the corrective
     // nudge stay internal to the retry loop, so they don't count as extra agent turns
-    expect(result.match_prebuilt_rules_messages).toHaveLength(3);
+    expect(result.match_prebuilt_rules_messages).toHaveLength(2);
     expect(result.match_prebuilt_rules_messages?.at(-1)).toBe(goodMessage);
     expect(result.match_prebuilt_rules_result).toEqual(
       matchResult('Suspicious MS Office Child Process')
@@ -173,7 +267,7 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
     const result = await node({ ...baseState, match_prebuilt_rules_messages: priorMessages });
 
     expect(mockInvoke).toHaveBeenCalledTimes(2);
-    expect(result.match_prebuilt_rules_messages).toHaveLength(3);
+    expect(result.match_prebuilt_rules_messages).toHaveLength(2);
     expect(result.match_prebuilt_rules_messages?.at(-1)).toBe(secondBadMessage);
     expect(result.match_prebuilt_rules_result).toBeUndefined();
   });
@@ -203,9 +297,9 @@ describe('getMatchPrebuiltRuleAgentNode', () => {
       });
 
       const [invokedMessages] = mockInvoke.mock.calls[0];
-      // the match prompt precedes the query prompt
-      const matchMessage = invokedMessages.at(-2);
-      expect(String(matchMessage.content).includes('Consider the scope of both rules')).toBe(
+      // the match prompt is the only message injected on an evaluation turn with candidates
+      const matchMessage = invokedMessages.at(-1);
+      expect(String(matchMessage.content).includes('consider the scope of both the rules')).toBe(
         shouldIncludeScopeGuideline
       );
     }
