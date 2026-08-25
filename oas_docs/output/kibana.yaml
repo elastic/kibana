@@ -97117,11 +97117,6 @@ components:
           additionalProperties: {}
           description: Per-type payload. Shape is a consumer-side convention, not enforced by the framework.
           type: object
-        id:
-          description: Optional stable identifier of the originating spec, e.g. a prebuilt rule id or template id. Use to filter by source id.
-          maxLength: 256
-          minLength: 1
-          type: string
         type:
           description: Source type discriminator, e.g. "prebuilt_rule", "content_pack". Namespaced by convention.
           maxLength: 128
