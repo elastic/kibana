@@ -118,13 +118,14 @@ const clickWhenVisibleElseOpenMore = (selector: string) => {
   // Wait for chrome to settle before checking visibility — the SideNav can cover elements with a
   // transient overlay (css-1rrlroc) while it is still measuring/laying out after initial render.
   // https://github.com/elastic/kibana/issues/239331
-  // nav-item is a serverless-only chrome selector; skip this check in stateful/ESS environments
-  // where openNavigationPanel from this file may still be called (e.g. siem_migrations.ts).
+  // These are serverless-only chrome-settle gates; skip them in stateful/ESS environments where
+  // openNavigationPanel from this file may still be called (e.g. siem_migrations.ts). On ESS the
+  // globalLoadingIndicator never reaches -hidden on pages with background polling, so it would hang.
   if (Cypress.env('IS_SERVERLESS')) {
     cy.get('[data-test-subj~="nav-item"]').should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator-hidden"]').should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   }
-  cy.get('[data-test-subj="globalLoadingIndicator-hidden"]').should('exist');
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   cy.get('body').then(($body) => {
     const hasVisible = $body.find(selector).filter(':visible').length > 0;
     if (hasVisible) {
@@ -150,9 +151,11 @@ export const showMoreItems = () => {
   // TODO: more menu item is flaky in security because of initial rendering and heigh measurement
   // so we really try to get a stable reference here before proceeding
   // https://github.com/elastic/kibana/issues/239331
-  cy.get('[data-test-subj~="nav-item"]').should('exist');
-  cy.get('[data-test-subj="globalLoadingIndicator-hidden"]').should('exist');
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  if (Cypress.env('IS_SERVERLESS')) {
+    cy.get('[data-test-subj~="nav-item"]').should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator-hidden"]').should('exist');
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  }
 
   // TODO: https://github.com/elastic/kibana/issues/239331
   // eslint-disable-next-line cypress/no-unnecessary-waiting
