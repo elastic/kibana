@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
           const policy = await indexFleetEndpointPolicy(
             getService('kibanaServer'),
             `Default ${uuidv4()}`,
-            '1.1.1',
+            undefined,
             undefined,
             log
           );
