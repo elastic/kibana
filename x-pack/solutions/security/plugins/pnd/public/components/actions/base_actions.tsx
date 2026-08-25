@@ -64,11 +64,18 @@ export interface BaseActionsProps {
   investigation: Investigation;
   isFlyout?: boolean;
   onClickAction: (action: CardActionType, conversationId: Investigation['recordId']) => void;
+  showProposedAction?: boolean;
   'data-test-subj'?: string;
 }
 
 export const BaseActions = memo<BaseActionsProps>(
-  ({ investigation, isFlyout = false, onClickAction, 'data-test-subj': dataTestSubj }) => {
+  ({
+    investigation,
+    isFlyout = false,
+    onClickAction,
+    showProposedAction,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const handleClose = useCallback(() => setIsOpen(false), []);
@@ -97,6 +104,16 @@ export const BaseActions = memo<BaseActionsProps>(
 
     const actionConfigs = useMemo<ActionConfig[]>(
       () => [
+        ...(showProposedAction
+          ? [
+              {
+                key: 'proposedAction',
+                icon: 'lightbulb',
+                name: ACTIONS_TRANSLATIONS.buttons.proposedAction,
+                onClick: () => onClickAction('proposedAction', investigation.recordId),
+              },
+            ]
+          : []),
         {
           key: 'openIncident',
           icon: 'document',

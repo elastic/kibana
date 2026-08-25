@@ -141,7 +141,9 @@ export const ConversationsPage: React.FC = () => {
           rationalePlaceholder={MODAL_TRANSLATIONS.dismiss.rationalePlaceholder}
           primaryAction={{
             color: 'danger',
-            label: 'Requires Approval',
+            label:
+              sortedConversations.find((c) => c.recordId === selectedIdForRecommendedAction)
+                ?.primaryActionLabel ?? '',
             onClick: () => {
               // TODO: use dismiss action API call hook
               setSelectedIdForRecommendedAction(undefined);
