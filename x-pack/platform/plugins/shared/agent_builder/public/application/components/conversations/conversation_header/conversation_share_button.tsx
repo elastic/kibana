@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -193,34 +193,24 @@ export const ConversationShareButton: React.FC = () => {
   const [searchValue, setSearchValue] = useState('');
   const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
-  const accessControl = useMemo(
-    () => normalizeConversationAccessControl(conversation?.access_control),
-    [conversation?.access_control]
-  );
-  const accessControlMemberIds = useMemo(
-    () => accessControl.entries.map((entry) => entry.id),
-    [accessControl]
-  );
+  const accessControl = normalizeConversationAccessControl(conversation?.access_control);
+  const accessControlMemberIds = accessControl.entries.map((entry) => entry.id);
 
   useEffect(() => {
-    setAccessMode(accessControl.access_mode);
-    setMemberIds(accessControlMemberIds);
-  }, [accessControl.access_mode, accessControlMemberIds]);
+    const nextAccessControl = normalizeConversationAccessControl(conversation?.access_control);
+
+    setAccessMode(nextAccessControl.access_mode);
+    setMemberIds(nextAccessControl.entries.map((entry) => entry.id));
+  }, [conversation?.access_control]);
 
   const ownerId = conversation?.user.id;
   const ownerFallbackName = conversation?.user.username ?? '';
-  const profileUids = useMemo(
-    () => [ownerId, ...memberIds].filter((uid): uid is string => Boolean(uid)),
-    [memberIds, ownerId]
-  );
+  const profileUids = [ownerId, ...memberIds].filter((uid): uid is string => Boolean(uid));
   const { data: profiles = [] } = useConversationAccessControlProfiles({
     uids: profileUids,
     enabled: isPopoverOpen,
   });
-  const profileByUid = useMemo(
-    () => new Map(profiles.map((profile) => [profile.uid, profile])),
-    [profiles]
-  );
+  const profileByUid = new Map(profiles.map((profile) => [profile.uid, profile]));
 
   const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
   const { data: suggestedProfiles = [], isFetching: isSearchingUsers } = useSuggestUsers(
@@ -233,17 +223,10 @@ export const ConversationShareButton: React.FC = () => {
     }
   );
 
-  const excludedIds = useMemo(
-    () => new Set([ownerId, ...memberIds].filter(Boolean)),
-    [memberIds, ownerId]
-  );
-  const userOptions = useMemo<UserOption[]>(
-    () =>
-      suggestedProfiles
-        .filter((profile) => !excludedIds.has(profile.uid))
-        .map((profile) => profileToOption(profile)),
-    [excludedIds, suggestedProfiles]
-  );
+  const excludedIds = new Set([ownerId, ...memberIds].filter(Boolean));
+  const userOptions = suggestedProfiles
+    .filter((profile) => !excludedIds.has(profile.uid))
+    .map((profile) => profileToOption(profile));
 
   const { mutate: updateAccessControl, isLoading: isSaving } = useUpdateConversationAccessControl({
     conversationId: conversationId ?? '',
@@ -258,66 +241,56 @@ export const ConversationShareButton: React.FC = () => {
     },
   });
 
-  const saveAccessControl = useCallback(
-    (nextAccessMode: ConversationAccessControlMode, nextMemberIds: string[]) => {
-      if (!conversationId) {
-        return;
-      }
+  const saveAccessControl = (
+    nextAccessMode: ConversationAccessControlMode,
+    nextMemberIds: string[]
+  ) => {
+    if (!conversationId) {
+      return;
+    }
 
-      updateAccessControl({
-        access_mode: nextAccessMode,
-        entries:
-          nextAccessMode === ConversationAccessControlMode.Public
-            ? []
-            : nextMemberIds.map((id) => ({
-                type: 'user',
-                id,
-                role: ConversationAccessControlRole.Member,
-              })),
-      });
-    },
-    [conversationId, updateAccessControl]
-  );
+    updateAccessControl({
+      access_mode: nextAccessMode,
+      entries:
+        nextAccessMode === ConversationAccessControlMode.Public
+          ? []
+          : nextMemberIds.map((id) => ({
+              type: 'user',
+              id,
+              role: ConversationAccessControlRole.Member,
+            })),
+    });
+  };
 
-  const onAccessModeChange = useCallback(
-    (event: React.ChangeEvent<HTMLSelectElement>) => {
-      const nextAccessMode = event.target.value as ConversationAccessControlMode;
-      const nextMemberIds =
-        nextAccessMode === ConversationAccessControlMode.Public ? [] : memberIds;
+  const onAccessModeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const nextAccessMode = event.target.value as ConversationAccessControlMode;
+    const nextMemberIds = nextAccessMode === ConversationAccessControlMode.Public ? [] : memberIds;
 
-      setAccessMode(nextAccessMode);
-      setMemberIds(nextMemberIds);
-      saveAccessControl(nextAccessMode, nextMemberIds);
-    },
-    [memberIds, saveAccessControl]
-  );
+    setAccessMode(nextAccessMode);
+    setMemberIds(nextMemberIds);
+    saveAccessControl(nextAccessMode, nextMemberIds);
+  };
 
-  const onAddUser = useCallback(
-    (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-      const selected = selectedOptions[0] as UserOption | undefined;
-      const nextId = selected?.value;
-      if (!nextId || memberIds.includes(nextId)) {
-        return;
-      }
+  const onAddUser = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    const selected = selectedOptions[0] as UserOption | undefined;
+    const nextId = selected?.value;
+    if (!nextId || memberIds.includes(nextId)) {
+      return;
+    }
 
-      const nextMemberIds = [...memberIds, nextId];
-      setMemberIds(nextMemberIds);
-      setSearchValue('');
-      saveAccessControl(accessMode, nextMemberIds);
-    },
-    [accessMode, memberIds, saveAccessControl]
-  );
+    const nextMemberIds = [...memberIds, nextId];
+    setMemberIds(nextMemberIds);
+    setSearchValue('');
+    saveAccessControl(accessMode, nextMemberIds);
+  };
 
-  const onRemoveUser = useCallback(
-    (id: string) => {
-      const nextMemberIds = memberIds.filter((memberId) => memberId !== id);
-      setMemberIds(nextMemberIds);
-      saveAccessControl(accessMode, nextMemberIds);
-    },
-    [accessMode, memberIds, saveAccessControl]
-  );
+  const onRemoveUser = (id: string) => {
+    const nextMemberIds = memberIds.filter((memberId) => memberId !== id);
+    setMemberIds(nextMemberIds);
+    saveAccessControl(accessMode, nextMemberIds);
+  };
 
-  const renderOption = useCallback((option: EuiComboBoxOptionOption<string>) => {
+  const renderOption = (option: EuiComboBoxOptionOption<string>) => {
     const { profile } = option as UserOption;
     const displayName = getUserDisplayName(profile.user);
     const secondary = profile.user.email ?? profile.user.username;
@@ -338,7 +311,7 @@ export const ConversationShareButton: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, []);
+  };
 
   if (!conversation || !conversationId || !hasPersistedConversation || !canUpdateAccessControl) {
     return null;
