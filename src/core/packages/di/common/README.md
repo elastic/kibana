@@ -507,5 +507,45 @@ onSetup(Task, TaskManager, CoreStart('injection'), (task, taskManager, injection
 });
 ```
 
+### Inline Injection
+InversifyJS does not provide a way to inject dependencies into a function directly, and hence, the dependencies should be resolved imperatively from a factory.
+`KibanaContainerModule` provides a way to inject dependencies into a function directly by wrapping it into an asynchronous function.
+That function holds the invocation until the owning plugin is started so that it can guarantee consistency of the injected dependencies.
+```ts
+import { KibanaContainerModule } from '@kbn/core-di';
+
+export const module = new KibanaContainerModule(({ bind, inject }) => {
+  bind(Token).toDynamicValue(inject(Config, HttpClient, async (config, http) => {
+    const response = await http.get(config.url);
+
+    return response.data;
+  }));
+});
+```
+
+The returned function will always be asynchronous so that the example service should be resolved with the `getAsync` method.
+
+Apart from that the `inject` function can be used from the extended resolution context provided by the `KibanaContainerModule`.
+That can be used from callbacks passed to `onSetup`, `onStart`, and `onActivation`.
+```ts
+onSetup(Task, TaskManager, Logger, ({ inject }, task, taskManager, logger) => {
+  taskManager.register(task.name, inject(CoreStart('http'), (http, ...args) => { // Start services can be injected here
+    logger.debug(`Handling task ${task.name}.`);
+
+    return task.run(http, ...args);
+  }));
+
+});
+```
+
+And it is also available from the `toDynamicValue` and `toFactory` bindings:
+```ts
+  bind(Token).toDynamicValue(({ inject }) => inject(Config, HttpClient, async (config, http) => {
+    const response = await http.get(config.url);
+
+    return response.data;
+  })());
+```
+
 ## Examples
 There is an [example](https://github.com/elastic/kibana/tree/main/examples/dependency_injection) plugin covering the complete injection flow.
