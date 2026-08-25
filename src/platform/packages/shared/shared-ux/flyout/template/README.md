@@ -27,7 +27,9 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 
 ## Root props
 
-The root forwards a fixed subset of `EuiFlyoutProps` — `onClose`, `size`, `minWidth`, `maxWidth`, `type`, `paddingSize`, `ownFocus`, `resizable`, `onResize`, `session`, `historyKey`, `onActive`, `flyoutMenuProps` — plus `aria-label`, `aria-labelledby`, and `data-test-subj`. Anything not in that list is not accepted. `size` defaults to `m` and `session` defaults to `start`; `flyoutMenuDisplayMode` is fixed to `auto` and is not configurable.
+The root forwards a fixed subset of `EuiFlyoutProps` — `id`, `hasChildBackground`, `onClose`, `size`, `minWidth`, `maxWidth`, `type`, `paddingSize`, `ownFocus`, `resizable`, `onResize`, `outsideClickCloses`, `focusTrapProps`, `closeButtonProps`, `session`, `historyKey`, `onActive`, `flyoutMenuProps` — plus `aria-label`, `aria-labelledby`, and `data-test-subj`. Anything not in that list is not accepted. `size` defaults to `m` and `session` defaults to `start`; `flyoutMenuDisplayMode` is fixed to `auto` and is not configurable.
+
+Tab selection props also live on the root: `selectedTabId` (controlled), `defaultSelectedTabId` (uncontrolled initial), and `onTabChange` (called on every tab click either way). See "Tabs" below.
 
 ## Zones
 
@@ -38,7 +40,7 @@ The root forwards a fixed subset of `EuiFlyoutProps` — `onClose`, `size`, `min
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip` using `titleIcon` as its type, defaulting to `info`.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. Not wrapped in a `<p>`, so block content is valid.
 - `collapsed` — renders the compact layout permanently, regardless of scroll position. See "Header collapse".
-- `children` — reserved for future header parts. No header parts exist yet, so any child is dropped.
+- `children` — `Header.Tab` parts. Free-form content (arbitrary elements, components, bare text) is not rendered, and the assembly library warns in development about unrecognized children.
 
 **`FlyoutTemplate.Body`** renders arbitrary children inside `EuiFlyoutBody` in source order, with no sectioning, titling, or dividers added by the template. Each child manages its own layout.
 
@@ -71,6 +73,37 @@ Collapse is driven by the body's scroll container, so it is template-owned rathe
 Transitions are wrapped in `prefers-reduced-motion: no-preference`, so the state change is instant for users who ask for reduced motion.
 
 `collapsed` pins the header to the compact layout: the scroll listener is never attached and the collapsible region is hidden from first render, but wheel forwarding still works.
+
+## Tabs
+
+Declare `Header.Tab` parts inside the `Header` and a matching `Body.TabPanel` for each in the `Body`. The template renders the tab bar at the bottom of the header, wires the `tab`/`tabpanel` accessibility relationship, and mounts only the selected panel.
+
+```tsx
+<FlyoutTemplate onClose={onClose} selectedTabId={tabId} onTabChange={setTabId}>
+  <FlyoutTemplate.Header title="Alert details">
+    <FlyoutTemplate.Header.Tab id="overview" label="Overview" />
+    <FlyoutTemplate.Header.Tab id="metadata" label="Metadata" />
+  </FlyoutTemplate.Header>
+
+  <FlyoutTemplate.Body>
+    <FlyoutTemplate.Body.TabPanel tabId="overview">
+      <p>Overview content</p>
+    </FlyoutTemplate.Body.TabPanel>
+    <FlyoutTemplate.Body.TabPanel tabId="metadata">
+      <p>Metadata content</p>
+    </FlyoutTemplate.Body.TabPanel>
+  </FlyoutTemplate.Body>
+</FlyoutTemplate>
+```
+
+Each `Header.Tab` takes `id`, `label`, and optional `disabled`, `prepend`, and `append`. Selection is uncontrolled by default, starting on the first tab; pass `defaultSelectedTabId` to the root to start elsewhere. For controlled selection pass `selectedTabId` and `onTabChange` on the root — `onTabChange` fires on every tab click either way.
+
+**Behaviors pinned by design:**
+
+- **Tab bar is suppressed** when no `Body.TabPanel` is declared, even if `Header.Tab` parts are present. A flyout with tabs in the header and no panels in the body renders the body as if there were no tabs.
+- **Only the selected panel mounts.** Panel state is discarded on every tab switch. There is no keep-mounted escape hatch. This is a deliberate decision — free to revisit before there are consumers, expensive once there are.
+- **Top-level body content is not rendered in tabbed mode.** Once the body contains any `TabPanel`, all non-panel children (sections, passthrough content) are ignored. Everything must live inside a panel.
+- **A tab whose `tabId` has no matching panel** renders an empty body without error.
 
 ## Test subjects
 

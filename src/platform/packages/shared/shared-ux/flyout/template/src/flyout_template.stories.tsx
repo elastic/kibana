@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FlyoutTemplate } from './flyout_template';
 import {
   type SharedStoryArgs,
@@ -28,6 +28,7 @@ import {
 
 type Args = SharedStoryArgs & {
   headerIsCollapsed: boolean;
+  numTabs: number;
 };
 
 const meta: Meta<Args> = {
@@ -38,6 +39,7 @@ const meta: Meta<Args> = {
     numPages: 0,
     paginationJump: false,
     numUnstructuredBlocks: 0,
+    numTabs: 0,
     titleIcon: false,
     description: true,
     footer: true,
@@ -279,4 +281,104 @@ export const HeaderCollapseOnScroll: Story = {
     headerIsCollapsed: false,
   },
   render: HeaderCollapseOnScrollRender,
+};
+
+const TABS: Array<{ id: string; label: string; detail: string }> = [
+  { id: 'overview', label: 'Overview', detail: 'Overview panel content.' },
+  { id: 'metadata', label: 'Metadata', detail: 'Metadata panel content.' },
+  { id: 'timeline', label: 'Timeline', detail: 'Timeline panel content.' },
+  { id: 'insights', label: 'Insights', detail: 'Insights panel content.' },
+];
+
+const TabsRender = (args: Args): React.JSX.Element => {
+  const visibleTabs = TABS.slice(0, args.numTabs);
+  const [selectedTabId, setSelectedTabId] = useState<string | undefined>(visibleTabs[0]?.id);
+
+  useEffect(() => {
+    if (!visibleTabs.some((tab) => tab.id === selectedTabId)) {
+      setSelectedTabId(visibleTabs[0]?.id);
+    }
+  }, [visibleTabs, selectedTabId]);
+
+  return (
+    <>
+      <EuiText size="s">
+        <p>
+          These buttons live outside the flyout and drive the same <code>selectedTabId</code> state
+          as the tab bar below, proving that tab selection is controlled end-to-end.
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+        {visibleTabs.map(({ id, label }) => (
+          <EuiFlexItem grow={false} key={id}>
+            <EuiButton size="s" fill={selectedTabId === id} onClick={() => setSelectedTabId(id)}>
+              {label}
+            </EuiButton>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+
+      <FlyoutTemplate
+        onClose={action('onClose')}
+        size="m"
+        {...buildFlyoutProps(args)}
+        selectedTabId={selectedTabId}
+        onTabChange={setSelectedTabId}
+      >
+        <FlyoutTemplate.Header
+          title="Tabs demo"
+          {...buildTitleIconProps(args)}
+          description={args.description ? HEADER_DESCRIPTION : undefined}
+          collapsed={args.headerIsCollapsed}
+        >
+          {visibleTabs.map(({ id, label }) => (
+            <FlyoutTemplate.Header.Tab key={id} id={id} label={label} />
+          ))}
+        </FlyoutTemplate.Header>
+
+        <FlyoutTemplate.Body>
+          {visibleTabs.map(({ id, label, detail }) => (
+            <FlyoutTemplate.Body.TabPanel key={id} tabId={id}>
+              <EuiText size="s">
+                <p>{fillContent(detail)}</p>
+                <p>{fillContent()}</p>
+              </EuiText>
+            </FlyoutTemplate.Body.TabPanel>
+          ))}
+        </FlyoutTemplate.Body>
+
+        {footerZone(args)}
+      </FlyoutTemplate>
+    </>
+  );
+};
+
+export const Tabs: StoryObj<Args> = {
+  argTypes: {
+    numTabs: {
+      name: 'Tabs',
+      control: { type: 'range', min: 1, max: TABS.length, step: 1 },
+      table: { category: 'Header' },
+    },
+    headerIsCollapsed: {
+      name: 'Force collapsed',
+      control: { type: 'boolean' },
+      table: { category: 'Header' },
+    },
+    numLeadingActions: { table: { disable: true } },
+    numTrailingActions: { table: { disable: true } },
+    numPages: { table: { disable: true } },
+    paginationJump: { table: { disable: true } },
+    numUnstructuredBlocks: { table: { disable: true } },
+  },
+  args: {
+    numTabs: 4,
+    titleIcon: false,
+    description: true,
+    footer: true,
+    headerIsCollapsed: false,
+  },
+  render: TabsRender,
 };

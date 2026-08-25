@@ -7,12 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  FlyoutTemplateConfigProvider,
-  useFlyoutTemplateConfig,
-  resolveZoneTestSubj,
-} from './config_context';
-export type { FlyoutTemplateConfig } from './config_context';
-export { FlyoutTabsProvider, useFlyoutTabs } from './tabs_context';
-export type { FlyoutTabsState } from './tabs_context';
-export { FlyoutHeaderCollapseProvider, useFlyoutHeaderCollapse } from './collapse_context';
+import type { FlyoutHeaderTabProps } from '../../types';
+import { tabPart } from './part';
+
+/** Declarative `FlyoutTemplate.Header.Tab`. */
+export const Tab = tabPart.createComponent<FlyoutHeaderTabProps>({
+  resolve: ({ id, label, disabled, prepend, append, 'data-test-subj': dataTestSubj }) => ({
+    id,
+    label,
+    disabled,
+    prepend,
+    append,
+    'data-test-subj': dataTestSubj,
+  }),
+});
+
+Tab.displayName = 'FlyoutTemplate.Header.Tab';

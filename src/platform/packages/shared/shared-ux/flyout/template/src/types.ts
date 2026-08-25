@@ -10,15 +10,32 @@
 import type { MouseEventHandler, ReactNode } from 'react';
 import type { EuiButtonProps, EuiFlyoutProps, EuiIconProps } from '@elastic/eui';
 
+/** Props for the declarative `FlyoutTemplate.Header.Tab` part. */
+export interface FlyoutHeaderTabProps {
+  /** Stable identifier, used to link the tab to its `Body.TabPanel`. */
+  id: string;
+  /** Tab label rendered inside `EuiTab`. */
+  label: ReactNode;
+  disabled?: boolean;
+  prepend?: ReactNode;
+  append?: ReactNode;
+  'data-test-subj'?: string;
+}
+
+/** Props for the declarative `FlyoutTemplate.Body.TabPanel` part. */
+export interface FlyoutBodyTabPanelProps {
+  /** Must match the `id` of a `Header.Tab`. */
+  tabId: string;
+  children?: ReactNode;
+  'data-test-subj'?: string;
+}
+
 /** Props for the declarative `FlyoutTemplate.Header` zone. */
 export interface FlyoutHeaderProps {
-  /** Title rendered by the header as an H3. */
+  /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
   title: ReactNode;
   'data-test-subj'?: string;
-  /**
-   * Reserved for future header parts (Header.Badge, Header.InfoBlock, etc.).
-   * Free-form content placed here is not rendered; put it in the Body instead.
-   */
+  /** `Header.Tab` parts. Free-form content is not rendered. */
   children?: ReactNode;
   /** Icon beside the title; defaults to `info` when `titleTooltip` is set. */
   titleIcon?: EuiIconProps['type'];
@@ -36,7 +53,7 @@ export interface FlyoutHeaderProps {
 /** Props for the declarative `FlyoutTemplate.Body` zone. */
 export interface FlyoutBodyProps {
   'data-test-subj'?: string;
-  /** Arbitrary content rendered in source order. */
+  /** `Body.TabPanel` parts, and/or arbitrary content rendered as-is in source order. */
   children?: ReactNode;
 }
 
@@ -93,4 +110,10 @@ export type FlyoutTemplateProps = Pick<
   'data-test-subj'?: string;
   /** Declarative zone children: `FlyoutTemplate.Header`, `.Body`, `.Footer`. */
   children?: ReactNode;
+  /** Initial selected tab id (uncontrolled); ignored when `selectedTabId` is provided. */
+  defaultSelectedTabId?: string;
+  /** Currently selected tab id (controlled); `onTabChange` fires on every click either way. */
+  selectedTabId?: string;
+  /** Called when the user clicks a tab. */
+  onTabChange?: (id: string) => void;
 };
