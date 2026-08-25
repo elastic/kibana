@@ -76,7 +76,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
     const { description, tags, time_restore, project_routing_restore, title, ...options } =
       stateManager.getLatestState();
     return {
-      description,
+      ...(description && { description }),
       tags,
       title,
       options,
@@ -123,9 +123,11 @@ export function initializeSettingsManager(initialState: DashboardState) {
             const {
               description,
               tags,
-              title,
+
               time_restore,
+
               project_routing_restore,
+              title,
               ...optionDiffs
             } = diffComparators(comparators, lastSavedState, latestState, DEFAULT_SETTINGS);
             // options needs to contain all values and not just diffs since is spread into saved state
