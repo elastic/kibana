@@ -154,11 +154,15 @@ it.each([
   (workflowId, importedYaml, expectedFingerprint) => {
     const definition = managedWorkflowDefinitions.find(({ id }) => id === workflowId);
     if (!definition) throw new Error(`Managed watch "${workflowId}" is not registered`);
-    const contentFingerprint = createContentFingerprint(importedYaml);
-
-    // yamlTemplate hashing sees only the function source, not this imported string. Update this
-    // fingerprint only together with an intentional definition-version decision.
-    expect(`${definition.version}:${contentFingerprint}`).toBe(expectedFingerprint);
+    const actualFingerprint = `${definition.version}:${createContentFingerprint(importedYaml)}`;
+    if (actualFingerprint === expectedFingerprint) {
+      return;
+    }
+    throw new Error(
+      `Imported YAML for '${workflowId}' changed (${actualFingerprint}, expected ${expectedFingerprint}). ` +
+        `yamlTemplate hashing covers only the function source, not this imported string, so already-installed spaces will not receive the edit until definition.version is bumped. ` +
+        `Bump version in the watch module and update this expected fingerprint in the same change.`
+    );
   }
 );
 
