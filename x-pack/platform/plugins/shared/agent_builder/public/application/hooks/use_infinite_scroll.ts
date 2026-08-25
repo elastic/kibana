@@ -30,11 +30,13 @@ export const useInfiniteScroll = ({
   isFetchingNextPage,
   fetchNextPage,
   rootMargin = '200px',
+  scrollContainerRef,
 }: {
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
   fetchNextPage?: () => void;
   rootMargin?: string;
+  scrollContainerRef?: React.RefObject<Element | null>;
 }): React.RefCallback<HTMLDivElement> => {
   // Track the sentinel element as state so that changes (mount / unmount) cause
   // the observer effect below to re-run.
@@ -65,12 +67,12 @@ export const useInfiniteScroll = ({
           fetchRef.current?.();
         }
       },
-      { rootMargin, threshold: 0 }
+      { root: scrollContainerRef?.current ?? null, rootMargin, threshold: 0 }
     );
 
     observer.observe(sentinelEl);
     return () => observer.disconnect();
-  }, [sentinelEl, rootMargin]); // re-runs only when the sentinel element or rootMargin changes
+  }, [sentinelEl, rootMargin, scrollContainerRef]); // re-runs when the sentinel, margin, or container changes
 
   return sentinelRef;
 };

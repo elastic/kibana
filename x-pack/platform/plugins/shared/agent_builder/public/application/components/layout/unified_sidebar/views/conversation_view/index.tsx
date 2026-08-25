@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -77,12 +78,28 @@ const pinnedLabel = i18n.translate('xpack.agentBuilder.sidebar.conversation.pinn
   defaultMessage: 'Pinned',
 });
 
+const pinnedListScrollRegionLabel = i18n.translate(
+  'xpack.agentBuilder.sidebar.conversation.pinnedListScrollRegion',
+  {
+    defaultMessage: 'Pinned conversation list',
+  }
+);
+
 const conversationListScrollRegionLabel = i18n.translate(
   'xpack.agentBuilder.sidebar.conversation.conversationListScrollRegion',
   {
     defaultMessage: 'Conversation list',
   }
 );
+
+const pinnedSectionCss = css`
+  overflow: hidden;
+  max-block-size: 40%;
+`;
+
+const sectionLabelCss = ({ euiTheme }: UseEuiTheme) => css`
+  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+`;
 
 export const ConversationSidebarView: React.FC = () => {
   const { pathname } = useLocation();
@@ -185,13 +202,6 @@ export const ConversationSidebarView: React.FC = () => {
 
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
 
-  const sectionLabelCss = useMemo(
-    () => css`
-      padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-    `,
-    [euiTheme]
-  );
-
   useEffect(() => {
     // Once agents have loaded, redirect to the last valid agent if the current agent ID
     // is not recognised — but only when there is no conversation ID in the URL (new
@@ -293,6 +303,13 @@ export const ConversationSidebarView: React.FC = () => {
                           {pinnedLabel}
                         </EuiText>
                         <EuiSpacer size="xs" />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                        role="region"
+                        aria-label={pinnedListScrollRegionLabel}
+                        css={pinnedSectionCss}
+                      >
                         <PinnedConversationList
                           agentId={agentId}
                           currentConversationId={conversationId}

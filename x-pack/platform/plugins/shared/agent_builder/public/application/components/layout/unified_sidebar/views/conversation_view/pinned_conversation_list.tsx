@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 
 import {
   EuiDroppable,
@@ -14,6 +14,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +27,22 @@ import { DraggableConversationItem } from './draggable_conversation_item';
 const dragToPinLabel = i18n.translate('xpack.agentBuilder.sidebar.pinned.dragToPin', {
   defaultMessage: 'Drag a chat here to pin it',
 });
+
+const scrollContainerStyle = css`
+  height: 100%;
+  overflow-y: auto;
+`;
+
+const listContainerStyle = css`
+  position: relative;
+`;
+
+const placeHolderStyle = ({ euiTheme }: UseEuiTheme) => css`
+  border-radius: ${euiTheme.border.radius.small};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 interface PinnedConversationListProps {
   agentId: string;
@@ -53,7 +70,13 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
   isDragging = false,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const sentinelRef = useInfiniteScroll({ hasNextPage, isFetchingNextPage, fetchNextPage });
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    scrollContainerRef,
+  });
   const isEmpty = pinnedConversations.length === 0;
   const showOverlay = isDragging && !isEmpty;
 
@@ -63,16 +86,9 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
     </EuiText>
   );
 
-  const sharedPlaceholderCss = css`
-    border-radius: ${euiTheme.border.radius.small};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  `;
-
   return (
-    <>
-      <div style={{ position: 'relative' }}>
+    <div ref={scrollContainerRef} css={scrollContainerStyle}>
+      <div css={listContainerStyle}>
         <EuiDroppable
           droppableId={DROPPABLE_IDS.PINNED}
           spacing="none"
@@ -94,7 +110,7 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
             {isEmpty && (
               <div
                 css={[
-                  sharedPlaceholderCss,
+                  placeHolderStyle,
                   css`
                     border: 1px dashed
                       ${isDragging
@@ -128,7 +144,7 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
         {showOverlay && (
           <div
             css={[
-              sharedPlaceholderCss,
+              placeHolderStyle,
               css`
                 position: absolute;
                 inset: 0;
@@ -152,6 +168,6 @@ export const PinnedConversationList: React.FC<PinnedConversationListProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </>
+    </div>
   );
 };
