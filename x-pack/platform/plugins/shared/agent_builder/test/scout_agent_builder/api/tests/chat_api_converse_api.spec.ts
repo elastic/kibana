@@ -9,7 +9,11 @@ import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
-import { CONVERSATION_SCHEMA_VERSION, TimelineEventType } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  CONVERSATION_SCHEMA_VERSION,
+  TimelineEventType,
+} from '@kbn/agent-builder-common';
 import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
@@ -30,6 +34,35 @@ const ROUND_DERIVED_EVENT_TYPES = [
   TimelineEventType.executionStarted,
   TimelineEventType.executionTerminated,
 ];
+
+const conversationIdFromSseStream = (streamText: string): string | undefined => {
+  for (const block of streamText.split('\n\n')) {
+    const lines = block.split('\n');
+    const eventType = lines
+      .find((line) => line.startsWith('event:'))
+      ?.slice('event:'.length)
+      .trim();
+    if (
+      eventType !== ChatEventType.conversationCreated &&
+      eventType !== ChatEventType.conversationUpdated
+    ) {
+      continue;
+    }
+    const dataLine = lines.find((line) => line.startsWith('data:'));
+    if (!dataLine) {
+      continue;
+    }
+    try {
+      const payload = JSON.parse(dataLine.slice('data:'.length).trim());
+      if (typeof payload?.data?.conversation_id === 'string') {
+        return payload.data.conversation_id;
+      }
+    } catch {
+      // Not a JSON data line — skip it.
+    }
+  }
+  return undefined;
+};
 
 const postChatConverse = (
   apiClient: ScoutAgentBuilderApiClient,
@@ -157,10 +190,11 @@ apiTest.describe(
       const streamText = String(res.body);
       expect(streamText).toContain(MOCKED_LLM_RESPONSE);
 
-      const match = streamText.match(/"conversation_id":"([^"]+)"/);
-      if (match) {
-        conversationIds.push(match[1]);
-      }
+      // Track the conversation for cleanup, and fail loudly (not silently leak) if the SSE format
+      // ever shifts so this stops finding the id.
+      const conversationId = conversationIdFromSseStream(streamText);
+      expect(conversationId, 'expected a conversation_id in the SSE stream').toBeDefined();
+      conversationIds.push(conversationId!);
     });
 
     apiTest('invalid converse payload returns 400', async ({ apiClient }) => {
