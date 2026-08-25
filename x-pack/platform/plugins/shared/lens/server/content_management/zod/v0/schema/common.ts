@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { savedObjectSchema } from '@kbn/content-management-utils/zod';
 
 /**
@@ -16,17 +16,19 @@ import { savedObjectSchema } from '@kbn/content-management-utils/zod';
  *
  * @deprecated - use `v1` schemas
  */
-export const lensItemAttributesSchemaV0 = z
-  .object({
-    title: z.string(),
-    description: z.string().nullable().optional(),
-    visualizationType: z.string().nullable().optional(),
-    state: z.unknown().optional(),
-    uiStateJSON: z.string().optional(),
-    visState: z.string().optional(),
-    savedSearchRefName: z.string().optional(),
-  })
-  .strip();
+export const lensItemAttributesSchemaV0 = lazySchema(() =>
+  z
+    .object({
+      title: z.string(),
+      description: z.string().nullable().optional(),
+      visualizationType: z.string().nullable().optional(),
+      state: z.unknown().optional(),
+      uiStateJSON: z.string().optional(),
+      visState: z.string().optional(),
+      savedSearchRefName: z.string().optional(),
+    })
+    .strip()
+);
 
 /**
  * The underlying SO type used to store Lens state in Content Management.
@@ -35,19 +37,23 @@ export const lensItemAttributesSchemaV0 = z
  *
  * @deprecated - use `v1` schemas
  */
-export const lensSavedObjectSchemaV0 = savedObjectSchema(lensItemAttributesSchemaV0);
+export const lensSavedObjectSchemaV0 = lazySchema(() =>
+  savedObjectSchema(lensItemAttributesSchemaV0)
+);
 
 /**
  * The Lens item data returned from the server
  *
  * @deprecated - use `v1` schemas
  */
-export const lensItemSchemaV0 = lensSavedObjectSchemaV0
-  .pick({
-    id: true,
-    references: true,
-  })
-  .extend(lensItemAttributesSchemaV0.shape)
-  .strict();
+export const lensItemSchemaV0 = lazySchema(() =>
+  lensSavedObjectSchemaV0
+    .pick({
+      id: true,
+      references: true,
+    })
+    .extend(lensItemAttributesSchemaV0.shape)
+    .strict()
+);
 
-export const lensItemDataSchemaV0 = lensItemSchemaV0.omit({ id: true });
+export const lensItemDataSchemaV0 = lazySchema(() => lensItemSchemaV0.omit({ id: true }));

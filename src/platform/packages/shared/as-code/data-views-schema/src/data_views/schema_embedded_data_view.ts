@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   compositeRuntimeFieldSchema,
   primitiveRuntimeFieldSchema,
@@ -22,39 +22,44 @@ import {
   nameSchema,
 } from './common';
 
-export const fieldSettingsSchema = z
-  .union([compositeRuntimeFieldSchema, primitiveRuntimeFieldSchema, fieldSettingsBaseSchema])
-  .meta({
-    id: 'kbn-field-settings-entry',
-    title: 'Field settings or runtime field',
-    description:
-      'Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.',
-  });
-
-export const dataViewReferenceSchema = z
-  .object({
-    type: z.literal(AS_CODE_DATA_VIEW_REFERENCE_TYPE),
-    ref_id: z.string().meta({
+export const fieldSettingsSchema = lazySchema(() =>
+  z
+    .union([compositeRuntimeFieldSchema, primitiveRuntimeFieldSchema, fieldSettingsBaseSchema])
+    .meta({
+      id: 'kbn-field-settings-entry',
+      title: 'Field settings or runtime field',
       description:
-        'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
-    }),
-  })
-  .strict()
-  .meta({ id: 'kbn-data-view-reference-schema', title: 'Data view reference' });
+        'Display overrides for an indexed field, or a runtime field definition when `type` is set to a runtime field kind.',
+    })
+);
 
-export const dataViewSpecSchema = z
-  .object({
-    type: z.literal(AS_CODE_DATA_VIEW_SPEC_TYPE),
-    name: nameSchema,
-    index_pattern: indexPatternSchema,
-    time_field: timeFieldSchema,
-    allow_hidden_indices: allowHiddenIndicesSchema,
-    field_settings: z.record(fieldSettingsFieldNameSchema, fieldSettingsSchema).optional(),
-  })
-  .strict()
-  .meta({ id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' });
+export const dataViewReferenceSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal(AS_CODE_DATA_VIEW_REFERENCE_TYPE),
+      ref_id: z.string().meta({
+        description:
+          'The id of the Kibana data view to use as the data source. Example: "my-data-view".',
+      }),
+    })
+    .strict()
+    .meta({ id: 'kbn-data-view-reference-schema', title: 'Data view reference' })
+);
 
-export const dataViewSchema = z.discriminatedUnion('type', [
-  dataViewReferenceSchema,
-  dataViewSpecSchema,
-]);
+export const dataViewSpecSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal(AS_CODE_DATA_VIEW_SPEC_TYPE),
+      name: nameSchema,
+      index_pattern: indexPatternSchema,
+      time_field: timeFieldSchema,
+      allow_hidden_indices: allowHiddenIndicesSchema,
+      field_settings: z.record(fieldSettingsFieldNameSchema, fieldSettingsSchema).optional(),
+    })
+    .strict()
+    .meta({ id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' })
+);
+
+export const dataViewSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [dataViewReferenceSchema, dataViewSpecSchema])
+);

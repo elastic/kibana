@@ -7,43 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { DEFAULT_OBJECT_FIT, IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS } from '../common';
 
-const imageFileSrcSchema = z
-  .object({
-    type: z.literal('file'),
-    file_id: z.string(),
-  })
-  .strict()
-  .meta({
-    title: 'file',
-  });
+const imageFileSrcSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('file'),
+      file_id: z.string(),
+    })
+    .strict()
+    .meta({
+      title: 'file',
+    })
+);
 
-const imageUrlSrcSchema = z
-  .object({
-    type: z.literal('url'),
-    url: z.string().meta({ description: 'URL of the image' }),
-  })
-  .strict()
-  .meta({
-    title: 'url',
-  });
+const imageUrlSrcSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('url'),
+      url: z.string().meta({ description: 'URL of the image' }),
+    })
+    .strict()
+    .meta({
+      title: 'url',
+    })
+);
 
-const imageConfigSchema = z
-  .object({
-    src: z.union([imageFileSrcSchema, imageUrlSrcSchema]).meta({ description: 'Image source' }),
-    alt_text: z.string().optional(),
-    object_fit: z
-      .union([z.literal('fill'), z.literal('contain'), z.literal('cover'), z.literal('none')])
-      .default(DEFAULT_OBJECT_FIT)
-      .meta({ description: 'How the image should be sized within its container' }),
+const imageConfigSchema = lazySchema(() =>
+  z
+    .object({
+      src: z.union([imageFileSrcSchema, imageUrlSrcSchema]).meta({ description: 'Image source' }),
+      alt_text: z.string().optional(),
+      object_fit: z
+        .union([z.literal('fill'), z.literal('contain'), z.literal('cover'), z.literal('none')])
+        .default(DEFAULT_OBJECT_FIT)
+        .meta({ description: 'How the image should be sized within its container' }),
 
-    background_color: z.string().optional(),
-  })
-  .strict();
+      background_color: z.string().optional(),
+    })
+    .strict()
+);
 
 export function getImageEmbeddableSchema(getDrilldownsSchemas: GetDrilldownsSchemaFnType) {
   return z

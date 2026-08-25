@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 const DURATION_FINE_GRAINED_INPUT = ['ps', 'ns', 'us'] as const;
 
@@ -19,9 +19,9 @@ const DURATION_OUTPUT_UNITS = [...DURATION_AUTO_OUTPUT, ...DURATION_STANDARD_INP
 export type DurationInputUnit = (typeof DURATION_INPUT_UNITS)[number];
 export type DurationOutputUnit = (typeof DURATION_OUTPUT_UNITS)[number];
 
-export const durationInputUnitSchema = z.enum(DURATION_INPUT_UNITS);
+export const durationInputUnitSchema = lazySchema(() => z.enum(DURATION_INPUT_UNITS));
 
-export const durationOutputUnitSchema = z.enum(DURATION_OUTPUT_UNITS);
+export const durationOutputUnitSchema = lazySchema(() => z.enum(DURATION_OUTPUT_UNITS));
 
 const durationFormatSuffixSchema = z.string().optional().meta({
   description: 'Suffix appended to the formatted value.',
@@ -43,24 +43,26 @@ const durationFormatCompactSchema = z.boolean().optional().meta({
     'When `true`, uses short unit suffixes (for example, `ms` instead of `Milliseconds`). Defaults to `true`. Ignored for `auto-approximate`.',
 });
 
-export const durationFormatSchema = z
-  .object({
-    type: z.literal('duration'),
-    from: durationInputUnitSchema.meta({
-      description:
-        'Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.',
-    }),
-    to: durationOutputUnitSchema.meta({
-      description:
-        'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.',
-    }),
-    decimals: durationFormatDecimalsSchema,
-    compact: durationFormatCompactSchema,
-    suffix: durationFormatSuffixSchema,
-  })
-  .strict()
-  .meta({
-    id: 'durationFormat',
-    title: 'Duration Format',
-    description: 'Duration format between time units.',
-  });
+export const durationFormatSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('duration'),
+      from: durationInputUnitSchema.meta({
+        description:
+          'Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.',
+      }),
+      to: durationOutputUnitSchema.meta({
+        description:
+          'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.',
+      }),
+      decimals: durationFormatDecimalsSchema,
+      compact: durationFormatCompactSchema,
+      suffix: durationFormatSuffixSchema,
+    })
+    .strict()
+    .meta({
+      id: 'durationFormat',
+      title: 'Duration Format',
+      description: 'Duration format between time units.',
+    })
+);

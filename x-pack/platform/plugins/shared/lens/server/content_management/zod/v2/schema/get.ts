@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { lazySchema } from '@kbn/zod';
 import { objectTypeToGetResultSchema } from '@kbn/content-management-utils/zod';
 
 import { lensSavedObjectSchemaV2 } from './common';
 
-export const lensCMGetResultSchema = objectTypeToGetResultSchema(lensSavedObjectSchemaV2);
+export const lensCMGetResultSchema = lazySchema(() =>
+  objectTypeToGetResultSchema(lensSavedObjectSchemaV2)
+);

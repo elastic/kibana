@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { filterWithLabelSchema } from './filter';
 import {
   LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
@@ -32,46 +32,48 @@ export const BUCKET_OP_TITLES = {
   ranges: 'Ranges Operation',
 } as const;
 
-export const bucketDateHistogramOperationSchema = z
-  .object({
-    /**
-     * Select bucket operation type
-     */
-    operation: z.literal('date_histogram'),
-    ...labelSharedSchema.shape,
-    /**
-     * Field to be used for the date histogram
-     */
-    field: z.string().meta({
-      description: 'Field to be used for the date histogram.',
-    }),
-    /**
-     * Suggested interval
-     */
-    suggested_interval: z.string().default(LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT).meta({
-      description: 'Suggested time interval.',
-    }),
-    /**
-     * Whether to use original time range
-     */
-    use_original_time_range: z
-      .boolean()
-      .default(LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT)
-      .meta({
-        description:
-          'When `true`, uses the original time range instead of the current query time range.',
+export const bucketDateHistogramOperationSchema = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Select bucket operation type
+       */
+      operation: z.literal('date_histogram'),
+      ...labelSharedSchema.shape,
+      /**
+       * Field to be used for the date histogram
+       */
+      field: z.string().meta({
+        description: 'Field to be used for the date histogram.',
       }),
-    /**
-     * Whether to include empty rows
-     */
-    include_empty_rows: z.boolean().default(LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT).meta({
-      description: 'When `true`, includes empty rows in the results.',
-    }),
-    drop_partial_intervals: z.boolean().default(false).optional().meta({
-      description: 'When `true`, drops partial intervals from the results.',
-    }),
-  })
-  .meta({ id: 'dateHistogramOperation', title: BUCKET_OP_TITLES.dateHistogram });
+      /**
+       * Suggested interval
+       */
+      suggested_interval: z.string().default(LENS_DATE_HISTOGRAM_INTERVAL_DEFAULT).meta({
+        description: 'Suggested time interval.',
+      }),
+      /**
+       * Whether to use original time range
+       */
+      use_original_time_range: z
+        .boolean()
+        .default(LENS_DATE_HISTOGRAM_IGNORE_TIME_RANGE_DEFAULT)
+        .meta({
+          description:
+            'When `true`, uses the original time range instead of the current query time range.',
+        }),
+      /**
+       * Whether to include empty rows
+       */
+      include_empty_rows: z.boolean().default(LENS_DATE_HISTOGRAM_EMPTY_ROWS_DEFAULT).meta({
+        description: 'When `true`, includes empty rows in the results.',
+      }),
+      drop_partial_intervals: z.boolean().default(false).optional().meta({
+        description: 'When `true`, drops partial intervals from the results.',
+      }),
+    })
+    .meta({ id: 'dateHistogramOperation', title: BUCKET_OP_TITLES.dateHistogram })
+);
 const bucketTermsRankByCustomSharedSchema = z
   .object({
     type: z.literal('custom'),
@@ -152,269 +154,279 @@ const bucketTermsRankByPercentileRankOperationSchema = bucketTermsRankByCustomSh
       'Terms ranked by the percentile rank of a single value: the proportion of field values at or below that value.',
   });
 
-export const bucketTermsOperationSchema = z
-  .object({
-    operation: z.literal('terms'),
-    ...formatSchema.shape,
-    ...labelSharedSchema.shape,
-    /**
-     * Fields to be used for the terms
-     */
-    fields: z
-      .array(
-        z.string().meta({
-          description: 'Fields to be used for the terms.',
+export const bucketTermsOperationSchema = lazySchema(() =>
+  z
+    .object({
+      operation: z.literal('terms'),
+      ...formatSchema.shape,
+      ...labelSharedSchema.shape,
+      /**
+       * Fields to be used for the terms
+       */
+      fields: z
+        .array(
+          z.string().meta({
+            description: 'Fields to be used for the terms.',
+          })
+        )
+        .min(1)
+        .max(4),
+      /**
+       * Maximum number of terms.
+       */
+      limit: z
+        .number()
+        .default(LENS_TERMS_LIMIT_DEFAULT)
+        .meta({ description: 'Number of terms to return.' }),
+      /**
+       * Whether to increase accuracy
+       */
+      increase_accuracy: z.boolean().optional().meta({
+        description: 'When `true`, increases accuracy at the cost of performance.',
+      }),
+      /**
+       * Includes
+       */
+      includes: z
+        .object({
+          // A terms field is either string- or number-typed, so the values are homogeneous: an array of
+          // strings or an array of numbers, never mixed.
+          values: z
+            .union([z.array(z.string()).max(100), z.array(z.number()).max(100)])
+            .meta({ description: 'Values to include.' }),
+          as_regex: z.boolean().optional().meta({
+            description: 'When `true`, treats the values as regular expressions.',
+          }),
         })
-      )
-      .min(1)
-      .max(4),
-    /**
-     * Maximum number of terms.
-     */
-    limit: z
-      .number()
-      .default(LENS_TERMS_LIMIT_DEFAULT)
-      .meta({ description: 'Number of terms to return.' }),
-    /**
-     * Whether to increase accuracy
-     */
-    increase_accuracy: z.boolean().optional().meta({
-      description: 'When `true`, increases accuracy at the cost of performance.',
-    }),
-    /**
-     * Includes
-     */
-    includes: z
-      .object({
-        // A terms field is either string- or number-typed, so the values are homogeneous: an array of
-        // strings or an array of numbers, never mixed.
-        values: z
-          .union([z.array(z.string()).max(100), z.array(z.number()).max(100)])
-          .meta({ description: 'Values to include.' }),
-        as_regex: z.boolean().optional().meta({
-          description: 'When `true`, treats the values as regular expressions.',
-        }),
-      })
-      .strip()
-      .optional(),
-    /**
-     * Excludes
-     */
-    excludes: z
-      .object({
-        values: z
-          .union([z.array(z.string()).max(100), z.array(z.number()).max(100)])
-          .meta({ description: 'Values to exclude.' }),
-        as_regex: z.boolean().optional().meta({
-          description: 'When `true`, treats the values as regular expressions.',
-        }),
-      })
-      .strip()
-      .optional(),
-    /**
-     * Other bucket
-     */
-    other_bucket: z
-      .object({
-        include_documents_without_field: z.boolean().meta({
-          description: 'When `true`, includes documents that do not have the specified field.',
-        }),
-      })
-      .strip()
-      .optional(),
-    /**
-     * Rank by
-     */
-    rank_by: z
-      .union([
-        z
-          .object({
-            type: z.literal('alphabetical'),
-            /**
-             * Direction of the alphabetical order
-             */
-            direction: directionSchema.meta({
-              id: 'termsRankByAlphabeticalDirection',
-              description: 'Sort direction for alphabetical ranking.',
-            }),
-          })
-          .strip()
-          .meta({
-            id: 'termsRankByAlphabetical',
-            title: 'Terms Rank By Alphabetical',
-            description: 'Terms ranked alphabetically.',
+        .strip()
+        .optional(),
+      /**
+       * Excludes
+       */
+      excludes: z
+        .object({
+          values: z
+            .union([z.array(z.string()).max(100), z.array(z.number()).max(100)])
+            .meta({ description: 'Values to exclude.' }),
+          as_regex: z.boolean().optional().meta({
+            description: 'When `true`, treats the values as regular expressions.',
           }),
-        z
-          .object({
-            type: z.literal('rare'),
-            /**
-             * Maximum number of rare terms
-             */
-            max: z.number().meta({
-              description: 'Maximum number of rare terms to include.',
-            }),
-          })
-          .strip()
-          .meta({
-            id: 'termsRankByRare',
-            title: 'Terms Rank By Rarity',
-            description: 'Terms ranked by rarity.',
+        })
+        .strip()
+        .optional(),
+      /**
+       * Other bucket
+       */
+      other_bucket: z
+        .object({
+          include_documents_without_field: z.boolean().meta({
+            description: 'When `true`, includes documents that do not have the specified field.',
           }),
-        z
-          .object({
-            type: z.literal('significant'),
-          })
-          .strip()
-          .meta({
-            id: 'termsRankBySignificant',
-            title: 'Terms Rank By Significance',
-            description: 'Terms ranked by significance.',
+        })
+        .strip()
+        .optional(),
+      /**
+       * Rank by
+       */
+      rank_by: z
+        .union([
+          z
+            .object({
+              type: z.literal('alphabetical'),
+              /**
+               * Direction of the alphabetical order
+               */
+              direction: directionSchema.meta({
+                id: 'termsRankByAlphabeticalDirection',
+                description: 'Sort direction for alphabetical ranking.',
+              }),
+            })
+            .strip()
+            .meta({
+              id: 'termsRankByAlphabetical',
+              title: 'Terms Rank By Alphabetical',
+              description: 'Terms ranked alphabetically.',
+            }),
+          z
+            .object({
+              type: z.literal('rare'),
+              /**
+               * Maximum number of rare terms
+               */
+              max: z.number().meta({
+                description: 'Maximum number of rare terms to include.',
+              }),
+            })
+            .strip()
+            .meta({
+              id: 'termsRankByRare',
+              title: 'Terms Rank By Rarity',
+              description: 'Terms ranked by rarity.',
+            }),
+          z
+            .object({
+              type: z.literal('significant'),
+            })
+            .strip()
+            .meta({
+              id: 'termsRankBySignificant',
+              title: 'Terms Rank By Significance',
+              description: 'Terms ranked by significance.',
+            }),
+          z
+            .object({
+              type: z.literal('metric'),
+              metric_index: z.number().min(0).default(0).meta({
+                description:
+                  'Zero-based index into the metrics array identifying which metric to rank by.',
+              }),
+
+              direction: directionSchema.meta({
+                id: 'termsRankByMetricDirection',
+                description: 'Sort direction for metric-based ranking.',
+              }),
+            })
+            .strip()
+            .meta({
+              id: 'termsRankByMetric',
+              title: 'Terms Rank By Metric',
+              description: 'Terms ranked by a linked metric.',
+            }),
+          bucketTermsRankByCustomOperationSchema,
+          bucketTermsRankByCustomCountOperationSchema,
+          bucketTermsRankByPercentileOperationSchema,
+          bucketTermsRankByPercentileRankOperationSchema,
+        ])
+        .optional(),
+    })
+    .meta({ id: 'termsOperation', title: BUCKET_OP_TITLES.terms })
+);
+
+export const bucketFiltersOperationSchema = lazySchema(() =>
+  z
+    .object({
+      operation: z.literal('filters'),
+      ...labelSharedSchema.shape,
+      /**
+       * Filters
+       */
+      filters: z.array(filterWithLabelSchema).max(100),
+    })
+    .meta({ id: 'filtersOperation', title: BUCKET_OP_TITLES.filters })
+);
+
+export const bucketHistogramOperationSchema = lazySchema(() =>
+  z
+    .object({
+      operation: z.literal('histogram'),
+      ...formatSchema.shape,
+      ...labelSharedSchema.shape,
+      /**
+       * Label for the operation
+       */
+      label: z.string().optional().meta({
+        description: 'Label for the operation',
+      }),
+      /**
+       * Field to be used for the histogram
+       */
+      field: z.string().meta({
+        description: 'Field to be used for the histogram.',
+      }),
+      /**
+       * Granularity of the histogram: the target number of buckets (bars). This maps directly to the
+       * Lens `maxBars` value and controls how finely the field is divided into evenly spaced,
+       * "nice"-valued intervals. It is a target, not a guarantee: the effective ceiling is the
+       * `histogram:maxBars` advanced setting (default 1000), which is deployment-configurable and can
+       * be raised or lowered by an admin. Because that ceiling is only known at render time, no upper
+       * bound is enforced here — values above the configured ceiling are clamped when the chart runs.
+       * Use `'auto'` (the default) to let Lens pick the granularity.
+       */
+      granularity: z
+        .union([
+          z.number().min(LENS_HISTOGRAM_GRANULARITY_MIN).meta({
+            description:
+              'Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.',
           }),
-        z
-          .object({
-            type: z.literal('metric'),
-            metric_index: z.number().min(0).default(0).meta({
-              description:
-                'Zero-based index into the metrics array identifying which metric to rank by.',
-            }),
+          z.literal('auto'),
+        ])
+        .default(LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE),
+      /**
+       * Whether to include empty rows
+       */
+      include_empty_rows: z.boolean().default(LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT).meta({
+        description: 'When `true`, includes empty rows in the results.',
+      }),
+    })
+    .meta({ id: 'histogramOperation', title: BUCKET_OP_TITLES.histogram })
+);
 
-            direction: directionSchema.meta({
-              id: 'termsRankByMetricDirection',
-              description: 'Sort direction for metric-based ranking.',
-            }),
-          })
-          .strip()
-          .meta({
-            id: 'termsRankByMetric',
-            title: 'Terms Rank By Metric',
-            description: 'Terms ranked by a linked metric.',
-          }),
-        bucketTermsRankByCustomOperationSchema,
-        bucketTermsRankByCustomCountOperationSchema,
-        bucketTermsRankByPercentileOperationSchema,
-        bucketTermsRankByPercentileRankOperationSchema,
-      ])
-      .optional(),
-  })
-  .meta({ id: 'termsOperation', title: BUCKET_OP_TITLES.terms });
+export const bucketRangesOperationSchema = lazySchema(() =>
+  z
+    .object({
+      operation: z.literal('range'),
+      ...formatSchema.shape,
+      ...labelSharedSchema.shape,
+      /**
+       * Label for the operation
+       */
+      label: z.string().optional().meta({
+        description: 'Label for the operation',
+      }),
+      /**
+       * Field to be used for the range
+       */
+      field: z.string().meta({
+        description: 'Field to be used for the range.',
+      }),
+      /**
+       * Ranges
+       */
+      ranges: z
+        .array(
+          z
+            .object({
+              /**
+               * Less than or equal to
+               */
+              lte: z.number().optional().meta({
+                description: 'Less than or equal to.',
+              }),
+              /**
+               * Greater than
+               */
+              gt: z.number().optional().meta({
+                description: 'Greater than.',
+              }),
+              /**
+               * Label
+               */
+              label: z.string().optional().meta({
+                description: 'Label.',
+              }),
+            })
+            .strip()
+        )
+        .max(100),
+    })
+    .meta({ id: 'rangesOperation', title: BUCKET_OP_TITLES.ranges })
+);
 
-export const bucketFiltersOperationSchema = z
-  .object({
-    operation: z.literal('filters'),
-    ...labelSharedSchema.shape,
-    /**
-     * Filters
-     */
-    filters: z.array(filterWithLabelSchema).max(100),
-  })
-  .meta({ id: 'filtersOperation', title: BUCKET_OP_TITLES.filters });
-
-export const bucketHistogramOperationSchema = z
-  .object({
-    operation: z.literal('histogram'),
-    ...formatSchema.shape,
-    ...labelSharedSchema.shape,
-    /**
-     * Label for the operation
-     */
-    label: z.string().optional().meta({
-      description: 'Label for the operation',
-    }),
-    /**
-     * Field to be used for the histogram
-     */
-    field: z.string().meta({
-      description: 'Field to be used for the histogram.',
-    }),
-    /**
-     * Granularity of the histogram: the target number of buckets (bars). This maps directly to the
-     * Lens `maxBars` value and controls how finely the field is divided into evenly spaced,
-     * "nice"-valued intervals. It is a target, not a guarantee: the effective ceiling is the
-     * `histogram:maxBars` advanced setting (default 1000), which is deployment-configurable and can
-     * be raised or lowered by an admin. Because that ceiling is only known at render time, no upper
-     * bound is enforced here — values above the configured ceiling are clamped when the chart runs.
-     * Use `'auto'` (the default) to let Lens pick the granularity.
-     */
-    granularity: z
-      .union([
-        z.number().min(LENS_HISTOGRAM_GRANULARITY_MIN).meta({
-          description:
-            'Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.',
-        }),
-        z.literal('auto'),
-      ])
-      .default(LENS_HISTOGRAM_GRANULARITY_DEFAULT_VALUE),
-    /**
-     * Whether to include empty rows
-     */
-    include_empty_rows: z.boolean().default(LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT).meta({
-      description: 'When `true`, includes empty rows in the results.',
-    }),
-  })
-  .meta({ id: 'histogramOperation', title: BUCKET_OP_TITLES.histogram });
-
-export const bucketRangesOperationSchema = z
-  .object({
-    operation: z.literal('range'),
-    ...formatSchema.shape,
-    ...labelSharedSchema.shape,
-    /**
-     * Label for the operation
-     */
-    label: z.string().optional().meta({
-      description: 'Label for the operation',
-    }),
-    /**
-     * Field to be used for the range
-     */
-    field: z.string().meta({
-      description: 'Field to be used for the range.',
-    }),
-    /**
-     * Ranges
-     */
-    ranges: z
-      .array(
-        z
-          .object({
-            /**
-             * Less than or equal to
-             */
-            lte: z.number().optional().meta({
-              description: 'Less than or equal to.',
-            }),
-            /**
-             * Greater than
-             */
-            gt: z.number().optional().meta({
-              description: 'Greater than.',
-            }),
-            /**
-             * Label
-             */
-            label: z.string().optional().meta({
-              description: 'Label.',
-            }),
-          })
-          .strip()
-      )
-      .max(100),
-  })
-  .meta({ id: 'rangesOperation', title: BUCKET_OP_TITLES.ranges });
-
-export const bucketOperationDefinitionSchema = z
-  .union([
-    bucketDateHistogramOperationSchema,
-    bucketTermsOperationSchema,
-    bucketHistogramOperationSchema,
-    bucketRangesOperationSchema,
-    bucketFiltersOperationSchema,
-  ])
-  .meta({
-    title: 'Breakdown Operation',
-    description:
-      'Breakdown dimension configuration using date histogram, terms, numeric histogram, value ranges, or custom filters.',
-  });
+export const bucketOperationDefinitionSchema = lazySchema(() =>
+  z
+    .union([
+      bucketDateHistogramOperationSchema,
+      bucketTermsOperationSchema,
+      bucketHistogramOperationSchema,
+      bucketRangesOperationSchema,
+      bucketFiltersOperationSchema,
+    ])
+    .meta({
+      title: 'Breakdown Operation',
+      description:
+        'Breakdown dimension configuration using date histogram, terms, numeric histogram, value ranges, or custom filters.',
+    })
+);
 
 export type TermOperationRankByCustomOperationType = z.output<
   typeof bucketTermsRankByCustomOperationSchema

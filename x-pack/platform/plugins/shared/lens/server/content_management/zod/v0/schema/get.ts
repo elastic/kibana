@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { lazySchema } from '@kbn/zod';
 import { objectTypeToGetResultSchema } from '@kbn/content-management-utils/zod';
 
 import { lensSavedObjectSchemaV0 } from './common';
@@ -12,4 +13,6 @@ import { lensSavedObjectSchemaV0 } from './common';
 /**
  * @deprecated - use `v1` schemas
  */
-export const lensCMGetResultSchemaV0 = objectTypeToGetResultSchema(lensSavedObjectSchemaV0);
+export const lensCMGetResultSchemaV0 = lazySchema(() =>
+  objectTypeToGetResultSchema(lensSavedObjectSchemaV0)
+);

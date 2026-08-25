@@ -7,51 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { BY_REF_SCHEMA_META, BY_VALUE_SCHEMA_META } from '@kbn/presentation-publishing-schemas';
 
-export const markdownStateSchema = z
-  .object({
-    content: z.string().meta({
-      description:
-        'The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\\n` for line breaks within JSON strings.',
-    }),
-    settings: z
-      .object({
-        open_links_in_new_tab: z.boolean().default(true).meta({
-          description: 'Open links in a new browser tab.',
-        }),
-      })
-      .strict()
-      .default({ open_links_in_new_tab: true })
-      .meta({ description: 'Display settings for the markdown panel.' }),
-  })
-  .strict();
+export const markdownStateSchema = lazySchema(() =>
+  z
+    .object({
+      content: z.string().meta({
+        description:
+          'The Markdown text rendered by the panel. Supports GitHub-flavored Markdown, including headings, paragraphs, lists, links, images, tables, blockquotes, and code blocks. Use `\\n` for line breaks within JSON strings.',
+      }),
+      settings: z
+        .object({
+          open_links_in_new_tab: z.boolean().default(true).meta({
+            description: 'Open links in a new browser tab.',
+          }),
+        })
+        .strict()
+        .default({ open_links_in_new_tab: true })
+        .meta({ description: 'Display settings for the markdown panel.' }),
+    })
+    .strict()
+);
 
-export const markdownByValueStateSchema = z
-  .object({
-    ...serializedTitlesSchema.shape,
-    ...markdownStateSchema.shape,
-  })
-  .strip()
-  .meta(BY_VALUE_SCHEMA_META);
+export const markdownByValueStateSchema = lazySchema(() =>
+  z
+    .object({
+      ...serializedTitlesSchema.shape,
+      ...markdownStateSchema.shape,
+    })
+    .strip()
+    .meta(BY_VALUE_SCHEMA_META)
+);
 
-const markdownByReferenceStateSchema = z
-  .object({
-    ...serializedTitlesSchema.shape,
-    ref_id: z.string().meta({
-      description: 'The unique identifier of the markdown library item.',
-    }),
-  })
-  .strip()
-  .meta(BY_REF_SCHEMA_META);
+const markdownByReferenceStateSchema = lazySchema(() =>
+  z
+    .object({
+      ...serializedTitlesSchema.shape,
+      ref_id: z.string().meta({
+        description: 'The unique identifier of the markdown library item.',
+      }),
+    })
+    .strip()
+    .meta(BY_REF_SCHEMA_META)
+);
 
-export const markdownEmbeddableSchema = z
-  .union([markdownByValueStateSchema, markdownByReferenceStateSchema])
-  .meta({
+export const markdownEmbeddableSchema = lazySchema(() =>
+  z.union([markdownByValueStateSchema, markdownByReferenceStateSchema]).meta({
     description: 'Markdown panel config',
-  });
+  })
+);
 
 export type MarkdownByValueState = z.output<typeof markdownByValueStateSchema>;
 export type MarkdownByReferenceState = z.output<typeof markdownByReferenceStateSchema>;

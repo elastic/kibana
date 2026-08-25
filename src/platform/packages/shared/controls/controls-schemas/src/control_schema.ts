@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
 
-export const controlTitleSchema = z
-  .object({
-    title: z.string().optional().meta({ description: 'A human-readable title for the control.' }),
-  })
-  .strict();
+export const controlTitleSchema = lazySchema(() =>
+  z
+    .object({
+      title: z.string().optional().meta({ description: 'A human-readable title for the control.' }),
+    })
+    .strict()
+);
 
 const sharedDataControlProps = {
   ...controlTitleSchema.shape,
@@ -31,13 +33,15 @@ const sharedDataControlProps = {
 /**
  * This uses a union with only one option so we can provide a default value for backwards compat
  */
-export const dataControlFieldValuesSourceSchema = z
-  .union([z.literal(ControlValuesSource.FIELD)])
-  .default(ControlValuesSource.FIELD)
-  .meta({
-    description:
-      'The source of the field options for this control. Defaults to `field` for legacy controls.',
-  });
+export const dataControlFieldValuesSourceSchema = lazySchema(() =>
+  z
+    .union([z.literal(ControlValuesSource.FIELD)])
+    .default(ControlValuesSource.FIELD)
+    .meta({
+      description:
+        'The source of the field options for this control. Defaults to `field` for legacy controls.',
+    })
+);
 
 /**
  * Injects a default `values_source: 'field'` when the field is absent from the input.
@@ -53,38 +57,44 @@ export const withFieldValuesSourceDefault = (val: unknown): unknown => {
   return val;
 };
 
-export const dataControlFieldVariantSchema = z
-  .object({
-    ...sharedDataControlProps,
-    values_source: dataControlFieldValuesSourceSchema,
-    data_view_id: z.string().min(1).meta({
-      description: 'The ID of the data view that provides field options for this control.', // this will generate a reference
-    }),
-    field_name: z.string().min(1).meta({
-      description: 'The name of the field in the data view that this control filters on.',
-    }),
-  })
-  .strip();
-
-export const dataControlEsqlVariantSchema = z
-  .object({
-    ...sharedDataControlProps,
-    values_source: z.literal(ControlValuesSource.ESQL),
-    esql_query: z.string().min(1).meta({
-      description: 'The ES|QL query that provides field options for this control',
-    }),
-  })
-  .strip();
-
-export const dataControlSchema = z.preprocess(
-  withFieldValuesSourceDefault,
+export const dataControlFieldVariantSchema = lazySchema(() =>
   z
-    .discriminatedUnion('values_source', [
-      dataControlEsqlVariantSchema,
-      dataControlFieldVariantSchema,
-    ])
-    .meta({
-      description:
-        'The source of the field options for this control, either `field` for all possible values of a field, or `esql` for the results of an ES|QL query.',
+    .object({
+      ...sharedDataControlProps,
+      values_source: dataControlFieldValuesSourceSchema,
+      data_view_id: z.string().min(1).meta({
+        description: 'The ID of the data view that provides field options for this control.', // this will generate a reference
+      }),
+      field_name: z.string().min(1).meta({
+        description: 'The name of the field in the data view that this control filters on.',
+      }),
     })
+    .strip()
+);
+
+export const dataControlEsqlVariantSchema = lazySchema(() =>
+  z
+    .object({
+      ...sharedDataControlProps,
+      values_source: z.literal(ControlValuesSource.ESQL),
+      esql_query: z.string().min(1).meta({
+        description: 'The ES|QL query that provides field options for this control',
+      }),
+    })
+    .strip()
+);
+
+export const dataControlSchema = lazySchema(() =>
+  z.preprocess(
+    withFieldValuesSourceDefault,
+    z
+      .discriminatedUnion('values_source', [
+        dataControlEsqlVariantSchema,
+        dataControlFieldVariantSchema,
+      ])
+      .meta({
+        description:
+          'The source of the field options for this control, either `field` for all possible values of a field, or `esql` for the results of an ES|QL query.',
+      })
+  )
 );

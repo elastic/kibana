@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { lazySchema } from '@kbn/zod';
+
 import { lensCommonSavedObjectSchemaV1 } from './common';
 
-export const lensCMMSearchResultSchema = lensCommonSavedObjectSchemaV1;
+export const lensCMMSearchResultSchema = lazySchema(() => lensCommonSavedObjectSchemaV1);

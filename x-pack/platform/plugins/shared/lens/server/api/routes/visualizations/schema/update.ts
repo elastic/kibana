@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 
 import { lensResponseItemSchema } from './common';
 
-export const lensUpdateRequestParamsSchema = z
-  .object({
-    id: z.string().meta({
-      description: 'The visualization identifier, as returned by the create or search endpoints.',
-    }),
-  })
-  .strict();
+export const lensUpdateRequestParamsSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().meta({
+        description: 'The visualization identifier, as returned by the create or search endpoints.',
+      }),
+    })
+    .strict()
+);
 
-export const lensUpdateRequestBodySchema = lensApiConfigSchemaNoESQL;
+export const lensUpdateRequestBodySchema = lazySchema(() => lensApiConfigSchemaNoESQL);
 
-export const lensUpdateResponseBodySchema = lensResponseItemSchema;
+export const lensUpdateResponseBodySchema = lazySchema(() => lensResponseItemSchema);

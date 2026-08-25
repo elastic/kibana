@@ -5,36 +5,44 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from './anomaly_utils';
 
-const mlEntityFieldTypeSchema = z.enum(ML_ENTITY_FIELD_TYPE);
+const mlEntityFieldTypeSchema = lazySchema(() => z.enum(ML_ENTITY_FIELD_TYPE));
 
-const mlEntityFieldOperationSchema = z.enum(ML_ENTITY_FIELD_OPERATIONS);
+const mlEntityFieldOperationSchema = lazySchema(() => z.enum(ML_ENTITY_FIELD_OPERATIONS));
 
-export const influencerSchema = z
-  .object({
-    fieldName: z.string().max(10000),
-    fieldValue: z.any(),
-  })
-  .strict();
+export const influencerSchema = lazySchema(() =>
+  z
+    .object({
+      fieldName: z.string().max(10000),
+      fieldValue: z.any(),
+    })
+    .strict()
+);
 
-export const criteriaFieldSchema = z
-  .object({
-    fieldName: z.string().max(10000),
-    fieldValue: z.any(),
-    fieldType: mlEntityFieldTypeSchema.optional(),
-  })
-  .strict();
+export const criteriaFieldSchema = lazySchema(() =>
+  z
+    .object({
+      fieldName: z.string().max(10000),
+      fieldValue: z.any(),
+      fieldType: mlEntityFieldTypeSchema.optional(),
+    })
+    .strict()
+);
 
-export const mlEntityFieldValueSchema = z.union([z.string().max(10000), z.number()]);
+export const mlEntityFieldValueSchema = lazySchema(() =>
+  z.union([z.string().max(10000), z.number()])
+);
 
-export const mlEntityFieldSchema = z
-  .object({
-    fieldName: z.string().max(10000),
-    fieldValue: mlEntityFieldValueSchema.optional(),
-    fieldType: mlEntityFieldTypeSchema.optional(),
-    operation: mlEntityFieldOperationSchema.optional(),
-    cardinality: z.number().optional(),
-  })
-  .strict();
+export const mlEntityFieldSchema = lazySchema(() =>
+  z
+    .object({
+      fieldName: z.string().max(10000),
+      fieldValue: mlEntityFieldValueSchema.optional(),
+      fieldType: mlEntityFieldTypeSchema.optional(),
+      operation: mlEntityFieldOperationSchema.optional(),
+      cardinality: z.number().optional(),
+    })
+    .strict()
+);

@@ -6,26 +6,28 @@
  */
 
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { SLO_BURN_RATE_SUPPORTED_TRIGGERS } from '../../../common/embeddables/burn_rate/constants';
 
-const BurnRateCustomSchema = z
-  .object({
-    slo_id: z.string().max(64).meta({
-      description: 'The ID of the SLO to display the burn rate for',
-    }),
-    slo_instance_id: z.string().max(512).default(ALL_VALUE).meta({
-      description:
-        'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
-    }),
-    duration: z.string().max(32).meta({
-      description:
-        'Duration for the burn rate chart in the format [value][unit], e.g. 5m, 3h, or 6d',
-    }),
-  })
-  .strict();
+const BurnRateCustomSchema = lazySchema(() =>
+  z
+    .object({
+      slo_id: z.string().max(64).meta({
+        description: 'The ID of the SLO to display the burn rate for',
+      }),
+      slo_instance_id: z.string().max(512).default(ALL_VALUE).meta({
+        description:
+          'ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).',
+      }),
+      duration: z.string().max(32).meta({
+        description:
+          'Duration for the burn rate chart in the format [value][unit], e.g. 5m, 3h, or 6d',
+      }),
+    })
+    .strict()
+);
 
 export const getBurnRateEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return z

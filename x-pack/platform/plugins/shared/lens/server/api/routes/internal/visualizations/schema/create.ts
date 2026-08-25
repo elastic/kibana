@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 
 import { lensItemDataSchemaV2 } from '../../../../../content_management/zod';
@@ -13,11 +13,13 @@ import { lensItemDataSchemaV0 } from '../../../../../content_management/zod/v0';
 import { lensItemDataSchemaV1 } from '../../../../../content_management/zod/v1';
 import { lensResponseItemSchema } from './common';
 
-export const lensCreateRequestBodySchema = z.union([
-  lensApiConfigSchema,
-  lensItemDataSchemaV2,
-  lensItemDataSchemaV1,
-  lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
-]);
+export const lensCreateRequestBodySchema = lazySchema(() =>
+  z.union([
+    lensApiConfigSchema,
+    lensItemDataSchemaV2,
+    lensItemDataSchemaV1,
+    lensItemDataSchemaV0, // Temporarily permit passing old v0 SO attributes on create
+  ])
+);
 
-export const lensCreateResponseBodySchema = lensResponseItemSchema;
+export const lensCreateResponseBodySchema = lazySchema(() => lensResponseItemSchema);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
@@ -13,11 +13,13 @@ import {
 } from './constants';
 
 /** Zod schema for the content-only fields of a custom content panel. */
-export const customContentStateSchema = z.object({
-  prompt: z.string().max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH).optional(),
-  esqlQuery: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
-  template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH).optional(),
-});
+export const customContentStateSchema = lazySchema(() =>
+  z.object({
+    prompt: z.string().max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH).optional(),
+    esqlQuery: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
+    template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH).optional(),
+  })
+);
 
 export type CustomContentState = z.output<typeof customContentStateSchema>;
 

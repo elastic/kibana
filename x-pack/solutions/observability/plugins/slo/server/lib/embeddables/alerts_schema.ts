@@ -6,26 +6,30 @@
  */
 
 import type { GetDrilldownsSchemaFnType } from '@kbn/embeddable-plugin/server';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
 import { SLO_ALERTS_SUPPORTED_TRIGGERS } from '../../../common/embeddables/alerts/constants';
 
-const sloItemSchema = z
-  .object({
-    slo_id: z.string().max(64).meta({ description: 'SLO ID' }),
-    slo_instance_id: z.string().max(512).default('*').meta({ description: 'SLO instance ID' }),
-  })
-  .strict();
+const sloItemSchema = lazySchema(() =>
+  z
+    .object({
+      slo_id: z.string().max(64).meta({ description: 'SLO ID' }),
+      slo_instance_id: z.string().max(512).default('*').meta({ description: 'SLO instance ID' }),
+    })
+    .strict()
+);
 
-const AlertsCustomSchema = z
-  .object({
-    slos: z
-      .array(sloItemSchema)
-      .max(100)
-      .default([])
-      .meta({ description: 'List of SLOs to display alerts for' }),
-  })
-  .strict();
+const AlertsCustomSchema = lazySchema(() =>
+  z
+    .object({
+      slos: z
+        .array(sloItemSchema)
+        .max(100)
+        .default([])
+        .meta({ description: 'List of SLOs to display alerts for' }),
+    })
+    .strict()
+);
 
 export const getAlertsEmbeddableSchema = (getDrilldownsSchema: GetDrilldownsSchemaFnType) => {
   return z

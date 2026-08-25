@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
-export const serializedTitlesSchema = z
-  .object({
-    description: z.string().optional().meta({ description: 'A short description of the panel.' }),
-    hide_title: z
-      .boolean()
-      .optional()
-      .meta({ description: 'When true, the panel title is hidden. Defaults to false.' }),
-    title: z.string().optional().meta({ description: 'The panel title.' }),
-    hide_border: z
-      .boolean()
-      .optional()
-      .meta({ description: 'When true, the panel border is hidden. Defaults to false.' }),
-  })
-  .strict();
+export const serializedTitlesSchema = lazySchema(() =>
+  z
+    .object({
+      description: z.string().optional().meta({ description: 'A short description of the panel.' }),
+      hide_title: z
+        .boolean()
+        .optional()
+        .meta({ description: 'When true, the panel title is hidden. Defaults to false.' }),
+      title: z.string().optional().meta({ description: 'The panel title.' }),
+      hide_border: z
+        .boolean()
+        .optional()
+        .meta({ description: 'When true, the panel border is hidden. Defaults to false.' }),
+    })
+    .strict()
+);

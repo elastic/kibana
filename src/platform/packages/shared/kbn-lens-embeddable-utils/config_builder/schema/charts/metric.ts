@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS } from '@kbn/lens-common';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -54,89 +54,97 @@ import {
 } from '../alignments';
 import { simpleOrientationSchema } from '../enums';
 
-const compareToSchemaShared = z
-  .object({
-    palette: z.string().default(DEFAULT_SECONDARY_COMPARE_TO_PALETTE).optional().meta({
-      description:
-        "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
-    }),
-    icon: z
-      .boolean()
-      .default(true)
-      .optional()
-      .meta({ description: 'When `true`, displays the icon for the secondary value.' }),
-    value: z
-      .boolean()
-      .default(true)
-      .optional()
-      .meta({ description: 'When `true`, displays the secondary value.' }),
-  })
-  .strict()
-  .meta({
-    id: 'metricChartCompareToShared',
-    title: 'Compare To Shared',
-    description: 'Shared configuration for compare-to options (palette, icon, value visibility).',
-  });
+const compareToSchemaShared = lazySchema(() =>
+  z
+    .object({
+      palette: z.string().default(DEFAULT_SECONDARY_COMPARE_TO_PALETTE).optional().meta({
+        description:
+          "Color palette name. Accepted values: 'default', 'elastic_line_optimized', 'severity', 'eui_amsterdam', 'kibana_v7_legacy', 'elastic_brand_2023'. Defaults to `default`.",
+      }),
+      icon: z
+        .boolean()
+        .default(true)
+        .optional()
+        .meta({ description: 'When `true`, displays the icon for the secondary value.' }),
+      value: z
+        .boolean()
+        .default(true)
+        .optional()
+        .meta({ description: 'When `true`, displays the secondary value.' }),
+    })
+    .strict()
+    .meta({
+      id: 'metricChartCompareToShared',
+      title: 'Compare To Shared',
+      description: 'Shared configuration for compare-to options (palette, icon, value visibility).',
+    })
+);
 
-const barBackgroundChartSchema = z
-  .object({
-    type: z.literal('bar'),
-    /**
-     * Direction of the bar. Possible values:
-     * - 'vertical': Bar is oriented vertically
-     * - 'horizontal': Bar is oriented horizontally
-     */
-    orientation: simpleOrientationSchema.optional(),
-  })
-  .strict()
-  .meta({
-    id: 'metricBarBackgroundChart',
-    title: 'Bar Background Chart',
-    description: 'Bar chart shown as background context behind the primary metric value.',
-  });
-
-export const complementaryVizSchemaNoESQL = z
-  .union([
-    barBackgroundChartSchema.extend({
+const barBackgroundChartSchema = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('bar'),
       /**
-       * Max value
+       * Direction of the bar. Possible values:
+       * - 'vertical': Bar is oriented vertically
+       * - 'horizontal': Bar is oriented horizontally
        */
-      max_value: metricOperationDefinitionSchema,
-    }),
-    z
-      .object({
-        type: z.literal('trend'),
-      })
-      .strict(),
-  ])
-  .meta({
-    id: 'metricComplementaryViz',
-    title: 'Complementary Visualization',
-    description:
-      'Secondary visualization displayed behind the primary metric value, either a bar chart (with optional max value) or a trend line.',
-  });
+      orientation: simpleOrientationSchema.optional(),
+    })
+    .strict()
+    .meta({
+      id: 'metricBarBackgroundChart',
+      title: 'Bar Background Chart',
+      description: 'Bar chart shown as background context behind the primary metric value.',
+    })
+);
 
-export const complementaryVizSchemaESQL = z
-  .union([
-    barBackgroundChartSchema
-      .extend({
+export const complementaryVizSchemaNoESQL = lazySchema(() =>
+  z
+    .union([
+      barBackgroundChartSchema.extend({
         /**
          * Max value
          */
-        max_value: esqlColumnSchema,
-      })
-      .meta({ id: 'metricComplementaryBar', title: 'Complementary Bar' }),
-    z
-      .object({
-        type: z.literal('trend'),
-      })
-      .meta({ id: 'metricComplementaryTrend', title: 'Complementary Trend' }),
-  ])
-  .meta({
-    id: 'metricComplementaryVizESQL',
-    title: 'Complementary Visualization',
-    description: 'Bar chart or trendline shown behind the primary metric value.',
-  });
+        max_value: metricOperationDefinitionSchema,
+      }),
+      z
+        .object({
+          type: z.literal('trend'),
+        })
+        .strict(),
+    ])
+    .meta({
+      id: 'metricComplementaryViz',
+      title: 'Complementary Visualization',
+      description:
+        'Secondary visualization displayed behind the primary metric value, either a bar chart (with optional max value) or a trend line.',
+    })
+);
+
+export const complementaryVizSchemaESQL = lazySchema(() =>
+  z
+    .union([
+      barBackgroundChartSchema
+        .extend({
+          /**
+           * Max value
+           */
+          max_value: esqlColumnSchema,
+        })
+        .meta({ id: 'metricComplementaryBar', title: 'Complementary Bar' }),
+      z
+        .object({
+          type: z.literal('trend'),
+        })
+        .meta({ id: 'metricComplementaryTrend', title: 'Complementary Trend' }),
+    ])
+    .meta({
+      id: 'metricComplementaryVizESQL',
+      title: 'Complementary Visualization',
+      description: 'Bar chart or trendline shown behind the primary metric value.',
+    })
+);
 
 const metricConfigBackgroundChartShapeNoESQL = {
   /**
@@ -152,197 +160,202 @@ const metricConfigBackgroundChartShapeESQL = {
   background_chart: complementaryVizSchemaESQL.optional(),
 };
 
-const metricStylingSchema = z
-  .object({
-    /**
-     * Density preset for metric elements.
-     * Possible values:
-     * - 'compact': Compact density (original implementation)
-     * - 'default': Default density with increased spacing, paddings, and sizing
-     */
-    density: z
-      .union([z.literal('compact'), z.literal('default')])
-      .default(DEFAULT_DENSITY)
-      .optional()
-      .meta({
-        description:
-          'Density preset for the metric chart layout. Use `compact` for a compact layout, or `default` for increased padding, element spacing, and font size.',
-      }),
-    /**
-     * Icon configuration
-     */
-    icon: z
-      .object({
-        /**
-         * Icon name
-         */
-        name: z
-          .union([
-            z.literal('alert'),
-            z.literal('asterisk'),
-            z.literal('bell'),
-            z.literal('bolt'),
-            z.literal('bug'),
-            z.literal('compute'),
-            z.literal('editor_comment'),
-            z.literal('flag'),
-            z.literal('globe'),
-            z.literal('heart'),
-            z.literal('map_marker'),
-            z.literal('pin'),
-            z.literal('sort_down'),
-            z.literal('sort_up'),
-            z.literal('star_empty'),
-            z.literal('tag'),
-            z.literal('temperature'),
-          ])
-          .meta({ description: 'Icon name' }),
-        /**
-         * Icon alignment. Possible values:
-         * - 'right': Icon is aligned to the right
-         * - 'left': Icon is aligned to the left
-         */
-        alignment: leftRightAlignmentSchema
-          .default(DEFAULT_PRIMARY_ICON_ALIGNMENT)
-          .optional()
-          .meta({
-            description: 'Icon alignment. Accepted values: `left`, `right`. Defaults to `right`.',
-          }),
-      })
-      .strict()
-      .optional()
-      .meta({
-        id: 'metricIconConfig',
-        title: 'Icon Configuration',
-        description: 'Icon configuration for the metric chart',
-      }),
-    primary: z
-      .object({
-        /**
-         * Position of the primary metric value. Possible values:
-         * - 'top': Value appears above the labels
-         * - 'middle': Value appears between the labels
-         * - 'bottom': Value appears below the labels
-         */
-        position: metricValuePositionSchema.default(DEFAULT_PRIMARY_POSITION).optional().meta({
-          description: 'Position of the primary metric value (top, middle, or bottom).',
+const metricStylingSchema = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Density preset for metric elements.
+       * Possible values:
+       * - 'compact': Compact density (original implementation)
+       * - 'default': Default density with increased spacing, paddings, and sizing
+       */
+      density: z
+        .union([z.literal('compact'), z.literal('default')])
+        .default(DEFAULT_DENSITY)
+        .optional()
+        .meta({
+          description:
+            'Density preset for the metric chart layout. Use `compact` for a compact layout, or `default` for increased padding, element spacing, and font size.',
         }),
-        /**
-         * Title and subtitle text configuration for the primary metric.
-         */
-        labels: z
-          .object({
-            /**
-             * Horizontal alignment for the title and subtitle text. Possible values:
-             * - 'left': Align to the left
-             * - 'center': Align to the center
-             * - 'right': Align to the right
-             */
-            alignment: horizontalAlignmentSchema
-              .default(DEFAULT_PRIMARY_LABELS_ALIGNMENT)
-              .optional()
-              .meta({
-                description:
-                  'Horizontal alignment for the title and subtitle text. Accepted values: `left`, `center`, `right`. Defaults to `left`.',
-              }),
-          })
-          .strict()
-          .optional()
-          .meta({ description: 'Labels (title and subtitle) configuration' }),
-        /**
-         * Values configuration
-         */
-        value: z
-          .object({
-            /**
-             * Alignment for values. Possible values:
-             * - 'left': Align value to the left
-             * - 'center': Align value to the center
-             * - 'right': Align value to the right
-             */
-            alignment: horizontalAlignmentSchema
-              .default(DEFAULT_PRIMARY_VALUE_ALIGNMENT)
-              .optional()
-              .meta({
-                description:
-                  'Alignment for the primary metric value. Accepted values: `left`, `center`, `right`. Defaults to `right`.',
-              }),
-            /**
-             * Controls how the primary value text is sized within the panel.
-             * - 'auto': selects a font size from predefined breakpoints based on panel height,
-             *   then shrinks if the text overflows horizontally.
-             * - 'fill': scales the text to be as large as possible, filling all available space.
-             */
-            sizing: z
-              .union([z.literal('auto'), z.literal('fill')])
-              .default(DEFAULT_PRIMARY_VALUE_SIZING)
-              .optional()
-              .meta({
-                description:
-                  "Controls how the primary value text is sized within the panel. 'auto' selects a font size from predefined breakpoints based on panel height, then shrinks if the text overflows horizontally. 'fill' scales the text to be as large as possible, filling all available space.",
-              }),
-          })
-          .strict()
-          .optional()
-          .meta({ description: 'Primary metric value configuration' }),
-      })
-      .strict()
-      .optional(),
-    secondary: z
-      .object({
-        /**
-         * Label configuration
-         */
-        label: z
-          .object({
-            /**
-             * Whether to display the label
-             */
-            visible: z
-              .boolean()
-              .default(DEFAULT_SECONDARY_LABEL_VISIBLE)
-              .optional()
-              .meta({ description: 'When `true`, displays the label.' }),
-            /**
-             * Label placement relative to the secondary metric value. Possible values:
-             * - 'before': Label appears before the value
-             * - 'after': Label appears after the value
-             */
-            placement: placementSchema.default(DEFAULT_SECONDARY_LABEL_PLACEMENT).optional().meta({
-              description:
-                'Label placement relative to the secondary metric value (before or after).',
+      /**
+       * Icon configuration
+       */
+      icon: z
+        .object({
+          /**
+           * Icon name
+           */
+          name: z
+            .union([
+              z.literal('alert'),
+              z.literal('asterisk'),
+              z.literal('bell'),
+              z.literal('bolt'),
+              z.literal('bug'),
+              z.literal('compute'),
+              z.literal('editor_comment'),
+              z.literal('flag'),
+              z.literal('globe'),
+              z.literal('heart'),
+              z.literal('map_marker'),
+              z.literal('pin'),
+              z.literal('sort_down'),
+              z.literal('sort_up'),
+              z.literal('star_empty'),
+              z.literal('tag'),
+              z.literal('temperature'),
+            ])
+            .meta({ description: 'Icon name' }),
+          /**
+           * Icon alignment. Possible values:
+           * - 'right': Icon is aligned to the right
+           * - 'left': Icon is aligned to the left
+           */
+          alignment: leftRightAlignmentSchema
+            .default(DEFAULT_PRIMARY_ICON_ALIGNMENT)
+            .optional()
+            .meta({
+              description: 'Icon alignment. Accepted values: `left`, `right`. Defaults to `right`.',
             }),
-          })
-          .strict()
-          .optional(),
-        value: z
-          .object({
-            /**
-             * Alignment for secondary values. Possible values:
-             * - 'left': Align value to the left
-             * - 'center': Align value to the center
-             * - 'right': Align value to the right
-             */
-            alignment: horizontalAlignmentSchema
-              .default(DEFAULT_SECONDARY_VALUE_ALIGNMENT)
-              .optional()
-              .meta({
-                description:
-                  'Alignment for secondary values. Accepted values: `left`, `center`, `right`. Defaults to `right`.',
-              }),
-          })
-          .strict()
-          .optional()
-          .meta({ description: 'Secondary metric value configuration' }),
-      })
-      .strict()
-      .optional(),
-  })
-  .strict()
-  .meta({
-    id: 'metricStyling',
-    description: 'Visual chart styling options',
-  });
+        })
+        .strict()
+        .optional()
+        .meta({
+          id: 'metricIconConfig',
+          title: 'Icon Configuration',
+          description: 'Icon configuration for the metric chart',
+        }),
+      primary: z
+        .object({
+          /**
+           * Position of the primary metric value. Possible values:
+           * - 'top': Value appears above the labels
+           * - 'middle': Value appears between the labels
+           * - 'bottom': Value appears below the labels
+           */
+          position: metricValuePositionSchema.default(DEFAULT_PRIMARY_POSITION).optional().meta({
+            description: 'Position of the primary metric value (top, middle, or bottom).',
+          }),
+          /**
+           * Title and subtitle text configuration for the primary metric.
+           */
+          labels: z
+            .object({
+              /**
+               * Horizontal alignment for the title and subtitle text. Possible values:
+               * - 'left': Align to the left
+               * - 'center': Align to the center
+               * - 'right': Align to the right
+               */
+              alignment: horizontalAlignmentSchema
+                .default(DEFAULT_PRIMARY_LABELS_ALIGNMENT)
+                .optional()
+                .meta({
+                  description:
+                    'Horizontal alignment for the title and subtitle text. Accepted values: `left`, `center`, `right`. Defaults to `left`.',
+                }),
+            })
+            .strict()
+            .optional()
+            .meta({ description: 'Labels (title and subtitle) configuration' }),
+          /**
+           * Values configuration
+           */
+          value: z
+            .object({
+              /**
+               * Alignment for values. Possible values:
+               * - 'left': Align value to the left
+               * - 'center': Align value to the center
+               * - 'right': Align value to the right
+               */
+              alignment: horizontalAlignmentSchema
+                .default(DEFAULT_PRIMARY_VALUE_ALIGNMENT)
+                .optional()
+                .meta({
+                  description:
+                    'Alignment for the primary metric value. Accepted values: `left`, `center`, `right`. Defaults to `right`.',
+                }),
+              /**
+               * Controls how the primary value text is sized within the panel.
+               * - 'auto': selects a font size from predefined breakpoints based on panel height,
+               *   then shrinks if the text overflows horizontally.
+               * - 'fill': scales the text to be as large as possible, filling all available space.
+               */
+              sizing: z
+                .union([z.literal('auto'), z.literal('fill')])
+                .default(DEFAULT_PRIMARY_VALUE_SIZING)
+                .optional()
+                .meta({
+                  description:
+                    "Controls how the primary value text is sized within the panel. 'auto' selects a font size from predefined breakpoints based on panel height, then shrinks if the text overflows horizontally. 'fill' scales the text to be as large as possible, filling all available space.",
+                }),
+            })
+            .strict()
+            .optional()
+            .meta({ description: 'Primary metric value configuration' }),
+        })
+        .strict()
+        .optional(),
+      secondary: z
+        .object({
+          /**
+           * Label configuration
+           */
+          label: z
+            .object({
+              /**
+               * Whether to display the label
+               */
+              visible: z
+                .boolean()
+                .default(DEFAULT_SECONDARY_LABEL_VISIBLE)
+                .optional()
+                .meta({ description: 'When `true`, displays the label.' }),
+              /**
+               * Label placement relative to the secondary metric value. Possible values:
+               * - 'before': Label appears before the value
+               * - 'after': Label appears after the value
+               */
+              placement: placementSchema
+                .default(DEFAULT_SECONDARY_LABEL_PLACEMENT)
+                .optional()
+                .meta({
+                  description:
+                    'Label placement relative to the secondary metric value (before or after).',
+                }),
+            })
+            .strict()
+            .optional(),
+          value: z
+            .object({
+              /**
+               * Alignment for secondary values. Possible values:
+               * - 'left': Align value to the left
+               * - 'center': Align value to the center
+               * - 'right': Align value to the right
+               */
+              alignment: horizontalAlignmentSchema
+                .default(DEFAULT_SECONDARY_VALUE_ALIGNMENT)
+                .optional()
+                .meta({
+                  description:
+                    'Alignment for secondary values. Accepted values: `left`, `center`, `right`. Defaults to `right`.',
+                }),
+            })
+            .strict()
+            .optional()
+            .meta({ description: 'Secondary metric value configuration' }),
+        })
+        .strict()
+        .optional(),
+    })
+    .strict()
+    .meta({
+      id: 'metricStyling',
+      description: 'Visual chart styling options',
+    })
+);
 
 const metricConfigPrimaryMetricOptionsShape = {
   // this is used to differentiate primary and secondary metrics
@@ -448,135 +461,145 @@ function validateMetrics(metrics: (PrimaryMetricType | SecondaryMetricType)[]) {
   }
 }
 
-export const primaryMetricSchemaNoESQL = getMetricsWithChartDimensionSchemaWithRefBasedOps(
-  'metricPrimary'
-).and(
-  z.object({
-    ...metricConfigPrimaryMetricOptionsShape,
-    ...metricConfigBackgroundChartShapeNoESQL,
-  })
+export const primaryMetricSchemaNoESQL = lazySchema(() =>
+  getMetricsWithChartDimensionSchemaWithRefBasedOps('metricPrimary').and(
+    z.object({
+      ...metricConfigPrimaryMetricOptionsShape,
+      ...metricConfigBackgroundChartShapeNoESQL,
+    })
+  )
 );
 
-const secondaryMetricSchemaNoESQL = getMetricsWithChartDimensionSchemaWithRefBasedOps(
-  'metricSecondary'
-).and(z.object(metricConfigSecondaryMetricOptionsShape));
-
-export const metricConfigSchemaNoESQL = z
-  .object({
-    type: z.literal('metric'),
-    ...sharedPanelInfoSchema.shape,
-    ...dslOnlyPanelInfoSchema.shape,
-    ...layerSettingsSchema.shape,
-    ...dataSourceSchema.shape,
-    styling: metricStylingSchema.optional(),
-    /**
-     * Primary value configuration, must define operation.
-     */
-    metrics: z
-      .array(z.union([primaryMetricSchemaNoESQL, secondaryMetricSchemaNoESQL]))
-      .min(1)
-      .max(2)
-      .superRefine((metrics, ctx) => {
-        const msg = validateMetrics(metrics);
-        if (msg) {
-          ctx.addIssue({ code: 'custom', message: msg });
-        }
-      })
-      .meta({
-        description:
-          'Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.',
-      }),
-    /**
-     * Configure how to break down the metric (e.g. show one metric per term).
-     */
-    breakdown_by: getBucketsWithChartDimensionSchema('metricBreakdown')
-      .and(z.object(metricConfigBreakdownByOptionsShape))
-      .optional(),
-  })
-  .superRefine(({ metrics, breakdown_by }, ctx) => {
-    const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
-
-    if (primaryMetric?.color?.type === 'dynamic' && primaryMetric.color.range === 'percentage') {
-      if (!breakdown_by && !(primaryMetric.background_chart?.type === 'bar')) {
-        ctx.addIssue({
-          code: 'custom',
-          message:
-            'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.',
-        });
-      }
-    }
-  })
-  .meta({
-    id: 'metricNoESQL',
-    title: 'Metric Chart (DSL)',
-    description: 'Metric chart configuration for standard queries',
-  });
-
-const primaryMetricESQL = esqlColumnWithFormatSchema
-  .extend(metricConfigPrimaryMetricOptionsShape)
-  .extend(metricConfigBackgroundChartShapeESQL);
-
-const secondaryMetricESQL = esqlColumnWithFormatSchema.extend(
-  metricConfigSecondaryMetricOptionsShape
+const secondaryMetricSchemaNoESQL = lazySchema(() =>
+  getMetricsWithChartDimensionSchemaWithRefBasedOps('metricSecondary').and(
+    z.object(metricConfigSecondaryMetricOptionsShape)
+  )
 );
 
-export const metricConfigSchemaESQL = z
-  .object({
-    type: z.literal('metric'),
-    ...sharedPanelInfoSchema.shape,
-    ...layerSettingsSchema.shape,
-    ...dataSourceEsqlTableSchema.shape,
-    styling: metricStylingSchema.optional(),
-    /**
-     * Primary value configuration, must define operation.
-     */
-    metrics: z
-      .array(z.union([primaryMetricESQL, secondaryMetricESQL]))
-      .min(1)
-      .max(2)
-      .superRefine((metrics, ctx) => {
-        const msg = validateMetrics(metrics);
-        if (msg) {
-          ctx.addIssue({ code: 'custom', message: msg });
+export const metricConfigSchemaNoESQL = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('metric'),
+      ...sharedPanelInfoSchema.shape,
+      ...dslOnlyPanelInfoSchema.shape,
+      ...layerSettingsSchema.shape,
+      ...dataSourceSchema.shape,
+      styling: metricStylingSchema.optional(),
+      /**
+       * Primary value configuration, must define operation.
+       */
+      metrics: z
+        .array(z.union([primaryMetricSchemaNoESQL, secondaryMetricSchemaNoESQL]))
+        .min(1)
+        .max(2)
+        .superRefine((metrics, ctx) => {
+          const msg = validateMetrics(metrics);
+          if (msg) {
+            ctx.addIssue({ code: 'custom', message: msg });
+          }
+        })
+        .meta({
+          description:
+            'Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.',
+        }),
+      /**
+       * Configure how to break down the metric (e.g. show one metric per term).
+       */
+      breakdown_by: getBucketsWithChartDimensionSchema('metricBreakdown')
+        .and(z.object(metricConfigBreakdownByOptionsShape))
+        .optional(),
+    })
+    .superRefine(({ metrics, breakdown_by }, ctx) => {
+      const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
+
+      if (primaryMetric?.color?.type === 'dynamic' && primaryMetric.color.range === 'percentage') {
+        if (!breakdown_by && !(primaryMetric.background_chart?.type === 'bar')) {
+          ctx.addIssue({
+            code: 'custom',
+            message:
+              'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.',
+          });
         }
-      })
-      .meta({
-        description:
-          'Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.',
-      }),
-    /**
-     * Configure how to break down the metric (e.g. show one metric per term).
-     */
-    breakdown_by: esqlColumnWithFormatSchema
-      .extend(metricConfigBreakdownByOptionsShape)
-      .strict()
-      .optional(),
-  })
-  .superRefine(({ metrics, breakdown_by }, ctx) => {
-    const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
-
-    if (primaryMetric?.color?.type === 'dynamic' && primaryMetric.color.range === 'percentage') {
-      if (!breakdown_by && !(primaryMetric.background_chart?.type === 'bar')) {
-        ctx.addIssue({
-          code: 'custom',
-          message:
-            'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.',
-        });
       }
-    }
-  })
-  .meta({
-    id: 'metricESQL',
-    title: 'Metric Chart (ES|QL)',
-    description: 'Metric chart configuration for ES|QL queries',
-  });
+    })
+    .meta({
+      id: 'metricNoESQL',
+      title: 'Metric Chart (DSL)',
+      description: 'Metric chart configuration for standard queries',
+    })
+);
 
-export const metricConfigSchema = z.union([metricConfigSchemaNoESQL, metricConfigSchemaESQL]).meta({
-  id: 'metricChart',
-  title: 'Metric Chart',
-  description:
-    'One or two metric values with optional color coding, trend line, and breakdown by dimension.',
-});
+const primaryMetricESQL = lazySchema(() =>
+  esqlColumnWithFormatSchema
+    .extend(metricConfigPrimaryMetricOptionsShape)
+    .extend(metricConfigBackgroundChartShapeESQL)
+);
+
+const secondaryMetricESQL = lazySchema(() =>
+  esqlColumnWithFormatSchema.extend(metricConfigSecondaryMetricOptionsShape)
+);
+
+export const metricConfigSchemaESQL = lazySchema(() =>
+  z
+    .object({
+      type: z.literal('metric'),
+      ...sharedPanelInfoSchema.shape,
+      ...layerSettingsSchema.shape,
+      ...dataSourceEsqlTableSchema.shape,
+      styling: metricStylingSchema.optional(),
+      /**
+       * Primary value configuration, must define operation.
+       */
+      metrics: z
+        .array(z.union([primaryMetricESQL, secondaryMetricESQL]))
+        .min(1)
+        .max(2)
+        .superRefine((metrics, ctx) => {
+          const msg = validateMetrics(metrics);
+          if (msg) {
+            ctx.addIssue({ code: 'custom', message: msg });
+          }
+        })
+        .meta({
+          description:
+            'Metric dimensions to display. The first must be a primary metric; an optional second must be a secondary metric.',
+        }),
+      /**
+       * Configure how to break down the metric (e.g. show one metric per term).
+       */
+      breakdown_by: esqlColumnWithFormatSchema
+        .extend(metricConfigBreakdownByOptionsShape)
+        .strict()
+        .optional(),
+    })
+    .superRefine(({ metrics, breakdown_by }, ctx) => {
+      const primaryMetric = metrics.find((metric) => isPrimaryMetric(metric));
+
+      if (primaryMetric?.color?.type === 'dynamic' && primaryMetric.color.range === 'percentage') {
+        if (!breakdown_by && !(primaryMetric.background_chart?.type === 'bar')) {
+          ctx.addIssue({
+            code: 'custom',
+            message:
+              'When using percentage-based dynamic coloring, a breakdown dimension or max must be defined.',
+          });
+        }
+      }
+    })
+    .meta({
+      id: 'metricESQL',
+      title: 'Metric Chart (ES|QL)',
+      description: 'Metric chart configuration for ES|QL queries',
+    })
+);
+
+export const metricConfigSchema = lazySchema(() =>
+  z.union([metricConfigSchemaNoESQL, metricConfigSchemaESQL]).meta({
+    id: 'metricChart',
+    title: 'Metric Chart',
+    description:
+      'One or two metric values with optional color coding, trend line, and breakdown by dimension.',
+  })
+);
 
 export type MetricConfig = z.output<typeof metricConfigSchema>;
 export type MetricConfigNoESQL = z.output<typeof metricConfigSchemaNoESQL>;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   asCodeEsqlApproximationSchema,
   asCodeIdSchema,
@@ -69,40 +69,44 @@ const discoverSessionControlWidthSchema = z
     description: 'Minimum width of the control panel.',
   });
 
-export const discoverSessionControlPanelSchema = z
-  .object({
-    id: z.string().min(1).meta({ description: 'The unique ID of the control.' }),
-    type: z.literal(ESQL_CONTROL),
-    width: discoverSessionControlWidthSchema,
-    grow: z
-      .boolean()
-      .default(DEFAULT_PINNED_CONTROL_STATE.grow)
-      .meta({
-        description:
-          'When `true`, the control expands to fill any available horizontal space. ' +
-          'Defaults to `false`.',
-      }),
-    config: optionsListESQLControlSchema,
-  })
-  .strict()
-  .meta({
-    id: 'kbn-discover-session-api-esql-control-panel',
-    title: ESQL_CONTROL,
-    description:
-      'An ES|QL variable control whose selected value is injected into Discover ES|QL ' +
-      'queries using the `?variable_name` syntax.',
-  });
+export const discoverSessionControlPanelSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().min(1).meta({ description: 'The unique ID of the control.' }),
+      type: z.literal(ESQL_CONTROL),
+      width: discoverSessionControlWidthSchema,
+      grow: z
+        .boolean()
+        .default(DEFAULT_PINNED_CONTROL_STATE.grow)
+        .meta({
+          description:
+            'When `true`, the control expands to fill any available horizontal space. ' +
+            'Defaults to `false`.',
+        }),
+      config: optionsListESQLControlSchema,
+    })
+    .strict()
+    .meta({
+      id: 'kbn-discover-session-api-esql-control-panel',
+      title: ESQL_CONTROL,
+      description:
+        'An ES|QL variable control whose selected value is injected into Discover ES|QL ' +
+        'queries using the `?variable_name` syntax.',
+    })
+);
 
-export const discoverSessionControlPanelsSchema = z
-  .array(discoverSessionControlPanelSchema)
-  .max(MAX_DISCOVER_SESSION_CONTROL_PANELS)
-  .refine(
-    (panels) => new Set(panels.map((p) => p.id)).size === panels.length,
-    'control_panels must have unique ids'
-  )
-  .meta({
-    description: 'An array of Discover ES|QL control panels.',
-  });
+export const discoverSessionControlPanelsSchema = lazySchema(() =>
+  z
+    .array(discoverSessionControlPanelSchema)
+    .max(MAX_DISCOVER_SESSION_CONTROL_PANELS)
+    .refine(
+      (panels) => new Set(panels.map((p) => p.id)).size === panels.length,
+      'control_panels must have unique ids'
+    )
+    .meta({
+      description: 'An array of Discover ES|QL control panels.',
+    })
+);
 
 const discoverSessionTabPresentationSchema = z
   .object({
@@ -179,49 +183,53 @@ const discoverSessionApiTabSchema = z.union([
   discoverSessionEsqlTabSchema,
 ]);
 
-export const discoverSessionApiDataSchema = z
-  .object({
-    title: z
-      .string()
-      .min(1)
-      .max(MAX_SESSION_TITLE_LENGTH)
-      .meta({ description: 'Discover session title.' }),
-    description: z
-      .string()
-      .max(MAX_SESSION_DESCRIPTION_LENGTH)
-      .default('')
-      .meta({ description: 'Discover session description.' }),
-    tags: getAsCodeTagsSchema(
-      'Tag IDs to associate with this Discover session.',
-      MAX_DISCOVER_SESSION_TAGS
-    ).optional(),
-    tabs: z
-      .array(discoverSessionApiTabSchema)
-      .min(1)
-      .max(MAX_DISCOVER_SESSION_TABS)
-      .refine(
-        (tabs) => new Set(tabs.map((t) => t.id)).size === tabs.length,
-        'tabs must have unique ids'
-      )
-      .meta({
-        description:
-          'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID because Dashboard panels and Discover links can reference it.',
-      }),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-discover-session-data',
-    title: 'Discover session data',
-    description: 'Configuration data for a Discover session.',
-  });
+export const discoverSessionApiDataSchema = lazySchema(() =>
+  z
+    .object({
+      title: z
+        .string()
+        .min(1)
+        .max(MAX_SESSION_TITLE_LENGTH)
+        .meta({ description: 'Discover session title.' }),
+      description: z
+        .string()
+        .max(MAX_SESSION_DESCRIPTION_LENGTH)
+        .default('')
+        .meta({ description: 'Discover session description.' }),
+      tags: getAsCodeTagsSchema(
+        'Tag IDs to associate with this Discover session.',
+        MAX_DISCOVER_SESSION_TAGS
+      ).optional(),
+      tabs: z
+        .array(discoverSessionApiTabSchema)
+        .min(1)
+        .max(MAX_DISCOVER_SESSION_TABS)
+        .refine(
+          (tabs) => new Set(tabs.map((t) => t.id)).size === tabs.length,
+          'tabs must have unique ids'
+        )
+        .meta({
+          description:
+            'Ordered list of tabs in the Discover session. Each tab requires a stable, unique ID because Dashboard panels and Discover links can reference it.',
+        }),
+    })
+    .strict()
+    .meta({
+      id: 'kbn-discover-session-data',
+      title: 'Discover session data',
+      description: 'Configuration data for a Discover session.',
+    })
+);
 
-export const discoverSessionApiResponseSchema = z
-  .object({
-    id: z.string().meta({ description: 'The Discover session ID.' }),
-    data: discoverSessionApiDataSchema,
-    meta: asCodeMetaSchema,
-  })
-  .strict();
+export const discoverSessionApiResponseSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string().meta({ description: 'The Discover session ID.' }),
+      data: discoverSessionApiDataSchema,
+      meta: asCodeMetaSchema,
+    })
+    .strict()
+);
 
 /* Shared context for warnings produced while transforming a Discover session tab. */
 const discoverSessionWarningBaseSchema = z.object({
@@ -246,29 +254,38 @@ const discoverSessionDroppedPropertyWarningSchema = discoverSessionWarningBaseSc
   .strict();
 
 /* Allows GET responses to preserve valid session data while reporting what was dropped. */
-export const discoverSessionWarningsSchema = z
-  .array(
-    z.union([discoverSessionDroppedPanelWarningSchema, discoverSessionDroppedPropertyWarningSchema])
-  )
-  .meta({
-    description:
-      'Warnings generated when stored Discover session content cannot be fully represented in the API response.',
-  });
-
-export const discoverSessionGetResponseSchema = discoverSessionApiResponseSchema.extend({
-  warnings: discoverSessionWarningsSchema.optional(),
-});
-
-export const discoverSessionSearchParamsSchema = asCodeSearchRequestSchema.extend({
-  query: z
-    .string()
-    .max(MAX_SEARCH_QUERY_LENGTH)
+export const discoverSessionWarningsSchema = lazySchema(() =>
+  z
+    .array(
+      z.union([
+        discoverSessionDroppedPanelWarningSchema,
+        discoverSessionDroppedPropertyWarningSchema,
+      ])
+    )
     .meta({
       description:
-        'Full-text search (`simple_query_string`) over `title` and `description`. All terms must match.',
+        'Warnings generated when stored Discover session content cannot be fully represented in the API response.',
     })
-    .optional(),
-});
+);
+
+export const discoverSessionGetResponseSchema = lazySchema(() =>
+  discoverSessionApiResponseSchema.extend({
+    warnings: discoverSessionWarningsSchema.optional(),
+  })
+);
+
+export const discoverSessionSearchParamsSchema = lazySchema(() =>
+  asCodeSearchRequestSchema.extend({
+    query: z
+      .string()
+      .max(MAX_SEARCH_QUERY_LENGTH)
+      .meta({
+        description:
+          'Full-text search (`simple_query_string`) over `title` and `description`. All terms must match.',
+      })
+      .optional(),
+  })
+);
 
 const discoverSessionSearchItemSchema = z
   .object({
@@ -287,18 +304,21 @@ const discoverSessionSearchItemSchema = z
   })
   .strict();
 
-export const discoverSessionSearchResponseSchema = z
-  .object({
-    data: z
-      .array(discoverSessionSearchItemSchema)
-      // Mirror the request's production-enforced `per_page` maximum in OAS and dev response validation.
-      .max(PAGINATION_MAX_SIZE)
-      .meta({
-        description: 'List of matching Discover sessions (summaries, not the full session state).',
-      }),
-    meta: asCodePaginationResponseMetaSchema,
-  })
-  .strict();
+export const discoverSessionSearchResponseSchema = lazySchema(() =>
+  z
+    .object({
+      data: z
+        .array(discoverSessionSearchItemSchema)
+        // Mirror the request's production-enforced `per_page` maximum in OAS and dev response validation.
+        .max(PAGINATION_MAX_SIZE)
+        .meta({
+          description:
+            'List of matching Discover sessions (summaries, not the full session state).',
+        }),
+      meta: asCodePaginationResponseMetaSchema,
+    })
+    .strict()
+);
 
 export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
