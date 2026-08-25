@@ -32,7 +32,7 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     return awsServiceMatrix.filter(
       (s) =>
         s.showInUI &&
-        (signalFilter === 'all' || s.signalType === signalFilter) &&
+        (signalFilter === 'all' || s.signalTypes.includes(signalFilter)) &&
         (q === '' || s.name.toLowerCase().includes(q))
     );
   }, [awsServiceMatrix, signalFilter, searchQuery]);
@@ -69,7 +69,7 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
   const signalFilteredServices = useMemo(
     () =>
       awsServiceMatrix.filter(
-        (s) => s.showInUI && (signalFilter === 'all' || s.signalType === signalFilter)
+        (s) => s.showInUI && (signalFilter === 'all' || s.signalTypes.includes(signalFilter))
       ),
     [awsServiceMatrix, signalFilter]
   );
