@@ -111,18 +111,18 @@ export function NightshiftApp(): React.ReactElement {
     null
   );
 
-  const [activeChatConversationId, setActiveChatConversationId] = useState<string | null>(null);
-  // Maps investigation_id → conversation_id, populated when a conversation is opened
-  const [investigationConversationMap, setInvestigationConversationMap] = useState<
-    Record<string, string>
-  >({});
-  // Maps event_uuid → conversation_id, populated when a conversation is opened
-  const [eventConversationMap, setEventConversationMap] = useState<Record<string, string>>({});
+  // Track which investigation/sigevent card is highlighted (set optimistically on click,
+  // cleared when agentBuilder signals the sidebar closed).
+  const [openedInvestigationId, setOpenedInvestigationId] = useState<string | null>(null);
+  const [openedEventUuid, setOpenedEventUuid] = useState<string | null>(null);
 
   useEffect(() => {
     if (!agentBuilder) return;
     const subscription = agentBuilder.events.ui.activeConversation$.subscribe((active) => {
-      setActiveChatConversationId(active?.id ?? null);
+      if (!active) {
+        setOpenedInvestigationId(null);
+        setOpenedEventUuid(null);
+      }
     });
     return () => subscription.unsubscribe();
   }, [agentBuilder]);
@@ -339,14 +339,6 @@ export function NightshiftApp(): React.ReactElement {
     return () => window.clearTimeout(transitionTimeout);
   }, [eventsError, hasEvents, isLoading]);
 
-  useEffect(() => {
-    if (!agentBuilder) return;
-    const subscription = agentBuilder.events.ui.activeConversation$.subscribe((active) => {
-      setActiveChatConversationId(active?.id ?? null);
-    });
-    return () => subscription.unsubscribe();
-  }, [agentBuilder]);
-
   usePageReady({
     isReady: !isLoading && !eventsError,
     isRefreshing: isFetching && !isLoading,
@@ -366,23 +358,13 @@ export function NightshiftApp(): React.ReactElement {
     },
   });
 
-  const activeChatEventUuid = activeChatConversationId
-    ? Object.entries(eventConversationMap).find(([, cid]) => cid === activeChatConversationId)?.[0]
-    : undefined;
-
-  const activeChatInvestigationId = activeChatConversationId
-    ? Object.entries(investigationConversationMap).find(
-        ([, cid]) => cid === activeChatConversationId
-      )?.[0]
-    : undefined;
-
   const sharedListProps = {
     closingEventUuid,
     investigationStatuses,
     onChatClick,
     onCloseClick: handleCloseSignificantEvent,
     onEventClick: handleEventClick,
-    selectedEventUuid: selectedEvent?.event_uuid ?? activeChatEventUuid,
+    selectedEventUuid: selectedEvent?.event_uuid ?? openedEventUuid ?? undefined,
   };
 
   const eventNotFoundCallout = notFoundEventId ? (
@@ -593,10 +575,6 @@ export function NightshiftApp(): React.ReactElement {
               >
                 <ol css={css`list-style: none; margin: 0; padding: 0;`}>
                   {investigationsData.results.map((item, index) => {
-                    const convId = investigationConversationMap[item.investigation_id];
-                    const isSelected =
-                      (Boolean(convId) && convId === activeChatConversationId) ||
-                      item.investigation_id === activeChatInvestigationId;
                     const isLast = index === investigationsData.results.length - 1;
                     return (
                       <li
@@ -607,8 +585,11 @@ export function NightshiftApp(): React.ReactElement {
                       >
                         <InvestigationCard
                           item={item}
-                          isSelected={isSelected}
-                          onClick={() => setPendingRecentInvestigationId(item.investigation_id)}
+                          isSelected={item.investigation_id === openedInvestigationId}
+                          onClick={() => {
+                            setOpenedInvestigationId(item.investigation_id);
+                            setPendingRecentInvestigationId(item.investigation_id);
+                          }}
                         />
                       </li>
                     );
@@ -655,18 +636,15 @@ export function NightshiftApp(): React.ReactElement {
           key={pendingChatEvent.event_uuid}
           event={pendingChatEvent}
           agentBuilder={agentBuilder}
-          onOpened={() => setPendingChatEvent(null)}
+          onOpened={() => {
+            setOpenedEventUuid(pendingChatEvent.event_uuid);
+            setPendingChatEvent(null);
+          }}
           onFallback={() => {
             const evt = pendingChatEvent;
             setPendingChatEvent(null);
             openEventFlyout(evt);
           }}
-          onConversationOpened={(cid) =>
-            setEventConversationMap((prev) => ({
-              ...prev,
-              [pendingChatEvent.event_uuid]: cid,
-            }))
-          }
         />
       )}
 
@@ -685,12 +663,6 @@ export function NightshiftApp(): React.ReactElement {
           investigationId={pendingRecentInvestigationId}
           agentBuilder={agentBuilder}
           onOpened={() => setPendingRecentInvestigationId(null)}
-          onConversationOpened={(cid) =>
-            setInvestigationConversationMap((prev) => ({
-              ...prev,
-              [pendingRecentInvestigationId]: cid,
-            }))
-          }
         />
       )}
 
@@ -714,13 +686,11 @@ function InvestigationChatOpener({
   agentBuilder,
   onOpened,
   onFallback,
-  onConversationOpened,
 }: {
   event: SignificantEvent;
   agentBuilder: NonNullable<ReturnType<typeof useKibana>['services']['agentBuilder']>;
   onOpened: () => void;
   onFallback: () => void;
-  onConversationOpened?: (conversationId: string) => void;
 }): null {
   const { http } = useKibana().services;
   const workflowExecutionId = getLatestInvestigation(event)?.workflow_execution_id;
@@ -734,8 +704,6 @@ function InvestigationChatOpener({
   onOpenedRef.current = onOpened;
   const onFallbackRef = useRef(onFallback);
   onFallbackRef.current = onFallback;
-  const onConversationOpenedRef = useRef(onConversationOpened);
-  onConversationOpenedRef.current = onConversationOpened;
 
   useEffect(() => {
     if (!workflowExecutionId) {
@@ -745,7 +713,6 @@ function InvestigationChatOpener({
 
   useEffect(() => {
     if (conversationId) {
-      onConversationOpenedRef.current?.(conversationId);
       agentBuilder.openChat({ conversationId });
       onOpenedRef.current();
     }
@@ -803,12 +770,10 @@ function RecentInvestigationOpener({
   investigationId,
   agentBuilder,
   onOpened,
-  onConversationOpened,
 }: {
   investigationId: string;
   agentBuilder: NonNullable<ReturnType<typeof useKibana>['services']['agentBuilder']>;
   onOpened: () => void;
-  onConversationOpened?: (conversationId: string) => void;
 }): null {
   const { http } = useKibana().services;
   const { conversationId, status } = useInvestigationState({
@@ -819,12 +784,9 @@ function RecentInvestigationOpener({
 
   const onOpenedRef = useRef(onOpened);
   onOpenedRef.current = onOpened;
-  const onConversationOpenedRef = useRef(onConversationOpened);
-  onConversationOpenedRef.current = onConversationOpened;
 
   useEffect(() => {
     if (conversationId) {
-      onConversationOpenedRef.current?.(conversationId);
       agentBuilder.openChat({ conversationId });
       onOpenedRef.current();
     }
