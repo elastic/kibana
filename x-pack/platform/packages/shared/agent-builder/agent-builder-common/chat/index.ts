@@ -53,6 +53,9 @@ export {
   findTodosStep,
   carriedOverTodos,
   type ConversationWithoutRounds,
+  type ConversationPermissions,
+  type ConversationWithPermissions,
+  type ConversationWithoutRoundsWithPermissions,
   type ConversationRoundStepMixin,
   type ToolCallStep,
   type ConversationRoundStep,
@@ -161,6 +164,8 @@ export type { RoundState } from './round_state';
 export type { ConversationListOptions } from './conversation_list';
 export {
   CONVERSATION_SCHEMA_VERSION,
+  MIN_EVENTS_NATIVE_SCHEMA_VERSION,
+  isEventsNativeVersion,
   EventActorType,
   TimelineTriggerType,
   TimelineEventType,
