@@ -189,6 +189,21 @@ describe('appendTimeBucketToEsqlQuery', () => {
     expect(result).not.toContain('BUCKET(@timestamp');
   });
 
+  it('preserves an existing TBUCKET in a FROM query without adding a regular BUCKET', () => {
+    const query = 'FROM kibana_sample_data_logstsdb | STATS AVG(bytes) BY TBUCKET(100)';
+    const result = appendTimeBucketToEsqlQuery(query, '@timestamp');
+    expect(result).toBe(query);
+    expect(result).not.toContain('BUCKET(@timestamp');
+  });
+
+  it('preserves an aliased TBUCKET in a FROM query without adding a regular BUCKET', () => {
+    const query =
+      'FROM kibana_sample_data_logstsdb | STATS avg_bytes = AVG(bytes) BY time_bucket = TBUCKET(100)';
+    const result = appendTimeBucketToEsqlQuery(query, '@timestamp');
+    expect(result).toBe(query);
+    expect(result).not.toContain('BUCKET(@timestamp');
+  });
+
   it('does not apply TS bucketing semantics to a later STATS command', () => {
     const query =
       'TS metrics-* | STATS total = AVG(cpu) BY host | STATS MAX(total) BY TBUCKET(100)';
@@ -270,5 +285,22 @@ describe('buildTrendlineQueryWithMetricFieldMap', () => {
 
     expect(result.query).toBe('TS metrics-* | STATS avg_cpu = AVG(cpu) BY host, TBUCKET(75)');
     expect(result.timeField).toBe('TBUCKET(75)');
+  });
+
+  it('returns the TBUCKET result column for a FROM query with an aliased TBUCKET', () => {
+    const query =
+      'FROM kibana_sample_data_logstsdb | STATS avg_bytes = AVG(bytes) BY time_bucket = TBUCKET(100)';
+    const result = buildTrendlineQueryWithMetricFieldMap(query, '@timestamp');
+
+    expect(result.query).toBe(query);
+    expect(result.timeField).toBe('time_bucket');
+  });
+
+  it('returns the TBUCKET expression for a FROM query with an unaliased TBUCKET', () => {
+    const query = 'FROM kibana_sample_data_logstsdb | STATS AVG(bytes) BY TBUCKET(100)';
+    const result = buildTrendlineQueryWithMetricFieldMap(query, '@timestamp');
+
+    expect(result.query).toBe(query);
+    expect(result.timeField).toBe('TBUCKET(100)');
   });
 });

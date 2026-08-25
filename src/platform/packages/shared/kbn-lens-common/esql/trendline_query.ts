@@ -95,6 +95,13 @@ const findFirstStatsAfterTs = (commands: ESQLCommand[]): ESQLCommand<'stats'> | 
     .find((command): command is ESQLCommand<'stats'> => command.name === 'stats');
 };
 
+/** Finds the first STATS command whose BY clause contains a TBUCKET grouping. */
+const findStatsWithTbucket = (commands: ESQLCommand[]): ESQLCommand<'stats'> | undefined =>
+  commands.find(
+    (command): command is ESQLCommand<'stats'> =>
+      command.name === 'stats' && getTbucketResultColumn(command) !== undefined
+  );
+
 const getTbucketResultColumn = (statsCommand: ESQLCommand): string | undefined => {
   const byOption = statsCommand.args.find(isOptionNode);
   if (!byOption) return;
@@ -150,6 +157,9 @@ const preserveTimeFieldInKeepCommands = (commands: ESQLCommand[], timeField: str
  * a TBUCKET grouping. Later STATS commands operate on tabular results and are
  * not selected as the time-series aggregation.
  *
+ * For non-TS sources (e.g. FROM), an existing TBUCKET grouping in any STATS
+ * command is preserved as-is; no additional BUCKET is appended.
+ *
  * When the query has no STATS and `metricFields` are provided, each field is
  * wrapped in `AVG()` (e.g. `STATS AVG(bytes) BY BUCKET(...)`). When no metric
  * fields are given, it falls back to `STATS COUNT(*) BY BUCKET(...)`.
@@ -170,6 +180,13 @@ export const appendTimeBucketToEsqlQuery = (
   }
 
   const tsStatsCommand = findFirstStatsAfterTs(root.commands);
+
+  // TBUCKET is also valid with non-TS source commands (e.g. FROM); an existing
+  // TBUCKET grouping already time-buckets the results, so no BUCKET may be added.
+  if (!tsStatsCommand && findStatsWithTbucket(root.commands)) {
+    return BasicPrettyPrinter.print(root);
+  }
+
   if (tsStatsCommand) {
     if (!getTbucketResultColumn(tsStatsCommand)) {
       const tbucketExpression = buildTrendlineTbucketExpression();
@@ -239,6 +256,7 @@ export const buildTrendlineQueryWithMetricFieldMap = (
   const sourceQueryHasStats = queryHasStatsCommand(esqlQuery);
   const metricFieldMap = new Map<string, string>();
   const { root } = Parser.parse(esqlQuery);
+  const tbucketStatsCommand = findStatsWithTbucket(root.commands);
   const tsStatsCommand = findFirstStatsAfterTs(root.commands);
 
   if (!sourceQueryHasStats) {
@@ -253,10 +271,9 @@ export const buildTrendlineQueryWithMetricFieldMap = (
       !sourceQueryHasStats ? groupByFields : undefined
     ),
     metricFieldMap,
-    timeField:
-      (tsStatsCommand && getTbucketResultColumn(tsStatsCommand)) ??
-      (tsStatsCommand
-        ? buildTrendlineTbucketExpression()
-        : buildTrendlineBucketExpression(timeField)),
+    timeField: tsStatsCommand
+      ? getTbucketResultColumn(tsStatsCommand) ?? buildTrendlineTbucketExpression()
+      : (tbucketStatsCommand && getTbucketResultColumn(tbucketStatsCommand)) ??
+        buildTrendlineBucketExpression(timeField),
   };
 };
