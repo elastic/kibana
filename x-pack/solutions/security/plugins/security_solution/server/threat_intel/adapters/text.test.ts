@@ -26,11 +26,12 @@ describe('stripHtml', () => {
     expect(result).toBe('before after');
   });
 
-  it('drops script bodies whose end tag carries whitespace', () => {
-    const html = `<p>before</p><script>alert("xss")</script ><p>after</p>`;
-    const result = stripHtml(html);
-    expect(result).not.toContain('alert');
-    expect(result).toBe('before after');
+  it('drops script bodies whose end tag carries whitespace or junk', () => {
+    for (const closeTag of ['</script >', '</script\t\n bar>', '</script foo="1">']) {
+      const result = stripHtml(`<p>before</p><script>alert("xss")${closeTag}<p>after</p>`);
+      expect(result).not.toContain('alert');
+      expect(result).toBe('before after');
+    }
   });
 
   it('decodes the named entities feeds use most often', () => {
@@ -145,11 +146,12 @@ describe('htmlToStructured', () => {
     expect(result).not.toContain('body{}');
   });
 
-  it('strips script bodies whose end tag carries whitespace', () => {
-    const html = '<script>alert(1)</script ><p>safe</p>';
-    const result = htmlToStructured(html);
-    expect(result).toContain('safe');
-    expect(result).not.toContain('alert');
+  it('strips script bodies whose end tag carries whitespace or junk', () => {
+    for (const closeTag of ['</script >', '</script\t\n bar>', '</script foo="1">']) {
+      const result = htmlToStructured(`<script>alert(1)${closeTag}<p>safe</p>`);
+      expect(result).toContain('safe');
+      expect(result).not.toContain('alert');
+    }
   });
 
   it('leaves no reassembled tag from nested angle brackets', () => {

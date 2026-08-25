@@ -26,8 +26,8 @@ export const stripHtml = (html: string | undefined | null): string => {
   // Drop the most expensive substrings up front (script/style bodies)
   // before falling through to the generic tag stripper.
   const withoutScripts = html
-    .replace(/<script[\s\S]*?<\/script\s*>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style\s*>/gi, ' ');
+    .replace(/<script[\s\S]*?<\/script\b[^>]*>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style\b[^>]*>/gi, ' ');
   const withoutTags = withoutScripts.replace(/<[^>]+>/g, ' ');
   const decoded = decodeEntities(withoutTags);
   return collapseWhitespace(decoded);
@@ -162,10 +162,12 @@ const _splitHtmlBySections = (html: string): Array<{ kind: SectionKind; html: st
 export const htmlToStructured = (html: string | undefined | null): string => {
   if (!html) return '';
 
-  // 1. Drop script/style bodies (same pre-pass as stripHtml).
+  // 1. Drop script/style bodies (same pre-pass as stripHtml). The end tag
+  //    matches attributes/junk too (`</script foo>`, `</script\t\n bar>`) so a
+  //    crafted close tag cannot smuggle a body past the stripper.
   const cleaned = html
-    .replace(/<script[\s\S]*?<\/script\s*>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style\s*>/gi, ' ');
+    .replace(/<script[\s\S]*?<\/script\b[^>]*>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style\b[^>]*>/gi, ' ');
 
   // 2. Split at heading boundaries so each chunk knows its section kind.
   //    Href-lifting is applied only to ioc and references chunks (step 3 below).
