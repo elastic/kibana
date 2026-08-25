@@ -54,7 +54,6 @@ const createCrossIconSvg = (): SVGSVGElement => {
   return svg;
 };
 
-/** Creates a non-editable inline chip representing an image attachment in the editor. */
 export const createImagePlaceholderElement = (label: string): HTMLSpanElement => {
   const span = document.createElement('span');
   span.contentEditable = 'false';
@@ -89,7 +88,6 @@ export const getPlaceholderNamesFromElement = (el: HTMLElement): string[] =>
     (s) => s.dataset.placeholderName ?? ''
   );
 
-/** Removes the first placeholder with the given name. */
 export const removePlaceholderByName = (el: HTMLElement, name: string): void => {
   const spans = el.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`);
   for (const span of Array.from(spans)) {
@@ -98,4 +96,28 @@ export const removePlaceholderByName = (el: HTMLElement, name: string): void => 
       return;
     }
   }
+};
+
+export interface HandleImagePlaceholderRemoveClickOpts {
+  onChange: () => void;
+  onAfterInput?: () => void;
+}
+
+/**
+ * Handles a mousedown on the editor contentEditable that may have landed on a
+ * placeholder chip's remove button. Removes the chip and fires callbacks when matched.
+ */
+export const handleImagePlaceholderRemoveClick = (
+  event: MouseEvent,
+  opts: HandleImagePlaceholderRemoveClickOpts
+): void => {
+  const target = event.target as Element;
+  const removeButton = target.closest?.(`[${IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE}]`);
+  if (!removeButton) return;
+  const chip = removeButton.closest(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`);
+  if (!chip) return;
+  event.preventDefault();
+  chip.remove();
+  opts.onChange();
+  opts.onAfterInput?.();
 };
