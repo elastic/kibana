@@ -63,7 +63,7 @@ describe('buildPendingRoundActions', () => {
     expect(result.consumedPromptIds).toEqual(['s1']);
   });
 
-  it('restores previously answered ask_user_question steps before the current pending answers', () => {
+  it('restores previously answered ask_user_question steps before the current pending answers', async () => {
     const answered = createAskUserQuestionStep({
       prompt_id: 's1',
       questions: [sampleQuestion],
@@ -92,7 +92,7 @@ describe('buildPendingRoundActions', () => {
       },
     } as any;
 
-    const result = buildPendingRoundActions({
+    const result = await buildPendingRoundActions({
       round,
       promptState,
       toolIdMapping: new Map(),
@@ -115,7 +115,7 @@ describe('buildPendingRoundActions', () => {
     }
   });
 
-  it('keeps interleaved tool calls and answered asks in step order before the pending prompt', () => {
+  it('keeps interleaved tool calls and answered asks in step order before the pending prompt', async () => {
     const answered = createAskUserQuestionStep({
       prompt_id: 's1',
       questions: [sampleQuestion],
@@ -166,7 +166,7 @@ describe('buildPendingRoundActions', () => {
       },
     } as any;
 
-    const result = buildPendingRoundActions({
+    const result = await buildPendingRoundActions({
       round,
       promptState,
       toolIdMapping: new Map(),
