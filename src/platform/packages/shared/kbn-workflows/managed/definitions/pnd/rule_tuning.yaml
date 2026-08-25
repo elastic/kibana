@@ -251,8 +251,7 @@ steps:
       # kill the rest of the sweep.
       #
       # ES|QL rows arrive as positional arrays, so `item.5` is the sixth field the
-      # harvest's KEEP projects: the alert_ids multivalue. `${{ }}` rather than `{{ }}`
-      # passes that list through as an array instead of stringifying it.
+      # harvest's KEEP projects: the alert_ids multivalue.
       - name: mark_alerts_reviewed
         type: security.setAlertTags
         if: "${{ steps.review_tuning.output.response.approved != null }}"
