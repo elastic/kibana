@@ -123,6 +123,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.save();
         await fieldEditor.waitUntilClosed();
         await header.waitUntilLoadingHasFinished();
+        // Lens must register the new runtime field before it can be committed to a dimension,
+        // otherwise the dimension field selection is silently discarded.
+        await lens.searchField('runtimefield');
+        await lens.waitForField('runtimefield');
         await lens.configureDimension({
           dimension: 'lnsDatatable_metrics > lns-empty-dimension',
           operation: 'average',
@@ -188,6 +192,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await fieldEditor.save();
         await fieldEditor.waitUntilClosed();
         await header.waitUntilLoadingHasFinished();
+        // Lens must register the new runtime field before it can be committed to a dimension,
+        // otherwise the dimension field selection is silently discarded.
+        await lens.searchField('runtimefield');
+        await lens.waitForField('runtimefield');
         await lens.configureDimension({
           dimension: 'lnsDatatable_metrics > lns-empty-dimension',
           operation: 'average',
