@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
@@ -82,32 +76,40 @@ function TemplateAwareBody(): React.ReactElement {
   const FirstTabContent = resolvedTabs[0].def.content;
 
   return (
-    <EuiFlexGroup
-      direction="row"
-      responsive={false}
+    <div
       css={css`
+        display: flex;
+        flex-direction: row;
         flex: 1;
         min-height: 0;
         overflow: hidden;
       `}
     >
-      <EuiFlexItem grow={3}>
+      <div
+        css={css`
+          flex: 3;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        `}
+      >
         <EuiFlyoutBody css={bodyStyles}>
           <Conversation />
         </EuiFlyoutBody>
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <div
-          css={css`
-            overflow-y: auto;
-            height: 100%;
-            padding: ${euiTheme.size.base};
-          `}
-        >
-          {conversation && <FirstTabContent conversation={conversation} />}
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </div>
+      <div
+        css={css`
+          flex: 2;
+          min-width: 0;
+          overflow-y: auto;
+          border-left: 1px solid ${euiTheme.border.color};
+          padding: ${euiTheme.size.base};
+        `}
+      >
+        {conversation && <FirstTabContent conversation={conversation} />}
+      </div>
+    </div>
   );
 }
 
