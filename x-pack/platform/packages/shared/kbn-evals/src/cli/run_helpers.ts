@@ -491,7 +491,12 @@ export const evalRunFlags: FlagOptions = {
     'evaluations-kbn-url',
     'evaluations-kbn-api-key',
   ],
-  boolean: ['skip-server', 'dry-run', 'skip-init'],
+  boolean: ['skip-server', 'dry-run', 'skip-init', 'require-eis-judge'],
   alias: { model: 'project', judge: 'evaluation-connector-id' },
-  default: { 'skip-server': false, 'dry-run': false, 'skip-init': false },
+  default: {
+    'skip-server': false,
+    'dry-run': false,
+    'skip-init': false,
+    'require-eis-judge': false,
+  },
 };

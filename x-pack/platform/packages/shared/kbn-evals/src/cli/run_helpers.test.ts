@@ -7,7 +7,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
-import { resolveEvaluationConnectorId } from './run_helpers';
+import { resolveEvaluationConnectorId, evalRunFlags } from './run_helpers';
 
 const log = new ToolingLog();
 
@@ -101,5 +101,24 @@ describe('resolveEvaluationConnectorId', () => {
         )
       ).rejects.toThrow(/not EIS-backed/);
     });
+  });
+});
+
+describe('evalRunFlags', () => {
+  // resolveEvaluationConnectorId reads `require-eis-judge` via flagsReader.boolean(),
+  // and FlagsReader throws on any flag absent from the command's declaration.
+  // `start` and `run` both call it, so the flag must live in the SHARED set --
+  // declaring it on `run` alone made every `evals start` die with
+  // "expected --require-eis-judge to be a boolean".
+  it.each(['require-eis-judge', 'skip-server', 'dry-run', 'skip-init'])(
+    'declares %s so both start and run can read it',
+    (flag) => {
+      expect(evalRunFlags.boolean).toContain(flag);
+      expect(evalRunFlags.default).toHaveProperty(flag, false);
+    }
+  );
+
+  it('aliases judge to evaluation-connector-id', () => {
+    expect(evalRunFlags.alias).toMatchObject({ judge: 'evaluation-connector-id' });
   });
 });
