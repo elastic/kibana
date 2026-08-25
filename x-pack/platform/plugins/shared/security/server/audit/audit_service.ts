@@ -92,10 +92,6 @@ export class AuditService {
   }: AuditServiceSetupParams): AuditServiceSetup {
     const auditLogPath = config.enabled ? getAuditLogPath(config.appender) : undefined;
 
-    // The startup probe only covers misconfiguration at boot and license transitions. Anything that
-    // breaks afterwards — disk full, quota exceeded, the mount going read-only, the log directory
-    // being removed — is reported by the appender through `onWriteError` instead of taking the
-    // process down, and feeds the same stream as the probe.
     const runtimeWriteAccess$ = new Subject<AuditLogWriteAccess>();
     const onWriteError = auditLogPath
       ? ({ path, code, reason }: LogFileWriteError) =>
@@ -128,10 +124,6 @@ export class AuditService {
       )
     ).pipe(shareReplay(1));
 
-    // `startWith` matters: `license.features$` does not emit until the first Elasticsearch license
-    // fetch resolves, and the status observable is a `combineLatest`. Without a seed the plugin
-    // status stays silent, and core reports `unavailable: Status check timed out after 30s` instead
-    // of the derived status that names the real culprit. `undefined` reads as "nothing probed yet".
     const writeAccess$ = auditLogPath
       ? state$.pipe(
           map(({ writeAccess }) => writeAccess),
@@ -143,7 +135,6 @@ export class AuditService {
     // trail shows up in /api/status rather than having to be inferred.
     status.set(getAuditStatus$({ writeAccess$, derivedStatus$: status.derivedStatus$ }));
 
-    // Configure logging during setup, when the license changes, and when a write fails at runtime
     logging.configure(
       state$.pipe(
         map(({ features, writeAccess }) =>
@@ -295,9 +286,6 @@ export const createLoggingConfig =
           }
         : baseAppender;
 
-    // Only the file-backed appenders can fail mid-write, and only this handler opts them out of
-    // crashing Kibana. Injecting it here (rather than accepting it from `config.appender`) is what
-    // keeps the behavior scoped to the audit log: it always overwrites whatever the config held.
     const auditTrailAppender =
       onWriteError && (appender.type === 'file' || appender.type === 'rolling-file')
         ? { ...appender, onWriteError }

@@ -67,7 +67,6 @@ export class RollingFileManager {
     this.writeFailed = true;
     const stream = this.outputStream;
     this.outputStream = undefined;
-    // `closeStream` can no longer reach the stream, so release the descriptor here.
     stream?.destroy();
     this.onWriteError!(toLogFileWriteError(error, this.filePath));
   }

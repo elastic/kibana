@@ -264,8 +264,6 @@ describe('write failures', () => {
     });
 
     it('lets a layout failure through instead of blaming the file', () => {
-      // A record that cannot be formatted is a bad record, not a broken disk. Treating it as a
-      // write error would latch the appender off and report the file as unwritable.
       const stream = createMockStream();
       mockCreateWriteStream.mockReturnValue(stream);
       const onWriteError = jest.fn();

@@ -67,9 +67,6 @@ export class FileAppender implements DisposableAppender {
       return;
     }
 
-    // Formatted outside the `try`: a layout failure (`JSON.stringify` on a circular record, say) is
-    // a bad record, not a broken file. Reporting it as a write error would latch `writeFailed` and
-    // silently drop every later record. Matches `RollingFileAppender`, which formats before writing.
     const content = `${this.layout.format(record)}\n`;
 
     try {
@@ -100,7 +97,6 @@ export class FileAppender implements DisposableAppender {
     this.writeFailed = true;
     const stream = this.outputStream;
     this.outputStream = undefined;
-    // `dispose` can no longer reach the stream, so release the descriptor here.
     stream?.destroy();
     this.onWriteError!(toLogFileWriteError(error, this.path));
   }

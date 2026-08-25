@@ -1089,14 +1089,10 @@ describe('runtime audit log write failures', () => {
   };
 
   it('reports a status before the license resolves, so core does not time the check out', () => {
-    // `license.features$` only emits once the first Elasticsearch license fetch resolves. If the
-    // status observable stays silent, core replaces it with `unavailable: Status check timed out
-    // after 30s`, hiding the derived status that names the real problem.
     const audit = new AuditService(logger);
     const statusMock = statusServiceMock.createSetupContract();
 
     audit.setup({
-      // Never emits, standing in for Elasticsearch being unreachable at boot.
       license: licenseMock.create(new Subject<Partial<SecurityLicenseFeatures>>()),
       config: createAuditConfig({
         enabled: true,
