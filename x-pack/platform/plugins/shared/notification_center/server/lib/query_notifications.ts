@@ -35,11 +35,15 @@ export interface NotificationQueryDeps {
 }
 
 /**
- * Doc-level filters. Only attributes identical across every copy of a notification
- * (`namespace`, `type`) may filter here — a filter on mutable state would change which copy
+ * Doc-level filters. User-supplied filters are limited to attributes identical across every copy
+ * of a notification (`namespace`, `type`): a filter on mutable state would change which copy
  * represents the collapsed group, and with it the timestamp the read annotation anchors on.
- * `from`/`to` selects which copies are candidates for the window: a notification appears if
- * any copy falls inside it, represented by its newest in-window copy.
+ * `from`/`to` selects which copies are candidates for the window: a notification appears if any
+ * copy falls inside it, represented by its newest in-window copy.
+ *
+ * The severity TTL gate is the one filter on mutable state, and it is retention rather than a
+ * facet. A downgraded re-push expires before an older, higher-severity copy, so until that copy
+ * leaves its own window it can hand the group a stale representative.
  */
 const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryContainer[] => {
   const { namespace, type, from, to } = params;

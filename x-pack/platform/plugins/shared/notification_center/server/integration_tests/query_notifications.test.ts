@@ -18,7 +18,6 @@ import {
 } from '../storage/notification_data_stream';
 import { queryNotifications } from '../lib/query_notifications';
 import type { NotificationReadState } from '../lib/read_state';
-import { READ_ALL_BEFORE_DEFAULT } from '../storage/user_storage';
 
 const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
@@ -153,8 +152,8 @@ describe('queryNotifications [integration]', () => {
     const { items } = await query();
 
     expect(items.every((item) => !('isRead' in item))).toBe(true);
-    // A marker at the epoch default annotates instead of skipping: everything reads unread
-    const annotated = await query({}, { overrides: {}, readAllBefore: READ_ALL_BEFORE_DEFAULT });
+    // An all-unread annotation is still an annotation: `isRead: false` everywhere, not absent
+    const annotated = await query({}, { overrides: {}, readAllBefore: daysAgo(365) });
     expect(annotated.items.every(({ isRead }) => isRead === false)).toBe(true);
   });
 });

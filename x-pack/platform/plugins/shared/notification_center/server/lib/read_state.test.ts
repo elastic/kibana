@@ -19,7 +19,7 @@ import { getReadState, isReadAt, markRead, markAllRead } from './read_state';
 const createClient = (initial: { overrides?: ReadOverrides; readAllBefore?: string } = {}) => {
   const store: Record<string, unknown> = {
     [OVERRIDES_KEY]: initial.overrides ?? {},
-    ...(initial.readAllBefore ? { [READ_ALL_BEFORE_KEY]: initial.readAllBefore } : {}),
+    [READ_ALL_BEFORE_KEY]: initial.readAllBefore ?? READ_ALL_BEFORE_DEFAULT,
   };
   const client: IUserStorageClient = {
     get: jest.fn(async (key: string) => store[key]),
@@ -48,14 +48,16 @@ describe('markRead', () => {
     expect(Date.parse(stored.b.markedAt)).not.toBeNaN();
   });
 
-  it('is a no-op when the id is already read', async () => {
-    const { client, store } = createClient({
-      overrides: { a: readOverride('2026-07-01T00:00:00.000Z') },
-    });
+  it('re-stamps markedAt for an id that is already read', async () => {
+    const markedAt = '2026-07-01T00:00:00.000Z';
+    const { client, store } = createClient({ overrides: { a: readOverride(markedAt) } });
     await markRead(client, 'a');
 
-    expect(store[OVERRIDES_KEY]).toEqual({ a: readOverride('2026-07-01T00:00:00.000Z') });
-    expect(client.set).not.toHaveBeenCalled();
+    // The override anchors on the copy in hand, so re-marking has to move the anchor forward or
+    // an id re-pushed since the last mark can never be read again.
+    const stored = store[OVERRIDES_KEY] as ReadOverrides;
+    expect(stored.a.read).toBe(true);
+    expect(Date.parse(stored.a.markedAt)).toBeGreaterThan(Date.parse(markedAt));
   });
 
   it('caps overrides at MAX_OVERRIDES, dropping the oldest by markedAt', async () => {
@@ -112,6 +114,25 @@ describe('getReadState', () => {
     });
   });
 
+  it('stamps the catch-up marker on a first read', async () => {
+    const { client, store } = createClient();
+
+    const state = await getReadState(client, loggingSystemMock.createLogger());
+
+    const stamped = store[READ_ALL_BEFORE_KEY] as string;
+    expect(state?.readAllBefore).toBe(stamped);
+    // The marker postdates the backlog, so what the user inherits reads as read
+    expect(state && isReadAt(state, 'a', '2026-01-01T00:00:00.000Z')).toBe(true);
+  });
+
+  it('leaves an existing marker untouched', async () => {
+    const { client } = createClient({ readAllBefore: '2026-07-02T00:00:00.000Z' });
+
+    await getReadState(client, loggingSystemMock.createLogger());
+
+    expect(client.set).not.toHaveBeenCalled();
+  });
+
   it('degrades to an unannotated list when userStorage fails', async () => {
     const { client } = createClient();
     (client.get as jest.Mock).mockRejectedValue(new Error('boom'));
@@ -137,7 +158,7 @@ describe('isReadAt', () => {
   it('prefers a read override over the marker, anchored on when it was recorded', () => {
     const state = {
       overrides: { a: readOverride('2026-07-10T00:00:00.000Z') },
-      readAllBefore: READ_ALL_BEFORE_DEFAULT,
+      readAllBefore: '2026-01-01T00:00:00.000Z',
     };
 
     expect(at('2026-07-09T00:00:00.000Z', state)).toBe(true);
