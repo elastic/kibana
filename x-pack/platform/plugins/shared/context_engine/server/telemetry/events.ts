@@ -53,7 +53,7 @@ const kiWriteEventSchema: RootSchema<ReportKiWriteEventParams> = {
     type: 'keyword',
     _meta: {
       description:
-        'Error type on failure, from a fixed set of error names/workflow ExecutionError types; "unknown" otherwise. Never the error message.',
+        'Error type on failure: the error class name or workflow ExecutionError type; "unknown" otherwise.',
       optional: true,
     },
   },
