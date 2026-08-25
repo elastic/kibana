@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SourceDisplayMode } from '../types';
 
 export const SOURCE_COLUMN = '_source';
@@ -29,7 +28,7 @@ export const isSummaryOnlyColumn = (columns: string[]): boolean =>
  */
 export function getDisplayedColumns(
   stateColumns: string[] = [],
-  dataView?: DataView,
+  timeFieldName?: string,
   sourceDisplayMode: SourceDisplayMode = 'summary'
 ) {
   // JSON mode is a single JSON cell; selected fields filter that cell instead of becoming their own
@@ -40,7 +39,7 @@ export function getDisplayedColumns(
   return stateColumns &&
     stateColumns.length > 0 &&
     // check if all columns where removed except the configured timeField (this can't be removed)
-    !(stateColumns.length === 1 && stateColumns[0] === dataView?.timeFieldName)
+    !(stateColumns.length === 1 && stateColumns[0] === timeFieldName)
     ? stateColumns
     : SOURCE_ONLY;
 }

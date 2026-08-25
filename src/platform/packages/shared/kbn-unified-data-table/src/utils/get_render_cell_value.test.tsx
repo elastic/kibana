@@ -16,7 +16,7 @@ import type { EuiDataGridSetCellProps } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import userEvent from '@testing-library/user-event';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { EsqlSource, IndexPatternSource } from '@kbn/data-source';
+import { EsqlSource, IndexPatternSource, getFieldFromDataSource } from '@kbn/data-source';
 import {
   createDataViewWithBytesField,
   createFormatFieldValueReactSpy,
@@ -26,7 +26,6 @@ import {
 import { screen, waitFor, within } from '@testing-library/react';
 import * as sourceDocumentModule from '../components/source_document';
 import * as sourcePopoverContentModule from '../components/source_popover_content';
-import { getFieldFromDataSource } from './get_field_from_data_source';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';

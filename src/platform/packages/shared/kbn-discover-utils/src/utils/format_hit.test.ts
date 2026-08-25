@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EsqlSource, IndexPatternSource } from '@kbn/data-source';
 import { dataViewMock } from '../__mocks__';
 import { formatHitReact } from './format_hit';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -14,6 +15,7 @@ import type { DataTableRecord, EsHitRecord } from '../types';
 import { buildDataTableRecord } from './build_data_record';
 
 describe('formatHitReact', () => {
+  const dataSourceMock = new IndexPatternSource(dataViewMock);
   let row: DataTableRecord;
   let hit: EsHitRecord;
   beforeEach(() => {
@@ -36,7 +38,7 @@ describe('formatHitReact', () => {
   it('formats a document as expected using convertToReact', () => {
     const formatted = formatHitReact(
       row,
-      dataViewMock,
+      dataSourceMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       220,
       fieldFormatsMock,
@@ -62,7 +64,7 @@ describe('formatHitReact', () => {
 
     const formatted = formatHitReact(
       highlightHit,
-      dataViewMock,
+      dataSourceMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       220,
       fieldFormatsMock,
@@ -87,7 +89,7 @@ describe('formatHitReact', () => {
     );
     const formatted = formatHitReact(
       highlightHit,
-      dataViewMock,
+      dataSourceMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       220,
       fieldFormatsMock,
@@ -105,7 +107,7 @@ describe('formatHitReact', () => {
   it('only limits count of pairs based on advanced setting', () => {
     const formatted = formatHitReact(
       row,
-      dataViewMock,
+      dataSourceMock,
       (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       2,
       fieldFormatsMock,
@@ -121,7 +123,7 @@ describe('formatHitReact', () => {
   it('should not include fields not mentioned in fieldsToShow', () => {
     const formatted = formatHitReact(
       row,
-      dataViewMock,
+      dataSourceMock,
       (fieldName) => ['_index', 'message', 'object.value'].includes(fieldName),
       220,
       fieldFormatsMock,
@@ -151,7 +153,7 @@ describe('formatHitReact', () => {
 
     const formatted = formatHitReact(
       highlightHit,
-      dataViewMock,
+      dataSourceMock,
       (fieldName) => ['_index', 'object'].includes(fieldName),
       220,
       fieldFormatsMock,
@@ -169,7 +171,7 @@ describe('formatHitReact', () => {
   it('should filter fields based on their real name not displayName', () => {
     const formatted = formatHitReact(
       row,
-      dataViewMock,
+      dataSourceMock,
       (fieldName) => ['_index', 'bytes'].includes(fieldName),
       220,
       fieldFormatsMock,
@@ -196,11 +198,11 @@ describe('formatHitReact', () => {
       dataViewMock
     );
 
-    formatHitReact(rowWithNullishFields, dataViewMock, () => true, 2, fieldFormatsMock);
+    formatHitReact(rowWithNullishFields, dataSourceMock, () => true, 2, fieldFormatsMock);
 
     const formatted = formatHitReact(
       rowWithNullishFields,
-      dataViewMock,
+      dataSourceMock,
       () => true,
       2,
       fieldFormatsMock,
@@ -232,7 +234,7 @@ describe('formatHitReact', () => {
 
     const formatted = formatHitReact(
       rowWithFalsyFields,
-      dataViewMock,
+      dataSourceMock,
       () => true,
       3,
       fieldFormatsMock,
@@ -247,5 +249,29 @@ describe('formatHitReact', () => {
       ['c_false_value', 'c_false_value'],
       ['and 1 more field', null],
     ]);
+  });
+
+  it('formats ES|QL computed columns using the type reported by the query result', async () => {
+    const esqlSource = await EsqlSource.create({
+      query: 'FROM logs | EVAL custom_bytes = bytes * 2',
+      resultColumns: [
+        { id: 'custom_bytes', name: 'custom_bytes', meta: { type: 'number', esType: 'long' } },
+      ],
+    });
+    const esqlRow = buildDataTableRecord({
+      _id: 'esql-1',
+      _index: 'logs',
+      _source: { custom_bytes: 7124 },
+    });
+    (fieldFormatsMock.getDefaultInstance as jest.Mock).mockClear();
+
+    const formatted = formatHitReact(esqlRow, esqlSource, () => true, 220, fieldFormatsMock);
+
+    expect(formatted.map(([displayName, , fieldName]) => [displayName, fieldName])).toEqual([
+      ['custom_bytes', 'custom_bytes'],
+    ]);
+    // An ES|QL source has no DataView, so the default formatter for the column's own
+    // type is used — falling back to STRING here would drop number formatting.
+    expect(fieldFormatsMock.getDefaultInstance).toHaveBeenCalledWith('number');
   });
 });

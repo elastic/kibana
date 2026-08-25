@@ -22,7 +22,7 @@ import type { UnifiedDataTableSettingsColumn } from '../types';
 const columns = ['extension', 'message'];
 const columnsWithTimeCol = getVisibleColumns(
   ['extension', 'message'],
-  dataViewWithTimefieldMock,
+  dataViewWithTimefieldMock.timeFieldName,
   true
 ) as string[];
 
@@ -303,7 +303,7 @@ describe('Data table columns', function () {
     it('returns eui grid with in memory sorting for text based languages and columns on the dataview', async () => {
       const columnsNotInDataview = getVisibleColumns(
         ['extension'],
-        dataViewWithTimefieldMock,
+        dataViewWithTimefieldMock.timeFieldName,
         true
       ) as string[];
       const dataSource = await createTextBasedDataSource({
@@ -440,7 +440,7 @@ describe('Data table columns', function () {
     it('returns eui grid with in memory sorting for text based languages and columns not on the columnsMeta', async () => {
       const columnsNotInDataview = getVisibleColumns(
         ['var_test'],
-        dataViewWithTimefieldMock,
+        dataViewWithTimefieldMock.timeFieldName,
         true
       ) as string[];
       const dataSource = await createTextBasedDataSource({

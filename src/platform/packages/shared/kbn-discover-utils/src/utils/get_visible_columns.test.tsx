@@ -18,7 +18,7 @@ describe('getVisibleColumns utils', function () {
     it('returns grid columns without time column when data view has no timestamp field', () => {
       const actual = getVisibleColumns(
         ['extension', 'message'],
-        dataViewMockWithoutTimeField,
+        dataViewMockWithoutTimeField.timeFieldName,
         true
       ) as string[];
       expect(actual).toEqual(['extension', 'message']);
@@ -27,7 +27,7 @@ describe('getVisibleColumns utils', function () {
     it('returns grid columns without time column when showTimeCol is falsy', () => {
       const actual = getVisibleColumns(
         ['extension', 'message'],
-        dataViewMockWithTimeField,
+        dataViewMockWithTimeField.timeFieldName,
         false
       ) as string[];
       expect(actual).toEqual(['extension', 'message']);
@@ -36,7 +36,7 @@ describe('getVisibleColumns utils', function () {
     it('returns grid columns with time column when data view has timestamp field', () => {
       const actual = getVisibleColumns(
         ['extension', 'message'],
-        dataViewMockWithTimeField,
+        dataViewMockWithTimeField.timeFieldName,
         true
       ) as string[];
       expect(actual).toEqual(['@timestamp', 'extension', 'message']);
@@ -59,9 +59,7 @@ describe('getVisibleColumns utils', function () {
         }
       });
 
-      it('should return false if no _source column is passed, text-based datasource', () => {
-        // The time field is only ever prepended alongside the summary (`_source`) column in
-        // ES|QL mode; individual field columns never trigger it, regardless of showTimeCol.
+      it('should forward showTimeCol if no _source columns is passed, text-based datasource', () => {
         for (const showTimeCol of [true, false]) {
           expect(
             canPrependTimeFieldColumn(
@@ -71,7 +69,7 @@ describe('getVisibleColumns utils', function () {
               showTimeCol,
               true
             )
-          ).toBe(false);
+          ).toBe(showTimeCol);
         }
       });
 

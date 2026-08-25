@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-
 export function canPrependTimeFieldColumn(
   columns: string[] | undefined,
   timeFieldName: string | undefined,
@@ -21,7 +19,7 @@ export function canPrependTimeFieldColumn(
   }
 
   if (isESQLMode) {
-    return !!columns && hasTimeFieldInResult && columns.includes('_source');
+    return !!columns && hasTimeFieldInResult;
   }
 
   return true;
@@ -29,11 +27,9 @@ export function canPrependTimeFieldColumn(
 
 export function getVisibleColumns(
   columns: string[],
-  dataView: DataView | undefined,
+  timeFieldName: string | undefined,
   shouldPrependTimeFieldColumn: boolean
 ) {
-  const timeFieldName = dataView?.timeFieldName;
-
   if (
     shouldPrependTimeFieldColumn &&
     timeFieldName &&

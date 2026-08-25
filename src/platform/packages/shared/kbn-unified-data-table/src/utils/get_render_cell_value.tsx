@@ -14,7 +14,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { type DataSource, IndexPatternSource } from '@kbn/data-source';
+import { type DataSource, IndexPatternSource, getFieldFromDataSource } from '@kbn/data-source';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
@@ -24,7 +24,6 @@ import { SourceDocument } from '../components/source_document';
 import { SourceDocumentJsonMode } from '../components/source_document_json_mode';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
-import { getFieldFromDataSource } from './get_field_from_data_source';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
 

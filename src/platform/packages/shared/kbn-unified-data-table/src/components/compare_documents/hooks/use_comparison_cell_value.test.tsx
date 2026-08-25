@@ -15,6 +15,7 @@ import { render, screen, renderHook, within } from '@testing-library/react';
 import React from 'react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
+import { IndexPatternSource } from '@kbn/data-source';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { UseComparisonCellValueProps } from './use_comparison_cell_value';
 import { useComparisonCellValue } from './use_comparison_cell_value';
@@ -55,7 +56,7 @@ const fieldColumnId = 'fieldColumnId';
 
 const renderComparisonCellValue = (props: Partial<UseComparisonCellValueProps> = {}) => {
   const defaultProps: UseComparisonCellValueProps = {
-    dataView: dataViewWithTimefieldMock,
+    dataSource: new IndexPatternSource(dataViewWithTimefieldMock),
     comparisonFields: ['message', 'extension', 'bytes'],
     fieldColumnId,
     selectedDocIds: ['0', '1', '2'],

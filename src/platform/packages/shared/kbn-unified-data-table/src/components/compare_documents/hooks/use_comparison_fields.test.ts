@@ -13,8 +13,9 @@ import type { UseComparisonFieldsProps } from './use_comparison_fields';
 import { MAX_COMPARISON_FIELDS, useComparisonFields } from './use_comparison_fields';
 import { buildDataViewMock, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
-import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { fieldList } from '@kbn/data-views-plugin/common';
+import { EsqlSource, IndexPatternSource } from '@kbn/data-source';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 
 const matchValues = (hit: EsHitRecord) => {
@@ -31,12 +32,13 @@ const clearValues = (hit: EsHitRecord) => {
 
 const renderFields = ({
   props,
+  dataView = dataViewWithTimefieldMock,
   transformHit = (hit) => hit,
 }: {
   props?: Partial<Omit<UseComparisonFieldsProps, 'docMap'>>;
+  dataView?: DataView;
   transformHit?: (hit: EsHitRecord) => EsHitRecord;
 } = {}) => {
-  const dataView = props?.dataView ?? dataViewWithTimefieldMock;
   const docs = generateEsHits(dataView, 5).map((hit) =>
     buildDataTableRecord(transformHit(hit), dataView)
   );
@@ -47,7 +49,7 @@ const renderFields = ({
     },
   } = renderHook(() =>
     useComparisonFields({
-      dataView,
+      dataSource: new IndexPatternSource(dataView),
       selectedFieldNames: ['message', 'extension', 'bytes'],
       selectedDocIds: ['0', '1', '2'],
       showAllFields: true,
@@ -154,8 +156,23 @@ describe('useComparisonFields', () => {
       name: 'test',
       fields: fieldList(fields),
     });
-    const { comparisonFields, totalFields } = renderFields({ props: { dataView } });
+    const { comparisonFields, totalFields } = renderFields({ dataView });
     expect(comparisonFields).toHaveLength(fields.length - overflow);
     expect(totalFields).toBe(fields.length);
+  });
+
+  it('should return all fields from an ES|QL source, which has no DataView', async () => {
+    const dataSource = await EsqlSource.create({
+      query: 'FROM logstash-*',
+      resultColumns: [
+        { id: 'timestamp', name: 'timestamp', meta: { type: 'date' } },
+        { id: 'message', name: 'message', meta: { type: 'string' } },
+        { id: 'bytes', name: 'bytes', meta: { type: 'number' } },
+      ],
+      timeFieldName: 'timestamp',
+    });
+    const { comparisonFields, totalFields } = renderFields({ props: { dataSource } });
+    expect(comparisonFields).toEqual(['timestamp', 'bytes', 'message']);
+    expect(totalFields).toBe(3);
   });
 });

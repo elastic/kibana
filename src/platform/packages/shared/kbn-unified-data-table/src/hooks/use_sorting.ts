@@ -10,7 +10,7 @@
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getSortingCriteria, NonStringSortableFieldType } from '@kbn/sort-predicates';
-import { type DataSource, IndexPatternSource } from '@kbn/data-source';
+import { type DataSource, IndexPatternSource, getFieldFromDataSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useMemo } from 'react';
@@ -18,7 +18,6 @@ import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/
 import type { SortOrder } from '../components/data_table';
 import { kibanaJSON } from '../constants';
 import { SOURCE_COLUMN } from '../utils/columns';
-import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
 
 export const useSorting = ({
   rows,

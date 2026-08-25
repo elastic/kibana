@@ -8,11 +8,10 @@
  */
 
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
-import { type DataSource, IndexPatternSource } from '@kbn/data-source';
+import { type DataSource, IndexPatternSource, getFieldFromDataSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
-import { getFieldFromDataSource } from './get_field_from_data_source';
 import type { SourceDisplayMode } from '../types';
 import { SOURCE_COLUMN } from './columns';
 import { sourceDocumentToJsonString } from './build_document_tree';

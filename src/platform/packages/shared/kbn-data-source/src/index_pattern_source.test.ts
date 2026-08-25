@@ -41,9 +41,13 @@ function makeDataViewMock(
 }
 
 describe('IndexPatternSource', () => {
-  it('throws when constructed with a DataView that has no id', () => {
+  it('allows construction with a DataView that has no id', () => {
     const dv = makeDataViewMock({ id: undefined });
-    expect(() => new IndexPatternSource(dv)).toThrow(/requires a DataView with an id/);
+    const source = new IndexPatternSource(dv);
+
+    expect(source.id).toBe('');
+    expect(source.references).toEqual([]);
+    expect(source.getDataView()).toBe(dv);
   });
 
   it('exposes kind = "index-pattern"', () => {
@@ -175,6 +179,16 @@ describe('IndexPatternSource', () => {
 
       expect(source.serialize()).not.toHaveProperty('fields');
       expect(source.serialize()).not.toHaveProperty('columns');
+    });
+
+    it('serializes with an empty id when the DataView has none', () => {
+      const source = new IndexPatternSource(makeDataViewMock({ id: undefined }));
+
+      expect(source.serialize()).toEqual({
+        kind: 'index-pattern',
+        id: '',
+        references: [],
+      });
     });
   });
 

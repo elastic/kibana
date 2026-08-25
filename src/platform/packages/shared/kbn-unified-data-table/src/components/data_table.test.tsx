@@ -257,6 +257,43 @@ describe('UnifiedDataTable', () => {
     jest.clearAllMocks();
   });
 
+  describe('dataView backwards compatibility', () => {
+    it(
+      'renders when given a dataView instead of dataSource',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          dataSource: undefined,
+          dataView: dataViewMock,
+        });
+
+        expect(screen.getByTestId('discoverDocTable')).toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'renders when the dataView has no id',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          dataSource: undefined,
+          dataView: Object.assign(
+            buildDataViewMock({
+              fields: deepMockedFields,
+              name: 'the-data-view',
+              timeFieldName: '@timestamp',
+            }),
+            { id: undefined }
+          ),
+        });
+
+        expect(screen.getByTestId('discoverDocTable')).toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+  });
+
   describe('Document selection', () => {
     it(
       'no documents are selected initially',

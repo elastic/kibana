@@ -13,6 +13,7 @@ import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { act, render } from '@testing-library/react';
 import { omit } from 'lodash';
 import React from 'react';
+import { IndexPatternSource } from '@kbn/data-source';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import type { CompareDocumentsProps } from './compare_documents';
 import CompareDocuments from './compare_documents';
@@ -66,7 +67,7 @@ const renderCompareDocuments = ({
       consumer="test"
       ariaDescribedBy="test"
       ariaLabelledBy="test"
-      dataView={dataViewWithTimefieldMock}
+      dataSource={new IndexPatternSource(dataViewWithTimefieldMock)}
       isPlainRecord={false}
       selectedFieldNames={['message', 'extension', 'bytes']}
       selectedDocIds={['0', '1', '2']}

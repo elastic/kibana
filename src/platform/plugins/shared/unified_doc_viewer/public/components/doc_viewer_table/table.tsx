@@ -226,13 +226,14 @@ const InternalDocViewerTable = ({
 
   const displayedFieldNames = useMemo(() => {
     if (shouldShowOnlySelectedFields) {
+      const timeFieldName = dataSource?.timeFieldName ?? dataView.timeFieldName;
       return getVisibleColumns(
         fieldsFromColumns,
-        dataView,
+        timeFieldName,
         canPrependTimeFieldColumn(
           columns,
-          dataView.timeFieldName,
-          Boolean(dataView.timeFieldName && dataSource?.getColumn(dataView.timeFieldName)),
+          timeFieldName,
+          Boolean(timeFieldName && dataSource?.getColumn(timeFieldName)),
           !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
           isEsqlMode
         )

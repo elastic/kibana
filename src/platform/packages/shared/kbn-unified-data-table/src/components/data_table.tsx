@@ -67,9 +67,8 @@ import {
   useDataGridInTableSearch,
 } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
-import { type DataSource, IndexPatternSource } from '@kbn/data-source';
+import { type DataSource, IndexPatternSource, getFieldFromDataSource } from '@kbn/data-source';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
-import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
 import type {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -173,6 +172,11 @@ interface InternalUnifiedDataTableProps {
    * for ES|QL. Internal helpers consume this exclusively.
    */
   dataSource?: DataSource;
+  /**
+   * @deprecated Pass `dataSource` instead. Kept so existing DSL consumers can
+   * keep passing a `DataView`; it is wrapped in an `IndexPatternSource` internally.
+   */
+  dataView?: DataView;
   /**
    * Field tokens could be rendered in column header next to the field name.
    */
@@ -548,6 +552,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       ariaLabelledBy,
       columns,
       dataSource: dataSourceProp,
+      dataView: dataViewProp,
       showColumnTokens,
       canDragAndDropColumns,
       configHeaderRowHeight,
@@ -635,14 +640,20 @@ const InternalUnifiedDataTable = React.forwardRef<
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
     useImperativeHandle(ref, () => dataGridRef.current!);
 
-    const dataSource = dataSourceProp;
+    const dataSource = useMemo(() => {
+      if (dataSourceProp) {
+        return dataSourceProp;
+      }
+      return dataViewProp ? new IndexPatternSource(dataViewProp) : undefined;
+    }, [dataSourceProp, dataViewProp]);
     const dataView =
-      dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
+      dataSource instanceof IndexPatternSource ? dataSource.getDataView() : dataViewProp;
+    const timeFieldName = dataSource?.timeFieldName;
 
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
-    const displayedColumns = getDisplayedColumns(columns, dataView, sourceDisplayMode);
+    const displayedColumns = getDisplayedColumns(columns, timeFieldName, sourceDisplayMode);
     const isSummaryOnlyColumn = getIsSummaryOnlyColumn(displayedColumns);
     const showSummaryColumn = getShowSummaryColumn(displayedColumns);
 
@@ -677,7 +688,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
     }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
 
-    const timeFieldName = dataSource?.timeFieldName;
     const shouldPrependTimeFieldColumn = useCallback(
       (activeColumns: string[]) =>
         canPrependTimeFieldColumn(
@@ -693,10 +703,10 @@ const InternalUnifiedDataTable = React.forwardRef<
     const visibleColumns = useMemo(() => {
       return getVisibleColumns(
         displayedColumns,
-        dataView,
+        timeFieldName,
         shouldPrependTimeFieldColumn(displayedColumns)
       );
-    }, [dataView, displayedColumns, shouldPrependTimeFieldColumn]);
+    }, [timeFieldName, displayedColumns, shouldPrependTimeFieldColumn]);
 
     const { sortedRows, sorting } = useSorting({
       rows,
@@ -1508,7 +1518,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 consumer={consumer}
                 ariaDescribedBy={randomId}
                 ariaLabelledBy={ariaLabelledBy}
-                dataView={dataView}
+                dataSource={dataSource}
                 isPlainRecord={isPlainRecord}
                 selectedFieldNames={visibleColumns}
                 selectedDocIds={docIdsInSelectionOrder}

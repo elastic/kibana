@@ -19,6 +19,7 @@ export { IndexPatternSource } from './src/index_pattern_source';
 export { EsqlSource } from './src/esql_source';
 export type { EsqlSourceArgs } from './src/esql_source';
 export { columnFromDataViewField, columnFromDatatableColumn } from './src/to_column';
+export { getFieldFromDataSource } from './src/get_field';
 export { DataSourceService } from './src/data_source_service';
 export type { DataViewLookup } from './src/data_source_service';
 export {

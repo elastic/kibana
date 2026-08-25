@@ -17,6 +17,7 @@ import {
   EuiToken,
 } from '@elastic/eui';
 import React from 'react';
+import { IndexPatternSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { formatHitReact } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -66,11 +67,10 @@ export function createDocumentSummaryCellRenderer(options: {
         dataView && typeof dataView.getFieldByName === 'function'
           ? formatHitReact(
               row as DataTableRecord,
-              dataView,
+              new IndexPatternSource(dataView),
               () => true,
               maxEntries,
-              fieldFormats,
-              undefined
+              fieldFormats
             )
           : [];
 

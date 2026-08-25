@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
-import { type DataSource, EsqlSource, IndexPatternSource } from '@kbn/data-source';
+import type { DataSource } from './types';
+import { EsqlSource } from './esql_source';
+import { IndexPatternSource } from './index_pattern_source';
 
 /**
  * Resolves a `DataViewField` for a given column name from a `DataSource`.

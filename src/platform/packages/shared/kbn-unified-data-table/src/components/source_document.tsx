@@ -15,7 +15,7 @@ import type {
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/src/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { type DataSource, IndexPatternSource } from '@kbn/data-source';
+import { type DataSource, IndexPatternSource, getFieldFromDataSource } from '@kbn/data-source';
 import { formatFieldValueReact, formatHitReact } from '@kbn/discover-utils';
 import {
   EuiDescriptionList,
@@ -27,7 +27,6 @@ import {
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classnames from 'classnames';
 import { getInnerColumns } from '../utils/columns';
-import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 const SKIP_NULLISH_VALUES_FORMAT_OPTIONS = { skipNullishValues: true };
@@ -58,7 +57,6 @@ export function SourceDocument({
   isCompressed?: boolean;
 }) {
   const styles = useMemoCss(componentStyles);
-  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairsReact(
         row,
@@ -70,7 +68,7 @@ export function SourceDocument({
       ).slice(0, maxEntries)
     : formatHitReact(
         row,
-        dataView,
+        dataSource,
         shouldShowFieldHandler,
         maxEntries,
         fieldFormats,

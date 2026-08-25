@@ -20,7 +20,7 @@ import {
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { type DataSource, IndexPatternSource } from '@kbn/data-source';
+import { type DataSource, IndexPatternSource, getFieldFromDataSource } from '@kbn/data-source';
 import { SOURCE_COLUMN } from '../utils/columns';
 import { ExpandButton } from './data_table_expand_button';
 import type {
@@ -29,7 +29,6 @@ import type {
   UnifiedDataTableSettings,
 } from '../types';
 import type { ValueToStringConverter } from '../types';
-import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton, getSelectAllButton } from './data_table_document_selection';

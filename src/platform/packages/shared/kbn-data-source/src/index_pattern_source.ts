@@ -29,14 +29,15 @@ export class IndexPatternSource implements DataSource {
   public readonly references: SavedObjectReference[];
 
   constructor(private readonly dataView: DataView) {
-    if (!dataView.id) {
-      throw new Error('IndexPatternSource requires a DataView with an id');
-    }
-    this.references = [{ type: 'index-pattern', id: dataView.id, name: 'data-source' }];
+    // Ad-hoc DataViews and test mocks may omit `id`. Table rendering only needs
+    // the wrapped DataView; identity/references are empty until an id exists.
+    this.references = dataView.id
+      ? [{ type: 'index-pattern', id: dataView.id, name: 'data-source' }]
+      : [];
   }
 
   public get id(): string {
-    return this.dataView.id!;
+    return this.dataView.id ?? '';
   }
 
   public get name(): string {

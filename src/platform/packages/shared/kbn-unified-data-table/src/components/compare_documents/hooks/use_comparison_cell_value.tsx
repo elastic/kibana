@@ -9,7 +9,8 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { type DataSource, IndexPatternSource, getFieldFromDataSource } from '@kbn/data-source';
 import { formatFieldValueReact } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -34,7 +35,7 @@ import {
 } from './use_comparison_css';
 
 export interface UseComparisonCellValueProps {
-  dataView?: DataView;
+  dataSource?: DataSource;
   comparisonFields: string[];
   fieldColumnId: string;
   selectedDocIds: string[];
@@ -44,7 +45,7 @@ export interface UseComparisonCellValueProps {
 }
 
 export const useComparisonCellValue = ({
-  dataView,
+  dataSource,
   comparisonFields,
   fieldColumnId,
   selectedDocIds,
@@ -60,7 +61,7 @@ export const useComparisonCellValue = ({
     (props: EuiDataGridCellValueElementProps) => (
       <DiffProvider value={calculateDiffMemoized}>
         <CellValue
-          dataView={dataView}
+          dataSource={dataSource}
           comparisonFields={comparisonFields}
           fieldColumnId={fieldColumnId}
           baseDocId={baseDocId}
@@ -77,7 +78,7 @@ export const useComparisonCellValue = ({
       baseDocId,
       calculateDiffMemoized,
       comparisonFields,
-      dataView,
+      dataSource,
       diffMode,
       fieldColumnId,
       fieldFormats,
@@ -95,9 +96,12 @@ type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocIds'> &
 const EMPTY_VALUE = '-';
 
 const CellValue = (props: CellValueProps) => {
-  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, docMap } = props;
+  const { dataSource, comparisonFields, fieldColumnId, rowIndex, columnId, docMap } = props;
   const fieldName = comparisonFields[rowIndex];
-  const field = useMemo(() => dataView?.fields.getByName(fieldName), [dataView?.fields, fieldName]);
+  const field = useMemo(
+    () => getFieldFromDataSource(dataSource, fieldName),
+    [dataSource, fieldName]
+  );
   const comparisonDoc = useMemo(() => docMap.get(columnId)?.doc, [columnId, docMap]);
 
   if (columnId === fieldColumnId) {
@@ -148,7 +152,7 @@ type DiffCellValueProps = CellValueProps &
   };
 
 const DiffCellValue = ({
-  dataView,
+  dataSource,
   field,
   fieldName,
   baseDocId,
@@ -159,6 +163,8 @@ const DiffCellValue = ({
   fieldFormats,
   setCellProps,
 }: DiffCellValueProps) => {
+  // Only DSL sources expose a DataView, which enables per-field formatter overrides.
+  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
   const baseValue = baseDoc?.[fieldName];
   const comparisonValue = comparisonDoc?.flattened[fieldName];
   const isBaseDoc = columnId === baseDocId;

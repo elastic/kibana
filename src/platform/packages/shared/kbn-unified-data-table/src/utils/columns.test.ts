@@ -13,7 +13,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
 describe('getDisplayedColumns', () => {
   test('returns default columns given a data view without timefield', async () => {
-    const result = getDisplayedColumns([], dataViewMock);
+    const result = getDisplayedColumns([], dataViewMock.timeFieldName);
     expect(result).toMatchInlineSnapshot(`
       Array [
         "_source",
@@ -21,7 +21,7 @@ describe('getDisplayedColumns', () => {
     `);
   });
   test('returns default columns given a data view with timefield', async () => {
-    const result = getDisplayedColumns([], dataViewWithTimefieldMock);
+    const result = getDisplayedColumns([], dataViewWithTimefieldMock.timeFieldName);
     expect(result).toMatchInlineSnapshot(`
       Array [
         "_source",
@@ -29,7 +29,7 @@ describe('getDisplayedColumns', () => {
     `);
   });
   test('returns default columns when just timefield is in state', async () => {
-    const result = getDisplayedColumns(['timestamp'], dataViewWithTimefieldMock);
+    const result = getDisplayedColumns(['timestamp'], dataViewWithTimefieldMock.timeFieldName);
     expect(result).toMatchInlineSnapshot(`
       Array [
         "_source",
@@ -37,7 +37,7 @@ describe('getDisplayedColumns', () => {
     `);
   });
   test('returns columns given by argument, no fallback ', async () => {
-    const result = getDisplayedColumns(['test'], dataViewWithTimefieldMock);
+    const result = getDisplayedColumns(['test'], dataViewWithTimefieldMock.timeFieldName);
     expect(result).toMatchInlineSnapshot(`
       Array [
         "test",
@@ -45,16 +45,18 @@ describe('getDisplayedColumns', () => {
     `);
   });
   test('returns the same instance of ["_source"] over multiple calls', async () => {
-    const result = getDisplayedColumns([], dataViewWithTimefieldMock);
-    const result2 = getDisplayedColumns([], dataViewWithTimefieldMock);
+    const result = getDisplayedColumns([], dataViewWithTimefieldMock.timeFieldName);
+    const result2 = getDisplayedColumns([], dataViewWithTimefieldMock.timeFieldName);
     expect(result).toBe(result2);
   });
   test('returns only the source column in JSON mode even when fields are selected', () => {
-    expect(getDisplayedColumns(['bytes', 'extension'], dataViewWithTimefieldMock, 'json')).toEqual([
-      '_source',
-    ]);
+    expect(
+      getDisplayedColumns(['bytes', 'extension'], dataViewWithTimefieldMock.timeFieldName, 'json')
+    ).toEqual(['_source']);
   });
   test('returns the selected fields in summary mode', () => {
-    expect(getDisplayedColumns(['bytes'], dataViewWithTimefieldMock, 'summary')).toEqual(['bytes']);
+    expect(
+      getDisplayedColumns(['bytes'], dataViewWithTimefieldMock.timeFieldName, 'summary')
+    ).toEqual(['bytes']);
   });
 });

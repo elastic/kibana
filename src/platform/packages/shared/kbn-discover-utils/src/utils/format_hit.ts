@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { type DataSource, IndexPatternSource, getFieldFromDataSource } from '@kbn/data-source';
 import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
@@ -42,12 +42,15 @@ const formattedHitCache = new WeakMap<
  */
 export function formatHitReact(
   hit: DataTableRecord,
-  dataView: DataView | undefined,
+  dataSource: DataSource | undefined,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
   fieldFormats: FieldFormatsStart,
   options?: FormatHitReactOptions
 ): FormattedHit {
+  // Only DSL sources expose a DataView, which enables per-field formatter overrides.
+  // ES|QL columns fall back to the default formatter for the column's type.
+  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
   const skipNullishValues = Boolean(options?.skipNullishValues);
   const cached = formattedHitCache.get(hit.raw);
 
@@ -72,7 +75,7 @@ export function formatHitReact(
       continue;
     }
 
-    const field = dataView?.fields.getByName(key);
+    const field = getFieldFromDataSource(dataSource, key);
     const displayKey = field?.displayName;
     const pairs = highlights[key] ? renderedPairs : otherPairs;
 
@@ -107,7 +110,7 @@ export function formatHitReact(
   // Now format only the values which will be shown to the user
   for (const pair of renderedPairs) {
     const key = pair[2]!;
-    const field = dataView?.fields.getByName(key);
+    const field = getFieldFromDataSource(dataSource, key);
 
     pair[1] = formatFieldValueReact({
       value: flattened[key],

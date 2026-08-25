@@ -17,7 +17,7 @@ import type {
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
@@ -36,7 +36,7 @@ export interface CompareDocumentsProps {
   consumer: string;
   ariaDescribedBy: string;
   ariaLabelledBy: string;
-  dataView?: DataView;
+  dataSource?: DataSource;
   isPlainRecord: boolean;
   selectedFieldNames: string[];
   selectedDocIds: string[];
@@ -65,7 +65,7 @@ const CompareDocuments = ({
   consumer,
   ariaDescribedBy,
   ariaLabelledBy,
-  dataView,
+  dataSource,
   isPlainRecord,
   selectedFieldNames,
   selectedDocIds: originalSelectedDocIds,
@@ -116,7 +116,7 @@ const CompareDocuments = ({
 
   const fieldColumnId = useGeneratedHtmlId({ prefix: 'fields' });
   const { comparisonFields, totalFields } = useComparisonFields({
-    dataView,
+    dataSource,
     selectedFieldNames,
     selectedDocIds,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
@@ -195,7 +195,7 @@ const CompareDocuments = ({
     [additionalControls, comparisonFields, totalFields]
   );
   const renderCellValue = useComparisonCellValue({
-    dataView,
+    dataSource,
     comparisonFields,
     fieldColumnId,
     selectedDocIds,
