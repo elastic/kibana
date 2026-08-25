@@ -190,8 +190,6 @@ export const defaultConfig: ScoutServerConfig = {
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
       '--xpack.fleet.productVersionsApiTimeoutMs=5000',
-      // nightshift_investigations routes are gated off by default
-      '--xpack.nightshift_investigations.enabled=true',
       `--xpack.fleet.fleetServerHosts=${JSON.stringify([
         {
           id: 'default-fleet-server',
