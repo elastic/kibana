@@ -37,6 +37,7 @@ import type {
   GetChangeHistoryByFieldsOptions,
   GetChangeHistoryByFieldsResult,
   ObjectChange,
+  TrackUserAction,
 } from './types';
 import { sha256, sanitizeFields } from './utils';
 
@@ -73,17 +74,25 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
   private kibanaVersion: string;
   private logger: Logger;
   private client?: ChangeHistoryDataStreamClient;
+  private trackUserAction?: TrackUserAction;
 
   constructor({
     module,
     dataset,
     logger,
     kibanaVersion,
+    trackUserAction,
   }: {
     module: string;
     dataset: string;
     logger: Logger;
     kibanaVersion: string;
+    /**
+     * Optional callback used to emit a Kibana user-activity entry for each change that
+     * carries a `userActivity` block, after the change-history write succeeds. Emit
+     * failures are logged and never propagated to the caller.
+     */
+    trackUserAction?: TrackUserAction;
   }) {
     if (module.includes(SEPARATOR_CHAR)) {
       throw new Error(
@@ -99,6 +108,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     this.dataset = dataset;
     this.kibanaVersion = kibanaVersion;
     this.logger = logger;
+    this.trackUserAction = trackUserAction;
   }
 
   /**
@@ -258,6 +268,22 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     } catch (err) {
       this.logger.error(`Error saving change history: ${err}`);
       throw err;
+    }
+
+    // Emit user-activity entries only after the ES bulk create succeeded (success-only
+    // coverage by design). Each emit is isolated: a failing tracker is logged and never
+    // propagated to the caller.
+    if (this.trackUserAction) {
+      for (const { userActivity } of changes) {
+        if (!userActivity) {
+          continue;
+        }
+        try {
+          this.trackUserAction(userActivity);
+        } catch (err) {
+          this.logger.warn(`Failed to track user action "${userActivity.event.action}": ${err}`);
+        }
+      }
     }
   }
 

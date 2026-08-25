@@ -88,6 +88,44 @@ describe('ChangeTrackingService', () => {
     });
   });
 
+  describe('setTrackUserAction', () => {
+    const userActivity = {
+      message: 'User updated rule "a" (id: rule-1).',
+      event: {
+        action: 'alerting_rule_update' as const,
+        type: 'change' as const,
+        outcome: 'success' as const,
+      },
+      object: { id: 'rule-1', name: 'a', type: 'rule', tags: [] },
+    };
+
+    const getInjectedTracker = () => {
+      const ctorArgs = ChangeHistoryClientMock.mock.calls[0]![0] as {
+        trackUserAction?: (params: unknown) => void;
+      };
+      return ctorArgs.trackUserAction;
+    };
+
+    it('injects a lazy tracker into each client that forwards to the tracker set later', () => {
+      service.register('stack');
+      const injected = getInjectedTracker();
+      expect(injected).toEqual(expect.any(Function));
+
+      const trackUserAction = jest.fn();
+      service.setTrackUserAction(trackUserAction);
+      injected!(userActivity);
+
+      expect(trackUserAction).toHaveBeenCalledWith(userActivity);
+    });
+
+    it('is a no-op when the injected tracker is called before setTrackUserAction', () => {
+      service.register('stack');
+      const injected = getInjectedTracker();
+
+      expect(() => injected!(userActivity)).not.toThrow();
+    });
+  });
+
   describe('isInitialized', () => {
     it('delegates to the client isInitialized()', () => {
       service.register('stack');
@@ -328,6 +366,49 @@ describe('ChangeTrackingService', () => {
             username: '',
             userProfileId: undefined,
           })
+        );
+      });
+
+      it('threads the per-change userActivity block through the regrouping', async () => {
+        service.register('stack');
+        const client = ChangeHistoryClientMock.mock.results[0]!.value as MockChangeHistoryClient;
+        initializeService({ username: 'alice' });
+
+        const userActivity = {
+          message: 'User updated rule "a" (id: rule-1).',
+          event: {
+            action: 'alerting_rule_update' as const,
+            type: 'change' as const,
+            outcome: 'success' as const,
+          },
+          object: { id: 'rule-1', name: 'a', type: 'rule', tags: ['tag-1'] },
+        };
+        const changes: RuleChange[] = [
+          {
+            module: 'stack',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            objectId: 'rule-1',
+            snapshot: ruleSnapshot('a'),
+            userActivity,
+          },
+          {
+            module: 'stack',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            objectId: 'rule-2',
+            snapshot: ruleSnapshot('b'),
+          },
+        ];
+
+        await service
+          .asScoped(httpServerMock.createKibanaRequest())
+          .logBulk(changes, { action: 'rule_update', spaceId: 'default' });
+
+        expect(client.logBulk).toHaveBeenCalledWith(
+          [
+            expect.objectContaining({ objectId: 'rule-1', userActivity }),
+            expect.objectContaining({ objectId: 'rule-2', userActivity: undefined }),
+          ],
+          expect.any(Object)
         );
       });
 

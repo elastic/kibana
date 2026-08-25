@@ -48,6 +48,11 @@ describe('logBulkRuleChanges', () => {
         objectType: RULE_SAVED_OBJECT_TYPE,
         module: 'stack',
         snapshot: expect.objectContaining({ id: 'rule-1', name: 'rule rule-1' }),
+        userActivity: {
+          message: 'User deleted rule "rule rule-1" (id: rule-1).',
+          event: { action: 'alerting_rule_delete', type: 'deletion', outcome: 'success' },
+          object: { id: 'rule-1', name: 'rule rule-1', type: 'rule', tags: [] },
+        },
       },
       {
         timestamp: REFERENCE_TIMESTAMP_ISO,
@@ -55,6 +60,11 @@ describe('logBulkRuleChanges', () => {
         objectType: RULE_SAVED_OBJECT_TYPE,
         module: 'stack',
         snapshot: expect.objectContaining({ id: 'rule-2', name: 'rule rule-2' }),
+        userActivity: {
+          message: 'User deleted rule "rule rule-2" (id: rule-2).',
+          event: { action: 'alerting_rule_delete', type: 'deletion', outcome: 'success' },
+          object: { id: 'rule-2', name: 'rule rule-2', type: 'rule', tags: [] },
+        },
       },
     ]);
     expect(opts).toEqual({
@@ -464,6 +474,82 @@ describe('logBulkRuleChanges', () => {
       const [changes] = changeTrackingService.logBulk.mock.calls[0];
       const distinctTimestamps = new Set(changes.map((c) => c.timestamp));
       expect(distinctTimestamps).toEqual(new Set([REFERENCE_TIMESTAMP_ISO]));
+    });
+  });
+
+  describe('user activity block', () => {
+    it.each<{ action: RuleChangeTrackingAction; actionId: string; type: string; message: string }>([
+      {
+        action: RuleChangeTrackingAction.ruleCreate,
+        actionId: 'alerting_rule_create',
+        type: 'creation',
+        message: 'User created rule "rule rule-1" (id: rule-1).',
+      },
+      {
+        action: RuleChangeTrackingAction.ruleSnooze,
+        actionId: 'alerting_rule_snooze',
+        type: 'change',
+        message: 'User snoozed rule "rule rule-1" (id: rule-1).',
+      },
+      {
+        action: RuleChangeTrackingAction.ruleUpdateApiKey,
+        actionId: 'alerting_rule_api_key_update',
+        type: 'change',
+        message: 'User updated the API key of rule "rule rule-1" (id: rule-1).',
+      },
+    ])(
+      'attaches the mapped block for $action with the registered id and message',
+      async ({ action, actionId, type, message }) => {
+        const context = buildContext({ changeTrackingService });
+
+        await logRuleChanges({
+          rulesClientContext: context,
+          ruleSOs: [buildRuleSO('rule-1')],
+          changesContext: { action, timestamp: REFERENCE_TIMESTAMP_MS },
+        });
+
+        const [changes] = changeTrackingService.logBulk.mock.calls[0];
+        expect(changes[0].userActivity).toEqual({
+          message,
+          event: { action: actionId, type, outcome: 'success' },
+          object: { id: 'rule-1', name: 'rule rule-1', type: 'rule', tags: [] },
+        });
+      }
+    );
+
+    it('enriches the block object with the rule tags from the domain transform', async () => {
+      const context = buildContext({ changeTrackingService });
+      const ruleSO = buildRuleSO('rule-1');
+      ruleSO.attributes.tags = ['production', 'cpu'];
+
+      await logRuleChanges({
+        rulesClientContext: context,
+        ruleSOs: [ruleSO],
+        changesContext: {
+          action: RuleChangeTrackingAction.ruleUpdate,
+          timestamp: REFERENCE_TIMESTAMP_MS,
+        },
+      });
+
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes[0].userActivity?.object.tags).toEqual(['production', 'cpu']);
+    });
+
+    it('attaches no block for unmapped (custom) actions and logs a debug message', async () => {
+      const context = buildContext({ changeTrackingService });
+
+      await logRuleChanges({
+        rulesClientContext: context,
+        ruleSOs: [buildRuleSO('rule-1')],
+        changesContext: { action: 'rule_install', timestamp: REFERENCE_TIMESTAMP_MS },
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes[0].userActivity).toBeUndefined();
+      expect(context.logger.debug).toHaveBeenCalledWith(
+        'No user-activity action registered for change-tracking action "rule_install"; logging to change history only'
+      );
     });
   });
 

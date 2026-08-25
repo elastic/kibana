@@ -18,6 +18,7 @@ import type {
   GetHistoryResult,
   LogChangeHistoryOptions,
   GetChangeHistoryOptions,
+  TrackUserAction,
 } from '@kbn/change-history';
 import { ChangeHistoryClient } from '@kbn/change-history';
 import { RULE_SAVED_OBJECT_TYPE, RuleAttributesToEncrypt } from '../../../saved_objects';
@@ -40,6 +41,7 @@ export class ChangeTrackingService implements IChangeTrackingService {
   private modules: RuleTypeSolution[];
   private dataset = ALERTING_RULE_DATASET;
   private authService?: CoreAuthenticationService;
+  private trackUserAction?: TrackUserAction;
 
   constructor(logger: Logger, kibanaVersion: string) {
     this.clients = {} as Record<RuleTypeSolution, ChangeHistoryClient>;
@@ -48,13 +50,29 @@ export class ChangeTrackingService implements IChangeTrackingService {
     this.modules = [];
   }
 
+  /**
+   * Injects the core user-activity tracker (`coreSetup.userActivity.trackUserAction`).
+   * The service is constructed before core setup is available, so the tracker is handed
+   * over here; the per-solution clients receive a lazy closure, making the call order
+   * relative to {@link register} irrelevant.
+   */
+  setTrackUserAction(trackUserAction: TrackUserAction): void {
+    this.trackUserAction = trackUserAction;
+  }
+
   register(module: RuleTypeSolution): void {
     if (this.modules.includes(module)) {
       return;
     }
     this.modules.push(module);
     const { dataset, logger, kibanaVersion } = this;
-    const client = new ChangeHistoryClient({ module, dataset, logger, kibanaVersion });
+    const client = new ChangeHistoryClient({
+      module,
+      dataset,
+      logger,
+      kibanaVersion,
+      trackUserAction: (params) => this.trackUserAction?.(params),
+    });
     this.clients[module] = client;
     this.logger.debug(`Change tracking registered for [${module}, ${this.dataset}]`);
   }
@@ -128,12 +146,12 @@ export class ChangeTrackingService implements IChangeTrackingService {
     // Group rule changes per solution
     const correlationId = crypto.randomBytes(16).toString('hex');
     const groups = changes.reduce((result, change) => {
-      const { objectId, objectType, snapshot, module } = change;
+      const { objectId, objectType, snapshot, module, userActivity } = change;
       let objects = result.get(module);
       if (!objects) {
         result.set(module, (objects = []));
       }
-      objects.push({ objectType, objectId, snapshot });
+      objects.push({ objectType, objectId, snapshot, userActivity });
       return result;
     }, new Map<RuleTypeSolution, ObjectChange[]>());
 
