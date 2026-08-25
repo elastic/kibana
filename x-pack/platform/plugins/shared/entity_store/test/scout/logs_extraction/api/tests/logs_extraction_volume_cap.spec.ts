@@ -17,7 +17,7 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
   clearEntityStoreIndices,
-  ingestLogDoc,
+  ingestDoc,
   LOGS_TEST_INDEX,
 } from '../../../common/fixtures/helpers';
 import {
@@ -95,7 +95,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
 
       try {
         for (let i = 0; i < HOST_TIMESTAMPS.length; i++) {
-          await ingestLogDoc(esClient, {
+          await ingestDoc(esClient, {
             '@timestamp': HOST_TIMESTAMPS[i],
             host: { name: `cap-defer-host-${i + 1}` },
           });
@@ -192,7 +192,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
 
       try {
         for (let i = 0; i < HOST_TIMESTAMPS.length; i++) {
-          await ingestLogDoc(esClient, {
+          await ingestDoc(esClient, {
             '@timestamp': HOST_TIMESTAMPS[i],
             host: { name: `cap-drop-host-${i + 1}` },
           });
@@ -253,7 +253,7 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
 
       try {
         for (let i = 0; i < HOST_TIMESTAMPS.length; i++) {
-          await ingestLogDoc(esClient, {
+          await ingestDoc(esClient, {
             '@timestamp': HOST_TIMESTAMPS[i],
             host: { name: `cap-disabled-host-${i + 1}` },
           });

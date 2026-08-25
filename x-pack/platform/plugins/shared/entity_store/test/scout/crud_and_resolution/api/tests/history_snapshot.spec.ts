@@ -21,6 +21,7 @@ import {
   forceLogExtraction,
   normalizeKeywordList,
   setupLogsTestDataStream,
+  teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
 
 apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
@@ -63,6 +64,7 @@ apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, ()
     });
     expect(response.statusCode).toBe(200);
     await clearEntityStoreIndices(esClient);
+    await teardownLogsTestDataStream(esClient);
   });
 
   apiTest(

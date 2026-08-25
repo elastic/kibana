@@ -29,10 +29,11 @@ import {
 import {
   clearEntityStoreIndices,
   forceLogExtraction,
-  ingestLogDoc,
+  ingestDoc,
   normalizeKeywordList,
   searchDocById,
   setupLogsTestDataStream,
+  teardownLogsTestDataStream,
 } from '../../../common/fixtures/helpers';
 import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../../../../../server/domain/saved_objects';
 
@@ -98,6 +99,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
     expect(response.statusCode).toBe(200);
     await clearEntityStoreIndices(esClient);
+    await teardownLogsTestDataStream(esClient);
   });
 
   apiTest('Should extract properly extract host', async ({ apiClient, esClient, log }) => {
@@ -238,7 +240,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
   apiTest('Should properly handle field retention strategies', async ({ apiClient, esClient }) => {
     // Ingest a document without sub_type
-    await ingestLogDoc(esClient, {
+    await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:00:00Z',
       event: { kind: 'asset', module: 'okta' },
       user: {
@@ -273,7 +275,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     // Add sub_type to the document
-    await ingestLogDoc(esClient, {
+    await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:01:00Z',
       event: { kind: 'asset', module: 'okta' },
       user: {
@@ -312,7 +314,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     // Update sub_type in between documents with null values
-    await ingestLogDoc(esClient, {
+    await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:01Z',
       event: { kind: 'asset', module: 'okta' },
       user: {
@@ -323,7 +325,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       },
     });
 
-    await ingestLogDoc(esClient, {
+    await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:02Z',
       event: { kind: 'asset', module: 'okta' },
       user: {
@@ -335,7 +337,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       },
     });
 
-    await ingestLogDoc(esClient, {
+    await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:03Z',
       event: { kind: 'asset', module: 'okta' },
       user: {
@@ -347,7 +349,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       },
     });
 
-    await ingestLogDoc(esClient, {
+    await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:02:04Z',
       event: { kind: 'asset', module: 'okta' },
       user: {
@@ -386,7 +388,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
 
     // Make sure latest is not overwritten from the document if not changed
-    await ingestLogDoc(esClient, {
+    await ingestDoc(esClient, {
       '@timestamp': '2026-02-13T11:03:00Z',
       event: { kind: 'asset', module: 'okta' },
       user: {
@@ -450,7 +452,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const to = '2026-03-01T12:00:00Z';
 
       // 1. IDP: asset event (Okta) — matches idpDocumentFilter + idpPostAggFilter → extracted without prior latest.
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:01:00Z',
         event: { kind: 'asset', module: 'okta' },
         user: {
@@ -473,7 +475,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       });
 
       // 2. IDP: asset event — same user id; second doc updates latest (idpPostAggFilter still matches).
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:02:00Z',
         event: { kind: 'asset', module: 'okta' },
         user: {
@@ -482,7 +484,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         },
       });
       await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:03:00Z',
         event: { kind: 'asset', module: 'okta' },
         user: {
@@ -506,7 +508,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       // 3. Not non-IDP (no host.id). Matches idpDocumentFilter (user.id/name) but not idpPostAggFilter (not asset/iam)
       //    and not nonIdpPostAggFilter (no host.id) and no entity.id yet → no postAgg keep branch → not extracted.
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:04:00Z',
         event: { kind: 'random-kind', module: 'okta' },
         user: {
@@ -520,7 +522,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       expect(hit3.hits.hits).toHaveLength(0);
 
       // 4. IDP: IAM user event (entityanalytics_ad) — matches idpPostAggFilter; namespace active_directory from fieldEvaluations.
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:05:00Z',
         event: { category: 'iam', type: 'user', module: 'entityanalytics_ad' },
         user: {
@@ -548,7 +550,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       // 5. Follow-up doc is not asset/iam (no idpPostAggFilter) and has no host.id (no nonIdpPostAggFilter);
       //    row is kept via entity.id after LOOKUP (prior latest from step 4) → still extracted/updated.
       await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:06:00Z',
         event: { kind: 'not-asset-or-iam', module: 'entityanalytics_ad' },
         user: {
@@ -582,7 +584,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const to = '2026-03-02T12:00:00Z';
 
       // 1. Create IDP entity
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-02T10:01:00Z',
         event: { kind: 'asset', module: 'okta' },
         user: { id: 'enrich-idp-user', name: 'Enrich IDP' },
@@ -592,7 +594,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       expect(ext1.body).toMatchObject({ count: 1 });
 
       // 2. Create non-IDP (local) entity
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-02T10:02:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
         user: { name: 'enrich-local-user' },
@@ -604,7 +606,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       // 3. Ingest enrichment docs only (entity already exists - same entity, new data)
       // IDP enrichment: same user, updated name
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-02T10:03:00Z',
         event: { kind: 'asset', module: 'okta' },
         user: {
@@ -614,7 +616,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         },
       });
       // Non-IDP enrichment: same user+host, updated name
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-02T10:04:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
         user: { name: 'enrich-local-user' },
@@ -659,7 +661,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     async ({ apiClient, esClient }) => {
       // Non-IDP: user.name + host.id present, user.name not in excluded list.
       // Event must NOT be asset/iam so identity fieldEvaluations (condition whenClause) set entity.namespace = 'local'.
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T10:00:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
         user: { name: 'local-user' },
@@ -693,7 +695,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   apiTest(
     'Should set entity.name to user.name when non-IDP local document has no host.name',
     async ({ apiClient, esClient }) => {
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T11:00:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
         user: { name: 'local-user-no-hostname' },
@@ -734,14 +736,14 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const to = '2026-03-18T15:00:00Z';
 
       // IDP document (asset kind) → extracted
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T14:01:00Z',
         event: { kind: 'asset', module: 'okta' },
         user: { id: 'mixed-idp-user', name: 'IDP User' },
       });
 
       // Non-IDP document (local: user.name + host.id, event.kind=event) → extracted
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T14:02:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
         user: { name: 'mixed-local-user' },
@@ -749,17 +751,17 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       });
 
       // Invalid documents (omitted but should not cause extraction to fail)
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T14:03:00Z',
         event: { kind: 'asset', module: 'okta', outcome: 'failure' },
         user: { id: 'mixed-invalid-failure', name: 'Failure' },
       });
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T14:04:00Z',
         event: { kind: 'asset', module: 'okta' },
         host: { id: 'mixed-no-user-host', name: 'server' },
       });
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T14:05:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
         user: { name: 'root' },
@@ -827,7 +829,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const excludedNames = ['root', 'jenkins', 'ansible', 'postgres', 'admin', 'service'];
       for (let i = 0; i < excludedNames.length; i++) {
         const name = excludedNames[i];
-        await ingestLogDoc(esClient, {
+        await ingestDoc(esClient, {
           '@timestamp': `2026-03-18T20:0${i + 1}:00Z`,
           event: { kind: 'event', category: 'network', outcome: 'success' },
           user: { name },
@@ -836,7 +838,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       }
 
       // Valid non-IDP user for comparison
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T20:10:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
         user: { name: 'allowed.user' },
@@ -887,45 +889,45 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const to = '2026-03-18T17:00:00Z';
 
       // Host: valid
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T16:01:00Z',
         event: { module: 'okta', dataset: 'host.dataset' },
         data_stream: { dataset: 'host.fallback' },
         host: { id: 'mixed-host-valid', name: 'mixed-server-01' },
       });
       // Host: invalid (no host.id, host.name, host.hostname)
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T16:02:00Z',
         event: { module: 'system' },
       });
 
       // User: IDP + non-IDP + invalid (already covered above, use unique IDs)
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T16:03:00Z',
         event: { kind: 'asset', module: 'okta' },
         user: { id: 'mixed-all-idp', name: 'AllTypes IDP' },
       });
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T16:04:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
         user: { name: 'mixed-all-local' },
         host: { id: 'mixed-all-host', name: 'ws-01' },
       });
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T16:05:00Z',
         event: { kind: 'asset', module: 'okta', outcome: 'failure' },
         user: { id: 'mixed-all-invalid', name: 'Invalid' },
       });
 
       // Service: valid
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T16:06:00Z',
         event: { dataset: 'aws.cloudtrail' },
         service: { name: 'mixed-service-valid' },
       });
 
       // Generic: valid
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T16:07:00Z',
         data_stream: { dataset: 'custom.integration' },
         entity: { id: 'mixed-generic-valid', name: 'Mixed Generic' },
@@ -1011,21 +1013,21 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const to = '2026-03-18T12:00:00Z';
 
       // 1. event.outcome = 'failure' → documentsFilter omits (pre-agg)
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T11:01:00Z',
         event: { kind: 'asset', module: 'okta', outcome: 'failure' },
         user: { id: 'omitted-failure', name: 'FailureUser' },
       });
 
       // 2. No user identity (no user.email, user.id, user.name) → documentsFilter omits
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T11:02:00Z',
         event: { kind: 'asset', module: 'okta' },
         host: { id: 'host-omitted', name: 'server' },
       });
 
       // 3. user.name in excluded list (e.g. 'root') with host.id, event.kind='event' → postAggFilter omits
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T11:03:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
         user: { name: 'root' },
@@ -1034,7 +1036,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
       // 4. user.name only, plain network event (no host.id) — idpDocumentFilter passes but postAggFilter omits
       //    (not idpPostAgg asset/iam shape, not nonIdpPostAgg without host.id, no entity.id).
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T11:04:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
         user: { name: 'no-host-user' },
@@ -1131,7 +1133,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         // logsPageCursorStart = (SHARED_TIMESTAMP, lastId). Outer iteration 2 must
         // find the remaining docs via the compound cursor — the fix makes this work.
         for (let i = 1; i <= TOTAL_DOCS; i++) {
-          await ingestLogDoc(esClient, {
+          await ingestDoc(esClient, {
             '@timestamp': SHARED_TIMESTAMP,
             host: { name: `ts-collision-host-${i}` },
           });
@@ -1171,7 +1173,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const hostName = 'relationship-bag-smoke-host';
       const entityId = `host:${hostName}`;
 
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': ts,
         host: {
           name: hostName,
@@ -1248,35 +1250,35 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const to = '2026-06-01T12:00:00Z';
 
       // 1. cloud.provider=aws → namespace aws
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-06-01T10:01:00Z',
         event: { kind: 'asset', module: 'asset_discovery' },
         user: { id: 'cloud-aws-user' },
         cloud: { provider: 'aws' },
       });
       // 2. cloud.provider=gcp → namespace gcp
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-06-01T10:02:00Z',
         event: { kind: 'asset', module: 'asset_discovery' },
         user: { id: 'cloud-gcp-user' },
         cloud: { provider: 'gcp' },
       });
       // 3. cloud.provider=azure → namespace entra_id (normalised by the mapping)
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-06-01T10:03:00Z',
         event: { kind: 'asset', module: 'asset_discovery' },
         user: { id: 'cloud-azure-user' },
         cloud: { provider: 'azure' },
       });
       // 4. cloud.provider not in mapping (ibm) → falls through to source value (event.module)
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-06-01T10:04:00Z',
         event: { kind: 'asset', module: 'asset_discovery' },
         user: { id: 'cloud-ibm-user' },
         cloud: { provider: 'ibm' },
       });
       // 5. cloud.provider absent → falls through to source value (event.module)
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-06-01T10:05:00Z',
         event: { kind: 'asset', module: 'asset_discovery' },
         user: { id: 'cloud-no-provider-user' },
@@ -1285,7 +1287,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       //    cloud.provider=aws and event.module=custom-module produce different namespaces so
       //    the wrong path would yield 'aws' while the correct path yields 'custom-module'.
       //    IAM event so postAggFilter passes via idpGate (event.category=iam + event.type=user).
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-06-01T10:06:00Z',
         event: { category: 'iam', type: 'user', module: 'custom-module' },
         user: { id: 'cloud-non-asset-user' },
@@ -1294,7 +1296,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       // 7. event.kind=asset but event.module ≠ 'asset_discovery' → defensive guard fires;
       //    cloud.provider mapping does NOT apply; namespace comes from event.module ('other_integration').
       //    Verifies that only the Cloud Asset Discovery integration triggers the cloud.provider routing.
-      await ingestLogDoc(esClient, {
+      await ingestDoc(esClient, {
         '@timestamp': '2026-06-01T10:07:00Z',
         event: { kind: 'asset', module: 'other_integration' },
         user: { id: 'cloud-other-module-user' },

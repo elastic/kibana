@@ -19,7 +19,11 @@ import {
   assertEntitiesEqual,
   expectedHostEntities,
 } from '../../../common/fixtures/entity_extraction_expected';
-import { clearEntityStoreIndices, setupLogsTestDataStream } from '../../../common/fixtures/helpers';
+import {
+  clearEntityStoreIndices,
+  setupLogsTestDataStream,
+  teardownLogsTestDataStream,
+} from '../../../common/fixtures/helpers';
 
 apiTest.describe(
   'Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage)',
@@ -70,6 +74,7 @@ apiTest.describe(
       });
       expect(response.statusCode).toBe(200);
       await clearEntityStoreIndices(esClient);
+      await teardownLogsTestDataStream(esClient);
     });
 
     apiTest(

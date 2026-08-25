@@ -38,9 +38,12 @@ export const normalizeKeywordList = (value: unknown): string[] => {
 /** Logs-compatible data stream used by extraction tests to seed source log events. */
 export const LOGS_TEST_INDEX = 'logs-entity-store-tests-default';
 
+/** Non-logs data stream used by query translation tests. Avoids logs-* template quirks (null stripping, constant_keyword). */
+export const QUERY_TRANSLATION_TEST_INDEX = 'entity-store-tests-default';
+
 /**
  * Deletes all Entity Store data indices: latest, updates, history snapshots, and
- * the test-only logs source data stream populated by ingestLogDoc / esArchiver (logs archive).
+ * the test-only logs source data stream populated by ingestDoc / esArchiver (logs archive).
  * Call in afterAll / afterEach to prevent stale data from leaking between
  * sequential test-target runs that share the same ES cluster.
  */
@@ -52,8 +55,8 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
   const toDelete = [LATEST_INDEX, UPDATES_INDEX, ...historyIndices];
   await esClient.indices.delete({ index: toDelete, ignore_unavailable: true }, { ignore: [404] });
 
-  // LOGS_TEST_INDEX is a data stream — must use deleteDataStream, not indices.delete
   await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
+  await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
 };
 
 /**
@@ -71,19 +74,17 @@ export interface ForceLogExtractionApiClient {
   ): Promise<{ statusCode: number; body: unknown }>;
 }
 
-export const ingestDoc = async (esClient: EsClient, body: Record<string, unknown>) =>
+export const ingestDoc = async (
+  esClient: EsClient,
+  body: Record<string, unknown>,
+  index = LOGS_TEST_INDEX
+) =>
   esClient.index({
-    index: LOGS_TEST_INDEX,
+    index,
     refresh: 'wait_for',
     body,
   });
 
-export const ingestLogDoc = async (esClient: EsClient, body: Record<string, unknown>) =>
-  esClient.index({
-    index: LOGS_TEST_INDEX,
-    refresh: 'wait_for',
-    body,
-  });
 
 /**
  * Creates an index template that overrides data_stream.dataset from constant_keyword
@@ -99,6 +100,11 @@ export const setupLogsTestDataStream = async (esClient: EsClient) => {
     name: 'entity-store-test-logs-override',
     index_patterns: ['logs-entity-store-tests-*'],
     data_stream: {},
+    // Compose the same component templates as the built-in `logs` template so ECS field
+    // mappings (e.g. entity.id as keyword) are preserved. Our own template.mappings entry
+    // for data_stream.dataset overrides the constant_keyword from ecs@mappings, which
+    // is what allows us to index documents with different dataset values in one backing index.
+    composed_of: ['logs@mappings', 'logs@settings', 'ecs@mappings'],
     template: {
       mappings: {
         properties: {
@@ -109,6 +115,30 @@ export const setupLogsTestDataStream = async (esClient: EsClient) => {
     priority: 500,
   });
   await esClient.indices.deleteDataStream({ name: LOGS_TEST_INDEX }).catch(() => {});
+};
+
+export const teardownLogsTestDataStream = async (esClient: EsClient) => {
+  await esClient.indices
+    .deleteIndexTemplate({ name: 'entity-store-test-logs-override' })
+    .catch(() => {});
+};
+
+/** Sets up a plain (non-logs-*) data stream for query translation tests with ECS field mappings. */
+export const setupQueryTranslationTestDataStream = async (esClient: EsClient) => {
+  await esClient.indices.putIndexTemplate({
+    name: 'entity-store-query-translation-test',
+    index_patterns: ['entity-store-tests-*'],
+    data_stream: {},
+    composed_of: ['ecs@mappings'],
+    priority: 500,
+  });
+  await esClient.indices.deleteDataStream({ name: QUERY_TRANSLATION_TEST_INDEX }).catch(() => {});
+};
+
+export const teardownQueryTranslationTestDataStream = async (esClient: EsClient) => {
+  await esClient.indices
+    .deleteIndexTemplate({ name: 'entity-store-query-translation-test' })
+    .catch(() => {});
 };
 
 export const searchDocById = async (esClient: EsClient, id: string) => {

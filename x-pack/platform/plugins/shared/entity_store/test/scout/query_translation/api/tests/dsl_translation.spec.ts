@@ -16,8 +16,9 @@ import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
   clearEntityStoreIndices,
   ingestDoc,
-  LOGS_TEST_INDEX,
-  setupLogsTestDataStream,
+  QUERY_TRANSLATION_TEST_INDEX,
+  setupQueryTranslationTestDataStream,
+  teardownQueryTranslationTestDataStream,
 } from '../../../common/fixtures/helpers';
 import {
   getEuidDslFilterBasedOnDocument,
@@ -51,7 +52,7 @@ async function searchWithFilter(
   size = 100
 ) {
   return esClient.search({
-    index: LOGS_TEST_INDEX,
+    index: QUERY_TRANSLATION_TEST_INDEX,
     query: query ? { ...query } : {},
     size,
   }) as Promise<{
@@ -98,9 +99,9 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     });
     expect(response.statusCode).toBe(201);
 
-    await setupLogsTestDataStream(esClient);
+    await setupQueryTranslationTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
-      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/logs'
+      'x-pack/platform/plugins/shared/entity_store/test/scout/common/es_archives/query_translation_source'
     );
   });
 
@@ -112,6 +113,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     });
     expect(response.statusCode).toBe(200);
     await clearEntityStoreIndices(esClient);
+    await teardownQueryTranslationTestDataStream(esClient);
   });
 
   apiTest(
@@ -221,7 +223,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
     apiTest(
       `user.ts DSL (ingested asset + cloud.provider): single hit for scenario "${scenario.id}"`,
       async ({ esClient }) => {
-        await ingestDoc(esClient, scenario.ingestSource!);
+        await ingestDoc(esClient, scenario.ingestSource!, QUERY_TRANSLATION_TEST_INDEX);
         const dsl = getEuidDslFilterBasedOnDocument('user', scenario.dslFilterSource);
         expect(dsl).toBeDefined();
 
@@ -241,7 +243,7 @@ apiTest.describe('DSL query translation', { tag: ENTITY_STORE_TAGS }, () => {
         });
 
         await esClient.deleteByQuery({
-          index: LOGS_TEST_INDEX,
+          index: QUERY_TRANSLATION_TEST_INDEX,
           refresh: true,
           query: scenario.query as object,
         });
