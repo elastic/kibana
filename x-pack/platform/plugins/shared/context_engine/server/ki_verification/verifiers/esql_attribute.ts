@@ -11,7 +11,7 @@ import {
 } from '../../../common/step_types/ki';
 import type { KiVerifierContext, KnowledgeIndicator } from '../types';
 
-/** The KI attribute the ES|QL verifiers read when a run configures no attributes. */
+/** KI attribute carrying the ES|QL to verify: a query string or array of query strings. */
 export const ESQL_ATTRIBUTE_KEY = 'esql';
 
 // Aligned with the KI attribute schema bounds so queries accepted there are never rejected here.
@@ -20,18 +20,12 @@ export const MAX_ESQL_QUERY_LENGTH = MAX_KI_ATTRIBUTE_VALUE_LENGTH;
 
 const REASON_QUERY_PREVIEW_LENGTH = 200;
 
-/** The attribute names a run inspects, defaulting to `esql`. */
 export const resolveEsqlAttributeKeys = ({ esqlAttributes }: KiVerifierContext): string[] =>
   esqlAttributes && esqlAttributes.length > 0 ? [...new Set(esqlAttributes)] : [ESQL_ATTRIBUTE_KEY];
 
-/** How an attribute is named in failure reasons. */
 const describeAttribute = (key: string): string => `attributes.${key}`;
 
-/**
- * Whether the KI carries a value in any configured attribute. A configured
- * attribute the KI does not have is skipped rather than failed, so a KI
- * carrying none of them is simply not applicable.
- */
+/** Returns whether the KI contains any configured ES|QL attribute. */
 export const hasEsqlAttribute = (ki: KnowledgeIndicator, context: KiVerifierContext): boolean =>
   resolveEsqlAttributeKeys(context).some((key) => ki.attributes?.[key] !== undefined);
 
@@ -40,18 +34,12 @@ export const previewQuery = (query: string): string =>
     ? `${query.slice(0, REASON_QUERY_PREVIEW_LENGTH)}…`
     : query;
 
-/** One query to verify, tagged with the KI attribute it came from. */
 export interface EsqlQueryRef {
-  /** The attribute name, as it appears in failure reasons. */
   source: string;
   query: string;
 }
 
-/**
- * The failure message for a query that exceeds {@link MAX_ESQL_QUERY_LENGTH},
- * or `undefined` when it is within bounds. The KI still fails, but only this
- * query goes unchecked; the rest are still verified.
- */
+/** Returns a failure reason for an oversized query. */
 export const getOversizedQueryFailure = ({ source, query }: EsqlQueryRef): string | undefined =>
   query.length > MAX_ESQL_QUERY_LENGTH
     ? `${source}: ES|QL query "${previewQuery(
@@ -60,21 +48,12 @@ export const getOversizedQueryFailure = ({ source, query }: EsqlQueryRef): strin
     : undefined;
 
 export type EsqlQueriesResult =
-  /**
-   * The queries worth verifying, plus a failure per attribute whose value was
-   * malformed. Both can be non-empty at once: one bad attribute does not hide
-   * problems in the others, so a run reports everything it can see.
-   */
+  /** Valid queries and malformed-attribute failures collected in one pass. */
   | { ok: true; queries: EsqlQueryRef[]; failures: string[] }
-  /** Nothing was verified, because doing so would have cost too much. */
+  /** Extraction stopped because the total query count exceeded the limit. */
   | { ok: false; reason: string };
 
-/**
- * Normalizes every configured attribute into a flat list of trimmed queries
- * tagged with their source. An attribute the KI does not carry is skipped; one
- * it carries with a malformed value (non-string, empty, or an array holding
- * non-string entries) is a verification failure.
- */
+/** Extracts trimmed ES|QL queries and malformed-attribute failures from configured attributes. */
 export const getEsqlQueries = (
   ki: KnowledgeIndicator,
   context: KiVerifierContext
@@ -120,9 +99,6 @@ export const getEsqlQueries = (
     );
   }
 
-  // Bounded across every configured attribute, not per attribute, so adding
-  // attributes cannot multiply the work a single verification run does. Unlike a
-  // malformed attribute, this stops the run: the point is to not do the work.
   if (queries.length > MAX_ESQL_QUERIES) {
     return {
       ok: false,

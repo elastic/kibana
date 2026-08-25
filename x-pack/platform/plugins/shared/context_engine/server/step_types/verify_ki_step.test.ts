@@ -35,8 +35,6 @@ const makeHandlerContext = (
 describe('verify_ki workflow step', () => {
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let uiSettingsGet: jest.Mock;
-  // Accepts every query, so verifier-level execution failures stay the concern
-  // of the verifier's own tests; these cover the step's wiring.
   let esClient: EsClientMock;
 
   const setContextEngineEnabled = (isEnabled: boolean) => {

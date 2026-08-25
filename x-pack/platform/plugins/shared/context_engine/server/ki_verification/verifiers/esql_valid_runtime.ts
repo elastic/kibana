@@ -19,18 +19,9 @@ import type { KiVerifier } from '../types';
 
 export const ESQL_VALID_RUNTIME_VERIFIER_ID = 'esql-valid-runtime';
 
-/**
- * Row cap injected right after the source command, so a query is bounded before
- * any downstream work rather than after it. Verification only cares that a
- * query runs, never about what it returns.
- */
 export const ESQL_EXECUTION_ROW_LIMIT = 1;
 
-/**
- * Bounds a query for verification. `getESQLWithSafeLimit` parses the query, so a
- * KI whose ES|QL is malformed falls back to the query as written; Elasticsearch
- * then rejects it with a message at least as useful as anything we could add.
- */
+/** Returns the original query when limit injection cannot parse it. */
 const boundQuery = (query: string): string => {
   try {
     return getESQLWithSafeLimit(query, ESQL_EXECUTION_ROW_LIMIT);
@@ -48,11 +39,7 @@ const formatEsError = (error: errors.ResponseError): string => {
   return reason ?? error.message;
 };
 
-/**
- * Executes a KI's ES|QL against the cluster to catch what static validation
- * cannot: unknown indices and fields, type errors, and any other rejection that
- * only surfaces once Elasticsearch plans and runs the query.
- */
+/** Creates a verifier that executes ES|QL queries against Elasticsearch. */
 export const createEsqlValidRuntimeVerifier = (): KiVerifier => ({
   id: ESQL_VALID_RUNTIME_VERIFIER_ID,
   applies: hasEsqlAttribute,
@@ -84,9 +71,7 @@ export const createEsqlValidRuntimeVerifier = (): KiVerifier => ({
           },
           { signal: abortSignal }
         );
-        // The request parameter above should have made this an error already, but
-        // a cluster that reports partial results anyway has not told us the
-        // query runs.
+        // Treat an unexpected partial response as a verification failure.
         if (isPartial) {
           failures.push(
             `${source}: ES|QL query "${previewQuery(
@@ -95,9 +80,7 @@ export const createEsqlValidRuntimeVerifier = (): KiVerifier => ({
           );
         }
       } catch (error) {
-        // A rejection from Elasticsearch is a statement about the query. Anything
-        // else - a dropped connection, an aborted request - is a statement about
-        // the run, so it propagates to the framework instead of failing the KI.
+        // Re-throw non-response errors such as transport failures and cancellation.
         if (!isResponseError(error)) {
           throw error;
         }

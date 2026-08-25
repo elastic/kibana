@@ -13,7 +13,6 @@ import { kiPartialFieldsSchema, MAX_KI_ATTRIBUTE_KEY_LENGTH } from './ki';
 
 export const VERIFY_KI_STEP_TYPE_ID = 'context-engine.verifyKi';
 
-/** The KI attribute the ES|QL verifiers read when `esql_attributes` is omitted. */
 export const DEFAULT_ESQL_ATTRIBUTE = 'esql';
 
 export const MAX_ESQL_ATTRIBUTES = 20;

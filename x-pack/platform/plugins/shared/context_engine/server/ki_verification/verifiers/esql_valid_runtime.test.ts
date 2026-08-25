@@ -25,7 +25,7 @@ const esResponseError = (type: string, reason: string, statusCode = 400) =>
     elasticsearchClientMock.createApiResponse({ statusCode, body: { error: { type, reason } } })
   );
 
-describe('esql-executes verifier', () => {
+describe('esql-valid-runtime verifier', () => {
   const verifier = createEsqlValidRuntimeVerifier();
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let context: KiVerifierContext;
