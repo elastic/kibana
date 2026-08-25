@@ -18,7 +18,7 @@ import type { Geometry, Position } from 'geojson';
 import { asyncForEach, asyncMap } from '@kbn/std';
 import { DRAW_MODE, DRAW_SHAPE, LAYER_STYLE_TYPE } from '../../common/constants';
 import type { MapExtentState, MapViewContext } from '../reducers/map/types';
-import { getInspectorAdapters, getMapApi } from '../reducers/non_serializable_instances';
+import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import type { MapStoreState } from '../reducers/store';
 import type { IVectorStyle } from '../classes/styles/vector/vector_style';
 import {
@@ -38,7 +38,6 @@ import {
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import {
-  CLEAR_GOTO,
   CLEAR_MOUSE_COORDINATES,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   MAP_DESTROYED,
@@ -68,7 +67,6 @@ import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import type {
   CustomIcon,
   DrawState,
-  MapCenterAndZoom,
   MapExtent,
   MapSettings,
   Timeslice,
@@ -281,30 +279,6 @@ export function setMouseCoordinates({ lat, lon }: { lat: number; lon: number }) 
 
 export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
-}
-
-export function setMapCenter({ lat, lon, zoom }: MapCenterAndZoom) {
-  return (
-    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
-    getState: () => MapStoreState
-  ) => {
-    const mapApi = getMapApi(getState());
-    if (!mapApi) {
-      // set initial map location
-      return;
-    }
-
-    mapApi.jumpTo({
-      zoom,
-      center: [lon, lat],
-    });
-
-
-  }
-}
-
-export function clearGoto() {
-  return { type: CLEAR_GOTO };
 }
 
 export function setQuery({

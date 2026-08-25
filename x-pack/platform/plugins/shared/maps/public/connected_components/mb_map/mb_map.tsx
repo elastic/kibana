@@ -17,7 +17,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
-import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
 import {
   getPreserveDrawingBuffer,
@@ -27,7 +26,7 @@ import {
 import type { ILayer } from '../../classes/layers/layer';
 import type {
   CustomIcon,
-  Goto,
+  MapCenter,
   MapCenterAndZoom,
   MapSettings,
   Timeslice,
@@ -55,14 +54,14 @@ import { transformRequest } from './transform_request';
 import { boundsToExtent } from '../../classes/util/maplibre_utils';
 
 export interface Props {
-  setMapApi: (mapApi?: MapApi) => void;
   mapApi: MapApi | undefined;
-  isMapReady: boolean;
+  setMapApi: (mapApi?: MapApi) => void;
+  initialMapCenter: MapCenter | null;
+  initialMapZoom: number | null;
   settings: MapSettings;
   customIcons: CustomIcon[];
   layerList: ILayer[];
   spatialFiltersLayer: ILayer;
-  goto?: Goto | null;
   inspectorAdapters: Adapters;
   isFullScreen: boolean;
   extentChanged: (mapExtentState: MapExtentState) => void;
@@ -70,7 +69,6 @@ export interface Props {
   onMapDestroyed: () => void;
   setMouseCoordinates: ({ lat, lon }: { lat: number; lon: number }) => void;
   clearMouseCoordinates: () => void;
-  clearGoto: () => void;
   setMapInitError: (errorMessage: string) => void;
   addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
   getFilterActions?: () => Promise<Action[]>;
@@ -99,7 +97,6 @@ export class MbMap extends Component<Props> {
   }
 
   componentDidUpdate() {
-    this._syncMbMapWithMapState(); // do not debounce syncing of map-state
     this._debouncedSync();
   }
 
@@ -113,7 +110,7 @@ export class MbMap extends Component<Props> {
   }
 
   _debouncedSync = _.debounce(() => {
-    if (this._isMounted && this.props.isMapReady && this.props.mapApi) {
+    if (this._isMounted && this.props.mapApi) {
       const hasLayerListChanged = this._prevLayerList !== this.props.layerList; // Comparing re-select memoized instance so no deep equals needed
       const hasTimesliceChanged = !_.isEqual(this._prevTimeslice, this.props.timeslice);
       if (hasLayerListChanged || hasTimesliceChanged) {
@@ -169,6 +166,14 @@ export class MbMap extends Component<Props> {
           lng: initialView.lon,
           lat: initialView.lat,
         };
+      } else if (this.props.initialMapCenter) {
+        if (this.props.initialMapZoom !== null) {
+          options.zoom = this.props.initialMapZoom;
+        }
+        options.center = {
+          lng: this.props.initialMapCenter.lon,
+          lat: this.props.initialMapCenter.lat,
+        };
       } else {
         options.bounds = [-170, -60, 170, 75];
       }
@@ -214,7 +219,7 @@ export class MbMap extends Component<Props> {
   }
 
   async _initializeMap() {
-    const initialView = await getInitialView(this.props.goto, this.props.settings);
+    const initialView = await getInitialView(this.props.settings);
     if (!this._isMounted) {
       return;
     }
@@ -241,8 +246,7 @@ export class MbMap extends Component<Props> {
   _registerMapEventListeners(mbMap: MapApi) {
     // moveend callback is debounced to avoid updating map extent state while map extent is still changing
     // moveend is fired while the map extent is still changing in the following scenarios
-    // 1) During opening/closing of layer details panel, the EUI animation results in 8 moveend events
-    // 2) Setting map zoom and center from goto is done in 2 API calls, resulting in 2 moveend events
+    // * During opening/closing of layer details panel, the EUI animation results in 8 moveend events
     mbMap.on(
       'moveend',
       _.debounce(() => {
@@ -313,39 +317,6 @@ export class MbMap extends Component<Props> {
       }
     }
   }
-
-  _syncMbMapWithMapState = () => {
-    const { isMapReady, goto, clearGoto } = this.props;
-
-    if (!isMapReady || !goto || !this.props.mapApi) {
-      return;
-    }
-
-    clearGoto();
-
-    if (goto.bounds) {
-      // clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
-      const lnLatBounds = new maplibregl.LngLatBounds(
-        new maplibregl.LngLat(
-          clampToLonBounds(goto.bounds.minLon),
-          clampToLatBounds(goto.bounds.minLat)
-        ),
-        new maplibregl.LngLat(
-          clampToLonBounds(goto.bounds.maxLon),
-          clampToLatBounds(goto.bounds.maxLat)
-        )
-      );
-      // maxZoom ensure we're not zooming in too far on single points or small shapes
-      // the padding is to avoid too tight of a fit around edges
-      this.props.mapApi.fitBounds(lnLatBounds, { maxZoom: 17, padding: 16 });
-    } else if (goto.center) {
-      this.props.mapApi.setZoom(goto.center.zoom);
-      this.props.mapApi.setCenter({
-        lng: goto.center.lon,
-        lat: goto.center.lat,
-      });
-    }
-  };
 
   _syncMbMapWithLayerList = () => {
     if (!this.props.mapApi) {

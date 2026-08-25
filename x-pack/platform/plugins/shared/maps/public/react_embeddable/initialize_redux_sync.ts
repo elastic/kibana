@@ -21,7 +21,6 @@ import {
   getLayerListRaw,
   getMapBuffer,
   getMapCenter,
-  getMapReady,
   getMapZoom,
   isMapLoading,
 } from '../selectors/map_selectors';
@@ -37,6 +36,7 @@ import { getCharts, getExecutionContextService } from '../kibana_services';
 import type { EventHandlers } from '../reducers/non_serializable_instances';
 import {
   getInspectorAdapters,
+  getMapReady,
   setChartsPaletteServiceGetColor,
   setEventHandlers,
 } from '../reducers/non_serializable_instances';

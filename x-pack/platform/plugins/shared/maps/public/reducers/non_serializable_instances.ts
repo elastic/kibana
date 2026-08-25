@@ -10,9 +10,14 @@ import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { Map as MapApi } from '@kbn/mapbox-gl';
 import type { AnyAction } from 'redux-v4';
 import type { ThunkDispatch } from 'redux-thunk-v2';
+import maplibregl from 'maplibre-gl';
 import { MapAdapter, VectorTileAdapter } from '../inspector';
 import { getShowMapsInspectorAdapter } from '../kibana_services';
 import type { MapStoreState } from './store';
+import { MAP_EXTENT_CHANGED } from '../actions';
+import type { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
+import { clampToLatBounds, clampToLonBounds } from '../../common/elasticsearch_util';
+import type { MapViewContext } from './map';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
 const UNREGISTER_CANCEL_CALLBACK = 'UNREGISTER_CANCEL_CALLBACK';
@@ -126,8 +131,8 @@ export function nonSerializableInstancesReducers(
     case SET_MAP_API: {
       return {
         ...state,
-        mapApi: action.mapApi
-      }
+        mapApi: action.mapApi,
+      };
     }
     default:
       return state;
@@ -157,6 +162,10 @@ export function getOnMapMove({ nonSerializableInstances }: MapStoreState) {
 
 export function getMapApi({ nonSerializableInstances }: MapStoreState) {
   return nonSerializableInstances.mapApi;
+}
+
+export function getMapReady({ nonSerializableInstances }: MapStoreState) {
+  return Boolean(nonSerializableInstances.mapApi);
 }
 
 // Actions
@@ -219,5 +228,50 @@ export function setMapApi(mapApi?: MapApi) {
   return {
     type: SET_MAP_API,
     mapApi,
+  };
+}
+
+export function jumpTo({ lat, lon, zoom }: MapCenterAndZoom) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    dispatch({
+      type: MAP_EXTENT_CHANGED,
+      mapViewContext: {
+        center: { lat, lon },
+        zoom,
+      } as Pick<MapViewContext, 'center' | 'zoom'>,
+    });
+    const mapApi = getMapApi(getState());
+    if (mapApi) {
+      mapApi.jumpTo({
+        zoom,
+        center: [lon, lat],
+      });
+    }
+  };
+}
+
+export function fitMapToBounds(bounds: MapExtent) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    const mapApi = getMapApi(getState());
+    if (!mapApi) {
+      // eslint-disable-next-line no-console
+      console.warn('Unable to fit to bounds, Map API is not available.');
+      return;
+    }
+
+    // clamping ot -89/89 latitudes since Mapboxgl does not seem to handle bounds that contain the poles (logs errors to the console when using -90/90)
+    const lnLatBounds = new maplibregl.LngLatBounds(
+      new maplibregl.LngLat(clampToLonBounds(bounds.minLon), clampToLatBounds(bounds.minLat)),
+      new maplibregl.LngLat(clampToLonBounds(bounds.maxLon), clampToLatBounds(bounds.maxLat))
+    );
+    // maxZoom ensure we're not zooming in too far on single points or small shapes
+    // the padding is to avoid too tight of a fit around edges
+    mapApi.fitBounds(lnLatBounds, { maxZoom: 17, padding: 16 });
   };
 }

@@ -37,7 +37,6 @@ import {
   getLayerListConfigOnly,
 } from '../../../selectors/map_selectors';
 import {
-  setGotoWithCenter,
   setMapSettings,
   replaceLayerList,
   setIsLayerTOCOpen,
@@ -72,6 +71,7 @@ import type {
   MapByValueState,
   MapEmbeddableState,
 } from '../../../../common/embeddable/types';
+import { jumpTo } from '../../../reducers/non_serializable_instances';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
@@ -205,16 +205,16 @@ export class SavedMap {
     this._store.dispatch(setOpenTOCDetails(openTOCDetails));
 
     if (this._mapEmbeddableState?.mapCenter !== undefined) {
-      this._store.dispatch(
-        setGotoWithCenter({
+      this._store.dispatch<any>(
+        jumpTo({
           lat: this._mapEmbeddableState.mapCenter.lat,
           lon: this._mapEmbeddableState.mapCenter.lon,
           zoom: this._mapEmbeddableState.mapCenter.zoom,
         })
       );
     } else if (this._attributes?.center) {
-      this._store.dispatch(
-        setGotoWithCenter({
+      this._store.dispatch<any>(
+        jumpTo({
           lat: this._attributes.center.lat,
           lon: this._attributes.center.lon,
           zoom: this._attributes.zoom ?? 1,

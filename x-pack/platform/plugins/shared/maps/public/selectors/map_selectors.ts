@@ -46,7 +46,6 @@ import type {
   DrawState,
   EMSVectorTileLayerDescriptor,
   EditState,
-  Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
   LayerGroupDescriptor,
@@ -155,12 +154,8 @@ export const getHasLockedTooltips = (state: MapStoreState): boolean => {
   });
 };
 
-export const getMapReady = ({ map }: MapStoreState): boolean => map && map.ready;
-
 export const getMapInitError = ({ map }: MapStoreState): string | null | undefined =>
   map.mapInitError;
-
-export const getGoto = ({ map }: MapStoreState): Goto | null | undefined => map && map.goto;
 
 export const getSelectedLayerId = ({ map }: MapStoreState): string | null => {
   return !map.selectedLayerId || !map.layerList ? null : map.selectedLayerId;
