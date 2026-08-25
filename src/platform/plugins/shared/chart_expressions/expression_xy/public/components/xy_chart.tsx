@@ -212,6 +212,19 @@ function getIconForSeriesType(layer: CommonXYDataLayerConfig): IconType {
 
 export const XYChartReportable = React.memo(XYChart);
 
+const openBubbleTraceLabel = i18n.translate('expressionXY.bubbleTooltip.openTraceAction', {
+  defaultMessage: 'Open in Discover',
+});
+
+/** Returns the details of the bubble marker present in the given tooltip values, if any. */
+const getBubbleTooltipDetails = (
+  values?: Array<TooltipValue<Record<string, string | number>, XYChartSeriesIdentifier>>
+): BubbleDetail[] | undefined => {
+  const bubble = values?.find((value) => value.seriesIdentifier?.specId === BUBBLES_SERIES_ID)
+    ?.datum as unknown as BubblePoint | undefined;
+  return bubble?.details?.length ? bubble.details : undefined;
+};
+
 export function XYChart({
   args,
   data,
@@ -263,11 +276,12 @@ export function XYChart({
   // `useEuiTheme()` doesn't reliably reflect Kibana dark mode in this chart's
   // render path, so drive the bubble marker colors from the trusted `darkMode`
   // flag using the colorMode-independent constants `plainLight`/`plainDark`.
-  // Fill and outline are inverse neutrals (black diamond + white outline in dark
-  // mode, and the reverse in light mode) so markers stay legible in both themes
-  // and never collide with the vis palette used by the metric series.
-  const bubbleFill = darkMode ? euiTheme.colors.plainDark : euiTheme.colors.plainLight;
-  const bubbleStroke = darkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark;
+  // `bubbleInk` is the series color: it fills the marker and shows as the swatch
+  // next to the series name in the tooltip, so it must contrast with the tooltip
+  // background (black in light mode, white in dark mode). `bubblePaper` is the
+  // inverse, used as the marker outline so the marker stays legible on the line.
+  const bubbleInk = darkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark;
+  const bubblePaper = darkMode ? euiTheme.colors.plainDark : euiTheme.colors.plainLight;
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = useMemo(() => getFilteredLayers(layers), [layers]);
@@ -662,14 +676,10 @@ export function XYChart({
     // this cast is safe because we are rendering a cartesian chart
     const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
 
-    // Bubble markers route the click to the consumer (which owns the flyout)
-    // instead of triggering the normal filter path. Only bubbles that carry
-    // details are clickable; the rest are hover-only.
+    // Bubble markers are handled through the tooltip (hover shows details, the
+    // pinned tooltip exposes the "Open in Discover" action). Skip the normal
+    // filter path so a bubble click does not filter the chart.
     if (xySeries.specId === BUBBLES_SERIES_ID) {
-      const bubble = xyGeometry.datum as BubblePoint;
-      if (bubble.details?.length) {
-        onBubbleClick?.(bubble.details);
-      }
       return;
     }
 
@@ -910,18 +920,46 @@ export function XYChart({
                     )
                   : undefined
               }
-              actions={getTooltipActions(
-                dataLayers,
-                onClickMultiValue,
-                onCreateAlertRule,
-                fieldFormats,
-                formattedDatatables,
-                xAxisFormatter,
-                formatFactory,
-                isEsqlMode,
-                canCreateAlerts,
-                interactive && !args.detailedTooltip
-              )}
+              actions={
+                bubbles.length && onBubbleClick
+                  ? (selected) => {
+                      const base =
+                        getTooltipActions(
+                          dataLayers,
+                          onClickMultiValue,
+                          onCreateAlertRule,
+                          fieldFormats,
+                          formattedDatatables,
+                          xAxisFormatter,
+                          formatFactory,
+                          isEsqlMode,
+                          canCreateAlerts,
+                          interactive && !args.detailedTooltip
+                        ) ?? [];
+                      const details = getBubbleTooltipDetails(selected);
+                      return details
+                        ? [
+                            {
+                              label: () => openBubbleTraceLabel,
+                              onSelect: () => onBubbleClick(details),
+                            },
+                            ...base,
+                          ]
+                        : base;
+                    }
+                  : getTooltipActions(
+                      dataLayers,
+                      onClickMultiValue,
+                      onCreateAlertRule,
+                      fieldFormats,
+                      formattedDatatables,
+                      xAxisFormatter,
+                      formatFactory,
+                      isEsqlMode,
+                      canCreateAlerts,
+                      interactive && !args.detailedTooltip
+                    )
+              }
               customTooltip={
                 args.detailedTooltip
                   ? ({ header, values }) => (
@@ -1156,13 +1194,13 @@ export function XYChart({
                 xAccessor="x"
                 yAccessors={['y']}
                 data={bubbles}
-                color={bubbleFill}
+                color={bubbleInk}
                 bubbleSeriesStyle={{
                   point: {
                     shape: PointShape.Diamond,
                     radius: 4,
                     strokeWidth: 1,
-                    stroke: bubbleStroke,
+                    stroke: bubblePaper,
                   },
                 }}
                 hideInLegend

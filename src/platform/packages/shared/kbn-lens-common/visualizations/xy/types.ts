@@ -156,6 +156,10 @@ export interface XYVisualizationState {
   bubbles?: XYBubblePoint[];
   /** Series name shown when hovering the bubble markers. */
   bubblesTitle?: string;
+  /** ES|QL query fetched at render time to build the bubble markers. */
+  bubblesQuery?: string;
+  /** Result column used as the Y value for the fetched bubble markers. */
+  bubblesValueColumn?: string;
 }
 
 /**

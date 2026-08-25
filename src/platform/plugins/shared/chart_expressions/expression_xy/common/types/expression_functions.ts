@@ -315,6 +315,8 @@ export interface LayeredXYArgs {
   pointVisibility?: PointVisibility;
   bubbles?: string;
   bubblesTitle?: string;
+  bubblesQuery?: string;
+  bubblesValueColumn?: string;
 }
 
 export interface XYProps {
@@ -344,6 +346,8 @@ export interface XYProps {
   pointVisibility?: PointVisibility;
   bubbles?: string;
   bubblesTitle?: string;
+  bubblesQuery?: string;
+  bubblesValueColumn?: string;
 }
 
 export interface AnnotationLayerArgs {

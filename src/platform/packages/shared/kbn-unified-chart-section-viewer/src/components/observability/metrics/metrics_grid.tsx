@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { XYBubbleDetail } from '@kbn/lens-common';
@@ -26,7 +26,6 @@ import { stableStringify } from '@kbn/std';
 import type { Dimension, UnifiedMetricsGridProps, ParsedMetricItem } from '../../../types';
 import type { ChartSize } from '../../chart';
 import { Chart } from '../../chart';
-import { BubbleDetailsFlyout } from '../../chart/bubble_details_flyout';
 import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
@@ -397,32 +396,29 @@ const ChartItem = React.memo(
       return getFieldSearchMatchingHighlight(metricItem.metricName, searchTerm.trim());
     }, [metricItem.metricName, searchTerm]);
 
-    // Bubble (exemplar) click opens a consumer-owned details flyout. The chart/Lens
-    // layer only forwards the clicked bubble's details payload.
-    const [bubbleDetails, setBubbleDetails] = useState<XYBubbleDetail[] | null>(null);
-    const handleBubbleClick = useCallback((data: unknown) => {
-      const details = (data as { details?: XYBubbleDetail[] })?.details;
-      setBubbleDetails(details?.length ? details : null);
-    }, []);
-    const traceId = useMemo(
-      () => bubbleDetails?.find((detail) => detail.field === TRACE_ID_FIELD)?.value,
-      [bubbleDetails]
+    // Bubble (exemplar) click opens the related trace in a new Discover tab. The
+    // chart forwards the clicked bubble's details via the tooltip "Open in Discover"
+    // action; only exemplars carrying a trace id navigate.
+    const handleBubbleClick = useCallback(
+      (data: unknown) => {
+        const details = (data as { details?: XYBubbleDetail[] })?.details;
+        const traceId = details?.find((detail) => detail.field === TRACE_ID_FIELD)?.value;
+        if (!traceId) {
+          return;
+        }
+        actions.openInNewTab?.({
+          query: {
+            esql: `FROM traces-apm*,apm-*,traces-*.otel-* | WHERE trace.id == "${traceId}"`,
+          },
+          tabLabel: i18n.translate('metricsExperience.exemplars.traceTabLabel', {
+            defaultMessage: 'Trace {traceId}',
+            values: { traceId },
+          }),
+          timeRange: fetchParams.timeRange,
+        });
+      },
+      [actions, fetchParams.timeRange]
     );
-    const handleOpenTraceInDiscover = useCallback(() => {
-      if (!traceId) {
-        return;
-      }
-      actions.openInNewTab?.({
-        query: {
-          esql: `FROM traces-apm*,apm-*,traces-*.otel-* | WHERE trace.id == "${traceId}"`,
-        },
-        tabLabel: i18n.translate('metricsExperience.exemplars.traceTabLabel', {
-          defaultMessage: 'Trace {traceId}',
-          values: { traceId },
-        }),
-        timeRange: fetchParams.timeRange,
-      });
-    }, [traceId, actions, fetchParams.timeRange]);
 
     return (
       <A11yGridCell
@@ -460,15 +456,6 @@ const ChartItem = React.memo(
           userMessages={userMessages}
           profileId={profileId}
         />
-        {bubbleDetails ? (
-          <BubbleDetailsFlyout
-            details={bubbleDetails}
-            onClose={() => setBubbleDetails(null)}
-            onOpenInDiscover={
-              traceId && actions.openInNewTab ? handleOpenTraceInDiscover : undefined
-            }
-          />
-        ) : null}
       </A11yGridCell>
     );
   }

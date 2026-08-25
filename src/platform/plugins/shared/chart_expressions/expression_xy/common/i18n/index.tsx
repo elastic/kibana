@@ -146,6 +146,14 @@ export const strings = {
     i18n.translate('expressionXY.layeredXyVis.bubbles.help', {
       defaultMessage: 'JSON array of bubble points to render as clickable markers',
     }),
+  getBubblesQueryHelp: () =>
+    i18n.translate('expressionXY.layeredXyVis.bubblesQuery.help', {
+      defaultMessage: 'ES|QL query fetched at render time to build the bubble markers',
+    }),
+  getBubblesValueColumnHelp: () =>
+    i18n.translate('expressionXY.layeredXyVis.bubblesValueColumn.help', {
+      defaultMessage: 'Result column used as the Y value for the fetched bubble markers',
+    }),
   getBubblesTitleHelp: () =>
     i18n.translate('expressionXY.layeredXyVis.bubblesTitle.help', {
       defaultMessage: 'Series name shown when hovering the bubble markers',

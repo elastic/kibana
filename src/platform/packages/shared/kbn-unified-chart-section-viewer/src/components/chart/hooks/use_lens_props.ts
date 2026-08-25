@@ -39,10 +39,14 @@ import {
 } from 'rxjs';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
-import type { XYBubblePoint } from '@kbn/lens-common';
+import { i18n } from '@kbn/i18n';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { useReportChartSectionError } from './use_report_chart_section_error';
-import { fetchExemplars } from './fetch_exemplars';
+import { buildExemplarsQuery } from './fetch_exemplars';
+
+const EXEMPLAR_BUBBLE_TITLE = i18n.translate('metricsExperience.exemplars.bubbleTitle', {
+  defaultMessage: 'Exemplar',
+});
 
 export type LensProps = Pick<
   EmbeddableComponentProps,
@@ -127,23 +131,10 @@ export const useLensProps = ({
     // force Lens to build with no datasource on error to show the error message
     if (!chartLayers.length && !effectiveError) return null;
 
-    // Fetch correlated exemplars for this metric and pass them to the chart as
-    // generic bubble points; failures (e.g. no exemplar index) just yield no
-    // markers and never block the chart.
-    const bubbles =
-      metricName && fetchParams.dataView
-        ? await fetchExemplars({
-            metricName,
-            search: services.data.search.search,
-            dataView: fetchParams.dataView,
-            timeRange: fetchParams.timeRange,
-            filters: fetchParams.filters,
-            variables: fetchParams.esqlVariables,
-            uiSettings: services.uiSettings,
-            profileId,
-            signal: fetchParams.abortController?.signal,
-          }).catch(() => [] as XYBubblePoint[])
-        : [];
+    // Pass the exemplar query (not the fetched points) so Lens fetches the markers
+    // itself at render time. This keeps the overlay in sync wherever Lens renders
+    // the chart (metrics grid, dashboards, Discover), not just here.
+    const exemplars = metricName ? buildExemplarsQuery(metricName) : undefined;
 
     const lensParams = buildLensParams({
       query,
@@ -152,8 +143,9 @@ export const useLensProps = ({
       chartLayers,
       yBounds,
       legend,
-      bubbles,
-      bubblesTitle: metricName,
+      bubblesQuery: exemplars?.query,
+      bubblesValueColumn: exemplars?.valueColumn,
+      bubblesTitle: metricName ? EXEMPLAR_BUBBLE_TITLE : undefined,
     });
     const builder = new LensConfigBuilder(services.dataViews);
 
@@ -297,7 +289,8 @@ const buildLensParams = ({
   chartLayers,
   yBounds,
   legend,
-  bubbles,
+  bubblesQuery,
+  bubblesValueColumn,
   bubblesTitle,
 }: {
   query: string;
@@ -306,7 +299,8 @@ const buildLensParams = ({
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
   legend?: LensLegendConfig;
-  bubbles?: XYBubblePoint[];
+  bubblesQuery?: string;
+  bubblesValueColumn?: string;
   bubblesTitle?: string;
 }): LensConfig => {
   return {
@@ -325,7 +319,8 @@ const buildLensParams = ({
     layers: chartLayers,
     fittingFunction: 'Linear',
     yBounds,
-    bubbles,
+    bubblesQuery,
+    bubblesValueColumn,
     bubblesTitle,
   };
 };

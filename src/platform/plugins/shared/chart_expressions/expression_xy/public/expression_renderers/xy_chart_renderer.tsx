@@ -221,8 +221,8 @@ export const getXyChartRenderer = ({
     const deps = await getStartDeps();
 
     // Lazy loaded parts
-    const [{ XYChartReportable }, { calculateMinInterval, getDataLayers }] = await Promise.all([
-      import('../components/xy_chart'),
+    const [{ XYChartWithExemplars }, { calculateMinInterval, getDataLayers }] = await Promise.all([
+      import('./xy_chart_with_exemplars'),
       import('../helpers'),
     ]);
 
@@ -288,7 +288,7 @@ export const getXyChartRenderer = ({
     ReactDOM.render(
       <KibanaRenderContextProvider {...deps.startServices}>
         <div css={chartContainerStyle} data-test-subj="xyVisChart">
-          <XYChartReportable
+          <XYChartWithExemplars
             {...config}
             data={deps.data}
             formatFactory={deps.formatFactory}

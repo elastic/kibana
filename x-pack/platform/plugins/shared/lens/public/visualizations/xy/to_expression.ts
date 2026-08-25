@@ -349,6 +349,8 @@ export const buildXYExpression = (
     pointVisibility: state.pointVisibility ?? PointVisibilityOptions.AUTO,
     bubbles: JSON.stringify(state.bubbles ?? []),
     bubblesTitle: state.bubblesTitle ?? '',
+    bubblesQuery: state.bubblesQuery ?? '',
+    bubblesValueColumn: state.bubblesValueColumn ?? '',
     areaFill: state.areaFill ?? AreaFillOptions.SOLID,
     valueLabels: state.valueLabels ?? 'hide',
     hideEndzones: state.hideEndzones ?? false,

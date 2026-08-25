@@ -64,6 +64,16 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
       help: strings.getBubblesHelp(),
       default: '[]',
     },
+    bubblesQuery: {
+      types: ['string'],
+      help: strings.getBubblesQueryHelp(),
+      default: '',
+    },
+    bubblesValueColumn: {
+      types: ['string'],
+      help: strings.getBubblesValueColumnHelp(),
+      default: '',
+    },
     bubblesTitle: {
       types: ['string'],
       help: strings.getBubblesTitleHelp(),

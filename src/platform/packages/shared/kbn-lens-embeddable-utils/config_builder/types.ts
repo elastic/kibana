@@ -312,6 +312,8 @@ export interface LensXYConfigBase {
   valueLabels?: 'hide' | 'show';
   bubbles?: XYBubblePoint[];
   bubblesTitle?: string;
+  bubblesQuery?: string;
+  bubblesValueColumn?: string;
 }
 export interface BuildDependencies {
   dataViewsAPI: DataViewsCommon;
