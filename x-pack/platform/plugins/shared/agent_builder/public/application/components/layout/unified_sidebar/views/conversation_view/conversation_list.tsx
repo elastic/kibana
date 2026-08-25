@@ -122,7 +122,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         display: flex;
         flex-direction: column;
         gap: ${euiTheme.size.xs};
-        border-radius: ${euiTheme.border.radius.small};
+        border-radius: ${euiTheme.border.radius.control};
         background-color: ${backgroundColor};
         transition: background-color 0.15s;
       `}
