@@ -13,7 +13,7 @@ import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils
 import type { RegionMapConfig } from './region_map';
 import { regionMapConfigSchema } from './region_map';
 
-type DefaultRegionMapConfig = Pick<RegionMapConfig, 'sampling' | 'ignore_global_filters'>;
+type DefaultRegionMapConfig = Pick<RegionMapConfig, 'sampling' | 'ignore_global_filters' | 'tags'>;
 type RegionMapWithoutDefaultsConfig = Omit<RegionMapConfig, 'sampling' | 'ignore_global_filters'>;
 
 type RegionTerms = Extract<RegionMapConfig['region'], { operation: 'terms' }>;
@@ -33,6 +33,7 @@ describe('Region Map Schema', () => {
   const defaultValues: DefaultRegionMapConfig = {
     sampling: 1,
     ignore_global_filters: false,
+    tags: [],
   };
 
   describe('basic configuration', () => {

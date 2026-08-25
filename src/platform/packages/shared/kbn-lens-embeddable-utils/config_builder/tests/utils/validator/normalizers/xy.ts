@@ -513,9 +513,6 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       );
     }
 
-    // Tag references (type: "tag") are not preserved by the transform — drop them.
-    attributes.references = attributes.references.filter((ref) => ref.type !== 'tag');
-
     // External index-pattern refs with raw index-pattern IDs (e.g. "logs-*") that match
     // an adHocDataViews entry are treated as adhoc by the transform and dropped from external refs.
     const adHocDataViews = (attributes.state as any).adHocDataViews as
