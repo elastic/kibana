@@ -108,13 +108,14 @@ describe('createAlertEventsBatchBuilder', () => {
   });
 
   it('stamps @timestamp per batch, not once per run', () => {
-    const buildBatch = createAlertEventsBatchBuilder({
+    const { buildBatch } = createAlertEventsBatchBuilder({
       ruleId: 'rule-123',
       ruleVersion: 1,
       spaceId: 'default',
       ruleAttributes: { grouping: { fields: ['host.name'] } },
       scheduledTimestamp: '2024-12-31T23:59:00.000Z',
       type: 'signal',
+      maxGroupsPerExecution: 10000,
     });
 
     const [firstBatchDoc] = buildBatch([{ 'host.name': 'host-a' }]);
