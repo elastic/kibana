@@ -22,6 +22,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { TaskAlreadyRunningError } from './lib/errors';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
+import { taskManagerClaimNudgeTelemetry } from './otel/claim_nudge_telemetry';
 
 let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
@@ -85,8 +86,13 @@ describe('TaskScheduling', () => {
     },
   });
 
+  let recordClaimNudgeSpy: jest.SpyInstance;
+
   beforeEach(() => {
     jest.resetAllMocks();
+    recordClaimNudgeSpy = jest
+      .spyOn(taskManagerClaimNudgeTelemetry, 'recordClaimNudge')
+      .mockImplementation(() => {});
   });
 
   test('allows scheduling tasks', async () => {
@@ -159,6 +165,23 @@ describe('TaskScheduling', () => {
       { refresh: true }
     );
     expect(claimNudgeService.notify).toHaveBeenCalledTimes(1);
+    expect(recordClaimNudgeSpy).toHaveBeenCalledWith('schedule');
+  });
+
+  test('does not request refresh:true for requestImmediateClaim when no claim nudge service is configured', async () => {
+    const taskScheduling = new TaskScheduling(omit(taskSchedulingOpts, 'claimNudgeService'));
+    const task = {
+      taskType: 'foo',
+      params: {},
+      state: {},
+    };
+    mockTaskStore.schedule.mockResolvedValueOnce(taskManagerMock.createTask({ id: 'my-foo-id' }));
+
+    await taskScheduling.schedule(task, { requestImmediateClaim: true });
+
+    expect(mockTaskStore.schedule).toHaveBeenCalledWith(expect.anything(), undefined);
+    expect(claimNudgeService.notify).not.toHaveBeenCalled();
+    expect(recordClaimNudgeSpy).not.toHaveBeenCalled();
   });
 
   test('does not notify the claim nudge when requestImmediateClaim is not set', async () => {
@@ -191,6 +214,8 @@ describe('TaskScheduling', () => {
     expect(taskSchedulingOpts.logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('nudge index unavailable')
     );
+    // attempts are counted, not successes
+    expect(recordClaimNudgeSpy).toHaveBeenCalledWith('schedule');
   });
 
   test('allows scheduling tasks that are disabled', async () => {
@@ -1302,6 +1327,7 @@ describe('TaskScheduling', () => {
       expect(mockTaskStore.get).toHaveBeenCalledWith(id);
       expect(result).toEqual({ id, forced: false });
       expect(claimNudgeService.notify).toHaveBeenCalledTimes(1);
+      expect(recordClaimNudgeSpy).toHaveBeenCalledWith('run_soon');
     });
 
     test('runs failed tasks too', async () => {
@@ -1489,7 +1515,7 @@ describe('TaskScheduling', () => {
       );
     });
 
-    test('does not attempt to notify when no claim nudge service is configured', async () => {
+    test('does not attempt to notify or force a refresh when no claim nudge service is configured', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(omit(taskSchedulingOpts, 'claimNudgeService'));
 
@@ -1502,6 +1528,11 @@ describe('TaskScheduling', () => {
 
       expect(result).toEqual({ id, forced: false });
       expect(claimNudgeService.notify).not.toHaveBeenCalled();
+      expect(recordClaimNudgeSpy).not.toHaveBeenCalled();
+      expect(mockTaskStore.update).toHaveBeenCalledWith(expect.anything(), {
+        validate: false,
+        refresh: false,
+      });
     });
   });
 

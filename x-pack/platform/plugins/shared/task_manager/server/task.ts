@@ -624,8 +624,9 @@ export type ScheduleOptions = Record<string, unknown> &
      * next poll_interval, for latency-sensitive callers. Best-effort: if the nudge fails,
      * the task still runs on the next regular poll.
      *
-     * Only applies when the call creates the task: an `ensureScheduled()` that finds the task
-     * already scheduled does not nudge, since nothing became claimable. Use `runSoon()` instead.
+     * Only honored by `schedule()` when that call creates the task. An `ensureScheduled()` that
+     * finds the task already scheduled does not nudge; use `runSoon()` for an existing task.
+     * `bulkSchedule()` ignores this option.
      */
     requestImmediateClaim?: boolean;
   };
