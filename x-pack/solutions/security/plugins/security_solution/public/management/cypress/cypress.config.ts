@@ -10,9 +10,6 @@ import { getCypressBaseConfig } from './cypress_base.config';
 
 export default defineCypressConfig(
   getCypressBaseConfig({
-    e2e: {
-      specPattern: 'public/management/cypress/e2e/response_actions/response_actions_history.cy.ts',
-    },
     env: {
       grepTags: '@ess',
     },
