@@ -1446,13 +1446,15 @@ const InternalUnifiedDataTable = React.forwardRef<
     const toolbarVisibility = useMemo(
       () => ({
         ...toolbarVisibilityDefaults,
-        showSortSelector: isSortEnabled,
+        showSortSelector: isSortEnabled && !isJsonSourceMode,
+        showColumnSelector: toolbarVisibilityDefaults.showColumnSelector && !isJsonSourceMode,
         additionalControls,
         showDisplaySelector,
         showKeyboardShortcuts,
         showFullScreenSelector: showFullScreenButton,
       }),
       [
+        isJsonSourceMode,
         isSortEnabled,
         additionalControls,
         showDisplaySelector,

@@ -962,6 +962,22 @@ describe('UnifiedDataTable', () => {
       },
       EXTENDED_JEST_TIMEOUT
     );
+
+    it(
+      'should hide Columns and Sort toolbar controls in JSON source mode',
+      async () => {
+        await renderComponent({
+          ...getProps(),
+          sourceDisplayModeState: 'json',
+        });
+
+        expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+          showColumnSelector: false,
+          showSortSelector: false,
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 
   describe('custom control columns', () => {
