@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { UserActionTitle } from '@kbn/cases-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getRuleInfo, type AlertAttachmentMetadata } from '@kbn/cases-plugin/common';
 import { useFetchAlertData } from '../../../pages/use_fetch_alert_data';
+import { useAlertDataRetry } from './use_alert_data_retry';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import * as i18n from '../translations';
@@ -75,30 +76,13 @@ export const AlertEvent: React.FC<AlertEventProps> = ({
   );
   const [loadingAlertData, alertsData, refetchAlertData] = useFetchAlertData(idsToFetch);
 
-  // Ref so the retry gate doesn't cause a re-render when set.
-  const hasRetried = useRef(false);
-
-  // refetchAlertData is null until the first fetch completes (see use_query.tsx).
-  // null === "no fetch has run yet", which is distinct from "fetch returned empty".
-  const firstFetchReturnedNoData =
-    !hasRuleIdFromMetadata &&
-    !loadingAlertData &&
-    refetchAlertData !== null &&
-    alertsData[alertId] == null &&
-    !hasRetried.current;
-
-  // Single 300ms retry for the concurrent-race case where N simultaneous mounts
-  // return empty on the first round. refetchAlertData != null narrows the type.
-  // hasRetried is set inside the callback so a re-render before the delay expires
-  // neither cancels the retry nor permanently suppresses it via the gate.
-  useEffect(() => {
-    if (!firstFetchReturnedNoData || refetchAlertData == null) return;
-    const timer = setTimeout(() => {
-      hasRetried.current = true;
-      refetchAlertData();
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [firstFetchReturnedNoData, refetchAlertData]);
+  const firstFetchReturnedNoData = useAlertDataRetry({
+    hasRuleIdFromMetadata,
+    loadingAlertData,
+    alertsData,
+    alertId,
+    refetchAlertData,
+  });
 
   const { ruleId: resolvedRuleId, ruleName: resolvedRuleName } = useMemo(
     () =>
