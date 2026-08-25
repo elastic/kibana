@@ -93,8 +93,6 @@ export const useQueryAlerts = <Hit, Aggs>({
     response: '',
     request: '',
     setQuery,
-    // null until first fetch completes — AlertEvent uses this to distinguish "not fetched yet"
-    // from "fetched, no data". Do not initialise to a no-op.
     refetch: null,
   });
   const [loading, setLoading] = useState(false);
