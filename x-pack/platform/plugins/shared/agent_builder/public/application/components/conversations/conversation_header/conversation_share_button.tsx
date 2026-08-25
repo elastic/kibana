@@ -442,6 +442,12 @@ const ConversationSharePopover: React.FC<{
               options={accessModeOptions}
               onChange={onAccessModeChange}
               disabled={isSaving}
+              style={{
+                minHeight: euiTheme.size.xxxl,
+                lineHeight: 'normal',
+                paddingTop: euiTheme.size.xs,
+                paddingBottom: euiTheme.size.xs,
+              }}
               popoverProps={{
                 panelPaddingSize: 's',
                 anchorPosition: 'downRight',
@@ -460,24 +466,6 @@ const ConversationSharePopover: React.FC<{
                 position: relative;
               `}
             >
-              <span
-                css={css`
-                  position: absolute;
-                  inset-inline-start: ${euiTheme.size.s};
-                  top: 50%;
-                  z-index: 1;
-                  display: flex;
-                  transform: translateY(-50%);
-                  pointer-events: none;
-                `}
-              >
-                <EuiIcon
-                  type="search"
-                  color="subdued"
-                  data-test-subj="agentBuilderConversationSharingUserSearchIcon"
-                  aria-hidden={true}
-                />
-              </span>
               <EuiComboBox<string>
                 compressed
                 fullWidth
@@ -507,6 +495,24 @@ const ConversationSharePopover: React.FC<{
                 rowHeight={48}
                 data-test-subj="agentBuilderConversationSharingUserSearch"
               />
+              <span
+                css={css`
+                  position: absolute;
+                  inset-inline-start: ${euiTheme.size.s};
+                  top: 50%;
+                  z-index: ${euiTheme.levels.header};
+                  display: flex;
+                  transform: translateY(-50%);
+                  pointer-events: none;
+                `}
+              >
+                <EuiIcon
+                  type="magnify"
+                  color="subdued"
+                  data-test-subj="agentBuilderConversationSharingUserSearchIcon"
+                  aria-hidden={true}
+                />
+              </span>
             </div>
           </EuiFormRow>
           <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
