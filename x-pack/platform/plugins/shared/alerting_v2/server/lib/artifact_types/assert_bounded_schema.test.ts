@@ -131,10 +131,12 @@ describe('assertBoundedSchema', () => {
 
   describe('accumulated worst-case total', () => {
     it('rejects multiplicative blow-up even when every node is within its cap', () => {
+      // Each node is individually legal (string ≤ MAX_ARTIFACT_STRING_LENGTH,
+      // maxItems ≤ MAX_ARTIFACT_ARRAY_ITEMS) but the product exceeds the budget.
       const dataSchema = z
         .object({
           items: z
-            .array(z.object({ note: z.string().max(500) }).strict())
+            .array(z.object({ note: z.string().max(MAX_ARTIFACT_STRING_LENGTH) }).strict())
             .max(MAX_ARTIFACT_ARRAY_ITEMS),
         })
         .strict();
