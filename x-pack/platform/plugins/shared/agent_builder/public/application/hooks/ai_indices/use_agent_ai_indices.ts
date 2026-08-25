@@ -7,7 +7,7 @@
 
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useQuery } from '@kbn/react-query';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import type { AgentAiIndexEntry, AgentAiIndicesItem } from '../../../../common/http_api/agents';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
@@ -30,20 +30,19 @@ export const useAgentAiIndices = ({
   const { agentService } = useAgentBuilderServices();
   const { addErrorToast } = useToasts();
 
-  const { data, isLoading, error, isError } = useQuery<AgentAiIndicesItem[], Error>({
+  const { data, isLoading, error } = useQuery<AgentAiIndicesItem[], Error>({
     queryKey: queryKeys.agentProfiles.agentAiIndicesList,
     queryFn: () => agentService.listAgentAiIndices(),
     enabled,
+    onError: (err) => {
+      if (enabled) {
+        addErrorToast({
+          title: labels.aiIndices.loadInheritedErrorMessage,
+          text: formatAgentBuilderErrorMessage(err),
+        });
+      }
+    },
   });
-
-  useEffect(() => {
-    if (enabled && isError) {
-      addErrorToast({
-        title: labels.aiIndices.loadInheritedErrorMessage,
-        text: formatAgentBuilderErrorMessage(error),
-      });
-    }
-  }, [enabled, isError, error, addErrorToast]);
 
   const aiIndicesByAgentId = useMemo(
     () =>

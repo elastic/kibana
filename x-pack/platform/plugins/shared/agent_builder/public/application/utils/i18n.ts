@@ -2945,7 +2945,7 @@ export const labels = {
   },
   aiIndices: {
     sectionTitle: i18n.translate('xpack.agentBuilder.aiIndices.sectionTitle', {
-      defaultMessage: 'AI Indices',
+      defaultMessage: 'AI indices',
     }),
     sectionDescription: i18n.translate('xpack.agentBuilder.aiIndices.sectionDescription', {
       defaultMessage:

@@ -7,7 +7,6 @@
 
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useQuery } from '@kbn/react-query';
-import { useEffect } from 'react';
 import type {
   AgentAiIndexEntry,
   GetAgentAiIndicesResponse,
@@ -34,20 +33,19 @@ export const useAgentAiIndicesById = (
   const { addErrorToast } = useToasts();
   const isEnabled = enabled && Boolean(agentId);
 
-  const { data, isLoading, error, isError } = useQuery<GetAgentAiIndicesResponse, Error>({
+  const { data, isLoading, error } = useQuery<GetAgentAiIndicesResponse, Error>({
     queryKey: queryKeys.agentProfiles.agentAiIndicesById(agentId ?? ''),
     queryFn: () => agentService.getAgentAiIndices(agentId!),
     enabled: isEnabled,
+    onError: (err) => {
+      if (isEnabled) {
+        addErrorToast({
+          title: labels.aiIndices.loadInheritedErrorMessage,
+          text: formatAgentBuilderErrorMessage(err),
+        });
+      }
+    },
   });
-
-  useEffect(() => {
-    if (isEnabled && isError) {
-      addErrorToast({
-        title: labels.aiIndices.loadInheritedErrorMessage,
-        text: formatAgentBuilderErrorMessage(error),
-      });
-    }
-  }, [isEnabled, isError, error, addErrorToast]);
 
   return {
     aiIndices: data?.ai_indices ?? [],

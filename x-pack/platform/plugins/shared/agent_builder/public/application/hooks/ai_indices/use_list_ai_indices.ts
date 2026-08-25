@@ -12,7 +12,6 @@ import type {
   AiIndexHttpItem,
   ListAiIndexResponse,
 } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
-import { useEffect } from 'react';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useKibana } from '../use_kibana';
@@ -36,20 +35,17 @@ export const useListAiIndices = (): UseListAiIndicesResult => {
   } = useKibana();
   const { addErrorToast } = useToasts();
 
-  const { data, isLoading, error, isError } = useQuery<ListAiIndexResponse, Error>({
+  const { data, isLoading, error } = useQuery<ListAiIndexResponse, Error>({
     queryKey: queryKeys.aiIndices.list,
     queryFn: ({ signal }) =>
       http.get<ListAiIndexResponse>(aiIndexPath, { version: AI_INDEX_API_VERSION, signal }),
-  });
-
-  useEffect(() => {
-    if (isError) {
+    onError: (err) => {
       addErrorToast({
         title: labels.aiIndices.loadErrorMessage,
-        text: formatAgentBuilderErrorMessage(error),
+        text: formatAgentBuilderErrorMessage(err),
       });
-    }
-  }, [isError, error, addErrorToast]);
+    },
+  });
 
   return { aiIndices: data?.ai_indices ?? [], isLoading, error: error ?? undefined };
 };

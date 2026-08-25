@@ -42,11 +42,14 @@ describe('useListAiIndices', () => {
   });
 
   it('shows an error toast when the list request fails', async () => {
-    useQuery.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      error: new Error('boom'),
-      isError: true,
+    useQuery.mockImplementation((options: { onError?: (error: Error) => void }) => {
+      options.onError?.(new Error('boom'));
+      return {
+        data: undefined,
+        isLoading: false,
+        error: new Error('boom'),
+        isError: true,
+      };
     });
 
     renderHook(() => useListAiIndices());
