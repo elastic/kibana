@@ -7,6 +7,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { EuiPageTemplate } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppMountParameters, ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
@@ -57,7 +58,11 @@ export const mountStandaloneApp = async ({
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
-          <EvalsApp history={history} setBreadcrumbs={setBreadcrumbs} getHref={getHref} />
+          <EuiPageTemplate offset={0}>
+            <EuiPageTemplate.Section restrictWidth={false}>
+              <EvalsApp history={history} setBreadcrumbs={setBreadcrumbs} getHref={getHref} />
+            </EuiPageTemplate.Section>
+          </EuiPageTemplate>
         </KibanaContextProvider>
       </I18nProvider>
     </QueryClientProvider>
