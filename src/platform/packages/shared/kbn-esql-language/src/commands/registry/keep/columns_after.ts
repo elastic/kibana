@@ -24,10 +24,14 @@ export const columnsAfter = (
   });
 
   const columnsByName = new Map(previousColumns.map((column) => [column.name, column]));
+  const uniqueColumnsToKeep = columnsToKeep.filter(
+    (name, index) => columnsToKeep.lastIndexOf(name) === index
+  );
 
-  // If `previousColumns` is `[a, b]`, `KEEP b, a` must return `[b, a]`.
+  // KEEP follows the written order and keeps the last occurrence of repeated columns.
+  // For example, `KEEP a, b, a` returns `[b, a]`.
   // Multi-column IN uses this order to compare the fields on each side.
-  return columnsToKeep.flatMap((name) => {
+  return uniqueColumnsToKeep.flatMap((name) => {
     const column = columnsByName.get(name);
 
     return column ? [column] : [];
