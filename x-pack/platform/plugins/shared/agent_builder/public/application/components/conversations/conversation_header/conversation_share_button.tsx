@@ -295,7 +295,7 @@ const ConversationSharePopover: React.FC<{
     const showSecondary = secondary && secondary !== displayName;
 
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexGroup key={option.key ?? option.value} gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
           <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
         </EuiFlexItem>
