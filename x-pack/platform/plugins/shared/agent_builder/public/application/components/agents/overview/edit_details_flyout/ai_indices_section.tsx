@@ -15,23 +15,22 @@ import type { EditDetailsFormData } from './types';
 
 interface AiIndicesSectionProps {
   agentId: string;
-  isDisabled: boolean;
 }
 
 /**
  * Picks the AI indices an agent retrieves from.
  */
-export const AiIndicesSection: React.FC<AiIndicesSectionProps> = ({ agentId, isDisabled }) => {
+export const AiIndicesSection: React.FC<AiIndicesSectionProps> = ({ agentId }) => {
   const isContextEngineEnabled = useIsContextEngineEnabled();
 
   if (!isContextEngineEnabled) {
     return null;
   }
 
-  return <AiIndicesSectionContent agentId={agentId} isDisabled={isDisabled} />;
+  return <AiIndicesSectionContent agentId={agentId} />;
 };
 
-const AiIndicesSectionContent: React.FC<AiIndicesSectionProps> = ({ agentId, isDisabled }) => {
+const AiIndicesSectionContent: React.FC<AiIndicesSectionProps> = ({ agentId }) => {
   const { control } = useFormContext<EditDetailsFormData>();
   const { availableAiIndices, inheritedIds, isLoading, error } = useAiIndices(agentId);
 
@@ -56,7 +55,7 @@ const AiIndicesSectionContent: React.FC<AiIndicesSectionProps> = ({ agentId, isD
               inheritedIds={inheritedIds}
               isLoading={isLoading}
               error={error}
-              isFormDisabled={isDisabled}
+              isFormDisabled={false}
               onChange={field.onChange}
             />
           )}

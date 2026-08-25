@@ -156,7 +156,7 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
           agent_id: 'chat-agent',
           ai_indices: [
             {
-              id: 'Failed to resolve default AI indices for type "chat": boom',
+              id: 'Failed to resolve AI indices',
               is_default: true,
             },
             { id: 'my-index', is_default: false },

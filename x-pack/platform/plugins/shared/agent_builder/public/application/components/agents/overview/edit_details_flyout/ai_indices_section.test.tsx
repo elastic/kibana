@@ -49,7 +49,7 @@ const TestForm: React.FC<{ assignedIds?: string[] }> = ({ assignedIds = [] }) =>
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <AiIndicesSection agentId={AGENT_ID} isDisabled={false} />
+        <AiIndicesSection agentId={AGENT_ID} />
         <button type="submit">submit</button>
       </form>
     </FormProvider>

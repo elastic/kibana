@@ -84,7 +84,7 @@ export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
         </EuiFlexGroup>
       </EuiPanel>
 
-      <AiIndicesSection agentId={agentId} isDisabled={false} />
+      <AiIndicesSection agentId={agentId} />
 
       {showWorkflowSection && (
         <>
