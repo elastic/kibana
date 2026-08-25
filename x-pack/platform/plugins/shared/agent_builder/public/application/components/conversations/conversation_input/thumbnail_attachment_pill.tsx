@@ -48,8 +48,6 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
   const [isHovered, setIsHovered] = useState(false);
   const canRemoveAttachment = Boolean(onRemoveAttachment);
 
-  console.log({ isHighlighted, isHovered });
-
   return (
     <div
       css={css`

@@ -75,6 +75,7 @@ export const RoundInputText: React.FC<RoundInputTextProps> = ({ text }) => {
       euiTheme.border.radius.small,
       euiTheme.colors.backgroundFilledPrimary,
       euiTheme.colors.textInverse,
+      euiTheme.size.l,
       euiTheme.size.xs,
     ]
   );
