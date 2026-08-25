@@ -1572,7 +1572,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
     },
-    context?: RequestHandlerContext
+    context?: RequestHandlerContext,
+    request?: KibanaRequest
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('update');
 
@@ -1604,7 +1605,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         packagePolicyUpdateWithId,
         soClient,
         esClient,
-        context
+        context,
+        request
       );
     } catch (error) {
       logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);

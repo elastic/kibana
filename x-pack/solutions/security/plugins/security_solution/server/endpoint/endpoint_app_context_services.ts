@@ -264,7 +264,8 @@ export class EndpointAppContextService {
         this.setupDependencies.cloud,
         productFeaturesService,
         telemetryConfigProvider,
-        experimentalFeatures
+        experimentalFeatures,
+        this
       )
     );
 

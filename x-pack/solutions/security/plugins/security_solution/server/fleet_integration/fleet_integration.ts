@@ -67,6 +67,7 @@ import { createEventFilters } from './handlers/create_event_filters';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import { removeProtectionUpdatesNote } from './handlers/remove_protection_updates_note';
 import { catchAndWrapError } from '../endpoint/utils';
+import { validateProtectedPolicySettings } from './handlers/validate_protected_policy_settings';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -131,7 +132,8 @@ export const getPackagePolicyCreateCallback = (
   cloud: CloudSetup,
   productFeatures: ProductFeaturesService,
   telemetryConfigProvider: TelemetryConfigProvider,
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  endpointServices: EndpointAppContextService
 ): PostPackagePolicyCreateCallback => {
   return async (
     newPackagePolicy,
@@ -160,6 +162,20 @@ export const getPackagePolicyCreateCallback = (
       validatePolicyAgainstProductFeatures(newPackagePolicy.inputs, productFeatures);
       validateEndpointPackagePolicy(newPackagePolicy.inputs);
     }
+
+    // Gate security-critical artifact trust/transport settings behind superuser/admin.
+    // On create the stored policy does not exist yet, so currentPolicyValue is undefined
+    // and any supplied value counts as a change.
+    await validateProtectedPolicySettings({
+      newPolicyValue: (newPackagePolicy?.inputs?.[0]?.config?.policy?.value ?? undefined) as
+        | Record<string, unknown>
+        | undefined,
+      currentPolicyValue: undefined,
+      endpointServices,
+      request,
+      logger,
+    });
+
     // Optional endpoint integration configuration
     let endpointIntegrationConfig;
 
@@ -267,7 +283,9 @@ export const getPackagePolicyUpdateCallback = (
   return async (
     newPackagePolicy: NewPackagePolicy,
     soClient,
-    esClient
+    esClient,
+    _context,
+    request
   ): Promise<UpdatePackagePolicy> => {
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
@@ -306,13 +324,31 @@ export const getPackagePolicyUpdateCallback = (
     // Make sure policy includes general expected data
     validateEndpointPackagePolicy(endpointIntegrationData.inputs, 'update');
 
-    if (endpointIntegrationData.id) {
-      await notifyProtectionFeatureUsage(
-        endpointIntegrationData,
-        (await endpointServices
+    // Fetch the stored policy once; reused for both the protected-settings check and the
+    // feature-usage notification below so we only make one SO read.
+    const storedPolicyData = endpointIntegrationData.id
+      ? ((await endpointServices
           .getInternalFleetServices()
           .packagePolicy.get(soClient, endpointIntegrationData.id as string)
-          .catch(catchAndWrapError)) as PolicyData,
+          .catch(catchAndWrapError)) as PolicyData | null)
+      : null;
+
+    // Gate security-critical artifact trust/transport settings behind superuser/admin.
+    // Throws 403 (apiPassThrough) when a non-superuser tries to change these fields.
+    await validateProtectedPolicySettings({
+      newPolicyValue: policyValue as unknown as Record<string, unknown> | undefined,
+      currentPolicyValue: storedPolicyData?.inputs?.[0]?.config?.policy?.value as
+        | Record<string, unknown>
+        | undefined,
+      endpointServices,
+      request,
+      logger,
+    });
+
+    if (storedPolicyData) {
+      await notifyProtectionFeatureUsage(
+        endpointIntegrationData,
+        storedPolicyData,
         featureUsageService
       );
     }

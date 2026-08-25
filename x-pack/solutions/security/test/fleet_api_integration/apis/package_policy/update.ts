@@ -972,6 +972,130 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('Protected artifact policy settings gate', () => {
+      const buildEndpointPolicyBody = (policyOverrides: Record<string, unknown> = {}) => ({
+        name: 'endpoint-1',
+        description: '',
+        namespace: 'updated_namespace',
+        policy_id: agentPolicyId,
+        enabled: true,
+        inputs: [
+          {
+            enabled: true,
+            streams: [],
+            config: {
+              artifact_manifest: { value: {} },
+              policy: {
+                value: {
+                  ...policyFactory(),
+                  ...policyOverrides,
+                },
+              },
+            },
+            type: 'endpoint',
+          },
+        ],
+        force: true,
+        package: {
+          name: 'endpoint',
+          title: 'Elastic Defend',
+          version: endpointVersion,
+        },
+      });
+
+      it('returns 403 when non-superuser injects windows.advanced.artifacts.global.public_key', async function () {
+        await superTestWithoutAuth
+          .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            testUsers.endpoint_integr_write_policy.username,
+            testUsers.endpoint_integr_write_policy.password
+          )
+          .send(
+            buildEndpointPolicyBody({
+              windows: {
+                ...policyFactory().windows,
+                advanced: {
+                  artifacts: {
+                    global: {
+                      public_key:
+                        '-----BEGIN PUBLIC KEY-----\nattackerkey\n-----END PUBLIC KEY-----',
+                    },
+                  },
+                },
+              },
+            })
+          )
+          .expect(403);
+      });
+
+      it('returns 403 when non-superuser injects linux.advanced.artifacts.global.base_url', async function () {
+        await superTestWithoutAuth
+          .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            testUsers.endpoint_integr_write_policy.username,
+            testUsers.endpoint_integr_write_policy.password
+          )
+          .send(
+            buildEndpointPolicyBody({
+              linux: {
+                ...policyFactory().linux,
+                advanced: {
+                  artifacts: {
+                    global: {
+                      base_url: 'https://attacker.evil/artifacts',
+                    },
+                  },
+                },
+              },
+            })
+          )
+          .expect(403);
+      });
+
+      it('returns 200 when superuser changes artifact trust settings', async function () {
+        await supertest
+          .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(
+            buildEndpointPolicyBody({
+              windows: {
+                ...policyFactory().windows,
+                advanced: {
+                  artifacts: {
+                    global: {
+                      public_key:
+                        '-----BEGIN PUBLIC KEY-----\ntrustedkey\n-----END PUBLIC KEY-----',
+                    },
+                  },
+                },
+              },
+            })
+          )
+          .expect(200);
+
+        // Reset back to a clean policy so subsequent tests don't see the injected key as pre-existing
+        await supertest
+          .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(buildEndpointPolicyBody())
+          .expect(200);
+      });
+
+      it('returns 200 when non-superuser changes an unrelated policy setting (no regression)', async function () {
+        await superTestWithoutAuth
+          .put(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .auth(
+            testUsers.endpoint_integr_write_policy.username,
+            testUsers.endpoint_integr_write_policy.password
+          )
+          .send(buildEndpointPolicyBody())
+          .expect(200);
+      });
+    });
+
     describe('Input Packages', () => {
       it('should install index templates when upgrading from input package to integration package', async () => {
         const { body: packagePolicyResponse } = await supertest
