@@ -359,10 +359,8 @@
       "groupName": "react-router dependencies",
       "matchDepNames": [
         "react-router",
-        "react-router-config",
         "react-router-dom",
         "@types/react-router",
-        "@types/react-router-config",
         "@types/react-router-dom",
         "history",
         "@types/history"
@@ -371,6 +369,15 @@
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX", "effort:high", "upgrade-risk:high"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "groupName": "react-router-config dependencies",
+      "matchDepNames": ["react-router-config", "@types/react-router-config"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "reviewers": ["team:obs-presentation-team"],
+      "matchBaseBranches": ["main"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
