@@ -39,6 +39,7 @@ jest.mock('@kbn/task-manager-plugin/server', () => ({
   },
 }));
 
+import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intel';
 import {
   buildBulkOpsForTest,
   PROMOTE_THREAT_INDICATORS_TASK_TYPE,
@@ -293,6 +294,8 @@ describe('promote task runner', () => {
       return response;
     });
     (esClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+    (esClient.openPointInTime as jest.Mock).mockResolvedValue({ id: 'pit-1' });
+    (esClient.closePointInTime as jest.Mock).mockResolvedValue({ succeeded: true, num_freed: 1 });
 
     const coreSetup = coreMock.createSetup();
     (coreSetup.getStartServices as jest.Mock).mockResolvedValue([coreStart, {}, {}]);
@@ -387,6 +390,89 @@ describe('promote task runner', () => {
     const result = await runner.run();
 
     expect(result.state).toEqual(expect.objectContaining({ totalIndicatorsWritten: 0 }));
+  });
+
+  // Item-level failures used to be logged while the cursor advanced anyway, so
+  // the affected reports were never promoted and nothing re-read that range.
+  it('holds the cursor when bulk items fail, so the range is re-scanned', async () => {
+    const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
+    (esClient.bulk as jest.Mock).mockResolvedValue({
+      errors: true,
+      items: [{ update: { error: { type: 'strict_dynamic_mapping_exception' } } }],
+    });
+
+    const runner = definition.createTaskRunner(
+      runContext({ taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never })
+    );
+
+    const result = await runner.run();
+
+    expect(result.state).toEqual(expect.objectContaining({ lastSyncedAt: 'now-30d' }));
+  });
+
+  describe('point-in-time pagination', () => {
+    it('opens a PIT over the reports pattern and searches through it', async () => {
+      const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
+
+      await definition
+        .createTaskRunner(runContext({ taskInstance: { state: {}, params: {} } as never }))
+        .run();
+
+      expect(esClient.openPointInTime).toHaveBeenCalledWith(
+        expect.objectContaining({ index: THREAT_REPORTS_INDEX_PATTERN })
+      );
+
+      // The PIT pins the indices, so the search must not also pass `index`.
+      const searchArg = (esClient.search as jest.Mock).mock.calls[0][0];
+      expect(searchArg.pit).toEqual(expect.objectContaining({ id: 'pit-1' }));
+      expect(searchArg.index).toBeUndefined();
+      // `_shard_doc` is the stable tie-breaker a PIT makes available.
+      expect(searchArg.sort).toEqual([
+        { 'lineage.extracted_at': { order: 'asc' } },
+        { _shard_doc: { order: 'asc' } },
+      ]);
+    });
+
+    it('closes the PIT when the scan completes', async () => {
+      const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
+
+      await definition
+        .createTaskRunner(runContext({ taskInstance: { state: {}, params: {} } as never }))
+        .run();
+
+      expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
+    });
+
+    it('closes the PIT even when the scan throws', async () => {
+      const { definition, esClient } = setupRunner([]);
+      (esClient.search as jest.Mock).mockRejectedValue(
+        Object.assign(new Error('boom'), { statusCode: 500 })
+      );
+
+      await expect(
+        definition
+          .createTaskRunner(runContext({ taskInstance: { state: {}, params: {} } as never }))
+          .run()
+      ).rejects.toBeDefined();
+
+      expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-1' });
+    });
+
+    it('treats a missing reports index as a no-op', async () => {
+      const { definition, esClient } = setupRunner([]);
+      (esClient.openPointInTime as jest.Mock).mockRejectedValue(
+        Object.assign(new Error('index_not_found'), { statusCode: 404 })
+      );
+
+      const result = await definition
+        .createTaskRunner(
+          runContext({ taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never })
+        )
+        .run();
+
+      expect(result.state).toEqual(expect.objectContaining({ lastSyncedAt: 'now-30d' }));
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
   });
 });
 

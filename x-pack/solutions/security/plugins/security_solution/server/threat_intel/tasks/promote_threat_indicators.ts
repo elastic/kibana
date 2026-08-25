@@ -34,11 +34,21 @@ const PAGE_SIZE = 200;
 const TASK_TIMEOUT = '2m';
 
 /**
- * Tie-breaker for `search_after` without a PIT. Sorting on `_id` or `_shard_doc`
- * (without PIT) triggers fielddata on `_id` (disabled by default). `_doc` uses
- * Lucene doc order and does not require `_id` fielddata.
+ * Tie-breaker for `search_after`. `_shard_doc` is only available inside a
+ * point-in-time, which is why the scan opens one: without a PIT the previous
+ * `_doc` tie-breaker was neither stable across refreshes and segment merges nor
+ * globally unique across the shards matched by the wildcard. Enrichment writes
+ * concurrently with this scan, so reports sharing an `extracted_at` value could
+ * move across a page boundary and be skipped — and since only the timestamp is
+ * persisted, a skipped report was never picked up by a later run.
  */
-const REPORT_SCAN_SORT: estypes.Sort = [{ 'lineage.extracted_at': { order: 'asc' } }, '_doc'];
+const REPORT_SCAN_SORT: estypes.Sort = [
+  { 'lineage.extracted_at': { order: 'asc' } },
+  { _shard_doc: { order: 'asc' } },
+];
+
+/** Long enough to outlive the task timeout, so the PIT survives the whole scan. */
+const PIT_KEEP_ALIVE = '3m';
 
 /** `extracted.iocs` is `nested` in the reports mapping; `exists` on the parent path matches nothing. */
 const HAS_EXTRACTED_IOCS_FILTER: estypes.QueryDslQueryContainer = {
@@ -375,137 +385,181 @@ export const registerPromoteThreatIndicatorsTask = ({
           // tick and the next run's `gt` would skip every remaining report
           // sharing it.
           let scanCompleted = false;
+          // Item-level bulk rejections leave indicators unwritten. Advancing the
+          // cursor past them would drop those reports permanently (nothing
+          // re-reads a range once `lastSyncedAt` moves), so any failure holds
+          // the checkpoint and the next run re-scans the range. Writes are
+          // idempotent, so re-scanning is the cheap side of this trade.
+          let hadWriteFailures = false;
 
-          // Page through reports that have been (re-)enriched since the
-          // last sync. `search_after` over `lineage.extracted_at` keeps
-          // the cursor stable even when concurrent ingestion is writing.
-          // The loop checks `signal.aborted` between pages so timeouts
-          // surface as graceful state returns rather than write storms.
-          while (!signal.aborted) {
-            let searchResponse;
-            try {
-              searchResponse = await esClient.search<ReportHit['_source']>(
-                {
-                  index: THREAT_REPORTS_INDEX_PATTERN,
-                  // Reports live in a hidden index, which a wildcard skips by default.
-                  ...HIDDEN_INDEX_SEARCH_OPTIONS,
-                  size: PAGE_SIZE,
-                  _source: [
-                    '@timestamp',
-                    'space_id',
-                    'source.name',
-                    'source.url',
-                    'content.title',
-                    'severity.level',
-                    'extracted.iocs',
-                    'lineage.extracted_at',
-                  ],
-                  query: {
-                    bool: {
-                      filter: [
-                        { range: { 'lineage.extracted_at': { gt: lower } } },
-                        HAS_EXTRACTED_IOCS_FILTER,
-                      ],
-                    },
-                  },
-                  sort: REPORT_SCAN_SORT,
-                  ...(searchAfter ? { search_after: searchAfter } : {}),
-                },
-                { signal }
-              );
-            } catch (err) {
-              const message = (err as Error).message ?? String(err);
-              // ES temporarily unavailable — retry the whole run in a minute.
-              // Anything else (mapping conflict, RBAC) is permanent for this
-              // run and surfaces in the next attempt.
-              const status = (err as { statusCode?: number }).statusCode;
-              if (status === 503 || status === 429) {
-                throwRetryableError(
-                  new Error(`Elasticsearch transient failure during report scan: ${message}`),
-                  new Date(Date.now() + 60_000)
-                );
-              }
-              if (status === 404) {
-                // Reports index not created yet (first plugin start race).
-                // Treat as no-op and let the next scheduled run pick up.
-                return {
-                  state: previousState satisfies PromoteThreatIndicatorsState,
-                };
-              }
-              throwUnrecoverableError(
-                new Error(`Failed to scan .kibana-threat-reports for IOC sync: ${message}`)
-              );
-              return { state: previousState };
+          // A point-in-time freezes the view for the whole scan, which is what
+          // makes `search_after` stable while enrichment writes concurrently,
+          // and is what allows the `_shard_doc` tie-breaker.
+          let pitId: string;
+          try {
+            const pit = await esClient.openPointInTime({
+              index: THREAT_REPORTS_INDEX_PATTERN,
+              keep_alive: PIT_KEEP_ALIVE,
+              // Reports live in a hidden index, which a wildcard skips by default.
+              ...HIDDEN_INDEX_SEARCH_OPTIONS,
+            });
+            pitId = pit.id;
+          } catch (err) {
+            const message = (err as Error).message ?? String(err);
+            const status = (err as { statusCode?: number }).statusCode;
+            if (status === 404) {
+              // Reports index not created yet (first plugin start race).
+              // Treat as no-op and let the next scheduled run pick up.
+              return { state: previousState satisfies PromoteThreatIndicatorsState };
             }
-
-            const hits = (searchResponse?.hits?.hits ?? []) as ReportHit[];
-            if (hits.length === 0) {
-              scanCompleted = true;
-              break;
+            if (status === 503 || status === 429) {
+              throwRetryableError(
+                new Error(
+                  `Elasticsearch transient failure opening the report scan PIT: ${message}`
+                ),
+                new Date(Date.now() + 60_000)
+              );
             }
+            throwUnrecoverableError(
+              new Error(`Failed to open a point-in-time for the report scan: ${message}`)
+            );
+            return { state: previousState };
+          }
 
-            const ops = buildBulkOps(hits, now);
-            if (ops.length > 0) {
-              const bulkBody: Array<BulkUpdateAction | BulkScriptedUpsert> = [];
-              for (const op of ops) {
-                bulkBody.push({ update: { _index: op._index, _id: op._id } });
-                bulkBody.push({
-                  script: {
-                    source: SOURCES_UPSERT_SCRIPT,
-                    lang: 'painless',
-                    params: op.scriptParams as Record<string, unknown>,
-                  },
-                  upsert: op.upsert,
-                });
-              }
+          try {
+            // Page through reports that have been (re-)enriched since the
+            // last sync. The loop checks `signal.aborted` between pages so
+            // timeouts surface as graceful state returns rather than write storms.
+            while (!signal.aborted) {
+              let searchResponse;
               try {
-                const bulkResponse = await esClient.bulk(
-                  { refresh: false, operations: bulkBody },
+                searchResponse = await esClient.search<ReportHit['_source']>(
+                  {
+                    // `pit` replaces `index`: the point-in-time already pins the
+                    // target indices and their wildcard resolution.
+                    pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE },
+                    size: PAGE_SIZE,
+                    _source: [
+                      '@timestamp',
+                      'space_id',
+                      'source.name',
+                      'source.url',
+                      'content.title',
+                      'severity.level',
+                      'extracted.iocs',
+                      'lineage.extracted_at',
+                    ],
+                    query: {
+                      bool: {
+                        filter: [
+                          { range: { 'lineage.extracted_at': { gt: lower } } },
+                          HAS_EXTRACTED_IOCS_FILTER,
+                        ],
+                      },
+                    },
+                    sort: REPORT_SCAN_SORT,
+                    ...(searchAfter ? { search_after: searchAfter } : {}),
+                  },
                   { signal }
                 );
-                if (bulkResponse.errors) {
-                  const failedItems = bulkResponse.items.filter(
-                    (item) => item.update?.error || item.index?.error || item.create?.error
-                  );
-                  const firstError = failedItems[0];
-                  logger.error(
-                    `IOC indicator bulk rejected ${failedItems.length} of ${ops.length} operations. ` +
-                      `Those indicators are not searchable by Indicator Match rules and this run ` +
-                      `will not retry them (first error: ${JSON.stringify(firstError ?? {})})`
-                  );
-                  indicatorsWritten += ops.length - failedItems.length;
-                } else {
-                  indicatorsWritten += ops.length;
-                }
+                // ES can hand back a refreshed PIT id; carry it to the next page.
+                if (searchResponse.pit_id) pitId = searchResponse.pit_id;
               } catch (err) {
                 const message = (err as Error).message ?? String(err);
-                throwRetryableError(
-                  new Error(`Bulk write to ${THREAT_INTEL_INDICATORS_INDEX} failed: ${message}`),
-                  new Date(Date.now() + 60_000)
+                // ES temporarily unavailable — retry the whole run in a minute.
+                // Anything else (mapping conflict, RBAC) is permanent for this
+                // run and surfaces in the next attempt.
+                const status = (err as { statusCode?: number }).statusCode;
+                if (status === 503 || status === 429) {
+                  throwRetryableError(
+                    new Error(`Elasticsearch transient failure during report scan: ${message}`),
+                    new Date(Date.now() + 60_000)
+                  );
+                }
+                throwUnrecoverableError(
+                  new Error(`Failed to scan .kibana-threat-reports for IOC sync: ${message}`)
                 );
                 return { state: previousState };
               }
-            }
 
-            reportsProcessed += hits.length;
-            const lastHit = hits[hits.length - 1];
-            const lastExtractedAt = lastHit?._source?.lineage?.extracted_at ?? null;
-            if (typeof lastExtractedAt === 'string') latestExtractedAt = lastExtractedAt;
-            // search_after over [extracted_at, _doc] so we don't
-            // docs that share an extracted_at tick with the page boundary.
-            if (!lastHit?.sort) {
-              throwUnrecoverableError(
-                new Error(
-                  'Threat report scan returned hits without sort values — cannot paginate safely'
-                )
-              );
-            }
-            searchAfter = lastHit.sort;
+              const hits = (searchResponse?.hits?.hits ?? []) as ReportHit[];
+              if (hits.length === 0) {
+                scanCompleted = true;
+                break;
+              }
 
-            if (hits.length < PAGE_SIZE) {
-              scanCompleted = true;
-              break;
+              const ops = buildBulkOps(hits, now);
+              if (ops.length > 0) {
+                const bulkBody: Array<BulkUpdateAction | BulkScriptedUpsert> = [];
+                for (const op of ops) {
+                  bulkBody.push({ update: { _index: op._index, _id: op._id } });
+                  bulkBody.push({
+                    script: {
+                      source: SOURCES_UPSERT_SCRIPT,
+                      lang: 'painless',
+                      params: op.scriptParams as Record<string, unknown>,
+                    },
+                    upsert: op.upsert,
+                  });
+                }
+                try {
+                  const bulkResponse = await esClient.bulk(
+                    { refresh: false, operations: bulkBody },
+                    { signal }
+                  );
+                  if (bulkResponse.errors) {
+                    const failedItems = bulkResponse.items.filter(
+                      (item) => item.update?.error || item.index?.error || item.create?.error
+                    );
+                    const firstError = failedItems[0];
+                    // Hold the checkpoint: those indicators are not searchable by
+                    // Indicator Match rules, and advancing past them would drop
+                    // them for good.
+                    hadWriteFailures = true;
+                    logger.error(
+                      `IOC indicator bulk rejected ${failedItems.length} of ${ops.length} operations. ` +
+                        `Holding the sync checkpoint so the next run re-scans this range ` +
+                        `(first error: ${JSON.stringify(firstError ?? {})})`
+                    );
+                    indicatorsWritten += ops.length - failedItems.length;
+                  } else {
+                    indicatorsWritten += ops.length;
+                  }
+                } catch (err) {
+                  const message = (err as Error).message ?? String(err);
+                  throwRetryableError(
+                    new Error(`Bulk write to ${THREAT_INTEL_INDICATORS_INDEX} failed: ${message}`),
+                    new Date(Date.now() + 60_000)
+                  );
+                  return { state: previousState };
+                }
+              }
+
+              reportsProcessed += hits.length;
+              const lastHit = hits[hits.length - 1];
+              const lastExtractedAt = lastHit?._source?.lineage?.extracted_at ?? null;
+              if (typeof lastExtractedAt === 'string') latestExtractedAt = lastExtractedAt;
+              // search_after over [extracted_at, _shard_doc] so reports sharing an
+              // extracted_at tick with the page boundary are not skipped.
+              if (!lastHit?.sort) {
+                throwUnrecoverableError(
+                  new Error(
+                    'Threat report scan returned hits without sort values — cannot paginate safely'
+                  )
+                );
+              }
+              searchAfter = lastHit.sort;
+
+              if (hits.length < PAGE_SIZE) {
+                scanCompleted = true;
+                break;
+              }
             }
+          } finally {
+            // Best effort: an orphaned PIT expires on its own after keep_alive.
+            await esClient.closePointInTime({ id: pitId }).catch((err) => {
+              logger.debug(`Failed to close report scan PIT: ${(err as Error).message}`);
+            });
           }
 
           if (!scanCompleted) {
@@ -519,10 +573,13 @@ export const registerPromoteThreatIndicatorsTask = ({
 
           const nextState: PromoteThreatIndicatorsState = {
             // Writes are idempotent (stable `_id` + report_id-deduped sources[]),
-            // so re-scanning is cheap compared with skipping reports.
-            lastSyncedAt: scanCompleted
-              ? latestExtractedAt ?? previousState.lastSyncedAt
-              : previousState.lastSyncedAt,
+            // so re-scanning is cheap compared with skipping reports. The cursor
+            // only moves when the scan drained the backlog *and* every write
+            // landed.
+            lastSyncedAt:
+              scanCompleted && !hadWriteFailures
+                ? latestExtractedAt ?? previousState.lastSyncedAt
+                : previousState.lastSyncedAt,
             totalReportsProcessed: (previousState.totalReportsProcessed ?? 0) + reportsProcessed,
             totalIndicatorsWritten: (previousState.totalIndicatorsWritten ?? 0) + indicatorsWritten,
           };
