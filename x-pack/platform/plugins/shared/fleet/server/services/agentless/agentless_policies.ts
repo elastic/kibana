@@ -336,7 +336,6 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         esClient: this.esClient,
         logger: this.logger,
         cloudConnectorName: data.cloud_connector?.name,
-        policyTemplate,
       });
 
       newPackagePolicy = updatedPackagePolicy;
@@ -529,7 +528,7 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
         esClient: this.esClient,
         logger: this.logger,
         cloudConnectorName: data.cloud_connector?.name,
-        policyTemplate,
+        attachedCloudConnectorId: existingPackagePolicy.cloud_connector_id ?? undefined,
       });
 
       newPackagePolicy = integratedPackagePolicy;
