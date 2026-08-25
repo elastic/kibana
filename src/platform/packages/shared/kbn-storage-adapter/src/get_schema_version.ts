@@ -9,30 +9,9 @@
 
 import { stableStringify } from '@kbn/std';
 import objectHash from 'object-hash';
-import type { ClusterGetComponentTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IndexStorageSettings } from '..';
 
-export interface ResolvedComponentTemplateDependency {
-  name: string;
-  componentTemplate?: ClusterGetComponentTemplateResponse['component_templates'][number]['component_template'];
-}
-
-export function getSchemaVersion(
-  storage: IndexStorageSettings,
-  componentTemplateDependencies: readonly ResolvedComponentTemplateDependency[] = []
-): string {
-  const dependencyMappings = componentTemplateDependencies.map(({ name, componentTemplate }) => ({
-    name,
-    present: componentTemplate !== undefined,
-    mappings: componentTemplate?.template.mappings,
-  }));
-  const versionInput = storage.componentTemplate
-    ? {
-        properties: storage.schema.properties,
-        componentTemplate: storage.componentTemplate,
-        componentTemplateDependencies: dependencyMappings,
-      }
-    : storage.schema.properties;
-  const version = objectHash(stableStringify(versionInput));
+export function getSchemaVersion(storage: IndexStorageSettings): string {
+  const version = objectHash(stableStringify(storage.schema.properties));
   return version;
 }

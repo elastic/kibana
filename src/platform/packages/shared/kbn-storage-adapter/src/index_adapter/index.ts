@@ -45,7 +45,7 @@ import type {
   InternalIStorageClient,
   StorageTransportOptions,
 } from '../..';
-import { getSchemaVersion, type ResolvedComponentTemplateDependency } from '../get_schema_version';
+import { getSchemaVersion } from '../get_schema_version';
 import type { StorageMappingProperty } from '../../types';
 import { BulkOperationError } from '../errors';
 
@@ -131,21 +131,6 @@ function optionalTransportArgs(
   return transportOptions ? [transportOptions] : [];
 }
 
-// Short enough to detect external component changes promptly while avoiding repeated
-// cluster-state reads for request-scoped adapters handling nearby requests.
-const COMPONENT_TEMPLATE_DEPENDENCY_CACHE_TTL_MS = 30_000;
-
-interface ComponentTemplateDependencyCacheEntry {
-  dependenciesPromise: Promise<ResolvedComponentTemplateDependency[]>;
-  expiresAt?: number;
-  mappingChecks: Map<string, Promise<void>>;
-}
-
-const componentTemplateDependencyCache = new WeakMap<
-  ElasticsearchClient,
-  Map<string, ComponentTemplateDependencyCacheEntry>
->();
-
 export interface StorageIndexAdapterOptions<TApplicationType> {
   /**
    * Client used for cluster-scoped index template operations. Defaults to the
@@ -202,7 +187,6 @@ export class StorageIndexAdapter<
 
   private readonly logger: Logger;
   private updateMappingsPromise: Promise<void> | undefined;
-  private lastCheckedComposedVersion: string | undefined;
   private serverlessCheck: Promise<boolean | undefined> | undefined;
   private isServerless: boolean | undefined;
 
@@ -249,144 +233,18 @@ export class StorageIndexAdapter<
     return getAliasName(this.storage.name);
   }
 
-  private resolveComponentTemplateDependencies(): {
-    dependenciesPromise: Promise<ResolvedComponentTemplateDependency[]>;
-    cacheEntry?: ComponentTemplateDependencyCacheEntry;
-  } {
-    const { componentTemplate } = this.storage;
-    const dependencyNames = componentTemplate
-      ? [...new Set([...(componentTemplate.required ?? []), ...(componentTemplate.optional ?? [])])]
-      : [];
-    if (dependencyNames.length === 0) {
-      return { dependenciesPromise: Promise.resolve([]) };
-    }
-
-    const cacheKey = JSON.stringify({
-      owned: componentTemplate?.name,
-      required: componentTemplate?.required ?? [],
-      optional: componentTemplate?.optional ?? [],
-    });
-    let clientCache = componentTemplateDependencyCache.get(this.indexManagementClient);
-    if (!clientCache) {
-      clientCache = new Map();
-      componentTemplateDependencyCache.set(this.indexManagementClient, clientCache);
-    }
-
-    const now = Date.now();
-    for (const [key, entry] of clientCache) {
-      if (entry.expiresAt !== undefined && entry.expiresAt <= now) {
-        clientCache.delete(key);
-      }
-    }
-
-    const cachedEntry = clientCache.get(cacheKey);
-    if (cachedEntry) {
-      return {
-        dependenciesPromise: cachedEntry.dependenciesPromise,
-        cacheEntry: cachedEntry,
-      };
-    }
-
-    const dependenciesPromise = Promise.all(
-      dependencyNames.map(async (name) => {
-        const resolvedComponentTemplate = await wrapEsCall(
-          this.indexManagementClient.cluster.getComponentTemplate({ name })
-        )
-          .then(
-            (response) =>
-              response.component_templates.find((template) => template.name === name)
-                ?.component_template
-          )
-          .catch((error) => {
-            if (isNotFoundError(error)) {
-              return undefined;
-            }
-            throw error;
-          });
-
-        return { name, componentTemplate: resolvedComponentTemplate };
-      })
-    );
-    const cacheEntry: ComponentTemplateDependencyCacheEntry = {
-      dependenciesPromise,
-      mappingChecks: new Map(),
-    };
-    clientCache.set(cacheKey, cacheEntry);
-    dependenciesPromise.then(
-      () => {
-        cacheEntry.expiresAt = Date.now() + COMPONENT_TEMPLATE_DEPENDENCY_CACHE_TTL_MS;
-        const expirationTimer = setTimeout(() => {
-          if (clientCache?.get(cacheKey) === cacheEntry) {
-            clientCache.delete(cacheKey);
-          }
-        }, COMPONENT_TEMPLATE_DEPENDENCY_CACHE_TTL_MS);
-        if (typeof expirationTimer === 'object') {
-          expirationTimer.unref();
-        }
-      },
-      () => {
-        if (clientCache?.get(cacheKey) === cacheEntry) {
-          clientCache.delete(cacheKey);
-        }
-      }
-    );
-
-    return { dependenciesPromise, cacheEntry };
-  }
-
-  private async resolveEffectiveSchemaVersion(): Promise<{
-    version: string;
-    cacheEntry?: ComponentTemplateDependencyCacheEntry;
-  }> {
-    if (!this.storage.componentTemplate) {
-      return { version: getSchemaVersion(this.storage) };
-    }
-
-    const { dependenciesPromise, cacheEntry } = this.resolveComponentTemplateDependencies();
-    const dependencies = await dependenciesPromise;
-    return { version: getSchemaVersion(this.storage, dependencies), cacheEntry };
-  }
-
-  private async createOrUpdateComponentTemplate(version: string): Promise<void> {
-    const { componentTemplate } = this.storage;
-    if (!componentTemplate) {
-      return;
-    }
-
-    await wrapEsCall(
-      this.indexManagementClient.cluster.putComponentTemplate({
-        name: componentTemplate.name,
-        create: false,
-        template: {
-          mappings: {
-            _meta: { version },
-            dynamic: 'strict',
-            properties: {
-              ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
-            },
-          },
-        },
-      })
-    ).catch(catchConflictError);
-  }
-
-  private async createOrUpdateIndexTemplate(expectedSchemaVersion?: string): Promise<string> {
-    const version = expectedSchemaVersion ?? (await this.resolveEffectiveSchemaVersion()).version;
-    const { componentTemplate } = this.storage;
+  private async createOrUpdateIndexTemplate(): Promise<void> {
+    const version = getSchemaVersion(this.storage);
 
     const mappings: IndicesPutIndexTemplateIndexTemplateMapping['mappings'] = {
       _meta: { version },
-      ...(componentTemplate
+      dynamic: 'strict',
+      ...(this.storage.inlineSchemaMappings === false
         ? {}
         : {
-            dynamic: 'strict',
-            ...(this.storage.inlineSchemaMappings === false
-              ? {}
-              : {
-                  properties: {
-                    ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
-                  },
-                }),
+            properties: {
+              ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+            },
           }),
     };
 
@@ -396,8 +254,6 @@ export class StorageIndexAdapter<
       },
     };
 
-    await this.createOrUpdateComponentTemplate(version);
-
     const putTemplate = (includeSettings: boolean) =>
       wrapEsCall(
         this.indexManagementClient.indices.putIndexTemplate({
@@ -406,16 +262,7 @@ export class StorageIndexAdapter<
           allow_auto_create: false,
           index_patterns: getIndexPattern(this.storage.name),
           _meta: { version },
-          ...(componentTemplate
-            ? {
-                composed_of: [
-                  ...(componentTemplate.required ?? []),
-                  componentTemplate.name,
-                  ...(componentTemplate.optional ?? []),
-                ],
-                ignore_missing_component_templates: [...(componentTemplate.optional ?? [])],
-              }
-            : {}),
+          ...(this.storage.priority !== undefined ? { priority: this.storage.priority } : {}),
           ...(this.storage.composedOf !== undefined
             ? { composed_of: this.storage.composedOf }
             : {}),
@@ -424,7 +271,6 @@ export class StorageIndexAdapter<
                 ignore_missing_component_templates: this.storage.ignoreMissingComponentTemplates,
               }
             : {}),
-          ...(this.storage.priority !== undefined ? { priority: this.storage.priority } : {}),
           template: {
             ...(includeSettings ? { settings: StorageIndexAdapter.INDEX_SETTINGS } : {}),
             mappings,
@@ -436,7 +282,7 @@ export class StorageIndexAdapter<
     const serverless = this.isServerless ?? (await this.detectServerless());
     if (serverless !== undefined) {
       await putTemplate(!serverless);
-      return version;
+      return;
     }
 
     try {
@@ -453,7 +299,6 @@ export class StorageIndexAdapter<
         throw error;
       }
     }
-    return version;
   }
 
   private async getExistingIndexTemplate(): Promise<IndicesIndexTemplate | undefined> {
@@ -466,28 +311,6 @@ export class StorageIndexAdapter<
       .catch((error) => {
         if (isNotFoundError(error)) {
           return undefined;
-        }
-        throw error;
-      });
-  }
-
-  private async getExistingComponentTemplate(): Promise<boolean> {
-    const { componentTemplate } = this.storage;
-    if (!componentTemplate) {
-      return false;
-    }
-
-    return await wrapEsCall(
-      this.indexManagementClient.cluster.getComponentTemplate({
-        name: componentTemplate.name,
-      })
-    )
-      .then((templates) =>
-        templates.component_templates.some(({ name }) => name === componentTemplate.name)
-      )
-      .catch((error) => {
-        if (isNotFoundError(error)) {
-          return false;
         }
         throw error;
       });
@@ -570,56 +393,21 @@ export class StorageIndexAdapter<
     }
   }
 
-  private async updateMappingsIfNeeded(expectedSchemaVersion?: string): Promise<void> {
-    const version = expectedSchemaVersion ?? (await this.resolveEffectiveSchemaVersion()).version;
+  private async updateMappingsIfNeeded(): Promise<void> {
+    const expectedSchemaVersion = getSchemaVersion(this.storage);
 
     const writeIndex = await this.getCurrentWriteIndex();
     if (!writeIndex) {
       return;
     }
 
-    if (writeIndex.state.mappings?._meta?.version !== version) {
+    if (writeIndex.state.mappings?._meta?.version !== expectedSchemaVersion) {
       this.logger.debug(
         `Updating index template and mappings of existing index due to schema version mismatch`
       );
-      await this.createOrUpdateIndexTemplate(version);
+      await this.createOrUpdateIndexTemplate();
       await this.updateMappingsOfExistingIndex({ name: writeIndex.name });
     }
-  }
-
-  private getMappingCheckKey(version: string): string {
-    return JSON.stringify([this.storage.name, version]);
-  }
-
-  private markMappingVersionChecked(
-    cacheEntry: ComponentTemplateDependencyCacheEntry | undefined,
-    version: string
-  ): void {
-    if (cacheEntry) {
-      cacheEntry.mappingChecks.set(this.getMappingCheckKey(version), Promise.resolve());
-    } else {
-      this.lastCheckedComposedVersion = version;
-    }
-  }
-
-  private getOrCreateMappingCheck(
-    cacheEntry: ComponentTemplateDependencyCacheEntry,
-    version: string
-  ): Promise<void> {
-    const checkKey = this.getMappingCheckKey(version);
-    const cachedCheck = cacheEntry.mappingChecks.get(checkKey);
-    if (cachedCheck) {
-      return cachedCheck;
-    }
-
-    const mappingCheck = this.updateMappingsIfNeeded(version).catch((error) => {
-      if (cacheEntry.mappingChecks.get(checkKey) === mappingCheck) {
-        cacheEntry.mappingChecks.delete(checkKey);
-      }
-      throw error;
-    });
-    cacheEntry.mappingChecks.set(checkKey, mappingCheck);
-    return mappingCheck;
   }
 
   /**
@@ -630,9 +418,8 @@ export class StorageIndexAdapter<
    * - the index has the right version (if not, update it)
    */
   private async validateComponentsBeforeWriting<T>(cb: () => Promise<T>): Promise<T> {
-    const { version: expectedSchemaVersion, cacheEntry } =
-      await this.resolveEffectiveSchemaVersion();
-    await this.createOrUpdateIndexTemplate(expectedSchemaVersion);
+    const expectedSchemaVersion = getSchemaVersion(this.storage);
+    await this.createOrUpdateIndexTemplate();
 
     const writeIndex = await this.getCurrentWriteIndex();
     if (!writeIndex) {
@@ -646,37 +433,11 @@ export class StorageIndexAdapter<
         });
       }
     }
-    this.markMappingVersionChecked(cacheEntry, expectedSchemaVersion);
 
     return await cb();
   }
 
   private async ensureMappingsBeforeReading<T>(cb: () => Promise<T>): Promise<T> {
-    if (this.storage.componentTemplate) {
-      if (!this.updateMappingsPromise) {
-        this.updateMappingsPromise = (async () => {
-          try {
-            const { version: expectedSchemaVersion, cacheEntry } =
-              await this.resolveEffectiveSchemaVersion();
-            if (cacheEntry) {
-              await this.getOrCreateMappingCheck(cacheEntry, expectedSchemaVersion);
-              return;
-            }
-            if (expectedSchemaVersion === this.lastCheckedComposedVersion) {
-              return;
-            }
-            await this.updateMappingsIfNeeded(expectedSchemaVersion);
-            this.markMappingVersionChecked(undefined, expectedSchemaVersion);
-          } finally {
-            this.updateMappingsPromise = undefined;
-          }
-        })();
-      }
-
-      await this.updateMappingsPromise;
-      return cb();
-    }
-
     if (!this.updateMappingsPromise) {
       this.updateMappingsPromise = this.updateMappingsIfNeeded().catch((error) => {
         this.updateMappingsPromise = undefined;
@@ -875,19 +636,10 @@ export class StorageIndexAdapter<
         })
       );
     }
-    // Delete only the component template owned by this adapter.
-    const hasComponentTemplate = await this.getExistingComponentTemplate();
-    if (hasComponentTemplate && this.storage.componentTemplate) {
-      await wrapEsCall(
-        this.indexManagementClient.cluster.deleteComponentTemplate({
-          name: this.storage.componentTemplate.name,
-        })
-      );
-    }
 
     return {
       acknowledged: true,
-      result: hasIndices || hasTemplate || hasComponentTemplate ? 'deleted' : 'noop',
+      result: hasIndices || hasTemplate ? 'deleted' : 'noop',
     };
   };
 
