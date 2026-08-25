@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { lensApiConfigSchemaNoESQL, type LensApiConfigNoESQL } from '@kbn/lens-embeddable-utils';
+import { lensApiConfigSchemaNoESQL } from '@kbn/lens-embeddable-utils';
 import { asCodeMetaSchema, getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 
 import { lensCommonSavedObjectSchemaV2 } from '../../../../content_management/zod';
