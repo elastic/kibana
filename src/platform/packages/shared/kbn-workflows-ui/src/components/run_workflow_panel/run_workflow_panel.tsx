@@ -179,9 +179,7 @@ export const RunWorkflowPanel = ({
             onSuccess,
             onError: (err) => {
               notifications.toasts.addError(
-                new Error(
-                  (err as { body?: { message?: string } }).body?.message ?? err.message
-                ),
+                new Error((err as { body?: { message?: string } }).body?.message ?? err.message),
                 { title: i18n.WORKFLOW_START_FAILED_TOAST }
               );
             },
