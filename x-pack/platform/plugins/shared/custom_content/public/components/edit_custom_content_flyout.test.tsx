@@ -180,7 +180,7 @@ describe('EditCustomContentFlyout', () => {
       });
       render(<EditCustomContentFlyout {...defaultProps} esqlQuery="FROM other" />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'Run Preview' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Run preview' }));
 
       expect(handleRender).toHaveBeenCalled();
     });
