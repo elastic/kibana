@@ -69,15 +69,6 @@ const parsePositiveInt = (raw: unknown, field: string, max: number): number => {
   return raw;
 };
 
-const parseNonNegativeInt = (raw: unknown, field: string, max: number): number => {
-  if (typeof raw !== 'number' || !Number.isInteger(raw) || raw < 0 || raw > max) {
-    throw new Error(
-      `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid ${field}`
-    );
-  }
-  return raw;
-};
-
 const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateValues => {
   const {
     settingsVersion,
@@ -89,11 +80,8 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
     tier2When,
     candidateLimit,
     fanOutMax,
-    scheduleEveryMinutes,
+    huntCooldownMinutes,
     targetTechnology,
-    leadPollIntervalMinutes,
-    leadMinPriority,
-    intelEventTriggerEnabled,
   } = raw;
 
   if (settingsVersion !== undefined && settingsVersion !== WATCH_SETTINGS_VERSION) {
@@ -138,12 +126,6 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
       `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid targetTechnology`
     );
   }
-  if (typeof intelEventTriggerEnabled !== 'boolean') {
-    throw new Error(
-      `PND watch "${SYSTEM_SECURITY_WATCH_DARK_ID}" settings contain an invalid intelEventTriggerEnabled`
-    );
-  }
-
   return {
     settingsVersion: WATCH_SETTINGS_VERSION,
     autonomyLevel: parsedAutonomyLevel.data,
@@ -154,19 +136,12 @@ const parseDarkWatchValues = (raw: Record<string, unknown>): DarkWatchTemplateVa
     tier2When: parsedTier2When,
     candidateLimit: parsePositiveInt(candidateLimit, 'candidateLimit', MAX_CANDIDATE_LIMIT),
     fanOutMax: parsePositiveInt(fanOutMax, 'fanOutMax', MAX_FAN_OUT_MAX),
-    scheduleEveryMinutes: parsePositiveInt(
-      scheduleEveryMinutes,
-      'scheduleEveryMinutes',
+    huntCooldownMinutes: parsePositiveInt(
+      huntCooldownMinutes,
+      'huntCooldownMinutes',
       MAX_INTERVAL_MINUTES
     ),
     targetTechnology: parsedTargetTechnology,
-    leadPollIntervalMinutes: parsePositiveInt(
-      leadPollIntervalMinutes,
-      'leadPollIntervalMinutes',
-      MAX_INTERVAL_MINUTES
-    ),
-    leadMinPriority: parseNonNegativeInt(leadMinPriority, 'leadMinPriority', 100),
-    intelEventTriggerEnabled,
   };
 };
 
@@ -180,11 +155,8 @@ const DEFAULT_DARK_WATCH_VALUES: DarkWatchTemplateValues = {
   tier2When: 'on_hits',
   candidateLimit: 10,
   fanOutMax: 10,
-  scheduleEveryMinutes: 240,
+  huntCooldownMinutes: 240,
   targetTechnology: 'aws_iam',
-  leadPollIntervalMinutes: 60,
-  leadMinPriority: 7,
-  intelEventTriggerEnabled: false,
 };
 
 const createDefaultDarkWatchValues = (): DarkWatchTemplateValues => ({
@@ -229,13 +201,8 @@ export const createDarkWatchSettingsRegistration = (): WatchSettingsRegistration
       tier2When: patch.dark?.tier2When ?? values.tier2When,
       candidateLimit: patch.dark?.candidateLimit ?? values.candidateLimit,
       fanOutMax: patch.dark?.fanOutMax ?? values.fanOutMax,
-      scheduleEveryMinutes: patch.dark?.scheduleEveryMinutes ?? values.scheduleEveryMinutes,
+      huntCooldownMinutes: patch.dark?.huntCooldownMinutes ?? values.huntCooldownMinutes,
       targetTechnology: patch.dark?.targetTechnology ?? values.targetTechnology,
-      leadPollIntervalMinutes:
-        patch.dark?.leadPollIntervalMinutes ?? values.leadPollIntervalMinutes,
-      leadMinPriority: patch.dark?.leadMinPriority ?? values.leadMinPriority,
-      intelEventTriggerEnabled:
-        patch.dark?.intelEventTriggerEnabled ?? values.intelEventTriggerEnabled,
       scopes: patch.dark?.scopes ?? values.scopes,
     };
 
@@ -251,11 +218,8 @@ export const createDarkWatchSettingsRegistration = (): WatchSettingsRegistration
         tier2When: values.tier2When,
         candidateLimit: values.candidateLimit,
         fanOutMax: values.fanOutMax,
-        scheduleEveryMinutes: values.scheduleEveryMinutes,
+        huntCooldownMinutes: values.huntCooldownMinutes,
         targetTechnology: values.targetTechnology,
-        leadPollIntervalMinutes: values.leadPollIntervalMinutes,
-        leadMinPriority: values.leadMinPriority,
-        intelEventTriggerEnabled: values.intelEventTriggerEnabled,
         scheduleId: values.scheduleId,
         allowManualRun: values.allowManualRun,
         scopes: values.scopes,

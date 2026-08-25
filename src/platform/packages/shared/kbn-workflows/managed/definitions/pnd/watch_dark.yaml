@@ -40,11 +40,8 @@ consts:
     tier2When: __WATCH_TIER2_WHEN__
     candidateLimit: __WATCH_CANDIDATE_LIMIT__
     fanOutMax: __WATCH_FAN_OUT_MAX__
-    scheduleEveryMinutes: __WATCH_SCHEDULE_EVERY_MINUTES__
+    huntCooldownMinutes: __WATCH_HUNT_COOLDOWN_MINUTES__
     targetTechnology: "__WATCH_TARGET_TECHNOLOGY__"
-    leadPollIntervalMinutes: __WATCH_LEAD_POLL_INTERVAL_MINUTES__
-    leadMinPriority: __WATCH_LEAD_MIN_PRIORITY__
-    intelEventTriggerEnabled: __WATCH_INTEL_EVENT_TRIGGER_ENABLED__
   watch_policy:
     settingsVersion: __WATCH_SETTINGS_VERSION__
     # Persisted plumbing only; runtime autonomy semantics are defined separately.
@@ -54,7 +51,8 @@ consts:
     onDemand: true
     draft: false
     cadence: sweep
-    every: __WATCH_SCHEDULE_EVERY_MINUTES__
+    # Display metadata: matches the hourly rrule above, not the hunt cooldown.
+    every: 60
     from: 22
     to: 6
     mode: window
@@ -93,7 +91,7 @@ steps:
                 should:
                   - range:
                       last_hunted_at:
-                        lte: "now-__WATCH_SCHEDULE_EVERY_MINUTES__m"
+                        lte: "now-__WATCH_HUNT_COOLDOWN_MINUTES__m"
                   - bool:
                       must_not:
                         exists:

@@ -260,13 +260,10 @@ export const DarkWatchSettings = lazySchema(() =>
      */
     fanOutMax: z.number().int().min(1).max(20),
     /**
-     * Hunt cooldown / soft sweep cadence in minutes.
+     * How long a report is skipped after a hunt pass, as a lookback on last_hunted_at.
      */
-    scheduleEveryMinutes: z.number().int().min(1).max(10080),
+    huntCooldownMinutes: z.number().int().min(1).max(10080),
     targetTechnology: DarkWatchTargetTechnology,
-    leadPollIntervalMinutes: z.number().int().min(1).max(10080),
-    leadMinPriority: z.number().int().min(0).max(100),
-    intelEventTriggerEnabled: z.boolean(),
     scheduleId: z.string().min(1).max(128),
     allowManualRun: z.boolean(),
     scopes: z.array(DarkWatchScope).max(32),
