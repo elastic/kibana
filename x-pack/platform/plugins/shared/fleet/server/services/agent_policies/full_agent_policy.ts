@@ -9,6 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
 import { set } from '@kbn/safer-lodash-set';
+import { PrivilegeType } from '@kbn/apm-types';
 
 import {
   getDefaultPresetForEsOutput,
@@ -34,6 +35,7 @@ import type {
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
+
 import {
   dataTypes,
   kafkaCompressionType,
@@ -41,6 +43,7 @@ import {
   outputType,
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
 } from '../../../common/constants';
+import { createManagedBulkOutputMatcher } from '../preconfiguration/outputs';
 import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
@@ -340,6 +343,8 @@ export async function getFullAgentPolicy(
     cluster: DEFAULT_CLUSTER_PERMISSIONS,
   };
 
+  const isManagedBulkOutput = createManagedBulkOutputMatcher(appContextService.getConfig());
+
   // Only add permissions if output.type is "elasticsearch"
   fullAgentPolicy.output_permissions = Object.keys(fullAgentPolicy.outputs).reduce<
     NonNullable<FullAgentPolicy['output_permissions']>
@@ -349,6 +354,19 @@ export async function getFullAgentPolicy(
       output &&
       (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
     ) {
+      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+
+      if (agentPolicy.supports_agentless && originalOutput && isManagedBulkOutput(originalOutput)) {
+        outputPermissions[outputId] = {
+          _managed_bulk_apm: {
+            applications: [
+              { application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] },
+            ],
+          },
+        };
+        return outputPermissions;
+      }
+
       const permissions: FullAgentPolicyOutputPermissions = {};
       if (outputId === getOutputIdForAgentPolicy(monitoringOutput)) {
         Object.assign(permissions, monitoringPermissions);
@@ -362,7 +380,6 @@ export async function getFullAgentPolicy(
       }
 
       // Add logs-* permissions for outputs with write_to_streams enabled
-      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
       if (originalOutput?.write_to_logs_streams) {
         const streamsPermissions = {
           _write_to_logs_streams: {
