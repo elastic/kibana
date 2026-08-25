@@ -143,9 +143,17 @@ export class AgentMemoryPlugin
       return {};
     }
 
-    const { createMemoryStorage } = await import('./storage/memory_storage');
+    const [{ createMemoryStorage }, { ensureAgentMemoryMappingsComponentTemplate }] =
+      await Promise.all([
+        import('./storage/memory_storage'),
+        import('./storage/ensure_agent_memory_component_template'),
+      ]);
 
     const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+    await ensureAgentMemoryMappingsComponentTemplate({
+      esClient: internalEsClient,
+      logger: this.logger.get('storage'),
+    });
 
     // Populate lazy-getter targets. These must be set before any request handler
     // could run — Kibana guarantees start() completes before the first request.

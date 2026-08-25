@@ -23,8 +23,17 @@ jest.mock('./storage/memory_storage', () => ({
   createMemoryStorage: jest.fn().mockReturnValue({}),
 }));
 
+jest.mock('./storage/ensure_agent_memory_component_template', () => ({
+  ensureAgentMemoryMappingsComponentTemplate: jest.fn().mockResolvedValue(undefined),
+}));
+
 const { createMemoryStorage } = jest.requireMock('./storage/memory_storage') as {
   createMemoryStorage: jest.Mock;
+};
+const { ensureAgentMemoryMappingsComponentTemplate } = jest.requireMock(
+  './storage/ensure_agent_memory_component_template'
+) as {
+  ensureAgentMemoryMappingsComponentTemplate: jest.Mock;
 };
 
 describe('AgentMemoryPlugin', () => {
@@ -207,6 +216,10 @@ describe('AgentMemoryPlugin', () => {
     const currentUserEsClient = {} as ElasticsearchClient;
     createStorage(currentUserEsClient);
 
+    expect(ensureAgentMemoryMappingsComponentTemplate).toHaveBeenCalledWith({
+      esClient: internalEsClient,
+      logger: expect.anything(),
+    });
     expect(createMemoryStorage).toHaveBeenCalledWith({
       logger: expect.anything(),
       esClient: currentUserEsClient,

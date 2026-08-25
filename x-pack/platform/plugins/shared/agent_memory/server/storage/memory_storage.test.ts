@@ -9,7 +9,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { AGENT_MEMORY_INDEX } from '../../common';
-import { createMemoryStorage, memoryStorageSettings } from './memory_storage';
+import {
+  agentMemoryMappingsComponentProperties,
+  createMemoryStorage,
+  memoryStorageSettings,
+} from './memory_storage';
 
 jest.mock('@kbn/storage-adapter', () => {
   const actual = jest.requireActual('@kbn/storage-adapter');
@@ -28,26 +32,47 @@ describe('memoryStorageSettings', () => {
     format: 'strict_date_optional_time',
     type: 'date',
   } as const;
+  const semanticTextMapping = {
+    fields: {
+      semantic: {
+        type: 'semantic_text',
+      },
+    },
+    type: 'text',
+  } as const;
 
   it('configures the index, component composition, and Agent Memory-owned mappings', () => {
     expect(AGENT_MEMORY_INDEX).toBe('ai-index-idx-agent-memory');
     expect({
       name: memoryStorageSettings.name,
       priority: memoryStorageSettings.priority,
-      componentTemplate: memoryStorageSettings.componentTemplate,
+      composedOf: memoryStorageSettings.composedOf,
+      ignoreMissingComponentTemplates: memoryStorageSettings.ignoreMissingComponentTemplates,
+      inlineSchemaMappings: memoryStorageSettings.inlineSchemaMappings,
     }).toEqual({
       name: 'ai-index-idx-agent-memory',
       priority: 600,
-      componentTemplate: {
-        name: 'ai-index-agent-memory@mappings',
-        required: ['ai-index@mappings'],
-        optional: ['ai-index@custom'],
-      },
+      composedOf: ['ai-index@mappings', 'ai-index@custom', 'ai-index-agent-memory@mappings'],
+      ignoreMissingComponentTemplates: ['ai-index@custom'],
+      inlineSchemaMappings: false,
     });
 
     const rootProperties = memoryStorageSettings.schema.properties;
 
     expect(rootProperties).toEqual({
+      '@timestamp': dateMapping,
+      type: keywordMapping,
+      title: semanticTextMapping,
+      description: semanticTextMapping,
+      content: semanticTextMapping,
+      tags: keywordMapping,
+      attributes: { type: 'flattened' },
+      references: {
+        properties: {
+          uri: keywordMapping,
+        },
+        type: 'object',
+      },
       id: keywordMapping,
       deleted: { type: 'boolean' },
       expires_at: dateMapping,
@@ -74,18 +99,14 @@ describe('memoryStorageSettings', () => {
       },
     });
 
-    for (const inheritedField of [
-      '@timestamp',
-      'type',
-      'title',
-      'description',
-      'content',
-      'tags',
-      'attributes',
-      'references',
-    ]) {
-      expect(rootProperties).not.toHaveProperty(inheritedField);
-    }
+    expect(agentMemoryMappingsComponentProperties).toEqual({
+      id: keywordMapping,
+      deleted: { type: 'boolean' },
+      expires_at: dateMapping,
+      created_at: dateMapping,
+      space_id: keywordMapping,
+      memory: rootProperties.memory,
+    });
   });
 });
 

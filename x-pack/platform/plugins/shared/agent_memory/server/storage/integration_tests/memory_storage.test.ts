@@ -12,7 +12,16 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { AGENT_MEMORY_INDEX } from '../../../common';
 import { recallMemory } from '../../core/recall_memory';
 import { writeMemory } from '../../core/write_memory';
-import { createMemoryStorage, memoryStorageSettings, type MemoryStorage } from '../memory_storage';
+import {
+  deleteAgentMemoryMappingsComponentTemplate,
+  ensureAgentMemoryMappingsComponentTemplate,
+} from '../ensure_agent_memory_component_template';
+import {
+  agentMemoryMappingsComponentProperties,
+  createMemoryStorage,
+  memoryStorageSettings,
+  type MemoryStorage,
+} from '../memory_storage';
 
 describe('Agent Memory AI Index integration', () => {
   let esServer: TestElasticsearchUtils;
@@ -41,8 +50,13 @@ describe('Agent Memory AI Index integration', () => {
 
     esServer = await startES();
     esClient = esServer.es.getClient();
+    const logger = loggerMock.create();
+    await ensureAgentMemoryMappingsComponentTemplate({
+      esClient: esClient as unknown as ElasticsearchClient,
+      logger,
+    });
     storage = createMemoryStorage({
-      logger: loggerMock.create(),
+      logger,
       esClient: esClient as unknown as ElasticsearchClient,
       indexManagementClient: esClient as unknown as ElasticsearchClient,
     });
@@ -51,6 +65,9 @@ describe('Agent Memory AI Index integration', () => {
   afterAll(async () => {
     try {
       await storage?.getClient().clean();
+      await deleteAgentMemoryMappingsComponentTemplate({
+        esClient: esClient as unknown as ElasticsearchClient,
+      });
 
       await expect(
         esClient.cluster.getComponentTemplate({ name: 'ai-index@mappings' })
@@ -88,7 +105,7 @@ describe('Agent Memory AI Index integration', () => {
     const indexTemplate = await esClient.indices.getIndexTemplate({ name: AGENT_MEMORY_INDEX });
     expect(indexTemplate.index_templates[0].index_template).toMatchObject({
       priority: 600,
-      composed_of: ['ai-index@mappings', 'ai-index-agent-memory@mappings', 'ai-index@custom'],
+      composed_of: ['ai-index@mappings', 'ai-index@custom', 'ai-index-agent-memory@mappings'],
       ignore_missing_component_templates: ['ai-index@custom'],
     });
 
@@ -108,14 +125,40 @@ describe('Agent Memory AI Index integration', () => {
       mappings: {
         dynamic: 'strict',
         properties: {
-          content: {
+          '@timestamp': { type: 'date' },
+          type: { type: 'keyword' },
+          title: {
+            type: 'text',
             fields: {
               semantic: {
                 type: 'semantic_text',
               },
             },
           },
-          ...memoryStorageSettings.schema.properties,
+          description: {
+            type: 'text',
+            fields: {
+              semantic: {
+                type: 'semantic_text',
+              },
+            },
+          },
+          content: {
+            type: 'text',
+            fields: {
+              semantic: {
+                type: 'semantic_text',
+              },
+            },
+          },
+          tags: { type: 'keyword' },
+          attributes: { type: 'flattened' },
+          references: {
+            properties: {
+              uri: { type: 'keyword' },
+            },
+          },
+          ...agentMemoryMappingsComponentProperties,
           memory: {
             ...expectedMemoryMapping,
             properties: {
