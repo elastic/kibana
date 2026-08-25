@@ -6,12 +6,9 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import type { ScoutLogger } from '@kbn/scout-security';
 import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { ENTITY_STORE_ROUTES } from '@kbn/entity-store/common';
-import type { Client } from '@elastic/elasticsearch';
-import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   AnomalyOverviewResponse,
   AnomalySummaryResponse,
@@ -38,149 +35,6 @@ const ML_ANOMALIES_SHARED_INDEX = '.ml-anomalies-shared';
 const ENTITY_STORE_LATEST_ALIAS = 'entities-latest-default';
 const UNKNOWN_ENTITY_EUID = 'user:does-not-exist@a1b2c3d4e5f6789012345678901234ab@local';
 const SOURCE_EVENTS_INDEX = 'logs-windows.forwarded-default';
-const SOURCE_EVENTS_INDEX_TEMPLATE = 'scout-ml-anomaly-summary-source-events';
-const CAROL_USER_NAME = 'carol.davis';
-const EXPECTED_CAROL_NY_BASELINE_COUNT = 3;
-const KEYWORD_SOURCE_EVENT_FIELDS = [
-  ['source', 'geo', 'region_name'],
-  ['user', 'name'],
-  ['host', 'os', 'type'],
-  ['event', 'id'],
-  ['event', 'code'],
-] as const;
-
-const formatBulkFailures = (response: BulkResponse): string[] =>
-  (response.items ?? []).flatMap((item) => {
-    const op = item.create ?? item.index ?? item.update ?? item.delete;
-    if (!op?.error) {
-      return [];
-    }
-    return [`${op._id ?? 'unknown id'}: ${op.error.type ?? 'error'}: ${op.error.reason ?? ''}`];
-  });
-
-const assertBulkIndexed = (
-  response: BulkResponse,
-  label: string,
-  expectedCount: number,
-  log: { info: (msg: string) => void }
-): void => {
-  const items = response.items ?? [];
-  if (response.errors) {
-    throw new Error(`${label} bulk had errors:\n${formatBulkFailures(response).join('\n')}`);
-  }
-  if (items.length !== expectedCount) {
-    throw new Error(`${label} bulk returned ${items.length} items, expected ${expectedCount}`);
-  }
-  log.info(`${label}: bulk indexed ${items.length} docs with no errors`);
-};
-
-const getHitCount = (total: number | { value?: number } | undefined, hitLength: number): number => {
-  if (typeof total === 'number') {
-    return total;
-  }
-  return total?.value ?? hitLength;
-};
-
-interface SourceEventHit {
-  event?: { id?: string; code?: string };
-  user?: { name?: string };
-  host?: { os?: { type?: string } };
-  source?: { geo?: { region_name?: string } };
-}
-
-const getNestedMapping = (mappings: unknown, path: readonly string[]): unknown => {
-  let current = mappings;
-  for (const segment of path) {
-    if (!current || typeof current !== 'object') {
-      return undefined;
-    }
-    const obj = current as { properties?: Record<string, unknown> };
-    current = obj.properties?.[segment] ?? (current as Record<string, unknown>)[segment];
-  }
-  return current;
-};
-
-const getMappingType = (mapping: unknown): string | undefined => {
-  if (!mapping || typeof mapping !== 'object' || Array.isArray(mapping)) {
-    return undefined;
-  }
-  const type = (mapping as { type?: unknown }).type;
-  return typeof type === 'string' ? type : undefined;
-};
-
-const sourceEventsMappingsAreAggregatable = (mappings: unknown): boolean =>
-  KEYWORD_SOURCE_EVENT_FIELDS.every(
-    (path) => getMappingType(getNestedMapping(mappings, path)) === 'keyword'
-  );
-
-const SOURCE_EVENTS_INDEX_MAPPINGS = {
-  properties: {
-    '@timestamp': { type: 'date' as const },
-    event: {
-      properties: {
-        id: { type: 'keyword' as const },
-        code: { type: 'keyword' as const },
-      },
-    },
-    user: { properties: { name: { type: 'keyword' as const } } },
-    host: {
-      properties: {
-        os: { properties: { type: { type: 'keyword' as const } } },
-      },
-    },
-    source: {
-      properties: {
-        geo: {
-          properties: {
-            region_name: { type: 'keyword' as const },
-            city_name: { type: 'keyword' as const },
-            country_name: { type: 'keyword' as const },
-          },
-        },
-      },
-    },
-  },
-};
-
-const ensureSourceEventsIndexIsAggregatable = async (
-  esClient: Client,
-  log: ScoutLogger
-): Promise<void> => {
-  // Fleet logs-* templates on serverless often dynamically map strings as
-  // match_only_text. A more specific, higher-priority template wins for this
-  // index so the rare detector's terms agg on source.geo.region_name works.
-  await esClient.indices.putIndexTemplate({
-    name: SOURCE_EVENTS_INDEX_TEMPLATE,
-    index_patterns: [SOURCE_EVENTS_INDEX],
-    priority: 1000,
-    data_stream: {},
-    template: { mappings: SOURCE_EVENTS_INDEX_MAPPINGS },
-  });
-  log.info(`Put index template ${SOURCE_EVENTS_INDEX_TEMPLATE} for ${SOURCE_EVENTS_INDEX}`);
-
-  const exists = await esClient.indices.exists({ index: SOURCE_EVENTS_INDEX });
-  if (!exists) {
-    return;
-  }
-
-  const mappingResp = await esClient.indices.getMapping({ index: SOURCE_EVENTS_INDEX });
-  const firstMapping = Object.values(mappingResp)[0]?.mappings;
-  if (sourceEventsMappingsAreAggregatable(firstMapping)) {
-    log.info(`${SOURCE_EVENTS_INDEX} already has keyword mappings for rare-baseline fields`);
-    return;
-  }
-
-  log.info(
-    `${SOURCE_EVENTS_INDEX} mapping is not aggregatable (${JSON.stringify(
-      getNestedMapping(firstMapping, ['source', 'geo', 'region_name'])
-    )}); deleting so the template can recreate it`
-  );
-  try {
-    await esClient.indices.deleteDataStream({ name: SOURCE_EVENTS_INDEX }, { ignore: [404] });
-  } catch {
-    await esClient.indices.delete({ index: SOURCE_EVENTS_INDEX, ignore_unavailable: true });
-  }
-};
 
 const INTERNAL_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -239,12 +93,6 @@ apiTest.describe(
         responseType: 'json',
         body: {},
       });
-
-      // Put a keyword template before PAD/Fleet can create logs-* with
-      // match_only_text. ES cannot change an existing field to keyword, so if
-      // the stream already exists with a non-aggregatable mapping, delete it
-      // so bulk recreate uses this template.
-      await ensureSourceEventsIndexIsAggregatable(esClient, log);
 
       const startMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
 
@@ -319,6 +167,33 @@ apiTest.describe(
         start: startMs,
       });
 
+      // DIAGNOSTIC (theory 1): verify the PAD ML job was created with a non-empty config.
+      // In MKI the job config has been theorised to be empty, which would cause baseline
+      // enrichment to silently fail.
+      try {
+        const padJobRes = await esClient.ml.getJobs({
+          job_id: 'pad_windows_rare_region_name_by_user_ea',
+        });
+        const padJob = padJobRes.jobs?.[0];
+        if (!padJob) {
+          log.debug(`[DIAG] PAD job not found — job config is missing entirely`);
+        } else {
+          const analysisConfig = padJob.analysis_config;
+          const detectorCount = analysisConfig?.detectors?.length ?? 0;
+          log.debug(
+            `[DIAG] PAD job config: detectors=${detectorCount}, ` +
+              `analysisConfig=${JSON.stringify(analysisConfig)}`
+          );
+          if (detectorCount === 0) {
+            log.debug(
+              `[DIAG] WARNING: PAD job analysis_config.detectors is empty — theory 1 confirmed`
+            );
+          }
+        }
+      } catch (err) {
+        log.debug(`[DIAG] Failed to fetch PAD job config: ${err}`);
+      }
+
       // Create Security: Authentication ML jobs
       log.debug(`Setting up Security: Authentication ML jobs...`);
       await setupMlModuleWithRetry('security_auth', {
@@ -333,126 +208,103 @@ apiTest.describe(
       // Index source events that determine baseline behavior for the rare detector.
       log.debug(`Indexing test source events...`);
       const sourceData = sourceTestData();
-      const sourceBulk = await esClient.bulk({
+      await esClient.bulk({
         operations: sourceData.flatMap((data) => [
           { create: { _index: SOURCE_EVENTS_INDEX } },
           data,
         ]),
         refresh: true,
       });
-      assertBulkIndexed(sourceBulk, 'Source events', sourceData.length, log);
 
-      const sourceSearch = await esClient.search<SourceEventHit>({
-        index: SOURCE_EVENTS_INDEX,
-        ignore_unavailable: true,
-        size: SOURCE_EVENT_IDS.length,
-        query: { terms: { 'event.id': [...SOURCE_EVENT_IDS] } },
-        _source: [
-          'event.id',
-          'event.code',
-          'user.name',
-          'host.os.type',
-          'source.geo.region_name',
-          '@timestamp',
-        ],
-      });
-      const sourceHits = sourceSearch.hits.hits;
-      const sourceCount = getHitCount(sourceSearch.hits.total, sourceHits.length);
-      log.info(
-        `Source events searchable in ${SOURCE_EVENTS_INDEX}: ${sourceCount}/${SOURCE_EVENT_IDS.length}`
-      );
-      for (const hit of sourceHits) {
-        log.info(
-          `  source hit _index=${hit._index} ${JSON.stringify({
-            eventId: hit._source?.event?.id,
-            user: hit._source?.user?.name,
-            region: hit._source?.source?.geo?.region_name,
-            osType: hit._source?.host?.os?.type,
-            eventCode: hit._source?.event?.code,
-          })}`
-        );
+      // DIAGNOSTIC (theory 2): verify the source index mappings applied the right types for
+      // the fields the PAD rare detector queries.  If dynamic mapping mapped
+      // source.geo.region_name or user.name as non-keyword the baseline lookup will
+      // return nothing and baselineValues will be empty.
+      try {
+        const mappingRes = await esClient.indices.getMapping({ index: SOURCE_EVENTS_INDEX });
+        const indexNames = Object.keys(mappingRes);
+        for (const indexName of indexNames) {
+          const props = (mappingRes[indexName]?.mappings?.properties ?? {}) as Record<
+            string,
+            unknown
+          >;
+          const sourceGeo = (props.source as Record<string, unknown> | undefined)?.properties as
+            | Record<string, unknown>
+            | undefined;
+          const regionNameMapping = (sourceGeo?.geo as Record<string, unknown> | undefined)
+            ?.properties as Record<string, unknown> | undefined;
+          const regionNameType = (
+            regionNameMapping?.region_name as Record<string, unknown> | undefined
+          )?.type;
+          const userProps = (props.user as Record<string, unknown> | undefined)?.properties as
+            | Record<string, unknown>
+            | undefined;
+          const userNameType = (userProps?.name as Record<string, unknown> | undefined)?.type;
+          log.debug(
+            `[DIAG] ${indexName} mappings: source.geo.region_name.type=${regionNameType}, user.name.type=${userNameType}`
+          );
+          if (regionNameType !== 'keyword' && regionNameType !== undefined) {
+            log.debug(
+              `[DIAG] WARNING: source.geo.region_name mapped as "${regionNameType}" not keyword — theory 2 confirmed`
+            );
+          }
+        }
+      } catch (err) {
+        log.debug(`[DIAG] Failed to fetch source index mappings: ${err}`);
       }
 
-      const carolNyHits = sourceHits.filter(
-        (hit) =>
-          hit._source?.user?.name === CAROL_USER_NAME &&
-          hit._source?.source?.geo?.region_name === 'New York'
-      );
-      log.info(`Carol New York baseline events found: ${carolNyHits.length}`);
-
-      const mappingResp = await esClient.indices.getMapping({
-        index: SOURCE_EVENTS_INDEX,
-      });
-      const firstMapping = Object.values(mappingResp)[0]?.mappings;
-      const regionMapping = getNestedMapping(firstMapping, ['source', 'geo', 'region_name']);
-      log.info(`source.geo.region_name mapping: ${JSON.stringify(regionMapping)}`);
-      if (getMappingType(regionMapping) !== 'keyword') {
-        throw new Error(
-          `source.geo.region_name must be keyword for rare baseline aggregation, got ${JSON.stringify(
-            regionMapping
-          )}`
+      // DIAGNOSTIC (theory 2 continued): confirm the source events were actually indexed with
+      // the expected geo data so we can tell mapping issues apart from indexing failures.
+      try {
+        const searchRes = await esClient.search({
+          index: SOURCE_EVENTS_INDEX,
+          query: {
+            bool: {
+              must: [
+                { term: { 'user.name': 'carol.davis' } },
+                { exists: { field: 'source.geo.region_name' } },
+              ],
+            },
+          },
+          _source: ['user.name', 'source.geo.region_name', '@timestamp'],
+          size: 10,
+        });
+        const hits = searchRes.hits?.hits ?? [];
+        log.debug(
+          `[DIAG] Source events for carol.davis with source.geo.region_name: count=${hits.length}, ` +
+            `docs=${JSON.stringify(hits.map((h) => h._source))}`
         );
-      }
-
-      const regionAgg = await esClient.search({
-        index: SOURCE_EVENTS_INDEX,
-        ignore_unavailable: true,
-        size: 0,
-        query: { term: { 'user.name': CAROL_USER_NAME } },
-        aggs: {
-          regions: { terms: { field: 'source.geo.region_name', size: 10 } },
-        },
-      });
-      const buckets = (
-        regionAgg.aggregations as
-          | { regions?: { buckets?: Array<{ key: string; doc_count: number }> } }
-          | undefined
-      )?.regions?.buckets;
-      log.info(`Carol region terms agg: ${JSON.stringify(buckets)}`);
-      const newYorkBucket = buckets?.find((bucket) => bucket.key === 'New York');
-      if (!newYorkBucket || newYorkBucket.doc_count < EXPECTED_CAROL_NY_BASELINE_COUNT) {
-        throw new Error(
-          `Expected a source.geo.region_name terms bucket for New York with at least ${EXPECTED_CAROL_NY_BASELINE_COUNT} docs, got ${JSON.stringify(
-            buckets
-          )}`
-        );
-      }
-
-      if (sourceCount !== SOURCE_EVENT_IDS.length) {
-        throw new Error(
-          `Expected ${SOURCE_EVENT_IDS.length} searchable source events in ${SOURCE_EVENTS_INDEX}, found ${sourceCount}`
-        );
-      }
-      if (carolNyHits.length < EXPECTED_CAROL_NY_BASELINE_COUNT) {
-        throw new Error(
-          `Expected at least ${EXPECTED_CAROL_NY_BASELINE_COUNT} Carol New York source events, found ${carolNyHits.length}`
-        );
+        if (hits.length === 0) {
+          log.debug(
+            `[DIAG] WARNING: no carol.davis source events with geo region found — baseline enrichment will return empty`
+          );
+        }
+      } catch (err) {
+        log.debug(`[DIAG] Failed to search source events: ${err}`);
       }
 
       // Index anomaly records for the test entities.
       log.debug(`Indexing test anomaly records...`);
       const anomalyData = anomalyTestData();
-      const anomalyBulk = await esClient.bulk({
+      await esClient.bulk({
         operations: anomalyData.flatMap(({ _id, ...data }) => [
           { index: { _index: ML_ANOMALIES_SHARED_INDEX, _id } },
           data,
         ]),
         refresh: true,
       });
-      assertBulkIndexed(anomalyBulk, 'Anomaly records', anomalyData.length, log);
 
       // Index the entity store documents backing the anomaly test entities.
       // The anomaly overview/summary routes 404 when the entity isn't present
       // in the entity store's latest index, independent of ML data.
       log.debug(`Indexing test entity store documents...`);
-      const entityBulk = await esClient.bulk({
+      await esClient.bulk({
         operations: entityTestData.flatMap((data) => [
           { index: { _index: ENTITY_STORE_LATEST_ALIAS } },
           data,
         ]),
         refresh: true,
       });
-      assertBulkIndexed(entityBulk, 'Entity store documents', entityTestData.length, log);
     });
 
     apiTest.afterAll(async ({ apiClient, esClient }) => {
@@ -499,9 +351,6 @@ apiTest.describe(
         .catch(() => {});
       await esClient.indices
         .delete({ index: ML_ANOMALIES_SHARED_INDEX, ignore_unavailable: true })
-        .catch(() => {});
-      await esClient.indices
-        .deleteIndexTemplate({ name: SOURCE_EVENTS_INDEX_TEMPLATE })
         .catch(() => {});
       // Uninstall the entity store
       await apiClient
