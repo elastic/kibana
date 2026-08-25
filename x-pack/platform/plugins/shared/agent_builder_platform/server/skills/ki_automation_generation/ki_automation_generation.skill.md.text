@@ -370,8 +370,8 @@ The AI Index schema has these base fields (all required unless noted):
 | `attributes.evidence` | string[] | Observed values that justify a materialized detection/fact; each string quotes a real distribution (e.g. `"~20% of spans are errors (1,204 / 6,033)"`) |
 | `attributes.expires_at` | string (ISO date) | Expiry date (~30 days); used by the expiry-based freshness guard. **Omit entirely for durable (immutable-fact) KIs** — a KI with no `expires_at` never ages out (principle #2). Stored as an ISO-8601 string; compare with `TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at"))` in ES\|QL. |
 | `attributes.excluded` | boolean | Soft-exclude: KI exists but is skipped by agents |
-| `attributes.esql` | string or string[] | **The canonical location for a KI's complete runnable ES\|QL** (e.g. a detection's materialized query) — this is the field the ES\|QL verifiers read (see "Writing and verifying KIs"). **Optional:** KI kinds without ES\|QL simply omit it. Parameterized `?param` templates are not runnable — those stay in `content` as access patterns. |
-| `attributes.slug` | string | Normalized natural key for dedup — `context-engine.createKi` generates the document id, so idempotency comes from looking this key up (see the create-or-merge sink). |
+| `attributes.esql` | string or string[] | **The canonical location for a KI's complete runnable ES\|QL** (e.g. a detection's materialized query) — this is the field the ES\|QL verifiers read (see "Writing and verifying KIs"). **Optional:** KI kinds without ES\|QL simply omit it. Parameterized `?param` templates are not runnable — those stay in `content` as access patterns — but always populate `attributes.esql` with their runnable `esql_example` counterparts so verifiers check them. |
+| `attributes.slug` | string | Normalized natural key for dedup — `context-engine.createKi` generates the document id, so idempotency comes from looking this key up (see the KI upsert). |
 
 Strategy-specific structured output (e.g. a detection's materialized query and `query_type`/`severity_score`, a feature's `subtype`/`slug`) also goes in `content` + `attributes` — never in bespoke declared mappings.
 
@@ -393,14 +393,15 @@ type:        <KI kind, e.g. "index_metadata" | "document" | "detection" | "featu
 title:       <display_name>
 tags:        [...]
 attributes:
-  # Stable natural key for cross-run dedup (see the create-or-merge sink):
+  # Stable natural key for cross-run dedup (see the KI upsert):
   slug:            <normalized natural key, e.g. "raw-cases-all">
   # Quality & lifecycle metadata (all under attributes — no declared mappings needed):
   confidence:      <0.0–1.0 calibrated correctness score (see grounding contract)>
   coverage:        <0.0–1.0 completeness score from profile_index (optional)>
   expires_at:      "2025-08-20T10:00:00Z"   # omit for durable (immutable-fact) KIs
   evidence:        ["~20% of spans are errors (1,204 / 6,033)"]
-  # Detection KIs only — the complete runnable query, in the field verifiers read:
+  # Complete runnable ES|QL carried by the KI (a detection's materialized query, or an
+  # index profile's esql_example queries) — the field verifiers read:
   esql:            'FROM logs-* | WHERE event.outcome == "failure" | STATS c = COUNT(*) BY user.name'
   # Repeat structured values here for exact-match / filter queries.
   # Index Metadata example:
@@ -452,7 +453,7 @@ setting (`contextEngine:enabled`); confirm availability and exact params with
   auto-creates the AI index (backing index `ai-index-idx-<id>`) when it does not exist yet.
 - `createKi` sets `@timestamp` and generates the document id itself — include neither in
   `ki`. Idempotency therefore comes from a lookup, not a caller-supplied id (see the
-  create-or-merge sink below).
+  KI upsert below).
 - The `ki` object is the "KI document shape" above: `type` and `title` required;
   `description`, `content`, `tags`, `attributes` optional.
 
@@ -477,7 +478,7 @@ writes:
    reason) with a `console` step so failures are visible, never silently dropped.
 4. The write — `context-engine.createKi`, or `context-engine.updateKi` on a collision.
 
-### Create-or-merge sink (dedup across runs)
+### KI upsert (dedup across runs)
 
 1. Store the KI's normalized natural key in `attributes.slug` (e.g. `<index>/<doc_id>`, an
    entity id, or the source index name).
@@ -518,7 +519,7 @@ values in `field.path=value` notation (e.g. `service.name=checkout`, `error.type
 When a KI is derived from specific documents, record the **minimal covering set** of source `_id`s
 (one per distinct source doc, not one per evidence string) — enough to trace every claim, no more.
 
-**Dedup & merge (not blind overwrite).** The create-or-merge sink's lookup on `attributes.slug`
+**Dedup & merge (not blind overwrite).** The KI upsert's lookup on `attributes.slug`
 catches only *exact* key collisions. Also treat two KIs as duplicates when they share a
 **fingerprint** — same `type` + `subtype` + same structured `attributes` — even if titles or slugs
 differ slightly. Derive the slug from a normalized natural key (trim + lowercase) so cosmetic
@@ -561,7 +562,9 @@ A `foreach` loop over a hardcoded list of index names. Per iteration: `GET /<ind
 each run samples different records rather than always returning the first-ingested documents), `ai.prompt` producing display_name, purpose,
 answers_questions, does_not_contain, key_fields, joins, when_to_use, and access_patterns (each
 with question_type, esql_template, esql_example, params, returns). Then the verified KI sink
-(`verifyKi` gate → `context-engine.createKi`) with `attributes.slug` set to the index name.
+(`verifyKi` gate → `context-engine.createKi`) with `attributes.slug` set to the index name and
+`attributes.esql` set to the runnable `esql_example` queries (array of strings) so the ES|QL
+verifiers check them.
 Put key_fields, when_to_use, and joins into `attributes`; put purpose, answers_questions, and
 access patterns into `content`. A complete reference YAML is in the `index-selection-reference-workflow` resource.
 
@@ -569,7 +572,7 @@ access patterns into `content`. A complete reference YAML is in the `index-selec
 An `elasticsearch.esql.query` pulling docs with id, title, and body fields;
 truncate body to 12,000 chars with `EVAL body = SUBSTRING(body_field, 1, 12000)`. A `foreach`
 over the results. Per iteration: `ai.prompt` producing title, summary, answers_questions,
-key_entities, topics, and access_patterns. Then the create-or-merge sink with
+key_entities, topics, and access_patterns. Then the KI upsert with
 `attributes.slug` set to `<index>/<doc_id>` (stable, so re-runs merge instead of duplicating).
 Put structured fields (key_entities, topics, any domain-specific categorical
 values like status, severity, product_mentions) into `attributes`; put summary, answers_questions,
@@ -587,7 +590,7 @@ Put filterable fields (severity, error_type, affected_component) into `attribute
 **Atomic Facts:**
 An `elasticsearch.esql.query` pulling docs, full text truncated to 24,000 chars. An
 `ai.prompt` extracting a list of discrete atomic claims: `{ facts: [{ claim, entities, topics }] }`.
-A `foreach` over the facts. Per iteration: the create-or-merge sink with `attributes.slug` set to
+A `foreach` over the facts. Per iteration: the KI upsert with `attributes.slug` set to
 `<index>/<doc_id>-fact-<n>`.
 Put entities and topics into `attributes` on each fact KI.
 
@@ -595,7 +598,7 @@ Put entities and topics into `attributes` on each fact KI.
 A top-level `foreach` over a hardcoded list of 1–2 entity IDs (pilot). Per entity: an
 `elasticsearch.esql.query` finding all documents referencing that entity (`LIMIT 10` for pilot).
 An `ai.prompt` synthesizing them into an entity profile: entity_name, summary, key_facts,
-open_questions, related_indices, and access_patterns. The create-or-merge sink with
+open_questions, related_indices, and access_patterns. The KI upsert with
 `attributes.slug` set to the entity ID — re-runs resolve to the same KI via
 `context-engine.updateKi`, enriching it over time. Put entity_name, entity_type, and related_indices into `attributes`.
 
@@ -603,8 +606,8 @@ open_questions, related_indices, and access_patterns. The create-or-merge sink w
 Call `platform.workflows.get_step_definitions` with the connector type to get correct step params.
 A connector step to list/query documents. A `foreach` over the results. Per
 iteration: a second connector step to fetch the full document body. An `ai.prompt` extracting a
-KI including access_patterns using `execute_connector_sub_action` syntax. Then the create-or-merge
-sink. Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
+KI including access_patterns using `execute_connector_sub_action` syntax. Then the KI upsert.
+Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
 into `attributes` so they remain filterable after ingestion. Note that any of the above strategies
 can be used with connectors.
 
@@ -628,8 +631,8 @@ Detection guardrails (bake into the prompt):
 > **`feature` vs. `entity` (Cumulative / Wiki-style):** these are deliberately different granularities and can coexist. A `feature` KI is a lightweight **inventory / orientation** signal from a single profiling pass — "this index *contains* a service called `checkout`", "it *depends on* Postgres" — answering "what exists in this data?". A Cumulative `entity` KI is a deep **per-instance dossier** enriched over many runs — everything known about one specific entity — answering "tell me everything about X". Reach for `feature` to map the shape of an index; reach for Cumulative when an entity deserves its own evolving profile. If a `feature/entity` grows into a full dossier, promote it to a Cumulative `entity` KI.
 
 *Sinking:*
-- `sink_detection_ki` — the create-or-merge sink with `type = "detection"`, `content` (with the materialized query repeated as prose), and `attributes` (esql, query_type, severity_score, confidence, evidence, expires_at, slug = `<index>/<slug-of-title>`).
-- `sink_feature_ki` — the create-or-merge sink with `type = "feature"`, `content`, and `attributes` (subtype, slug = `<index>/<slug>`, evidence_doc_ids, confidence, evidence, expires_at).
+- `sink_detection_ki` — the KI upsert with `type = "detection"`, `content` (with the materialized query repeated as prose), and `attributes` (esql, query_type, severity_score, confidence, evidence, expires_at, slug = `<index>/<slug-of-title>`).
+- `sink_feature_ki` — the KI upsert with `type = "feature"`, `content`, and `attributes` (subtype, slug = `<index>/<slug>`, evidence_doc_ids, confidence, evidence, expires_at).
 - Detections carry `attributes.esql`, so the ES|QL verifiers actually run on `verifyKi` here: a detection whose query fails verification is reported (verifier + reason) and not written.
 
 *Lifecycle and dedup:*
@@ -639,7 +642,7 @@ Detection guardrails (bake into the prompt):
 
 ## Adapting the recipe
 
-- **Scheduling:** When the workflow runs on a schedule, query `FROM <backing index> | WHERE FIELD_EXTRACT(attributes, "slug") == "<index_name>" | KEEP @timestamp` to retrieve the KI's last-profiled date (`@timestamp` only reflects creation — on merge-heavy flows compare `attributes.last_profiled_at` instead; see the create-or-merge sink note). Skip re-profiling if the source index has not been updated since that timestamp (e.g. check with `elasticsearch.search` using a `range` query on the source index's `@timestamp`). This avoids burning LLM tokens on unchanged data.
+- **Scheduling:** When the workflow runs on a schedule, query `FROM <backing index> | WHERE FIELD_EXTRACT(attributes, "slug") == "<index_name>" | KEEP @timestamp` to retrieve the KI's last-profiled date (`@timestamp` only reflects creation — on merge-heavy flows compare `attributes.last_profiled_at` instead; see the KI upsert note). Skip re-profiling if the source index has not been updated since that timestamp (e.g. check with `elasticsearch.search` using a `range` query on the source index's `@timestamp`). This avoids burning LLM tokens on unchanged data.
 
 - **Large or noisy indices (multi-iteration with exclusion):** For indices whose content cannot be captured in a single 20-document random sample, use a while-loop convergence pattern: `sample_docs` → `profile_index` → merge into the accumulated result → repeat. Crucially, **exclude what you've already covered on each re-sample** rather than re-rolling blindly: add a `must_not` filter for the entities/patterns already profiled (e.g. `must_not` on known `service.name` values) so each pass sees *new* data instead of re-profiling the same dominant records. Combine with `random_score` for variety within the not-yet-covered slice. Stop when a pass surfaces nothing new, `coverage` meets threshold, or max iterations is reached — whichever comes first. Merge per the dedup rules in the grounding contract.
 

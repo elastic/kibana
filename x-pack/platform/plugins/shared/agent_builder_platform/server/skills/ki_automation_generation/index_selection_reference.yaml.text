@@ -9,9 +9,10 @@ tags:
   - index-selection
   - knowledge-indicators
 consts:
-  # AI index id, not an Elasticsearch index name. context-engine.createKi creates the
+  # AI index id, not an Elasticsearch index name. context-engine.createKi registers the
   # AI index (backing index ai-index-idx-ki-example) when it does not exist yet.
   ai_index_id: ki-example
+  target_index: ai-index-idx-ki-example
   indices:
     - raw-cases-all
     - raw-articles-all
@@ -19,6 +20,16 @@ consts:
 triggers:
   - type: manual
 steps:
+  # Ensure the backing index exists up front. No mappings block: the built-in AI index
+  # templates (ai-index@mappings) apply to ai-index-* names and already define the KI
+  # fields — bespoke mappings here would fight them (and strict mappings would reject
+  # the @timestamp that context-engine.createKi writes).
+  - name: ensure_target_index
+    type: elasticsearch.indices.create
+    with:
+      index: "{{ consts.target_index }}"
+    on-failure:
+      continue: true
   - name: loop_indices
     type: foreach
     foreach: "{{ consts.indices | json }}"
@@ -138,10 +149,6 @@ steps:
         timeout: 120s
       # Build the KI once so verify_ki and sink_index_ki see the same document.
       # @timestamp and the document id are set by context-engine.createKi — never here.
-      # This index-metadata KI carries no attributes.esql (its ES|QL access patterns are
-      # ?param templates inside content), so verification passes with empty results;
-      # KIs that carry complete runnable ES|QL put it in attributes.esql, the field the
-      # ES|QL verifiers read.
       - name: build_ki
         type: data.set
         with:
@@ -153,8 +160,13 @@ steps:
             attributes:
               # Stable natural key: on re-runs, look this up in the backing index and
               # switch to context-engine.updateKi to merge instead of duplicating
-              # (see "Create-or-merge sink" in the skill).
+              # (see "KI upsert" in the skill).
               slug: "{{ foreach.item }}"
+              # Complete runnable ES|QL carried by the KI, in the canonical field the
+              # ES|QL verifiers read. Here: each access pattern's runnable esql_example
+              # (the ?param templates stay in content). Always populate attributes.esql
+              # when a KI carries runnable ES|QL.
+              esql: "${{ steps.profile_index.output.content.access_patterns | map: 'esql_example' }}"
               ingestion_method: manual
               key_fields: "{{ steps.profile_index.output.content.key_fields | join: ', ' }}"
               when_to_use: "{{ steps.profile_index.output.content.when_to_use }}"
