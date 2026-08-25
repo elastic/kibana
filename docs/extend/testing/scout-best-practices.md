@@ -238,33 +238,6 @@ When you add new tests, fix flakes, or make significant changes, run the same te
 
 Prefer doing this locally first (faster feedback), and use the Flaky Test Runner in CI when needed. See [Debug flaky tests](../testing/debugging.md#scout-debugging-flaky-tests) for guidance.
 
-## Wait for what you assert on [wait-for-what-you-assert-on]
-
-A UI flake is usually a race: the test reads something before the app has finished producing it. Wait for the *exact* thing your assertion checks — not an earlier step.
-
-- **Wait on the element you assert on, not the click or a spinner.** Web-first assertions (`expect(locator).toBeVisible()`, `toHaveText`) auto-wait, so asserting on the target usually *is* the wait. Guarding the click (`{ force: true }`, a retry) or waiting for a spinner to vanish leaves the real read racing.
-- **No element to wait on? Add one in the app.** A `data-test-subj` or `data-loaded` attribute reflects the real render and survives endpoint changes. Only for a gate with no UI (a background write, a setup step) fall back to `page.waitForResponse(...)`, armed *before* the action. Better yet, remove the race: seed via API or mock the endpoint so the data is ready first.
-- **Retry a read, never an action.** `expect.poll`/`toPass` that re-checks a value is a fine wait (re-query *inside* the loop). Re-firing a click, type, or navigation to make it "land" hides a real bug.
-- **A stale or empty read right after a write is a propagation issue, not a timeout to bump** — it's a missing wait, an app with no readiness signal to wait on, or a genuine product bug. Diagnose which.
-- **If a fix's error stops but the test fails at a different step, that's a new, separate flake** — fix it on its own merits; don't assume the earlier wait was wrong.
-
-:::::{dropdown} Example
-❌ **Don't:** act, then read before the result has rendered:
-
-```ts
-await page.testSubj.click('saveButton');
-const title = await page.testSubj.locator('detailsTitle').textContent(); // may not exist yet
-expect(title).toBe('My item');
-```
-
-✔️ **Do:** assert on the element itself — the assertion auto-waits for it to render:
-
-```ts
-await page.testSubj.click('saveButton');
-await expect(page.testSubj.locator('detailsTitle')).toHaveText('My item');
-```
-:::::
-
 ## Keep test suites independent [keep-test-suites-independent]
 
 - Keep **one top-level suite** per file (`test.describe`).
