@@ -26,7 +26,11 @@ import { DEFAULT_CONDITION, ForTheLastExpression } from './common/for_the_last_e
 import type { StatusRuleParamsProps } from './status_rule_ui';
 import { LocationsValueExpression } from './common/condition_locations_value';
 import { PopoverExpression } from './common/popover_expression';
-import { DEFAULT_PENDING_THRESHOLD } from '../../../../../common/rules/status_rule';
+import {
+  DEFAULT_PENDING_THRESHOLD,
+  DEFAULT_DOWN_THRESHOLD,
+  DEFAULT_LOCATIONS_THRESHOLD,
+} from '../../../../../common/rules/status_rule';
 
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];
@@ -35,11 +39,11 @@ interface Props {
 
 export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParams }) => {
   const condition = ruleParams.condition ?? DEFAULT_CONDITION;
-  const downThreshold = condition.downThreshold ?? DEFAULT_CONDITION.downThreshold;
+  const downThreshold = condition.downThreshold ?? DEFAULT_DOWN_THRESHOLD;
   const pendingThreshold = condition.pendingThreshold ?? DEFAULT_PENDING_THRESHOLD;
   const isAlertOnNoData = ruleParams.condition?.alertOnNoData !== undefined;
 
-  const locationsThreshold = condition.locationsThreshold ?? DEFAULT_CONDITION.locationsThreshold;
+  const locationsThreshold = condition.locationsThreshold ?? DEFAULT_LOCATIONS_THRESHOLD;
 
   const onThresholdChange = useCallback(
     (value: number) => {

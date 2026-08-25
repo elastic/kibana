@@ -16,6 +16,8 @@ import { i18n } from '@kbn/i18n';
 import type { StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import {
   DEFAULT_PENDING_THRESHOLD,
+  DEFAULT_DOWN_THRESHOLD,
+  DEFAULT_LOCATIONS_THRESHOLD,
   getConditionType,
 } from '../../../../../../common/rules/status_rule';
 import type { StatusRuleParamsProps } from '../status_rule_ui';
@@ -72,8 +74,8 @@ const OPTIONS: Option[] = [
 export const DEFAULT_CONDITION: StatusRuleCondition = {
   window: { numberOfChecks: 5 },
   groupBy: 'locationId',
-  downThreshold: 3,
-  locationsThreshold: 1,
+  downThreshold: DEFAULT_DOWN_THRESHOLD,
+  locationsThreshold: DEFAULT_LOCATIONS_THRESHOLD,
   pendingThreshold: DEFAULT_PENDING_THRESHOLD,
   recoveryStrategy: 'firstUp',
 };
