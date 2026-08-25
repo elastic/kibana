@@ -89,6 +89,9 @@ describe('AddNewMonitorsPublicAPI', () => {
         soCreated: true,
       });
 
+      // The full monitor delete (which tears down its Fleet package policies
+      // too) owns cleanup here; the direct package-policy bulkDelete path is
+      // only for orphan policies from a create that never reached the SO.
       expect(deleteMonitorExecute).toHaveBeenCalledWith({ monitorIds: ['monitor-1'] });
       expect(bulkDelete).not.toHaveBeenCalled();
     });

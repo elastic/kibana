@@ -149,11 +149,16 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
 
   // An internal app link; the global redirectAppLinks wrapper turns the click into SPA navigation.
   // The preserved indices-list params (filter, hidden toggle, …) are carried in the href itself.
-  const indicesListHref = useMemo(() => {
+  const indicesListBack = useMemo(() => {
     const paramsString = resetIndexUrlParams(search);
-    return `/app/management/data/index_management/${Section.Indices}${
-      paramsString ? `?${paramsString}` : ''
-    }`;
+    return {
+      href: `/app/management/data/index_management/${Section.Indices}${
+        paramsString ? `?${paramsString}` : ''
+      }`,
+      label: i18n.translate('xpack.idxMgmt.indexDetails.backToListLabel', {
+        defaultMessage: 'Indices',
+      }),
+    };
   }, [search]);
 
   const onIndexRefresh = useCallback(() => {
@@ -260,7 +265,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     <>
       <AppHeader
         title={index.name}
-        back={indicesListHref}
+        back={indicesListBack}
         tabs={headerTabs}
         badges={badges}
         menu={appMenu}
