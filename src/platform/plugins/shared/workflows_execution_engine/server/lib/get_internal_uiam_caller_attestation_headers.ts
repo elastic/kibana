@@ -8,7 +8,11 @@
  */
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
+import {
+  HTTPAuthorizationHeader,
+  isExternalUiamCredential,
+  isUiamCredential,
+} from '@kbn/core-security-server';
 
 export const getInternalUiamCallerAttestationHeaders = (
   coreStart: CoreStart,
@@ -16,6 +20,14 @@ export const getInternalUiamCallerAttestationHeaders = (
 ): Record<string, string> => {
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
   if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+    return {};
+  }
+
+  // A user-created (external) UIAM key must not be attested: the receiving Kibana would honor the
+  // attestation and attach the UIAM shared secret to its Elasticsearch calls, and UIAM rejects
+  // external keys presented with client authentication. External keys authenticate inbound on
+  // their own, so skipping the stamp is both correct and fail-closed.
+  if (isExternalUiamCredential(request)) {
     return {};
   }
 
