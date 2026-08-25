@@ -24,31 +24,15 @@ import { useServiceFlyoutCapabilities } from './hooks/use_service_flyout_capabil
 import { useApmIndices } from './hooks/use_apm_indices';
 export type { ServiceFlyoutService } from './types';
 
-/**
- * APM service overview timeseries chart ids for which the elastic-charts tooltip
- * portal should be kept below the service flyout.
- * See: https://github.com/elastic/kibana/issues/286822
- *
- * Each id matches `<Chart id={...}>` in the owning component, which also renders
- * the same string as `data-test-subj` via ChartContainer — so a rename breaks
- * those tests and won't silently break this CSS.
- *
- * Lens mounts a global `[id^='echTooltipPortal'] { z-index: levels.flyout + 1 !important }`
- * rule whenever any Lens embeddable is on the page (lens/expression_renderer_styles.tsx,
- * PR #280957). The `body ` prefix gives this rule higher specificity (0,2,0 vs 0,1,0) so
- * it wins regardless of emotion insertion order.
- */
-const SERVICE_OVERVIEW_CHART_IDS = [
-  'latencyChart', // shared/charts/latency_chart/index.tsx
-  'throughput', // app/service_overview/service_overview_throughput_chart/index.tsx
-  'errorRate', // shared/charts/failed_transaction_rate_chart/index.tsx
-  'transactionBreakdownChart', // shared/charts/transaction_breakdown_chart/index.tsx
-  'coldstartRate', // shared/charts/transaction_coldstart_rate_chart/index.tsx
-] as const;
-
-const SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS = SERVICE_OVERVIEW_CHART_IDS.map(
-  (id) => `body [id^='echTooltipPortalMainTooltip__${id}']`
-).join(',\n  ');
+const SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS = [
+  'latencyChart',
+  'throughput',
+  'errorRate',
+  'transactionBreakdownChart',
+  'coldstartRate',
+]
+  .map((id) => `body [id^='echTooltipPortalMainTooltip__${id}']`)
+  .join(',\n  ');
 
 export const SERVICE_FLYOUT_TAB_IDS = {
   overview: 'overview',
@@ -144,15 +128,6 @@ export function ServiceFlyout({
 
   return (
     <>
-      {/*
-       * While the flyout is open, pin the service overview chart tooltip portals below
-       * flyout level. Lens mounts a global `[id^='echTooltipPortal'] { z-index: 1001 !important }`
-       * rule for every Lens embeddable (PR #280957) — the flyout's own charts are Lens
-       * embeddables, so opening it drags the page's native chart tooltips from 100 to 1001,
-       * just above the flyout's 1000. The `body` prefix (specificity 0,2,0) beats Lens's
-       * single-attribute selector (0,1,0) regardless of emotion insertion order.
-       * https://github.com/elastic/kibana/issues/286822
-       */}
       <Global
         styles={css`
           ${SERVICE_OVERVIEW_CHART_TOOLTIP_SELECTORS} {
