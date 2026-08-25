@@ -168,11 +168,19 @@ export class AgentsService {
       request,
     }) => {
       const spaceId = getCurrentSpaceId({ request, spaces });
-      return configurationResolver({
+      return configurationResolver.resolveConfig({
         agentType: agent.type,
         configuration: agent.configuration,
         ctx: { request, spaceId },
       });
+    };
+
+    const resolveAgentBaseConfiguration: AgentsServiceStart['resolveAgentBaseConfiguration'] = ({
+      agentType,
+      request,
+    }) => {
+      const spaceId = getCurrentSpaceId({ request, spaces });
+      return configurationResolver.resolveBase(agentType, { request, spaceId });
     };
 
     const removeToolRefsFromAgents = async ({
@@ -227,6 +235,7 @@ export class AgentsService {
       getRegistry,
       ensure,
       resolveAgentConfiguration,
+      resolveAgentBaseConfiguration,
       removeToolRefsFromAgents,
       getAgentsUsingTools,
       removePluginRefsFromAgents,
