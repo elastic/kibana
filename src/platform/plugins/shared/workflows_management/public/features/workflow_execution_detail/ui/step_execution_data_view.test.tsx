@@ -65,6 +65,7 @@ describe('StepExecutionDataView', () => {
   it('renders error data with error title', () => {
     const errorStepExecution = {
       ...baseStepExecution,
+      output: undefined,
       error: {
         message: 'Something went wrong',
         code: 'ERROR_CODE',
@@ -76,6 +77,38 @@ describe('StepExecutionDataView', () => {
 
     expect(mockJSONDataView).toHaveBeenCalledWith({
       data: { error: { message: 'Something went wrong', code: 'ERROR_CODE' } },
+      title: 'Error',
+      fieldPathActionsPrefix: undefined,
+    });
+  });
+
+  it('merges partial output into the error view when both are present', () => {
+    const errorStepExecution = {
+      ...baseStepExecution,
+      output: {
+        respondedBy: 'system',
+        channel: 'timeout',
+        respondedAt: '2026-08-25T15:03:56.638Z',
+      },
+      error: {
+        type: 'TimeoutError',
+        message: 'Approval wait exceeded the configured timeout of 30s.',
+      },
+    };
+    renderWithIntl(
+      <StepExecutionDataView stepExecution={errorStepExecution as any} mode="output" />
+    );
+
+    expect(mockJSONDataView).toHaveBeenCalledWith({
+      data: {
+        respondedBy: 'system',
+        channel: 'timeout',
+        respondedAt: '2026-08-25T15:03:56.638Z',
+        error: {
+          type: 'TimeoutError',
+          message: 'Approval wait exceeded the configured timeout of 30s.',
+        },
+      },
       title: 'Error',
       fieldPathActionsPrefix: undefined,
     });

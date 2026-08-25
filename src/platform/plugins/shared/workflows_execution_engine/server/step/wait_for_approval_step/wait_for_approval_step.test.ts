@@ -230,16 +230,29 @@ describe('WaitForApprovalStepImpl', () => {
 
   it('finishes with approval output shape on resume', async () => {
     mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
+    (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+      hitl: {
+        respondedBy: 'elastic',
+        channel: 'kibana_execution_view',
+        respondedAt: '2026-08-25T15:06:54.847Z',
+      },
+    };
     mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
       id: 'exec-abc',
-      context: { resumeInput: { approved: true }, resumedBy: 'user-1' },
+      // Engine resume context may carry a profile UID; claim stamp should win.
+      context: {
+        resumeInput: { approved: true },
+        resumedBy: 'u_profile_uid_example',
+      },
     } as unknown as ReturnType<WorkflowExecutionRuntimeManager['getWorkflowExecution']>);
 
     await underTest.run();
 
     expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
       response: { approved: true },
-      respondedBy: 'user-1',
+      respondedBy: 'elastic',
+      channel: 'kibana_execution_view',
+      respondedAt: '2026-08-25T15:06:54.847Z',
     });
     expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
   });
@@ -319,7 +332,12 @@ describe('WaitForApprovalStepImpl', () => {
       expect(mockStepExecutionRuntime.failStep).toHaveBeenCalledWith(
         expect.objectContaining({
           toSerializableObject: expect.any(Function),
-        })
+        }),
+        {
+          respondedBy: 'system',
+          channel: 'timeout',
+          respondedAt: '2025-06-01T12:01:00.000Z',
+        }
       );
       const timeoutError = (mockStepExecutionRuntime.failStep as jest.Mock).mock
         .calls[0][0] as ExecutionError;

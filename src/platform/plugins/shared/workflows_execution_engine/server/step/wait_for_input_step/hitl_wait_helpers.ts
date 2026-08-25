@@ -33,14 +33,22 @@ export function resumeHitlWaitStep({
   const context = execution.context;
   const resumeInput = context?.resumeInput as Record<string, unknown> | undefined;
   const ctx = context as Record<string, unknown> | null | undefined;
-  const resumedBy = typeof ctx?.resumedBy === 'string' ? ctx.resumedBy : 'unknown';
+  // Prefer the claim-time HITL stamp (username / external_resume:*) over the
+  // engine resume context, which may store a profile UID from a different
+  // getAuthenticatedUser helper.
+  const hitl = stepExecutionRuntime.stepExecution?.hitl;
+  const resumedBy =
+    (typeof hitl?.respondedBy === 'string' && hitl.respondedBy) ||
+    (typeof ctx?.resumedBy === 'string' ? ctx.resumedBy : 'unknown');
   const executionId = execution.id;
 
   const stepOutput = transformResumeInput
     ? transformResumeInput(resumeInput, resumedBy)
     : resumeInput;
 
-  stepExecutionRuntime.finishStep(stepOutput);
+  const enrichedOutput = enrichHitlStepOutput(stepOutput, hitl);
+
+  stepExecutionRuntime.finishStep(enrichedOutput);
 
   if (context != null && typeof context === 'object' && 'resumeInput' in context) {
     const { resumeInput: _cleared, ...restContext } = context as Record<string, unknown>;
@@ -93,16 +101,44 @@ export function failHitlWaitOnTimeout(params: {
 }): void {
   const { stepExecutionRuntime, executionId, stepType, error } = params;
   const respondedAt = new Date().toISOString();
-  stepExecutionRuntime.stampHitlAudit({
+  const hitl = {
     respondedBy: 'system',
     respondedAt,
     channel: 'timeout',
-  });
+  };
+  stepExecutionRuntime.stampHitlAudit(hitl);
   emitHitlLifecycle({
     type: 'timed_out',
     executionId,
     stepExecutionId: stepExecutionRuntime.stepExecutionId,
     stepType,
   });
-  stepExecutionRuntime.failStep(error);
+  // Persist HITL audit fields as partial output so the Error tab can show them
+  // alongside the TimeoutError without a separate callout.
+  stepExecutionRuntime.failStep(error, {
+    respondedBy: hitl.respondedBy,
+    channel: hitl.channel,
+    respondedAt: hitl.respondedAt,
+  });
+}
+
+function enrichHitlStepOutput(
+  stepOutput: unknown,
+  hitl: { channel?: string; respondedAt?: string } | undefined
+): unknown {
+  if (
+    !hitl ||
+    stepOutput === null ||
+    stepOutput === undefined ||
+    typeof stepOutput !== 'object' ||
+    Array.isArray(stepOutput)
+  ) {
+    return stepOutput;
+  }
+
+  return {
+    ...(stepOutput as Record<string, unknown>),
+    ...(hitl.channel !== undefined ? { channel: hitl.channel } : {}),
+    ...(hitl.respondedAt !== undefined ? { respondedAt: hitl.respondedAt } : {}),
+  };
 }

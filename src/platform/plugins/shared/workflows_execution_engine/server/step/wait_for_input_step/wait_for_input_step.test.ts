@@ -282,10 +282,45 @@ describe('WaitForInputStepImpl', () => {
     });
 
     it('should call finishStep with the resumeInput from context', async () => {
+      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+        hitl: {
+          respondedBy: 'jane.doe',
+          channel: 'inbox',
+          respondedAt: '2026-08-25T12:00:00.000Z',
+        },
+      };
       await underTest.run();
       expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
         response: resumeInput,
         respondedBy: 'jane.doe',
+        channel: 'inbox',
+        respondedAt: '2026-08-25T12:00:00.000Z',
+      });
+    });
+
+    it('prefers claim-time hitl.respondedBy over engine resume profile UID', async () => {
+      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+        hitl: {
+          respondedBy: 'elastic',
+          channel: 'kibana_execution_view',
+          respondedAt: '2026-08-25T15:06:54.847Z',
+        },
+      };
+      mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
+        context: {
+          resumeInput,
+          resumedBy: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+        },
+      } as any);
+
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: resumeInput,
+        respondedBy: 'elastic',
+        channel: 'kibana_execution_view',
+        respondedAt: '2026-08-25T15:06:54.847Z',
       });
     });
 

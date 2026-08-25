@@ -285,45 +285,6 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                 <>
                   {selectedTabId === 'output' && (
                     <>
-                      {stepExecution?.hitl && (
-                        <>
-                          <EuiCallOut
-                            size="s"
-                            color={stepExecution.hitl.channel === 'timeout' ? 'warning' : 'primary'}
-                            title={
-                              stepExecution.hitl.channel === 'timeout'
-                                ? i18n.translate(
-                                    'workflowsManagement.stepExecutionDetails.hitlTimeoutTitle',
-                                    {
-                                      defaultMessage: 'HITL timed out (system)',
-                                    }
-                                  )
-                                : i18n.translate(
-                                    'workflowsManagement.stepExecutionDetails.hitlResponseTitle',
-                                    {
-                                      defaultMessage: 'HITL response',
-                                    }
-                                  )
-                            }
-                            iconType="user"
-                            announceOnMount={false}
-                            data-test-subj="workflowStepHitlAudit"
-                          >
-                            <FormattedMessage
-                              id="workflowsManagement.stepExecutionDetails.hitlResponseDescription"
-                              defaultMessage="Responded by {respondedBy} via {channel} at {respondedAt}"
-                              values={{
-                                respondedBy: (
-                                  <strong>{stepExecution.hitl.respondedBy ?? '—'}</strong>
-                                ),
-                                channel: <strong>{stepExecution.hitl.channel ?? '—'}</strong>,
-                                respondedAt: stepExecution.hitl.respondedAt ?? '—',
-                              }}
-                            />
-                          </EuiCallOut>
-                          <EuiSpacer size="m" />
-                        </>
-                      )}
                       {isTriggerPseudoStep && triggerType !== 'manual' && (
                         <>
                           <EuiCallOut
