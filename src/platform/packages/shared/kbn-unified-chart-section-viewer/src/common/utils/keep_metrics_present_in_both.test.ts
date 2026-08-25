@@ -51,4 +51,13 @@ describe('keepMetricsPresentInBoth', () => {
     expect(keepMetricsPresentInBoth([metric('a')], [])).toEqual([]);
     expect(keepMetricsPresentInBoth([], [metric('a')])).toEqual([]);
   });
+
+  it('matches membership rows that only carry identity fields', () => {
+    const capable = [metric('demo.dimension.sentinel')];
+    const withData = [{ indexName: 'metrics-a', metricName: 'demo.dimension.sentinel' }];
+
+    expect(keepMetricsPresentInBoth(capable, withData).map((item) => item.metricName)).toEqual([
+      'demo.dimension.sentinel',
+    ]);
+  });
 });

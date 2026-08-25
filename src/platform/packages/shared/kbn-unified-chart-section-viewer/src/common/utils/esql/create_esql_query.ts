@@ -50,7 +50,7 @@ export function createESQLQuery({
   whereStatements = [],
   originalSource,
   gridSettings,
-}: CreateESQLQueryParams) {
+}: CreateESQLQueryParams): string {
   const { metricName, metricTypes, fieldTypes, indexName } = metricItem;
   const index = isSingleSource(originalSource) ? originalSource : indexName;
   const instrument = firstNonNullable(metricTypes);

@@ -14,6 +14,9 @@ import { BasicPrettyPrinter, mutate, Parser } from '@elastic/esql';
  * Returns the original string when there is no WHERE or parsing fails so
  * callers can use reference equality to detect a no-op.
  */
+export function dropWhereCommands(query: string): string;
+export function dropWhereCommands(query: undefined): undefined;
+export function dropWhereCommands(query: string | undefined): string | undefined;
 export function dropWhereCommands(query: string | undefined): string | undefined {
   if (!query) {
     return query;

@@ -16,7 +16,7 @@ import { getMetricUniqueKey } from './get_metric_unique_key';
  */
 export function keepMetricsPresentInBoth(
   capable: ParsedMetricItem[],
-  withData: ParsedMetricItem[]
+  withData: ReadonlyArray<Pick<ParsedMetricItem, 'indexName' | 'metricName'>>
 ): ParsedMetricItem[] {
   const withDataKeys = new Set(withData.map(getMetricUniqueKey));
   return capable.filter((item) => withDataKeys.has(getMetricUniqueKey(item)));
