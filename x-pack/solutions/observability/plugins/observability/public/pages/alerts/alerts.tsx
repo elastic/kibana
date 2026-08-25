@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
@@ -298,139 +298,145 @@ function InternalAlertsPage() {
 
   return (
     <Provider value={alertSearchBarStateContainer}>
-      <ObservabilityPageTemplate data-test-subj="alertsPageWithData">
+      <ObservabilityPageTemplate
+        data-test-subj="alertsPageWithData"
+        pageSectionProps={{ paddingSize: 'none' }}
+      >
         <AppHeader
           title={i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}
           menu={appMenu}
           docLink={docLinks.links.observability.createAlerts}
-          spacing="largeBleed"
+          spacing="standard"
         />
-        <EuiSpacer size="l" />
-        <EuiFlexGroup direction="column" gutterSize="m">
-          {authorizedToReadAnyRules && (
+        <EuiPageSection paddingSize="m" restrictWidth={false}>
+          <EuiFlexGroup direction="column" gutterSize="m">
+            {authorizedToReadAnyRules && (
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="l" responsive={false} alignItems="center" wrap>
+                  {renderRuleStats(
+                    ruleStats,
+                    ruleStatsLoading,
+                    locators.get<RulesLocatorParams>(rulesLocatorID)
+                  ).map((statComponent, index) => (
+                    <EuiFlexItem grow={false} key={index}>
+                      {statComponent}
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="l" responsive={false} alignItems="center" wrap>
-                {renderRuleStats(
-                  ruleStats,
-                  ruleStatsLoading,
-                  locators.get<RulesLocatorParams>(rulesLocatorID)
-                ).map((statComponent, index) => (
-                  <EuiFlexItem grow={false} key={index}>
-                    {statComponent}
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
+              <MaintenanceWindowCallout
+                kibanaServices={kibanaServices}
+                categories={[DEFAULT_APP_CATEGORIES.observability.id]}
+              />
             </EuiFlexItem>
-          )}
-          <EuiFlexItem>
-            <MaintenanceWindowCallout
-              kibanaServices={kibanaServices}
-              categories={[DEFAULT_APP_CATEGORIES.observability.id]}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ObservabilityAlertSearchBar
-              {...alertSearchBarStateProps}
-              appName={ALERTS_SEARCH_BAR_ID}
-              onEsQueryChange={setEsQuery}
-              filterControls={filterControls}
-              onFilterControlsChange={setFilterControls}
-              onControlApiAvailable={setControlApi}
-              showFilterBar
-              services={{
-                timeFilterService,
-                AlertsSearchBar,
-                http,
-                data,
-                dataViews,
-                notifications,
-                spaces,
-                useToasts,
-                uiSettings,
-              }}
-            />
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {hasInitialControlLoadingFinished ? (
-              <AlertSummaryWidget
-                ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-                consumers={observabilityAlertFeatureIds}
-                filter={esQuery}
-                fullSize
-                timeRange={alertSummaryTimeRange}
-                chartProps={{
-                  themeOverrides,
-                  onBrushEnd,
+            <EuiFlexItem>
+              <ObservabilityAlertSearchBar
+                {...alertSearchBarStateProps}
+                appName={ALERTS_SEARCH_BAR_ID}
+                onEsQueryChange={setEsQuery}
+                filterControls={filterControls}
+                onFilterControlsChange={setFilterControls}
+                onControlApiAvailable={setControlApi}
+                showFilterBar
+                services={{
+                  timeFilterService,
+                  AlertsSearchBar,
+                  http,
+                  data,
+                  dataViews,
+                  notifications,
+                  spaces,
+                  useToasts,
+                  uiSettings,
                 }}
               />
-            ) : (
-              <AlertsLoader />
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            {esQuery && hasInitialControlLoadingFinished && (
-              <AlertsGrouping<AlertsByGroupingAgg>
-                ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-                consumers={observabilityAlertFeatureIds}
-                from={alertSearchBarStateProps.rangeFrom}
-                to={alertSearchBarStateProps.rangeTo}
-                globalFilters={globalFilters}
-                globalQuery={globalQuery}
-                groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
-                defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
-                initialGroupings={
-                  alertSearchBarStateProps?.groupings?.length
-                    ? alertSearchBarStateProps.groupings
-                    : undefined
-                }
-                onGroupingsChange={onGroupingsChange}
-                getAggregationsByGroupingField={getAggregationsByGroupingField}
-                renderGroupPanel={renderGroupPanel}
-                getGroupStats={getGroupStats}
-                services={{
-                  notifications,
-                  dataViews,
-                  http,
-                }}
-              >
-                {(groupingFilters) => {
-                  const groupQuery = buildEsQuery({
-                    filters: groupingFilters,
-                  });
-                  return (
-                    <ObservabilityAlertsTable
-                      id={ALERTS_TABLE_ID}
-                      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-                      consumers={observabilityAlertFeatureIds}
-                      query={mergeBoolQueries(esQuery, groupQuery)}
-                      pageSize={ALERTS_PER_PAGE}
-                      onUpdate={onUpdate}
-                      columns={tableColumns}
-                      renderAdditionalToolbarControls={() => (
-                        <GroupingToolbarControls
-                          groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
-                          ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-                        />
-                      )}
-                      showInspectButton
-                      services={{
-                        data,
-                        http,
-                        notifications,
-                        fieldFormats,
-                        application,
-                        licensing,
-                        cases,
-                        settings,
-                      }}
-                    />
-                  );
-                }}
-              </AlertsGrouping>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {hasInitialControlLoadingFinished ? (
+                <AlertSummaryWidget
+                  ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                  consumers={observabilityAlertFeatureIds}
+                  filter={esQuery}
+                  fullSize
+                  timeRange={alertSummaryTimeRange}
+                  chartProps={{
+                    themeOverrides,
+                    onBrushEnd,
+                  }}
+                />
+              ) : (
+                <AlertsLoader />
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {esQuery && hasInitialControlLoadingFinished && (
+                <AlertsGrouping<AlertsByGroupingAgg>
+                  ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                  consumers={observabilityAlertFeatureIds}
+                  from={alertSearchBarStateProps.rangeFrom}
+                  to={alertSearchBarStateProps.rangeTo}
+                  globalFilters={globalFilters}
+                  globalQuery={globalQuery}
+                  groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
+                  defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
+                  initialGroupings={
+                    alertSearchBarStateProps?.groupings?.length
+                      ? alertSearchBarStateProps.groupings
+                      : undefined
+                  }
+                  onGroupingsChange={onGroupingsChange}
+                  getAggregationsByGroupingField={getAggregationsByGroupingField}
+                  renderGroupPanel={renderGroupPanel}
+                  getGroupStats={getGroupStats}
+                  services={{
+                    notifications,
+                    dataViews,
+                    http,
+                  }}
+                >
+                  {(groupingFilters) => {
+                    const groupQuery = buildEsQuery({
+                      filters: groupingFilters,
+                    });
+                    return (
+                      <ObservabilityAlertsTable
+                        id={ALERTS_TABLE_ID}
+                        ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                        consumers={observabilityAlertFeatureIds}
+                        query={mergeBoolQueries(esQuery, groupQuery)}
+                        pageSize={ALERTS_PER_PAGE}
+                        onUpdate={onUpdate}
+                        columns={tableColumns}
+                        renderAdditionalToolbarControls={() => (
+                          <GroupingToolbarControls
+                            groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
+                            ruleTypeIds={
+                              OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES
+                            }
+                          />
+                        )}
+                        showInspectButton
+                        services={{
+                          data,
+                          http,
+                          notifications,
+                          fieldFormats,
+                          application,
+                          licensing,
+                          cases,
+                          settings,
+                        }}
+                      />
+                    );
+                  }}
+                </AlertsGrouping>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageSection>
       </ObservabilityPageTemplate>
     </Provider>
   );
