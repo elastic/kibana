@@ -17,8 +17,6 @@ import {
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
-  COMMENT_WORKFLOW_ORIGIN_TYPE,
-  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
 } from './constants';
 
 const defaultWorkflow = { id: 'wf-1', name: 'My Workflow', executionId: 'exec-1' };
@@ -57,8 +55,6 @@ describe('WorkflowOriginRt', () => {
     ['cases.observable', observableOrigin],
     ['cases.alert', alertOrigin],
     ['cases.alerts', { type: ALERTS_WORKFLOW_ORIGIN_TYPE, id: 'case-1' }],
-    ['cases.comment', { type: COMMENT_WORKFLOW_ORIGIN_TYPE, id: 'comment-1' }],
-    ['cases.attachment', { type: ATTACHMENT_WORKFLOW_ORIGIN_TYPE, id: 'attachment-1' }],
   ] as const)('accepts origin type %s', (_label, origin) => {
     const result = WorkflowOriginRt.decode(origin);
     expect(result._tag).toBe('Right');
@@ -75,6 +71,14 @@ describe('WorkflowOriginRt', () => {
     const result = WorkflowOriginRt.decode({ type: 'cases.unknown', id: 'x' });
     expect(result._tag).toBe('Left');
   });
+
+  it.each(['cases.comment', 'cases.attachment'] as const)(
+    'rejects removed origin type %s',
+    (type) => {
+      const result = WorkflowOriginRt.decode({ type, id: 'x' });
+      expect(result._tag).toBe('Left');
+    }
+  );
 });
 
 describe('WorkflowUserActionPayloadRt', () => {

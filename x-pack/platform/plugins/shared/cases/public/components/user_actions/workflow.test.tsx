@@ -19,8 +19,6 @@ import {
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
-  COMMENT_WORKFLOW_ORIGIN_TYPE,
-  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
 import { WorkflowsManagementUiActions } from '@kbn/workflows';
 
@@ -153,20 +151,6 @@ describe('createWorkflowUserActionBuilder', () => {
       buildAndRender(makePayload(ALERTS_WORKFLOW_ORIGIN_TYPE));
       expect(screen.getByTestId('workflow-user-action-label')).toHaveTextContent(
         `ran ${WORKFLOW_NAME} on alerts`
-      );
-    });
-
-    it('renders the comment origin label', () => {
-      buildAndRender(makePayload(COMMENT_WORKFLOW_ORIGIN_TYPE));
-      expect(screen.getByTestId('workflow-user-action-label')).toHaveTextContent(
-        `ran ${WORKFLOW_NAME} on a comment`
-      );
-    });
-
-    it('renders the attachment origin label', () => {
-      buildAndRender(makePayload(ATTACHMENT_WORKFLOW_ORIGIN_TYPE));
-      expect(screen.getByTestId('workflow-user-action-label')).toHaveTextContent(
-        `ran ${WORKFLOW_NAME} on an attachment`
       );
     });
   });

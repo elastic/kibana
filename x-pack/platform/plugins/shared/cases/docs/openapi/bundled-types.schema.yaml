@@ -4410,8 +4410,6 @@ components:
                 - cases.observable
                 - cases.alert
                 - cases.alerts
-                - cases.comment
-                - cases.attachment
             id:
               type: string
               description: The primary identifier (caseId, observableId, alertId, commentId, or attachmentId).

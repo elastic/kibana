@@ -12,8 +12,6 @@ import {
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
-  COMMENT_WORKFLOW_ORIGIN_TYPE,
-  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
 } from './constants';
 
 /** Identifies the workflow plus the specific execution to link to. */
@@ -35,8 +33,6 @@ export const WorkflowOriginRt = rt.exact(
         rt.literal(OBSERVABLE_WORKFLOW_ORIGIN_TYPE),
         rt.literal(ALERT_WORKFLOW_ORIGIN_TYPE),
         rt.literal(ALERTS_WORKFLOW_ORIGIN_TYPE),
-        rt.literal(COMMENT_WORKFLOW_ORIGIN_TYPE),
-        rt.literal(ATTACHMENT_WORKFLOW_ORIGIN_TYPE),
       ]),
       /** The primary identifier: caseId, observableId, alertId, commentId, or attachmentId. */
       id: rt.string,

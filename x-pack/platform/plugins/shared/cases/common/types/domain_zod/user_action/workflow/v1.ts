@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { UserActionTypes } from '../action/v1';
-import { CASE_WORKFLOW_USER_ACTION_ORIGIN_TYPES } from '../../../domain/user_action/workflow/constants';
+import { CASE_WORKFLOW_RUN_ORIGIN_TYPES } from '../../../domain/user_action/workflow/constants';
 
 export const WorkflowPayloadSchema = z.object({
   id: z.string(),
@@ -16,7 +16,7 @@ export const WorkflowPayloadSchema = z.object({
 });
 
 export const WorkflowOriginSchema = z.object({
-  type: z.enum(CASE_WORKFLOW_USER_ACTION_ORIGIN_TYPES),
+  type: z.enum(CASE_WORKFLOW_RUN_ORIGIN_TYPES),
   id: z.string(),
   index: z.string().optional(),
   typeKey: z.string().optional(),

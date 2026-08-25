@@ -101,7 +101,7 @@ describe('run workflow route', () => {
     expect(() =>
       runCaseWorkflowBodySchema.validate({
         inputs: {},
-        origin: { type: 'cases.comment', id: 'comment-1' },
+        origin: { type: 'cases.bogus', id: 'bogus-1' },
       })
     ).toThrow();
   });

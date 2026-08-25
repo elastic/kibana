@@ -17,8 +17,6 @@ import {
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
-  COMMENT_WORKFLOW_ORIGIN_TYPE,
-  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
 import type { UserActionBuilder, UserActionBuilderArgs } from './types';
@@ -101,22 +99,6 @@ const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
           <FormattedMessage
             id="xpack.cases.caseView.userActions.ranWorkflowOnAlertsLabel"
             defaultMessage="ran {name} on alerts"
-            values={{ name: workflowNameNode }}
-          />
-        );
-      case COMMENT_WORKFLOW_ORIGIN_TYPE:
-        return (
-          <FormattedMessage
-            id="xpack.cases.caseView.userActions.ranWorkflowOnCommentLabel"
-            defaultMessage="ran {name} on a comment"
-            values={{ name: workflowNameNode }}
-          />
-        );
-      case ATTACHMENT_WORKFLOW_ORIGIN_TYPE:
-        return (
-          <FormattedMessage
-            id="xpack.cases.caseView.userActions.ranWorkflowOnAttachmentLabel"
-            defaultMessage="ran {name} on an attachment"
             values={{ name: workflowNameNode }}
           />
         );
