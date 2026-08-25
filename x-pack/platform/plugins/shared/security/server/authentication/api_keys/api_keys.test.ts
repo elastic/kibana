@@ -658,6 +658,121 @@ describe('API Keys', () => {
       });
     });
 
+    describe('bulkGrantAsInternalUser()', () => {
+      it('returns null when security feature is disabled', async () => {
+        mockLicense.isEnabled.mockReturnValue(false);
+        const result = await apiKeys.bulkGrantAsInternalUser(httpServerMock.createKibanaRequest(), [
+          { name: 'test_api_key', role_descriptors: {} },
+        ]);
+        expect(result).toBeNull();
+        expect(mockClusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
+      });
+
+      it('returns empty created list without calling ES when given no keys', async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        const result = await apiKeys.bulkGrantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Basic ${encodeToBase64('foo:bar')}` },
+          }),
+          []
+        );
+        expect(result).toEqual({ created: [] });
+        expect(mockClusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
+      });
+
+      it('throws when request does not contain authorization header', async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        await expect(
+          apiKeys.bulkGrantAsInternalUser(httpServerMock.createKibanaRequest(), [
+            { name: 'test_api_key', role_descriptors: {} },
+          ])
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Unable to grant an API Key, request does not contain an authorization header"`
+        );
+        expect(mockClusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
+      });
+
+      it('calls `_bulk_grant` with proper parameters for the Basic scheme', async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        mockClusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
+          created: [
+            { id: '1', name: 'key-a', api_key: 'secret-a' },
+            { id: '2', name: 'key-b', api_key: 'secret-b' },
+          ],
+        });
+
+        const result = await apiKeys.bulkGrantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Basic ${encodeToBase64('foo:bar')}` },
+          }),
+          [
+            { name: 'key-a', role_descriptors: roleDescriptors, metadata: { managed: true } },
+            { name: 'key-b', role_descriptors: {} },
+          ]
+        );
+
+        expect(result).toEqual({
+          created: [
+            { id: '1', name: 'key-a', api_key: 'secret-a' },
+            { id: '2', name: 'key-b', api_key: 'secret-b' },
+          ],
+        });
+        expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/api_key/_bulk_grant',
+          body: {
+            grant_type: 'password',
+            username: 'foo',
+            password: 'bar',
+            api_keys: [
+              { name: 'key-a', role_descriptors: { foo: true }, metadata: { managed: true } },
+              { name: 'key-b', role_descriptors: {} },
+            ],
+          },
+        });
+      });
+
+      it('calls `_bulk_grant` with proper parameters for the Bearer scheme', async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        mockClusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
+          created: [{ id: '1', name: 'key-a', api_key: 'secret-a' }],
+        });
+
+        await apiKeys.bulkGrantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Bearer foo-access-token` },
+          }),
+          [{ name: 'key-a', role_descriptors: roleDescriptors }]
+        );
+
+        expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+          method: 'POST',
+          path: '/_security/api_key/_bulk_grant',
+          body: {
+            grant_type: 'access_token',
+            access_token: 'foo-access-token',
+            api_keys: [{ name: 'key-a', role_descriptors: roleDescriptors }],
+          },
+        });
+      });
+
+      it('throws when transport.request fails', async () => {
+        mockLicense.isEnabled.mockReturnValue(true);
+        mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce(
+          new Error('Elasticsearch error')
+        );
+
+        await expect(
+          apiKeys.bulkGrantAsInternalUser(
+            httpServerMock.createKibanaRequest({
+              headers: { authorization: `Bearer foo-access-token` },
+            }),
+            [{ name: 'key-a', role_descriptors: {} }]
+          )
+        ).rejects.toThrow('Elasticsearch error');
+      });
+    });
+
     it('throw error for other schemes', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       await expect(

@@ -28,6 +28,28 @@ const grantKey = async (context: RulesClientContext, name: string): Promise<Reso
   return { createdAPIKey, isAuthTypeApiKey: false };
 };
 
+export const shouldGrantRuleApiKey = (
+  context: RulesClientContext,
+  enabled: boolean,
+  apiKeyOwnership?: RuleApiKeyOwnership
+): boolean => {
+  if (!enabled) {
+    return false;
+  }
+  if (!apiKeyOwnership && context.cloneApiKeysOnCreate) {
+    return false;
+  }
+  const isApiKeyAuth = context.isAuthenticationTypeAPIKey();
+  const frameworkManaged = apiKeyOwnership?.apiKeyCreatedByUser === false;
+  if (frameworkManaged) {
+    return !isApiKeyAuth;
+  }
+  if (isApiKeyAuth) {
+    return false;
+  }
+  return true;
+};
+
 export const resolveRuleAPIKey = async (
   context: RulesClientContext,
   name: string,

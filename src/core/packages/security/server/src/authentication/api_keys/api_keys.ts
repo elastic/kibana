@@ -69,6 +69,20 @@ export interface NativeAPIKeysType {
   ): Promise<GrantAPIKeyResult | null>;
 
   /**
+   * Tries to grant multiple API keys for the current user in a single Elasticsearch call
+   * (`POST /_security/api_key/_bulk_grant`). Grant credentials are shared; each item is a
+   * key specification. Successfully created keys are listed under `created` in request order
+   * (failures omitted). Returns `null` if API keys are disabled.
+   *
+   * @param request Request instance.
+   * @param createParams Key specifications to grant.
+   */
+  bulkGrantAsInternalUser(
+    request: KibanaRequest,
+    createParams: Array<CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams>
+  ): Promise<BulkGrantAPIKeyResult | null>;
+
+  /**
    * Tries to validate an API key.
    * @param apiKeyPrams ValidateAPIKeyParams.
    */
@@ -171,6 +185,18 @@ export interface GrantAPIKeyResult {
    * Generated API key
    */
   api_key: string;
+}
+
+/**
+ * Response of Elasticsearch `POST /_security/api_key/_bulk_grant`.
+ * `created` is in the original request order with per-key failures omitted.
+ */
+export interface BulkGrantAPIKeyResult {
+  created: GrantAPIKeyResult[];
+  errors?: {
+    count: number;
+    details: Record<string, { type?: string; reason?: string | null }>;
+  };
 }
 
 export interface CloneAPIKeyParams {

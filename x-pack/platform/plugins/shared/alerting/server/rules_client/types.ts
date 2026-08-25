@@ -86,6 +86,7 @@ export interface RulesClientContext {
   readonly maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   readonly minimumScheduleIntervalInMs: number;
   readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
+  readonly createAPIKeys?: (names: string[]) => Promise<CreateAPIKeyResult[]>;
   readonly getActionsClient: () => Promise<ActionsClient>;
   readonly actionsAuthorization: ActionsAuthorization;
   readonly getEventLogClient: () => Promise<IEventLogClient>;

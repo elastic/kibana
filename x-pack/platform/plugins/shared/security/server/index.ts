@@ -37,6 +37,7 @@ export type {
   AuthenticationServiceStart,
   InvalidateAPIKeyResult,
   GrantAPIKeyResult,
+  BulkGrantAPIKeyResult,
   CloneAPIKeyParams,
   CloneAPIKeyResult,
   ValidateAPIKeyParams,
