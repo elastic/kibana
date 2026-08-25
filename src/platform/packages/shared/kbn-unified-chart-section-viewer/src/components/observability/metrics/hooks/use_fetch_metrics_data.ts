@@ -13,7 +13,7 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildJoinedFilter, buildMetricsInfoQuery, escapeStringValue } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
 import type { Dimension, MetricsESQLResponse, MetricsInfo, ParsedMetrics } from '../../../../types';
-import { dropWherePredicatesOnColumns, keepMetricsPresentInBoth } from '../../../../common/utils';
+import { dropWhereCommands, keepMetricsPresentInBoth } from '../../../../common/utils';
 import { useTelemetry } from '../../../../context/ebt_telemetry_context';
 import { useChartSectionInspector } from '../../../../context/chart_section_inspector';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
@@ -32,12 +32,12 @@ import { useReportChartSectionError } from '../../../chart/hooks/use_report_char
 /**
  * Fetches METRICS_INFO for the metrics grid.
  *
- * Capability (`Grid of metrics`): selected-dimension WHERE predicates are
- * dropped, then METRICS_INFO + MV_CONTAINS. This is also the source of the
- * dimension dropdown.
+ * Capability (`Grid of metrics`): when a dimension is selected, every WHERE
+ * command is dropped, then METRICS_INFO + MV_CONTAINS. This is also the source
+ * of the dimension dropdown.
  *
  * Membership (`Metrics with data`): the full user query + METRICS_INFO, names
- * only. Run only when a selected-dimension predicate was actually dropped.
+ * only. Run only when dropping WHERE changed the query.
  *
  * Cards = capability ∩ membership.
  */
@@ -72,10 +72,12 @@ export function useFetchMetricsData({
     [appliedDimensions]
   );
 
-  const capabilitySourceQuery = useMemo(
-    () => dropWherePredicatesOnColumns(esql, appliedDimensionNames),
-    [esql, appliedDimensionNames]
-  );
+  const capabilitySourceQuery = useMemo(() => {
+    if (!appliedDimensionNames?.length) {
+      return esql;
+    }
+    return dropWhereCommands(esql);
+  }, [esql, appliedDimensionNames]);
 
   const declaredDimensionFilter = useMemo(
     () =>

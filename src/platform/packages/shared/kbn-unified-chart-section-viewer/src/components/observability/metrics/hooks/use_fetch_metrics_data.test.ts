@@ -855,7 +855,7 @@ describe('useFetchMetricsData', () => {
   });
 
   describe('capability ∩ membership', () => {
-    it('runs only Grid of metrics when the user query does not filter selected dimensions', async () => {
+    it('runs only Grid of metrics when the user query has no WHERE', async () => {
       const params = createDefaultParams();
       params.selectedDimensionNames = [hostDimension];
 
@@ -879,7 +879,7 @@ describe('useFetchMetricsData', () => {
       );
     });
 
-    it('intersects Grid of metrics with Metrics with data when a selected-dimension WHERE is present', async () => {
+    it('intersects Grid of metrics with Metrics with data when a WHERE is present', async () => {
       const capable = createMockParsedMetrics(
         ['demo.dimension.sentinel', 'demo.dimension.named_only'],
         [serviceDimension]
@@ -911,6 +911,35 @@ describe('useFetchMetricsData', () => {
         'demo.dimension.sentinel',
       ]);
       expect(result.current.allDimensions).toEqual([serviceDimension]);
+    });
+
+    it('intersects when a WHERE is present even if it does not mention the selected dimension', async () => {
+      const capable = createMockParsedMetrics(
+        ['demo.dimension.sentinel', 'demo.dimension.named_only'],
+        [serviceDimension]
+      );
+      const withData = createMockParsedMetrics(['demo.dimension.sentinel'], [hostDimension]);
+      mockParseMetricsWithTelemetry.mockReturnValueOnce(capable).mockReturnValueOnce(withData);
+
+      const params = createDefaultParams({
+        query: { esql: 'TS metrics-* | WHERE host.name IS NOT NULL' },
+      });
+      params.selectedDimensionNames = [serviceDimension];
+
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+      expect(mockTrackRequest.mock.calls.map((call) => call[0])).toEqual([
+        'Grid of metrics',
+        'Metrics with data',
+      ]);
+      expect(result.current.metricItems.map((item) => item.metricName)).toEqual([
+        'demo.dimension.sentinel',
+      ]);
     });
   });
 });

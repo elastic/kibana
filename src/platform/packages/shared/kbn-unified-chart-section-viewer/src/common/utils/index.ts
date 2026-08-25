@@ -9,7 +9,7 @@
 
 export * from './esql/create_esql_query';
 export * from './esql/create_aggregation';
-export * from './esql/drop_where_predicates_on_columns';
+export * from './esql/drop_where_commands';
 export * from './esql/resolve_conflicting_field_types';
 export * from './keep_metrics_present_in_both';
 export * from './first_null_nullable';
