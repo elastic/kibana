@@ -169,7 +169,7 @@ describe('registerCasesWorkflowEventBridge', () => {
   });
 
   describe('extendedFieldsUpdated trigger', () => {
-    const basePayload = { caseId: 'case-1', owner: 'securitySolution' };
+    const basePayload = { caseId: 'case-1', owner: 'securitySolution' as const };
 
     it('fires when extended_fields change directly', async () => {
       eventBus.emitCaseUpdated(
@@ -388,18 +388,16 @@ describe('registerCasesWorkflowEventBridge', () => {
         request,
         { ...basePayload, updatedFields: ['extended_fields'] },
         {
-          // @ts-expect-error - partial case objects for testing
           previousCase: {
             attributes: { extended_fields: { priority: 'low', severity: 'medium' } },
-          },
-          // @ts-expect-error - partial case objects for testing
-          updatedCase: { extended_fields: { priority: 'high', severity: 'medium' } },
+          } as never,
+          updatedCase: { extended_fields: { priority: 'high', severity: 'medium' } } as never,
         }
       );
 
       await flushMicrotasks();
 
-      const [, payload] = mockClient.emitEvent.mock.calls[1];
+      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[1];
       expect(payload).not.toHaveProperty('extendedFields.severity');
       expect(payload).not.toHaveProperty('previousExtendedFields.severity');
     });
@@ -409,18 +407,16 @@ describe('registerCasesWorkflowEventBridge', () => {
         request,
         { ...basePayload, updatedFields: ['extended_fields'] },
         {
-          // @ts-expect-error - partial case objects for testing
           previousCase: {
             attributes: { extended_fields: { charlie: '1', alpha: '2', beta: '3' } },
-          },
-          // @ts-expect-error - partial case objects for testing
-          updatedCase: { extended_fields: { charlie: 'x', alpha: 'y', beta: 'z' } },
+          } as never,
+          updatedCase: { extended_fields: { charlie: 'x', alpha: 'y', beta: 'z' } } as never,
         }
       );
 
       await flushMicrotasks();
 
-      const [, payload] = mockClient.emitEvent.mock.calls[1];
+      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[1];
       expect((payload as { changedFields: string[] }).changedFields).toEqual([
         'alpha',
         'beta',
@@ -443,7 +439,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
       await flushMicrotasks();
 
-      const [, payload] = mockClient.emitEvent.mock.calls[1];
+      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[1];
       const p = payload as {
         extendedFields: Record<string, string>;
         truncatedFields: string[];
@@ -461,12 +457,10 @@ describe('registerCasesWorkflowEventBridge', () => {
         request,
         { ...basePayload, updatedFields: ['status', 'extended_fields'] },
         {
-          // @ts-expect-error - partial case objects for testing
           previousCase: {
             attributes: { status: 'open', extended_fields: { priority: 'low' } },
-          },
-          // @ts-expect-error - partial case objects for testing
-          updatedCase: { status: 'closed', extended_fields: { priority: 'high' } },
+          } as never,
+          updatedCase: { status: 'closed', extended_fields: { priority: 'high' } } as never,
         }
       );
 
@@ -542,7 +536,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
       await flushMicrotasks();
 
-      const [, payload] = mockClient.emitEvent.mock.calls[1];
+      const [, payload] = jest.mocked(mockClient.emitEvent).mock.calls[1];
       const p = payload as {
         changedFields: string[];
         extendedFields: Record<string, string>;
