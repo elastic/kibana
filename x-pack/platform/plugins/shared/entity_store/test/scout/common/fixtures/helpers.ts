@@ -85,7 +85,6 @@ export const ingestDoc = async (
     body,
   });
 
-
 /**
  * Creates an index template that overrides data_stream.dataset from constant_keyword
  * to keyword for the test data stream, then resets it so the new mapping applies.
