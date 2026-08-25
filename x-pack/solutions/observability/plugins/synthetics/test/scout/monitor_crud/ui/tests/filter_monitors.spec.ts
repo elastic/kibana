@@ -18,6 +18,8 @@ test.describe(
   () => {
     test.beforeAll(async ({ syntheticsServices }) => {
       await syntheticsServices.cleanUp();
+      // Viewer cannot enable Synthetics; serverless overview then has no date picker.
+      await syntheticsServices.enable();
     });
 
     test.afterAll(async ({ syntheticsServices }) => {
