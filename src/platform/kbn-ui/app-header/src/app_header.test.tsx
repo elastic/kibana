@@ -395,7 +395,7 @@ describe('AppHeaderView', () => {
   });
 
   it('uses back hrefs as final targets without rewriting them', () => {
-    render(<AppHeaderView back="/base-other/app" />);
+    render(<AppHeaderView back={{ href: '/base-other/app', label: 'Other app' }} />);
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',
