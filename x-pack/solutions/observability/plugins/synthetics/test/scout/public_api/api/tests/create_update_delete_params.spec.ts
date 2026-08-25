@@ -155,6 +155,13 @@ apiTest.describe(
 
     apiTest.beforeEach(async ({ kbnClient }) => {
       await kbnClient.savedObjects.clean({ types: [SYNTHETICS_PARAM_SO_TYPE] });
+      // Share-across-spaces uniqueness is cluster-wide; leftover keys in other
+      // spaces (this suite only cleans the default space above) would 409.
+      for (const spaceId of spacesToCleanUp) {
+        await kbnClient.savedObjects
+          .clean({ types: [SYNTHETICS_PARAM_SO_TYPE], space: spaceId })
+          .catch(() => {});
+      }
     });
 
     apiTest.afterAll(async ({ kbnClient }) => {
@@ -554,7 +561,7 @@ apiTest.describe(
     });
 
     apiTest('returns a 409 conflict when creating a duplicate key', async ({ apiClient }) => {
-      const param = { key: 'duplicate-key', value: 'value1' };
+      const param = { key: `duplicate-key-${uuidv4()}`, value: 'value1' };
       await createParam(apiClient, allHeaders, param);
       await createParam(apiClient, allHeaders, { ...param, value: 'value2' }, { statusCode: 409 });
 
