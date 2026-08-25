@@ -11,7 +11,6 @@ import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { AlertAction } from '../../../resources/datastreams/alert_actions';
 import {
   createActionGroup,
-  createActionPolicy,
   createAlertEpisode,
   createDispatcherPipelineState,
   createRule,
@@ -394,7 +393,6 @@ describe('StoreActionsStep', () => {
     });
   });
 
-
   describe('space_id resolution', () => {
     it('uses the space_id from the episode directly', async () => {
       const mockService = createMockStorageServiceContract();
@@ -490,7 +488,6 @@ describe('StoreActionsStep', () => {
       expect(callArgs.docs[1].space_id).toBe('space-b');
     });
   });
-
 
   describe('recordedEpisodes count', () => {
     it('counts suppressed episodes', async () => {
@@ -675,9 +672,7 @@ describe('StoreActionsStep', () => {
         recordedEpisodes: 5,
         dispatchable: [unmatchedEpisode],
         suppressed: [{ ...suppEpisode, reason: 'acked' }],
-        throttled: [
-          createActionGroup({ id: 'g-t', policyId: 'p1', episodes: [throttleEpisode] }),
-        ],
+        throttled: [createActionGroup({ id: 'g-t', policyId: 'p1', episodes: [throttleEpisode] })],
         dispatch: [],
       });
 
@@ -708,8 +703,7 @@ describe('StoreActionsStep', () => {
       if (mockService.bulkIndexDocs.mock.calls.length > 0) {
         const { docs } = mockService.bulkIndexDocs.mock.calls[0][0];
         const fireOrNotified = docs.filter(
-          (d: Record<string, unknown>) =>
-            d.action_type === 'fire' || d.action_type === 'notified'
+          (d: Record<string, unknown>) => d.action_type === 'fire' || d.action_type === 'notified'
         );
         expect(fireOrNotified).toHaveLength(0);
       }

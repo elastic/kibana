@@ -34,7 +34,6 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   DispatchFailure,
-  ActionPolicy,
 } from '../types';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
@@ -137,20 +136,30 @@ export class DispatchStep implements DispatcherStep {
         }
 
         const chunk = pending.slice(offset, offset + DISPATCH_CHUNK_SIZE);
-        const chunkGroups = new Map<ActionGroupId, ActionGroup>();
+
+        // Groups in this chunk with no successful destination yet. A group whose
+        // destinations span chunks gets its fire/notified pair exactly once — in the
+        // chunk where its first destination succeeds.
+        const unrecordedGroups = new Map<ActionGroupId, ActionGroup>();
         for (const { group } of chunk) {
-          if (!dispatchedExecutions.has(group.id)) chunkGroups.set(group.id, group);
+          if (!dispatchedExecutions.has(group.id)) {
+            unrecordedGroups.set(group.id, group);
+          }
         }
 
         await this.dispatchChunk(chunk, request, dispatchedExecutions, dispatchFailures, logger);
 
-        const newlyDispatched: ActionGroup[] = [];
-        for (const [id, group] of chunkGroups) {
-          if (dispatchedExecutions.has(id)) newlyDispatched.push(group);
-        }
+        // Commit fire/notified for groups first dispatched in this chunk before the
+        // next abort check, so an aborted tick never leaves dispatched groups unrecorded.
+        const newlyDispatched = [...unrecordedGroups.values()].filter((group) =>
+          dispatchedExecutions.has(group.id)
+        );
         if (newlyDispatched.length > 0) {
           await this.recordFiredGroups(newlyDispatched, policies, now);
-          firedEpisodesCount += newlyDispatched.reduce((n, g) => n + g.episodes.length, 0);
+          firedEpisodesCount += newlyDispatched.reduce(
+            (sum, group) => sum + group.episodes.length,
+            0
+          );
         }
       }
     }
@@ -212,16 +221,17 @@ export class DispatchStep implements DispatcherStep {
 
     const workflowsBySpace = new Map<string, Map<string, WorkflowDetailDto>>();
     const failedSpaces = new Map<string, Error>();
-    await Promise.all(
-      [...idsBySpace].map(async ([spaceId, ids]) => {
-        try {
-          const workflows = await this.workflowsManagement.getWorkflowsByIds([...ids], spaceId);
-          workflowsBySpace.set(spaceId, new Map(workflows.map((w) => [w.id, w])));
-        } catch (err) {
-          failedSpaces.set(spaceId, toError(err));
-        }
-      })
-    );
+    for (const [spaceId, ids] of idsBySpace) {
+      try {
+        const workflows = await this.workflowsManagement.getWorkflowsByIds([...ids], spaceId);
+        workflowsBySpace.set(
+          spaceId,
+          new Map(workflows.map((workflow) => [workflow.id, workflow]))
+        );
+      } catch (err) {
+        failedSpaces.set(spaceId, toError(err));
+      }
+    }
 
     return { workflowsBySpace, failedSpaces };
   }

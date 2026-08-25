@@ -1254,7 +1254,6 @@ describe('DispatcherService', () => {
 
   // ── Phase 5: stuck-watermark escape hatch ────────────────────────────────────
   describe('stuck-watermark escape hatch (STUCK_TICK_LIMIT)', () => {
-
     it('nextStuckTicks increments on stuck ticks and resets to 0 on advance', async () => {
       const { storageService: noopStorage } = createStorageService();
       const eventWatermark = new Date('2026-01-22T07:30:00.000Z');

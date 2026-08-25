@@ -300,11 +300,6 @@ function aggregateByPolicy(
 ): Map<ActionPolicyId, PolicySummary> {
   const summaries = new Map<ActionPolicyId, PolicySummary>();
   for (const group of groups) {
-    // Skip abort-skipped groups: in dispatch but absent from both dispatchedExecutions
-    // and dispatchFailures. These were never reached by the dispatch loop and will be
-    // retried next tick — emitting a dispatched event for them would be incorrect.
-    if (dispatchedExecutions !== undefined && !dispatchedExecutions.has(group.id) && !failedDestinations?.has(group.id)) continue;
-
     // Compute the subset of destinations that were successfully dispatched.
     // When failedDestinations is provided (dispatched path), destinations that
     // recorded a DispatchFailure are excluded. Groups with at least one

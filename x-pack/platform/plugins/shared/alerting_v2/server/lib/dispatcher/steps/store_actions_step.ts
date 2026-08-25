@@ -7,11 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import type {
-  DispatcherStep,
-  DispatcherPipelineState,
-  DispatcherStepOutput,
-} from '../types';
+import type { DispatcherStep, DispatcherPipelineState, DispatcherStepOutput } from '../types';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
@@ -30,14 +26,21 @@ export class StoreActionsStep implements DispatcherStep {
     state: Readonly<DispatcherPipelineState>,
     _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
-    const { suppressed = [], throttled = [], dispatch = [], dispatchable = [] } = state;
+    const {
+      suppressed = [],
+      throttled = [],
+      dispatch = [],
+      dispatchable = [],
+      // Fire/notified records already written by DispatchStep, one bulk write per chunk.
+      recordedEpisodes: dispatchedEpisodes = 0,
+    } = state;
 
     const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled);
 
     if (
       suppressed.length === 0 &&
       throttled.length === 0 &&
-      (state.recordedEpisodes ?? 0) === 0 &&
+      dispatchedEpisodes === 0 &&
       unmatched.length === 0
     ) {
       return { type: 'halt', reason: 'no_actions' };
@@ -85,7 +88,7 @@ export class StoreActionsStep implements DispatcherStep {
     }
 
     const recordedEpisodes =
-      (state.recordedEpisodes ?? 0) +
+      dispatchedEpisodes +
       suppressed.length +
       throttled.reduce((n, g) => n + g.episodes.length, 0) +
       unmatched.length;
