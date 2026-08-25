@@ -44,6 +44,7 @@ const MOCK_AWS_PACKAGE_RESPONSE = {
       // elb_logs — used by flyout tests
       {
         name: 'elb',
+        title: 'AWS ELB',
         data_streams: ['elb_logs'],
         deployment_modes: { agentless: { enabled: true } },
         inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }],
@@ -51,6 +52,7 @@ const MOCK_AWS_PACKAGE_RESPONSE = {
       // cloudtrail — ECF, dual-input (S3 + CloudWatch); needed for signal-filter test
       {
         name: 'cloudtrail',
+        title: 'AWS CloudTrail',
         data_streams: ['cloudtrail'],
         inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }],
       },
