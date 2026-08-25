@@ -74,6 +74,7 @@ describe('Agent Memory ES|QL recall builders', () => {
     expect(request.query).toContain('MATCH(content.semantic,');
     expect(request.query).toContain('3.0 / (30.0 + age_days)');
     expect(request.query).toContain('FUSE RRF WITH {"rank_constant": 20}');
+    expect(request.query).toContain('WHERE _score >= 0.05');
     expect(request.query).toContain('LIMIT 20');
     expect(request.query).toContain('LIMIT 10');
     expect(request.params).toEqual([
@@ -81,6 +82,16 @@ describe('Agent Memory ES|QL recall builders', () => {
       { lexicalDescriptionQuery: 'preferred sources' },
       { semanticQuery: 'preferred sources' },
     ]);
+  });
+
+  it('allows the hybrid score floor to be tuned', () => {
+    const request = buildHybridRecallPipeline({
+      query: 'preferred sources',
+      limit: 10,
+      minScore: 0.07,
+    }).toRequest();
+
+    expect(request.query).toContain('WHERE _score >= 0.07');
   });
 
   it('builds a keyword fallback without semantic fusion', () => {

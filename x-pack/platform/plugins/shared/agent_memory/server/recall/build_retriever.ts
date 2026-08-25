@@ -8,6 +8,9 @@
 import { esql, type ComposerQuery } from '@elastic/esql';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
+/** Default RRF score floor retained from the pre-ES|QL hybrid retriever. */
+export const DEFAULT_HYBRID_MIN_SCORE = 0.05;
+
 /**
  * Parameters for the ES|QL recall query and its authoritative body filter.
  *
@@ -95,7 +98,8 @@ export const buildBeliefFilter = ({
 export const buildHybridRecallPipeline = ({
   query,
   limit,
-}: Pick<BuildRecallQueryParams, 'query' | 'limit'>): ComposerQuery => {
+  minScore = DEFAULT_HYBRID_MIN_SCORE,
+}: Pick<BuildRecallQueryParams, 'query' | 'limit'> & { minScore?: number }): ComposerQuery => {
   const candidateLimit = limit * 2;
 
   return esql`
@@ -115,6 +119,7 @@ export const buildHybridRecallPipeline = ({
         | LIMIT ${candidateLimit}
       )
     | FUSE RRF WITH {"rank_constant": 20}
+    | WHERE _score >= ${minScore}
     | SORT _score DESC, _id ASC
     | LIMIT ${limit}
     | EVAL category = memory.category,
