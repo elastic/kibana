@@ -108,6 +108,10 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
         })
     );
 
+    // Wait for awsServicesMap to resolve and ManagedIntegrationsSection to render.
+    // The section only appears after the React Query for the aws package manifest completes.
+    await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
+
     // elb has identityFederationSupported=true → radio defaults to Identity Federation.
     // Switch to Access Keys so the static-keys form appears.
     // Scope the getByLabel to the radio group to avoid false matches elsewhere on the page.
