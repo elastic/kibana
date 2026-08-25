@@ -12,7 +12,7 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { ServiceChipState } from '../../onboarding_flow_context';
 import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
-import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
+import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
 import {
   buildDeployGroups,
   buildInstanceStatuses,
@@ -23,18 +23,13 @@ import type { DeployGroup } from './deploy_groups';
 
 export { getRegionFieldName, buildStreamVars, buildPackageInputs } from './package_inputs';
 
-interface ServiceSettingsPersistedState {
-  globalRegion: string;
-  serviceVars: Record<string, ServiceVars>;
-  instances?: ServiceInstance[];
-}
-
 export interface UseDeployResult {
   namespace: string;
   setNamespace: (ns: string) => void;
   isDeploying: boolean;
   failedInstances: string[];
   handleDeploy: (instanceIds?: string[]) => void;
+  isAlreadyDeployed: boolean;
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
@@ -56,7 +51,12 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
 
   const [namespace, setNamespace] = useState('default');
   const [isDeploying, setIsDeploying] = useState(false);
-  const [failedInstances, setFailedInstances] = useState<string[]>([]);
+  // Seeded from session storage so a partial failure survives unmounting Step 3. Without this,
+  // navigating Back and forward again clears the failure locally while serviceStatuses still holds
+  // the 'error' chip, which opens the isDone gate on a deploy that never succeeded.
+  const [failedInstances, setFailedInstances] = useState<string[]>(
+    () => deployAndDetectStep.failedInstances ?? []
+  );
 
   const deployGroups: DeployGroup[] = useMemo(
     () =>
@@ -66,6 +66,18 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         servicesMap ?? new Map()
       ),
     [serviceSettings?.instances, selectedServiceIds, servicesMap]
+  );
+
+  const isAlreadyDeployed = useMemo(
+    () =>
+      deployGroups.length > 0 &&
+      deployGroups.every((group) =>
+        group.members.every(({ instance }) => {
+          const status = deployAndDetectStep.serviceStatuses[instance.instanceId];
+          return status === 'receiving' || status === 'detecting';
+        })
+      ),
+    [deployGroups, deployAndDetectStep.serviceStatuses]
   );
 
   const nonAgentlessServices: AwsServiceMatrixEntry[] = useMemo(
@@ -208,5 +220,5 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     registerDeployHandler(handleDeploy);
   }, [handleDeploy, registerDeployHandler]);
 
-  return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy };
+  return { namespace, setNamespace, isDeploying, failedInstances, handleDeploy, isAlreadyDeployed };
 }

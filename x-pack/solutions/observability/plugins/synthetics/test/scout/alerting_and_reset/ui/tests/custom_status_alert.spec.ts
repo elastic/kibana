@@ -11,7 +11,7 @@ import { test } from '../../../common/ui/fixtures';
 
 test.describe(
   'CustomStatusAlert',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
   () => {
     let configId: string;
 
@@ -56,23 +56,27 @@ test.describe(
         await pageObjects.syntheticsApp.openManageStatusRule();
         await page.testSubj.click('createNewStatusRule');
 
-        let requestMade = false;
-        page.on('request', (request) => {
-          if (request.url().includes('api/alerting/rule') && request.method() === 'POST') {
-            requestMade = true;
-          }
-        });
+        const ruleCreationResponse = page.waitForResponse(
+          (response) =>
+            response.url().includes('api/alerting/rule') && response.request().method() === 'POST'
+        );
 
         await page.testSubj.click('ruleFormStep-details');
         await expect(page.getByText('Related dashboards')).toBeVisible();
         await page.testSubj.click('ruleFlyoutFooterSaveButton');
         await page.testSubj.click('confirmModalConfirmButton');
-        expect(requestMade).toBe(true);
+
+        const response = await ruleCreationResponse;
+        expect(response.ok()).toBe(true);
       });
 
       await test.step('verify rule creation', async () => {
+        const ruleName = 'Synthetics monitor status rule';
         await pageObjects.syntheticsApp.goToRulesPage();
-        await expect(page.getByText('Synthetics monitor status rule')).toBeVisible();
+        // Search by name to force a fresh scoped query: the list fetches once on load, which with preset rules (serverless) can predate the new rule being queryable.
+        await page.testSubj.fill('ruleSearchField', ruleName);
+        await page.testSubj.locator('ruleSearchField').press('Enter');
+        await expect(page.getByText(ruleName)).toBeVisible();
       });
     });
   }
