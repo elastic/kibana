@@ -41,6 +41,6 @@ A cancelled workflow run reports `outcome: aborted` instead of `failure`, keyed 
 
 ## Logs
 
-- KI writes and write failures log at `debug` from the `plugins.contextEngine.ki_steps` logger. Log lines carry the KI document id and the AI index id in the same hashed or verbatim form as the EBT payload.
+- KI writes and write failures log at `debug` from the `plugins.contextEngine.context_steps` logger. Log lines carry the KI document id and the AI index id in the same hashed or verbatim form as the EBT payload.
 
 - Telemetry reporting failures log at `debug` from the `plugins.contextEngine.telemetry` logger.

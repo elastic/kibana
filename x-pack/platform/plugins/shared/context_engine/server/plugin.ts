@@ -127,7 +127,7 @@ export class ContextEnginePlugin
     registerStepDefinitions({
       workflowsExtensions: setupDeps.workflowsExtensions,
       analyticsService,
-      logger: this.logger.get('ki_steps'),
+      logger: this.logger.get('context_steps'),
       getAiIndexService: () => {
         if (!this.aiIndexService) {
           throw new Error('AI index service not available — plugin has not started');
