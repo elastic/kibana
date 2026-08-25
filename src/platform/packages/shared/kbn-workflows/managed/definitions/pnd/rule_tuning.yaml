@@ -221,23 +221,15 @@ steps:
             Continue investigation: /app/agent_builder/conversations/{{ steps.diagnose_rule.output.conversation_id }}
             {% endif %}
 
-      # Decided once so the apply and hand-off branches stay exact complements. Grouping
-      # an `or` chain with parentheses is a tokenization error in these expressions.
-      - name: classify_proposal
-        type: data.set
-        with:
-          can_apply: >-
-            ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
-              and steps.diagnose_rule.output.structured_output.proposed_query != ''
-              and steps.fetch_rule.output.type == 'query'
-              and steps.preview_proposed_query.output.succeeded == true
-              and steps.preview_proposed_query.output.is_aborted == false }}
-
       - name: apply_query_tuning
         type: kibana.request
         if: >-
           ${{ steps.review_tuning.output.response.approved == true
-            and steps.classify_proposal.output.can_apply == true }}
+            and steps.diagnose_rule.output.structured_output.change_type == 'query'
+            and steps.diagnose_rule.output.structured_output.proposed_query != ''
+            and steps.fetch_rule.output.type == 'query'
+            and steps.preview_proposed_query.output.succeeded == true
+            and steps.preview_proposed_query.output.is_aborted == false }}
         with:
           method: PATCH
           path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
@@ -249,20 +241,38 @@ steps:
             id: "{{ foreach.item.0 }}"
             query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
 
-      - name: record_manual_tuning
-        type: data.set
-        if: >-
-          ${{ steps.review_tuning.output.response.approved == true
-            and steps.classify_proposal.output.can_apply == false }}
-        with:
-          rule_id: "{{ foreach.item.0 }}"
-          note: Apply the approved proposal in the Detection Rules UI.
-
-      - name: mark_alerts_reviewed
+      - name: mark_alerts_reviewed_non_query
         type: security.setAlertTags
         if: >-
           ${{ steps.review_tuning.output.response.approved == true
-            and steps.classify_proposal.output.can_apply == false }}
+            and steps.diagnose_rule.output.structured_output.change_type != 'query' }}
+        with:
+          alert_ids: "${{ foreach.item.5 }}"
+          tags_to_add:
+            - "{{ consts.reviewed_tag }}"
+        on-failure:
+          continue: true
+
+      - name: mark_alerts_reviewed_manual
+        type: security.setAlertTags
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.diagnose_rule.output.structured_output.change_type == 'query'
+            and steps.fetch_rule.output.type != 'query' }}
+        with:
+          alert_ids: "${{ foreach.item.5 }}"
+          tags_to_add:
+            - "{{ consts.reviewed_tag }}"
+        on-failure:
+          continue: true
+
+      - name: mark_alerts_reviewed_preview_failed
+        type: security.setAlertTags
+        if: >-
+          ${{ steps.review_tuning.output.response.approved == true
+            and steps.diagnose_rule.output.structured_output.change_type == 'query'
+            and steps.fetch_rule.output.type == 'query'
+            and steps.preview_proposed_query.output.succeeded == false }}
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add:
@@ -285,7 +295,11 @@ steps:
         type: security.setAlertTags
         if: >-
           ${{ steps.review_tuning.output.response.approved == true
-            and steps.classify_proposal.output.can_apply == true }}
+            and steps.diagnose_rule.output.structured_output.change_type == 'query'
+            and steps.diagnose_rule.output.structured_output.proposed_query != ''
+            and steps.fetch_rule.output.type == 'query'
+            and steps.preview_proposed_query.output.succeeded == true
+            and steps.preview_proposed_query.output.is_aborted == false }}
         with:
           alert_ids: "${{ foreach.item.5 }}"
           tags_to_add:
