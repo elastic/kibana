@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0.
- */
-
 /**
  * Reproduces the APM Alerts table "View in App" (eye icon) truncating
  * service.name, service.environment, and transaction.type to their first
