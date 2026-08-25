@@ -6,14 +6,23 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import { AlertsV2SearchBar } from './alerts_v2_search_bar';
 import { AlertsV2KpisSection } from './alerts_v2_kpis_section';
+import { useEsqlRowCount } from './use_esql_row_count';
 
-const DEFAULT_QUERY: AggregateQuery = { esql: 'FROM .rule-events | LIMIT 100' };
-const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-15m', to: 'now' };
+const DEFAULT_QUERY: AggregateQuery = { esql: 'FROM .rule-events' };
+const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-24h', to: 'now' };
 
 /**
  * POC "Alerts v2" page (RnA / Alerting v2). Roughly mimics the v1 alerts page,
@@ -42,8 +51,61 @@ export const AlertsV2Page = () => {
       />
       <EuiSpacer size="l" />
       <AlertsV2SearchBar query={query} timeRange={timeRange} onSubmit={onSubmit} />
+      <EuiSpacer size="s" />
+      <DebugRowCount query={query} timeRange={timeRange} />
       <EuiSpacer size="l" />
       <AlertsV2KpisSection query={query} timeRange={timeRange} />
     </>
+  );
+};
+
+/**
+ * Temporary debug readout: how many rows the current query returns (time-filtered),
+ * for comparing against Discover and against each chart on the page.
+ */
+const DebugRowCount = ({ query, timeRange }: { query: AggregateQuery; timeRange: TimeRange }) => {
+  const { count, isLoading, error } = useEsqlRowCount(query, timeRange);
+
+  return (
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      responsive={false}
+      data-test-subj="alertsV2DebugRowCount"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued">
+          <FormattedMessage
+            id="xpack.securitySolution.alertsV2.debugRowCount.label"
+            defaultMessage="Query returns"
+          />
+        </EuiText>
+      </EuiFlexItem>
+      {isLoading ? (
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="s" />
+        </EuiFlexItem>
+      ) : error ? (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="danger">
+            {error.message}
+          </EuiText>
+        </EuiFlexItem>
+      ) : (
+        <>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{count ?? 0}</EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.securitySolution.alertsV2.debugRowCount.suffix"
+                defaultMessage="rows (time-filtered)"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </>
+      )}
+    </EuiFlexGroup>
   );
 };
