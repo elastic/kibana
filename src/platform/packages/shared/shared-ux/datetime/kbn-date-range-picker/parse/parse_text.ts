@@ -283,10 +283,36 @@ function applyRelativeRounding(
   return `${bound}/${roundUnit}`;
 }
 
+/** One date-math operation: an offset (`+3M`, `-1y`) or a rounding (`/y`, `/ms`). */
+const DATE_MATH_OP_RE = '(?:[+-]\\d*(?:ms|[smhdwMy])|\\/(?:ms|[smhdwMy]))';
+const CHAINED_DATE_MATH_RE = new RegExp(`^(now)?(${DATE_MATH_OP_RE}+)$`);
+
+/**
+ * Parses chained Elasticsearch date math — rounding combined with further
+ * offsets, e.g. `now/y+3M`, `now-3M/y+3M`, `-1y/y+3M`.
+ *
+ * Simple one-offset forms (`now-7d`, `now-7d/d`) are handled by the shorthand
+ * regex; this catches the remainder, including rounding-only `now/d`. Bare
+ * expressions without `now` are canonicalized (`-1y/y+3M` → `now-1y/y+3M`).
+ * Returns `null` when the text is not chained date math or does not parse.
+ */
+function parseChainedDateMath(text: string): DateString | null {
+  const match = text.match(CHAINED_DATE_MATH_RE);
+  if (!match) return null;
+
+  const [, nowPrefix, ops] = match;
+  // A leading rounding with no `now` (`/d`) is not a valid standalone expression.
+  if (!nowPrefix && ops.startsWith('/')) return null;
+
+  const expression = `now${ops}`;
+  const parsed = dateMath.parse(expression);
+  return parsed?.isValid() ? expression : null;
+}
+
 /**
  * Converts a single text fragment into a {@link DateString}.
  * Tries (in order): "now", shorthand, natural instant, unix timestamp,
- * absolute formats, and finally dateMath/ISO fallback.
+ * chained/rounding-only date math, absolute formats, and dateMath/ISO fallback.
  */
 function instantToDateString(
   text: string,
@@ -319,9 +345,11 @@ function instantToDateString(
   const unixDate = unixTimestampToDate(trimmed);
   if (unixDate) return unixDate.toISOString();
 
-  // DateMath with rounding only (e.g. "now/d", "now/w") — preserve as-is.
-  // These aren't caught by the shorthand regex which expects a count.
-  if (/^now\/[smhdwMy]$/.test(trimmed)) return trimmed;
+  // Chained date math (e.g. "now/y+3M", "now-3M/y+3M", "-1y/y+3M") and
+  // rounding-only ("now/d"). Must run before the vocabulary guard: unit
+  // letters in these expressions (`y`, `M`) are also grammar words.
+  const chained = parseChainedDateMath(trimmed);
+  if (chained) return chained;
 
   // Natural-language vocabulary (a unit word, direction word, or instant
   // marker) that reached this point is a failed PHRASE, not an absolute

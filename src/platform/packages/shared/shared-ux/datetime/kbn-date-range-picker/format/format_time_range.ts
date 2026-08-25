@@ -178,6 +178,12 @@ function formatDateInstant(
     );
   }
 
+  // Rounding plus a further offset has no natural-language form — keep the
+  // shorthand as-is rather than resolving it to an absolute date.
+  if (isChainedDateMath(dateString)) {
+    return dateString;
+  }
+
   // For absolute dates, format using the date object
   if (date) {
     return formatAbsoluteInstant(date, dateFormat);
@@ -185,6 +191,18 @@ function formatDateInstant(
 
   // Fallback: return original string
   return dateString;
+}
+
+/**
+ * True when `value` is Elasticsearch date math with more than one operation
+ * after `now` (e.g. `now/y+3M`, `now-3M/y+3M`). Simple `now±Nunit[/unit]` and
+ * rounding-only `now/unit` return false — those have their own display paths.
+ */
+function isChainedDateMath(value: string): boolean {
+  if (!value.startsWith('now') || value === 'now') return false;
+  const ops = value.slice('now'.length);
+  const opMatches = ops.match(/[+-]\d*(?:ms|[smhdwMy])|\/(?:ms|[smhdwMy])/g);
+  return (opMatches?.length ?? 0) >= 2 && ops === (opMatches?.join('') ?? '');
 }
 
 /**
