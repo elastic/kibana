@@ -6,7 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { MAX_AI_INDEX_ID_LENGTH } from '@kbn/context-engine-plugin/common/constants';
+import { agentIdMaxLength } from '@kbn/agent-builder-common/agents';
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -17,6 +19,29 @@ import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY } from '../route_security';
 import { isContextEngineEnabled } from '../agents';
 import { buildEffectiveAgentAiIndices } from '../../services/agents/build_effective_agent_ai_indices';
+import type { AgentsServiceStart } from '../../services/agents/types';
+
+const resolveInheritedAiIndicesForType = async ({
+  agentsService,
+  agentType,
+  request,
+  logger,
+}: {
+  agentsService: AgentsServiceStart;
+  agentType: string;
+  request: KibanaRequest;
+  logger: Logger;
+}): Promise<string[]> => {
+  try {
+    const base = await agentsService.resolveAgentBaseConfiguration({ agentType, request });
+    return base?.ai_indices ?? [];
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+
+    logger.warn(`Failed to resolve AI indices for type "${agentType}": ${message}`);
+    return [`Failed to resolve AI indices`];
+  }
+};
 
 export function registerInternalAgentRoutes({
   router,
@@ -38,7 +63,7 @@ export function registerInternalAgentRoutes({
     },
     wrapHandler(async (ctx, request, response) => {
       if (!(await isContextEngineEnabled(ctx))) {
-        return response.ok<ListAgentAiIndicesResponse>({ body: { results: [] } });
+        return response.notFound();
       }
 
       const { agents: agentsService } = getInternalServices();
@@ -50,11 +75,13 @@ export function registerInternalAgentRoutes({
       const aiIndicesByType = new Map(
         await Promise.all(
           types.map(async (type) => {
-            const base = await agentsService.resolveAgentBaseConfiguration({
-              agent: { type },
+            const inherited = await resolveInheritedAiIndicesForType({
+              agentsService,
+              agentType: type,
               request,
+              logger,
             });
-            return [type, base?.ai_indices ?? []] as const;
+            return [type, inherited] as const;
           })
         )
       );
@@ -77,7 +104,7 @@ export function registerInternalAgentRoutes({
       path: `${internalApiPath}/agents/{id}/_ai_indices`,
       validate: {
         params: schema.object({
-          id: schema.string({ maxLength: MAX_AI_INDEX_ID_LENGTH }),
+          id: schema.string({ maxLength: agentIdMaxLength }),
         }),
       },
       options: { access: 'internal' },
@@ -85,21 +112,23 @@ export function registerInternalAgentRoutes({
     },
     wrapHandler(async (ctx, request, response) => {
       if (!(await isContextEngineEnabled(ctx))) {
-        return response.ok<GetAgentAiIndicesResponse>({ body: { ai_indices: [] } });
+        return response.notFound();
       }
 
       const { agents: agentsService } = getInternalServices();
       const registry = await agentsService.getRegistry({ request });
       const agent = await registry.get(request.params.id);
-      const base = await agentsService.resolveAgentBaseConfiguration({
-        agent: { type: agent.type },
+      const inherited = await resolveInheritedAiIndicesForType({
+        agentsService,
+        agentType: agent.type,
         request,
+        logger,
       });
 
       return response.ok<GetAgentAiIndicesResponse>({
         body: {
           ai_indices: buildEffectiveAgentAiIndices({
-            inherited: base?.ai_indices ?? [],
+            inherited,
             assigned: agent.configuration.ai_indices ?? [],
           }),
         },

@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiSkeletonText,
@@ -164,7 +165,11 @@ export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const profileMap = useOwnerProfiles(agents ?? []);
   const isContextEngineEnabled = useIsContextEngineEnabled();
-  const { aiIndicesByAgentId, isLoading: isLoadingAgentAiIndices } = useAgentAiIndices({
+  const {
+    aiIndicesByAgentId,
+    isLoading: isLoadingAgentAiIndices,
+    error: aiIndicesError,
+  } = useAgentAiIndices({
     enabled: isContextEngineEnabled,
   });
   const { createAgentBuilderUrl } = useNavigation();
@@ -297,12 +302,26 @@ export const AgentsList: React.FC = () => {
       width: '14%',
       valign: 'top',
       name: columnNames.aiIndices,
-      render: (agent) =>
-        isLoadingAgentAiIndices ? (
-          <EuiSkeletonText lines={1} data-test-subj="agentBuilderAgentsListAiIndicesLoading" />
-        ) : (
+      render: (agent) => {
+        if (isLoadingAgentAiIndices) {
+          return (
+            <EuiSkeletonText lines={1} data-test-subj="agentBuilderAgentsListAiIndicesLoading" />
+          );
+        }
+        if (aiIndicesError) {
+          return (
+            <EuiIconTip
+              type="warning"
+              color="danger"
+              content={i18nLabels.aiIndices.loadErrorMessage}
+              data-test-subj="agentBuilderAgentsListAiIndicesError"
+            />
+          );
+        }
+        return (
           <AgentAiIndices aiIndices={(aiIndicesByAgentId[agent.id] ?? []).map(({ id }) => id)} />
-        ),
+        );
+      },
       'data-test-subj': 'agentBuilderAgentsListAiIndices',
     };
 
@@ -448,6 +467,7 @@ export const AgentsList: React.FC = () => {
     isContextEngineEnabled,
     aiIndicesByAgentId,
     isLoadingAgentAiIndices,
+    aiIndicesError,
     spaceDefaultAgentId,
     setSpaceDefaultAgent,
     profileMap,

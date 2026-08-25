@@ -141,8 +141,6 @@ export const agentFormSchema = z.object({
     enable_elastic_capabilities: z.boolean().optional(),
     workflow_ids: z.array(z.string()).optional(),
     plugin_ids: z.array(z.string()).optional(),
-    // Every configuration field the agent carries has to be listed here: the resolver submits the
-    // parsed output, and `z.object` drops anything it does not know about.
     connector_ids: z.array(z.string()).optional(),
     ai_indices: z.array(z.string()).optional(),
   }),

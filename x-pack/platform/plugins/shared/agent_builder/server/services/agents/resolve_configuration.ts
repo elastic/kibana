@@ -61,7 +61,7 @@ export const createConfigurationResolver = ({
     return type ? readBaseConfiguration(type, ctx) : undefined;
   };
 
-  const resolve = async ({
+  const resolveConfig = async ({
     agentType,
     configuration,
     ctx,
@@ -77,7 +77,7 @@ export const createConfigurationResolver = ({
   // `resolveBase` is exposed alongside the merged result because callers that need to distinguish
   // the type's contribution from the agent's own configuration cannot recover it from the merge:
   // the two are unioned, so an entry present in both is indistinguishable afterwards.
-  return Object.assign(resolve, { resolveBase: resolveRegisteredBaseConfiguration });
+  return { resolveConfig, resolveBase: resolveRegisteredBaseConfiguration };
 };
 
 export type ConfigurationResolver = ReturnType<typeof createConfigurationResolver>;

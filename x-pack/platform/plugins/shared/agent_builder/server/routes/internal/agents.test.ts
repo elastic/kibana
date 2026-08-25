@@ -38,6 +38,7 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
 
   const mockResponse = {
     ok: jest.fn((params: { body?: unknown }) => ({ type: 'ok', ...params })),
+    notFound: jest.fn(() => ({ type: 'notFound' })),
   };
 
   const callList = (contextEngineEnabled: boolean) =>
@@ -78,8 +79,8 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
       type: 'chat',
       configuration: { tools: [], ai_indices: ['my-index'] },
     });
-    mockResolveBase = jest.fn(async ({ agent }) =>
-      agent.type === 'chat' ? { ai_indices: ['elastic'] } : { ai_indices: ['another-one'] }
+    mockResolveBase = jest.fn(async ({ agentType }) =>
+      agentType === 'chat' ? { ai_indices: ['elastic'] } : { ai_indices: ['another-one'] }
     );
 
     const getInternalServices = jest.fn().mockReturnValue({
@@ -132,12 +133,40 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
       expect(mockList).toHaveBeenCalledWith();
     });
 
-    it('returns no results and does not resolve anything when the Context Engine is disabled', async () => {
+    it('returns not found and does not resolve anything when the Context Engine is disabled', async () => {
       const result = await callList(false);
 
-      expect(result.body.results).toEqual([]);
+      expect(result.type).toBe('notFound');
       expect(mockResolveBase).not.toHaveBeenCalled();
       expect(mockList).not.toHaveBeenCalled();
+    });
+
+    it('reports a resolve error in inherited AI indices instead of failing the whole request', async () => {
+      mockResolveBase.mockImplementation(async ({ agentType }) => {
+        if (agentType === 'chat') {
+          throw new Error('boom');
+        }
+        return { ai_indices: ['another-one'] };
+      });
+
+      const result = await callList(true);
+
+      expect(result.body.results).toEqual([
+        {
+          agent_id: 'chat-agent',
+          ai_indices: [
+            {
+              id: 'Failed to resolve default AI indices for type "chat": boom',
+              is_default: true,
+            },
+            { id: 'my-index', is_default: false },
+          ],
+        },
+        {
+          agent_id: 'discovery-agent',
+          ai_indices: [{ id: 'another-one', is_default: true }],
+        },
+      ]);
     });
   });
 
@@ -156,10 +185,10 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
       ]);
     });
 
-    it('returns an empty list and does not load the agent when the Context Engine is disabled', async () => {
+    it('returns not found and does not load the agent when the Context Engine is disabled', async () => {
       const result = await callById(false);
 
-      expect(result.body.ai_indices).toEqual([]);
+      expect(result.type).toBe('notFound');
       expect(mockGet).not.toHaveBeenCalled();
       expect(mockResolveBase).not.toHaveBeenCalled();
     });
