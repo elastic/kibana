@@ -43,7 +43,11 @@ import {
 } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import {
+  CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  readEsqlQuery,
+  toEsqlQueryState,
+} from '@kbn/custom-content-common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getServices } from './services';
@@ -70,10 +74,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
     let isRetained = false;
-    const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
+    const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
-    const usesEsql$ = new BehaviorSubject<boolean>(Boolean(initialState.esqlQuery));
+    const usesEsql$ = new BehaviorSubject<boolean>(Boolean(readEsqlQuery(initialState)));
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
@@ -82,7 +86,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
-      esqlQuery: esqlQuery$.getValue(),
+      esql_query: toEsqlQueryState(esqlQuery$.getValue()),
       template: template$.getValue(),
     });
 
@@ -108,12 +112,12 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       ),
       getComparators: () => ({
         ...titleComparators,
-        esqlQuery: 'referenceEquality',
+        esql_query: 'deepEquality',
         template: 'referenceEquality',
       }),
       applySerializedState: (lastSaved) => {
         titleManager.reinitializeState(lastSaved ?? {});
-        esqlQuery$.next(lastSaved?.esqlQuery);
+        esqlQuery$.next(lastSaved ? readEsqlQuery(lastSaved) : undefined);
         template$.next(lastSaved?.template);
       },
     });

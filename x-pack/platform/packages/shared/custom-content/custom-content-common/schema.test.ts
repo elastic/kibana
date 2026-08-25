@@ -14,6 +14,8 @@ import {
   customContentStateSchema,
   customContentUpdateSchema,
   customContentPanelUpdateSchema,
+  readEsqlQuery,
+  toEsqlQueryState,
 } from './schema';
 
 describe('customContentStateSchema', () => {
@@ -25,7 +27,7 @@ describe('customContentStateSchema', () => {
     expect(
       customContentStateSchema.safeParse({
         template: '<div>{{ row["rate"].value }}</div>',
-        esqlQuery: 'FROM logs-* | STATS rate = AVG(error) BY host',
+        esql_query: ['FROM logs-* | STATS rate = AVG(error) BY host'],
       }).success
     ).toBe(true);
   });
@@ -47,12 +49,22 @@ describe('customContentStateSchema', () => {
     ).toBe(false);
   });
 
-  it('rejects an esqlQuery exceeding CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH', () => {
+  it('rejects an esql_query entry exceeding CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH', () => {
     expect(
       customContentStateSchema.safeParse({
-        esqlQuery: 'a'.repeat(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH + 1),
+        esql_query: ['a'.repeat(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH + 1)],
       }).success
     ).toBe(false);
+  });
+
+  it('rejects more than one esql_query', () => {
+    expect(customContentStateSchema.safeParse({ esql_query: ['FROM a', 'FROM b'] }).success).toBe(
+      false
+    );
+  });
+
+  it('accepts an empty esql_query array', () => {
+    expect(customContentStateSchema.safeParse({ esql_query: [] }).success).toBe(true);
   });
 });
 
@@ -111,5 +123,20 @@ describe('customContentPanelUpdateSchema', () => {
 
   it('still requires at least one of prompt or esqlQuery', () => {
     expect(customContentPanelUpdateSchema.safeParse({ embeddable_id: 'p1' }).success).toBe(false);
+  });
+});
+
+describe('esql_query accessors', () => {
+  it('round-trips a single query', () => {
+    expect(readEsqlQuery({ esql_query: toEsqlQueryState('FROM logs') })).toBe('FROM logs');
+  });
+
+  it('maps no query to an absent field rather than an empty array', () => {
+    expect(toEsqlQueryState(undefined)).toBeUndefined();
+  });
+
+  it('reads undefined from a panel with no query', () => {
+    expect(readEsqlQuery({})).toBeUndefined();
+    expect(readEsqlQuery({ esql_query: [] })).toBeUndefined();
   });
 });

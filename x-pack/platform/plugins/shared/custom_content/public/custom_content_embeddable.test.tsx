@@ -13,6 +13,7 @@ import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
+import { readEsqlQuery } from '@kbn/custom-content-common';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { openLazyFlyout } from '@kbn/presentation-util';
@@ -97,7 +98,7 @@ jest.mock('./services', () => ({
 }));
 
 const baseState: CustomContentEmbeddableState = {
-  esqlQuery: 'FROM logs | STATS count = COUNT(*)',
+  esql_query: ['FROM logs | STATS count = COUNT(*)'],
   template: '<div>static html</div>',
 };
 
@@ -171,10 +172,10 @@ describe('customContentEmbeddableFactory', () => {
       act(() => {
         embeddable.api.applySerializedState({
           ...baseState,
-          esqlQuery: 'FROM metrics | STATS avg = AVG(value)',
+          esql_query: ['FROM metrics | STATS avg = AVG(value)'],
         });
       });
-      expect(embeddable.api.serializeState().esqlQuery).toBe(
+      expect(readEsqlQuery(embeddable.api.serializeState())).toBe(
         'FROM metrics | STATS avg = AVG(value)'
       );
     });
@@ -196,7 +197,7 @@ describe('customContentEmbeddableFactory', () => {
       act(() => {
         embeddable.api.applySerializedState({
           ...baseState,
-          esqlQuery: 'FROM metrics | LIMIT 10',
+          esql_query: ['FROM metrics | LIMIT 10'],
         });
       });
 
@@ -222,7 +223,7 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => render(<embeddable.Component />));
 
       const el = screen.getByTestId('mockCustomContentComponent');
-      expect(el).toHaveAttribute('data-esql-query', baseState.esqlQuery);
+      expect(el).toHaveAttribute('data-esql-query', readEsqlQuery(baseState));
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
     });
   });
@@ -253,7 +254,7 @@ describe('customContentEmbeddableFactory', () => {
       );
 
       const state = embeddable.api.serializeState();
-      expect(state.esqlQuery).toBe('FROM metrics | LIMIT 10');
+      expect(readEsqlQuery(state)).toBe('FROM metrics | LIMIT 10');
       expect(state.template).toBe('<div>new</div>');
     });
 

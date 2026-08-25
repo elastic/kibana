@@ -15,13 +15,26 @@ import {
 /**
  * Persisted content of a custom content panel. No `prompt`: on an edit the prompt is a delta
  * ("remove the background color"), not a description, so the template is the source of truth.
+ *
+ * `esql_query` is an array so the persisted shape can grow to several queries per panel without a
+ * migration, but is capped at one until the rest of the feature supports more. Read and write it
+ * through {@link readEsqlQuery} / {@link toEsqlQueryState} rather than indexing directly, so
+ * lifting the cap is a change in one place.
  */
 export const customContentStateSchema = z.object({
-  esqlQuery: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
+  esql_query: z.array(z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)).max(1).optional(),
   template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH).optional(),
 });
 
 export type CustomContentState = z.output<typeof customContentStateSchema>;
+
+/** The panel's single active ES|QL query, or `undefined` when it has none. */
+export const readEsqlQuery = (state: Pick<CustomContentState, 'esql_query'>): string | undefined =>
+  state.esql_query?.[0];
+
+/** Builds the persisted `esql_query` field from a single query, omitting it when there is none. */
+export const toEsqlQueryState = (esqlQuery: string | undefined): string[] | undefined =>
+  esqlQuery === undefined ? undefined : [esqlQuery];
 
 /**
  * Generation input for the create-panel and update-panel tools. `prompt` instructs this operation

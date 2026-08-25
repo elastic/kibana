@@ -7,6 +7,8 @@
 
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+  readEsqlQuery,
+  toEsqlQueryState,
   type CustomContentState,
 } from '@kbn/custom-content-common';
 import type { PanelFailure } from '../utils';
@@ -236,15 +238,15 @@ export const applyCustomContentTemplates = async (
       const { panel } = entry;
       if (!panel) return;
       if (panel.panelContent.type !== CUSTOM_CONTENT_EMBEDDABLE_TYPE) return;
-      const { prompt, ...persistedConfig } = panel.panelContent.config as CustomContentPanelConfig &
-        CustomContentState;
+      const { prompt, esqlQuery, ...persistedConfig } = panel.panelContent
+        .config as CustomContentPanelConfig & CustomContentState;
       if (!prompt || persistedConfig.template) return;
 
       try {
-        const template = await resolveTemplate({ prompt, esqlQuery: persistedConfig.esqlQuery });
+        const template = await resolveTemplate({ prompt, esqlQuery });
         panel.panelContent = {
           ...panel.panelContent,
-          config: { ...persistedConfig, template },
+          config: { ...persistedConfig, esql_query: toEsqlQueryState(esqlQuery), template },
         };
       } catch (err) {
         failures.push({
@@ -265,7 +267,7 @@ export const mergeAndResolveCustomContentEdit = async (
 ): Promise<CustomContentState> => {
   const isQueryChanging = editConfig.esqlQuery !== undefined;
   const mergedEsqlQuery = !isQueryChanging
-    ? existing.esqlQuery
+    ? readEsqlQuery(existing)
     : editConfig.esqlQuery === null
     ? undefined
     : editConfig.esqlQuery;
@@ -277,5 +279,5 @@ export const mergeAndResolveCustomContentEdit = async (
     existingTemplate: existing.template,
     hasExistingQuery: !isQueryChanging && !!mergedEsqlQuery,
   });
-  return { esqlQuery: mergedEsqlQuery, template };
+  return { esql_query: toEsqlQueryState(mergedEsqlQuery), template };
 };

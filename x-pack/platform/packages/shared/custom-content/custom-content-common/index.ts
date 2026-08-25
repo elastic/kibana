@@ -18,6 +18,8 @@ export {
   customContentStateSchema,
   customContentUpdateSchema,
   customContentPanelUpdateSchema,
+  readEsqlQuery,
+  toEsqlQueryState,
 } from './schema';
 export type { CustomContentUpdate } from './schema';
 export type { CustomContentState } from './schema';
