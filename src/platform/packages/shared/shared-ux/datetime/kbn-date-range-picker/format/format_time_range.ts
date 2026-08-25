@@ -17,6 +17,7 @@ import {
   type LocaleGrammar,
 } from '../parse';
 import {
+  CHAINED_DATE_MATH_RE,
   DATE_RANGE_DISPLAY_DELIMITER,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_NO_YEAR,
@@ -194,15 +195,13 @@ function formatDateInstant(
 }
 
 /**
- * True when `value` is Elasticsearch date math with more than one operation
- * after `now` (e.g. `now/y+3M`, `now-3M/y+3M`). Simple `now±Nunit[/unit]` and
- * rounding-only `now/unit` return false — those have their own display paths.
+ * True for chained date math (`now/y+3M`, `now-3M/y+3M`). Simple
+ * `now±Nunit[/unit]` and rounding-only `now/unit` return false.
  */
 function isChainedDateMath(value: string): boolean {
-  if (!value.startsWith('now') || value === 'now') return false;
-  const ops = value.slice('now'.length);
-  const opMatches = ops.match(/[+-]\d*(?:ms|[smhdwMy])|\/(?:ms|[smhdwMy])/g);
-  return (opMatches?.length ?? 0) >= 2 && ops === (opMatches?.join('') ?? '');
+  if (!value.startsWith('now') || !CHAINED_DATE_MATH_RE.test(value)) return false;
+  if (dateMathToRelativeParts(value)) return false;
+  return !/^now\/(?:ms|[smhdwMy])$/.test(value);
 }
 
 /**

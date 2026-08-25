@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 import {
+  CHAINED_DATE_MATH_RE,
   DATE_TYPE_ABSOLUTE,
   DATE_TYPE_NOW,
   DATE_TYPE_RELATIVE,
@@ -282,10 +283,6 @@ function applyRelativeRounding(
 
   return `${bound}/${roundUnit}`;
 }
-
-/** One date-math operation: an offset (`+3M`, `-1y`) or a rounding (`/y`, `/ms`). */
-const DATE_MATH_OP_RE = '(?:[+-]\\d*(?:ms|[smhdwMy])|\\/(?:ms|[smhdwMy]))';
-const CHAINED_DATE_MATH_RE = new RegExp(`^(now)?(${DATE_MATH_OP_RE}+)$`);
 
 /**
  * Parses chained Elasticsearch date math — rounding combined with further
