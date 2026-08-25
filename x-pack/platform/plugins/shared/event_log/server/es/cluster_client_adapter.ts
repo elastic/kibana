@@ -29,14 +29,6 @@ import type { EsNames } from './names';
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
 
-export interface SoftDeleteByQueryParams {
-  query: estypes.QueryDslQueryContainer;
-  field: string;
-  conflicts?: estypes.Conflicts;
-  slices?: estypes.Slices;
-  requestsPerSecond?: number;
-}
-
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
 export interface InternalFields {
@@ -142,6 +134,14 @@ export interface QueryEventsBySavedObjectSearchAfterResult {
   total: number;
   search_after?: estypes.SortResults;
   pit_id?: string;
+}
+
+export interface SoftDeleteByQueryParams {
+  query: estypes.QueryDslQueryContainer;
+  field: string;
+  conflicts?: estypes.Conflicts;
+  slices?: estypes.Slices;
+  requestsPerSecond?: number;
 }
 
 export class ClusterClientAdapter<
@@ -710,51 +710,6 @@ export class ClusterClientAdapter<
     }
   }
 
-  /**
-   * Sets a single boolean `field` to `true` on every document that matches
-   * `query`, using one blocking `_update_by_query` against the event log data
-   * stream. The field is only set when its parent object exists, so a malformed
-   * document cannot fail the batch. Chunking, logging, and error handling are the
-   * caller's responsibility.
-   */
-  public async softDeleteByQuery({
-    query,
-    field,
-    conflicts = 'proceed',
-    slices = 'auto',
-    requestsPerSecond,
-  }: SoftDeleteByQueryParams): Promise<estypes.UpdateByQueryResponse> {
-    const buildSetFieldTrueScript = (): string => {
-      const segments = field.split('.');
-      const assignPath = `ctx._source.${segments.join('.')}`;
-      const parents = segments.slice(0, -1);
-      if (parents.length === 0) {
-        return `${assignPath} = true;`;
-      }
-      const guardPath = `ctx._source.${parents[0]}${parents
-        .slice(1)
-        .map((segment) => `?.${segment}`)
-        .join('')}`;
-      return `if (${guardPath} != null) { ${assignPath} = true; }`;
-    };
-
-    const source = buildSetFieldTrueScript();
-
-    const esClient = await this.elasticsearchClientPromise;
-    return esClient.updateByQuery({
-      index: this.esNames.dataStream,
-      conflicts,
-      slices,
-      query,
-      script: {
-        source,
-        lang: 'painless',
-      },
-      // Optional trottling param
-      ...(requestsPerSecond == null ? {} : { requests_per_second: requestsPerSecond }),
-    });
-  }
-
   public async queryEventsBySavedObjectsSearchAfter(
     queryOptions: FindEventsOptionsSearchAfter
   ): Promise<QueryEventsBySavedObjectSearchAfterResult> {
@@ -852,6 +807,51 @@ export class ClusterClientAdapter<
       this.logger.error(`Failed to close point in time: ${err.message}`);
       throw err;
     }
+  }
+
+  /**
+   * Sets a single boolean `field` to `true` on every document that matches
+   * `query`, using one blocking `_update_by_query` against the event log data
+   * stream. The field is only set when its parent object exists, so a malformed
+   * document cannot fail the batch. Chunking, logging, and error handling are the
+   * caller's responsibility.
+   */
+  public async softDeleteByQuery({
+    query,
+    field,
+    conflicts = 'proceed',
+    slices = 'auto',
+    requestsPerSecond,
+  }: SoftDeleteByQueryParams): Promise<estypes.UpdateByQueryResponse> {
+    const buildSetFieldTrueScript = (): string => {
+      const segments = field.split('.');
+      const assignPath = `ctx._source.${segments.join('.')}`;
+      const parents = segments.slice(0, -1);
+      if (parents.length === 0) {
+        return `${assignPath} = true;`;
+      }
+      const guardPath = `ctx._source.${parents[0]}${parents
+        .slice(1)
+        .map((segment) => `?.${segment}`)
+        .join('')}`;
+      return `if (${guardPath} != null) { ${assignPath} = true; }`;
+    };
+
+    const source = buildSetFieldTrueScript();
+
+    const esClient = await this.elasticsearchClientPromise;
+    return esClient.updateByQuery({
+      index: this.esNames.dataStream,
+      conflicts,
+      slices,
+      query,
+      script: {
+        source,
+        lang: 'painless',
+      },
+      // Optional trottling param
+      ...(requestsPerSecond == null ? {} : { requests_per_second: requestsPerSecond }),
+    });
   }
 }
 
