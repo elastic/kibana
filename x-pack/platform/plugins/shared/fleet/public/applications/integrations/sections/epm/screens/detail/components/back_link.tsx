@@ -13,6 +13,8 @@ import React, { useMemo } from 'react';
 
 import { useStartServices } from '../../../../../../../hooks';
 
+import { INTEGRATION_GROUPS } from '../../home/integration_groups';
+
 interface Props {
   queryParams: URLSearchParams;
   integrationsPath: string;
@@ -37,11 +39,23 @@ export function BackLink({ queryParams, integrationsPath, collectionTitle }: Pro
   const appId = useReturnPath ? returnAppId : 'integrations';
   const path = useReturnPath ? returnPath : integrationsPath;
 
+  const returnCollectionTitle = useMemo(() => {
+    if (!returnPath) return undefined;
+    // returnPath may be a full path ("/browse?collection=nginx") or just a query
+    // string ("?collection=nginx") — extract only the search portion before parsing.
+    const qIndex = returnPath.indexOf('?');
+    const qs = qIndex !== -1 ? returnPath.slice(qIndex) : returnPath;
+    const groupId = new URLSearchParams(qs).get('collection');
+    return groupId ? INTEGRATION_GROUPS[groupId]?.title : undefined;
+  }, [returnPath]);
+  const resolvedCollectionTitle =
+    collectionTitle ?? (useReturnPath ? returnCollectionTitle : undefined);
+
   // Maintain 'Back to integrations' for the AI4SOC integrations page
-  const message = collectionTitle
+  const message = resolvedCollectionTitle
     ? i18n.translate('xpack.fleet.epm.backToCollectionText', {
         defaultMessage: 'Back to {collectionTitle} collection',
-        values: { collectionTitle },
+        values: { collectionTitle: resolvedCollectionTitle },
       })
     : !returnPath || returnPath.includes('/configurations/integrations')
     ? BACK_TO_INTEGRATIONS
