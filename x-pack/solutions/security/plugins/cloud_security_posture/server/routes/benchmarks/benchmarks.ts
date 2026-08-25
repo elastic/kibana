@@ -85,13 +85,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
           });
         } catch (err) {
           const error = transformError(err);
-          // 413 means the cluster dataset exceeded elasticsearch.maxResponseSize — a data-volume
-          // condition, not a code bug. Log at warn to avoid re-paging on-call engineers.
-          if (error.statusCode === 413) {
-            cspContext.logger.warn(`Failed to fetch benchmarks: ${error.message}`);
-          } else {
-            cspContext.logger.error(`Failed to fetch benchmarks: ${error.message}`);
-          }
+          cspContext.logger.error(`Failed to fetch benchmarks: ${error.message}`);
           return response.customError({
             body: { message: error.message },
             statusCode: error.statusCode,
