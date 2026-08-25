@@ -176,7 +176,8 @@ describe('ConversationShareButton', () => {
     expect(screen.getByText('Ethan Smith')).toBeInTheDocument();
     expect(screen.getByText('Alex Kim')).toBeInTheDocument();
     expect(screen.getByText('Author')).toBeInTheDocument();
-    expect(screen.getByText('Member')).toBeInTheDocument();
+    expect(screen.queryByText('Member')).not.toBeInTheDocument();
+    expect(screen.getByText('Only manually added members can see this chat')).toBeInTheDocument();
   });
 
   it('saves public access with no ACL entries', async () => {
@@ -198,8 +199,13 @@ describe('ConversationShareButton', () => {
     });
 
     await openPopover();
-    fireEvent.change(screen.getByTestId('agentBuilderConversationSharingAccessModeSelect'), {
-      target: { value: ConversationAccessControlMode.Public },
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('agentBuilderConversationSharingAccessModeSelect'));
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Public'));
     });
 
     expect(mutate).toHaveBeenCalledWith({

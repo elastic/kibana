@@ -18,8 +18,8 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiPopover,
-  EuiSelect,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -103,65 +103,99 @@ const labels = {
   }),
 };
 
+const AccessModeOption: React.FC<{
+  label: string;
+  helpText: string;
+}> = ({ label, helpText }) => (
+  <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+    <EuiFlexItem>
+      <EuiText size="s">
+        <strong>{label}</strong>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiText size="xs" color="subdued">
+        {helpText}
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 const accessModeOptions = [
   {
     value: ConversationAccessControlMode.Private,
-    text: labels.restricted,
+    inputDisplay: <AccessModeOption label={labels.restricted} helpText={labels.restrictedHelp} />,
+    dropdownDisplay: (
+      <AccessModeOption label={labels.restricted} helpText={labels.restrictedHelp} />
+    ),
   },
   {
     value: ConversationAccessControlMode.Public,
-    text: labels.public,
+    inputDisplay: <AccessModeOption label={labels.public} helpText={labels.publicHelp} />,
+    dropdownDisplay: <AccessModeOption label={labels.public} helpText={labels.publicHelp} />,
   },
 ];
 
 const UserAccessRow: React.FC<{
   profile: UserProfileWithAvatar;
-  badge: string;
+  badge?: string;
   onRemove?: () => void;
   isDisabled?: boolean;
-}> = ({ profile, badge, onRemove, isDisabled }) => (
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
-    gutterSize="s"
-    responsive={false}
-    data-test-subj="agentBuilderConversationShareMemberRow"
-  >
-    <EuiFlexItem>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiText size="s">{getUserDisplayName(profile.user)}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiBadge>{badge}</EuiBadge>
-        </EuiFlexItem>
+  hasBottomBorder?: boolean;
+}> = ({ profile, badge, onRemove, isDisabled, hasBottomBorder = true }) => {
+  const { euiTheme } = useEuiTheme();
 
-        {onRemove ? (
+  return (
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      gutterSize="s"
+      responsive={false}
+      css={css`
+        min-height: 49px;
+        padding: ${euiTheme.size.s} 0;
+        border-bottom: ${hasBottomBorder ? euiTheme.border.thin : 'none'};
+      `}
+      data-test-subj="agentBuilderConversationShareMemberRow"
+    >
+      <EuiFlexItem>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={labels.removeMember} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="cross"
-                color="text"
-                size="s"
-                aria-label={labels.removeMember}
-                onClick={onRemove}
-                isDisabled={isDisabled}
-                data-test-subj="agentBuilderConversationShareRemoveMember"
-              />
-            </EuiToolTip>
+            <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
           </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+          <EuiFlexItem grow>
+            <EuiText size="s">{getUserDisplayName(profile.user)}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          {badge ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{badge}</EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+
+          {onRemove ? (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={labels.removeMember} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="cross"
+                  color="danger"
+                  size="s"
+                  aria-label={labels.removeMember}
+                  onClick={onRemove}
+                  isDisabled={isDisabled}
+                  data-test-subj="agentBuilderConversationShareRemoveMember"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 const UserSearchOption: React.FC<{
   profile: UserProfileWithAvatar;
@@ -280,8 +314,7 @@ const ConversationSharePopover: React.FC<{
     });
   };
 
-  const onAccessModeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const nextAccessMode = event.target.value as ConversationAccessControlMode;
+  const onAccessModeChange = (nextAccessMode: ConversationAccessControlMode) => {
     const nextMemberIds = nextAccessMode === ConversationAccessControlMode.Public ? [] : memberIds;
 
     setAccessMode(nextAccessMode);
@@ -309,6 +342,20 @@ const ConversationSharePopover: React.FC<{
 
   const isPublic = accessMode === ConversationAccessControlMode.Public;
   const ownerProfile = ownerId ? profileByUid.get(ownerId) : undefined;
+  const memberProfiles = memberIds
+    .map((memberId) => {
+      const memberProfile = profileByUid.get(memberId);
+
+      if (!memberProfile) {
+        return;
+      }
+
+      return {
+        id: memberId,
+        profile: memberProfile,
+      };
+    })
+    .filter((member): member is { id: string; profile: UserProfileWithAvatar } => Boolean(member));
 
   return (
     <EuiPopover
@@ -348,7 +395,8 @@ const ConversationSharePopover: React.FC<{
           gutterSize="s"
           responsive={false}
           css={css`
-            padding: ${euiTheme.size.m};
+            min-height: 48px;
+            padding: 0 ${euiTheme.size.m};
           `}
         >
           <EuiFlexItem>
@@ -382,19 +430,19 @@ const ConversationSharePopover: React.FC<{
             </>
           ) : null}
           <EuiFormRow label={labels.generalAccess} fullWidth>
-            <EuiSelect
-              compressed
+            <EuiSuperSelect<ConversationAccessControlMode>
               fullWidth
-              value={accessMode}
+              valueOfSelected={accessMode}
               options={accessModeOptions}
               onChange={onAccessModeChange}
               disabled={isSaving}
+              popoverProps={{
+                panelPaddingSize: 's',
+                anchorPosition: 'downRight',
+              }}
               data-test-subj="agentBuilderConversationSharingAccessModeSelect"
             />
           </EuiFormRow>
-          <EuiText size="xs" color="subdued">
-            {isPublic ? labels.publicHelp : labels.restrictedHelp}
-          </EuiText>
           <EuiSpacer size="l" />
           <EuiFormRow
             label={labels.currentMembers}
@@ -428,28 +476,25 @@ const ConversationSharePopover: React.FC<{
               data-test-subj="agentBuilderConversationSharingUserSearch"
             />
           </EuiFormRow>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+          <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
             {ownerProfile ? (
               <EuiFlexItem>
-                <UserAccessRow profile={ownerProfile} badge={labels.author} />
+                <UserAccessRow
+                  profile={ownerProfile}
+                  badge={labels.author}
+                  hasBottomBorder={memberProfiles.length > 0}
+                />
               </EuiFlexItem>
             ) : null}
 
-            {memberIds.map((memberId) => {
-              const memberProfile = profileByUid.get(memberId);
-
-              if (!memberProfile) {
-                return null;
-              }
-
+            {memberProfiles.map(({ id, profile }, index) => {
               return (
-                <EuiFlexItem key={memberId}>
+                <EuiFlexItem key={id}>
                   <UserAccessRow
-                    profile={memberProfile}
-                    badge={labels.member}
+                    profile={profile}
+                    hasBottomBorder={index < memberProfiles.length - 1}
                     isDisabled={isSaving}
-                    onRemove={() => onRemoveUser(memberId)}
+                    onRemove={() => onRemoveUser(id)}
                   />
                 </EuiFlexItem>
               );
