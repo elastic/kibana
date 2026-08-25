@@ -371,7 +371,7 @@ The AI Index schema has these base fields (all required unless noted):
 | `attributes.expires_at` | string (ISO date) | Expiry date (~30 days); used by the expiry-based freshness guard. **Omit entirely for durable (immutable-fact) KIs** — a KI with no `expires_at` never ages out (principle #2). Stored as an ISO-8601 string; compare with `TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at"))` in ES\|QL. |
 | `attributes.excluded` | boolean | Soft-exclude: KI exists but is skipped by agents |
 | `attributes.esql` | string or string[] | **The canonical location for a KI's complete runnable ES\|QL** (e.g. a detection's materialized query) — this is the field the ES\|QL verifiers read (see "Writing and verifying KIs"). **Optional:** KI kinds without ES\|QL simply omit it. Parameterized `?param` templates are not runnable — those stay in `content` as access patterns — but always populate `attributes.esql` with their runnable `esql_example` counterparts so verifiers check them. |
-| `attributes.slug` | string | Normalized natural key for dedup — `context-engine.createKi` generates the document id, so idempotency comes from looking this key up (see the KI upsert). |
+| `attributes.slug` | string | Stable dedup key built from the KI's own data — `context-engine.createKi` generates the document id, so idempotency comes from looking this key up (see the KI upsert). |
 
 Strategy-specific structured output (e.g. a detection's materialized query and `query_type`/`severity_score`, a feature's `subtype`/`slug`) also goes in `content` + `attributes` — never in bespoke declared mappings.
 
@@ -393,8 +393,8 @@ type:        <KI kind, e.g. "index_metadata" | "document" | "detection" | "featu
 title:       <display_name>
 tags:        [...]
 attributes:
-  # Stable natural key for cross-run dedup (see the KI upsert):
-  slug:            <normalized natural key, e.g. "raw-cases-all">
+  # Stable dedup key for cross-run upserts (see the KI upsert):
+  slug:            <stable key built from the KI's subject, e.g. "raw-cases-all">
   # Quality & lifecycle metadata (all under attributes — no declared mappings needed):
   confidence:      <0.0–1.0 calibrated correctness score (see grounding contract)>
   coverage:        <0.0–1.0 completeness score from profile_index (optional)>
@@ -480,8 +480,9 @@ writes:
 
 ### KI upsert (dedup across runs)
 
-1. Store the KI's normalized natural key in `attributes.slug` (e.g. `<index>/<doc_id>`, an
-   entity id, or the source index name).
+1. Store a stable dedup key in `attributes.slug`, built from the KI's own data so the same
+   subject always produces the same value (e.g. `<index>/<doc_id>`, an entity id, or the
+   source index name).
 2. Before writing, look the key up in the AI index's backing store:
    `FROM <backing index> METADATA _id | WHERE FIELD_EXTRACT(attributes, "slug") == "<slug>" | KEEP _id | LIMIT 1`
 3. Hit → `context-engine.updateKi` with the hit's `_id`, merging per the dedup rules in the
@@ -522,7 +523,7 @@ When a KI is derived from specific documents, record the **minimal covering set*
 **Dedup & merge (not blind overwrite).** The KI upsert's lookup on `attributes.slug`
 catches only *exact* key collisions. Also treat two KIs as duplicates when they share a
 **fingerprint** — same `type` + `subtype` + same structured `attributes` — even if titles or slugs
-differ slightly. Derive the slug from a normalized natural key (trim + lowercase) so cosmetic
+differ slightly. Derive the slug from the KI's identifying data, normalized (trim + lowercase), so cosmetic
 variation collapses to one key. On a collision, **merge** via `context-engine.updateKi` rather than
 overwrite: union `evidence`/`tags`, average `confidence`, keep the richer `description`,
 shallow-merge `attributes`. This matters most for Cumulative / Wiki-style KIs (which enrich the
@@ -540,7 +541,7 @@ Before presenting any workflow to the user:
 - [ ] KIs are written via the `context-engine` steps (`createKi` / `updateKi`) — never raw `elasticsearch.index`
 - [ ] Every write is gated on `context-engine.verifyKi`: the workflow writes only when `passed` is true and surfaces the failing `results` (verifier + reason) otherwise
 - [ ] Any complete runnable ES|QL a KI carries lives in `attributes.esql` (string or array of strings) — the field verifiers read; KI kinds without ES|QL omit it
-- [ ] `attributes.slug` holds a stable value from a normalized natural key; collisions **merge** via `updateKi` (union evidence/tags, average confidence) rather than blind-overwrite
+- [ ] `attributes.slug` holds a stable, normalized key built from the KI's own data; collisions **merge** via `updateKi` (union evidence/tags, average confidence) rather than blind-overwrite
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
 - [ ] `@timestamp` and the document id are left to `context-engine.createKi`; `confidence`, `coverage` (if emitted), `evidence`, and `expires_at` are written *inside* `attributes` — never as top-level fields

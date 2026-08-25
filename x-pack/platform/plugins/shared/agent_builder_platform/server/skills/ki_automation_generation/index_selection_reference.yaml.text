@@ -9,8 +9,7 @@ tags:
   - index-selection
   - knowledge-indicators
 consts:
-  # AI index id, not an Elasticsearch index name. context-engine.createKi registers the
-  # AI index (backing index ai-index-idx-ki-example) when it does not exist yet.
+  # Context Engine AI index id; createKi registers the AI index if missing.
   ai_index_id: ki-example
   target_index: ai-index-idx-ki-example
   indices:
@@ -20,10 +19,7 @@ consts:
 triggers:
   - type: manual
 steps:
-  # Ensure the backing index exists up front. No mappings block: the built-in AI index
-  # templates (ai-index@mappings) apply to ai-index-* names and already define the KI
-  # fields — bespoke mappings here would fight them (and strict mappings would reject
-  # the @timestamp that context-engine.createKi writes).
+  # Mappings come from the built-in AI index templates.
   - name: ensure_target_index
     type: elasticsearch.indices.create
     with:
@@ -148,7 +144,7 @@ steps:
               - access_patterns
         timeout: 120s
       # Build the KI once so verify_ki and sink_index_ki see the same document.
-      # @timestamp and the document id are set by context-engine.createKi — never here.
+      # context-engine.createKi sets @timestamp and the document id.
       - name: build_ki
         type: data.set
         with:
@@ -158,14 +154,10 @@ steps:
             tags:
               - index-selection
             attributes:
-              # Stable natural key: on re-runs, look this up in the backing index and
-              # switch to context-engine.updateKi to merge instead of duplicating
-              # (see "KI upsert" in the skill).
+              # Stable dedup key: on re-runs look this up and switch to updateKi (see "KI upsert").
               slug: "{{ foreach.item }}"
-              # Complete runnable ES|QL carried by the KI, in the canonical field the
-              # ES|QL verifiers read. Here: each access pattern's runnable esql_example
-              # (the ?param templates stay in content). Always populate attributes.esql
-              # when a KI carries runnable ES|QL.
+              # Runnable ES|QL always goes in attributes.esql — the field the verifiers read.
+              # Here: each access pattern's esql_example (?param templates stay in content).
               esql: "${{ steps.profile_index.output.content.access_patterns | map: 'esql_example' }}"
               ingestion_method: manual
               key_fields: "{{ steps.profile_index.output.content.key_fields | join: ', ' }}"
@@ -186,13 +178,11 @@ steps:
               {% endfor %}
             description: |
               Index profile: {{ steps.profile_index.output.content.display_name }}. Does NOT contain: {{ steps.profile_index.output.content.does_not_contain | join: "; " }}. Key fields: {{ steps.profile_index.output.content.key_fields | join: "; " }}. Joins: {{ steps.profile_index.output.content.joins | join: "; " }}.
-      # Run the registered Context Engine verifiers before writing.
       - name: verify_ki
         type: context-engine.verifyKi
         with:
           ki: "${{ variables.ki }}"
-      # Write only when verification passes; otherwise surface the failing
-      # verifiers and reasons instead of silently persisting a broken KI.
+      # Write only when verification passes; surface failing verifiers + reasons otherwise.
       - name: gate_on_verification
         type: if
         condition: "${{ steps.verify_ki.output.passed }}"
