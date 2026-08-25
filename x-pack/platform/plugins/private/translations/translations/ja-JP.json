@@ -25175,7 +25175,6 @@
     "xpack.idxMgmt.indexDetails.overviewTab.health.yellowLabel": "警告",
     "xpack.idxMgmt.indexDetails.overviewTab.status.cardTitle": "ステータス",
     "xpack.idxMgmt.indexDetails.overviewTab.status.closedLabel": "対応済",
-    "xpack.idxMgmt.indexDetails.overviewTab.status.docCountErrorLabel": "取得できません",
     "xpack.idxMgmt.indexDetails.overviewTab.status.docCountErrorTooltip": "文書数を取得できません。ページを更新するか、後で再度お試しください。",
     "xpack.idxMgmt.indexDetails.overviewTab.status.documentsDeletedLabel": "{documentsDeleted}が削除されました",
     "xpack.idxMgmt.indexDetails.overviewTab.status.documentsLabel": "{documents, plural, one {# Document} other {#件のドキュメント}} / {documentsDeleted}が削除されました",

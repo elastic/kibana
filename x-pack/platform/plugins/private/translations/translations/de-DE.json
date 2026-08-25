@@ -25097,7 +25097,6 @@
     "xpack.idxMgmt.indexDetails.overviewTab.health.yellowLabel": "Warnung",
     "xpack.idxMgmt.indexDetails.overviewTab.status.cardTitle": "Status",
     "xpack.idxMgmt.indexDetails.overviewTab.status.closedLabel": "Geschlossen",
-    "xpack.idxMgmt.indexDetails.overviewTab.status.docCountErrorLabel": "Daten konnten nicht abgerufen werden",
     "xpack.idxMgmt.indexDetails.overviewTab.status.docCountErrorTooltip": "Dokumentenanzahl kann nicht abgerufen werden. Bitte aktualisieren Sie die Seite oder versuchen Sie es später erneut.",
     "xpack.idxMgmt.indexDetails.overviewTab.status.documentsDeletedLabel": "{documentsDeleted} gelöscht",
     "xpack.idxMgmt.indexDetails.overviewTab.status.documentsLabel": "{documents, plural, one {# Document} other {# Documents}} / {documentsDeleted} gelöscht",
