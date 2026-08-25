@@ -10,29 +10,55 @@
 import { parse, stringify } from 'query-string';
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import type { LayoutDirection } from '@kbn/workflows';
 
 export type WorkflowUrlStateTabType = 'workflow' | 'executions';
+export type WorkflowEditorView = 'yaml' | 'graph';
 
 export interface WorkflowUrlState {
   tab?: WorkflowUrlStateTabType;
+  view?: WorkflowEditorView;
+  direction?: LayoutDirection;
   executionId?: string;
   stepExecutionId?: string;
   stepId?: string;
   resume?: boolean;
+  replayExecutionId?: string;
+}
+
+/**
+ * Normalise a `query-string` value (which may be `string | string[] | null`)
+ * to `string | undefined`, taking the first element of any array.
+ */
+function firstString(value: string | string[] | null | undefined): string | undefined {
+  if (Array.isArray(value)) return value[0] ?? undefined;
+  return value ?? undefined;
 }
 
 export function useWorkflowUrlState() {
   const history = useHistory();
   const location = useLocation();
 
-  const urlState = useMemo(() => {
+  const urlState = useMemo((): {
+    tab: WorkflowUrlStateTabType;
+    view: WorkflowEditorView;
+    direction: LayoutDirection;
+    executionId: string | undefined;
+    stepExecutionId: string | undefined;
+    stepId: string | undefined;
+    shouldAutoResume: boolean;
+    replayExecutionId: string | undefined;
+  } => {
     const params = parse(location.search);
     return {
-      tab: (params.tab as WorkflowUrlStateTabType) || 'workflow',
-      executionId: params.executionId as string | undefined,
-      stepExecutionId: params.stepExecutionId as string | undefined,
-      stepId: params.stepId as string | undefined,
-      shouldAutoResume: params.resume === 'true',
+      tab: (firstString(params.tab) as WorkflowUrlStateTabType) || 'workflow',
+      view: params.view === 'graph' ? 'graph' : 'yaml',
+      direction: params.direction === 'LR' ? 'LR' : 'TB',
+      executionId: firstString(params.executionId),
+      stepExecutionId: firstString(params.stepExecutionId),
+      stepId: firstString(params.stepId),
+      shouldAutoResume: firstString(params.resume) === 'true',
+      replayExecutionId: firstString(params.replayExecutionId),
     };
   }, [location.search]);
 
@@ -46,22 +72,25 @@ export function useWorkflowUrlState() {
         ...updates,
       };
 
-      // Remove undefined values to keep URL clean
-      const cleanParams: Record<string, any> = {}; // eslint-disable-line @typescript-eslint/no-explicit-any
+      // Remove undefined/null values to keep URL clean
+      const cleanParams: Record<string, string | boolean> = {};
       Object.entries(newParams).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
-          cleanParams[key] = value;
+          cleanParams[key] = value as string | boolean;
         }
       });
 
       // Update the URL without causing a full page reload
       const newSearch = stringify(cleanParams, { encode: false });
-      const newLocation = {
-        ...history.location,
-        search: newSearch ? `?${newSearch}` : '',
-      };
+      const nextSearch = newSearch ? `?${newSearch}` : '';
+      if (nextSearch === history.location.search) {
+        return;
+      }
 
-      history.replace(newLocation);
+      history.replace({
+        ...history.location,
+        search: nextSearch,
+      });
     },
     [history]
   );
@@ -113,20 +142,50 @@ export function useWorkflowUrlState() {
     updateUrlState({ resume: undefined });
   }, [updateUrlState]);
 
+  const clearReplayExecutionId = useCallback(() => {
+    updateUrlState({ replayExecutionId: undefined });
+  }, [updateUrlState]);
+
+  const setEditorView = useCallback(
+    (view: WorkflowEditorView) => {
+      updateUrlState({
+        // Omit default to keep the URL clean
+        view: view === 'yaml' ? undefined : view,
+        // Clear the flyout selection when switching views
+        stepId: undefined,
+      });
+    },
+    [updateUrlState]
+  );
+
+  const setGraphDirection = useCallback(
+    (direction: LayoutDirection) => {
+      // Omit default 'TB' to keep the URL clean
+      updateUrlState({ direction: direction === 'TB' ? undefined : direction });
+    },
+    [updateUrlState]
+  );
+
   return {
     // Current state
     activeTab: urlState.tab,
+    editorView: urlState.view,
+    graphDirection: urlState.direction,
     selectedExecutionId: urlState.executionId,
     selectedStepExecutionId: urlState.stepExecutionId,
     selectedStepId: urlState.stepId,
     shouldAutoResume: urlState.shouldAutoResume,
+    replayExecutionId: urlState.replayExecutionId,
 
     // State setters
     setActiveTab,
+    setEditorView,
+    setGraphDirection,
     setSelectedExecution,
     setSelectedStepExecution,
     setSelectedStep,
     updateUrlState,
     clearResumeParam,
+    clearReplayExecutionId,
   };
 }

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
-import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowNotFoundError,
@@ -49,6 +49,8 @@ describe('WorkflowsManagementApi', () => {
       restoreWorkflowVersion: jest.fn(),
       deleteWorkflows: jest.fn(),
       bulkCreateWorkflows: jest.fn(),
+      disableAllWorkflows: jest.fn(),
+      getHistoryForWorkflow: jest.fn(),
       validateWorkflow: jest.fn(),
       getWorkflowExecution: jest.fn(),
       markStepAsResponded: jest.fn(),
@@ -103,11 +105,6 @@ describe('WorkflowsManagementApi', () => {
 
       const result = await api.cloneWorkflow(originalWorkflow, 'default', mockRequest);
 
-      expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-        { loose: false },
-        'default',
-        mockRequest
-      );
       expect(mockWorkflowsService.createWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({
           yaml: expect.stringContaining('name: Original Workflow Copy'),
@@ -123,9 +120,6 @@ describe('WorkflowsManagementApi', () => {
       const originalWorkflow = createMockWorkflow({
         yaml: 'name: Original Workflow\ndescription: A workflow to be cloned\nenabled: true',
       });
-
-      const mockZodSchema = createMockZodSchema();
-      mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
 
       const clonedWorkflow: WorkflowDetailDto = {
         ...originalWorkflow,
@@ -173,16 +167,6 @@ steps:
     action: test-action`,
       });
 
-      const mockZodSchema = z.object({
-        name: z.string(),
-        description: z.string().optional(),
-        enabled: z.boolean().optional(),
-        tags: z.array(z.string()).optional(),
-        steps: z.array(z.any()).optional(),
-      });
-
-      mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
-
       mockWorkflowsService.createWorkflow.mockImplementation((command) => {
         const yamlString = command.yaml;
         // Verify all properties are preserved
@@ -212,42 +196,64 @@ steps:
       expect(mockWorkflowsService.createWorkflow).toHaveBeenCalled();
     });
 
-    it('should handle YAML parsing errors gracefully', async () => {
+    it('should clone a schema-invalid workflow without throwing', async () => {
+      // Missing required `triggers`/`steps` makes this schema-invalid, but it is
+      // still an editable workflow the user should be able to clone.
+      const invalidYaml = `name: Broken Workflow
+description: Missing required fields
+enabled: true`;
       const originalWorkflow = createMockWorkflow({
-        yaml: 'invalid: yaml: content: with: multiple: colons',
+        name: 'Broken Workflow',
+        yaml: invalidYaml,
+        valid: false,
       });
 
-      const mockZodSchema = createMockZodSchema();
-      mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
+      mockWorkflowsService.createWorkflow.mockImplementation((command) =>
+        Promise.resolve({
+          ...originalWorkflow,
+          id: 'workflow-clone-invalid',
+          name: 'Broken Workflow Copy',
+          yaml: command.yaml,
+          valid: false,
+        })
+      );
 
-      await expect(api.cloneWorkflow(originalWorkflow, 'default', mockRequest)).rejects.toThrow();
+      await expect(
+        api.cloneWorkflow(originalWorkflow, 'default', mockRequest)
+      ).resolves.toBeDefined();
 
-      expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalled();
-      expect(mockWorkflowsService.createWorkflow).not.toHaveBeenCalled();
+      const clonedYaml = mockWorkflowsService.createWorkflow.mock.calls[0][0].yaml;
+      // Name is renamed while the rest of the (invalid) content is preserved.
+      expect(clonedYaml).toContain('name: Broken Workflow Copy');
+      expect(clonedYaml).toContain('description: Missing required fields');
+    });
+
+    it('should not call getWorkflowZodSchema when cloning', async () => {
+      const originalWorkflow = createMockWorkflow();
+      mockWorkflowsService.createWorkflow.mockResolvedValue(originalWorkflow);
+
+      await api.cloneWorkflow(originalWorkflow, 'default', mockRequest);
+
+      expect(mockWorkflowsService.getWorkflowZodSchema).not.toHaveBeenCalled();
     });
 
     it('should handle workflow creation errors', async () => {
       const originalWorkflow = createMockWorkflow();
-      const mockZodSchema = createMockZodSchema();
       const creationError = new Error('Failed to create workflow');
 
-      mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
       mockWorkflowsService.createWorkflow.mockRejectedValue(creationError);
 
       await expect(api.cloneWorkflow(originalWorkflow, 'default', mockRequest)).rejects.toThrow(
         'Failed to create workflow'
       );
 
-      expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalled();
       expect(mockWorkflowsService.createWorkflow).toHaveBeenCalled();
     });
 
     it('should work with different space contexts', async () => {
       const originalWorkflow = createMockWorkflow();
-      const mockZodSchema = createMockZodSchema();
       const spaceId = 'custom-space';
 
-      mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
       mockWorkflowsService.createWorkflow.mockResolvedValue({
         ...originalWorkflow,
         id: 'workflow-clone-789',
@@ -256,11 +262,6 @@ steps:
 
       await api.cloneWorkflow(originalWorkflow, spaceId, mockRequest);
 
-      expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-        { loose: false },
-        spaceId,
-        mockRequest
-      );
       expect(mockWorkflowsService.createWorkflow).toHaveBeenCalledWith(
         expect.any(Object),
         spaceId,
@@ -1122,7 +1123,7 @@ steps:
       expect(mockSmlIndex).toHaveBeenCalledWith({
         request: mockRequest,
         originId: 'wf-new',
-        attachmentType: WORKFLOW_SML_TYPE,
+        attachmentType: WORKFLOW_KI_TYPE,
         action: 'create',
       });
     });
@@ -1153,7 +1154,7 @@ steps:
       expect(mockSmlIndex).toHaveBeenCalledWith({
         request: mockRequest,
         originId: 'wf-upd',
-        attachmentType: WORKFLOW_SML_TYPE,
+        attachmentType: WORKFLOW_KI_TYPE,
         action: 'update',
       });
     });
@@ -1210,18 +1211,26 @@ steps:
       );
     });
 
-    it('uses "update" action in bulkCreateWorkflows when overwrite is true', async () => {
+    it('notifies SML with "create" for bulkCreateWorkflows when overwrite is true', async () => {
       mockWorkflowsService.bulkCreateWorkflows.mockResolvedValue({
-        created: [createWorkflowDto({ id: 'wf-ow' })],
+        created: [createWorkflowDto({ id: 'wf-new' }), createWorkflowDto({ id: 'wf-existing' })],
         failed: [],
       });
 
-      await api.bulkCreateWorkflows([{ yaml: 'name: W1' }], 'default', mockRequest, {
-        overwrite: true,
-      });
+      await api.bulkCreateWorkflows(
+        [{ yaml: 'name: W1' }, { yaml: 'name: W2' }],
+        'default',
+        mockRequest,
+        {
+          overwrite: true,
+        }
+      );
 
       expect(mockSmlIndex).toHaveBeenCalledWith(
-        expect.objectContaining({ originId: 'wf-ow', action: 'update' })
+        expect.objectContaining({ originId: 'wf-new', action: 'create' })
+      );
+      expect(mockSmlIndex).toHaveBeenCalledWith(
+        expect.objectContaining({ originId: 'wf-existing', action: 'create' })
       );
     });
 
@@ -1236,6 +1245,40 @@ steps:
       expect(mockSmlLogger.warn).toHaveBeenCalledWith(
         expect.stringContaining("Failed to create SML index for workflow 'wf-err'")
       );
+    });
+  });
+
+  describe('delegation', () => {
+    it('delegates disableAllWorkflows with spaceId and request', async () => {
+      mockWorkflowsService.disableAllWorkflows.mockResolvedValue({
+        total: 2,
+        disabled: 2,
+        failures: [],
+      });
+
+      const result = await api.disableAllWorkflows('my-space', mockRequest);
+
+      expect(mockWorkflowsService.disableAllWorkflows).toHaveBeenCalledWith(
+        'my-space',
+        mockRequest
+      );
+      expect(result).toEqual({ total: 2, disabled: 2, failures: [] });
+    });
+
+    it('delegates getHistoryForWorkflow with pagination options', async () => {
+      const history = { page: 2, perPage: 10, total: 1, items: [] };
+      mockWorkflowsService.getHistoryForWorkflow.mockResolvedValue(history);
+
+      const result = await api.getHistoryForWorkflow('wf-1', 'default', {
+        page: 2,
+        perPage: 10,
+      });
+
+      expect(mockWorkflowsService.getHistoryForWorkflow).toHaveBeenCalledWith('wf-1', 'default', {
+        page: 2,
+        perPage: 10,
+      });
+      expect(result).toBe(history);
     });
   });
 

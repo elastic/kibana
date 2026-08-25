@@ -14,28 +14,33 @@ import {
   createBadRequestError,
   isAgentNotFoundError,
 } from '@kbn/agent-builder-common';
+import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { GetAgentOptions, WritableAgentProvider, AgentProviderFn } from '../agent_source';
 import type { ToolsServiceStart } from '../../tools';
+import { AgentAvailabilityCache } from '../builtin/availability_cache';
 import { createClient } from './client';
 import type { AgentClient } from './client';
 import type { InternalAgentDefinition } from '../agent_registry';
 import type { PersistedAgentDefinitionWithPermissions } from './types';
 import { getDefaultAgentCreateRequest } from '../default_agent_definition';
 
-export const createPersistedProviderFn =
-  (opts: {
-    security: SecurityServiceStart;
-    elasticsearch: ElasticsearchServiceStart;
-    toolsService: ToolsServiceStart;
-    logger: Logger;
-  }): AgentProviderFn<false> =>
-  ({ request, space }) => {
+export const createPersistedProviderFn = (opts: {
+  security: SecurityServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
+  toolsService: ToolsServiceStart;
+  logger: Logger;
+  availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
+}): AgentProviderFn<false> => {
+  const availabilityCache = new AgentAvailabilityCache();
+  return ({ request, space }) => {
     return createPersistedProvider({
       ...opts,
       request,
       space,
+      availabilityCache,
     });
   };
+};
 
 const ensureDefaultAgent = async (
   client: AgentClient
@@ -50,6 +55,8 @@ const createPersistedProvider = async ({
   elasticsearch,
   toolsService,
   logger,
+  availabilityByAgentId,
+  availabilityCache,
 }: {
   space: string;
   request: KibanaRequest;
@@ -57,6 +64,8 @@ const createPersistedProvider = async ({
   elasticsearch: ElasticsearchServiceStart;
   toolsService: ToolsServiceStart;
   logger: Logger;
+  availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
+  availabilityCache: AgentAvailabilityCache;
 }): Promise<WritableAgentProvider> => {
   const client = await createClient({
     elasticsearch,
@@ -82,34 +91,48 @@ const createPersistedProvider = async ({
       const access = opts?.access ?? 'read';
       try {
         const definition = await client.getWithAccess(agentId, access);
-        return toInternalDefinition({ definition });
+        return toInternalDefinition({ definition, availabilityByAgentId, availabilityCache });
       } catch (e) {
         if (agentId === agentBuilderDefaultAgentId && isAgentNotFoundError(e)) {
           const definition = await ensureDefaultAgent(client);
-          return toInternalDefinition({ definition });
+          return toInternalDefinition({ definition, availabilityByAgentId, availabilityCache });
         }
         throw e;
       }
     },
     list: async (opts) => {
       const definitions = await client.list(opts);
-      const hasDefault = definitions.some((def) => def.id === agentBuilderDefaultAgentId);
-      if (!hasDefault) {
+      const ids = definitions.map(({ id }) => id);
+
+      if (!ids.includes(agentBuilderDefaultAgentId)) {
         const defaultAgent = await ensureDefaultAgent(client);
         definitions.push(defaultAgent);
       }
-      return definitions.map((definition) => toInternalDefinition({ definition }));
+
+      return definitions.map((definition) =>
+        toInternalDefinition({ definition, availabilityByAgentId, availabilityCache })
+      );
+    },
+    getIds: async (opts) => {
+      const ids = await client.getIds(opts);
+
+      if (!ids.includes(agentBuilderDefaultAgentId)) {
+        const defaultAgent = await ensureDefaultAgent(client);
+        ids.push(defaultAgent.id);
+      }
+
+      return ids;
     },
     create: async (createRequest) => {
       if (createRequest.id === agentBuilderDefaultAgentId) {
         throw createBadRequestError('The default agent cannot be manually created');
       }
       const definition = await client.create(createRequest);
-      return toInternalDefinition({ definition });
+      return toInternalDefinition({ definition, availabilityByAgentId, availabilityCache });
     },
     update: async (agentId, update) => {
       const definition = await client.update(agentId, update);
-      return toInternalDefinition({ definition });
+      return toInternalDefinition({ definition, availabilityByAgentId, availabilityCache });
     },
     delete: (agentId: string) => {
       return client.delete({ id: agentId });
@@ -126,14 +149,21 @@ const createPersistedProvider = async ({
 
 export const toInternalDefinition = ({
   definition,
+  availabilityByAgentId,
+  availabilityCache,
 }: {
   definition: PersistedAgentDefinitionWithPermissions;
+  availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
+  availabilityCache: AgentAvailabilityCache;
 }): InternalAgentDefinition => {
   return {
     ...definition,
     readonly: false,
-    isAvailable: () => {
-      return { status: 'available' };
+    isAvailable: async (ctx) => {
+      const availability = availabilityByAgentId.get(definition.id);
+      return availability
+        ? availabilityCache.getOrCompute(definition.id, availability, ctx)
+        : { status: 'available' };
     },
   };
 };

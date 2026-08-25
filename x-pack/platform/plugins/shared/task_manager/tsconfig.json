@@ -54,6 +54,8 @@
     "@kbn/core-security-server",
     "@kbn/core-security-common",
     "@kbn/scout",
+    "@kbn/std",
+    "@kbn/mock-idp-utils",
   ],
   "exclude": ["target/**/*"]
 }

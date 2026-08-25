@@ -1,0 +1,5 @@
+com.example.synthetic.ObfuscatedException: Problem when compiling program
+	at com.example.synthetic.ObfuscatedException.doWork(ObfuscatedException.kt:50)
+Caused by: com.example.synthetic.ObfuscatedException: You have to write the program first
+	at com.example.synthetic.ObfuscatedException.doWork(ObfuscatedException.kt:50)
+	... 7 more

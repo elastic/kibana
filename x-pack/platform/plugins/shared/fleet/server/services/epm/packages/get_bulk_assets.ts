@@ -6,14 +6,16 @@
  */
 
 import type {
+  SavedObject,
   SavedObjectsClientContract,
   ISavedObjectTypeRegistry,
   SavedObjectsType,
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 
-import type { AssetSOObject, KibanaSavedObjectType, SimpleSOAssetType } from '../../../../common';
+import type { AssetSOObject, GetBulkAssetsResponse, SimpleSOAssetType } from '../../../../common';
 import { ElasticsearchAssetType } from '../../../../common';
+import { KibanaSavedObjectType } from '../../../../common/types';
 
 import { displayedAssetTypesLookup } from '../../../../common/constants';
 
@@ -21,6 +23,16 @@ import type { SimpleSOAssetAttributes } from '../../../types';
 
 type DisplayableSOAssetAttributes = SimpleSOAssetAttributes & {
   name?: string;
+};
+
+type AlertingRuleTemplateAttributes = DisplayableSOAssetAttributes & {
+  engine?: 'v1' | 'v2';
+  rule?: {
+    metadata?: {
+      name?: string;
+      description?: string;
+    };
+  };
 };
 
 const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): string => {
@@ -48,6 +60,52 @@ const getKibanaLinkForESAsset = (type: ElasticsearchAssetType, id: string): stri
   }
 };
 
+const getAppLinkForESAssetType = (type: string, id: string): string =>
+  Object.values(ElasticsearchAssetType).includes(type as ElasticsearchAssetType)
+    ? getKibanaLinkForESAsset(type as ElasticsearchAssetType, id)
+    : '';
+
+type BulkAssetWithEngine = SimpleSOAssetType & {
+  attributes: SimpleSOAssetType['attributes'] & Pick<AlertingRuleTemplateAttributes, 'engine'>;
+};
+
+type BulkAssetItem = GetBulkAssetsResponse<BulkAssetWithEngine>['items'][number];
+
+const isType = <TAttributes extends DisplayableSOAssetAttributes>(
+  obj: SavedObject<DisplayableSOAssetAttributes>,
+  type: string
+): obj is SavedObject<TAttributes> => obj.type === type;
+
+const toAssetType = (
+  obj: SavedObject<DisplayableSOAssetAttributes>,
+  soType: SavedObjectsType | undefined,
+  appLink: string
+): BulkAssetItem => {
+  let attributes: BulkAssetItem['attributes'] = {
+    title: soType?.management?.getTitle?.(obj) ?? obj.attributes?.title ?? obj.attributes?.name,
+    description: obj.attributes?.description,
+  };
+
+  if (isType<AlertingRuleTemplateAttributes>(obj, KibanaSavedObjectType.alertingRuleTemplate)) {
+    const { engine, rule } = obj.attributes;
+    const ruleMetadata = rule?.metadata;
+    attributes = {
+      ...attributes,
+      title: ruleMetadata?.name ?? attributes.title,
+      description: ruleMetadata?.description ?? attributes.description,
+      ...(engine === 'v1' || engine === 'v2' ? { engine } : {}),
+    };
+  }
+
+  return {
+    id: obj.id,
+    type: obj.type as BulkAssetItem['type'],
+    updatedAt: obj.updated_at,
+    attributes,
+    appLink,
+  };
+};
+
 export async function getBulkAssets(
   soClient: SavedObjectsClientContract,
   soTypeRegistry: ISavedObjectTypeRegistry,
@@ -57,7 +115,7 @@ export async function getBulkAssets(
     await soClient.bulkResolve<DisplayableSOAssetAttributes>(assetIds);
   const types: Record<string, SavedObjectsType | undefined> = {};
 
-  const res: SimpleSOAssetType[] = resolvedObjects
+  const res: GetBulkAssetsResponse<BulkAssetWithEngine>['items'] = resolvedObjects
     .map(({ saved_object: savedObject }) => savedObject)
     .filter(
       (savedObject) =>
@@ -65,6 +123,16 @@ export async function getBulkAssets(
         displayedAssetTypesLookup.has(savedObject.type)
     )
     .map((obj) => {
+      if (isSavedObjectErrorResult(obj)) {
+        // Elasticsearch assets aren't saved objects, so `bulkResolve` reports them as
+        // unsupported types. They still need their Kibana links.
+        return {
+          id: obj.id,
+          type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
+          attributes: {},
+          appLink: getAppLinkForESAssetType(obj.type, obj.id),
+        };
+      }
       // Kibana SOs are registered with an app URL getter, so try to use that
       // for retrieving links to assets whenever possible
       if (!types[obj.type]) {
@@ -88,26 +156,10 @@ export async function getBulkAssets(
 
       // If we still don't have an app link at this point, manually map them (only ES types)
       if (!appLink) {
-        if (Object.values(ElasticsearchAssetType).includes(obj.type as ElasticsearchAssetType)) {
-          appLink = getKibanaLinkForESAsset(obj.type as ElasticsearchAssetType, obj.id);
-        }
+        appLink = getAppLinkForESAssetType(obj.type, obj.id);
       }
 
-      const title =
-        types[obj.type]?.management?.getTitle?.(obj) ??
-        obj.attributes?.title ??
-        obj.attributes?.name;
-
-      return {
-        id: obj.id,
-        type: obj.type as unknown as ElasticsearchAssetType | KibanaSavedObjectType,
-        updatedAt: obj.updated_at,
-        attributes: {
-          title,
-          description: obj.attributes?.description,
-        },
-        appLink,
-      };
+      return toAssetType(obj, types[obj.type], appLink);
     });
   return res;
 }

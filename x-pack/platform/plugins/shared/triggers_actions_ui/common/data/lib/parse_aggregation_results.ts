@@ -19,10 +19,33 @@ export interface ParsedAggregationGroup {
   group: string;
   count: number;
   hits: Array<SearchHit<unknown>>;
-  sourceFields: string[];
+  sourceFields: Record<string, string[]>;
   groups?: Group[];
   groupingObject?: Record<string, unknown>;
   value?: number;
+}
+
+/**
+ * Shape of a single `groupAgg` bucket consumed by {@link parseAggregationResults}.
+ */
+export interface ParsedAggregationBucket {
+  key: string | Array<string>;
+  keyFields?: string[];
+  doc_count: number;
+  topHitsAgg?: {
+    hits?: {
+      hits: Array<SearchHit<unknown>>;
+    };
+  };
+  metricAgg?: {
+    value?: number | null;
+  };
+}
+
+interface ParsedAggregations {
+  groupAgg?: { buckets?: ParsedAggregationBucket[] };
+  groupAggCount?: { count?: number };
+  metricAgg?: AggregationsSingleMetricAggregateBase;
 }
 
 export interface ParsedAggregationResults {
@@ -48,7 +71,9 @@ export const parseAggregationResults = ({
   generateSourceFieldsFromHits = false,
   termField,
 }: ParseAggregationResultsOpts): ParsedAggregationResults => {
-  const aggregations = esResult?.aggregations || {};
+  // `esResult.aggregations` is the opaque ES `Record<string, AggregationsAggregate>`;
+  // narrow it once to the sub-aggregations this parser actually uses.
+  const aggregations = (esResult?.aggregations ?? {}) as ParsedAggregations;
 
   // add a fake 'all documents' group aggregation, if a group aggregation wasn't used
   if (!isGroupAgg) {
@@ -66,8 +91,7 @@ export const parseAggregationResults = ({
           ...(!isCountAgg
             ? {
                 metricAgg: {
-                  value:
-                    (aggregations.metricAgg as AggregationsSingleMetricAggregateBase)?.value ?? 0,
+                  value: aggregations.metricAgg?.value ?? 0,
                 },
               }
             : {}),
@@ -76,9 +100,7 @@ export const parseAggregationResults = ({
     };
   }
 
-  // @ts-expect-error specify aggregations type explicitly
-  const groupBuckets = aggregations.groupAgg?.buckets || [];
-  // @ts-expect-error specify aggregations type explicitly
+  const groupBuckets = aggregations.groupAgg?.buckets ?? [];
   const numGroupsTotal = aggregations.groupAggCount?.count ?? 0;
   const results: ParsedAggregationResults = {
     results: [],
@@ -89,11 +111,12 @@ export const parseAggregationResults = ({
     if (resultLimit && results.results.length === resultLimit) break;
 
     const groupName = `${groupBucket?.key}`;
-    const groupKeys = [termField ?? []].flat();
+    // group buckets may carry their own field names in keyFields when its key values were filtered
+    const groupFields = groupBucket?.keyFields ?? termField;
+    const groupKeys = [groupFields ?? []].flat();
     const groupValues = [groupBucket.key].flat();
-
     const groups =
-      termField && groupBucket?.key
+      groupFields && groupBucket?.key
         ? groupKeys.reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {
             resultGroups.push({
               field: groupByItem,
@@ -102,21 +125,19 @@ export const parseAggregationResults = ({
             return resultGroups;
           }, [])
         : undefined;
-
     const groupingObject =
-      termField && groupBucket?.key
+      groupFields && groupBucket?.key
         ? groupKeys.reduce<Record<string, unknown>>((resultGroups, groupByItem, groupIndex) => {
             resultGroups[groupByItem] = groupValues[groupIndex];
             return resultGroups;
           }, {})
         : undefined;
-
     const sourceFields: { [key: string]: string[] } = {};
     if (generateSourceFieldsFromHits) {
       sourceFieldsParams.forEach((field) => {
         const fields: string[] = [];
         const hits = groupBucket?.topHitsAgg?.hits?.hits ?? [];
-        hits.forEach((hit: SearchHit<{ [key: string]: string }>) => {
+        hits.forEach((hit) => {
           const sourceField = get(hit._source, field.label);
           if (sourceField) {
             fields.push(sourceField);

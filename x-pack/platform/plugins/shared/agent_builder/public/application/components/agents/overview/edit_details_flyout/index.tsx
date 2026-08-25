@@ -73,14 +73,15 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
       avatar_symbol: agent.avatar_symbol ?? '',
       avatar_color: agent.avatar_color ?? '',
       labels: agent.labels ?? [],
-      access_control: agent.access_control ?? {
-        access_mode: AgentAccessControlMode.Private,
-        entries: [],
+      access_control: {
+        // Legacy agents without access control resolve to Public server-side.
+        access_mode: agent.access_control?.access_mode ?? AgentAccessControlMode.Public,
       },
       configuration: {
         enable_elastic_capabilities: agent.configuration?.enable_elastic_capabilities ?? false,
         workflow_ids: agent.configuration?.workflow_ids ?? [],
         instructions: agent.configuration?.instructions ?? '',
+        ai_indices: agent.configuration?.ai_indices ?? [],
       },
     },
     mode: 'onBlur',
@@ -96,11 +97,14 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
         avatar_symbol: data.avatar_symbol || undefined,
         avatar_color: data.avatar_color || undefined,
         labels: data.labels,
-        access_control: data.access_control,
+        // Send only the access mode; the update endpoint's schema rejects `entries`, which
+        // are managed via the dedicated access-control endpoint.
+        access_control: { access_mode: data.access_control.access_mode },
         configuration: {
           enable_elastic_capabilities: data.configuration.enable_elastic_capabilities,
           workflow_ids: data.configuration.workflow_ids,
           instructions: data.configuration.instructions,
+          ai_indices: data.configuration.ai_indices,
         },
       }),
     onSuccess: () => {
@@ -165,7 +169,7 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
             <AccessSection canChangeAccessControlMode={canChangeAccessControlMode} />
 
             <EuiHorizontalRule margin="xl" />
-            <CustomizationSection showWorkflowSection={showWorkflowSection} />
+            <CustomizationSection showWorkflowSection={showWorkflowSection} agentId={agent.id} />
 
             <EuiHorizontalRule margin="xl" />
             <CustomInstructionsSection />

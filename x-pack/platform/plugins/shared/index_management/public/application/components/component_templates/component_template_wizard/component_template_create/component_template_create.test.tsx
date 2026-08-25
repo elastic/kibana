@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { setupEnvironment } from '../../__jest__/client_integration/helpers';
@@ -37,7 +38,7 @@ describe('<ComponentTemplateCreate />', () => {
   describe('On component mount', () => {
     beforeEach(async () => {
       renderComponentTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
+      await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
     });
 
     test('updates the breadcrumbs to component templates', () => {
@@ -48,8 +49,10 @@ describe('<ComponentTemplateCreate />', () => {
 
     test('should set the correct page header', async () => {
       // Verify page title
-      expect(screen.getByTestId('pageTitle')).toBeInTheDocument();
-      expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create component template');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        'Create component template'
+      );
 
       // Verify documentation link
       expect(screen.getByTestId('documentationLink')).toBeInTheDocument();
@@ -86,6 +89,17 @@ describe('<ComponentTemplateCreate />', () => {
           fireEvent.click(screen.getByTestId('nextButton'));
 
           await screen.findByText('A component template name is required.');
+          expect(screen.getByTestId('nextButton')).toBeDisabled();
+        });
+
+        test('should prevent proceeding when the name has invalid characters', async () => {
+          const nameRow = screen.getByTestId('nameField');
+          const nameInput = within(nameRow).getByRole('textbox');
+
+          fireEvent.change(nameInput, { target: { value: 'Invalid#Name' } });
+          fireEvent.click(screen.getByTestId('nextButton'));
+
+          await screen.findByText("Name must not contain a '#'.");
           expect(screen.getByTestId('nextButton')).toBeDisabled();
         });
 

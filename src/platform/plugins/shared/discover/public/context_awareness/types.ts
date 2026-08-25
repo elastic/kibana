@@ -107,6 +107,10 @@ export interface OpenInNewTabParams {
    * The time range to open in the new tab
    */
   timeRange?: TimeRange;
+  /**
+   * Whether the new tab should use approximate ES|QL execution
+   */
+  esqlApproximation?: boolean;
 }
 
 /**
@@ -191,7 +195,8 @@ export interface RowIndicatorExtensionParams {
  */
 export interface DefaultAppStateColumn {
   /**
-   * The field name of the column
+   * The field name of the column.
+   * Use `'_source'` for the Summary column - it is always treated as a valid profile column.
    */
   name: string;
   /**
@@ -215,7 +220,9 @@ export interface DefaultAppStateExtensionParams {
  */
 export interface DefaultAppStateExtension {
   /**
-   * The columns to display in the data grid
+   * The columns to display in the data grid.
+   * Include `{ name: '_source' }` (usually last; omit `width` for auto-width) to show Summary
+   * alongside other default fields. Users can still pin or unpin Summary from the Columns popover.
    */
   columns?: DefaultAppStateColumn[];
   /**
@@ -237,6 +244,10 @@ export interface DefaultAppStateExtension {
    * The state for data table visibility toggle
    */
   hideTable?: boolean;
+  /**
+   * The state for field list sidebar visibility toggle
+   */
+  hideSidebar?: boolean;
 }
 
 /**

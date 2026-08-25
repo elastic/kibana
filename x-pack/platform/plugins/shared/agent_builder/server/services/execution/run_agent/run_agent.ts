@@ -13,9 +13,11 @@ import type {
   AgentConfiguration,
   RuntimeAgentConfigurationOverrides,
   ConversationAction,
+  ConversationRoundAuthor,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
+import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import { runDefaultAgentMode } from './run_chat_agent';
 
 export interface RunAgentParams {
@@ -27,6 +29,16 @@ export interface RunAgentParams {
    * Current conversation.
    */
   conversation?: Conversation;
+  /**
+   * External origin that initiated this execution, when it originated outside Kibana.
+   * Persisted as authorship on the completed round.
+   */
+  origin?: ExecutionConversationOrigin;
+  /**
+   * Resolved author for the round input (external author, or the Kibana user for public
+   * conversations). Stamped onto the completed round.
+   */
+  author?: ConversationRoundAuthor;
   /**
    * Configuration of the agent to run
    */

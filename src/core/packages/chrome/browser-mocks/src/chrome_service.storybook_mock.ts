@@ -23,6 +23,7 @@ type ChromeStorybookStart = Pick<
   componentDeps: {
     basePath: Pick<InternalChromeStart['componentDeps']['basePath'], 'get' | 'prepend'>;
     legacyActionMenu$: InternalChromeStart['componentDeps']['legacyActionMenu$'];
+    capabilities: Pick<InternalChromeStart['componentDeps']['capabilities'], 'navLinks'>;
   };
 };
 
@@ -31,8 +32,8 @@ type ChromeStorybookStart = Pick<
  *
  * Unlike {@link chromeServiceMock}, this does not use `jest`, so it can run in the Storybook
  * runtime. It implements only the surface Chrome-owned React components read when rendered
- * under `ChromeServiceProvider` (base path, the legacy action menu, the feedback handler,
- * and the badge/help observables); everything else is intentionally omitted behind a
+ * under `ChromeServiceProvider` (base path, the legacy action menu, capabilities, the feedback
+ * handler, and the badge/help observables); everything else is intentionally omitted behind a
  * single cast.
  */
 export const createChromeStorybookStart = (): InternalChromeStart => {
@@ -43,6 +44,9 @@ export const createChromeStorybookStart = (): InternalChromeStart => {
         prepend: (path: string) => path,
       },
       legacyActionMenu$: new BehaviorSubject(undefined),
+      capabilities: {
+        navLinks: { integrations: true },
+      },
     },
     next: {
       getFeedbackHandler$: () => new BehaviorSubject<(() => void) | undefined>(undefined),

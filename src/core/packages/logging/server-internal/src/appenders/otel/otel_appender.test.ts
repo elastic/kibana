@@ -8,6 +8,7 @@
  */
 
 import {
+  makeMockResource,
   mockBatchLogRecordProcessor,
   mockDetectResources,
   mockEmit,
@@ -20,7 +21,7 @@ import {
 } from './otel_appender.test.mocks';
 
 import { set } from '@kbn/safer-lodash-set';
-import { trace } from '@opentelemetry/api';
+import { metrics, trace, type Attributes } from '@opentelemetry/api';
 import { LogLevel } from '@kbn/logging';
 import { SeverityNumber } from '@opentelemetry/api-logs';
 import { OtelAppender } from './otel_appender';
@@ -106,6 +107,48 @@ describe('OtelAppender', () => {
       expect(result.attributes).toEqual({ 'service.name': 'my-kibana' });
     });
 
+    it('includeResources and promoteResourceAttributes are optional and absent by default', () => {
+      const result = OtelAppender.configSchema.validate({
+        type: 'otel',
+        url: 'http://collector:4318/v1/logs',
+      });
+      expect(result.includeResources).toBeUndefined();
+      expect(result.promoteResourceAttributes).toBeUndefined();
+    });
+
+    it('rejects YAML-representable values for the plugin-only options', () => {
+      // kibana.yml can only express serializable values, and the strict schema rejects unknown
+      // keys, so neither option can ever arrive from config files.
+      expect(() =>
+        OtelAppender.configSchema.validate({
+          ...validConfig,
+          transformAttributes: 'not-a-function',
+        })
+      ).toThrow(/transformAttributes/);
+      expect(() =>
+        OtelAppender.configSchema.validate({
+          ...validConfig,
+          dropResourceAttributes: ['host.name'],
+        })
+      ).toThrow(/dropResourceAttributes/);
+    });
+
+    it('accepts includeResources as an array of strings', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        includeResources: ['service.name', 'service.type'],
+      });
+      expect(result.includeResources).toEqual(['service.name', 'service.type']);
+    });
+
+    it('accepts promoteResourceAttributes as an array of strings', () => {
+      const result = OtelAppender.configSchema.validate({
+        ...validConfig,
+        promoteResourceAttributes: ['project.id'],
+      });
+      expect(result.promoteResourceAttributes).toEqual(['project.id']);
+    });
+
     it('rejects config without url', () => {
       expect(() => OtelAppender.configSchema.validate({ type: 'otel' })).toThrow();
     });
@@ -158,6 +201,46 @@ describe('OtelAppender', () => {
     });
   });
 
+  describe('runtimeConfigSchema (plugin path)', () => {
+    it('accepts a transformAttributes callback and passes it through', () => {
+      const transformAttributes = (attrs: Record<string, unknown>) => attrs;
+      const result = OtelAppender.runtimeConfigSchema.validate({
+        ...validConfig,
+        transformAttributes,
+      });
+      expect(result.transformAttributes).toBe(transformAttributes);
+    });
+
+    it('rejects a non-function transformAttributes', () => {
+      expect(() =>
+        OtelAppender.runtimeConfigSchema.validate({
+          ...validConfig,
+          transformAttributes: 'not-a-function',
+        })
+      ).toThrow(/transformAttributes/);
+    });
+
+    it('accepts dropResourceAttributes as an array of strings', () => {
+      const result = OtelAppender.runtimeConfigSchema.validate({
+        ...validConfig,
+        dropResourceAttributes: ['host.name', 'process.pid'],
+      });
+      expect(result.dropResourceAttributes).toEqual(['host.name', 'process.pid']);
+    });
+
+    it('still enforces the strict YAML options', () => {
+      // The runtime schema is an extension of the strict schema: required props stay required.
+      expect(() => OtelAppender.runtimeConfigSchema.validate({ type: 'otel' })).toThrow();
+      const result = OtelAppender.runtimeConfigSchema.validate({
+        type: 'otel',
+        url: 'http://collector:4318/v1/logs',
+      });
+      expect(result.url).toBe('http://collector:4318/v1/logs');
+      expect(result.transformAttributes).toBeUndefined();
+      expect(result.dropResourceAttributes).toBeUndefined();
+    });
+  });
+
   describe('OtelAppender constructor', () => {
     it('creates OTLPLogExporter with url and headers from config', () => {
       new OtelAppender(validConfig);
@@ -165,7 +248,25 @@ describe('OtelAppender', () => {
       expect(mockOTLPLogExporter).toHaveBeenCalledWith({
         url: validConfig.url,
         headers: validConfig.headers,
+        selfObsMeterProvider: metrics.getMeterProvider(),
       });
+    });
+
+    it('enables SDK self-observability metrics on the exporter, processor, and logger provider', () => {
+      new OtelAppender(validConfig);
+
+      // The global meter provider (noop unless telemetry.metrics registered one) is handed to
+      // all three hooks: the exporter emits otel.sdk.exporter.log.*, the batch processor emits
+      // otel.sdk.processor.log.*, and the provider emits otel.sdk.log.created.
+      expect(mockOTLPLogExporter).toHaveBeenCalledWith(
+        expect.objectContaining({ selfObsMeterProvider: metrics.getMeterProvider() })
+      );
+      expect(mockBatchLogRecordProcessor).toHaveBeenCalledWith(
+        expect.objectContaining({ selfObsMeterProvider: metrics.getMeterProvider() })
+      );
+      expect(mockLoggerProvider).toHaveBeenCalledWith(
+        expect.objectContaining({ meterProvider: metrics.getMeterProvider() })
+      );
     });
 
     it('passes httpAgentOptions when ssl is set (HTTP exporter)', () => {
@@ -177,6 +278,7 @@ describe('OtelAppender', () => {
       expect(mockOTLPLogExporter).toHaveBeenCalledWith({
         url: validConfig.url,
         headers: validConfig.headers,
+        selfObsMeterProvider: metrics.getMeterProvider(),
         httpAgentOptions: expect.objectContaining({ rejectUnauthorized: false }),
       });
     });
@@ -191,6 +293,7 @@ describe('OtelAppender', () => {
       expect(mockOTLPLogExporter).toHaveBeenCalledWith({
         url: validConfig.url,
         headers: validConfig.headers,
+        selfObsMeterProvider: metrics.getMeterProvider(),
         httpAgentOptions: expect.objectContaining({ rejectUnauthorized: true }),
       });
     });
@@ -218,6 +321,7 @@ describe('OtelAppender', () => {
       expect(mockOTLPLogExporter).toHaveBeenCalledWith({
         url: validConfig.url,
         headers: {},
+        selfObsMeterProvider: metrics.getMeterProvider(),
       });
     });
 
@@ -349,6 +453,166 @@ describe('OtelAppender', () => {
           'processDetector',
         ]),
       });
+    });
+
+    describe('includeResources', () => {
+      // Wires buildOtelResources().merge(...) to resolve to a resource whose getRawAttributes()
+      // returns the given entries, so we can assert what survives the allowlist/denylist filter.
+      const wireResourceWithRawAttributes = (rawAttributes: Array<[string, unknown]>) => {
+        const resourceWithKnownRaw = makeMockResource('known');
+        (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue(rawAttributes);
+        const r1 = makeMockResource('r1', {});
+        r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
+        mockMergeResource.mockReturnValueOnce(r1);
+        return resourceWithKnownRaw;
+      };
+
+      it('filters the resource to the allowlisted keys (detectors still run)', () => {
+        wireResourceWithRawAttributes([
+          ['service.name', 'serverless-kibana'],
+          ['service.type', 'kibana'],
+          ['host.name', 'my-host'],
+          ['process.pid', 123],
+          ['telemetry.sdk.language', 'nodejs'],
+        ]);
+
+        new OtelAppender({
+          ...validConfig,
+          includeResources: ['service.name', 'service.type'],
+          attributes: { 'service.name': 'serverless-kibana', 'service.type': 'kibana' },
+        });
+
+        // includeResources filters the detected resource — it does not skip detection.
+        expect(mockDetectResources).toHaveBeenCalled();
+        // Only the allowlisted keys survive.
+        const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+        expect(Object.keys(filteredArg).sort()).toEqual(['service.name', 'service.type']);
+        expect(filteredArg['service.name']).toBe('serverless-kibana');
+        expect(filteredArg['service.type']).toBe('kibana');
+      });
+
+      it('keeps the configured value on duplicate keys regardless of merge() ordering', () => {
+        // The APM-derived service.name ('kibana') is deliberately placed FIRST in the raw entries —
+        // i.e. as if merge() emitted the base before the override. config.attributes must still win,
+        // because precedence is resolved from config.attributes, not from raw-entry position.
+        wireResourceWithRawAttributes([
+          ['service.name', 'kibana'],
+          ['service.type', 'kibana'],
+          ['service.name', 'serverless-kibana'],
+        ]);
+
+        new OtelAppender({
+          ...validConfig,
+          includeResources: ['service.name', 'service.type'],
+          attributes: { 'service.name': 'serverless-kibana', 'service.type': 'kibana' },
+        });
+
+        const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+        // The configured override wins even though the base value appears first in the raw entries.
+        expect(filteredArg['service.name']).toBe('serverless-kibana');
+        expect(filteredArg['service.type']).toBe('kibana');
+      });
+
+      it('lets an explicit allowlist govern the resource even when a key is also in dropResourceAttributes', () => {
+        wireResourceWithRawAttributes([
+          ['service.name', 'serverless-kibana'],
+          ['service.type', 'kibana'],
+          ['host.name', 'my-host'],
+        ]);
+
+        new OtelAppender({
+          ...validConfig,
+          includeResources: ['service.name', 'service.type'],
+          // The resource allowlist keeps service.type in the resource: dropResourceAttributes does
+          // not shape the resource when an allowlist is set.
+          dropResourceAttributes: ['service.type'],
+        });
+
+        const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+        expect(Object.keys(filteredArg).sort()).toEqual(['service.name', 'service.type']);
+      });
+
+      it('does not rebuild the resource when includeResources defaults to all and no dropResourceAttributes', () => {
+        const resourceWithKnownRaw = wireResourceWithRawAttributes([['service.name', 'kibana']]);
+
+        new OtelAppender(validConfig); // no includeResources, no dropResourceAttributes
+
+        // Fast path: the merged resource is used directly, with no getRawAttributes()-based rebuild.
+        expect(resourceWithKnownRaw.getRawAttributes).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('promoteResourceAttributes', () => {
+    // Wire buildOtelResources().merge(...) to resolve to a resource whose getRawAttributes()
+    // returns the given entries (mirrors the includeResources wiring above).
+    const wireResource = (rawAttributes: Array<[string, unknown]>) => {
+      const resourceWithKnownRaw = makeMockResource('known');
+      (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue(rawAttributes);
+      const r1 = makeMockResource('r1', {});
+      r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
+      mockMergeResource.mockReturnValueOnce(r1);
+    };
+
+    it('promotes a resource attribute into per-record attributes', () => {
+      wireResource([
+        ['service.name', 'serverless-kibana'],
+        ['project.id', 'proj-123'],
+      ]);
+
+      const appender = new OtelAppender({
+        ...validConfig,
+        promoteResourceAttributes: ['project.id'],
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['project.id'], 'proj-123');
+    });
+
+    it('skips async (Promise) resource values', () => {
+      wireResource([['host.id', Promise.resolve('async-host-id')]]);
+
+      const appender = new OtelAppender({ ...validConfig, promoteResourceAttributes: ['host.id'] });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['host.id']);
+    });
+
+    it('promotes nothing when the key is absent from the resource', () => {
+      wireResource([['service.name', 'serverless-kibana']]);
+
+      const appender = new OtelAppender({
+        ...validConfig,
+        promoteResourceAttributes: ['project.id'],
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).not.toHaveProperty(['project.id']);
+    });
+
+    it('promotes per-record even when includeResources strips it from the resource', () => {
+      wireResource([
+        ['service.name', 'serverless-kibana'],
+        ['service.type', 'kibana'],
+        ['project.id', 'proj-123'],
+      ]);
+
+      const appender = new OtelAppender({
+        ...validConfig,
+        includeResources: ['service.name', 'service.type'],
+        promoteResourceAttributes: ['project.id'],
+      });
+      appender.append(makeRecord({ meta: { event: { action: 'user_login' } } }));
+
+      // Per-record attributes carry project.id...
+      const { attributes } = mockEmit.mock.calls[0][0];
+      expect(attributes).toHaveProperty(['project.id'], 'proj-123');
+      // ...but the resource does not (the allowlist stripped it).
+      const filteredResourceArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+      expect(filteredResourceArg).not.toHaveProperty(['project.id']);
     });
   });
 
@@ -589,6 +853,124 @@ describe('OtelAppender', () => {
         const { attributes } = mockEmit.mock.calls[0][0];
         expect(attributes).not.toHaveProperty('log.meta');
       });
+    });
+
+    describe('transformAttributes', () => {
+      // toHaveProperty('a.b') traverses nested objects; use array form (['a.b']) for flat dotted keys.
+
+      it('applies the callback to the flattened attributes before emit', () => {
+        const appender = new OtelAppender({
+          ...validConfig,
+          transformAttributes: (attributes) => {
+            const { 'kibana.space_id': spaceId, ...rest } = attributes;
+            return spaceId === undefined ? rest : { ...rest, 'kibana.space.id': spaceId };
+          },
+        });
+        appender.append(makeRecord({ meta: { kibana: { space_id: 'default' } } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).toHaveProperty(['kibana.space.id'], 'default');
+        expect(attributes).not.toHaveProperty(['kibana.space_id']);
+      });
+
+      it('runs after meta flattening for pattern layout (sees flattened meta and log.logger)', () => {
+        const transformAttributes = jest.fn((attributes: Attributes): Attributes => attributes);
+        const appender = new OtelAppender({ ...validConfig, transformAttributes });
+        appender.append(makeRecord({ meta: { http: { method: 'GET' } } }));
+
+        expect(transformAttributes).toHaveBeenCalledTimes(1);
+        expect(transformAttributes).toHaveBeenCalledWith(
+          expect.objectContaining({
+            'log.logger': 'test.context',
+            'http.method': 'GET',
+          })
+        );
+      });
+
+      it('with JSON layout: runs on attributes without the flattened meta (meta is in the body)', () => {
+        const transformAttributes = jest.fn((attributes: Attributes): Attributes => attributes);
+        const appender = new OtelAppender({
+          ...validConfig,
+          layout: { type: 'json' },
+          transformAttributes,
+        });
+        appender.append(makeRecord({ meta: { http: { method: 'GET' } } }));
+
+        expect(transformAttributes).toHaveBeenCalledTimes(1);
+        const received = transformAttributes.mock.calls[0][0];
+        expect(received).toHaveProperty(['log.logger'], 'test.context');
+        expect(received).not.toHaveProperty(['http.method']);
+      });
+
+      it('leaves attributes unchanged when transformAttributes is not configured', () => {
+        const appender = new OtelAppender(validConfig);
+        appender.append(makeRecord({ meta: { kibana: { space_id: 'default' } } }));
+
+        const { attributes } = mockEmit.mock.calls[0][0];
+        expect(attributes).toHaveProperty(['kibana.space_id'], 'default');
+        expect(attributes).not.toHaveProperty(['kibana.space.id']);
+      });
+    });
+  });
+
+  describe('dropResourceAttributes', () => {
+    it('rebuilds the resource via getRawAttributes() when set, excluding dropped keys and preserving async entries', () => {
+      // Set up a resource with known raw attributes including an async (Promise) entry
+      // to verify the rebuild uses getRawAttributes() — not the synchronous .attributes
+      // snapshot — so async-detected attrs (e.g. host.id from getMachineId) are preserved.
+      const asyncEntry = Promise.resolve('node-id');
+      const resourceWithKnownRaw = makeMockResource('known', {
+        'service.name': 'kibana',
+        'host.name': 'my-host',
+        'service.version': '9.0.0',
+      });
+      (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue([
+        ['service.name', 'kibana'],
+        ['host.name', 'my-host'],
+        ['service.version', '9.0.0'],
+        ['host.id', asyncEntry],
+      ]);
+
+      // Wire the mock chain: mockMergeResource (inside buildOtelResources) returns r1,
+      // whose .merge() (called by the OtelAppender constructor) returns the resource above.
+      const r1 = makeMockResource('r1', {});
+      r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
+      mockMergeResource.mockReturnValueOnce(r1);
+
+      new OtelAppender({
+        ...validConfig,
+        dropResourceAttributes: ['host.name', 'service.version'],
+      });
+
+      const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+      // Dropped keys must be absent from the rebuilt resource
+      expect(filteredArg).not.toHaveProperty(['host.name']);
+      expect(filteredArg).not.toHaveProperty(['service.version']);
+      // Non-dropped sync key is preserved
+      expect(filteredArg).toHaveProperty(['service.name'], 'kibana');
+      // Async entry is passed through as-is so the SDK can await it at export time
+      expect(filteredArg['host.id']).toBe(asyncEntry);
+    });
+
+    it('does not shape the resource when an explicit includeResources allowlist is set', () => {
+      // The allowlist fully governs the resource: dropResourceAttributes is ignored for it.
+      const resourceWithKnownRaw = makeMockResource('known', {});
+      (resourceWithKnownRaw.getRawAttributes as jest.Mock).mockReturnValue([
+        ['service.name', 'serverless-kibana'],
+        ['service.type', 'kibana'],
+      ]);
+      const r1 = makeMockResource('r1', {});
+      r1.merge.mockReturnValueOnce(resourceWithKnownRaw);
+      mockMergeResource.mockReturnValueOnce(r1);
+
+      new OtelAppender({
+        ...validConfig,
+        includeResources: ['service.name', 'service.type'],
+        dropResourceAttributes: ['service.type'],
+      });
+
+      const filteredArg = mockResourceFromAttributes.mock.calls.at(-1)![0];
+      expect(Object.keys(filteredArg).sort()).toEqual(['service.name', 'service.type']);
     });
   });
 

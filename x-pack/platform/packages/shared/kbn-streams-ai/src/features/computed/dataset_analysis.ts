@@ -6,7 +6,8 @@
  */
 
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
-import { DATASET_ANALYSIS_FEATURE_TYPE, getStreamSamplingSource } from '@kbn/streams-schema';
+import { getStreamSamplingSource } from '@kbn/streams-schema';
+import { DATASET_ANALYSIS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import type { ComputedFeatureGenerator } from './types';
 
 export const datasetAnalysisGenerator: ComputedFeatureGenerator = {
@@ -18,12 +19,13 @@ export const datasetAnalysisGenerator: ComputedFeatureGenerator = {
 Use the \`properties.analysis\` field to understand available fields and their value distributions.
 This is useful for understanding what fields are available for querying and what values they typically contain.`,
 
-  generate: async ({ stream, start, end, esClient }) => {
+  generate: async ({ stream, start, end, esClient, signal }) => {
     const analysis = await describeDataset({
       esClient,
       index: getStreamSamplingSource(stream),
       start,
       end,
+      signal,
     });
 
     const formattedAnalysis = formatDocumentAnalysis(analysis, {

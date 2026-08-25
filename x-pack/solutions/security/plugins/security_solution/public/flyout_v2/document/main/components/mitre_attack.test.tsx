@@ -11,6 +11,10 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { MitreAttack } from './mitre_attack';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',
@@ -119,5 +123,30 @@ describe('<MitreAttack />', () => {
     const { container } = renderMitreAttack(hit);
 
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('should still render when technique contains a null hole', () => {
+    const hit = createMockHit({
+      'kibana.alert.rule.parameters': [
+        {
+          threat: [
+            {
+              framework: 'MITRE ATT&CK',
+              tactic: {
+                id: 'TA0009',
+                name: 'Collection',
+                reference: 'https://attack.mitre.org/tactics/TA0009',
+              },
+              technique: [null],
+            },
+          ],
+        },
+      ],
+    });
+
+    const { getByTestId } = renderMitreAttack(hit);
+
+    expect(getByTestId(MITRE_ATTACK_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(MITRE_ATTACK_DETAILS_TEST_ID)).toBeInTheDocument();
   });
 });

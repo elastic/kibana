@@ -60,7 +60,6 @@
       "savedSearch",
       "unifiedDocViewer",
       "charts",
-      "entityManager",
       "inference",
       "discoverShared",
       "productDocBase",
@@ -88,7 +87,8 @@
       "agentBuilder",
       "llmTasks",
       "cps",
-      "searchInferenceEndpoints"
+      "searchInferenceEndpoints",
+      "esql"
     ],
     "requiredBundles": [
       "esUiShared",

@@ -20,13 +20,13 @@ export type Start = jest.Mocked<ReturnType<ChartsPlugin['start']>>;
 
 const createSetupContract = (): Setup => ({
   theme: themeServiceMock,
-  palettes: paletteServiceMock.setup(createCoreSetupMock().theme.getTheme()),
+  palettes: paletteServiceMock.setup(createCoreSetupMock().theme.theme$),
 });
 
 const createStartContract = (): Start => ({
   theme: themeServiceMock,
   activeCursor: activeCursorMock,
-  palettes: paletteServiceMock.setup(createCoreSetupMock().theme.getTheme()),
+  palettes: paletteServiceMock.setup(createCoreSetupMock().theme.theme$),
 });
 
 export const chartPluginMock = {

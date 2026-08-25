@@ -46,7 +46,10 @@ export function getDefendInsightsOutputSchema({ type }: { type: WorkflowInsightT
             remediation: z
               .object({
                 message: z.string().describe(policyResponsePrompts.REMEDIATION_MESSAGE ?? ''),
-                link: z.string().describe(policyResponsePrompts.REMEDIATION_LINK ?? ''),
+                link: z
+                  .string()
+                  .optional()
+                  .describe(policyResponsePrompts.REMEDIATION_LINK ?? ''),
               })
               .describe(policyResponsePrompts.REMEDIATION ?? ''),
           })

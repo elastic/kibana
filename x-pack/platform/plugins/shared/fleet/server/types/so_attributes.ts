@@ -18,6 +18,7 @@ import type {
   AgentUpgradeDetails,
   OutputPreset,
   AgentlessAgentPolicyConfig,
+  OtlpExporterConfig,
 } from '../../common/types';
 import type {
   AgentStatus,
@@ -105,6 +106,7 @@ export interface AgentSOAttributes {
   default_api_key?: string;
   default_api_key_id?: string;
   policy_id?: string;
+  policy_base_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';
@@ -133,6 +135,7 @@ export interface FleetServerHostSOAttributes {
   is_default: boolean;
   is_preconfigured: boolean;
   is_internal?: boolean;
+  allow_edit?: string[];
   proxy_id?: string | null;
   secrets?: {
     ssl?: {
@@ -181,19 +184,23 @@ export interface PackagePolicySOAttributes {
 export interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
+  is_default_otel?: boolean;
   name: string;
+  is_internal?: boolean;
+  is_preconfigured?: boolean;
+  allow_edit?: string[];
+  output_id?: string;
+}
+
+export interface BeatsSoBaseAttributes extends OutputSoBaseAttributes {
   hosts?: string[];
   ca_sha256?: string | null;
   ca_trusted_fingerprint?: string | null;
-  is_internal?: boolean;
-  is_preconfigured?: boolean;
   config_yaml?: string | null;
   otel_exporter_config_yaml?: string | null;
   otel_disable_beatsauth?: boolean | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
-  allow_edit?: string[];
-  output_id?: string;
   ssl?: string | null; // encrypted ssl field
   preset?: OutputPreset;
   write_to_logs_streams?: boolean | null;
@@ -204,12 +211,12 @@ export interface OutputSoBaseAttributes {
   };
 }
 
-interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
+interface OutputSoElasticsearchAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Elasticsearch'];
   secrets?: {};
 }
 
-export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
+export interface OutputSoRemoteElasticsearchAttributes extends BeatsSoBaseAttributes {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string | null;
   secrets?: {
@@ -224,11 +231,11 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   sync_uninstalled_integrations?: boolean;
 }
 
-interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
+interface OutputSoLogstashAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Logstash'];
 }
 
-export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
+export interface OutputSoKafkaAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Kafka'];
   client_id?: string;
   version?: string;
@@ -276,11 +283,30 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   };
 }
 
-export type OutputSOAttributes =
+export interface OutputSoOtlpAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Otlp'];
+  otlp_exporter: OtlpExporterConfig;
+  secrets?: {
+    otlp_exporter?: {
+      tls?: {
+        key_pem?: { id: string };
+        tpm?: {
+          owner_auth?: { id: string };
+          auth?: { id: string };
+        };
+      };
+    };
+  };
+}
+
+export type BeatsOutputSOAttributes =
   | OutputSoElasticsearchAttributes
   | OutputSoRemoteElasticsearchAttributes
   | OutputSoLogstashAttributes
   | OutputSoKafkaAttributes;
+
+// TODO: add `| OutputSoOtlpAttributes` when service-layer OTLP CRUD is activated in the follow-up PR
+export type OutputSOAttributes = BeatsOutputSOAttributes;
 
 export interface SettingsSOAttributes {
   prerelease_integrations_enabled?: boolean;
@@ -314,6 +340,7 @@ export interface DownloadSourceSOAttributes {
   name: string;
   host: string;
   is_default: boolean;
+  is_preconfigured?: boolean;
   source_id?: string;
   proxy_id?: string | null;
   ssl?: string | null; // encrypted ssl field

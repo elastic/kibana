@@ -184,7 +184,7 @@ export const ActionPolicyCanvasContent = ({
         label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.viewInPolicies', {
           defaultMessage: 'View in Policies',
         }),
-        icon: 'popout',
+        icon: 'external',
         type: ActionButtonType.OVERFLOW,
         handler: () => {
           application.navigateToUrl(basePath.prepend(paths.actionPolicyEdit(data.id)));

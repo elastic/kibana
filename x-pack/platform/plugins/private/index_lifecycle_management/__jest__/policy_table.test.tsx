@@ -166,9 +166,6 @@ describe('policy table', () => {
   test('does not show any hidden policies by default', () => {
     renderWithI18n(<TestComponent testPolicies={policies} />);
 
-    const includeHiddenPoliciesSwitch = screen.getByTestId('includeHiddenPoliciesSwitch');
-    expect(includeHiddenPoliciesSwitch).toHaveAttribute('aria-checked', 'false');
-
     const visiblePolicies = getPolicies();
     const hasManagedPolicies = visiblePolicies.some((p) => {
       const policyRow = screen.getByTestId(`policyTableRow-${p.name}`);
@@ -197,8 +194,9 @@ describe('policy table', () => {
   test('shows hidden policies with Managed badges when setting is switched on', async () => {
     renderWithI18n(<TestComponent testPolicies={policies} />);
 
-    const includeHiddenPoliciesSwitch = screen.getByTestId('includeHiddenPoliciesSwitch');
-    fireEvent.click(includeHiddenPoliciesSwitch);
+    const searchInput = screen.getByPlaceholderText(/Search/i);
+    fireEvent.change(searchInput, { target: { value: 'is:policy._meta.managed' } });
+    fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
 
     const perPageButton = screen.getByText(/Rows per page/);
     fireEvent.click(perPageButton);
@@ -209,19 +207,47 @@ describe('policy table', () => {
 
     await waitFor(() => {
       const visiblePolicies = getPolicies();
-      expect(visiblePolicies.filter((p) => p.isManagedPolicy).length).toBeGreaterThan(0);
+      expect(visiblePolicies.length).toBeGreaterThan(0);
+      // Every visible row must be managed
+      expect(visiblePolicies.every((p) => p.isManagedPolicy)).toBe(true);
 
       visiblePolicies.forEach((p) => {
         const policyRow = screen.getByTestId(`policyTableRow-${p.name}`);
         const warningBadge = within(policyRow).queryByTestId('managedPolicyBadge');
-
-        if (p.isManagedPolicy) {
-          expect(warningBadge).toBeInTheDocument();
-        } else {
-          expect(warningBadge).not.toBeInTheDocument();
-        }
+        expect(warningBadge).toBeInTheDocument();
       });
     });
+  });
+
+  test('negating the deprecated filter ("-is:") keeps non-deprecated policies visible and does not show deprecated badges', () => {
+    renderWithI18n(<TestComponent testPolicies={policies} />);
+
+    const searchInput = screen.getByPlaceholderText(/Search/i);
+    fireEvent.change(searchInput, { target: { value: '-is:policy.deprecated' } });
+    fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
+
+    // Non-deprecated policies should still be visible — not an empty table.
+    expect(getPolicyNames().length).toBeGreaterThan(0);
+
+    // No deprecated badges should appear.
+    const deprecatedPolicies = screen.queryAllByTestId('deprecatedPolicyBadge');
+    expect(deprecatedPolicies.length).toBe(0);
+  });
+
+  test('negating the managed filter ("-is:") keeps non-managed policies visible and does not produce an empty table', () => {
+    renderWithI18n(<TestComponent testPolicies={policies} />);
+
+    const searchInput = screen.getByPlaceholderText(/Search/i);
+    fireEvent.change(searchInput, { target: { value: '-is:policy._meta.managed' } });
+    fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
+
+    // Non-managed, non-deprecated policies should still be visible — not an empty table.
+    expect(getPolicyNames().length).toBeGreaterThan(0);
+
+    // No managed policies should appear when the negated clause is active.
+    const visiblePolicies = getPolicies();
+    const hasManagedPolicies = visiblePolicies.some((p) => p.isManagedPolicy);
+    expect(hasManagedPolicies).toEqual(false);
   });
 
   test('shows deprecated policies with Deprecated badges', () => {
@@ -303,8 +329,9 @@ describe('policy table', () => {
   test('confirmation modal shows warning when delete button is pressed for a hidden policy', async () => {
     renderWithI18n(<TestComponent testPolicies={policies} />);
 
-    const includeHiddenPoliciesSwitch = screen.getByTestId('includeHiddenPoliciesSwitch');
-    fireEvent.click(includeHiddenPoliciesSwitch);
+    const searchInput = screen.getByPlaceholderText(/Search/i);
+    fireEvent.change(searchInput, { target: { value: 'is:policy._meta.managed' } });
+    fireEvent.keyUp(searchInput, { key: 'Enter', keyCode: 13, which: 13 });
 
     const perPageButton = screen.getByText(/Rows per page/);
     fireEvent.click(perPageButton);

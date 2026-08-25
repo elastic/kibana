@@ -12,9 +12,12 @@ import type { ComponentProps } from 'react';
 import { EuiSkipLink, useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { Meta, StoryFn, StoryObj } from '@storybook/react';
-import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
+import {
+  APP_MAIN_SCROLL_CONTAINER_ID,
+  ChromeLayout,
+  ChromeLayoutConfigProvider,
+} from '@kbn/ui-chrome-layout';
 import { Box } from '@kbn/ui-chrome-layout/src/__stories__/box';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout';
 import { css, Global } from '@emotion/react';
 
 import { LOGO, PRIMARY_MENU_FOOTER_ITEMS, PRIMARY_MENU_ITEMS } from '../mocks/observability';
@@ -145,6 +148,66 @@ export const WithManyItems: StoryObj<PropsAndArgs> = {
           href: '/extra-3',
         },
       ],
+      footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+      overflowItems: [],
+    },
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+const customTitleItem = PRIMARY_MENU_ITEMS.find((item) => item.sections)!;
+
+export const WithCustomSecondaryMenuTitle: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Custom Secondary Menu Title',
+  decorators: [
+    (Story) => {
+      return (
+        <>
+          <Global styles={styles} />
+          <Story />
+        </>
+      );
+    },
+  ],
+  args: {
+    activeItemId: customTitleItem.id,
+    items: {
+      primaryItems: PRIMARY_MENU_ITEMS.map((item) =>
+        item.id === customTitleItem.id
+          ? { ...item, secondaryMenuTitle: 'my-production-cluster' }
+          : item
+      ),
+      footerItems: PRIMARY_MENU_FOOTER_ITEMS,
+      overflowItems: [],
+    },
+  },
+  render: (args) => <ControlledNavigation {...args} />,
+};
+
+export const WithLongSecondaryMenuTitle: StoryObj<PropsAndArgs> = {
+  name: 'Navigation with Long Secondary Menu Title',
+  decorators: [
+    (Story) => {
+      return (
+        <>
+          <Global styles={styles} />
+          <Story />
+        </>
+      );
+    },
+  ],
+  args: {
+    activeItemId: customTitleItem.id,
+    items: {
+      primaryItems: PRIMARY_MENU_ITEMS.map((item) =>
+        item.id === customTitleItem.id
+          ? {
+              ...item,
+              secondaryMenuTitle:
+                'my-extremely-long-production-cluster-name-that-should-wrap-or-truncate-gracefully',
+            }
+          : item
+      ),
       footerItems: PRIMARY_MENU_FOOTER_ITEMS,
       overflowItems: [],
     },

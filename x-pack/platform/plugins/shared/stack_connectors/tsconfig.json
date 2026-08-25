@@ -46,6 +46,9 @@
     "@kbn/deeplinks-analytics",
     "@kbn/spaces-plugin",
     "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/licensing-types",
     "@kbn/core-http-server-mocks",
     "@kbn/usage-collection-plugin",
     "@kbn/react-query",
@@ -55,6 +58,7 @@
     "@kbn/actions-utils",
     "@kbn/mcp-client",
     "@kbn/std",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*",

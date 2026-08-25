@@ -11,7 +11,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { WorkflowDisabledError } from '@kbn/workflows/common/errors';
+import { WorkflowDisabledError, WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import {
   createExternalService,
   type ScheduleWorkflowServiceFunction,
@@ -223,6 +223,45 @@ describe('Workflows Service', () => {
       const mockWorkflowService: WorkflowsServiceFunction = jest
         .fn()
         .mockRejectedValue(new WorkflowDisabledError('test-workflow-id'));
+
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest,
+        mockWorkflowService
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const error = await service.runWorkflow(params).catch((err) => err);
+
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(error.message).toContain('Unable to run workflow');
+    });
+
+    it('runWorkflow classifies missing workflow error as user error', async () => {
+      const mockWorkflowService: WorkflowsServiceFunction = jest
+        .fn()
+        .mockRejectedValue(new WorkflowNotFoundError('test-workflow-id'));
 
       const service = createExternalService(
         actionId,
@@ -501,6 +540,46 @@ describe('Workflows Service', () => {
       const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
         .fn()
         .mockRejectedValue(new WorkflowDisabledError('new-workflow'));
+
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest,
+        undefined,
+        mockScheduleWorkflowService
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const error = await service.scheduleWorkflow(params).catch((err) => err);
+
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(error.message).toContain('Unable to schedule workflow');
+    });
+
+    it('scheduleWorkflow classifies missing workflow error as user error', async () => {
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+        .fn()
+        .mockRejectedValue(new WorkflowNotFoundError('test-workflow-id'));
 
       const service = createExternalService(
         actionId,

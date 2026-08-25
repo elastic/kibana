@@ -13,6 +13,7 @@ import type {
   PluginStartDependencies,
 } from './types';
 import { registerAttachmentUiDefinitions } from './attachment_types';
+import { registerConversationTemplateTabs } from './conversation_template_tabs';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -31,13 +32,18 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart, startDeps: PluginStartDependencies): AgentBuilderPlatformPluginStart {
-    const { agentBuilder, share } = startDeps;
+    const { agentBuilder, share, triggersActionsUi } = startDeps;
 
     registerAttachmentUiDefinitions({
       attachments: agentBuilder.attachments,
       agents: agentBuilder.agents,
       locators: share.url.locators,
       core: coreStart,
+      triggersActionsUi,
+    });
+
+    registerConversationTemplateTabs({
+      conversationTemplates: agentBuilder.conversationTemplates,
     });
 
     return {};

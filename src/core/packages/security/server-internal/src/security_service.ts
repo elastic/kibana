@@ -19,6 +19,7 @@ import type {
 } from './internal_contracts';
 import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
+import { createCoreUiamService } from './uiam';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
@@ -70,20 +71,20 @@ export class SecurityService
 
         // Returned eagerly at setup but invoked at task-run time, by which point
         // the security delegate has been registered.
-        return (request, userProfileId) => {
+        return (request, user) => {
           if (!this.securityApi) {
             throw new Error(
               'Cannot enrich a fake request before the security delegate has been registered.'
             );
           }
-          this.securityApi.fakeRequestEnricher(request, userProfileId);
+          this.securityApi.fakeRequestEnricher(request, user);
         };
       },
       fips: {
         isEnabled: () => isFipsEnabled(securityConfig),
       },
       uiam: securityConfig?.uiam?.enabled
-        ? Object.freeze({ sharedSecret: securityConfig.uiam.sharedSecret })
+        ? createCoreUiamService(securityConfig.uiam.sharedSecret)
         : null,
     };
   }

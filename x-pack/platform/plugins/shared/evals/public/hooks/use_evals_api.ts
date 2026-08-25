@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -25,6 +25,7 @@ import {
   EVALS_DATASET_EXAMPLES_URL,
   EVALS_DATASET_EXAMPLE_URL,
   API_VERSIONS,
+  type DatasetMaturity,
   type GetEvaluationDatasetsResponse,
   type GetEvaluationDatasetsRequestQuery,
   type GetEvaluationDatasetResponse,
@@ -32,6 +33,7 @@ import {
   type CreateEvaluationDatasetResponse,
   type UpdateEvaluationDatasetRequestBodyInput,
   type UpdateEvaluationDatasetResponse,
+  type DeleteEvaluationDatasetRequestQuery,
   type DeleteEvaluationDatasetResponse,
   type AddEvaluationDatasetExamplesRequestBodyInput,
   type AddEvaluationDatasetExamplesResponse,
@@ -68,6 +70,8 @@ export interface ExperimentsListFilters {
   suiteId?: string;
   modelId?: string;
   branch?: string;
+  /** Free-text term matched against experiment name or git branch. */
+  search?: string;
   buildId?: string;
   datasetId?: string;
   page?: number;
@@ -81,6 +85,10 @@ interface DatasetsListFilters {
   page?: number;
   perPage?: number;
   search?: string;
+  /** Datasets must carry every tag listed here. */
+  tags?: string[];
+  /** Datasets must be at one of these maturity levels. */
+  maturity?: DatasetMaturity[];
   sortField?: DatasetSortField;
   sortOrder?: DatasetSortOrder;
 }
@@ -95,6 +103,14 @@ interface UpdateDatasetVariables extends DatasetWithId {
 
 interface AddExamplesVariables extends DatasetWithId {
   body: AddEvaluationDatasetExamplesRequestBodyInput;
+}
+
+interface DeleteDatasetVariables extends DatasetWithId {
+  /**
+   * Which outcome the confirmation the user saw described, so the server can
+   * refuse the other one rather than perform it unannounced.
+   */
+  intent?: DeleteEvaluationDatasetRequestQuery['intent'];
 }
 
 interface ExampleWithDatasetId extends DatasetWithId {
@@ -123,10 +139,12 @@ export const useDatasets = (filters: DatasetsListFilters = {}) => {
   return useQuery({
     queryKey: queryKeys.datasets.list(filters),
     queryFn: async (): Promise<GetEvaluationDatasetsResponse> => {
-      const query: Record<string, string | number> = {};
+      const query: Record<string, string | number | string[]> = {};
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
       if (filters.search) query.search = filters.search;
+      if (filters.tags?.length) query.tags = filters.tags;
+      if (filters.maturity?.length) query.maturity = filters.maturity;
       if (filters.sortField) query.sort_field = filters.sortField;
       if (filters.sortOrder) query.sort_order = filters.sortOrder;
 
@@ -143,6 +161,28 @@ export const useDatasets = (filters: DatasetsListFilters = {}) => {
       return true;
     },
   });
+};
+
+/**
+ * Every tag in use across datasets, for offering as suggestions. Asking for one
+ * dataset is enough because the tag facet comes from a global aggregation. Reusing
+ * a list query's facets would be cheaper but scopes suggestions to its search term.
+ */
+export const useDatasetTagSuggestions = ({ enabled }: { enabled: boolean }): string[] => {
+  const { services } = useKibana();
+
+  const { data } = useQuery({
+    queryKey: queryKeys.datasets.tagSuggestions(),
+    queryFn: async (): Promise<GetEvaluationDatasetsResponse> => {
+      return services.http!.get<GetEvaluationDatasetsResponse>(EVALS_DATASETS_URL, {
+        query: { per_page: 1 },
+        version: API_VERSIONS.internal.v1,
+      });
+    },
+    enabled,
+  });
+
+  return useMemo(() => (data?.facets?.tags ?? []).map(({ value }) => value), [data?.facets?.tags]);
 };
 
 export const useDataset = (datasetId: string) => {
@@ -212,15 +252,23 @@ export const useDeleteDataset = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ datasetId }: DatasetWithId): Promise<DeleteEvaluationDatasetResponse> => {
+    mutationFn: async ({
+      datasetId,
+      intent,
+    }: DeleteDatasetVariables): Promise<DeleteEvaluationDatasetResponse> => {
       return services.http!.delete<DeleteEvaluationDatasetResponse>(getDatasetUrl(datasetId), {
         version: API_VERSIONS.internal.v1,
+        ...(intent ? { query: { intent } } : {}),
       });
     },
-    onSuccess: async (_response, { datasetId }) => {
+    onSuccess: async () => {
+      // Invalidating `datasets.all` would cover both in one call, but it is a
+      // prefix of `datasets.detail`, so it would also refetch the dataset just
+      // deleted, from the detail page still on screen while it redirects away.
+      // That request 404s, so the stale detail entry is left to expire instead.
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.lists }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.tagSuggestions() }),
       ]);
     },
   });
@@ -397,6 +445,7 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
       if (filters.suiteId) query.suite_id = filters.suiteId;
       if (filters.modelId) query.model_id = filters.modelId;
       if (filters.branch) query.branch = filters.branch;
+      if (filters.search) query.search = filters.search;
       if (filters.buildId) query.build_id = filters.buildId;
       if (filters.datasetId) query.dataset_id = filters.datasetId;
       if (filters.page) query.page = filters.page;
@@ -408,6 +457,7 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
       });
     },
     keepPreviousData: true,
+    refetchOnMount: 'always',
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {
         return !error.response?.status || error.response.status >= 500;
@@ -417,7 +467,16 @@ export const useEvaluationExperiments = (filters: ExperimentsListFilters = {}) =
   });
 };
 
-export const useEvaluationExperiment = (experimentId: string, executionId?: string) => {
+interface EvaluationExperimentOptions {
+  refetchInterval?: number | false;
+  enabled?: boolean;
+}
+
+export const useEvaluationExperiment = (
+  experimentId: string,
+  executionId?: string,
+  options: EvaluationExperimentOptions = {}
+) => {
   const { services } = useKibana();
 
   return useQuery({
@@ -433,13 +492,14 @@ export const useEvaluationExperiment = (experimentId: string, executionId?: stri
         version: API_VERSIONS.internal.v1,
       });
     },
-    enabled: experimentId.length > 0,
+    enabled: experimentId.length > 0 && (options.enabled ?? true),
     retry: (_failureCount, error) => {
       if (isHttpFetchError(error)) {
         return !error.response?.status || error.response.status >= 500;
       }
       return true;
     },
+    refetchInterval: options.refetchInterval,
     refetchOnWindowFocus: false,
   });
 };
@@ -492,10 +552,16 @@ export const useCompareExperiments = (
   });
 };
 
+interface ExperimentDatasetExamplesOptions {
+  refetchInterval?: number | false;
+  staleTime?: number;
+}
+
 export const useExperimentDatasetExamples = (
   experimentId: string,
   datasetId: string,
-  executionId?: string
+  executionId?: string,
+  options: ExperimentDatasetExamplesOptions = {}
 ) => {
   const { services } = useKibana();
 
@@ -516,18 +582,25 @@ export const useExperimentDatasetExamples = (
       });
     },
     enabled: experimentId.length > 0 && datasetId.length > 0,
+    refetchInterval: options.refetchInterval,
+    staleTime: options.staleTime,
   });
 };
 
-export const useExampleScores = (exampleId: string) => {
+export const useExampleScores = (exampleId: string, datasetId?: string) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.examples.scores(exampleId),
+    queryKey: queryKeys.examples.scores(exampleId, datasetId),
     queryFn: async (): Promise<GetExampleScoresResponse> => {
       const url = EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', encodeURIComponent(exampleId));
+      const query: Record<string, string> = {};
+      if (datasetId) {
+        query.dataset_id = datasetId;
+      }
       return services.http!.get<GetExampleScoresResponse>(url, {
         version: API_VERSIONS.internal.v1,
+        query,
       });
     },
     enabled: exampleId.length > 0,

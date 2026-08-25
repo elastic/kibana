@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_LEADS_PER_RUN } from './constants';
 
 // ---------------------------------------------------------------------------
 // Enums
@@ -47,6 +48,8 @@ export type Observation = z.infer<typeof observationSchema>;
 export const leadEntitySchema = z.object({
   type: z.string(),
   name: z.string(),
+  // Entity Store unique identifier (EUID, e.g. `"host:8c67cb16-..."`)
+  id: z.string(),
 });
 
 export type LeadEntity = z.infer<typeof leadEntitySchema>;
@@ -60,16 +63,29 @@ export const leadSchema = z.object({
   title: z.string(),
   byline: z.string(),
   description: z.string(),
-  entities: z.array(leadEntitySchema),
+  entity: leadEntitySchema,
   tags: z.array(z.string()),
   priority: z.number().min(1).max(10),
   chatRecommendations: z.array(z.string()),
+  /**
+   * ISO-8601 timestamp of the last generation run that produced or re-observed this lead.
+   * Updated on every run regardless of whether new observations were added.
+   * Distinct from `createdAt` (first insert) and `changedAt` (lead content or status changed).
+   */
   timestamp: z.string().datetime(),
   staleness: LeadStalenessEnum,
   status: LeadStatusEnum.default('active'),
   observations: z.array(observationSchema),
   executionUuid: z.string().uuid(),
   sourceType: LeadSourceTypeEnum,
+  createdAt: z.string(),
+  /**
+   * When lead content or status last changed (create, evidence update, dismiss).
+   * Not `updatedAt`: a last-seen refresh still writes the document (stamps `timestamp`)
+   * but leaves this field unchanged so the change feed only emits material changes.
+   */
+  changedAt: z.string(),
+  version: z.number().int().min(1),
 });
 
 export type Lead = z.infer<typeof leadSchema>;
@@ -80,7 +96,7 @@ export type Lead = z.infer<typeof leadSchema>;
 
 export const leadGenerationEngineConfigSchema = z.object({
   minObservations: z.number().int().min(0).default(1),
-  maxLeads: z.number().int().min(1).default(10),
+  maxLeads: z.number().int().min(1).default(MAX_LEADS_PER_RUN),
   corroborationBonus: z.number().min(0).max(1).default(0.15),
   diversityBonus: z.number().min(0).max(1).default(0.1),
   normalizationCeiling: z.number().min(1).default(100),
@@ -114,6 +130,19 @@ export const findLeadsRequestSchema = z.object({
 });
 
 export type FindLeadsRequest = z.infer<typeof findLeadsRequestSchema>;
+
+export const leadChangesRequestSchema = z.object({
+  cursor: z.string().max(2048).optional(),
+  perPage: z.coerce.number().int().min(1).max(1000).optional().default(100),
+});
+export type LeadChangesRequest = z.infer<typeof leadChangesRequestSchema>;
+
+export const leadChangesResponseSchema = z.object({
+  changed: z.array(leadSchema),
+  cursor: z.string().nullable(),
+  hasMore: z.boolean(),
+});
+export type LeadChangesResponse = z.infer<typeof leadChangesResponseSchema>;
 
 export const findLeadsResponseSchema = z.object({
   leads: z.array(leadSchema),

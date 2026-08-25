@@ -56,6 +56,7 @@ const defaultCustomState: WithAllKeys<ServiceMapCustomState> = {
   environment: ENVIRONMENT_ALL.value,
   kuery: undefined,
   service_name: undefined,
+  highlighted_service_names: undefined,
   service_group_id: undefined,
   map_orientation: 'horizontal',
   sync_with_dashboard_filters: false,
@@ -69,6 +70,7 @@ const customStateComparators: StateComparators<ServiceMapCustomState> = {
   environment: 'referenceEquality',
   kuery: 'referenceEquality',
   service_name: 'referenceEquality',
+  highlighted_service_names: 'deepEquality',
   service_group_id: 'referenceEquality',
   map_orientation: 'referenceEquality',
   sync_with_dashboard_filters: 'referenceEquality',
@@ -145,6 +147,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           environment: state.environment,
           kuery: state.kuery,
           service_name: state.service_name,
+          highlighted_service_names: state.highlighted_service_names,
           service_group_id: state.service_group_id,
           map_orientation: state.map_orientation,
           sync_with_dashboard_filters: state.sync_with_dashboard_filters,
@@ -199,7 +202,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         canEditUnifiedSearch: () => true,
         getTypeDisplayName: () =>
           i18n.translate('xpack.apm.serviceMap.embeddable.typeDisplayName', {
-            defaultMessage: 'configuration',
+            defaultMessage: 'Service map',
           }),
         isEditingEnabled: () => true,
         onEdit: async () => {
@@ -219,6 +222,9 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                 }
                 customStateManager.api.setKuery(newState.kuery);
                 customStateManager.api.setServiceName(newState.service_name);
+                customStateManager.api.setHighlightedServiceNames(
+                  newState.highlighted_service_names
+                );
                 customStateManager.api.setMapOrientation(newState.map_orientation);
                 customStateManager.api.setSyncWithDashboardFilters(
                   newState.sync_with_dashboard_filters
@@ -280,6 +286,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             environment,
             kuery,
             serviceName,
+            highlightedServiceNames,
             serviceGroupId,
             mapOrientation,
             syncWithDashboardFilters,
@@ -291,6 +298,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             customStateManager.api.environment$,
             customStateManager.api.kuery$,
             customStateManager.api.serviceName$,
+            customStateManager.api.highlightedServiceNames$,
             customStateManager.api.serviceGroupId$,
             customStateManager.api.mapOrientation$,
             customStateManager.api.syncWithDashboardFilters$,
@@ -376,6 +384,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   environment={environment}
                   kuery={kuery}
                   serviceName={serviceName ?? undefined}
+                  highlightedServiceNames={highlightedServiceNames ?? undefined}
                   serviceGroupId={serviceGroupId ?? undefined}
                   core={deps.coreStart}
                   onBlockingError={(error) => blockingError$.next(error)}

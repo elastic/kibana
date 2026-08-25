@@ -8,6 +8,17 @@
 import { configSchema } from './config';
 
 describe('alerting_v2 config schema', () => {
+  describe('enabled', () => {
+    it('defaults to true', () => {
+      const config = configSchema.validate({});
+      expect(config.enabled).toBe(true);
+    });
+
+    it('can be turned off', () => {
+      expect(configSchema.validate({ enabled: false }).enabled).toBe(false);
+    });
+  });
+
   describe('rules.minimumScheduleInterval', () => {
     it('defaults to 1m', () => {
       const config = configSchema.validate({});
@@ -59,6 +70,63 @@ describe('alerting_v2 config schema', () => {
 
     it('rejects values above 32000', () => {
       expect(() => configSchema.validate({ rules: { maxScheduledPerMinute: 32001 } })).toThrow();
+    });
+  });
+
+  describe('rules.run.alerts.max', () => {
+    it('defaults to 10000', () => {
+      const config = configSchema.validate({});
+      expect(config.rules.run.alerts.max).toBe(10000);
+    });
+
+    it('accepts a smaller configured value', () => {
+      expect(
+        configSchema.validate({ rules: { run: { alerts: { max: 100 } } } }).rules.run.alerts.max
+      ).toBe(100);
+    });
+
+    it('rejects values below 1', () => {
+      expect(() => configSchema.validate({ rules: { run: { alerts: { max: 0 } } } })).toThrow();
+    });
+
+    it('rejects values above the 10000 ceiling', () => {
+      expect(() => configSchema.validate({ rules: { run: { alerts: { max: 10001 } } } })).toThrow();
+    });
+  });
+
+  describe('rules.run.timeout', () => {
+    it('defaults to undefined', () => {
+      const config = configSchema.validate({});
+      expect(config.rules.run.timeout).toBeUndefined();
+    });
+
+    it('accepts a valid duration', () => {
+      expect(configSchema.validate({ rules: { run: { timeout: '5m' } } }).rules.run.timeout).toBe(
+        '5m'
+      );
+    });
+
+    it('rejects a malformed duration', () => {
+      expect(() => configSchema.validate({ rules: { run: { timeout: 'nonsense' } } })).toThrow(
+        /Invalid duration/
+      );
+    });
+  });
+
+  describe('esql.responseFormat', () => {
+    it('defaults to json', () => {
+      const config = configSchema.validate({});
+      expect(config.esql.responseFormat).toBe('json');
+    });
+
+    it('accepts arrow', () => {
+      expect(configSchema.validate({ esql: { responseFormat: 'arrow' } }).esql.responseFormat).toBe(
+        'arrow'
+      );
+    });
+
+    it('rejects an unknown format', () => {
+      expect(() => configSchema.validate({ esql: { responseFormat: 'csv' } })).toThrow();
     });
   });
 });

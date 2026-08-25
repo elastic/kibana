@@ -18,13 +18,13 @@ import type {
 
 export const getStepIds = (isAlert: boolean): StepId[] =>
   isAlert
-    ? ['alertCondition', 'recoveryCondition', 'details', 'notifications']
-    : ['alertCondition', 'details'];
+    ? ['alertCondition', 'outcome', 'details', 'notifications']
+    : ['alertCondition', 'outcome', 'details'];
 
 export const getBuilderStepIds = (isAlert: boolean): StepId[] =>
   isAlert
-    ? ['builderCondition', 'recoveryCondition', 'details', 'notifications']
-    : ['builderCondition', 'details'];
+    ? ['builderCondition', 'outcome', 'details', 'notifications']
+    : ['builderCondition', 'outcome', 'details'];
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
@@ -45,49 +45,47 @@ export const createInitialState = ({
 }: InitialStateConfig): ComposeDiscoverState => {
   const recoveryType = initialKind === 'alert' ? initialRecoveryType : 'default';
   return {
-    mode,
     step: 0,
     recoveryType,
     activeTab: defaultTabForTabs(
-      getSandboxTabs(initialKind === 'alert', { step: 0, recoveryType, mode })
+      getSandboxTabs(initialKind === 'alert', {
+        step: 0,
+        recoveryType,
+        manualSplitEnabled: false,
+      })
     ),
-    childOpen: forceYamlMode || mode === 'create',
+    childOpen: forceYamlMode,
     queryCommitted: mode === 'edit' || isQueryPrePopulated,
     yamlMode: forceYamlMode,
+    manualSplitEnabled: false,
   };
 };
 
 /**
  * Returns the tabs to show in the Sandbox for the current step.
  *
- * create + alertCondition               → undefined (single unified editor; split runs on Apply)
- * edit   + alertCondition               → ['base', 'alert']
- * isAlert + recoveryCondition  + custom → ['recovery']
- * everything else                       → undefined (single editor)
+ * alertCondition + manualSplitEnabled → ['base', 'alert']
+ * alertCondition                      → undefined (unified editor; heuristic split on Apply)
+ * isAlert + outcome + custom          → ['recovery']
+ * everything else                     → undefined (single editor)
  */
 export function getSandboxTabs(
   isAlert: boolean,
-  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'mode'>
+  state: Pick<ComposeDiscoverState, 'step' | 'recoveryType' | 'manualSplitEnabled'>
 ): QueryTab[] | undefined {
   if (!isAlert) return undefined;
 
   const stepId = getStepIds(isAlert)[state.step];
 
   if (stepId === 'alertCondition') {
-    // Create authors a single unified ES|QL query; the heuristic split runs on Apply.
-    if (state.mode === 'create') return undefined;
-    return ['base', 'alert'];
+    return state.manualSplitEnabled ? ['base', 'alert'] : undefined;
   }
-  if (stepId === 'recoveryCondition' && state.recoveryType === 'custom') return ['recovery'];
+  if (stepId === 'outcome' && state.recoveryType === 'custom') return ['recovery'];
   return undefined;
 }
 
 function defaultTabForTabs(tabs: QueryTab[] | undefined): QueryTab {
   if (tabs?.includes('recovery')) return 'recovery';
-  /*
-   * When the split editor is open (base + alert), start on the base query —
-   * users build the base query first, then layer the alert condition on top.
-   */
   if (tabs?.includes('base')) return 'base';
   return 'alert';
 }
@@ -106,9 +104,18 @@ export function reducer(
           : {}),
       };
     case 'KIND_CHANGE':
+      /*
+       * Reset manual split when switching kind — the unified query is rebuilt.
+       * Stay on the current step (Outcome owns mode selection); do not force the sandbox open.
+       */
       return action.kind === 'alert'
-        ? { ...state, step: 0, childOpen: true, activeTab: 'base' }
-        : { ...state, recoveryType: 'default', step: 0, activeTab: 'alert' };
+        ? { ...state, activeTab: 'base', manualSplitEnabled: false }
+        : {
+            ...state,
+            recoveryType: 'default',
+            activeTab: 'alert',
+            manualSplitEnabled: false,
+          };
     case 'SET_TAB':
       return { ...state, activeTab: action.tab };
     case 'SET_STEP':
@@ -161,7 +168,13 @@ export function reducer(
         ...state,
         yamlMode: action.enabled,
         childOpen: action.enabled,
+        // GUI manual split does not carry over into YAML editing.
+        ...(action.enabled ? { manualSplitEnabled: false } : {}),
       };
+    case 'ENABLE_MANUAL_SPLIT':
+      return { ...state, manualSplitEnabled: true, activeTab: 'base' };
+    case 'DISABLE_MANUAL_SPLIT':
+      return { ...state, manualSplitEnabled: false, activeTab: 'alert' };
     default:
       return state;
   }

@@ -24,5 +24,11 @@ export type {
   MetricsESQLResponse,
   Dimension,
   MetricUnit,
+  MetricsSort,
   UnifiedMetricsGridProps,
 } from './src/types';
+export {
+  SIMPLE_AGGREGATION_OPTIONS,
+  HISTOGRAM_PERCENTILE_OPTIONS,
+  HISTOGRAM_PERCENTILE_VALUES,
+} from './src/components/flyout/metrics_grid_settings_flyout';

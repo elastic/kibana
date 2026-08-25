@@ -15,9 +15,12 @@ import type {
   AgentConfigurationOverrides,
   ConversationAction,
   AgentExecutionMode,
+  ConversationRoundAuthor,
+  InteractivityConfig,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
+import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 
 export const executeAgent$ = ({
@@ -30,13 +33,19 @@ export const executeAgent$ = ({
   runAgent,
   conversation,
   nextInput,
+  origin,
+  author,
   abortSignal,
   defaultConnectorId,
   telemetryMetadata,
+  maxContentLength,
   browserApiTools,
   configurationOverrides,
   action,
   executionMode,
+  interactivity,
+  parentExecutionId,
+  projectRouting,
 }: {
   agentId: string;
   executionId: string;
@@ -47,13 +56,19 @@ export const executeAgent$ = ({
   runAgent: RunAgentFn;
   conversation?: Conversation;
   nextInput: ConverseInput;
+  origin?: ExecutionConversationOrigin;
+  author?: ConversationRoundAuthor;
   abortSignal?: AbortSignal;
   defaultConnectorId?: string;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  maxContentLength?: number;
   browserApiTools?: BrowserApiToolMetadata[];
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
   executionMode?: AgentExecutionMode;
+  interactivity?: InteractivityConfig;
+  parentExecutionId?: string;
+  projectRouting?: string;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -63,10 +78,16 @@ export const executeAgent$ = ({
       abortSignal,
       defaultConnectorId,
       telemetryMetadata,
+      maxContentLength,
       executionMode,
+      interactive: interactivity,
+      parentExecutionId,
+      projectRouting,
       agentParams: {
         nextInput,
         conversation,
+        origin,
+        author,
         capabilities,
         browserApiTools,
         configurationOverrides,

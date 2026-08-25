@@ -18,6 +18,7 @@ import {
 } from '../../layout_annotations';
 import { WorkpadShortcuts } from '../../workpad_shortcuts';
 import { interactiveWorkpadPagePropTypes } from '../prop_types';
+import { WorkpadPageRoot } from '../workpad_page_root';
 import { InteractionBoundary } from './interaction_boundary';
 
 export class InteractiveWorkpadPage extends PureComponent {
@@ -71,7 +72,7 @@ export class InteractiveWorkpadPage extends PureComponent {
     shortcuts = <WorkpadShortcuts {...shortcutProps} />;
 
     return (
-      <div
+      <WorkpadPageRoot
         key={pageId}
         id={pageId}
         ref={(node) => {
@@ -131,7 +132,7 @@ export class InteractiveWorkpadPage extends PureComponent {
             }
           })
           .filter((element) => !!element)}
-      </div>
+      </WorkpadPageRoot>
     );
   }
 }

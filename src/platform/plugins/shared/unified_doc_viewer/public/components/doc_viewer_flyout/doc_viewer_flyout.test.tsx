@@ -7,14 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type ForwardedRef } from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewerFlyout, type UnifiedDocViewerFlyoutProps } from './doc_viewer_flyout';
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const react = jest.requireActual('react');
+  const OriginalFlyout = actual.EuiFlyout;
+
+  return {
+    ...actual,
+    EuiFlyout: react.forwardRef((props: EuiFlyoutProps, ref: ForwardedRef<HTMLDivElement>) => (
+      <OriginalFlyout {...props} ref={ref}>
+        {props.flyoutMenuProps && (
+          <actual.EuiFlyoutMenu {...props.flyoutMenuProps} hideCloseButton />
+        )}
+        {props.children}
+      </OriginalFlyout>
+    )),
+  };
+});
 
 const buildHit = ({ id, message }: { id: string; message: string }) =>
   buildDataTableRecord(
@@ -121,5 +141,103 @@ describe('UnifiedDocViewerFlyout', () => {
       'stale message'
     );
     expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
+  });
+
+  it('renders trailing actions in the flyout menu', async () => {
+    const user = userEvent.setup();
+    const onClick = jest.fn();
+    const trailingAction = {
+      iconType: 'share' as const,
+      'aria-label': 'Copy link to this document',
+      toolTipContent: 'Copy link to this document',
+      onClick,
+    };
+
+    render(
+      <UnifiedDocViewerFlyout
+        {...buildProps({
+          flyoutMenuTrailingActions: [trailingAction],
+        })}
+      />
+    );
+
+    const shareButton = await screen.findByRole('button', {
+      name: 'Copy link to this document',
+    });
+
+    await user.click(shareButton);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  describe('document pinning behavior', () => {
+    it('should update active page when hits reorder and the pinned doc is still present', () => {
+      const pinnedHit = buildHit({ id: 'pinned-hit', message: 'pinned message' });
+      const otherHits = [
+        buildHit({ id: 'hit-1', message: 'hit 1' }),
+        buildHit({ id: 'hit-2', message: 'hit 2' }),
+        buildHit({ id: 'hit-3', message: 'hit 3' }),
+        buildHit({ id: 'hit-4', message: 'hit 4' }),
+      ];
+      const initialHits = [pinnedHit, ...otherHits];
+      const reorderedHits = [...otherHits, pinnedHit];
+
+      const { rerender } = render(
+        <UnifiedDocViewerFlyout {...buildProps({ hit: pinnedHit, hits: initialHits })} />
+      );
+
+      expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeInTheDocument();
+      expect(screen.getByTestId('docViewerFlyoutNavigationPage-0')).toBeInTheDocument();
+
+      rerender(<UnifiedDocViewerFlyout {...buildProps({ hit: pinnedHit, hits: reorderedHits })} />);
+
+      expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeInTheDocument();
+      expect(screen.getByTestId('docViewerFlyoutNavigationPage-4')).toBeInTheDocument();
+    });
+
+    it('should hide navigation and show stale doc when hits change to exclude the pinned doc', () => {
+      const pinnedHit = buildHit({ id: 'pinned-hit', message: 'pinned message' });
+      const otherHits = [
+        buildHit({ id: 'hit-1', message: 'hit 1' }),
+        buildHit({ id: 'hit-2', message: 'hit 2' }),
+      ];
+
+      const renderHeader = ({ hit }: { hit: { raw: { _source?: Record<string, unknown> } } }) => (
+        <div data-test-subj="docViewerFlyoutHeaderHit" data-message={hit.raw._source?.message}>
+          Header
+        </div>
+      );
+
+      const { rerender } = render(
+        <UnifiedDocViewerFlyout
+          {...buildProps({
+            hit: pinnedHit,
+            hits: [pinnedHit, ...otherHits],
+            renderCustomHeader: renderHeader,
+          })}
+        />
+      );
+
+      expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeInTheDocument();
+
+      rerender(
+        <UnifiedDocViewerFlyout
+          {...buildProps({ hit: pinnedHit, hits: otherHits, renderCustomHeader: renderHeader })}
+        />
+      );
+
+      expect(screen.getByTestId('docViewerFlyoutHeaderHit')).toHaveAttribute(
+        'data-message',
+        'pinned message'
+      );
+      expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
+    });
+
+    it('should hide navigation when exactly one result exists', () => {
+      const pinnedHit = buildHit({ id: 'pinned-hit', message: 'pinned message' });
+
+      render(<UnifiedDocViewerFlyout {...buildProps({ hit: pinnedHit, hits: [pinnedHit] })} />);
+
+      expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
+    });
   });
 });

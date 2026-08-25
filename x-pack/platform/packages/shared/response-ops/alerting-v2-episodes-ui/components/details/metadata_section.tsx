@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiSkeletonRectangle, EuiSkeletonText, EuiSpacer, EuiText } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
@@ -18,6 +18,13 @@ import { AlertEpisodeMetadataTable } from './metadata_table';
 import type { AlertEpisodeMetadataTableProps } from './metadata_table';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
+
+/**
+ * ES metadata fields that a data view always declares in `metaFields`, but that this section's
+ * synthetic hit (built from the episode's stored `data`, not a real search hit) never has a real
+ * value for.
+ */
+const HIDDEN_METADATA_FIELDS = new Set(['_id', '_index', '_score', '_ignored']);
 
 export interface AlertEpisodeMetadataSectionProps {
   episodeId: string;
@@ -71,7 +78,17 @@ export const AlertEpisodeMetadataSection = ({
 
   const hit = useMemo(() => {
     if (!eventData || !dataView) return undefined;
-    return buildDataTableRecord({ _source: eventData.data }, dataView);
+    const record = buildDataTableRecord({ _source: eventData.data }, dataView);
+    // The record is synthesized from the episode's stored `data`, not a real search hit, so it
+    // has no real ES metadata. The data view's `metaFields` (`_id`, `_index`, `_score`, `_ignored`)
+    // still get merged into `flattened` as `undefined`, rendering as empty rows in the metadata
+    // table — strip them out since they can never have a meaningful value here.
+    return {
+      ...record,
+      flattened: Object.fromEntries(
+        Object.entries(record.flattened).filter(([field]) => !HIDDEN_METADATA_FIELDS.has(field))
+      ),
+    };
   }, [eventData, dataView]);
 
   const renderTable = useCallback<AlertEpisodeMetadataTableProps['renderTable']>(
@@ -94,7 +111,20 @@ export const AlertEpisodeMetadataSection = ({
     (ruleId && isRuleLoading(ruleState)) ||
     isDataViewLoading
   ) {
-    return <EuiLoadingSpinner size="m" data-test-subj="alertingV2EpisodeMetadataSectionLoading" />;
+    // Shaped like the doc-viewer table: a search input row, then field rows. The panel
+    // provides padding because this section renders edge-to-edge in the flyout.
+    return (
+      <EuiPanel
+        hasShadow={false}
+        color="transparent"
+        paddingSize="m"
+        data-test-subj="alertingV2EpisodeMetadataSectionLoading"
+      >
+        <EuiSkeletonRectangle width="100%" height={32} />
+        <EuiSpacer size="m" />
+        <EuiSkeletonText lines={8} size="s" />
+      </EuiPanel>
+    );
   }
 
   if (!isRuleLoaded(ruleState)) {

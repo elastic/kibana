@@ -17,6 +17,7 @@ import {
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
+import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import { dashboardTools } from '../../../common';
 import { retrieveLatestVersion } from './attachment_state';
 import {
@@ -26,6 +27,7 @@ import {
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
 } from './core';
+import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
   'New dashboards require a set_metadata operation with a non-empty title.';
@@ -47,8 +49,15 @@ const generateDashboardSchema = z.object({
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
  * heavy payload into a follow-up tool call.
+ *
+ * `authoringNotesByPanelId` holds the one-sentence note describing every chart
+ * authored in this run, keyed by panel id. Panels that were not authored now
+ * (or whose engine returned no note) simply have no `authoring_note`.
  */
-const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
+const summarizeDashboard = (
+  dashboardData: DashboardAttachmentData,
+  authoringNotesByPanelId: Map<string, string>
+) => ({
   title: dashboardData.title,
   description: dashboardData.description,
   panels: dashboardData.panels.map((widget) => {
@@ -62,6 +71,7 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
           type: panel.type,
           id: panel.id,
           grid: panel.grid,
+          authoring_note: authoringNotesByPanelId.get(panel.id),
         })),
       };
     }
@@ -69,9 +79,32 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
       type: widget.type,
       id: widget.id,
       grid: widget.grid,
+      authoring_note: authoringNotesByPanelId.get(widget.id),
     };
   }),
+  controls: (dashboardData.pinned_panels ?? []).map((control) => {
+    const c = control as { id?: string; type?: string; config?: { title?: string } };
+    return { id: c.id, type: c.type, title: c.config?.title };
+  }),
 });
+
+const CUSTOM_CONTENT_TOOL_GUIDANCE = `
+8. add / edit custom content panels (\`source: "config"\`, \`type: "custom_content"\`) for HTML-based layouts that Lens and Vega cannot express, such as KPI scorecards with colored status badges, health/status boards, or panels that mix narrative text with live data values.
+
+**Custom content panel type selection:**
+Use custom content only as a last resort:
+- Any standard time series, bar, pie, metric, or data table → use Lens.
+- Scatter plots, faceted charts, layered charts, combination charts → use Vega.
+- Plain explanatory text with no data → use markdown.
+- The content needs an HTML/CSS layout no single Lens chart type can express, or mixes narrative text with live data, or the user explicitly asks for a custom/HTML panel → use custom content.
+
+**Creating a custom content panel:**
+- Set \`config.prompt\` to a concise description of what to display. Do not supply \`template\` — it is generated server-side from the prompt.
+- Optionally set \`config.esqlQuery\` when the panel needs live data.
+
+**Editing a custom content panel:**
+- Use \`edit_panels\` (\`source: "config"\`, \`type: "custom_content"\`) and set \`panelId\` to the target panel.
+- Supply only \`prompt\` and/or \`esqlQuery\` — omit fields that should stay unchanged. The server regenerates the template from the merged prompt and query. Do not supply \`template\`.`;
 
 /**
  * Kibana dashboard generation tool.
@@ -80,14 +113,16 @@ const summarizeDashboard = (dashboardData: DashboardAttachmentData) => ({
  * Kibana attachment persistence so the LLM works against a lightweight reference:
  * - the prior payload is read server-side from `dashboardAttachmentId`,
  * - the generated payload is persisted as a `dashboard` attachment,
- * - the result returns only the attachment id, version, and a compact summary.
+ * - the result returns only the attachment id, version, and a compact dashboard summary.
  *
  * This keeps the heavy payload out of the LLM transcript — the model references
  * the attachment id to render it rather than copying it into the next tool call.
  */
-export const generateDashboardTool = (): BuiltinSkillBoundedTool<
-  typeof generateDashboardSchema
-> => {
+export const generateDashboardTool = ({
+  customContentEnabled = true,
+}: {
+  customContentEnabled?: boolean;
+} = {}): BuiltinSkillBoundedTool<typeof generateDashboardSchema> => {
   return {
     id: dashboardTools.generateDashboard,
     type: ToolType.builtin,
@@ -97,11 +132,14 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels (resolved panel configs or visualizations from natural language)
-3. edit existing Lens or markdown panel content
+2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
+3. edit existing Lens, Vega, or markdown panel content
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
-6. remove panels`,
+6. remove panels
+7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)${
+      customContentEnabled ? CUSTOM_CONTENT_TOOL_GUIDANCE : ''
+    }`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },
@@ -118,7 +156,7 @@ Use operations[] to:
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
 
-        const { dashboardData, failures } = await executeDashboardOperations({
+        const { dashboardData, failures, panelAuthoringNotes } = await executeDashboardOperations({
           dashboardData: latestVersion?.data,
           operations,
           logger,
@@ -128,18 +166,28 @@ Use operations[] to:
             events,
             esClient,
           }),
+          resolveCustomContentTemplate: customContentEnabled
+            ? createCustomContentTemplateResolver({ logger, modelProvider, esClient })
+            : undefined,
         });
 
-        const description = `Dashboard: ${dashboardData.title}`;
+        // Data-aware default time range computation
+        const finalDashboardData = await applyDefaultDashboardTimeRange({
+          dashboardData,
+          esClient,
+          logger,
+        });
+
+        const description = `Dashboard: ${finalDashboardData.title}`;
         const attachment = isNewDashboard
           ? await attachments.add({
               id: dashboardAttachmentId,
               type: DASHBOARD_ATTACHMENT_TYPE,
               description,
-              data: dashboardData,
+              data: finalDashboardData,
             })
           : await attachments.update(dashboardAttachmentId, {
-              data: dashboardData,
+              data: finalDashboardData,
               description,
             });
 
@@ -157,7 +205,15 @@ Use operations[] to:
               data: {
                 attachment_id: attachment.id,
                 version: attachment.current_version ?? 1,
-                dashboard: summarizeDashboard(dashboardData),
+                dashboard: summarizeDashboard(
+                  finalDashboardData,
+                  new Map(
+                    panelAuthoringNotes.map(({ panelId, authoringNote }) => [
+                      panelId,
+                      authoringNote,
+                    ])
+                  )
+                ),
                 failures: failures.length > 0 ? failures : undefined,
               },
             },

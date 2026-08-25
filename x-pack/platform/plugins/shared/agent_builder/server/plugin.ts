@@ -6,14 +6,10 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import {
-  AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
-  AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-} from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { createConversationPublicClient } from './services/conversation/conversation_public_client';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
@@ -25,6 +21,7 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
+import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
 import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
@@ -41,10 +38,6 @@ import { createModelProviderFactory } from './services/execution/runner/model_pr
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
-import {
-  syncAgentBuilderOverviewDashboard,
-  syncAgentBuilderOverviewDashboardForSpace,
-} from './dashboard';
 import { registerInferenceFeatures } from './inference_features';
 
 export class AgentBuilderPlugin
@@ -104,6 +97,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       cloud: setupDeps.cloud,
       usageApi: setupDeps.usageApi,
+      actions: setupDeps.actions,
     });
 
     registerTaskDefinitions({
@@ -118,6 +112,8 @@ export class AgentBuilderPlugin
     });
 
     registerFeatures({ features: setupDeps.features });
+
+    coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
 
     // Phantom capability: not a registered feature privilege. Used as an admin check
     // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
@@ -172,11 +168,11 @@ export class AgentBuilderPlugin
     });
 
     const smlTools = createSmlTools({
-      getAgentContextLayer: () => {
+      getAgentBuilderSml: () => {
         if (!this.startDeps) {
-          throw new Error('Agent Context Layer not available — plugin has not started');
+          throw new Error('Agent Builder SML not available — plugin has not started');
         }
-        return this.startDeps.agentContextLayer;
+        return this.startDeps.agentBuilderSml;
       },
     });
     smlTools.forEach((tool) => {
@@ -187,6 +183,10 @@ export class AgentBuilderPlugin
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
+      },
+      getInference: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.inference;
       },
     });
     connectorTools.forEach((tool) => {
@@ -199,9 +199,13 @@ export class AgentBuilderPlugin
       },
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
+        registerType: serviceSetups.agents.registerType.bind(serviceSetups.agents),
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
+      },
+      renderers: {
+        register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
       },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
@@ -211,6 +215,11 @@ export class AgentBuilderPlugin
       },
       plugins: {
         register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
+      },
+      conversationTemplates: {
+        register: serviceSetups.conversationTemplates.register.bind(
+          serviceSetups.conversationTemplates
+        ),
       },
       topSnippets: this.config.topSnippets,
     };
@@ -225,8 +234,15 @@ export class AgentBuilderPlugin
     }).then((teardownTracing) => {
       this.teardownTracing = teardownTracing;
     });
-    const { inference, spaces, actions, taskManager, searchInferenceEndpoints } = startDeps;
-    const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
+    const {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+      security: securityPlugin,
+    } = startDeps;
+    const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
 
     this.cleanupLegacySmlTasks(taskManager).catch((error) => {
@@ -236,7 +252,9 @@ export class AgentBuilderPlugin
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
+      securityPlugin,
       elasticsearch,
+      http,
       inference,
       spaces,
       actions,
@@ -250,36 +268,21 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
     });
 
-    const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
-      startServices;
+    const {
+      tools,
+      agents,
+      skills,
+      runnerFactory,
+      execution,
+      plugins,
+      conversations,
+      conversationTemplates,
+    } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
       registerSampleData(this.home, this.logger);
     }
-
-    void (async () => {
-      try {
-        const internalClient = new SavedObjectsClient(
-          coreStart.savedObjects.createInternalRepository()
-        );
-        const tracingEnabled = await coreStart.uiSettings
-          .asScopedToClient(internalClient)
-          .get<boolean>(AGENT_BUILDER_TRACING_ENABLED_SETTING_ID);
-        const experimentalFeaturesEnabled = await coreStart.uiSettings
-          .asScopedToClient(internalClient)
-          .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-        await syncAgentBuilderOverviewDashboard(
-          coreStart,
-          tracingEnabled && experimentalFeaturesEnabled,
-          this.logger
-        );
-      } catch (error) {
-        this.logger.error(
-          `Failed to sync Agent Builder overview dashboard: ${(error as Error).message}`
-        );
-      }
-    })();
 
     const modelProviderFactory = createModelProviderFactory({
       inference,
@@ -293,6 +296,7 @@ export class AgentBuilderPlugin
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
+        ensure: agents.ensure,
         runAgent: runner.runAgent.bind(runner),
       },
       tools: {
@@ -317,23 +321,11 @@ export class AgentBuilderPlugin
       conversations: {
         getScopedClient: async ({ request }) => {
           const client = await conversations.getScopedClient({ request });
-          return {
-            get: client.get.bind(client),
-            list: client.list.bind(client),
-          };
+          const agentRegistry = await agents.getRegistry({ request });
+          return createConversationPublicClient({ client, agentRegistry });
         },
       },
-      dashboard: {
-        syncOverview: (tracingEnabled: boolean) =>
-          syncAgentBuilderOverviewDashboard(coreStart, tracingEnabled, this.logger),
-        syncOverviewForSpace: (tracingEnabled: boolean, spaceId: string) =>
-          syncAgentBuilderOverviewDashboardForSpace(
-            coreStart,
-            tracingEnabled,
-            spaceId,
-            this.logger
-          ),
-      },
+      conversationTemplates,
     };
   }
 

@@ -106,15 +106,18 @@ export const dashboardClient = {
     }
     return result;
   },
-  search: async (searchParams: DashboardSearchRequestParams) => {
+  search: async (searchParams: Partial<DashboardSearchRequestParams>) => {
     const { query, ...params } = searchParams;
-    return await coreServices.http.get<DashboardSearchResponseBody>(`${DASHBOARD_API_PATH}`, {
+
+    const response = await coreServices.http.get<DashboardSearchResponseBody>(DASHBOARD_API_PATH, {
       version: DASHBOARD_API_VERSION,
       query: {
         ...params,
         ...(query ? { query: `${query}*` } : {}),
       },
     });
+
+    return response;
   },
   update: async (id: string, dashboardState: DashboardState) => {
     const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(

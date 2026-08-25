@@ -26,9 +26,12 @@ export function registerCasesPersistableState(
 ) {
   if (enabledFeatures.ad === true) {
     try {
-      cases.attachmentFramework.registerUnified({
+      cases.attachmentFramework.registerAttachment({
         id: ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
         schema: AnomalySwimLaneAttachmentPayloadSchema,
+        // `data.state` is the ML embeddable input bag produced by the
+        // anomaly explorer's "Add to case" flow — not authorable in YAML.
+        workflowSchema: false,
       });
     } catch (error) {
       logger.warn(
@@ -36,9 +39,12 @@ export function registerCasesPersistableState(
       );
     }
     try {
-      cases.attachmentFramework.registerUnified({
+      cases.attachmentFramework.registerAttachment({
         id: ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
         schema: AnomalyChartsAttachmentPayloadSchema,
+        // `data.state` is the ML embeddable input bag produced by the
+        // anomaly charts "Add to case" flow — not authorable in YAML.
+        workflowSchema: false,
       });
     } catch (error) {
       logger.warn(
@@ -47,9 +53,12 @@ export function registerCasesPersistableState(
     }
 
     try {
-      cases.attachmentFramework.registerUnified({
+      cases.attachmentFramework.registerAttachment({
         id: ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
         schema: SingleMetricViewerAttachmentPayloadSchema,
+        // `data.state` is the ML embeddable input bag produced by the
+        // single metric viewer "Add to case" flow — not authorable in YAML.
+        workflowSchema: false,
       });
     } catch (error) {
       logger.warn(

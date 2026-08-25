@@ -202,6 +202,32 @@ const mvSliceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'flattened',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'start',
+          type: 'integer',
+          optional: false,
+          description:
+            'Start position. If `null`, the function returns `null`. The start argument can be negative. An index of -1 is used to specify the last value in the list.',
+        },
+        {
+          name: 'end',
+          type: 'integer',
+          optional: true,
+          description:
+            'End position(included). Optional; if omitted, the position at `start` is returned. The end argument can be negative. An index of -1 is used to specify the last value in the list.',
+        },
+      ],
+      returnType: 'flattened',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'geo_point',
           optional: false,
           description:
@@ -561,8 +587,6 @@ const mvSortDefinition: FunctionDefinition = {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'boolean',
@@ -585,8 +609,6 @@ const mvSortDefinition: FunctionDefinition = {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'date',
@@ -609,8 +631,6 @@ const mvSortDefinition: FunctionDefinition = {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'date_nanos',
@@ -633,8 +653,6 @@ const mvSortDefinition: FunctionDefinition = {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'double',
@@ -657,8 +675,6 @@ const mvSortDefinition: FunctionDefinition = {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'integer',
@@ -681,8 +697,6 @@ const mvSortDefinition: FunctionDefinition = {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'ip',
@@ -705,8 +719,6 @@ const mvSortDefinition: FunctionDefinition = {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'keyword',
@@ -729,8 +741,6 @@ const mvSortDefinition: FunctionDefinition = {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'long',
@@ -753,8 +763,6 @@ const mvSortDefinition: FunctionDefinition = {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'keyword',
@@ -777,8 +785,6 @@ const mvSortDefinition: FunctionDefinition = {
             kind: 'constant',
             allowedValues: ['asc', 'desc'],
           },
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
         },
       ],
       returnType: 'version',
@@ -1002,6 +1008,25 @@ const mvUnionDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'flattened',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'flattened',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'flattened',
     },
     {
       params: [
@@ -2068,7 +2093,9 @@ const qstrDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Query string in Lucene query string format.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'options',
@@ -2078,7 +2105,9 @@ const qstrDefinition: FunctionDefinition = {
           optional: true,
           description:
             '(Optional) Additional options for Query String as <<esql-function-named-params,function named parameters>>. See <<query-dsl-query-string-query,query string query>> for more information.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -2090,7 +2119,9 @@ const qstrDefinition: FunctionDefinition = {
           type: 'text',
           optional: false,
           description: 'Query string in Lucene query string format.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'options',
@@ -2100,13 +2131,21 @@ const qstrDefinition: FunctionDefinition = {
           optional: true,
           description:
             '(Optional) Additional options for Query String as <<esql-function-named-params,function named parameters>>. See <<query-dsl-query-string-query,query string query>> for more information.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
+  locationsAvailable: [
+    Location.WHERE,
+    Location.STATS_WHERE,
+    Location.JOIN,
+    Location.EVAL,
+    Location.HIGHLIGHT_QUERY,
+  ],
   examples: [
     'FROM books\n| WHERE QSTR("author: Faulkner")',
     'FROM books\n| WHERE QSTR("title: Hobbjt~", {"fuzziness": 2})',
@@ -2736,7 +2775,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'double',
@@ -2755,7 +2796,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'double',
@@ -2785,7 +2828,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'integer',
@@ -2804,7 +2849,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'integer',
@@ -2834,7 +2881,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'long',
@@ -2853,7 +2902,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'long',
@@ -2883,7 +2934,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'unsigned_long',
@@ -2902,7 +2955,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'unsigned_long',
@@ -2955,7 +3010,6 @@ const roundToDefinition: FunctionDefinition = {
           hint: {
             kind: 'constant',
           },
-          constantOnly: true,
         },
       ],
       returnType: 'date',
@@ -2977,7 +3031,6 @@ const roundToDefinition: FunctionDefinition = {
           hint: {
             kind: 'constant',
           },
-          constantOnly: true,
         },
       ],
       returnType: 'date_nanos',
@@ -2999,7 +3052,6 @@ const roundToDefinition: FunctionDefinition = {
           hint: {
             kind: 'constant',
           },
-          constantOnly: true,
         },
       ],
       returnType: 'double',
@@ -3021,7 +3073,6 @@ const roundToDefinition: FunctionDefinition = {
           hint: {
             kind: 'constant',
           },
-          constantOnly: true,
         },
       ],
       returnType: 'double',
@@ -3043,7 +3094,6 @@ const roundToDefinition: FunctionDefinition = {
           hint: {
             kind: 'constant',
           },
-          constantOnly: true,
         },
       ],
       returnType: 'double',
@@ -3065,7 +3115,6 @@ const roundToDefinition: FunctionDefinition = {
           hint: {
             kind: 'constant',
           },
-          constantOnly: true,
         },
       ],
       returnType: 'double',
@@ -3087,7 +3136,6 @@ const roundToDefinition: FunctionDefinition = {
           hint: {
             kind: 'constant',
           },
-          constantOnly: true,
         },
       ],
       returnType: 'integer',
@@ -3109,7 +3157,6 @@ const roundToDefinition: FunctionDefinition = {
           hint: {
             kind: 'constant',
           },
-          constantOnly: true,
         },
       ],
       returnType: 'long',
@@ -3131,7 +3178,6 @@ const roundToDefinition: FunctionDefinition = {
           hint: {
             kind: 'constant',
           },
-          constantOnly: true,
         },
       ],
       returnType: 'double',
@@ -3153,7 +3199,6 @@ const roundToDefinition: FunctionDefinition = {
           hint: {
             kind: 'constant',
           },
-          constantOnly: true,
         },
       ],
       returnType: 'long',
@@ -3175,7 +3220,6 @@ const roundToDefinition: FunctionDefinition = {
           hint: {
             kind: 'constant',
           },
-          constantOnly: true,
         },
       ],
       returnType: 'long',
@@ -11075,6 +11119,39 @@ const toRadiansDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const toRangeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.TO_RANGE,
+  description: i18n.translate('kbn-esql-language.esql.definitions.to_range', {
+    defaultMessage:
+      'Constructs a range from two boundary values. The first argument is the inclusive lower bound; the second is the exclusive upper bound, following the half-open `[from, to)` convention used for all range types in ES|QL. Currently accepts `datetime` arguments and returns a `date_range`.',
+  }),
+  ignoreAsSuggestion: true,
+  preview: true,
+  alias: undefined,
+  signatures: [],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW from_dt = TO_DATETIME("2000-01-01T00:00:00.000Z"), to_dt = TO_DATETIME("2010-01-01T00:00:00.000Z")\n| EVAL r = TO_RANGE(from_dt, to_dt)\n| KEEP r',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const toStringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_STRING,
@@ -11185,6 +11262,18 @@ const toStringDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'exponential_histogram',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'flattened',
           optional: false,
           description:
             'Input value. The input can be a single- or multi-valued column or an expression.',
@@ -11439,10 +11528,9 @@ const toTextDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_TEXT,
   description: i18n.translate('kbn-esql-language.esql.definitions.to_text', {
-    defaultMessage: 'Converts an input value into a text.',
+    defaultMessage: 'Converts an input value into text.',
   }),
-  ignoreAsSuggestion: true,
-  preview: false,
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -12764,6 +12852,7 @@ export const scalarFunctionDefinitionsPart2: FunctionDefinition[] = [
   toLongDefinition,
   toLowerDefinition,
   toRadiansDefinition,
+  toRangeDefinition,
   toStringDefinition,
   toTdigestDefinition,
   toTextDefinition,
