@@ -9,10 +9,11 @@
 
 import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
-import type { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '../../server';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
+import { coreServices, screenshotModeService } from '../services/kibana_services';
 
 export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];
@@ -64,6 +65,13 @@ export function initializeSettingsManager(initialState: DashboardState) {
     comparators
   );
 
+  const deferBelowFold = coreServices.uiSettings.get('labs:dashboard:deferBelowFold', false);
+  // disable defer below fold with reporting
+  // can not check viewMode === 'print' because viewMode is only "print" when print format is enabled
+  const getFetchOnlyVisible = () =>
+    screenshotModeService.isScreenshotMode() ? false : deferBelowFold;
+  const fetchOnlyVisible$ = new BehaviorSubject<boolean>(getFetchOnlyVisible());
+
   function serializeSettings() {
     const { description, tags, time_restore, project_routing_restore, title, ...options } =
       stateManager.getLatestState();
@@ -77,6 +85,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
 
   return {
     api: {
+      fetchOnlyVisible$,
       setTags: stateManager.api.setTags,
       getSettings: stateManager.getLatestState,
       setSettings: (settings: Partial<DashboardSettings>) => {

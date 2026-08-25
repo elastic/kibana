@@ -20,6 +20,7 @@ import {
   createTextChunkEvent,
   createThinkingCompleteEvent,
   createBackgroundAgentCompleteEvent,
+  createSubagentRosterUpdatedEvent,
   createToolCallEvent,
   createToolResultEvent,
   extractTextContent,
@@ -42,6 +43,7 @@ import {
   isBackgroundExecutionCompleteAction,
   isExecuteToolAction,
   isHandoverAction,
+  isSubagentRosterUpdatedAction,
   isToolCallAction,
   isToolPromptAction,
 } from './actions';
@@ -243,6 +245,10 @@ export const convertGraphEvents = ({
                   );
                 }
               }
+            }
+
+            if (isSubagentRosterUpdatedAction(action)) {
+              resultEvents.push(createSubagentRosterUpdatedEvent(action.roster));
             }
           }
 

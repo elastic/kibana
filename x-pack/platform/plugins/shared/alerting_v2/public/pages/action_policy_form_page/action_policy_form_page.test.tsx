@@ -66,7 +66,7 @@ const INLINE_DEFS = [
   {
     id: 'email',
     label: 'Email',
-    iconType: 'email',
+    iconType: 'mail',
     connectorTypeId: '.email',
     paramsTemplate: 'to: ""\n',
   },
@@ -193,19 +193,19 @@ const EXISTING_POLICY: ActionPolicyResponse = {
   description: 'Routes critical alerts',
   enabled: true,
   matcher: 'data.severity : "critical"',
-  groupBy: ['host.name', 'service.name'],
+  group_by: ['host.name', 'service.name'],
   tags: ['production'],
-  groupingMode: 'per_field',
+  grouping_mode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
-  snoozedUntil: null,
+  snoozed_until: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
-  createdBy: 'elastic',
-  createdAt: '2026-03-01T10:00:00.000Z',
-  updatedBy: 'elastic',
-  updatedAt: '2026-03-01T10:00:00.000Z',
+  created_by: 'elastic',
+  created_at: '2026-03-01T10:00:00.000Z',
+  updated_by: 'elastic',
+  updated_at: '2026-03-01T10:00:00.000Z',
   auth: {
     owner: 'elastic',
-    createdByUser: false,
+    created_by_user: false,
   },
 };
 
@@ -245,7 +245,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('submits create payload on save', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPage();
 
       await user.type(screen.getByTestId(TEST_SUBJ.nameInput), 'Policy from test');
@@ -267,7 +267,7 @@ describe('ActionPolicyFormPage', () => {
         expect(mockCreateMutateAsync).toHaveBeenCalledWith({
           name: 'Policy from test',
           description: 'Description from test',
-          groupingMode: 'per_episode',
+          grouping_mode: 'per_episode',
           throttle: { strategy: 'on_status_change', interval: null },
           destinations: [{ type: 'workflow', id: 'workflow-1' }],
         })
@@ -279,7 +279,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('creates inline workflows and merges them into destinations on submit', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockCreateInlineWorkflows.mockResolvedValue(['wf-new']);
       renderPage();
 
@@ -313,7 +313,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('rolls back created workflows when policy creation fails', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockCreateInlineWorkflows.mockResolvedValue(['wf-new']);
       mockCreateMutateAsync.mockRejectedValue(new Error('policy failed'));
       renderPage();
@@ -337,7 +337,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('navigates to listing page on cancel', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       renderPage();
 
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
@@ -393,7 +393,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('submits update payload on save', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockUseFetchActionPolicy.mockReturnValue({
         data: EXISTING_POLICY,
         isLoading: false,
@@ -419,10 +419,10 @@ describe('ActionPolicyFormPage', () => {
           version: 'WzEsMV0=',
           name: 'Critical production alerts',
           description: 'Routes critical alerts',
-          groupingMode: 'per_field',
+          grouping_mode: 'per_field',
           tags: ['production'],
           matcher: 'data.severity : "critical"',
-          groupBy: ['host.name', 'service.name'],
+          group_by: ['host.name', 'service.name'],
           throttle: { strategy: 'time_interval', interval: '5m' },
           destinations: [{ type: 'workflow', id: 'workflow-2' }],
         },
@@ -430,7 +430,7 @@ describe('ActionPolicyFormPage', () => {
     });
 
     it('navigates to listing page on cancel', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       mockUseFetchActionPolicy.mockReturnValue({
         data: EXISTING_POLICY,
         isLoading: false,

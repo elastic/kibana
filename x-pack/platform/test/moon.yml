@@ -15,6 +15,7 @@ project:
   channel: ''
   sourceRoot: x-pack/platform/test
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/change-history'
   - '@kbn/test-suites-src'
   - '@kbn/telemetry-collection-manager-plugin'
@@ -46,7 +47,6 @@ dependsOn:
   - '@kbn/ml-agg-utils'
   - '@kbn/share-plugin'
   - '@kbn/tooling-log'
-  - '@kbn/index-management-plugin'
   - '@kbn/snapshot-restore-plugin'
   - '@kbn/monitoring-plugin'
   - '@kbn/core-saved-objects-base-server-internal'
@@ -120,7 +120,6 @@ dependsOn:
   - '@kbn/management-settings-ids'
   - '@kbn/server-route-repository'
   - '@kbn/ml-string-hash'
-  - '@kbn/data-visualizer-plugin'
   - '@kbn/cloud-integration-saml-provider-plugin'
   - '@kbn/ci-stats-reporter'
   - '@kbn/gen-ai-functional-testing'
@@ -134,7 +133,6 @@ dependsOn:
   - '@kbn/data-usage-plugin'
   - '@kbn/data-view-field-editor-plugin'
   - '@kbn/response-ops-rule-params'
-  - '@kbn/remote-clusters-plugin'
   - '@kbn/console-plugin'
   - '@kbn/serverless-common-settings'
   - '@kbn/core-saved-objects-import-export-server-internal'

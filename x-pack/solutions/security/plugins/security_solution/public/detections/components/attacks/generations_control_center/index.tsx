@@ -96,7 +96,7 @@ const GenerationsControlCenterFlyoutComponent: React.FC<Props> = ({
           <EuiButtonEmpty
             data-test-subj={GENERATIONS_CONTROL_CENTER_BACK_BUTTON_TEST_ID}
             flush="left"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             onClick={handleBack}
             size="s"
           >

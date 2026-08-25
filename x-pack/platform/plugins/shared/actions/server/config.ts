@@ -18,6 +18,10 @@ import {
 } from '../common';
 
 import { validateDuration } from './lib/parse_date';
+import {
+  INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
+  INBOUND_EVENTS_MAX_EMITTED_LIMIT,
+} from './inbound/constants';
 
 export enum AllowedHosts {
   Any = '*',
@@ -272,6 +276,15 @@ export const configSchema = schema.object({
         ),
       })
     ),
+  }),
+  inboundEvents: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    maxBodyBytes: schema.byteSize({ defaultValue: '1mb' }),
+    maxEmitted: schema.number({
+      defaultValue: INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
+      min: 1,
+      max: INBOUND_EVENTS_MAX_EMITTED_LIMIT,
+    }),
   }),
 });
 
