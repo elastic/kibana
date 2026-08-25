@@ -57,41 +57,24 @@ function truncateAt(str: string, divider: string): string {
 
 export const stripQueryParams = (url: string) => truncateAt(url, '?');
 
-function isAppLevelNavLink(id: string): boolean {
-  return !id.includes(':');
-}
-
-function getPathname(url: string): string | undefined {
-  if (!url) {
-    return undefined;
-  }
-  try {
-    const pathname = new URL(url, 'http://localhost').pathname.replace(/\/$/, '');
-    return pathname || undefined;
-  } catch {
-    return undefined;
-  }
+function stripTrailingSlash(path: string): string {
+  return path.replace(/\/$/, '') || path;
 }
 
 /**
- * App-level links store `defaultPath` on `url`. Active matching uses `baseUrl` so sibling
- * app routes stay active. Deep links keep matching `url`.
+ * Application ids match `appRoute` from the catalog (no `defaultPath`). Deep links match `url`.
  */
-function getNodeMatchPath(node: ChromeProjectNavigationNode):
-  | {
-      path: string;
-      matchAppRoot: boolean;
-    }
-  | undefined {
+function getNodeMatchPath(
+  node: ChromeProjectNavigationNode,
+  appRoutes: ReadonlyMap<string, string>
+): { path: string; matchAppRoot: boolean } | undefined {
   const deepLink = node.deepLink;
   if (!deepLink) {
     return undefined;
   }
-  if (isAppLevelNavLink(deepLink.id)) {
-    const appPath = getPathname(deepLink.baseUrl);
-    if (appPath) {
-      return { path: appPath, matchAppRoot: true };
-    }
+  const appRoute = appRoutes.get(deepLink.id);
+  if (appRoute) {
+    return { path: stripTrailingSlash(appRoute), matchAppRoot: true };
   }
   if (!deepLink.url) {
     return undefined;
@@ -153,13 +136,17 @@ function extractParentPaths(key: string, navTree: Record<string, ChromeProjectNa
  *
  * @param currentPathname The current Location.pathname
  * @param navTree The flattened navigation tree
+ * @param location The history location, required for `getIsActive`
+ * @param prepend Prepends the base path
+ * @param appRoutes Application id → prepended `appRoute`. App links match this path; deep links match `url`.
  * @returns The active nodes
  */
 export const findActiveNodes = (
   currentPathname: string,
   navTree: Record<string, ChromeProjectNavigationNode>,
   location?: Location,
-  prepend: (path: string) => string = (path) => path
+  prepend: (path: string) => string = (path) => path,
+  appRoutes: ReadonlyMap<string, string> = new Map()
 ): ChromeProjectNavigationNode[][] => {
   const activeNodes: ChromeProjectNavigationNode[][] = [];
   let maxLength = 0;
@@ -179,7 +166,7 @@ export const findActiveNodes = (
       return;
     }
 
-    const matchPath = getNodeMatchPath(node);
+    const matchPath = getNodeMatchPath(node, appRoutes);
 
     if (matchPath && pathMatchesNode(currentPathname, matchPath.path, matchPath.matchAppRoot)) {
       const { length } = matchPath.path;
