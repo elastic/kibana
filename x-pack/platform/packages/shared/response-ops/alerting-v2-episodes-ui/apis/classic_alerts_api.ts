@@ -31,7 +31,7 @@ import {
   CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS,
 } from '../classic_alerts/map_alert';
 import {
-  CLASSIC_ALERTS_INDEX,
+  CLASSIC_ALERT_RULE_TYPE_IDS,
   CLASSIC_ALERTS_HISTOGRAM_LIMIT,
   CLASSIC_ALERTS_LIST_PAGE_SIZE,
   CLASSIC_ALERTS_TAGS_LIMIT,
@@ -53,7 +53,7 @@ export type V1AlertFields = Record<string, unknown>;
 
 /** Body accepted by the authorized RAC alerts find route (`POST /internal/rac/alerts/find`). */
 interface RacFindBody {
-  index: string;
+  rule_type_ids: string[];
   query: estypes.QueryDslQueryContainer;
   size: number;
   track_total_hits?: boolean;
@@ -136,7 +136,7 @@ export const fetchV1AlertsAsEpisodes = async ({
   const response = await findClassicAlerts(
     http,
     {
-      index: CLASSIC_ALERTS_INDEX,
+      rule_type_ids: CLASSIC_ALERT_RULE_TYPE_IDS,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
       sort: buildClassicAlertsSort(sortState),
       size: Math.min(pageSize, CLASSIC_ALERTS_LIST_PAGE_SIZE),
@@ -168,7 +168,7 @@ export const fetchV1AlertsKpis = async ({
   const response = await findClassicAlerts<ClassicKpiAggregations>(
     http,
     {
-      index: CLASSIC_ALERTS_INDEX,
+      rule_type_ids: CLASSIC_ALERT_RULE_TYPE_IDS,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
       aggs: buildClassicAlertsKpiAggs(),
       size: 0,
@@ -207,7 +207,7 @@ export const fetchV1AlertsHistogram = async ({
   const response = await findClassicAlerts(
     http,
     {
-      index: CLASSIC_ALERTS_INDEX,
+      rule_type_ids: CLASSIC_ALERT_RULE_TYPE_IDS,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
       size: CLASSIC_ALERTS_HISTOGRAM_LIMIT,
       track_total_hits: false,
@@ -243,7 +243,7 @@ export const fetchV1AlertsTags = async ({
   const response = await findClassicAlerts<ClassicTagsAggregations>(
     http,
     {
-      index: CLASSIC_ALERTS_INDEX,
+      rule_type_ids: CLASSIC_ALERT_RULE_TYPE_IDS,
       query: buildClassicAlertsQuery(undefined, toTimeRangeParam(timeRange)),
       aggs: buildClassicAlertsTagsAggs(CLASSIC_ALERTS_TAGS_LIMIT),
       size: 0,
@@ -283,7 +283,7 @@ export const fetchV1AlertById = async ({
   const response = await findClassicAlerts(
     http,
     {
-      index: CLASSIC_ALERTS_INDEX,
+      rule_type_ids: CLASSIC_ALERT_RULE_TYPE_IDS,
       query: { bool: { filter: [{ term: { [ALERT_UUID]: id } }] } },
       size: 1,
       track_total_hits: false,

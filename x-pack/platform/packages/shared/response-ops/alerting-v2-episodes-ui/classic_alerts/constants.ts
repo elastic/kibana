@@ -5,27 +5,19 @@
  * 2.0.
  */
 
-/**
- * Classic (v1) alerts-as-data index patterns for observability + stack alerts.
- * These are read aliases; wildcards resolve leniently so an environment without
- * one of the contexts does not error the query.
- *
- * The read goes through the authorized RAC alerts API (`/internal/rac/alerts/find`),
- * which layers the Kibana alerting authorization filter (space + authorized rule
- * types) on top of this index pattern, so unauthorized alerts are never returned.
- */
-const CLASSIC_OBSERVABILITY_ALERTS_INDEX = '.alerts-observability.*';
-const CLASSIC_STACK_ALERTS_INDEX = '.alerts-stack.*';
-
-export const CLASSIC_ALERTS_INDEX = `${CLASSIC_OBSERVABILITY_ALERTS_INDEX},${CLASSIC_STACK_ALERTS_INDEX}`;
-
-export {
-  ALERT_MUTED as CLASSIC_ALERT_MUTED_FIELD,
-  ALERT_SNOOZED as CLASSIC_ALERT_SNOOZED_FIELD,
+import {
+  OBSERVABILITY_RULE_TYPE_IDS,
+  STACK_RULE_TYPE_IDS,
+  ALERT_MUTED,
+  ALERT_SNOOZED,
 } from '@kbn/rule-data-utils';
 
-/** Max classic alerts returned per list request. Mirrors the v2 list limit. */
+export const CLASSIC_ALERT_RULE_TYPE_IDS = Array.from(
+  new Set([...OBSERVABILITY_RULE_TYPE_IDS, ...STACK_RULE_TYPE_IDS])
+);
+
+export { ALERT_MUTED as CLASSIC_ALERT_MUTED_FIELD, ALERT_SNOOZED as CLASSIC_ALERT_SNOOZED_FIELD };
+
 export const CLASSIC_ALERTS_LIST_PAGE_SIZE = 1000;
-/** Max classic alerts fetched for histogram overlap counting. Mirrors the v2 histogram limit. */
 export const CLASSIC_ALERTS_HISTOGRAM_LIMIT = 10_000;
 export const CLASSIC_ALERTS_TAGS_LIMIT = 500;
