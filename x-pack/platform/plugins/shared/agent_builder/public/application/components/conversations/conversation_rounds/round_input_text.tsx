@@ -61,7 +61,8 @@ export const RoundInputText: React.FC<RoundInputTextProps> = ({ text }) => {
       gap: ${euiTheme.size.xs};
       min-width: 0;
       max-width: 24ch;
-      line-height: inherit;
+      height: ${euiTheme.size.l};
+      line-height: 1;
       background: ${euiTheme.colors.backgroundFilledPrimary};
       color: ${euiTheme.colors.textInverse};
       border-radius: ${euiTheme.border.radius.small};
@@ -81,9 +82,10 @@ export const RoundInputText: React.FC<RoundInputTextProps> = ({ text }) => {
   const imageBadgeInnerCss = useMemo(
     () => css`
       min-width: 0;
+      line-height: ${euiTheme.size.l};
       ${euiTextTruncate('100%')}
     `,
-    []
+    [euiTheme.size.l]
   );
 
   const hasNoBadges = segments.every((s) => s.type === 'text');

@@ -9,7 +9,23 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { expect, fn, userEvent, within } from '@storybook/test';
 import { AgentBuilderStorybookProvider } from '../../../__storybook__/agent_builder_storybook_provider';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { ConversationInput } from './conversation_input';
+
+const ConversationInputForStorybook: React.FC<React.ComponentProps<typeof ConversationInput>> = (
+  props
+) => {
+  const { resetAttachments } = useConversationContext();
+  return (
+    <ConversationInput
+      {...props}
+      onSubmitOverride={(content) => {
+        props.onSubmitOverride?.(content);
+        resetAttachments?.();
+      }}
+    />
+  );
+};
 
 // 1×1 blue pixel PNG — minimal valid image for clipboard paste
 const BLUE_PIXEL_PNG_BASE64 =
@@ -22,6 +38,7 @@ const meta: Meta<typeof ConversationInput> = {
   args: {
     onSubmitOverride: fn(),
   },
+  render: (args) => <ConversationInputForStorybook {...args} />,
   decorators: [
     (Story) => (
       <AgentBuilderStorybookProvider>

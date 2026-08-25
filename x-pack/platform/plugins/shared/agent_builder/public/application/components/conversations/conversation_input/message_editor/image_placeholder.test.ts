@@ -52,14 +52,16 @@ describe('createImagePlaceholderElement', () => {
     expect(svgs[1].hasAttribute(IMAGE_PLACEHOLDER_REMOVE_ATTRIBUTE)).toBe(true);
   });
 
-  it('uses 16x16 viewBox for both icons', () => {
+  it('uses correct sizes for each icon', () => {
     const el = createImagePlaceholderElement('a.png');
     const svgs = el.querySelectorAll('svg');
     svgs.forEach((svg) => {
       expect(svg.getAttribute('viewBox')).toBe('0 0 16 16');
-      expect(svg.getAttribute('width')).toBe('16');
-      expect(svg.getAttribute('height')).toBe('16');
     });
+    expect(svgs[0].getAttribute('width')).toBe('12');
+    expect(svgs[0].getAttribute('height')).toBe('12');
+    expect(svgs[1].getAttribute('width')).toBe('12');
+    expect(svgs[1].getAttribute('height')).toBe('12');
   });
 });
 

@@ -12,6 +12,9 @@ import React, { useState } from 'react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 
+const PILL_WIDTH = 72;
+const PILL_HEIGHT = 32;
+
 const removeAriaLabel = i18n.translate(
   'xpack.agentBuilder.thumbnailAttachmentPill.removeAriaLabel',
   {
@@ -45,19 +48,25 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
   const [isHovered, setIsHovered] = useState(false);
   const canRemoveAttachment = Boolean(onRemoveAttachment);
 
+  console.log({ isHighlighted, isHovered });
+
   return (
     <div
       css={css`
         position: relative;
-        width: 72px;
-        height: 32px;
-        border-radius: ${euiTheme.border.radius.small};
+        width: ${PILL_WIDTH}px;
+        height: ${PILL_HEIGHT}px;
+        aspect-ratio: ${PILL_WIDTH} / ${PILL_HEIGHT};
+        border-radius: ${euiTheme.size.s};
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        box-shadow: 0 0 0 ${euiTheme.border.width.thin}
+          ${isHighlighted
+            ? euiTheme.colors.borderStrongPrimary
+            : isHovered
+            ? euiTheme.colors.borderBasePrimary
+            : euiTheme.colors.borderBaseSubdued};
         overflow: hidden;
         flex-shrink: 0;
-        outline: 2px solid transparent;
-        outline-offset: 1px;
-        transition: outline-color ${euiTheme.animation.fast};
-        ${isHighlighted ? `outline-color: ${euiTheme.colors.borderStrongPrimary};` : ''}
       `}
       tabIndex={0}
       onMouseEnter={() => {
@@ -80,30 +89,41 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
           display: block;
         `}
       />
-      {canRemoveAttachment && isHovered && (
-        <div
+      <div
+        css={css`
+          position: absolute;
+          inset: 0;
+          background-color: ${euiTheme.colors.backgroundLightPrimary};
+          opacity: ${isHovered ? 0.75 : 0};
+          pointer-events: none;
+        `}
+      />
+      {canRemoveAttachment && (
+        <EuiButtonIcon
+          iconType="cross"
+          size="s"
           css={css`
             position: absolute;
-            inset: 0;
-            background: ${euiTheme.colors.backgroundLightPrimary};
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: ${euiTheme.size.l};
+            height: ${euiTheme.size.l};
+            border-radius: ${euiTheme.border.radius.small};
+            color: ${euiTheme.colors.textPrimary};
+            visibility: ${isHovered ? 'visible' : 'hidden'};
+            &::before {
+              display: none;
+            }
           `}
-        >
-          <EuiButtonIcon
-            iconType="cross"
-            size="s"
-            style={{ color: euiTheme.colors.textPrimary }}
-            aria-label={removeAriaLabel}
-            onClick={onRemoveAttachment}
-            {...getEbtProps({
-              element: AGENT_BUILDER_UI_EBT.element.pageContent,
-              action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
-              detail: 'conversation',
-            })}
-          />
-        </div>
+          aria-label={removeAriaLabel}
+          onClick={onRemoveAttachment}
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
+            detail: 'conversation',
+          })}
+        />
       )}
     </div>
   );

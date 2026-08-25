@@ -91,7 +91,7 @@ export const RoundInput = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <RoundResponseActions content={input} isVisible={isHovering} copyTarget="prompt" />
+        <RoundResponseActions content={input} isVisible={isHovering} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

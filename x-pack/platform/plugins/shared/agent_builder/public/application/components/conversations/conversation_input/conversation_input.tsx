@@ -235,7 +235,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
             removable
             onRemoveAttachment={handleRemoveAttachment}
             hoveredImageName={hoveredImageName}
-            onHoverImageName={setHoveredImageName}
           />
         </EuiFlexItem>
       )}
@@ -251,7 +250,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
           insertImagePlaceholderOnPaste
           onAfterInput={handleAfterInput}
           onHoveredPlaceholderChange={setHoveredImageName}
-          highlightedPlaceholderName={hoveredImageName}
           uploadingNames={uploadingNames}
         />
       </EuiFlexItem>

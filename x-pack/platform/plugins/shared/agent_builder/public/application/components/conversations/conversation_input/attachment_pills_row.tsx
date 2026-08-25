@@ -25,8 +25,6 @@ export interface AttachmentPillsRowProps {
   uploadingNames?: Set<string>;
   /** Name of the image placeholder currently hovered in the editor (drives pill highlight). */
   hoveredImageName?: string | null;
-  /** Called when the pointer enters/leaves a thumbnail pill. */
-  onHoverImageName?: (name: string | null) => void;
 }
 
 // NOTE: filesClient.upload uses http.put with no onProgress callback; true upload % is unavailable.
@@ -55,14 +53,28 @@ const UploadingImagePill: React.FC<{ name: string }> = ({ name }) => {
       <div
         css={css`
           position: absolute;
-          bottom: 0;
-          left: 0;
+          bottom: 4px;
+          left: 4px;
+          right: 4px;
           height: 2px;
-          width: 40%;
-          background: ${euiTheme.colors.borderStrongPrimary};
-          animation: ${indeterminateProgressSweep} 1.4s ease-in-out infinite;
+          border-radius: 999px;
+          background: ${euiTheme.colors.backgroundLightText};
+          overflow: hidden;
         `}
-      />
+      >
+        <div
+          css={css`
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 40%;
+            border-radius: 999px;
+            background: ${euiTheme.colors.backgroundFilledText};
+            animation: ${indeterminateProgressSweep} 1.4s ease-in-out infinite;
+          `}
+        />
+      </div>
     </div>
   );
 };
@@ -80,7 +92,6 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
   onRemoveAttachment,
   uploadingNames,
   hoveredImageName,
-  onHoverImageName,
 }) => {
   const { removeAttachment } = useConversationContext();
   const uploadingEntries = uploadingNames ? [...uploadingNames] : [];
@@ -142,8 +153,6 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
                   : undefined
               }
               isHighlighted={Boolean(imageName && hoveredImageName === imageName)}
-              onHoverStart={imageName ? () => onHoverImageName?.(imageName) : undefined}
-              onHoverEnd={imageName ? () => onHoverImageName?.(null) : undefined}
             />
           </EuiFlexItem>
         );

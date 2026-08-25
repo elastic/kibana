@@ -129,8 +129,6 @@ interface MessageEditorProps {
   onAfterInput?: () => void;
   /** Called when the pointer enters or leaves an image placeholder span. */
   onHoveredPlaceholderChange?: (name: string | null) => void;
-  /** Name of the placeholder to highlight (driven by thumbnail pill hover). */
-  highlightedPlaceholderName?: string | null;
   /** Names of images currently uploading — drives the progress bar on inline placeholder chips. */
   uploadingNames?: ReadonlySet<string>;
 }
@@ -146,7 +144,6 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   insertImagePlaceholderOnPaste = false,
   onAfterInput,
   onHoveredPlaceholderChange,
-  highlightedPlaceholderName,
   uploadingNames,
 }) => {
   const [isComposing, setIsComposing] = useState(false);
@@ -193,16 +190,6 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
     commandBadgeStyles,
     imagePlaceholderStyles,
   ];
-
-  useEffect(() => {
-    if (!ref.current) return;
-    ref.current.querySelectorAll<HTMLElement>(`[${IMAGE_PLACEHOLDER_ATTRIBUTE}]`).forEach((el) => {
-      el.classList.toggle(
-        'image-placeholder-highlighted',
-        el.dataset.placeholderName === highlightedPlaceholderName
-      );
-    });
-  }, [highlightedPlaceholderName, ref]);
 
   // Sync data-uploading attribute on chips whenever the uploading set changes.
   // The paste handler also sets data-uploading immediately on insertion (before the React

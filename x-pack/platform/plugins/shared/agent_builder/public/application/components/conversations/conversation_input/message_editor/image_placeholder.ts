@@ -20,8 +20,8 @@ const CROSS_ICON_PATH =
 
 const createDocumentIconSvg = (): SVGSVGElement => {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('width', '16');
-  svg.setAttribute('height', '16');
+  svg.setAttribute('width', '12');
+  svg.setAttribute('height', '12');
   svg.setAttribute('viewBox', '0 0 16 16');
   svg.setAttribute('fill', 'currentColor');
   svg.setAttribute('aria-hidden', 'true');
@@ -36,8 +36,8 @@ const createDocumentIconSvg = (): SVGSVGElement => {
 
 const createCrossIconSvg = (): SVGSVGElement => {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('width', '16');
-  svg.setAttribute('height', '16');
+  svg.setAttribute('width', '12');
+  svg.setAttribute('height', '12');
   svg.setAttribute('viewBox', '0 0 16 16');
   svg.setAttribute('fill', 'currentColor');
   svg.setAttribute('aria-hidden', 'true');
@@ -63,6 +63,14 @@ export const createImagePlaceholderElement = (label: string): HTMLSpanElement =>
   labelSpan.className = 'image-placeholder-label';
   labelSpan.textContent = label;
   span.appendChild(labelSpan);
+
+  const progressTrack = document.createElement('span');
+  progressTrack.className = 'image-placeholder-progress-track';
+  progressTrack.setAttribute('aria-hidden', 'true');
+  const progressFill = document.createElement('span');
+  progressFill.className = 'image-placeholder-progress-fill';
+  progressTrack.appendChild(progressFill);
+  span.appendChild(progressTrack);
 
   return span;
 };
