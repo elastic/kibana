@@ -22,6 +22,7 @@ import type {
   IngestStreamSettings,
 } from '@kbn/streams-schema';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
+import { Streams, getParentId } from '@kbn/streams-schema';
 
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 import { parseError } from './errors/parse_error';
@@ -231,6 +232,48 @@ export async function getUnmanagedElasticsearchAssetDetails({
     indexTemplate,
     dataStream: dataStreamResponse.data_streams[0],
   };
+}
+
+/**
+ * Resolves the Elasticsearch index / data-stream name whose read/write
+ * privileges gate access to a stream.
+ *
+ * Ingest (wired/classic) streams are backed by a real data stream named after
+ * the stream, so they authorize against their own name. Query streams are NOT
+ * backed by a real index (their `query.view` lives in the `$.` ES|QL
+ * namespace), so they must authorize against their nearest ingest ancestor's
+ * data stream — the real source the query reads from.
+ *
+ * Pass `streamsByName` (a map of all relevant definitions, including ancestor
+ * chain) so the walk can skip over intermediate query-stream ancestors and
+ * correctly resolve the nearest ingest ancestor even in nested query-under-query
+ * chains. Without the map the walk returns the immediate parent by name, which
+ * is only safe when the caller has verified the parent is not itself a query
+ * stream.
+ *
+ * Returns `undefined` when no ingest ancestor can be resolved (e.g. a
+ * root-level query stream with no dotted parent). Callers should allow access
+ * in that case — there is no parent ingest index to authorize against.
+ */
+export function getStreamPrivilegeSource(
+  definition: Streams.all.Definition,
+  streamsByName?: Map<string, Streams.all.Definition>
+): string | undefined {
+  if (!Streams.QueryStream.Definition.is(definition)) {
+    return definition.name;
+  }
+  let current = getParentId(definition.name);
+  while (current) {
+    const parent = streamsByName?.get(current);
+    if (parent && Streams.QueryStream.Definition.is(parent)) {
+      // This ancestor is itself a query stream (no real index); keep walking up.
+      current = getParentId(current);
+      continue;
+    }
+    // Either no map (trust the parent name) or the parent is an ingest stream.
+    return current;
+  }
+  return undefined;
 }
 
 interface CheckAccessParams extends BaseParams {
