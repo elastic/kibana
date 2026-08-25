@@ -647,10 +647,9 @@ class OutputService {
     }
 
     await validateOutputServerless(this, output, options?.id);
-    if (isBeatsOutput(output)) {
-      validateOutputSslPaths(output);
-    }
-    ensureNoDuplicateSecrets(output);
+    const isPreconfigured =
+      options?.fromPreconfiguration || ('is_preconfigured' in output && output.is_preconfigured);
+    this._runOutputValidators(output, isPreconfigured);
 
     const data: OutputSOAttributes = {
       ...omit(output, ['ssl', 'secrets']),
@@ -1110,10 +1109,8 @@ class OutputService {
 
     const typedFullUpdateData = { ...data, type: mergedType } as UpdateTypedOutput;
     await validateOutputServerless(this, typedFullUpdateData, id);
-    if (isBeatsOutput(typedFullUpdateData)) {
-      validateOutputSslPaths(typedFullUpdateData);
-    }
-    ensureNoDuplicateSecrets(typedFullUpdateData);
+    const isPreconfigured = fromPreconfiguration || originalOutput.is_preconfigured;
+    this._runOutputValidators(typedFullUpdateData, isPreconfigured);
 
     // type is always defined here after merging; ssl/secrets omitted at runtime but allowed on the type.
     const updateData = {
@@ -1510,6 +1507,24 @@ class OutputService {
       message: latestHit.message ?? '',
       timestamp: latestHit['@timestamp'],
     };
+  }
+
+  private _runOutputValidators(
+    output: UpdateTypedOutput | NewOutput,
+    isPreconfigured: boolean
+  ): void {
+    try {
+      if (isBeatsOutput(output)) {
+        validateOutputSslPaths(output);
+      }
+      ensureNoDuplicateSecrets(output);
+    } catch (e) {
+      if (isPreconfigured && e instanceof OutputInvalidError) {
+        appContextService.getLogger().warn(`Preconfigured output failed validation: ${e.message}`);
+      } else {
+        throw e;
+      }
+    }
   }
 
   async getOutputLastUpdateTime(id: string): Promise<string | undefined> {
