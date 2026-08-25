@@ -12,6 +12,7 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   attachmentDataToDashboardState,
 } from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { createDashboardSmlType } from './dashboard';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
@@ -103,6 +104,14 @@ const createLogger = (): Logger =>
 const createSavedObjectsClient = () => ({} as never);
 
 describe('dashboardSmlType', () => {
+  it('equals DASHBOARD_KI_TYPE', () => {
+    const dashboardSmlType = createDashboardSmlType({
+      getDashboardClient: async () => createDashboardClient(),
+    });
+
+    expect(dashboardSmlType.id).toBe(DASHBOARD_KI_TYPE);
+  });
+
   it('lists dashboards across all spaces', async () => {
     const finder = {
       find: jest.fn().mockReturnValue(

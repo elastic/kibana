@@ -11,8 +11,6 @@ import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
   createRuleDataSchema,
-  isSignalQueryBreachOnly,
-  isSignalUsingStandaloneFormat,
   isStateTransitionAllowed,
   updateRuleDataSchema,
   type RuleKind,
@@ -77,6 +75,7 @@ import type {
 } from './types';
 import {
   assertImmutableUnchanged,
+  validateMergedRuleAttributes,
   buildUpdateRuleAttributes,
   groupCandidatesByInterval,
   isTaskMidRun,
@@ -420,18 +419,7 @@ export class RulesClient {
       version: ruleVersion,
     });
 
-    if (!isSignalUsingStandaloneFormat(nextAttrs)) {
-      throw Boom.badRequest('kind "signal" requires query.format "standalone".', {
-        code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
-        details: { rule_id: id, rule_kind: existingAttrs.kind },
-      });
-    }
-    if (!isSignalQueryBreachOnly(nextAttrs)) {
-      throw Boom.badRequest('Signal rules cannot set recovery_strategy or no_data_strategy.', {
-        code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
-        details: { rule_id: id, rule_kind: existingAttrs.kind },
-      });
-    }
+    validateMergedRuleAttributes(id, nextAttrs);
 
     await this.validateSchedule({
       updatedEvery: nextAttrs.schedule.every,
@@ -1139,7 +1127,8 @@ export class RulesClient {
       }
 
       affectedCount += 1;
-      updatedRules.push({ ruleId: item.id, spaceId });
+      const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+      updatedRules.push({ ruleId: rule.id, spaceId, rule });
     }
 
     this.ruleEventPublisher.emitRuleUpdated(this.request, updatedRules);

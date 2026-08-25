@@ -15,7 +15,7 @@ import { relative } from 'path';
 import * as t from 'io-ts';
 import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import globby from 'globby';
+import { globby } from 'globby';
 import del from 'del';
 
 // Function to remove specific fields from an XML object in order to

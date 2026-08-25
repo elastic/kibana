@@ -81,14 +81,14 @@ export const buildStateSubscribe =
       }
     }
 
-    const { sampleSize, sort, dataSource, isApproximate } = prevState;
+    const { sampleSize, sort, dataSource, esqlApproximation } = prevState;
     // Cast to boolean to avoid false positives when comparing
     // undefined and false, which would trigger a refetch
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
     const approximationChanged =
-      (nextState.isApproximate ?? false) !== (isApproximate ?? false) && isEsqlMode;
+      (nextState.esqlApproximation ?? false) !== (esqlApproximation ?? false) && isEsqlMode;
 
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.dataSource && dataSourceChanged) {

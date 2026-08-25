@@ -17,7 +17,7 @@ import type {
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import { useLayoutUpdate } from '@kbn/ui-chrome-layout';
 import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
 
@@ -83,11 +83,12 @@ function useFallbackProps(): FallbackProps {
     const backTargets: AppHeaderBack[] = [];
     for (let i = breadcrumbs.length - 2; i >= 0; i--) {
       const crumb = breadcrumbs[i];
-      if (crumb.href && !isCurrentLocation(crumb.href)) {
+      const label = getBreadcrumbText(crumb);
+      if (label && crumb.href && !isCurrentLocation(crumb.href)) {
         backTargets.push({
           href: crumb.href,
           onClick: crumb.onClick,
-          label: getBreadcrumbText(crumb),
+          label,
         });
       }
     }

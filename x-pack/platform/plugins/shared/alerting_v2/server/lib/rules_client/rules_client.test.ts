@@ -109,6 +109,7 @@ describe('RulesClient', () => {
         run: { alerts: { max: 10000 }, query: { maxResponseSize: 50 * 1024 * 1024 } },
         ...rulesConfigOverrides,
       },
+      esql: { responseFormat: 'json' },
     };
 
     const pluginConfigAccessor =
@@ -544,6 +545,128 @@ describe('RulesClient', () => {
       ).resolves.not.toThrow();
 
       expect(rulesSavedObjectService.update).toHaveBeenCalled();
+    });
+
+    it('throws 400 when clearing recovery_strategy leaves a stale query.recovery block', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+        recovery_strategy: 'query',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          recovery: { query: 'FROM logs-* | LIMIT 2' },
+        },
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-stale-recovery',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-stale-recovery',
+          data: { recovery_strategy: null },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: 'query.recovery is only allowed when recovery_strategy is "query".',
+      });
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when setting recovery_strategy "query" without a query.recovery block', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-missing-recovery',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-missing-recovery',
+          data: { recovery_strategy: 'query' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message: 'query.recovery is required when recovery_strategy is "query".',
+      });
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when clearing no_data_strategy leaves a stale query.no_data block', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+        no_data_strategy: 'last_known_status',
+        query: {
+          format: 'standalone',
+          breach: { query: 'FROM logs-* | LIMIT 1' },
+          no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
+        },
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-stale-no-data',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-stale-no-data',
+          data: { no_data_strategy: null },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message:
+          'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
+      });
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when setting a no_data_strategy without a query.no_data block (standalone)', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-missing-no-data',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-missing-no-data',
+          data: { no_data_strategy: 'last_known_status' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        message:
+          'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
+      });
+
+      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
 
     it('allows setting state_transition to null on a signal rule (removing it)', async () => {
@@ -2057,7 +2180,7 @@ describe('RulesClient', () => {
       const client = createClient();
 
       const enabledAttrs = createRuleSoAttributes({
-        metadata: { name: 'enabled-rule' },
+        metadata: { name: 'enabled-rule', tags: ['critical', 'foo'] },
         schedule: { every: '5m', lookback: '1m' },
         enabled: true,
       });
@@ -2091,7 +2214,17 @@ describe('RulesClient', () => {
       ]);
 
       expect(ruleEventPublisher.emitRuleUpdated).toHaveBeenCalledWith(request, [
-        { ruleId: 'rule-1', spaceId: 'space-1' },
+        expect.objectContaining({
+          ruleId: 'rule-1',
+          spaceId: 'space-1',
+          rule: expect.objectContaining({
+            id: 'rule-1',
+            metadata: expect.objectContaining({
+              name: 'enabled-rule',
+              tags: ['critical', 'foo'],
+            }),
+          }),
+        }),
       ]);
 
       expect(res).toEqual({ affected_count: 1, errors: [] });
@@ -2934,6 +3067,28 @@ describe('RulesClient', () => {
         data: {
           code: 'INVALID_SIGNAL_RULE',
           details: { rule_id: 'rule-id-signal-z', rule_kind: 'signal' },
+        },
+      });
+    });
+
+    it('attaches INVALID_RULE_QUERY_CONFIG code when an update desynchronizes a strategy and its query block', async () => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-query-config',
+        attributes: { ...baseSoAttrs, kind: 'alert' },
+        version: 'v1',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-query-config',
+          data: { recovery_strategy: 'query' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: {
+          code: 'INVALID_RULE_QUERY_CONFIG',
+          details: { rule_id: 'rule-id-query-config' },
         },
       });
     });
