@@ -128,6 +128,7 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.breached,
         to: alertEpisodeStatus.active,
         stateTransition,
+        expectedStatusCount: 1,
       });
     });
 
@@ -136,6 +137,7 @@ describe('CountTimeframeStrategy', () => {
         on: alertEventStatus.breached,
         to: alertEpisodeStatus.active,
         stateTransition,
+        expectedStatusCount: 1,
       });
     });
   });
@@ -180,6 +182,7 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.active,
         stateTransition,
         statusCount: 2,
+        expectedStatusCount: 1,
       });
     });
 
@@ -190,6 +193,7 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.active,
         stateTransition,
         statusCount: 5,
+        expectedStatusCount: 1,
       });
     });
 
@@ -212,6 +216,7 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.active,
         stateTransition: { pending_timeframe: '2m' },
         statusCount: 1,
+        expectedStatusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
         previousTimestamp: '2025-01-01T00:00:00.000Z',
       });
@@ -241,6 +246,7 @@ describe('CountTimeframeStrategy', () => {
           pending_operator: 'OR',
         },
         statusCount: 1,
+        expectedStatusCount: 1,
         eventTimestamp: '2025-01-01T00:02:00.000Z',
         previousTimestamp: '2025-01-01T00:00:00.000Z',
       });
@@ -318,6 +324,7 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.active,
         stateTransition,
         statusCount: 1,
+        expectedStatusCount: 1,
       });
     });
   });
@@ -395,6 +402,7 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.active,
         stateTransition,
         statusCount: 1,
+        expectedStatusCount: 1,
       });
     });
 
@@ -439,6 +447,7 @@ describe('CountTimeframeStrategy', () => {
         to: alertEpisodeStatus.active,
         stateTransition: { pending_count: 2, pending_timeframe: 'bad' },
         statusCount: 1,
+        expectedStatusCount: 1,
       });
     });
 
@@ -460,7 +469,6 @@ describe('CountTimeframeStrategy', () => {
     };
 
     it.each<[string, AlertEpisodeStatus, AlertEventStatus, AlertEpisodeStatus]>([
-      ['active', alertEpisodeStatus.active, alertEventStatus.breached, alertEpisodeStatus.active],
       [
         'inactive',
         alertEpisodeStatus.inactive,
@@ -475,6 +483,118 @@ describe('CountTimeframeStrategy', () => {
       ],
     ])('stays %s', (_label, from, on, to) => {
       expectTransition({ from, on, to, stateTransition });
+    });
+  });
+
+  describe('active status_count', () => {
+    const stateTransition: RuleResponse['state_transition'] = {
+      pending_count: 3,
+      recovering_count: 3,
+    };
+
+    it('enters active with statusCount 1 from pending when the threshold is met', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        statusCount: 2,
+        expectedStatusCount: 1,
+      });
+    });
+
+    it('increments statusCount while staying active', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        statusCount: 1,
+        expectedStatusCount: 2,
+      });
+    });
+
+    it('keeps incrementing statusCount across consecutive active evaluations', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        statusCount: 4,
+        expectedStatusCount: 5,
+      });
+    });
+
+    it('resets statusCount to 1 on a new active span after recovering (flap)', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        statusCount: 3,
+        expectedStatusCount: 1,
+      });
+    });
+
+    it('enters active with statusCount 1 when skipping pending', () => {
+      expectTransition({
+        from: alertEpisodeStatus.inactive,
+        on: alertEventStatus.breached,
+        to: alertEpisodeStatus.active,
+        stateTransition: { pending_count: 0 },
+        expectedStatusCount: 1,
+      });
+    });
+
+    it('resets statusCount independently across active ↔ recovering flaps', () => {
+      const flapStateTransition: RuleResponse['state_transition'] = {
+        pending_count: 3,
+        recovering_count: 10,
+      };
+
+      const step = (
+        from: AlertEpisodeStatus,
+        on: AlertEventStatus,
+        statusCount: number
+      ): { status: AlertEpisodeStatus; statusCount?: number } =>
+        getNextState({
+          eventStatus: on,
+          stateTransition: flapStateTransition,
+          previousEpisode: buildLatestAlertEvent({
+            episodeStatus: from,
+            eventStatus: on,
+            statusCount,
+          }),
+        });
+
+      // Each contiguous run starts at 1 and increments while staying;
+      // a flap starts a new run and must not carry the previous span's count.
+      // Sequence: active → recovering → active → recovering → active → recovering
+      const ticks: Array<{
+        on: AlertEventStatus;
+        status: AlertEpisodeStatus;
+        statusCount: number;
+      }> = [
+        { on: alertEventStatus.breached, status: alertEpisodeStatus.active, statusCount: 2 },
+        { on: alertEventStatus.recovered, status: alertEpisodeStatus.recovering, statusCount: 1 },
+        { on: alertEventStatus.recovered, status: alertEpisodeStatus.recovering, statusCount: 2 },
+        { on: alertEventStatus.breached, status: alertEpisodeStatus.active, statusCount: 1 },
+        { on: alertEventStatus.breached, status: alertEpisodeStatus.active, statusCount: 2 },
+        { on: alertEventStatus.recovered, status: alertEpisodeStatus.recovering, statusCount: 1 },
+        { on: alertEventStatus.breached, status: alertEpisodeStatus.active, statusCount: 1 },
+        { on: alertEventStatus.recovered, status: alertEpisodeStatus.recovering, statusCount: 1 },
+      ];
+
+      let previous: { status: AlertEpisodeStatus; statusCount: number } = {
+        status: alertEpisodeStatus.active,
+        statusCount: 1,
+      };
+
+      for (const tick of ticks) {
+        const result = step(previous.status, tick.on, previous.statusCount);
+        expect(result).toEqual({ status: tick.status, statusCount: tick.statusCount });
+        previous = { status: tick.status, statusCount: tick.statusCount };
+      }
     });
   });
 
@@ -533,17 +653,38 @@ describe('CountTimeframeStrategy', () => {
       recovering_count: 3,
     };
 
-    it.each<[AlertEpisodeStatus]>([
-      [alertEpisodeStatus.inactive],
-      [alertEpisodeStatus.active],
-      [alertEpisodeStatus.recovering],
-    ])('transitions %s → active', (from) => {
+    it('transitions inactive → active with statusCount 1', () => {
       expectTransition({
-        from,
+        from: alertEpisodeStatus.inactive,
         on: alertEventStatus.no_data,
         to: alertEpisodeStatus.active,
         stateTransition,
         noDataStrategy: 'emit',
+        expectedStatusCount: 1,
+      });
+    });
+
+    it('increments statusCount while staying active', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        noDataStrategy: 'emit',
+        statusCount: 2,
+        expectedStatusCount: 3,
+      });
+    });
+
+    it('transitions recovering → active with statusCount 1 (new span)', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.active,
+        stateTransition,
+        noDataStrategy: 'emit',
+        statusCount: 2,
+        expectedStatusCount: 1,
       });
     });
 
@@ -567,6 +708,7 @@ describe('CountTimeframeStrategy', () => {
         stateTransition,
         noDataStrategy: 'emit',
         statusCount: 2,
+        expectedStatusCount: 1,
       });
     });
   });

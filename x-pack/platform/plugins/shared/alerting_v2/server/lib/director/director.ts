@@ -161,8 +161,9 @@ export class DirectorService {
     // back and lets the strategy own transitions again). We preserve
     // the incoming event's `status` (e.g. `recovered`) so downstream
     // analytics keep the raw engine signal. Only `episode.status` is
-    // forced. `episode.status_count` is dropped to mirror how the
-    // strategies emit any → active transitions.
+    // forced. `episode.status_count` follows the same per-span rules as
+    // the engine: reset to 1 when entering a new active span, increment
+    // while staying active.
     if (this.isUserLocked(previousAlertEvent)) {
       return {
         alertEvent: {
@@ -171,6 +172,7 @@ export class DirectorService {
           episode: {
             id: previousAlertEvent!.last_episode_id!,
             status: alertEpisodeStatus.active,
+            status_count: this.getUserLockedStatusCount(previousAlertEvent!),
           },
         },
         isNewEpisode: false,
@@ -247,6 +249,19 @@ export class DirectorService {
       previousAlertEvent.last_lifecycle_action_type === ALERT_EPISODE_ACTION_TYPE.ACTIVATE &&
       previousAlertEvent.last_episode_id !== null
     );
+  }
+
+  /**
+   * User-lock is a contiguous active span: reset to 1 if the previous
+   * status was not already active, otherwise increment.
+   */
+  private getUserLockedStatusCount(previousAlertEvent: LatestAlertEventState): number {
+    const defaultCount = 1;
+    if (previousAlertEvent.last_episode_status !== alertEpisodeStatus.active) {
+      return defaultCount;
+    }
+
+    return (previousAlertEvent.last_episode_status_count ?? defaultCount) + 1;
   }
 
   private resolveEpisodeId({
