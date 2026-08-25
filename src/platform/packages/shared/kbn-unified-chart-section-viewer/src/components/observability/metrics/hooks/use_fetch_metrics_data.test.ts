@@ -36,10 +36,6 @@ jest.mock('@kbn/esql-utils', () => ({
     return `${esql} | METRICS_INFO${post}`;
   }),
   escapeStringValue: jest.fn((val: string) => `"${val}"`),
-  buildJoinedFilter: jest.fn(
-    (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
-      fields?.map(clause).join(separator) ?? ''
-  ),
   // Still required by getFetchParamsMock (kbn-unified-histogram) which imports it
   // from @kbn/esql-utils to process breakdown fields. Not used by the hook itself.
   hasTransformationalCommand: jest.fn(() => false),
@@ -161,17 +157,13 @@ describe('useFetchMetricsData', () => {
     const { getEsqlQuery } = jest.requireMock('../utils/get_esql_query');
     getEsqlQuery.mockImplementation((query: { esql?: string } | undefined) => query?.esql);
 
-    const { buildMetricsInfoQuery, buildJoinedFilter, hasTransformationalCommand } =
+    const { buildMetricsInfoQuery, hasTransformationalCommand } =
       jest.requireMock('@kbn/esql-utils');
     buildMetricsInfoQuery.mockImplementation((esql: string, postFilter?: string) => {
       if (!esql?.trim()) return '';
       const post = postFilter ? ` | WHERE ${postFilter}` : '';
       return `${esql} | METRICS_INFO${post}`;
     });
-    buildJoinedFilter.mockImplementation(
-      (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
-        fields?.map(clause).join(separator) ?? ''
-    );
     hasTransformationalCommand.mockImplementation(() => false);
 
     mockTrackRequest.mockImplementation(

@@ -47,9 +47,9 @@ export function buildMetricsInfoQuery(esql?: string, postFilter?: string): strin
   const hasLimit = Walker.matchAll(root, { type: 'command', name: 'limit' }).length > 0;
   const baseCommands = root.commands.filter((cmd) => cmd.name !== 'sort' && cmd.name !== 'limit');
   const baseQuery = BasicPrettyPrinter.print({ ...root, commands: baseCommands }).trim();
-  const esqlQuery = appendToESQLQuery(baseQuery, '');
+  const esqlQuery = appendToESQLQuery(baseQuery, METRICS_INFO_SUFFIX);
 
   const postFilterSuffix = postFilter ? ` | WHERE ${postFilter}` : '';
   const limitSuffix = hasLimit ? ` | LIMIT ${getLimitFromESQLQuery(trimmed)}` : '';
-  return `${esqlQuery}${METRICS_INFO_SUFFIX}${postFilterSuffix}${limitSuffix}`;
+  return `${esqlQuery}${postFilterSuffix}${limitSuffix}`;
 }

@@ -10,10 +10,14 @@
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { buildJoinedFilter, buildMetricsInfoQuery, escapeStringValue } from '@kbn/esql-utils';
+import { buildMetricsInfoQuery, escapeStringValue } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
 import type { Dimension, MetricsESQLResponse, MetricsInfo, ParsedMetrics } from '../../../../types';
-import { dropWhereCommands, keepMetricsPresentInBoth } from '../../../../common/utils';
+import {
+  buildJoinedFilter,
+  dropWhereCommands,
+  keepMetricsPresentInBoth,
+} from '../../../../common/utils';
 import { useTelemetry } from '../../../../context/ebt_telemetry_context';
 import { useChartSectionInspector } from '../../../../context/chart_section_inspector';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
