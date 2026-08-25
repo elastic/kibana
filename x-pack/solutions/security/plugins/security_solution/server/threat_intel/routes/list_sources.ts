@@ -257,7 +257,12 @@ export const registerListSourcesRoute = ({
         if (notReady) return notReady;
 
         const core = await context.core;
-        const esClient = core.elasticsearch.client.asCurrentUser;
+        // Internal user: these are plugin-owned hidden indices, and Kibana
+        // feature privileges (securitySolution / RULES_API_ALL) do not grant
+        // Elasticsearch privileges on them, so asCurrentUser failed for every
+        // non-superuser. Access is already gated by route authz above and
+        // narrowed by the explicit space filter below.
+        const esClient = core.elasticsearch.client.asInternalUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         const size = request.body.size ?? 500;
 
@@ -383,7 +388,12 @@ export const registerCreateSourceRoute = ({
         if (notReady) return notReady;
 
         const core = await context.core;
-        const esClient = core.elasticsearch.client.asCurrentUser;
+        // Internal user: these are plugin-owned hidden indices, and Kibana
+        // feature privileges (securitySolution / RULES_API_ALL) do not grant
+        // Elasticsearch privileges on them, so asCurrentUser failed for every
+        // non-superuser. Access is already gated by route authz above and
+        // narrowed by the explicit space filter below.
+        const esClient = core.elasticsearch.client.asInternalUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         const now = new Date().toISOString();
         const sourceId =
@@ -451,7 +461,12 @@ export const registerUpdateSourceRoute = ({
         if (notReady) return notReady;
 
         const core = await context.core;
-        const esClient = core.elasticsearch.client.asCurrentUser;
+        // Internal user: these are plugin-owned hidden indices, and Kibana
+        // feature privileges (securitySolution / RULES_API_ALL) do not grant
+        // Elasticsearch privileges on them, so asCurrentUser failed for every
+        // non-superuser. Access is already gated by route authz above and
+        // narrowed by the explicit space filter below.
+        const esClient = core.elasticsearch.client.asInternalUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         const { sourceId } = request.params;
         const now = new Date().toISOString();
@@ -528,7 +543,12 @@ export const registerDeleteSourceRoute = ({
         if (notReady) return notReady;
 
         const core = await context.core;
-        const esClient = core.elasticsearch.client.asCurrentUser;
+        // Internal user: these are plugin-owned hidden indices, and Kibana
+        // feature privileges (securitySolution / RULES_API_ALL) do not grant
+        // Elasticsearch privileges on them, so asCurrentUser failed for every
+        // non-superuser. Access is already gated by route authz above and
+        // narrowed by the explicit space filter below.
+        const esClient = core.elasticsearch.client.asInternalUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         const { sourceId } = request.params;
 

@@ -77,7 +77,12 @@ export const registerCreateThreatReportRoute = ({
         if (notReady) return notReady;
 
         const core = await context.core;
-        const esClient = core.elasticsearch.client.asCurrentUser;
+        // Internal user: these are plugin-owned hidden indices, and Kibana
+        // feature privileges (securitySolution / RULES_API_ALL) do not grant
+        // Elasticsearch privileges on them, so asCurrentUser failed for every
+        // non-superuser. Access is already gated by route authz above and
+        // narrowed by the explicit space filter below.
+        const esClient = core.elasticsearch.client.asInternalUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         try {
           const result = await createThreatReport(esClient, logger, spaceId, {
