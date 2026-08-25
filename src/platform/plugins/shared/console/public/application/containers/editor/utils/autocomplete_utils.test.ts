@@ -766,6 +766,32 @@ describe('autocomplete_utils', () => {
         expect(acceptSuggestion(editorLines, stringTerm!)).toBe('  "mode": "foo.bar"');
       });
 
+      it('SHOULD replace the whole quoted punctuated value for non-dotted string terms', async () => {
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [{ name: 'foo-bar' }];
+        });
+        const editorLines = ['GET _search', '{', '  "mode": "foo-b"'];
+        // Cursor after `b`, before the auto-closed closing quote; Monaco's word starts after `-`.
+        const position = { lineNumber: 3, column: 17 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 16, word: 'b' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const stringTerm = items.find((item) => item.label === 'foo-bar');
+        expect(stringTerm?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 18,
+        });
+        expect(acceptSuggestion(editorLines, stringTerm!)).toBe('  "mode": "foo-bar"');
+      });
+
       it('SHOULD NOT suggest primitive terms inside a triple-quoted value', async () => {
         const editorLines = ['GET _search', '{', '  "value": """-1"""'];
         // Cursor after `-1`, before the closing triple quote.
@@ -934,6 +960,29 @@ describe('autocomplete_utils', () => {
 
         const items = await getBodyCompletionItems(
           buildModel(editorLines, { startColumn: 14, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find((item) => item.label === '0.5' && item.insertText === '0.5');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 14,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: 0.5 });
+        expect(acc).toBe('  "value": 0.5');
+      });
+
+      it('SHOULD repair a bare leading-dot decimal prefix for numeric primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": .5'];
+        const position = { lineNumber: 3, column: 14 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 13, word: '5' }),
           position,
           1,
           mockEditor
