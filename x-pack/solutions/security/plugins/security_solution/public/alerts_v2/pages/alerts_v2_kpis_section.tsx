@@ -10,6 +10,7 @@ import { EuiButtonGroup, EuiEmptyPrompt, EuiPanel, EuiSpacer, EuiText } from '@e
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
+import { SeverityLevelPanel } from './kpis/severity_level_panel';
 
 export type AlertsV2KpiView = 'summary' | 'trend' | 'counts' | 'treemap';
 
@@ -105,18 +106,22 @@ export const AlertsV2KpisSection = ({ query, timeRange }: AlertsV2KpisSectionPro
         data-test-subj="alertsV2KpiSelect"
       />
       <EuiSpacer size="m" />
-      <EuiEmptyPrompt
-        iconType="chartBarVerticalStack"
-        title={<h3>{activeView.label}</h3>}
-        body={
-          <EuiText size="s">
-            <p>{activeView.description}</p>
-            <p>
-              <FormattedComingSoon />
-            </p>
-          </EuiText>
-        }
-      />
+      {selectedView === 'summary' ? (
+        <SeverityLevelPanel query={query} timeRange={timeRange} />
+      ) : (
+        <EuiEmptyPrompt
+          iconType="chartBarVerticalStack"
+          title={<h3>{activeView.label}</h3>}
+          body={
+            <EuiText size="s">
+              <p>{activeView.description}</p>
+              <p>
+                <FormattedComingSoon />
+              </p>
+            </EuiText>
+          }
+        />
+      )}
     </EuiPanel>
   );
 };
