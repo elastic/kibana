@@ -307,7 +307,7 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       entityName: 'jack.white',
     },
   },
-  // --- IDP: IAM event types (idpEventTypeCondition), not asset kind ---
+  // --- IDP: IAM-only events — no entity.kind: asset → no entity created (postAggFilter blocks) ---
   {
     id: 'idp-iam-okta-user-id',
     query: {
@@ -320,20 +320,16 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: 'any-random', category: 'iam', type: 'user', module: 'okta' },
       host: { entity: { id: 'host-505' } },
     },
-    expectedEuid: 'user:user-505@okta',
-    expectedMeta: {
-      namespace: 'okta',
-      confidence: ENTITY_CONFIDENCE.High,
-      entityName: 'karen.green',
-    },
+    expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
   {
     id: 'idp-iam-azure-null-kind-email',
     query: {
       bool: {
         must: [
-          { term: { 'user.email': 'larry@example.com' } },
           { term: { 'user.name': 'larry.black' } },
+          { term: { 'host.id': 'host-606' } },
         ],
       },
     },
@@ -342,10 +338,10 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { kind: null, category: 'iam', type: 'creation', module: 'azure' },
       host: { id: 'host-606' },
     },
-    expectedEuid: 'user:larry@example.com@entra_id',
+    expectedEuid: 'user:larry.black@host-606@local',
     expectedMeta: {
-      namespace: 'entra_id',
-      confidence: ENTITY_CONFIDENCE.High,
+      namespace: USER_ENTITY_NAMESPACE.Local,
+      confidence: ENTITY_CONFIDENCE.Medium,
       entityName: 'larry.black',
     },
   },
@@ -359,12 +355,8 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { category: 'iam', type: 'group', module: 'entityanalytics_ad' },
       host: { name: 'server-07' },
     },
-    expectedEuid: 'user:mary.blue@corp@active_directory',
-    expectedMeta: {
-      namespace: 'active_directory',
-      confidence: ENTITY_CONFIDENCE.High,
-      entityName: 'mary.blue',
-    },
+    expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
   // --- Namespace from data_stream.dataset (first segment) ---
   {
@@ -375,12 +367,8 @@ export const USER_TS_EXTRACTION_CASES: readonly UserTsExtractionCase[] = [
       event: { category: 'iam', type: 'deletion' },
       data_stream: { dataset: 'entityanalytics_okta.users' },
     },
-    expectedEuid: 'user:okta.from.dataset@okta',
-    expectedMeta: {
-      namespace: 'okta',
-      confidence: ENTITY_CONFIDENCE.High,
-      entityName: 'okta.from.dataset',
-    },
+    expectedEuid: undefined,
+    expectNoPerDocumentDsl: true,
   },
   {
     id: 'idp-asset-aws-from-dataset',

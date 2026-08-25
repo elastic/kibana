@@ -422,7 +422,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest(
-    'Should apply user postAggFilter: IDP asset/iam paths and entity.id-after-LOOKUP; omit when no keep branch',
+    'Should apply user postAggFilter: IDP asset path and entity.id-after-LOOKUP; omit when no keep branch',
     async ({ apiClient, esClient }) => {
       const from = '2026-03-01T10:00:00Z';
       const to = '2026-03-01T12:00:00Z';
@@ -497,7 +497,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const hit3 = await searchDocById(esClient, 'user:postagg-nopostaggkeep-nolatest@okta');
       expect(hit3.hits.hits).toHaveLength(0);
 
-      // 4. IDP: IAM user event (entityanalytics_ad) — matches idpPostAggFilter; namespace active_directory from fieldEvaluations.
+      // 4. IAM lifecycle event (entityanalytics_ad, no event.kind: asset) — does NOT create an entity.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:05:00Z',
         event: { category: 'iam', type: 'user', module: 'entityanalytics_ad' },
@@ -512,26 +512,15 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         esClient,
         'user:postagg-idp-iam-ad-inlatest@active_directory'
       );
-      expect(hit4.hits.hits).toHaveLength(1);
-      expect(hit4.hits.hits[0]._source).toMatchObject({
-        entity: {
-          id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
-          type: 'Identity',
-          name: 'IDP IAM AD InLatest',
-          namespace: 'active_directory',
-          confidence: ENTITY_CONFIDENCE.High,
-        },
-      });
+      expect(hit4.hits.hits).toHaveLength(0);
 
-      // 5. Follow-up doc is not asset/iam (no idpPostAggFilter) and has no host.id (no nonIdpPostAggFilter);
-      //    row is kept via entity.id after LOOKUP (prior latest from step 4) → still extracted/updated.
-      await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      // 5. Asset event (entityanalytics_ad) — creates the entity now.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:06:00Z',
-        event: { kind: 'not-asset-or-iam', module: 'entityanalytics_ad' },
+        event: { kind: 'asset', module: 'entityanalytics_ad' },
         user: {
           id: 'postagg-idp-iam-ad-inlatest',
-          name: 'IDP IAM AD InLatest Updated',
+          name: 'IDP IAM AD InLatest',
         },
       });
       const ext5 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
@@ -542,6 +531,33 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       );
       expect(hit5.hits.hits).toHaveLength(1);
       expect(hit5.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
+          type: 'Identity',
+          name: 'IDP IAM AD InLatest',
+          namespace: 'active_directory',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+      });
+
+      // 6. IAM doc enriches via entity.id-after-LOOKUP (entity already exists from step 5).
+      await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T10:07:00Z',
+        event: { category: 'iam', type: 'user', module: 'entityanalytics_ad' },
+        user: {
+          id: 'postagg-idp-iam-ad-inlatest',
+          name: 'IDP IAM AD InLatest Updated',
+        },
+      });
+      const ext6 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      expect(ext6.statusCode).toBe(200);
+      const hit6 = await searchDocById(
+        esClient,
+        'user:postagg-idp-iam-ad-inlatest@active_directory'
+      );
+      expect(hit6.hits.hits).toHaveLength(1);
+      expect(hit6.hits.hits[0]._source).toMatchObject({
         entity: {
           id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
           type: 'Identity',

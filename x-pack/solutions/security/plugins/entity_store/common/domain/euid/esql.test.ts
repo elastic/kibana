@@ -112,7 +112,7 @@ describe('getEuidEsqlFilterBasedOnDocument', () => {
       );
     });
 
-    it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset/iam/entity.id)', () => {
+    it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset/entity.id)', () => {
       expect(
         getEuidEsqlFilterBasedOnDocument('user', {
           user: { id: 'user-id-42' },
