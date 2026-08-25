@@ -35,11 +35,11 @@ interface Props {
 
 export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParams }) => {
   const condition = ruleParams.condition ?? DEFAULT_CONDITION;
-  const downThreshold = condition.downThreshold ?? 3;
+  const downThreshold = condition.downThreshold ?? DEFAULT_CONDITION.downThreshold;
   const pendingThreshold = condition.pendingThreshold ?? DEFAULT_PENDING_THRESHOLD;
   const isAlertOnNoData = ruleParams.condition?.alertOnNoData !== undefined;
 
-  const locationsThreshold = condition.locationsThreshold ?? 1;
+  const locationsThreshold = condition.locationsThreshold ?? DEFAULT_CONDITION.locationsThreshold;
 
   const onThresholdChange = useCallback(
     (value: number) => {
