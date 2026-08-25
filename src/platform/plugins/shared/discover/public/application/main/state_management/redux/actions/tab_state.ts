@@ -9,6 +9,7 @@
 
 import { isFunction, isEqual } from 'lodash';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import {
@@ -31,6 +32,12 @@ import {
 } from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
+import {
+  ExpandedDocLinkability,
+  getExpandedDocLinkability,
+  getExpandedDocRef,
+} from '../../../utils/expanded_doc';
+import { DEFAULT_EXPANDED_DOC_OWNER } from '../constants';
 import { isEqualState } from '../../utils/state_comparators';
 import {
   internalStateSlice,
@@ -107,6 +114,43 @@ export const updateAppState: InternalStateThunkActionCreator<[AppStatePayload]> 
     if (hasStateChanges) {
       dispatch(setAppState({ ...payload, appState: mergedAppState }));
     }
+  };
+
+type ExpandedDocPayload = TabActionPayload<{
+  expandedDoc: DataTableRecord | undefined;
+  expandedDocOwner?: string;
+  initialDocViewerTabId?: string;
+  initialDocViewerTabState?: object;
+  shouldUpdateUrl?: boolean;
+}>;
+
+/** Sets the expanded document and synchronizes its URL reference. */
+export const setExpandedDoc: InternalStateThunkActionCreator<[ExpandedDocPayload]> = (payload) =>
+  function setExpandedDocThunkFn(dispatch, getState) {
+    const { shouldUpdateUrl = true, ...expandedDocPayload } = payload;
+
+    dispatch(internalStateSlice.actions.setExpandedDoc(expandedDocPayload));
+
+    if (!shouldUpdateUrl) {
+      return;
+    }
+
+    const { tabId, expandedDoc, expandedDocOwner = DEFAULT_EXPANDED_DOC_OWNER } = payload;
+    const { appState } = selectTab(getState(), tabId);
+
+    // The restore path cannot reconstruct documents from cascade grids.
+    const nextExpandedDocRef =
+      expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER &&
+      getExpandedDocLinkability(appState.query, expandedDoc) === ExpandedDocLinkability.Linkable
+        ? getExpandedDocRef(expandedDoc)
+        : undefined;
+
+    // Avoid adding URL history when closing a flyout that never wrote a reference.
+    if (isEqual(appState.expandedDoc, nextExpandedDocRef)) {
+      return;
+    }
+
+    dispatch(updateAppState({ tabId, appState: { expandedDoc: nextExpandedDocRef } }));
   };
 
 /**
@@ -417,6 +461,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
       updateAppState({
         tabId,
         appState: {
+          expandedDoc: undefined,
           query: {
             language: 'kuery',
             query: '',
@@ -466,6 +511,7 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
       updateAppState({
         tabId,
         appState: {
+          expandedDoc: undefined,
           query: { esql: queryString },
           filters: [],
           dataSource: {

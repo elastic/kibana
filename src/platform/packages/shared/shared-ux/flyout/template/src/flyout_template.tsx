@@ -57,6 +57,11 @@ const FlyoutTemplateRoot = ({
   historyKey,
   onActive,
   flyoutMenuProps,
+  id,
+  hasChildBackground,
+  outsideClickCloses,
+  focusTrapProps,
+  closeButtonProps,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   'data-test-subj': dataTestSubj,
@@ -103,6 +108,11 @@ const FlyoutTemplateRoot = ({
       onActive={onActive}
       flyoutMenuDisplayMode="auto"
       flyoutMenuProps={hasMenuProps ? mergedMenuProps : undefined}
+      id={id}
+      hasChildBackground={hasChildBackground}
+      outsideClickCloses={outsideClickCloses}
+      focusTrapProps={focusTrapProps}
+      closeButtonProps={closeButtonProps}
       aria-label={flyoutAriaLabel}
       aria-labelledby={flyoutAriaLabelledBy}
       data-test-subj={dataTestSubj}
