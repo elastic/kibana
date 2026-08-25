@@ -99,4 +99,44 @@ describe('bulkMarkApiKeysForInvalidation', () => {
 
     expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
   });
+
+  test('should skip raw user-created UIAM API keys and log a warning', async () => {
+    const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+    const logger = loggingSystemMock.create().get();
+
+    await bulkMarkApiKeysForInvalidation(
+      {
+        apiKeys: [
+          Buffer.from('123:abc').toString('base64'),
+          // stored as-is (no base64(id:key) encoding) for user-created Cloud API keys
+          'essu_user_created_key',
+        ],
+      },
+      logger,
+      unsecuredSavedObjectsClient
+    );
+
+    const bulkCreateCallMock = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0];
+    const savedObjects = bulkCreateCallMock[0];
+
+    expect(savedObjects).toHaveLength(1);
+    expect(savedObjects[0]).toHaveProperty('attributes.apiKeyId', '123');
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Skipping invalidation for a user-created UIAM API key; user-created API keys are not managed by alerting.'
+    );
+  });
+
+  test('should not call savedObjectsClient bulkCreate if all keys are raw user-created UIAM API keys', async () => {
+    const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+
+    await bulkMarkApiKeysForInvalidation(
+      { apiKeys: ['essu_user_created_key'] },
+      loggingSystemMock.create().get(),
+      unsecuredSavedObjectsClient
+    );
+
+    expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+  });
 });
