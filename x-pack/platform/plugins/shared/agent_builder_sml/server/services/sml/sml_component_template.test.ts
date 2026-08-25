@@ -111,6 +111,27 @@ describe('ensureSmlMappingsComponentTemplate', () => {
     expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
   });
 
+  it('re-verifies the install once the re-verify interval elapses (self-heals)', async () => {
+    const nowSpy = jest.spyOn(Date, 'now');
+    try {
+      nowSpy.mockReturnValue(1_000);
+      await ensureSmlMappingsComponentTemplate({ esClient, logger });
+      expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+
+      // Still within the interval: the memoized install is trusted, no re-put.
+      nowSpy.mockReturnValue(1_000 + 60_000);
+      await ensureSmlMappingsComponentTemplate({ esClient, logger });
+      expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
+
+      // Past the interval: re-put so an out-of-band delete or edit is repaired.
+      nowSpy.mockReturnValue(1_000 + 6 * 60_000);
+      await ensureSmlMappingsComponentTemplate({ esClient, logger });
+      expect(esClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
   it('retries on the next call when the install fails', async () => {
     esClient.cluster.putComponentTemplate
       .mockRejectedValueOnce(new Error('cluster unavailable'))

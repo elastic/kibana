@@ -16,26 +16,50 @@ import {
 } from '@kbn/agent-builder-sml-plugin/server';
 import { apiTest } from '../fixtures';
 
-const USER_CUSTOM_COMPONENT = 'ai-index@custom';
+/** Base mappings every AI index gets, shipped by Elasticsearch's stack templates. */
+const AI_INDEX_BASE_MAPPINGS_COMPONENT = 'ai-index@mappings';
+/** The real, globally-shared user customization slot. Referenced read-only; never mutated. */
+const AI_INDEX_CUSTOM_COMPONENT = 'ai-index@custom';
+
+/**
+ * A throwaway component that stands in for the shared `ai-index@custom` slot in
+ * the composition simulations below. Using it keeps these tests from writing to
+ * or deleting the real, globally-shared user slot — which every `ai-index-idx-*`
+ * index composes — so they cannot erase real configuration or race another suite.
+ */
+const uniqueSuffix = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+const TEST_USER_COMPONENT = `test-sml-user-slot-${uniqueSuffix}@mappings`;
+/** Never created — stands in for an optional slot that is referenced but absent. */
+const MISSING_USER_COMPONENT = `test-sml-missing-slot-${uniqueSuffix}@mappings`;
 const USER_FIELD = 'my_custom_label';
 
-const putUserCustomComponent = async (
+const putTestUserComponent = async (
   esClient: Client,
   properties: Record<string, MappingProperty>
 ) => {
   await esClient.cluster.putComponentTemplate({
-    name: USER_CUSTOM_COMPONENT,
+    name: TEST_USER_COMPONENT,
     template: { mappings: { properties } },
   });
 };
 
-/** Resolve the mappings Elasticsearch would apply to an SML backing index. */
-const resolveSmlMappings = async (esClient: Client) => {
+/**
+ * Resolve the mappings Elasticsearch would apply to an SML backing index. Composes
+ * the real base component and the real component Kibana installed for SML, with the
+ * shared user slot swapped for a per-run test component — the composition order
+ * (base → user slot → SML) and the `ignore_missing_component_templates` tolerance
+ * match production, so precedence is tested faithfully without touching the global
+ * `ai-index@custom`. Pass an uncreated `userComponent` to exercise the missing slot.
+ */
+const resolveSmlMappings = async (
+  esClient: Client,
+  { userComponent = TEST_USER_COMPONENT }: { userComponent?: string } = {}
+) => {
   const { template } = await esClient.indices.simulateTemplate({
     index_patterns: [`${smlIndexName}-*`],
     priority: smlStorageSettings.priority,
-    composed_of: smlStorageSettings.composedOf,
-    ignore_missing_component_templates: smlStorageSettings.ignoreMissingComponentTemplates,
+    composed_of: [AI_INDEX_BASE_MAPPINGS_COMPONENT, userComponent, smlMappingsComponentTemplateName],
+    ignore_missing_component_templates: [userComponent],
   });
   return (template.mappings?.properties ?? {}) as Record<string, MappingProperty>;
 };
@@ -51,15 +75,15 @@ apiTest.describe(
   { tag: [...tags.stateful.classic] },
   () => {
     apiTest.beforeAll(async ({ esClient }) => {
-      await putUserCustomComponent(esClient, { [USER_FIELD]: { type: 'keyword' } });
+      await putTestUserComponent(esClient, { [USER_FIELD]: { type: 'keyword' } });
     });
 
     apiTest.afterAll(async ({ esClient }) => {
-      try {
-        await esClient.cluster.deleteComponentTemplate({ name: USER_CUSTOM_COMPONENT });
-      } catch {
-        // ignore — already cleaned up
-      }
+      // Ignore a missing component, but let auth/transport failures surface.
+      await esClient.cluster.deleteComponentTemplate(
+        { name: TEST_USER_COMPONENT },
+        { ignore: [404] }
+      );
     });
 
     apiTest('Kibana installs the SML mappings component template', async ({ esClient }) => {
@@ -85,22 +109,15 @@ apiTest.describe(
       expect(Object.keys(properties)).not.toContain('content');
     });
 
-    apiTest('does not claim the shared user customization slot', async ({ esClient }) => {
-      expect(smlMappingsComponentTemplateName).not.toBe(USER_CUSTOM_COMPONENT);
-      expect(smlStorageSettings.composedOf).toContain(USER_CUSTOM_COMPONENT);
+    apiTest('does not claim the shared user customization slot', () => {
+      // Read-only: assert against the production name and settings without ever
+      // writing to or deleting the shared `ai-index@custom` component.
+      expect(smlMappingsComponentTemplateName).not.toBe(AI_INDEX_CUSTOM_COMPONENT);
+      expect(smlStorageSettings.composedOf).toContain(AI_INDEX_CUSTOM_COMPONENT);
       // Only the user slot may be missing; SML's own component must exist.
       expect(smlStorageSettings.ignoreMissingComponentTemplates).toStrictEqual([
-        USER_CUSTOM_COMPONENT,
+        AI_INDEX_CUSTOM_COMPONENT,
       ]);
-
-      // The slot still belongs to the user: Kibana installed its own component
-      // under a different name and left this one as the test wrote it.
-      const { component_templates: userComponents } = await esClient.cluster.getComponentTemplate({
-        name: USER_CUSTOM_COMPONENT,
-      });
-      const userProperties =
-        userComponents[0].component_template.template.mappings?.properties ?? {};
-      expect(Object.keys(userProperties)).toStrictEqual([USER_FIELD]);
     });
 
     apiTest('resolves base mappings, the user slot and SML together', async ({ esClient }) => {
@@ -111,7 +128,7 @@ apiTest.describe(
         type: 'text',
         fields: { semantic: { type: 'semantic_text' } },
       });
-      // From the user's `ai-index@custom`.
+      // From the user's customization slot.
       expect(properties[USER_FIELD]).toMatchObject({ type: 'keyword' });
       // From Kibana's SML component.
       expect(properties.spaces).toMatchObject({ type: 'keyword' });
@@ -129,8 +146,8 @@ apiTest.describe(
 
     apiTest('keeps SML fields intact when a user component conflicts', async ({ esClient }) => {
       // A user redefining an SML field must not win: SML's component is composed
-      // after `ai-index@custom` precisely so the @ menu and RBAC filters survive.
-      await putUserCustomComponent(esClient, {
+      // after the user slot precisely so the @ menu and RBAC filters survive.
+      await putTestUserComponent(esClient, {
         [USER_FIELD]: { type: 'keyword' },
         spaces: { type: 'text' },
       });
@@ -142,10 +159,15 @@ apiTest.describe(
       expect(properties[USER_FIELD]).toMatchObject({ type: 'keyword' });
     });
 
-    apiTest('resolves without the optional user slot present', async ({ esClient }) => {
-      await esClient.cluster.deleteComponentTemplate({ name: USER_CUSTOM_COMPONENT });
-
-      const properties = await resolveSmlMappings(esClient);
+    apiTest('tolerates a referenced optional component that was never created', async ({
+      esClient,
+    }) => {
+      // Mirror production: the optional slot stays referenced in `composed_of` and
+      // is tolerated through `ignore_missing_component_templates` — not dropped from
+      // the list — so resolution still succeeds and the base + SML fields land.
+      const properties = await resolveSmlMappings(esClient, {
+        userComponent: MISSING_USER_COMPONENT,
+      });
 
       expect(properties.title).toBeDefined();
       expect(properties.spaces).toMatchObject({ type: 'keyword' });

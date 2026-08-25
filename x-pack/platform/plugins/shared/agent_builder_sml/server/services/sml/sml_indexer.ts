@@ -208,6 +208,13 @@ class SmlIndexerImpl implements SmlIndexer {
       throw error;
     }
 
+    // Install the component template BEFORE `deleteEntry`, mirroring the
+    // permissions resolution above: the index template references this component
+    // as a required member, so a transient install failure must not be allowed
+    // to happen only after the existing entry has been wiped. The call is
+    // memoized, so on the crawler path (which ensures up front) this is a no-op.
+    await ensureSmlMappingsComponentTemplate({ esClient, logger: this.logger });
+
     await this.deleteEntry({ originUri, esClient });
 
     const indexOp = this.buildIndexOp({
@@ -335,10 +342,9 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient: ElasticsearchClient;
     originId: string;
   }): Promise<void> {
-    // The index template references this component, so it must exist before the
-    // storage adapter creates the template on first write.
-    await ensureSmlMappingsComponentTemplate({ esClient, logger: this.logger });
-
+    // The component template is ensured by the caller before `deleteEntry`, so
+    // it already exists before the storage adapter creates the index template
+    // here on first write.
     const storage = createSmlStorage({ logger: this.logger, esClient });
     const smlClient = storage.getClient();
 

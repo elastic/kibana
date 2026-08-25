@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { createSmlIndexer } from './sml_indexer';
 import { createSmlStorage, smlIndexName } from './sml_storage';
+import { ensureSmlMappingsComponentTemplate } from './sml_component_template';
 import { SmlUnregisteredTypeError } from './sml_errors';
 import type { SmlIndexerOriginParams, SmlTypeDefinition } from './types';
 
@@ -88,6 +89,8 @@ const createIndexerParams = (
 describe('createSmlIndexer', () => {
   beforeEach(() => {
     mockUuidCounter = 0;
+    // Default to a successful install; individual tests override per-call.
+    (ensureSmlMappingsComponentTemplate as jest.Mock).mockReset().mockResolvedValue(undefined);
   });
 
   describe('indexAttachment', () => {
@@ -476,6 +479,39 @@ describe('createSmlIndexer', () => {
       expect(logger.error).toHaveBeenCalledWith(
         expect.stringContaining('failed to index SML data')
       );
+    });
+
+    it('component template install failure aborts before the destructive delete', async () => {
+      // The install runs before `deleteEntry`, so a transient install failure must
+      // leave the existing entry intact: no delete, no write.
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+      (ensureSmlMappingsComponentTemplate as jest.Mock).mockRejectedValueOnce(
+        new Error('component template install failed')
+      );
+
+      const smlEntry = { type: 'lens', title: 'T', content: 'c' };
+      const getSmlEntry = jest.fn().mockResolvedValue(smlEntry);
+      const registry = createMockRegistry(createMockSmlTypeDefinition({ id: 'lens', getSmlEntry }));
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await expect(
+        indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'att-ensure-fail',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            logger,
+          })
+        )
+      ).rejects.toThrow('component template install failed');
+
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(bulkMock).not.toHaveBeenCalled();
     });
 
     describe('manual-entry protection (origin mode)', () => {
