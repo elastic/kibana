@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonCircle,
+  EuiSkeletonText,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { useQuery } from '@kbn/react-query';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -43,7 +50,22 @@ export const AlertEpisodeAssigneeCell = ({
   }
 
   if (isLoading) {
-    return <EuiLoadingSpinner size="s" />;
+    // Mirrors the loaded avatar + username layout.
+    return (
+      <EuiFlexGroup
+        gutterSize="xs"
+        alignItems="center"
+        responsive={false}
+        data-test-subj="alertingV2EpisodeAssigneeCellLoading"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiSkeletonCircle size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem css={{ maxWidth: 120 }}>
+          <EuiSkeletonText lines={1} size="s" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   if (isError) {

@@ -6,9 +6,13 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { makeDsView } from '../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
-import { FIELD_CONFIG } from '../service_settings_step/field_config';
-import type { ServiceVars } from '../service_settings_step/use_service_settings';
+import { resolveFieldMeta, toTyped } from '../service_settings_step/field_config';
+import type {
+  ServiceVars,
+  ServiceDataStreamVars,
+} from '../service_settings_step/use_service_settings';
 
 interface PackageInputEntry {
   enabled: boolean;
@@ -16,50 +20,61 @@ interface PackageInputEntry {
   streams: Record<string, { enabled: boolean; vars: Record<string, string | boolean | string[]> }>;
 }
 
-const BOOLEAN_VAR_NAMES = new Set([
-  'preserve_original_event',
-  'collect_s3_logs',
-  'preserve_duplicate_custom_fields',
-  'collect_esm_metrics',
-  'leaderelection',
-]);
-
 export function getRegionFieldName(
   service: AwsServiceMatrixEntry,
-  activeTransport: string | null
+  activeInput: string | null
 ): string {
   const rc = service.requiredConfig ?? [];
-  if (activeTransport === 'aws-s3' && rc.includes('region')) return 'region';
-  if (activeTransport === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
+  if (activeInput === 'aws-s3' && rc.includes('region')) return 'region';
+  if (activeInput === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
   if (rc.includes('aws_region')) return 'aws_region';
   return '';
 }
 
+/**
+ * Build Fleet stream vars for a single input of a single data stream.
+ * `service` should already be scoped to the DS (via makeDsView) so that
+ * requiredConfig/optionalConfig/varDefsByInput are DS-specific.
+ */
 export function buildStreamVars(
   service: AwsServiceMatrixEntry,
-  serviceVars: ServiceVars,
-  globalRegion: string
+  dsVars: ServiceDataStreamVars,
+  globalRegion: string,
+  activeInput: string
 ): Record<string, string | boolean | string[]> {
   const result: Record<string, string | boolean | string[]> = {};
 
-  for (const [key, value] of Object.entries(serviceVars.vars)) {
-    if (BOOLEAN_VAR_NAMES.has(key)) {
-      result[key] = value === 'true';
-    } else if (FIELD_CONFIG[key]?.multi) {
-      const parts = value
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (parts.length > 0) result[key] = parts;
-    } else {
+  for (const [key, value] of Object.entries(dsVars.varsByInput[activeInput] ?? {})) {
+    const meta = resolveFieldMeta(service, activeInput, key);
+    if (!meta) {
       result[key] = value;
+      continue;
+    }
+    result[key] = toTyped(value, meta);
+  }
+
+  // Emit manifest defaults for show_user fields belonging to this input not explicitly set.
+  const allShowUserFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  for (const key of allShowUserFields) {
+    if (key in result) continue;
+    const meta = resolveFieldMeta(service, activeInput, key);
+    if (!meta) continue;
+    const typed = toTyped(undefined, meta);
+    if (meta.isBool || (typeof typed === 'string' && typed !== '')) {
+      result[key] = typed;
     }
   }
 
-  // Backfill singular region field from globalRegion when not explicitly set
-  const regionField = getRegionFieldName(service, serviceVars.trigger);
+  // Backfill region from globalRegion when not explicitly set — but only when
+  // the manifest actually defines the region field at stream level. Input-level
+  // region vars (e.g. aws_region for guardduty) must not be emitted in streams[].vars;
+  // Fleet rejects them as "not found".
+  const regionField = getRegionFieldName(service, activeInput);
   if (regionField && !result[regionField] && globalRegion) {
-    result[regionField] = globalRegion;
+    const regionMeta = resolveFieldMeta(service, activeInput, regionField);
+    if (regionMeta) {
+      result[regionField] = globalRegion;
+    }
   }
 
   return result;
@@ -73,20 +88,49 @@ export function buildPackageInputs(
   const inputs: Record<string, PackageInputEntry> = {};
 
   for (const service of services) {
-    const serviceVars: ServiceVars = storedServiceVars[service.id] ?? { trigger: null, vars: {} };
-    const defaultInput = service.inputs?.includes('aws-s3') ? 'aws-s3' : service.inputs?.[0] ?? '';
-    const inputType = serviceVars.trigger ?? defaultInput;
-    if (!inputType) continue;
+    // Distinguish "never configured" (key absent → default to all DS) from "explicitly emptied"
+    // (key present with enabledDataStreams: [] → user turned everything off → skip).
+    const serviceVars: ServiceVars = storedServiceVars[service.id] ?? {
+      enabledDataStreams: service.dataStreams,
+      varsByDataStream: {},
+    };
 
-    const inputKey = service.policyTemplate ? `${service.policyTemplate}-${inputType}` : inputType;
-    const streamKey = `${service.packageName}.${service.dataStream ?? service.id}`;
-    const streamVars = buildStreamVars(service, serviceVars, globalRegion);
+    const activeDataStreams = serviceVars.enabledDataStreams;
 
-    if (!inputs[inputKey]) {
-      inputs[inputKey] = { enabled: true, streams: {} };
+    for (const dsId of activeDataStreams) {
+      const dsInfo = service.varDefsByDataStream?.[dsId];
+      const dsVars = serviceVars.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
+
+      // Determine which inputs are active for this data stream.
+      // Single-DS: default all inputs ON (matches the "all ON" display in the flyout).
+      const isSingleDs = service.dataStreams.length === 1;
+      const activeInputs = dsVars.enabledInputs.length
+        ? dsVars.enabledInputs
+        : isSingleDs
+        ? dsInfo?.inputs ?? service.inputs ?? []
+        : dsInfo?.defaultEnabledInputs?.length
+        ? dsInfo.defaultEnabledInputs
+        : dsInfo?.inputs?.length
+        ? dsInfo.inputs.slice(0, 1)
+        : service.defaultEnabledInputs?.length
+        ? service.defaultEnabledInputs.slice(0, 1)
+        : (service.inputs ?? []).slice(0, 1);
+
+      // Fleet stream key: <packageName>.<dataStreamPath>
+      const streamKey = `${service.packageName}.${dsId}`;
+      // Fleet input key: <policyTemplateName>-<inputType>  (service.id is now the PT name)
+      const dsView = makeDsView(service, dsId);
+
+      for (const inputType of activeInputs) {
+        const inputKey = `${service.id}-${inputType}`;
+        const streamVars = buildStreamVars(dsView, dsVars, globalRegion, inputType);
+
+        if (!inputs[inputKey]) {
+          inputs[inputKey] = { enabled: true, streams: {} };
+        }
+        inputs[inputKey].streams[streamKey] = { enabled: true, vars: streamVars };
+      }
     }
-
-    inputs[inputKey].streams[streamKey] = { enabled: true, vars: streamVars };
   }
 
   return inputs;

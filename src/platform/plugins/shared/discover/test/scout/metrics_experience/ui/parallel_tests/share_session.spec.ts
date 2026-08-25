@@ -86,13 +86,11 @@ spaceTest.describe(
         });
 
         await spaceTest.step('card count should match the original session', async () => {
-          const cardCountAfter = await metricsExperience.getVisibleCardCount();
-          expect(cardCountAfter).toStrictEqual(cardCountBefore);
+          await expect(metricsExperience.cards).toHaveCount(cardCountBefore);
         });
 
         await spaceTest.step('ES|QL query should be preserved', async () => {
-          const queryAfter = await discover.getEsqlQueryValue();
-          expect(queryAfter).toStrictEqual(queryBefore);
+          await expect.poll(() => discover.getEsqlQueryValue()).toBe(queryBefore);
         });
       }
     );
