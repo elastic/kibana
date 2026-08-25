@@ -107,15 +107,16 @@ describe('handleRouteError', () => {
   it('returns bad request for disabled workflow errors without logging', () => {
     const response = httpServerMock.createResponseFactory();
     const logger = loggingSystemMock.createLogger();
+    const disabledError = new WorkflowDisabledError('wf-1');
 
-    handleRouteError(response, new WorkflowDisabledError('wf-1'), {
+    handleRouteError(response, disabledError, {
       logger,
       logContext: { route: 'POST /api/workflows/workflow/{id}/run', workflowId: 'wf-1' },
     });
 
     expect(response.badRequest).toHaveBeenCalledWith({
       body: {
-        message: 'Workflow is disabled: wf-1. Enable the workflow to run it.',
+        message: disabledError.message,
       },
     });
     expect(logger.error).not.toHaveBeenCalled();

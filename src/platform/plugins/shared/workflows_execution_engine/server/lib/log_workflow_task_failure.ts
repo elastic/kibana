@@ -57,6 +57,9 @@ function isVersionConflictError(error: unknown): boolean {
 
 function isFinalAttempt(context: WorkflowTaskFailureLogContext): boolean {
   const { attempt, maxAttempts } = context;
+  // Task Manager increments `attempts` when claiming/marking the task running, so by the
+  // time the runner catch runs, the final attempt already has `attempt === maxAttempts`.
+  // This matches TM retry (`attempts < maxAttempts`) and resolveExhaustedWorkflowRunTask.
   return typeof attempt === 'number' && typeof maxAttempts === 'number' && attempt >= maxAttempts;
 }
 
