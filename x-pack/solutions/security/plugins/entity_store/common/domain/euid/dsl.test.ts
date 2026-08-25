@@ -209,7 +209,7 @@ describe('getEuidDslFilterBasedOnDocument', () => {
       });
     });
 
-    it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset/iam/entity.id)', () => {
+    it('returns undefined when doc passes documentsFilter but fails postAggFilter (no asset/entity.id)', () => {
       expect(
         getEuidDslFilterBasedOnDocument('user', {
           user: { id: 'user-id-42' },

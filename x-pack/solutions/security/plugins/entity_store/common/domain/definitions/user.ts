@@ -24,37 +24,7 @@ import { collectValues as collect, newestValue, oldestValue } from './field_rete
 /** Shared post-LOOKUP keep: entity already in store. */
 const entityIdExistsAfterLookup = { field: 'entity.id', exists: true } as const;
 
-const idpGate: Condition = {
-  or: [
-    { field: 'event.kind', includes: 'asset' },
-
-    {
-      and: [
-        {
-          or: [
-            // event.kind is not enrichment
-            { field: 'event.kind', neq: 'enrichment' },
-            // or event.kind doesn't exist
-            { field: 'event.kind', exists: false },
-          ],
-        },
-
-        // and event.category is iam
-        { field: 'event.category', includes: 'iam' },
-
-        // and event.type is user, creation, deletion or group
-        {
-          or: [
-            { field: 'event.type', includes: 'user' },
-            { field: 'event.type', includes: 'creation' },
-            { field: 'event.type', includes: 'deletion' },
-            { field: 'event.type', includes: 'group' },
-          ],
-        },
-      ],
-    },
-  ],
-};
+const idpGate: Condition = { field: 'event.kind', includes: 'asset' };
 
 const localNamespaceGate: Condition = {
   and: [
@@ -108,22 +78,7 @@ export const userEntityDefinition: EntityDefinitionWithoutId = {
         whenClauses: [
           // early match local namespace so we don't override IDP ones
           {
-            condition: {
-              and: [
-                // contains valid local user.name and host.id
-                localNamespaceGate,
-                {
-                  or: [
-                    // Rule of Host-Authoritative Source Exclusion
-                    // If it's asset, with host.id + user.name, it's asset.
-                    { field: 'event.kind', includes: 'asset' },
-
-                    // Or it's not an IDP event
-                    { not: idpGate },
-                  ],
-                },
-              ],
-            },
+            condition: localNamespaceGate,
             then: USER_ENTITY_NAMESPACE.Local,
           },
           {

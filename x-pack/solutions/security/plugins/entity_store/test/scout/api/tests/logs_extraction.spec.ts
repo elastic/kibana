@@ -502,7 +502,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         },
       });
 
-      // 3. Not non-IDP (no host.id). Matches idpDocumentFilter (user.id/name) but not idpPostAggFilter (not asset/iam)
+      // 3. Not non-IDP (no host.id). Matches idpDocumentFilter (user.id/name) but not idpPostAggFilter (not event.kind: asset)
       //    and not nonIdpPostAggFilter (no host.id) and no entity.id yet → no postAgg keep branch → not extracted.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:04:00Z',
@@ -517,41 +517,32 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const hit3 = await searchDocById(esClient, 'user:postagg-nopostaggkeep-nolatest@okta');
       expect(hit3.hits.hits).toHaveLength(0);
 
-      // 4. IDP: IAM user event (entityanalytics_ad) — matches idpPostAggFilter; namespace active_directory from fieldEvaluations.
+      // 4. IDP: IAM lifecycle event (entityanalytics_ad) with no host.id — the IdP gate only accepts
+      //    `event.kind: asset`, and there is no host.id for the non-IDP branch, so no entity is created.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:05:00Z',
         event: { category: 'iam', type: 'user', module: 'entityanalytics_ad' },
         user: {
-          id: 'postagg-idp-iam-ad-inlatest',
-          name: 'IDP IAM AD InLatest',
+          id: 'postagg-idp-iam-ad-nolatest',
+          name: 'IDP IAM AD NoLatest',
         },
       });
       const ext4 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
       expect(ext4.statusCode).toBe(200);
       const hit4 = await searchDocById(
         esClient,
-        'user:postagg-idp-iam-ad-inlatest@active_directory'
+        'user:postagg-idp-iam-ad-nolatest@active_directory'
       );
-      expect(hit4.hits.hits).toHaveLength(1);
-      expect(hit4.hits.hits[0]._source).toMatchObject({
-        entity: {
-          id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
-          type: 'Identity',
-          name: 'IDP IAM AD InLatest',
-          namespace: 'active_directory',
-          confidence: ENTITY_CONFIDENCE.High,
-        },
-      });
+      expect(hit4.hits.hits).toHaveLength(0);
 
-      // 5. Follow-up doc is not asset/iam (no idpPostAggFilter) and has no host.id (no nonIdpPostAggFilter);
-      //    row is kept via entity.id after LOOKUP (prior latest from step 4) → still extracted/updated.
-      await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      // 5. An IAM lifecycle event still enriches an entity that already exists.
+      //    First create the entity with an `event.kind: asset` doc.
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-01T10:06:00Z',
-        event: { kind: 'not-asset-or-iam', module: 'entityanalytics_ad' },
+        event: { kind: 'asset', module: 'entityanalytics_ad' },
         user: {
           id: 'postagg-idp-iam-ad-inlatest',
-          name: 'IDP IAM AD InLatest Updated',
+          name: 'IDP AD InLatest',
         },
       });
       const ext5 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
@@ -565,7 +556,43 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         entity: {
           id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
           type: 'Identity',
-          name: 'IDP IAM AD InLatest Updated',
+          name: 'IDP AD InLatest',
+          namespace: 'active_directory',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+      });
+
+      // 6. IAM lifecycle doc for the same user: no `event.kind: asset` (no idpPostAggFilter) and no
+      //    host.id (no nonIdpPostAggFilter). The extraction window holds only this doc, so the row can
+      //    only be kept via entity.id after LOOKUP against the entity created in step 5 → it enriches it.
+      const iamOnlyFrom = '2026-03-01T11:00:00Z';
+      const iamOnlyTo = '2026-03-01T12:00:00Z';
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-03-01T11:01:00Z',
+        event: { category: 'iam', type: 'user', module: 'entityanalytics_ad' },
+        user: {
+          id: 'postagg-idp-iam-ad-inlatest',
+          name: 'IDP AD InLatest Updated',
+        },
+      });
+      const ext6 = await forceLogExtraction(
+        apiClient,
+        internalHeaders,
+        'user',
+        iamOnlyFrom,
+        iamOnlyTo
+      );
+      expect(ext6.statusCode).toBe(200);
+      const hit6 = await searchDocById(
+        esClient,
+        'user:postagg-idp-iam-ad-inlatest@active_directory'
+      );
+      expect(hit6.hits.hits).toHaveLength(1);
+      expect(hit6.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:postagg-idp-iam-ad-inlatest@active_directory',
+          type: 'Identity',
+          name: 'IDP AD InLatest Updated',
           namespace: 'active_directory',
           confidence: ENTITY_CONFIDENCE.High,
         },
@@ -1031,7 +1058,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       });
 
       // 4. user.name only, plain network event (no host.id) — idpDocumentFilter passes but postAggFilter omits
-      //    (not idpPostAgg asset/iam shape, not nonIdpPostAgg without host.id, no entity.id).
+      //    (not event.kind: asset, not nonIdpPostAgg without host.id, no entity.id).
       await ingestDoc(esClient, {
         '@timestamp': '2026-03-18T11:04:00Z',
         event: { kind: 'event', category: 'network', outcome: 'success' },
@@ -1279,10 +1306,8 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         event: { kind: 'asset', module: 'asset_discovery' },
         user: { id: 'cloud-no-provider-user' },
       });
-      // 6. event.kind is not 'asset' → field-mapping condition does not fire;
-      //    cloud.provider=aws and event.module=custom-module produce different namespaces so
-      //    the wrong path would yield 'aws' while the correct path yields 'custom-module'.
-      //    IAM event so postAggFilter passes via idpGate (event.category=iam + event.type=user).
+      // 6. event.kind is not 'asset' and no host.id → idpGate (event.kind: asset) and nonIdpPostAggFilter
+      //    both fail → no entity created. (Previously this IAM event passed via the old IAM heuristic.)
       await ingestDoc(esClient, {
         '@timestamp': '2026-06-01T10:06:00Z',
         event: { category: 'iam', type: 'user', module: 'custom-module' },
@@ -1307,7 +1332,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         to
       );
       expect(extractionResponse.statusCode).toBe(200);
-      expect(extractionResponse.body).toMatchObject({ success: true, count: 7 });
+      expect(extractionResponse.body).toMatchObject({ success: true, count: 6 });
 
       // 1. aws → namespace aws
       const awsHit = await searchDocById(esClient, 'user:cloud-aws-user@aws');
@@ -1370,18 +1395,9 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         },
       });
 
-      // 6. event.kind ≠ 'asset' → cloud.provider mapping condition does not fire;
-      //    namespace comes from event.module ('custom-module'), not from cloud.provider ('aws')
+      // 6. IAM doc with no host.id — no entity created.
       const nonAssetHit = await searchDocById(esClient, 'user:cloud-non-asset-user@custom-module');
-      expect(nonAssetHit.hits.hits).toHaveLength(1);
-      expect(nonAssetHit.hits.hits[0]._source).toMatchObject({
-        entity: {
-          id: 'user:cloud-non-asset-user@custom-module',
-          namespace: 'custom-module',
-          confidence: ENTITY_CONFIDENCE.High,
-        },
-        cloud: { provider: 'aws' },
-      });
+      expect(nonAssetHit.hits.hits).toHaveLength(0);
 
       // 7. event.kind=asset but event.module ≠ 'asset_discovery' → defensive: cloud.provider mapping
       //    does NOT fire; namespace comes from event.module ('other_integration'), not 'aws'.
