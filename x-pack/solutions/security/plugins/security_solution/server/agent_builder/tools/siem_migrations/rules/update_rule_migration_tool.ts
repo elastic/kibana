@@ -10,7 +10,6 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/constants';
-import { UpdateRuleMigrationRequestBody } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../../plugin_contract';
 import type { ProductFeaturesService } from '../../../../lib/product_features_service/product_features_service';
@@ -20,11 +19,9 @@ import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
 import { SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID } from './tool_ids';
 
-// Reuse the generated schema; require at least one field so a no-op PATCH is rejected.
-const schema = UpdateRuleMigrationRequestBody.extend({
+const schema = z.object({
   migration_id: NonEmptyString.describe('The id of the rule migration to update.'),
-}).refine((v) => v.name !== undefined || v.index_pattern !== undefined, {
-  message: 'Provide at least one of name or index_pattern.',
+  name: NonEmptyString.describe('The new name for the rule migration.'),
 });
 
 const buildPath = (migrationId: string): string =>

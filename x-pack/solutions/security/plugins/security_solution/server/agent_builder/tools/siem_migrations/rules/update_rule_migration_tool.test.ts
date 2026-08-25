@@ -65,47 +65,6 @@ describe('updateRuleMigrationTool', () => {
     expect(result.results[0].data).toEqual({ ok: true, migration_id: 'abc' });
   });
 
-  it('should update an index pattern only', async () => {
-    mockFetch.mockResolvedValueOnce({
-      fetchOptions: { path: '/internal/siem_migrations/rules/abc' },
-      request: new Request('http://localhost/x'),
-      response: new Response(null, { status: 200 }),
-      body: null,
-    });
-
-    await tool.handler(
-      { migration_id: 'abc', index_pattern: 'logs-*,winlogbeat-*' },
-      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-    );
-
-    const body = (mockFetch.mock.calls[0][1] as { body: unknown }).body;
-    expect(body).toEqual({ index_pattern: 'logs-*,winlogbeat-*' });
-  });
-
-  it('should update both name and index_pattern together', async () => {
-    mockFetch.mockResolvedValueOnce({
-      fetchOptions: { path: '/internal/siem_migrations/rules/abc' },
-      request: new Request('http://localhost/x'),
-      response: new Response(null, { status: 200 }),
-      body: null,
-    });
-
-    await tool.handler(
-      { migration_id: 'abc', name: 'New Name', index_pattern: 'logs-archive-*' },
-      createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
-    );
-
-    const body = (mockFetch.mock.calls[0][1] as { body: unknown }).body;
-    expect(body).toEqual({ name: 'New Name', index_pattern: 'logs-archive-*' });
-  });
-
-  it('should reject a no-op PATCH where neither name nor index_pattern is provided', () => {
-    // Schema .refine rejects this before the handler runs.
-    const schema = tool.schema;
-    const result = schema.safeParse({ migration_id: 'abc' });
-    expect(result.success).toBe(false);
-  });
-
   it('should return an error result without calling the endpoint when privileges are missing', async () => {
     mockCheckPrivileges.mockResolvedValueOnce({ hasAllRequested: false });
 
