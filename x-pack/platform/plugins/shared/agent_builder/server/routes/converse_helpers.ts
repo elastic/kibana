@@ -31,8 +31,7 @@ export interface ResolvedExecutionOptions {
 
 /**
  * Converse helpers shared by the legacy `/api/agent_builder/converse` routes and the
- * events-native `/api/chat/converse` routes, so both drive the execution service through
- * exactly one code path (payload validation, connector resolution, and the executeAgent call).
+ * events-native `/api/chat/converse` routes.
  */
 export const getConverseHelpers = ({
   getInternalServices,
