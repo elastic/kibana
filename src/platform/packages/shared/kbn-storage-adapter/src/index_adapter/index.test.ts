@@ -1012,6 +1012,75 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     expect(indexManagementClient.index).not.toHaveBeenCalled();
   });
 
+  it('forwards composedOf and ignoreMissingComponentTemplates when set', async () => {
+    const adapter = new StorageIndexAdapter(
+      esClient,
+      loggerMock,
+      {
+        ...storageSettings,
+        composedOf: ['base@mappings', 'base@custom', 'my-index@mappings'],
+        ignoreMissingComponentTemplates: ['base@custom'],
+      },
+      { isServerless: true }
+    );
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        composed_of: ['base@mappings', 'base@custom', 'my-index@mappings'],
+        ignore_missing_component_templates: ['base@custom'],
+      })
+    );
+  });
+
+  it('omits composedOf and ignoreMissingComponentTemplates when unset', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: true,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        composed_of: expect.anything(),
+        ignore_missing_component_templates: expect.anything(),
+      })
+    );
+  });
+
+  it('omits schema properties but keeps _meta and dynamic when inlineSchemaMappings is false', async () => {
+    const adapter = new StorageIndexAdapter(
+      esClient,
+      loggerMock,
+      { ...storageSettings, inlineSchemaMappings: false },
+      { isServerless: true }
+    );
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    const [request] = jest.mocked(esClient.indices.putIndexTemplate).mock.calls[0];
+    expect(request.template?.mappings).toEqual({
+      _meta: { version: expect.any(String) },
+      dynamic: 'strict',
+    });
+  });
+
+  it('inlines schema properties by default', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings, {
+      isServerless: true,
+    });
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    const [request] = jest.mocked(esClient.indices.putIndexTemplate).mock.calls[0];
+    expect(request.template?.mappings?.properties).toEqual({ foo: { type: 'keyword' } });
+  });
+
   it('forwards priority to the index template when set', async () => {
     const adapter = new StorageIndexAdapter(
       esClient,

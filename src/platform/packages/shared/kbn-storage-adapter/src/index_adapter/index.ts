@@ -380,9 +380,13 @@ export class StorageIndexAdapter<
         ? {}
         : {
             dynamic: 'strict',
-            properties: {
-              ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
-            },
+            ...(this.storage.inlineSchemaMappings === false
+              ? {}
+              : {
+                  properties: {
+                    ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+                  },
+                }),
           }),
     };
 
@@ -410,6 +414,14 @@ export class StorageIndexAdapter<
                   ...(componentTemplate.optional ?? []),
                 ],
                 ignore_missing_component_templates: [...(componentTemplate.optional ?? [])],
+              }
+            : {}),
+          ...(this.storage.composedOf !== undefined
+            ? { composed_of: this.storage.composedOf }
+            : {}),
+          ...(this.storage.ignoreMissingComponentTemplates !== undefined
+            ? {
+                ignore_missing_component_templates: this.storage.ignoreMissingComponentTemplates,
               }
             : {}),
           ...(this.storage.priority !== undefined ? { priority: this.storage.priority } : {}),
