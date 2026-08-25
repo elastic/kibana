@@ -218,7 +218,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 'aria-label': ORPHAN_TITLE,
               }}
               color={theme.euiTheme.colors.danger}
-              type="unlink"
+              type="linkSlash"
               title={ORPHAN_TITLE}
               content={ORPHAN_CONTENT}
             />

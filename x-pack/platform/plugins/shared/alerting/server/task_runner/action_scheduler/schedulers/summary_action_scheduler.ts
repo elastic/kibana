@@ -70,7 +70,15 @@ export class SummaryActionScheduler<
         .map((action) => {
           if (!canGetSummarizedAlerts) {
             this.context.logger.error(
-              `Skipping action "${action.id}" for rule "${this.context.rule.id}" because the rule type "${this.context.ruleType.name}" does not support alert-as-data.`
+              `Skipping action "${action.id}" for rule "${this.context.rule.id}" because the rule type "${this.context.ruleType.name}" does not support alert-as-data.`,
+              {
+                labels: {
+                  actionId: action.id,
+                  ruleId: this.context.rule.id,
+                  ruleType: this.context.ruleType.id,
+                  spaceId: this.context.taskInstance.params.spaceId,
+                },
+              }
             );
             return null;
           }
@@ -214,6 +222,7 @@ export class SummaryActionScheduler<
           action: actionToRun,
           apiKey: this.context.apiKey,
           apiKeyId: this.context.apiKeyId,
+          uiamApiKeyExternal: this.context.uiamApiKeyExternal,
           executionId: this.context.executionId,
           priority: this.context.priority,
           ruleConsumer: this.context.ruleConsumer,

@@ -142,7 +142,7 @@ describe('RuleExecutorWorkflowSubscriber', () => {
           event_type: RULE_EXECUTION_SUCCEEDED_EVENT_TYPE,
           rule_id: succeededEvent.payload.rule.ruleId,
           space_id: succeededEvent.payload.rule.spaceId,
-          code: ALERTING_LOG_CODES.RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE,
+          code: ALERTING_LOG_CODES.EVENTS_RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILED,
         },
         error: expect.objectContaining({ message: 'workflows unreachable' }),
       });

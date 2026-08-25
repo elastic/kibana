@@ -39,6 +39,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText(request);
       });
       await PageObjects.console.selectAllRequests();
+      // Wait until the editor recognizes all requests as selected before playing (async parse race).
+      await PageObjects.console.waitForSelectedRequestsCount(requests.length);
       await PageObjects.console.clickPlayAndWaitForResults();
     };
 

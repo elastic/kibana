@@ -6,6 +6,7 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import { EffortLevels } from '@kbn/agent-builder-common';
 import type { ModelProvider, ScopedModel } from '@kbn/agent-builder-server';
@@ -18,16 +19,29 @@ import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
+import { getDefaultEsqlCacheKey } from './cache_key';
+
+export class GenerateEsqlNoDataError extends Error {
+  readonly code = 'NO_DATA' as const;
+  constructor(message: string) {
+    super(message);
+    this.name = 'GenerateEsqlNoDataError';
+  }
+}
 
 export interface GenerateEsqlResponse {
   /**
-   * The ES|QL query which was generated
+   * The ES|QL query which was generated.
+   *
+   * `undefined` when the model failed to produce a query after exhausting retries — in that
+   * case {@link GenerateEsqlResponse.error} is always set. Consumers should check `error`
+   * before using `query`.
    */
-  query: string;
+  query?: string;
   /**
    * The full text answer which was provided by the LLM when generating the query.
    */
-  answer: string;
+  answer?: string;
   /**
    * Results from executing the query.
    * Available if `executeQuery` was true and if a successful query was executed.
@@ -100,6 +114,10 @@ export interface GenerateEsqlOptions {
    * If true, external ES|QL datasets are considered when discovering and resolving the target.
    */
   includeDatasets?: boolean;
+  /**
+   * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
+   */
+  sessionId?: string;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -115,6 +133,7 @@ export const generateEsql = async ({
   timeRange: inputTimeRange,
   disableNamedParams,
   includeDatasets = false,
+  sessionId,
   model: inputModel,
   modelProvider,
   esClient,
@@ -128,6 +147,8 @@ export const generateEsql = async ({
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
+  const cacheSessionId = sessionId ?? getDefaultEsqlCacheKey();
+  const cacheControl: ChatCompleteCacheControl = { type: 'ephemeral', ttl: '5m' };
 
   const graph = createNlToEsqlGraph({
     model,
@@ -136,6 +157,8 @@ export const generateEsql = async ({
     documentation,
     esqlCallbacks,
     includeDatasets,
+    sessionId: cacheSessionId,
+    cacheControl,
   });
 
   return withActiveInferenceSpan(
@@ -143,6 +166,9 @@ export const generateEsql = async ({
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+        [ElasticGenAIAttributes.CacheControlType]: cacheControl.type,
+        [ElasticGenAIAttributes.CacheControlTTL]: cacheControl.ttl,
+        [ElasticGenAIAttributes.CacheControlSessionId]: cacheSessionId,
       },
     },
     async () => {
@@ -167,7 +193,7 @@ export const generateEsql = async ({
             logger,
           });
           if (!selectedResource) {
-            throw new Error(
+            throw new GenerateEsqlNoDataError(
               'Could not discover a suitable index for the query. Please specify an index explicitly.'
             );
           }
@@ -201,6 +227,9 @@ export const generateEsql = async ({
           results: outState.results,
         };
       } catch (e) {
+        if (e instanceof GenerateEsqlNoDataError) {
+          throw e;
+        }
         throw new Error(`Could not generate ESQL query: ${e.message}`);
       }
     }

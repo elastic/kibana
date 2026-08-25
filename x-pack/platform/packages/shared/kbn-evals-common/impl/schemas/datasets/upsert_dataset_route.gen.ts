@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { DatasetTags, DatasetMaturity } from '../common_attributes.gen';
+import { DatasetTags, DatasetMaturity, SpaceIds } from '../common_attributes.gen';
 
 export const UpsertDatasetExamplePayload = lazySchema(() =>
   z.object({
@@ -34,6 +34,7 @@ export const UpsertEvaluationDatasetRequestBody = lazySchema(() =>
     tags: DatasetTags.optional(),
     maturity: DatasetMaturity.optional(),
     examples: z.array(UpsertDatasetExamplePayload),
+    space_ids: SpaceIds.optional(),
   })
 );
 export type UpsertEvaluationDatasetRequestBody = z.infer<typeof UpsertEvaluationDatasetRequestBody>;

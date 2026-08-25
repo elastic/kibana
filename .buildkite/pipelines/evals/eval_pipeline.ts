@@ -10,8 +10,17 @@
 import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
 
 const EVALS_SUITES_METADATA_RELATIVE_PATH = '.buildkite/pipelines/evals/evals.suites.json';
+
+// Consumed by `run_suite.sh` (via jq) rather than here, but declared so this type describes the
+// whole file. Each shard becomes its own fanout step running the spec files it lists, resolved
+// relative to the suite root.
+export interface EvalsSuiteShard {
+  id: string;
+  specFiles: string[];
+}
 
 export interface EvalsSuiteMetadataEntry {
   id: string;
@@ -21,6 +30,8 @@ export interface EvalsSuiteMetadataEntry {
   serverConfigSet?: string;
   weeklyEisModelGroups?: string[];
   defaultModelGroups?: string[] | null;
+  shards?: EvalsSuiteShard[];
+  stepTimeoutInMinutes?: number;
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
@@ -123,14 +134,28 @@ function normalizeEvaluationConnectorId(raw: string): string {
     return `eis-${normalizeBuildkiteKey(raw.slice('eis/'.length))}`;
   }
 
-  // `models:judge:<modelGroup>` (e.g. `llm-gateway/gpt-5.2`) — judge value is a model group.
-  if (raw.includes('/')) {
-    return `litellm-${normalizeBuildkiteKey(raw)}`;
+  // `models:judge:openrouter/<provider>-<model>` (e.g. `openrouter/openai-gpt-5.4`).
+  if (raw.startsWith('openrouter/')) {
+    return `openrouter-${normalizeBuildkiteKey(raw.slice('openrouter/'.length))}`;
   }
 
-  // Already a connector id (e.g. `litellm-*` / `eis-*`).
+  // Native OpenRouter id (`openai/gpt-5.4`)
+  if (raw.includes('/')) {
+    return `openrouter-${normalizeBuildkiteKey(raw)}`;
+  }
+
+  // Already a connector id (e.g. `openrouter-*` / `eis-*`).
   return raw;
 }
+
+/**
+ * Boot disk for eval agents. Eval steps bootstrap the workspace, unpack the Kibana distributable
+ * and run a local ES + Kibana; on the image default ES ends up under its merge disk watermark and
+ * stops merging segments. These steps spell out their own agent block, so the repo-wide default
+ * has to be requested explicitly. `eval_agent_disk_size.test.ts` pins the copies in
+ * `steps/evals/run_suite.sh` and `llm_evals.yml`, which cannot import it, to this value.
+ */
+const EVAL_AGENT_DISK_SIZE_GB = DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb;
 
 /**
  * Whether heavy eval steps run on preemptible (spot) agents. Defaults to `true` (weekly/on-demand);
@@ -200,6 +225,7 @@ function buildEvalsYaml({
         `          imageProject: elastic-images-prod`,
         `          provider: gcp`,
         `          machineType: n2-standard-8`,
+        `          diskSizeGb: ${EVAL_AGENT_DISK_SIZE_GB}`,
         ...(preemptible ? [`          preemptible: true`] : []),
         `        retry:`,
         `          automatic:`,
