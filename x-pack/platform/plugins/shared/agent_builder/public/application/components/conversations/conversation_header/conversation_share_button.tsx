@@ -464,10 +464,6 @@ const ConversationSharePopover: React.FC<{
             <div
               css={css`
                 position: relative;
-
-                [data-test-subj='comboBoxToggleListButton'] {
-                  display: none;
-                }
               `}
             >
               <EuiComboBox<string>
