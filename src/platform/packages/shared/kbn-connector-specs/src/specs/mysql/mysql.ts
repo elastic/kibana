@@ -21,12 +21,10 @@
  * in `lib/clients/mysql.ts` decodes them from the Authorization header that
  * the framework's credential accessor produces.
  *
- * Read actions (`query`, `listDatabases`, `listTables`, `describeTable`,
- * `searchRows`) are enforced as read-only via `assertReadOnly`. `executeSql`
- * is unrestricted and carries `scope: 'destroy'`.
- * `query` wraps SELECT/WITH inside a bounded subquery to enforce `maxRows`
- * server-side; SHOW/DESCRIBE/EXPLAIN are run directly (they cannot appear
- * inside a derived table).
+ * `query` accepts SELECT/WITH only (enforced by `assertReadOnly`) and wraps
+ * the statement in a bounded subquery so `maxRows` is applied server-side.
+ * Use `listDatabases`, `listTables`, and `describeTable` for SHOW/DESCRIBE.
+ * `executeSql` is unrestricted and carries `scope: 'destroy'`.
  */
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
@@ -46,15 +44,26 @@ import {
   SearchRowsInputSchema,
 } from './types';
 
+const DEFAULT_MAX_ROWS = 100;
+const MAX_MAX_ROWS = 1000;
+
+const resolveMaxRows = (maxRows?: number): number => {
+  if (maxRows === undefined) {
+    return DEFAULT_MAX_ROWS;
+  }
+  if (!Number.isInteger(maxRows) || maxRows < 1 || maxRows > MAX_MAX_ROWS) {
+    throw new Error(`maxRows must be an integer between 1 and ${MAX_MAX_ROWS}`);
+  }
+  return maxRows;
+};
+
 const runSql = async (
   ctx: ActionContext,
   sql: string,
-  params?: string[]
+  params?: readonly string[]
 ): Promise<unknown> => {
   const pool = await ctx.getClient('mysql');
-  const [rows] = params
-    ? await pool.execute(sql, params as never[])
-    : await pool.execute(sql);
+  const [rows] = params ? await pool.execute(sql, [...params]) : await pool.execute(sql);
   return rows;
 };
 
@@ -80,6 +89,10 @@ export const MysqlConnector: ConnectorSpec = {
       host: z
         .string()
         .min(1)
+        .max(253)
+        .refine((value) => !/^[a-z][a-z0-9+.-]*:\/\//i.test(value), {
+          message: 'Host must be a hostname or IP address, without a protocol prefix',
+        })
         .describe(
           i18n.translate('core.kibanaConnectorSpecs.mysql.config.host.description', {
             defaultMessage: 'The MySQL server hostname or IP address',
@@ -100,6 +113,7 @@ export const MysqlConnector: ConnectorSpec = {
         .int()
         .min(1)
         .max(65535)
+        .default(3306)
         .describe(
           i18n.translate('core.kibanaConnectorSpecs.mysql.config.port.description', {
             defaultMessage: 'The MySQL server port',
@@ -118,6 +132,7 @@ export const MysqlConnector: ConnectorSpec = {
       database: z
         .string()
         .min(1)
+        .max(64)
         .describe(
           i18n.translate('core.kibanaConnectorSpecs.mysql.config.database.description', {
             defaultMessage: 'The default database to connect to',
@@ -133,6 +148,24 @@ export const MysqlConnector: ConnectorSpec = {
             defaultMessage: 'The name of the default database to query',
           }),
         }),
+      ssl: z
+        .enum(['required', 'disabled'])
+        .default('required')
+        .describe(
+          i18n.translate('core.kibanaConnectorSpecs.mysql.config.ssl.description', {
+            defaultMessage: 'Whether to use TLS when connecting to MySQL',
+          })
+        )
+        .meta({
+          widget: 'select',
+          label: i18n.translate('core.kibanaConnectorSpecs.mysql.config.ssl.label', {
+            defaultMessage: 'TLS',
+          }),
+          helpText: i18n.translate('core.kibanaConnectorSpecs.mysql.config.ssl.helpText', {
+            defaultMessage:
+              'Required (default) encrypts the connection using Kibana TLS settings. Disable only for servers that do not support TLS.',
+          }),
+        }),
     })
   ),
 
@@ -145,7 +178,7 @@ export const MysqlConnector: ConnectorSpec = {
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) => {
         assertReadOnly(input.sql);
-        const maxRows = input.maxRows ?? 100;
+        const maxRows = resolveMaxRows(input.maxRows);
         return runSql(ctx, `SELECT * FROM (\n${input.sql}\n) AS _q LIMIT ${maxRows}`);
       },
     },
@@ -187,19 +220,23 @@ export const MysqlConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Search for rows in a MySQL table by matching a text value against one or more columns using LIKE pattern matching (case-insensitive partial match). Returns up to maxRows results (default 100). Use describeTable first to discover searchable column names. Prefer query (SQL SELECT) for structured filtering; use searchRows for broad text discovery across known columns.',
+        'Search for rows in a MySQL table by matching a text value against one or more columns using LIKE pattern matching (case-insensitive partial match via LOWER). Returns up to maxRows results (default 100). Use describeTable first to discover searchable column names. Prefer query (SQL SELECT) for structured filtering; use searchRows for broad text discovery across known columns.',
       input: SearchRowsInputSchema,
       handler: async (ctx, input: SearchRowsInput) => {
         const db = resolveDatabase(input.database, ctx);
-        const likeParam = `%${escapeLikePattern(input.searchTerm, false)}%`;
+        const likeParam = `%${escapeLikePattern(input.searchTerm.toLowerCase(), false)}%`;
         const whereClause = input.columns
-          .map((col) => `${quoteIdentifier(col)} LIKE ? ESCAPE '!'`)
+          .map((col) => `LOWER(${quoteIdentifier(col)}) LIKE ? ESCAPE '!'`)
           .join(' OR ');
-        const maxRows = input.maxRows ?? 100;
+        const maxRows = resolveMaxRows(input.maxRows);
         const sql =
           `SELECT * FROM ${quoteIdentifier(db)}.${quoteIdentifier(input.table)}` +
           ` WHERE ${whereClause} LIMIT ${maxRows}`;
-        return runSql(ctx, sql, input.columns.map(() => likeParam));
+        return runSql(
+          ctx,
+          sql,
+          input.columns.map(() => likeParam)
+        );
       },
     },
 
@@ -239,12 +276,13 @@ export const MysqlConnector: ConnectorSpec = {
     '- Prefer `query` for structured filtering, joins, aggregation, or anything expressible as a SELECT.',
     '- Prefer `searchRows` for broad, unstructured text lookups across a known set of columns.',
     '- Use `executeSql` only for writes or DDL that the workflow explicitly requires (INSERT, UPDATE, DELETE, CREATE, DROP, etc.).',
-    '- Use `listDatabases`, `listTables`, and `describeTable` for schema exploration.',
+    '- Use `listDatabases`, `listTables`, and `describeTable` for schema exploration. Do not send SHOW or DESCRIBE to `query`.',
     '',
     '### Gotchas',
     '- `query` only allows SELECT and WITH — multi-statement and write SQL are rejected; use `executeSql` for writes.',
     '- `query` and `searchRows` cap results at `maxRows` (default 100, max 1000) — narrow with WHERE clauses rather than relying on a large `maxRows`.',
     '- Database and table names are case-sensitive on case-sensitive filesystems (the common case on Linux). Use the exact casing returned by `listDatabases` / `listTables`.',
+    '- TLS is required by default. Set TLS to disabled only when the MySQL server does not support TLS.',
   ].join('\n'),
 };
 

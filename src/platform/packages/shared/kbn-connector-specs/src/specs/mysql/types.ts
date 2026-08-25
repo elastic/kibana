@@ -38,7 +38,8 @@ export const ListTablesInputSchema = lazySchema(() =>
   z.object({
     database: z
       .string()
-      .max(200)
+      .min(1)
+      .max(64)
       .optional()
       .describe(
         'Database name to list tables from. Uses the configured default database if omitted.'
@@ -52,11 +53,12 @@ export const DescribeTableInputSchema = lazySchema(() =>
     table: z
       .string()
       .min(1)
-      .max(200)
+      .max(64)
       .describe('Name of the table to describe (e.g. "users", "orders")'),
     database: z
       .string()
-      .max(200)
+      .min(1)
+      .max(64)
       .optional()
       .describe(
         'Database name containing the table. Uses the configured default database if omitted.'
@@ -70,7 +72,7 @@ export const SearchRowsInputSchema = lazySchema(() =>
     table: z
       .string()
       .min(1)
-      .max(200)
+      .max(64)
       .describe('Name of the table to search (e.g. "users", "products")'),
     searchTerm: z
       .string()
@@ -80,7 +82,7 @@ export const SearchRowsInputSchema = lazySchema(() =>
         'Text to search for using SQL LIKE pattern matching. Matches rows where any of the specified columns contain this text (case-insensitive, partial match).'
       ),
     columns: z
-      .array(z.string().min(1).max(200))
+      .array(z.string().min(1).max(64))
       .min(1)
       .max(50)
       .describe(
@@ -95,7 +97,8 @@ export const SearchRowsInputSchema = lazySchema(() =>
       .describe('Maximum number of rows to return (1-1000, default: 100)'),
     database: z
       .string()
-      .max(200)
+      .min(1)
+      .max(64)
       .optional()
       .describe(
         'Database name containing the table. Uses the configured default database if omitted.'

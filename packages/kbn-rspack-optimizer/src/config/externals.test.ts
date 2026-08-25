@@ -14,7 +14,7 @@ import { getExternals, isKeaReactReduxImport } from './externals';
  * Rspack-specific externals that are NOT in UiSharedDepsSrc.externals.
  * Any addition here must be intentional and documented.
  */
-const RSPACK_ONLY_EXTERNALS = ['node:crypto'];
+const RSPACK_ONLY_EXTERNALS = ['node:crypto', 'mysql2', 'mysql2/promise'];
 
 describe('externals configuration', () => {
   const rspackExternals = getExternals();

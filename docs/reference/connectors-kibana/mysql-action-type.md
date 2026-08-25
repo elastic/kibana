@@ -9,7 +9,7 @@ applies_to:
 
 # MySQL connector [mysql-action-type]
 
-The MySQL connector enables you to connect directly to a MySQL database to search and query your data from chat conversations.
+The MySQL connector connects directly to a MySQL database so you can search, query, and explore schema from chat conversations. Workflow authors can also run write or DDL statements through **Execute SQL**.
 
 ## Create connectors in {{kib}} [define-mysql-ui]
 
@@ -33,6 +33,9 @@ Username
 
 Password
 :   The password for the MySQL user.
+
+TLS
+:   Whether to encrypt the connection. **Required** (default) uses Kibana TLS settings. **Disabled** is only for servers that do not support TLS.
 
 
 ## Test connectors [mysql-action-configuration]
@@ -66,14 +69,14 @@ Search Rows
     - **maxRows** (optional): Maximum number of rows to return (1-1000, default: 100).
     - **database** (optional): The database name. Uses the configured default if omitted.
 
-Execute SQL {applies_to}`stack: preview 9.6`
-:   Execute any SQL statement against the MySQL database. No restrictions — `INSERT`, `UPDATE`, `DELETE`, `DROP`, and DDL are all permitted. Use only when the workflow explicitly requires a write or destructive operation. Prefer **Query** for read-only access.
+Execute SQL
+:   Run any SQL statement against the MySQL database. No restrictions — `INSERT`, `UPDATE`, `DELETE`, `DROP`, and DDL are all permitted. Use only when the workflow explicitly requires a write or destructive operation. Prefer **Query** for read-only access.
     - **sql** (required): The SQL statement to execute.
 
 
 ## Requirements [mysql-requirements]
 
-The MySQL connector connects directly to MySQL over the native MySQL protocol (default port 3306). Your MySQL server must be network-accessible from your Kibana instance.
+The MySQL connector connects directly to MySQL over the native MySQL protocol (default port 3306). Your MySQL server must be network-accessible from your Kibana instance. TLS is required by default.
 
 To use the MySQL connector, you need:
 
@@ -96,7 +99,7 @@ GRANT SELECT ON my_database.* TO 'kibana_reader'@'%';
 FLUSH PRIVILEGES;
 ```
 
-The `query` action enforces read-only access at the application level by rejecting any SQL that does not begin with a read-only keyword (`SELECT`, `SHOW`, `DESCRIBE`, `EXPLAIN`, or `WITH`) and by blocking multi-statement input. Using a least-privilege database user adds a second, independent layer of enforcement. Note: the `executeSql` action bypasses these restrictions and can run any statement — do not grant write privileges unless your use case requires them.
+The `query` action enforces read-only access at the application level by accepting only `SELECT` and `WITH` statements and by blocking multi-statement input. Use **List Tables** and **Describe Table** for schema discovery. Using a least-privilege database user adds a second, independent layer of enforcement. Note: the `executeSql` action bypasses these restrictions and can run any statement — do not grant write privileges unless your use case requires them.
 
 You can further restrict the user to connections from your Kibana host's IP address:
 

@@ -7,21 +7,74 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const READ_ONLY_PREFIX = /^\s*(SELECT|SHOW|DESCRIBE|DESC|EXPLAIN|WITH)\b/i;
+/**
+ * Shared read-only SQL guardrail used by MySQL, Snowflake, and BigQuery.
+ *
+ * Strips leading whitespace and comments (line `--` / `#`, block comments),
+ * rejects a second statement after `;`, requires an allowlisted leading keyword, and rejects
+ * write / DDL tokens that can follow a read-only prefix (e.g. `WITH … INSERT`,
+ * `SELECT … INTO OUTFILE`).
+ *
+ * The `;` check is conservative: a semicolon inside a string literal is treated
+ * as a second statement. Agents can rewrite such queries.
+ */
 
-// WITH can prefix INSERT/UPDATE/DELETE in a CTE — catch the most common write patterns.
-const CTE_WRITE_PATTERN = /\b(INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM)\b/i;
+export const READ_ONLY_STATEMENT_PREFIXES = /^(SELECT|WITH|SHOW|DESCRIBE|DESC|EXPLAIN)\b/i;
+export const SELECT_OR_WITH_PREFIX = /^(SELECT|WITH)\b/i;
+export const BIGQUERY_READ_ONLY_PREFIXES = /^(SELECT|WITH|EXPLAIN)\b/i;
 
-export const assertReadOnly = (sql: string): void => {
-  if (!READ_ONLY_PREFIX.test(sql)) {
-    throw new Error(
-      'Only read-only SQL statements are permitted (SELECT, SHOW, DESCRIBE, EXPLAIN, WITH)'
-    );
+// Write / DDL that can hide after a read-only prefix (WITH CTE, SELECT INTO, EXPLAIN UPDATE).
+const WRITE_PATTERN =
+  /\b(INSERT\s+INTO|REPLACE\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|MERGE\s+INTO|CREATE\s+|DROP\s+|ALTER\s+|TRUNCATE\s+|GRANT\s+|REVOKE\s+|CALL\s+|LOAD\s+DATA|INTO\s+(OUTFILE|DUMPFILE))\b/i;
+
+export const stripLeadingCommentsAndWhitespace = (sql: string): string => {
+  let remaining = sql;
+  while (true) {
+    const before = remaining;
+    remaining = remaining.replace(/^\s+/, '');
+    remaining = remaining.replace(/^--[^\n]*(?:\n|$)/, '');
+    remaining = remaining.replace(/^#[^\n]*(?:\n|$)/, '');
+    remaining = remaining.replace(/^\/\*[\s\S]*?\*\//, '');
+    if (remaining === before) {
+      return remaining;
+    }
   }
-  if (sql.includes(';')) {
+};
+
+export const hasTrailingStatement = (sql: string): boolean => {
+  const semicolonIndex = sql.indexOf(';');
+  if (semicolonIndex === -1) {
+    return false;
+  }
+  const trailing = stripLeadingCommentsAndWhitespace(sql.slice(semicolonIndex + 1));
+  return trailing.length > 0;
+};
+
+export const isReadOnlySql = (
+  sql: string,
+  allowedPrefixes: RegExp = READ_ONLY_STATEMENT_PREFIXES
+): boolean => {
+  if (hasTrailingStatement(sql)) {
+    return false;
+  }
+  const head = stripLeadingCommentsAndWhitespace(sql);
+  return allowedPrefixes.test(head) && !WRITE_PATTERN.test(head);
+};
+
+export const assertReadOnly = (
+  sql: string,
+  allowedPrefixes: RegExp = SELECT_OR_WITH_PREFIX
+): void => {
+  if (hasTrailingStatement(sql)) {
     throw new Error('Multi-statement SQL is not permitted');
   }
-  if (/^\s*WITH\b/i.test(sql) && CTE_WRITE_PATTERN.test(sql)) {
+  const head = stripLeadingCommentsAndWhitespace(sql);
+  if (!allowedPrefixes.test(head)) {
+    throw new Error(
+      'Only read-only SQL statements are permitted (SELECT, WITH). Use listTables or describeTable for schema discovery, or executeSql for writes.'
+    );
+  }
+  if (WRITE_PATTERN.test(head)) {
     throw new Error('Write operations are not permitted');
   }
 };

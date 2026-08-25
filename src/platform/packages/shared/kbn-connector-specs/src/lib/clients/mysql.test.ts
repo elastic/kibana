@@ -14,9 +14,11 @@ interface MockPool {
   end: jest.Mock;
 }
 
-const mockCreatePool = jest.fn((_opts: unknown): MockPool => ({
-  end: jest.fn().mockResolvedValue(undefined),
-}));
+const mockCreatePool = jest.fn(
+  (): MockPool => ({
+    end: jest.fn().mockResolvedValue(undefined),
+  })
+);
 
 jest.mock('mysql2/promise', () => ({
   createPool: (opts: unknown) => mockCreatePool(opts),
@@ -101,6 +103,35 @@ describe('mysqlClientType', () => {
         expect.objectContaining({ host: 'mysql.prod', port: 3307, database: 'prod_db' })
       );
     });
+
+    it('applies Kibana TLS settings and connect timeout by default', async () => {
+      const networkSettings = makeNetworkSettings({
+        getSslSettings: jest.fn().mockReturnValue({ verificationMode: 'full' }),
+        getResponseSettings: jest.fn().mockReturnValue({ timeout: 15000, maxContentLength: 1 }),
+      });
+      const ctx = makeCtx({ networkSettings });
+
+      await mysqlClientType.build(ctx);
+
+      expect(mockCreatePool).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectTimeout: 15000,
+          queueLimit: 100,
+          ssl: expect.objectContaining({ rejectUnauthorized: true, verifyIdentity: true }),
+        })
+      );
+    });
+
+    it('omits ssl when config.ssl is disabled', async () => {
+      const ctx = makeCtx({
+        config: { host: 'db.example.com', port: 3306, database: 'testdb', ssl: 'disabled' },
+      });
+
+      await mysqlClientType.build(ctx);
+
+      const opts = mockCreatePool.mock.calls[0][0] as Record<string, unknown>;
+      expect(opts.ssl).toBeUndefined();
+    });
   });
 
   describe('terminate', () => {
@@ -112,6 +143,14 @@ describe('mysqlClientType', () => {
   });
 
   describe('isUserError', () => {
+    const isUserError = (err: unknown): boolean => {
+      const fn = mysqlClientType.isUserError;
+      if (!fn) {
+        throw new Error('expected mysqlClientType.isUserError');
+      }
+      return fn(err);
+    };
+
     it.each([
       'ER_ACCESS_DENIED_ERROR',
       'ER_DBACCESS_DENIED_ERROR',
@@ -120,17 +159,17 @@ describe('mysqlClientType', () => {
       'ENOTFOUND',
     ])('returns true for %s', (code) => {
       const err = Object.assign(new Error('db error'), { code });
-      expect(mysqlClientType.isUserError!(err)).toBe(true);
+      expect(isUserError(err)).toBe(true);
     });
 
     it('returns false for transient / unknown error codes', () => {
       const err = Object.assign(new Error('unknown'), { code: 'ER_LOCK_DEADLOCK' });
-      expect(mysqlClientType.isUserError!(err)).toBe(false);
+      expect(isUserError(err)).toBe(false);
     });
 
     it('returns false for non-Error values', () => {
-      expect(mysqlClientType.isUserError!('string error')).toBe(false);
-      expect(mysqlClientType.isUserError!(null)).toBe(false);
+      expect(isUserError('string error')).toBe(false);
+      expect(isUserError(null)).toBe(false);
     });
   });
 });

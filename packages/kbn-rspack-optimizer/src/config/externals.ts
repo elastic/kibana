@@ -39,5 +39,8 @@ export function getExternals(): Record<string, string> {
 
     // Node.js built-ins (rspack-specific, for browser compatibility)
     'node:crypto': 'commonjs crypto',
+    // Native MySQL driver — keep out of the browser bundle (mirrors webpack).
+    mysql2: 'commonjs mysql2',
+    'mysql2/promise': 'commonjs mysql2/promise',
   };
 }

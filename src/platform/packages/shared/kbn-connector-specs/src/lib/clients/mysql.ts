@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Pool as Mysql2Pool } from 'mysql2/promise';
+import { getNodeSSLOptions } from '@kbn/actions-utils';
+import type { Pool as Mysql2Pool, SslOptions } from 'mysql2/promise';
 import type { BuildContext, ClientTypeSpec } from './client_type_spec';
 
 // mysql2 error codes that indicate the user supplied bad configuration (not a transient network error).
@@ -23,7 +24,7 @@ const extractBasicCredentials = async (
   credential: BuildContext['credential']
 ): Promise<{ username: string; password: string }> => {
   const headers = await credential.getAuthHeaders();
-  const authHeader = headers['Authorization'] ?? headers['authorization'] ?? '';
+  const authHeader = headers.Authorization ?? headers.authorization ?? '';
   const encoded = authHeader.startsWith('Basic ') ? authHeader.slice(6) : '';
   const decoded = Buffer.from(encoded, 'base64').toString('utf8');
   const colonIdx = decoded.indexOf(':');
@@ -33,6 +34,25 @@ const extractBasicCredentials = async (
   };
 };
 
+const toMysqlSslOptions = (ctx: BuildContext, host: string, port: number): SslOptions => {
+  const sslSettings = ctx.networkSettings.getSslSettings();
+  const customHost = ctx.networkSettings.getCustomHostSettings(`mysql://${host}:${port}`);
+  const verificationMode =
+    customHost?.ssl?.verificationMode ?? sslSettings.verificationMode ?? 'full';
+  const nodeSsl = getNodeSSLOptions(ctx.logger, verificationMode, sslSettings);
+
+  const ssl: SslOptions = {
+    rejectUnauthorized: nodeSsl.rejectUnauthorized ?? true,
+    // 'full' checks hostname; 'certificate' and 'none' do not.
+    verifyIdentity: verificationMode === 'full',
+  };
+  if (nodeSsl.ca) ssl.ca = nodeSsl.ca;
+  if (nodeSsl.cert) ssl.cert = nodeSsl.cert;
+  if (nodeSsl.key) ssl.key = nodeSsl.key;
+  if (nodeSsl.passphrase) ssl.passphrase = nodeSsl.passphrase;
+  return ssl;
+};
+
 export const mysqlClientType: ClientTypeSpec<Mysql2Pool> = {
   id: 'mysql',
 
@@ -40,10 +60,12 @@ export const mysqlClientType: ClientTypeSpec<Mysql2Pool> = {
     const host = ctx.config?.host as string;
     const port = ctx.config?.port as number;
     const database = ctx.config?.database as string;
+    const sslMode = (ctx.config?.ssl as 'required' | 'disabled' | undefined) ?? 'required';
 
     ctx.networkSettings.ensureHostnameAllowed(host);
 
     const { username, password } = await extractBasicCredentials(ctx.credential);
+    const { timeout } = ctx.networkSettings.getResponseSettings();
 
     ctx.logger.info(`[mysql] Opening connection pool for ${host}:${port}/${database}`);
     const lib = await import('mysql2/promise');
@@ -55,9 +77,10 @@ export const mysqlClientType: ClientTypeSpec<Mysql2Pool> = {
       password,
       waitForConnections: true,
       connectionLimit: 10,
-      queueLimit: 0,
-      // Use static row parsers — Kibana runs with --disallow-code-generation-from-strings.
+      queueLimit: 100,
+      connectTimeout: timeout,
       disableEval: true,
+      ...(sslMode === 'required' ? { ssl: toMysqlSslOptions(ctx, host, port) } : {}),
     });
   },
 

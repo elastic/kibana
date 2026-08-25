@@ -91,14 +91,32 @@ describe('MysqlConnector', () => {
       expect(result.port).toBe(3306);
     });
 
+    it('defaults port to 3306 when omitted', () => {
+      const config = makeConfig();
+      delete (config as Record<string, unknown>).port;
+      const result = configSchema.parse(config);
+      expect(result.port).toBe(3306);
+    });
+
     it('rejects an out-of-range port', () => {
       expect(configSchema.safeParse(makeConfig({ port: 99999 })).success).toBe(false);
     });
 
-    it.each(['host', 'port', 'database'])('rejects a config missing %s', (field) => {
+    it('rejects a host with a protocol prefix', () => {
+      expect(configSchema.safeParse(makeConfig({ host: 'mysql://db.example.com' })).success).toBe(
+        false
+      );
+    });
+
+    it.each(['host', 'database'])('rejects a config missing %s', (field) => {
       const config = makeConfig();
       delete (config as Record<string, unknown>)[field];
       expect(configSchema.safeParse(config).success).toBe(false);
+    });
+
+    it('defaults TLS to required', () => {
+      const result = configSchema.parse(makeConfig());
+      expect(result.ssl).toBe('required');
     });
   });
 
@@ -157,6 +175,27 @@ describe('MysqlConnector', () => {
       ).rejects.toThrow(/multi-statement/i);
       expect(ctx.getClient).not.toHaveBeenCalled();
     });
+
+    it('rejects SHOW / DESCRIBE so they are not wrapped in a subquery', async () => {
+      const { ctx } = makeContextWithPool();
+
+      await expect(
+        MysqlConnector.actions.query.handler(ctx, { sql: 'SHOW TABLES' })
+      ).rejects.toThrow(/read-only/i);
+      await expect(
+        MysqlConnector.actions.query.handler(ctx, { sql: 'DESCRIBE users' })
+      ).rejects.toThrow(/read-only/i);
+      expect(ctx.getClient).not.toHaveBeenCalled();
+    });
+
+    it('rejects a write hidden behind a leading comment', async () => {
+      const { ctx } = makeContextWithPool();
+
+      await expect(
+        MysqlConnector.actions.query.handler(ctx, { sql: '-- looks fine\nDROP TABLE users' })
+      ).rejects.toThrow(/read-only/i);
+      expect(ctx.getClient).not.toHaveBeenCalled();
+    });
   });
 
   describe('listDatabases action', () => {
@@ -193,6 +232,14 @@ describe('MysqlConnector', () => {
         /no database specified/i
       );
     });
+
+    it('throws when the provided database is empty', async () => {
+      const { ctx } = makeContextWithPool();
+
+      await expect(
+        MysqlConnector.actions.listTables.handler(ctx, { database: '' })
+      ).rejects.toThrow(/no database specified/i);
+    });
   });
 
   describe('describeTable action', () => {
@@ -224,9 +271,22 @@ describe('MysqlConnector', () => {
       });
 
       expect(pool.execute).toHaveBeenCalledWith(
-        "SELECT * FROM `my_db`.`users` WHERE `name` LIKE ? ESCAPE '!' OR `email` LIKE ? ESCAPE '!' LIMIT 100",
+        "SELECT * FROM `my_db`.`users` WHERE LOWER(`name`) LIKE ? ESCAPE '!' OR LOWER(`email`) LIKE ? ESCAPE '!' LIMIT 100",
         ['%jane%', '%jane%']
       );
+    });
+
+    it('lowercases the search term so LIKE matching is case-insensitive', async () => {
+      const { ctx, pool } = makeContextWithPool(makeConfig({ database: 'my_db' }));
+
+      await MysqlConnector.actions.searchRows.handler(ctx, {
+        table: 'users',
+        searchTerm: 'Jane',
+        columns: ['name'],
+      });
+
+      const [, params] = pool.execute.mock.calls[0];
+      expect(params[0]).toBe('%jane%');
     });
 
     it('escapes SQL LIKE wildcards in the search term', async () => {
