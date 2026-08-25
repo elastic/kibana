@@ -42,7 +42,7 @@ describe('createLoggingConfig', () => {
   const config = auditConfig(rollingFileAppender('/var/log/kibana/audit.log'));
 
   it('keeps the configured appender and `info` level while the log is writable', () => {
-    const loggingConfig = createLoggingConfig(config, false, {
+    const loggingConfig = createLoggingConfig(config, {
       granted: true,
       path: '/var/log/kibana/audit.log',
       checkedAt: '2026-08-03T10:00:00.000Z',
@@ -54,7 +54,7 @@ describe('createLoggingConfig', () => {
 
   describe('when the audit log cannot be written', () => {
     const loggingConfig = (): LoggerContextConfigInput =>
-      createLoggingConfig(config, false, {
+      createLoggingConfig(config, {
         granted: false,
         path: '/var/log/kibana/audit.log',
         code: 'EROFS',
@@ -83,7 +83,7 @@ describe('createLoggingConfig', () => {
   it('is unaffected when there is nothing to probe', () => {
     const consoleConfig = auditConfig({ type: 'console', layout: { type: 'pattern' } } as any);
 
-    const loggingConfig = createLoggingConfig(consoleConfig, false, undefined)(allowAuditLogging);
+    const loggingConfig = createLoggingConfig(consoleConfig, undefined)(allowAuditLogging);
 
     expect((loggingConfig.appenders as any).auditTrailAppender.type).toEqual('console');
     expect(loggingConfig.loggers![0].level).toEqual('info');
