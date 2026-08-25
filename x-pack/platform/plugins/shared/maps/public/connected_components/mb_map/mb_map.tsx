@@ -236,11 +236,10 @@ export class MbMap extends Component<Props> {
       return;
     }
 
-    this.setState({ mbMap }, () => {
-      this._loadMakiSprites(mbMap);
-      this._registerMapEventListeners(mbMap);
-      this.props.onMapReady(this._getMapExtentState());
-    });
+    this.props.setMapApi(mbMap);
+    this.props.onMapReady(this._getMapExtentState());
+    this._loadMakiSprites(mbMap);
+    this._registerMapEventListeners(mbMap);
   }
 
   _registerMapEventListeners(mbMap: MapApi) {

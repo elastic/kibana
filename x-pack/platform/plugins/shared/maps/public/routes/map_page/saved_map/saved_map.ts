@@ -145,43 +145,10 @@ export class SavedMap {
 
   public async reset(mapEmbeddableState: MapEmbeddableState) {
     this._mapEmbeddableState = mapEmbeddableState;
-    await this.whenReady();
+    await this.initializeStore();
   }
 
-  async whenReady() {
-    await whenLicenseInitialized();
-
-    if ((this._mapEmbeddableState as MapByReferenceState)?.savedObjectId) {
-      const { attributes, managed, references, sharingSavedObjectProps } = await loadFromLibrary(
-        (this._mapEmbeddableState as MapByReferenceState).savedObjectId!
-      );
-      this._attributes = attributes;
-      if (sharingSavedObjectProps) {
-        this._sharingSavedObjectProps = sharingSavedObjectProps;
-      }
-      this._managed = managed;
-      const savedObjectsTagging = getSavedObjectsTagging();
-      if (savedObjectsTagging && references && references.length) {
-        this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
-      }
-    } else {
-      this._attributes = (this._mapEmbeddableState as MapByValueState)?.attributes
-        ? (this._mapEmbeddableState as MapByValueState).attributes
-        : {
-            title: '',
-          };
-    }
-
-    this._reportUsage();
-
-    if (this._attributes?.adHocDataViews?.length) {
-      const dataViewService = getIndexPatternService();
-      const promises = this._attributes.adHocDataViews.map((spec) => {
-        return dataViewService.create(spec);
-      });
-      await Promise.all(promises);
-    }
-
+  private async initializeStore() {
     if (this._mapEmbeddableState?.mapSettings !== undefined) {
       this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableState.mapSettings));
     } else if (this._attributes?.settings) {
@@ -237,6 +204,43 @@ export class SavedMap {
       this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableState.hiddenLayers));
     }
     this._initialLayerListConfig = copyPersistentState(layerList);
+  }
+
+  async whenReady() {
+    await whenLicenseInitialized();
+
+    if ((this._mapEmbeddableState as MapByReferenceState)?.savedObjectId) {
+      const { attributes, managed, references, sharingSavedObjectProps } = await loadFromLibrary(
+        (this._mapEmbeddableState as MapByReferenceState).savedObjectId!
+      );
+      this._attributes = attributes;
+      if (sharingSavedObjectProps) {
+        this._sharingSavedObjectProps = sharingSavedObjectProps;
+      }
+      this._managed = managed;
+      const savedObjectsTagging = getSavedObjectsTagging();
+      if (savedObjectsTagging && references && references.length) {
+        this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
+      }
+    } else {
+      this._attributes = (this._mapEmbeddableState as MapByValueState)?.attributes
+        ? (this._mapEmbeddableState as MapByValueState).attributes
+        : {
+            title: '',
+          };
+    }
+
+    this._reportUsage();
+
+    if (this._attributes?.adHocDataViews?.length) {
+      const dataViewService = getIndexPatternService();
+      const promises = this._attributes.adHocDataViews.map((spec) => {
+        return dataViewService.create(spec);
+      });
+      await Promise.all(promises);
+    }
+
+    await this.initializeStore();
 
     if (this._defaultLayerWizard) {
       this._store.dispatch<any>(setAutoOpenLayerWizardId(this._defaultLayerWizard));
