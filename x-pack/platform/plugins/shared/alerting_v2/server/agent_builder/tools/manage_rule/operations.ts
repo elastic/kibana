@@ -239,16 +239,14 @@ export const executeRuleOperations = async (
             // `resolveTimeFieldForQuery` re-resolves stale fields to an available
             // one (edit-path convenience), so we check the result matches the
             // requested field rather than relying on `null` alone.
-            resolvedTimeField = await resolveTimeFieldForQuery(
-              esClient,
-              rootQuery,
-              op.time_field
-            );
+            resolvedTimeField = await resolveTimeFieldForQuery(esClient, rootQuery, op.time_field);
             if (resolvedTimeField !== op.time_field) {
               const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
               throw new RuleOperationValidationError(
                 `The specified time_field "${op.time_field}" does not exist as a \`date\` or ` +
-                  `\`date_nanos\` field on ${sourceIndex ? `"${sourceIndex}"` : 'the source index'}. ` +
+                  `\`date_nanos\` field on ${
+                    sourceIndex ? `"${sourceIndex}"` : 'the source index'
+                  }. ` +
                   `Choose a date field that exists on the index, or omit time_field to auto-detect.`
               );
             }
