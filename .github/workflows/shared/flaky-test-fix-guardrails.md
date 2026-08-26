@@ -1,6 +1,6 @@
 The fix — whether you are proposing one, writing an original patch, or revising an existing one — must address a root cause and stay within these guardrails:
 
-**Applies to every test**
+#### Applies to every test
 
 - **Never fix flakiness with retries or error tolerance — in any code.** This applies to test code, helpers, page objects, fixtures, shared services, framework packages, and application code alike; the pattern is the problem, not the location:
   - Don't wrap an assertion in `retry()` / `retry.tryForTime`, and don't re-issue a `click`, `setValue`/type, or `goto`/navigation inside a retry so a "missed" interaction lands on a later attempt (e.g. `retry.tryForTime(() => { await testSubjects.click(x); await testSubjects.existOrFail(y); })`). Real users don't click or type the same thing repeatedly, so retrying an interaction hides a genuine actionability bug a real user would hit (element off-screen or at the viewport edge, the wrong sub-element targeted, an unstable re-render) — and re-running actions re-fires their side effects.
@@ -15,11 +15,11 @@ The fix — whether you are proposing one, writing an original patch, or revisin
 - **Use the framework's documented public API only.** Never widen a framework package's public surface to enable a fix — e.g. exporting an internal tag-computation helper instead of using the documented `tags` constants. If the documented API can't express the fix, that's a feature request for the framework's owning team, not something a fix PR should smuggle in.
 - **Follow the testing best practices in `docs/extend/testing/`** (`scout-best-practices.md`, `ui-best-practices.md`, `api-best-practices.md`), even where the surrounding test file predates them: existing retry-wrapped code nearby — a neighboring test or a sibling helper in the same file — is legacy to fix, not a pattern to copy or "mirror".
 
-**Functional tests (Scout, FTR, Cypress)**
+#### Functional tests (Scout, FTR, Cypress)
 
 - **Wait on readiness signals instead of retrying outcomes.** When the state the test must wait on has no DOM footprint (e.g. an async parse in a worker), prefer a small application-side change that exposes one (a `data-test-subj` or attribute) over re-issuing actions until the outcome looks right.
 
-**Jest and React Testing Library**
+#### Jest and React Testing Library
 
 - **A Jest or RTL flake is usually a cost problem, not a waiting problem.** Check the failure first: this applies when the test ran out of time, or when React warned that an update was not wrapped in `act` (CI hides that warning, so you will only see it when you run the test locally). A wrong assertion, non-deterministic data, or a product bug is a different problem — fix that instead. These tests get a 5-second budget unless the file or plugin raises it, and a single `waitFor` / `findBy*` can spend 4.5 seconds of it, so a render that is slow under CI's parallel load runs out of time. Fixes that hold make the test cheaper, or fix the cause:
   - Remove the async step so there is nothing to wait for. RTL wraps `fireEvent` in `act`, so a synchronous state update is already applied when it returns and you can read it with `getBy…` on the next line. When the update really waits on a promise or a timer, keep `findBy*` / `waitFor` — the goal is to delete the async step, not to assert across one.
