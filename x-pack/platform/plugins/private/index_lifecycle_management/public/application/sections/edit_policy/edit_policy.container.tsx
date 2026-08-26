@@ -7,7 +7,9 @@
 
 import React, { useEffect } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiLoadingSpinner, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { MIN_SEARCHABLE_SNAPSHOT_LICENSE } from '../../../../common/constants';
@@ -16,6 +18,7 @@ import { useKibana, attemptToURIDecode } from '../../../shared_imports';
 import { useLoadPoliciesList } from '../../services/api';
 import { getPolicyByName } from '../../lib/policies';
 import { defaultPolicy } from '../../constants';
+import { getPoliciesListPath } from '../../services/navigation';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
 import { EditPolicyContextProvider } from './edit_policy_context';
@@ -24,13 +27,24 @@ interface RouterProps {
   policyName: string;
 }
 
+const policyListTitle = i18n.translate('xpack.indexLifecycleMgmt.policyTable.sectionHeading', {
+  defaultMessage: 'Index Lifecycle Policies',
+});
+
+const createPolicyTitle = i18n.translate(
+  'xpack.indexLifecycleMgmt.editPolicy.createPolicyMessage',
+  {
+    defaultMessage: 'Create policy',
+  }
+);
+
 export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps>> = ({
   match: {
     params: { policyName },
   },
 }) => {
   const {
-    services: { breadcrumbService, license },
+    services: { breadcrumbService, license, docLinks, history },
   } = useKibana();
   const { error, isLoading, data: policies, resendRequest } = useLoadPoliciesList();
 
@@ -38,8 +52,20 @@ export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps
     breadcrumbService.setBreadcrumbs('editPolicy');
   }, [breadcrumbService]);
 
+  const decodedPolicyName = attemptToURIDecode(policyName) ?? '';
+  const existingPolicy = policies ? getPolicyByName(policies, decodedPolicyName) : undefined;
+  const isNewPolicy = policies ? !existingPolicy?.policy : !decodedPolicyName;
+
+  const title = isNewPolicy
+    ? createPolicyTitle
+    : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.editPolicyMessage', {
+        defaultMessage: 'Edit policy {originalPolicyName}',
+        values: { originalPolicyName: decodedPolicyName },
+      });
+
+  let body: React.ReactNode;
   if (isLoading) {
-    return (
+    body = (
       <EuiPageTemplate.EmptyPrompt
         title={<EuiLoadingSpinner size="xl" />}
         body={
@@ -50,10 +76,9 @@ export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps
         }
       />
     );
-  }
-  if (error || !policies) {
+  } else if (error || !policies) {
     const { statusCode, message } = error ? error : { statusCode: '', message: '' };
-    return (
+    body = (
       <EuiPageTemplate.EmptyPrompt
         color="danger"
         title={
@@ -79,29 +104,43 @@ export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps
         }
       />
     );
+  } else {
+    const isHotPhaseRequired = isNewPolicy ? true : Boolean(existingPolicy?.policy?.phases?.hot);
+
+    body = (
+      <EditPolicyContextProvider
+        value={{
+          isNewPolicy,
+          isHotPhaseRequired,
+          policyName: decodedPolicyName,
+          policy: existingPolicy?.policy ?? defaultPolicy,
+          existingPolicies: policies,
+          license: {
+            canUseSearchableSnapshot: () => license.hasAtLeast(MIN_SEARCHABLE_SNAPSHOT_LICENSE),
+          },
+          indices: existingPolicy && existingPolicy.indices ? existingPolicy.indices : [],
+          indexTemplates:
+            existingPolicy && existingPolicy.indexTemplates ? existingPolicy.indexTemplates : [],
+        }}
+      >
+        <PresentationComponent />
+      </EditPolicyContextProvider>
+    );
   }
 
-  const existingPolicy = getPolicyByName(policies, attemptToURIDecode(policyName));
-  const isNewPolicy = !existingPolicy?.policy;
-  const isHotPhaseRequired = isNewPolicy ? true : Boolean(existingPolicy?.policy?.phases?.hot);
-
   return (
-    <EditPolicyContextProvider
-      value={{
-        isNewPolicy,
-        isHotPhaseRequired,
-        policyName: attemptToURIDecode(policyName),
-        policy: existingPolicy?.policy ?? defaultPolicy,
-        existingPolicies: policies,
-        license: {
-          canUseSearchableSnapshot: () => license.hasAtLeast(MIN_SEARCHABLE_SNAPSHOT_LICENSE),
-        },
-        indices: existingPolicy && existingPolicy.indices ? existingPolicy.indices : [],
-        indexTemplates:
-          existingPolicy && existingPolicy.indexTemplates ? existingPolicy.indexTemplates : [],
-      }}
-    >
-      <PresentationComponent />
-    </EditPolicyContextProvider>
+    <>
+      <AppHeader
+        title={title}
+        back={{
+          href: history.createHref({ pathname: getPoliciesListPath() }),
+          label: policyListTitle,
+        }}
+        docLink={docLinks.links.elasticsearch.ilm}
+        spacing="bleed"
+      />
+      <EuiSpacer size="l" />
+      {body}
+    </>
   );
 };
