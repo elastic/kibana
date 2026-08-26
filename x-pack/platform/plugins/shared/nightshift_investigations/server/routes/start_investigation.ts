@@ -12,6 +12,10 @@ import { createNightshiftInvestigationsServerRoute } from './create_server_route
 
 const MAX_ALERTS_PER_INVESTIGATION = 20;
 
+// A rule type writes one evaluation entry per metric or criterion, so this bounds a hostile
+// array rather than a realistic rule.
+const MAX_EVALUATION_ENTRIES = 20;
+
 const alertSnapshotSchema = z.object({
   id: z.string().min(1).max(500),
   rule_id: z.string().min(1).max(500),
@@ -33,10 +37,17 @@ const alertSnapshotSchema = z.object({
     .optional(),
   evaluation: z
     .object({
-      // Genuinely both: scaled_float in the experimental field map, keyword for `.es-query`,
-      // whose executor writes a stringified value.
-      value: z.union([z.number(), z.string().max(500)]).optional(),
-      threshold: z.number().optional(),
+      // Every shape here is genuinely written by some rule type: scaled_float in the experimental
+      // field map, keyword for `.es-query`, whose executor writes a stringified value, and arrays
+      // for the custom-threshold rule type, which writes one entry per metric and per criterion.
+      value: z
+        .union([
+          z.number(),
+          z.string().max(500),
+          z.array(z.union([z.number(), z.string().max(500)])).max(MAX_EVALUATION_ENTRIES),
+        ])
+        .optional(),
+      threshold: z.union([z.number(), z.array(z.number()).max(MAX_EVALUATION_ENTRIES)]).optional(),
     })
     .optional(),
   rule_parameters: z.record(z.string().max(128), z.unknown()).optional(),

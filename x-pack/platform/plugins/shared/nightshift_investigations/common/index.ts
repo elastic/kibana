@@ -79,13 +79,18 @@ export interface AlertSnapshotGroup {
 
 export interface AlertSnapshotEvaluation {
   /**
-   * `kibana.alert.evaluation.value`. Both types are real: the legacy experimental field map
-   * types this `scaled_float`, but `stack_alerts` maps it as a `keyword` for `.es-query` and
-   * writes a stringified value.
+   * The observed value, from `kibana.alert.evaluation.value` or, when the rule type writes the
+   * plural field instead, `kibana.alert.evaluation.values`. Every type here is real:
+   * `scaled_float` in the legacy experimental field map, a `keyword` holding a stringified
+   * number for `.es-query`, and an array for the custom-threshold rule type, which writes one
+   * entry per configured metric.
    */
-  value?: number | string;
-  /** `kibana.alert.evaluation.threshold` — `scaled_float` everywhere it is mapped. */
-  threshold?: number;
+  value?: number | string | Array<number | string>;
+  /**
+   * `kibana.alert.evaluation.threshold`. Scalar for most rule types, but an array for the
+   * custom-threshold rule type, which writes one entry per criterion.
+   */
+  threshold?: number | number[];
 }
 
 /** Context shape required when `subject.type` is `alert`. */

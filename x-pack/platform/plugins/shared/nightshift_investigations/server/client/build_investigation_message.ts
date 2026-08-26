@@ -77,10 +77,24 @@ function isGroupList(value: unknown): value is AlertSnapshotGroup[] {
   );
 }
 
+function isNumber(value: unknown): value is number {
+  return typeof value === 'number';
+}
+
+function isNumberOrString(value: unknown): value is number | string {
+  return isNumber(value) || isString(value);
+}
+
+function isScalarOrArrayOf(value: unknown, check: (v: unknown) => boolean): boolean {
+  return check(value) || (Array.isArray(value) && value.every(check));
+}
+
 function isEvaluation(value: unknown): value is AlertSnapshotEvaluation {
   if (!isPlainObject(value)) return false;
-  const valueOk = value.value == null || isString(value.value) || typeof value.value === 'number';
-  return valueOk && (value.threshold == null || typeof value.threshold === 'number');
+  return (
+    absentOr(value.value, (v) => isScalarOrArrayOf(v, isNumberOrString)) &&
+    absentOr(value.threshold, (v) => isScalarOrArrayOf(v, isNumber))
+  );
 }
 
 function absentOr(value: unknown, check: (v: unknown) => boolean): boolean {
@@ -168,15 +182,24 @@ function describeEntity(alert: AlertSnapshot): string | undefined {
   return undefined;
 }
 
+/**
+ * Renders one side of the condition. Arrays are joined rather than reduced to their first entry:
+ * a multi-metric custom-threshold rule reports one value per metric, and dropping the rest would
+ * silently misstate the condition that fired.
+ */
+function formatEvaluationPart(part: number | string | Array<number | string> | undefined) {
+  if (part == null) return undefined;
+  const entries = Array.isArray(part) ? part : [part];
+  if (entries.length === 0) return undefined;
+  return entries.map((entry) => (isString(entry) ? sanitize(entry) : String(entry))).join(', ');
+}
+
 function describeCondition(alert: AlertSnapshot): string | undefined {
-  const { threshold } = alert.evaluation ?? {};
-  const value =
-    typeof alert.evaluation?.value === 'string'
-      ? sanitize(alert.evaluation.value)
-      : alert.evaluation?.value;
-  if (value != null && threshold != null) return `observed ${value} against threshold ${threshold}`;
-  if (value != null) return `observed ${value}`;
-  if (threshold != null) return `threshold ${threshold}`;
+  const value = formatEvaluationPart(alert.evaluation?.value);
+  const threshold = formatEvaluationPart(alert.evaluation?.threshold);
+  if (value && threshold) return `observed ${value} against threshold ${threshold}`;
+  if (value) return `observed ${value}`;
+  if (threshold) return `threshold ${threshold}`;
   return undefined;
 }
 
