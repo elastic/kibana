@@ -72,7 +72,6 @@ export const NewsfeedNavButton = ({ newsfeedApi, isOpen$, onToggle }: Props) => 
         }}
         data-test-subj={hasNew ? 'newsfeedHasUnread' : 'newsfeedAllRead'}
         aria-expanded={isOpen}
-        aria-haspopup="true"
         aria-label={
           hasNew
             ? i18n.translate('newsfeed.headerButton.unreadAriaLabel', {
