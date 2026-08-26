@@ -165,7 +165,9 @@ describe('AssetManagerClient', () => {
       analytics: {
         reportEvent: jest.fn(),
       } as unknown as import('../../telemetry/events').TelemetryReporter,
-      savedObjectsClient: {} as SavedObjectsClientContract,
+      savedObjectsClient: {
+        delete: jest.fn().mockResolvedValue({}),
+      } as unknown as SavedObjectsClientContract,
     });
   });
 
