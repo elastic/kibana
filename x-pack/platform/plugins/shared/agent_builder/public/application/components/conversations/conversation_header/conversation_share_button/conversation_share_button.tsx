@@ -239,8 +239,14 @@ const ConversationSharePopover: React.FC<{
         <EuiHorizontalRule margin="none" />
         <div
           css={css`
-            padding: ${euiTheme.size.m};
-            padding-bottom: ${isPublic ? euiTheme.size.l : euiTheme.size.m};
+            ${canUpdateAccessControl
+              ? css`
+                  padding: ${euiTheme.size.m};
+                  padding-bottom: ${isPublic ? euiTheme.size.l : euiTheme.size.s};
+                `
+              : css`
+                  padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
+                `}
           `}
         >
           {canUpdateAccessControl ? (

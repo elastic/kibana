@@ -143,6 +143,8 @@ export const ConversationShareEditableContent: React.FC<{
         />
       </EuiFormRow>
 
+      <EuiSpacer size="s" />
+
       <ConversationParticipantsList
         ownerProfile={ownerProfile}
         memberProfiles={memberProfiles}
