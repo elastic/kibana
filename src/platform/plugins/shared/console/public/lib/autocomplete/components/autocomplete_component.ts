@@ -11,9 +11,35 @@ import type { ResultTerm } from '../types';
 
 export type AutocompleteTermDefinition = string | ResultTerm;
 
+export interface AutocompleteNextGroup {
+  next?: AutocompleteComponent | AutocompleteComponent[];
+  fallback?: boolean;
+}
+
+export interface AutocompleteContinuationState {
+  parentName?: string;
+  components: AutocompleteComponent[];
+  contextExtensionList: Array<Record<string, unknown>>;
+  fallbackGroups: string[];
+  preferredFallbackGroups: string[];
+  priority?: number;
+  specificity: number;
+}
+
+/**
+ * Describes how path walking continues after a component matches.
+ *
+ * `context_values` extends the context for this branch, and `priority` contributes the minimum
+ * priority used across the chain. `next` contains ungrouped component continuations. `nextGroups`
+ * separates preferred and fallback continuations. `nextStates` carries pre-resolved continuation
+ * context and fallback metadata, such as across scope links. `nextStates` takes precedence over
+ * the component forms, and `nextGroups` takes precedence over `next`.
+ */
 export interface AutocompleteMatchResult {
   context_values?: Record<string, unknown>;
   next?: AutocompleteComponent | AutocompleteComponent[];
+  nextGroups?: AutocompleteNextGroup[];
+  nextStates?: AutocompleteContinuationState[];
   priority?: number;
 }
 
@@ -32,16 +58,7 @@ export class AutocompleteComponent {
   getTerms(_context?: unknown, _editor?: unknown): AutocompleteTermDefinition[] | null | undefined {
     return [];
   }
-  /*
- if the current matcher matches this term, this method should return an object with the following keys
- {
- context_values: {
- values extract from term that should be added to the context
- }
- next: AutocompleteComponent(s) to use next
- priority: optional priority to solve collisions between multiple paths. Min value is used across entire chain
- }
- */
+  /** Returns continuation metadata when this component matches, or a falsy value otherwise. */
   match(_token?: unknown, _context?: unknown, _editor?: unknown): AutocompleteMatch {
     return {
       next: this.next,
