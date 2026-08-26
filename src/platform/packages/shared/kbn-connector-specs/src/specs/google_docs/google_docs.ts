@@ -206,7 +206,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
 
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.googleDocs.test.description', {
-      defaultMessage: 'Verifies connection to the Google Docs API by fetching user information.',
+      defaultMessage: 'Verifies connection to the Google Docs API',
     }),
     handler: async (ctx) => {
       try {
