@@ -366,7 +366,7 @@ describe('set unified alerts tags', () => {
       expect(mockEventBus.emitAttackTagsChanged).not.toHaveBeenCalled();
     });
 
-    test('sets truncated: true when ids.length exceeds MAX_ALERTS_PER_TRIGGER', async () => {
+    test('makes multiple ES calls and classifies all IDs when ids.length exceeds MAX_ALERTS_PER_TRIGGER', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
       context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
         makeSearchResponse([{ _id: oversizedIds[0], _index: '.alerts-security.alerts-default' }])
@@ -381,9 +381,12 @@ describe('set unified alerts tags', () => {
       });
       await server.inject(request, requestContextMock.convertContext(context));
       await new Promise((r) => setTimeout(r, 0));
+      // Chunked: 2 ES calls for MAX_ALERTS_PER_TRIGGER+1 IDs
+      expect(context.core.elasticsearch.client.asCurrentUser.search.mock.calls.length).toBe(2);
+      // Only id-0 was found; truncated is false because alertIds.length (1) <= MAX_ALERTS_PER_TRIGGER
       expect(mockEventBus.emitAlertTagsChanged).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ truncated: true })
+        expect.objectContaining({ alertIds: [oversizedIds[0]], truncated: false })
       );
     });
   });

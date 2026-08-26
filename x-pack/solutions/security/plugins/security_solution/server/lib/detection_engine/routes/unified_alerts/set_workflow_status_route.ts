@@ -23,7 +23,7 @@ import { withSiemErrorHandling } from '../with_siem_error_handling';
 import { buildSiemResponse } from '../utils';
 import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
-  prefetchPreviousStatusesByIds,
+  prefetchAllPreviousStatusesByIds,
   type PreviousStatus,
 } from '../common/operations/prefetch_previous_statuses';
 import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
@@ -80,7 +80,7 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
         if (eventBus) {
           try {
             const esClient = core.elasticsearch.client.asCurrentUser;
-            const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(
+            const { previousStatuses, idToIndex } = await prefetchAllPreviousStatusesByIds(
               esClient,
               index,
               ids
@@ -119,24 +119,22 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
             reason: closingReason.reason,
           });
           if (prefetchSucceeded) {
-            const truncated = ids.length > MAX_ALERTS_PER_TRIGGER;
-            // When truncated, IDs beyond the cap were not prefetched; we cannot
-            // determine their types, so conservatively emit both events so
-            // consumers are notified even when all sampled IDs were no-ops.
-            if (attackIds.length > 0 || truncated) {
+            const attackTruncated = attackIds.length > MAX_ALERTS_PER_TRIGGER;
+            const alertTruncated = alertIds.length > MAX_ALERTS_PER_TRIGGER;
+            if (attackIds.length > 0) {
               void eventBus?.emitAttackStatusChanged(request, {
-                attackIds,
+                attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 status,
                 previousStatuses: attackPreviousStatuses,
-                truncated,
+                truncated: attackTruncated,
               });
             }
-            if (alertIds.length > 0 || truncated) {
+            if (alertIds.length > 0) {
               void eventBus?.emitAlertStatusChanged(request, {
-                alertIds,
+                alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 status,
                 previousStatuses: alertPreviousStatuses,
-                truncated,
+                truncated: alertTruncated,
               });
             }
           }

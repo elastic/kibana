@@ -27,7 +27,7 @@ import {
   MAX_ASSIGNEE_UID_LENGTH,
   MAX_ASSIGNEES_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
-import { fetchAlertIdToIndex } from '../common/operations/prefetch_previous_statuses';
+import { fetchAllAlertIdToIndex } from '../common/operations/prefetch_previous_statuses';
 import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 
 export const setUnifiedAlertsAssigneesRoute = (
@@ -73,7 +73,7 @@ export const setUnifiedAlertsAssigneesRoute = (
         if (eventBus) {
           try {
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const idToIndex = await fetchAlertIdToIndex(esClient, index, ids);
+            const idToIndex = await fetchAllAlertIdToIndex(esClient, index, ids);
             for (const id of ids) {
               const docIndex = idToIndex.get(id);
               if (docIndex != null) {
@@ -98,13 +98,12 @@ export const setUnifiedAlertsAssigneesRoute = (
             const validAssigneesToRemove = assignees.remove
               .filter((uid) => uid.length <= MAX_ASSIGNEE_UID_LENGTH)
               .slice(0, MAX_ASSIGNEES_PER_OPERATION);
-            const truncated = ids.length > MAX_ALERTS_PER_TRIGGER;
             if (attackIds.length > 0) {
               void eventBus.emitAttackAssigneesChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 assigneesToAdd: validAssigneesToAdd,
                 assigneesToRemove: validAssigneesToRemove,
-                truncated,
+                truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }
             if (alertIds.length > 0) {
@@ -112,7 +111,7 @@ export const setUnifiedAlertsAssigneesRoute = (
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 assigneesToAdd: validAssigneesToAdd,
                 assigneesToRemove: validAssigneesToRemove,
-                truncated,
+                truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }
           }

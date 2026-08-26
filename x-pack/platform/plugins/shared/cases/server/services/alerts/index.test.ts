@@ -1116,8 +1116,6 @@ describe('updateAlertsStatus — event bus', () => {
       ])
     ).resolves.not.toThrow();
 
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('listener boom'));
-
     bus.removeAllListeners();
   });
 

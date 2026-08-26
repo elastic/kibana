@@ -211,13 +211,14 @@ export const setSignalsStatusRoute = (
               runtimeMappings
             );
 
-            // previousStatuses only contains docs not already at `status` (pre-filtered by
-            // excludeStatus), so every entry here is a genuine transition.
-            if (previousStatuses.length > 0) {
+            // Post-filter: excludeStatus pre-filters modern docs at ES level, but legacy
+            // docs (signal.status only) may still appear. Remove no-ops explicitly.
+            const changingStatuses = previousStatuses.filter((ps) => ps.previousStatus !== status);
+            if (changingStatuses.length > 0 || truncated) {
               void eventBus?.emitAlertStatusChanged(request, {
-                alertIds: previousStatuses.map((ps) => ps.id),
+                alertIds: changingStatuses.map((ps) => ps.id),
                 status,
-                previousStatuses,
+                previousStatuses: changingStatuses,
                 truncated,
               });
             }

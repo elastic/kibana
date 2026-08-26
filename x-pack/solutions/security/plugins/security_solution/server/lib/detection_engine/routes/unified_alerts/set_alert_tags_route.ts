@@ -27,7 +27,7 @@ import {
   MAX_TAG_LENGTH,
   MAX_TAGS_PER_OPERATION,
 } from '../../../../../common/workflows/triggers';
-import { fetchAlertIdToIndex } from '../common/operations/prefetch_previous_statuses';
+import { fetchAllAlertIdToIndex } from '../common/operations/prefetch_previous_statuses';
 import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 
 export const setUnifiedAlertsTagsRoute = (
@@ -73,7 +73,7 @@ export const setUnifiedAlertsTagsRoute = (
         if (eventBus) {
           try {
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const idToIndex = await fetchAlertIdToIndex(esClient, index, ids);
+            const idToIndex = await fetchAllAlertIdToIndex(esClient, index, ids);
             for (const id of ids) {
               const docIndex = idToIndex.get(id);
               if (docIndex != null) {
@@ -98,13 +98,12 @@ export const setUnifiedAlertsTagsRoute = (
             const validTagsToRemove = tags.tags_to_remove
               .filter((t) => t.length <= MAX_TAG_LENGTH)
               .slice(0, MAX_TAGS_PER_OPERATION);
-            const truncated = ids.length > MAX_ALERTS_PER_TRIGGER;
             if (attackIds.length > 0) {
               void eventBus.emitAttackTagsChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 tagsToAdd: validTagsToAdd,
                 tagsToRemove: validTagsToRemove,
-                truncated,
+                truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }
             if (alertIds.length > 0) {
@@ -112,7 +111,7 @@ export const setUnifiedAlertsTagsRoute = (
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 tagsToAdd: validTagsToAdd,
                 tagsToRemove: validTagsToRemove,
-                truncated,
+                truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }
           }

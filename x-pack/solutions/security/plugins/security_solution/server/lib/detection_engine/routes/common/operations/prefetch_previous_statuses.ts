@@ -107,12 +107,10 @@ export const prefetchPreviousStatusesByQuery = async (
 }> => {
   const boolQuery: estypes.QueryDslBoolQuery = { filter: query };
   if (excludeStatus !== undefined) {
-    // Exclude both modern and legacy status fields so no-op transitions are
-    // pre-filtered at the ES level, keeping the 10k cap reserved for actual changes.
-    boolQuery.must_not = [
-      { term: { [ALERT_WORKFLOW_STATUS]: excludeStatus } },
-      { term: { 'signal.status': excludeStatus } },
-    ];
+    // Pre-filter docs where the modern field already matches the target status.
+    // Legacy-only docs (signal.status) pass through and are filtered post-fetch
+    // by the route so cross-field docs are never incorrectly excluded.
+    boolQuery.must_not = { term: { [ALERT_WORKFLOW_STATUS]: excludeStatus } };
   }
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
@@ -144,4 +142,46 @@ export const prefetchPreviousStatusesByQuery = async (
     }
   }
   return { ids, previousStatuses, idToIndex, truncated };
+};
+
+export const fetchAllAlertIdToIndex = async (
+  esClient: ElasticsearchClient,
+  index: string | string[],
+  ids: string[]
+): Promise<Map<string, string>> => {
+  const allIdToIndex = new Map<string, string>();
+  for (let i = 0; i < ids.length; i += MAX_ALERTS_PER_TRIGGER) {
+    const partial = await fetchAlertIdToIndex(
+      esClient,
+      index,
+      ids.slice(i, i + MAX_ALERTS_PER_TRIGGER)
+    );
+    for (const [id, idx] of partial) {
+      allIdToIndex.set(id, idx);
+    }
+  }
+  return allIdToIndex;
+};
+
+export const prefetchAllPreviousStatusesByIds = async (
+  esClient: ElasticsearchClient,
+  index: string | string[],
+  ids: string[]
+): Promise<{ previousStatuses: PreviousStatus[]; idToIndex: Map<string, string> }> => {
+  const allPreviousStatuses: PreviousStatus[] = [];
+  const allIdToIndex = new Map<string, string>();
+  for (let i = 0; i < ids.length; i += MAX_ALERTS_PER_TRIGGER) {
+    const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(
+      esClient,
+      index,
+      ids.slice(i, i + MAX_ALERTS_PER_TRIGGER)
+    );
+    for (const ps of previousStatuses) {
+      allPreviousStatuses.push(ps);
+    }
+    for (const [id, idx] of idToIndex) {
+      allIdToIndex.set(id, idx);
+    }
+  }
+  return { previousStatuses: allPreviousStatuses, idToIndex: allIdToIndex };
 };

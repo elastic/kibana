@@ -439,7 +439,7 @@ describe('set unified alerts workflow status', () => {
       expect(mockEventBus.emitAttackStatusChanged).not.toHaveBeenCalled();
     });
 
-    test('caps search size at MAX_ALERTS_PER_TRIGGER and sets truncated: true when ids.length exceeds the limit', async () => {
+    test('makes multiple ES calls when ids.length exceeds MAX_ALERTS_PER_TRIGGER', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
       context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
         makeSearchResponse([
@@ -458,18 +458,20 @@ describe('set unified alerts workflow status', () => {
       await server.inject(request, requestContextMock.convertContext(context));
       await new Promise((r) => setTimeout(r, 0));
 
+      // Chunked: 2 ES calls for MAX_ALERTS_PER_TRIGGER+1 IDs
+      expect(context.core.elasticsearch.client.asCurrentUser.search.mock.calls.length).toBe(2);
+      // Each individual call is still capped at MAX_ALERTS_PER_TRIGGER
       const searchCall = context.core.elasticsearch.client.asCurrentUser.search.mock.calls[0][0];
       expect((searchCall as { size?: number }).size).toBeLessThanOrEqual(MAX_ALERTS_PER_TRIGGER);
 
+      // Only id-0 was actually found; truncated is false because alertIds.length (1) <= MAX_ALERTS_PER_TRIGGER
       expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ truncated: true })
+        expect.objectContaining({ alertIds: [oversizedIds[0]], truncated: false })
       );
     });
 
-    test('emits both events with truncated: true when overflow IDs may have changed (all sampled are no-ops)', async () => {
-      // All MAX_ALERTS_PER_TRIGGER+1 IDs are sent; the sampled prefix is already at target status.
-      // Overflow IDs may still be transitioning, so both events must fire with truncated: true.
+    test('does not emit when all IDs are already at the target status across multiple chunks', async () => {
       const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 1 }, (_, i) => `id-${i}`);
       context.core.elasticsearch.client.asCurrentUser.search.mockResponse(
         makeSearchResponse([
@@ -488,14 +490,9 @@ describe('set unified alerts workflow status', () => {
       await server.inject(request, requestContextMock.convertContext(context));
       await new Promise((r) => setTimeout(r, 0));
 
-      expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({ alertIds: [], truncated: true })
-      );
-      expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({ attackIds: [], truncated: true })
-      );
+      // id-0 is already at target status (no-op), nothing else was found → no emit
+      expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      expect(mockEventBus.emitAttackStatusChanged).not.toHaveBeenCalled();
     });
   });
 });
