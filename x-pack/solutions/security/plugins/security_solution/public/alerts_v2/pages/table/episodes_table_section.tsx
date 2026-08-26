@@ -33,6 +33,9 @@ import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_al
 import { useKibana } from '../../../common/lib/kibana';
 import { EsqlInspectButton } from '../kpis/esql_inspect_button';
 import { useEpisodesTableData } from './use_episodes_table_data';
+import { HostNameCell } from './host_name_cell';
+import { UserNameCell } from './user_name_cell';
+import { NetworkIpCell } from './network_ip_cell';
 
 const TITLE = i18n.translate('xpack.securitySolution.alertsV2.episodesTable.title', {
   defaultMessage: 'Episodes',
@@ -163,6 +166,10 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
     () => ({
       'episode.status': EpisodeStatusCell,
       severity: EpisodeSeverityCell,
+      'host.name': HostNameCell,
+      'user.name': UserNameCell,
+      'source.ip': NetworkIpCell,
+      'destination.ip': NetworkIpCell,
       'rule.id': ({ row }) => {
         const ruleId = String(row.flattened['rule.id'] ?? '');
         const name = rulesCache[ruleId]?.metadata?.name ?? ruleId;
