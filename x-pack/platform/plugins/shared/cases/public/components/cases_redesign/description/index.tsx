@@ -128,14 +128,6 @@ export const Description = ({
         /* Aligns with the expanded body's text edge so toggling doesn't shift the content. */
         padding: ${euiTheme.size.m} ${euiTheme.size.l};
       `,
-      // Everything else on this page is a plain bordered panel, so a fourth bordered panel read as
-      // just more chrome. The description gets figure/ground separation instead: a tinted, slightly
-      // inset header band that names the region, and an accent edge tying the whole block together.
-      panel: css`
-        border-inline-start: ${euiTheme.border.width.thick} solid
-          ${euiTheme.colors.borderStrongPrimary};
-        overflow: hidden;
-      `,
       header: css`
         padding: ${euiTheme.size.s} ${euiTheme.size.m};
         align-items: center;
@@ -173,7 +165,6 @@ export const Description = ({
       hasShadow={false}
       grow={false}
       color="transparent"
-      css={styles.panel}
       data-test-subj="description"
     >
       <EuiFlexGroup direction="column" gutterSize="none">
