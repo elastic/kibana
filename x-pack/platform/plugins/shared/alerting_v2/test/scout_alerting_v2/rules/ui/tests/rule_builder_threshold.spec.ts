@@ -244,7 +244,7 @@ test.describe(
 
       await test.step('verify flyout opens in ES|QL mode (no builder switch button)', async () => {
         await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
-        await expect(page.testSubj.locator('composeDiscoverSwitchToEsql')).toBeHidden();
+        await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
       });
     });
 
@@ -277,18 +277,15 @@ test.describe(
       });
 
       await test.step('confirmation modal appears', async () => {
-        await expect(page.testSubj.locator('alertingV2ConfirmBuilderToEsqlModal')).toBeVisible({
+        await expect(pageObjects.composeDiscover.confirmBuilderToEsqlModal).toBeVisible({
           timeout: 30_000,
         });
       });
 
       await test.step('confirm opens flyout in ES|QL mode', async () => {
-        await page.testSubj
-          .locator('alertingV2ConfirmBuilderToEsqlModal')
-          .locator('[data-test-subj="confirmModalConfirmButton"]')
-          .click();
+        await pageObjects.composeDiscover.confirmBuilderToEsql();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
-        await expect(page.testSubj.locator('composeDiscoverSwitchToEsql')).toBeHidden();
+        await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
       });
     });
 
@@ -322,22 +319,19 @@ test.describe(
       });
 
       await test.step('click ES|QL switch button', async () => {
-        await page.testSubj.locator('composeDiscoverSwitchToEsql_esql').click();
+        await pageObjects.composeDiscover.clickSwitchToEsql();
       });
 
       await test.step('confirmation modal appears', async () => {
-        await expect(page.testSubj.locator('alertingV2ConfirmBuilderToEsqlModal')).toBeVisible({
+        await expect(pageObjects.composeDiscover.confirmBuilderToEsqlModal).toBeVisible({
           timeout: 10_000,
         });
       });
 
       await test.step('confirm switches to ES|QL mode', async () => {
-        await page.testSubj
-          .locator('alertingV2ConfirmBuilderToEsqlModal')
-          .locator('[data-test-subj="confirmModalConfirmButton"]')
-          .click();
-        await expect(page.testSubj.locator('alertingV2ConfirmBuilderToEsqlModal')).toBeHidden();
-        await expect(page.testSubj.locator('composeDiscoverSwitchToEsql')).toBeHidden();
+        await pageObjects.composeDiscover.confirmBuilderToEsql();
+        await expect(pageObjects.composeDiscover.confirmBuilderToEsqlModal).toBeHidden();
+        await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
       });
     });
   }
