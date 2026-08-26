@@ -1,26 +1,9 @@
 {
   "sha1": "cdd8b0b34e1c2ccd2f3997315fdc2c86a70d821b",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "f9db2c0f703ede6-10a320ba15dd24a",
-      "title": "Clean up infra data after UI parallel tests",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
-        "line": 11,
-        "column": 19
-      }
-    },
     {
       "id": "50b3a018a3d8e65-f2cd2d3cdc77643",
       "title": "Ingest data to Elasticsearch",
@@ -1505,6 +1488,22 @@
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/node_details/node_details.spec.ts",
         "line": 14,
         "column": 7
+      }
+    },
+    {
+      "id": "f9db2c0f703ede6-10a320ba15dd24a",
+      "title": "Clean up infra data after UI parallel tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 11,
+        "column": 19
       }
     }
   ]
