@@ -35,32 +35,17 @@ if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)
 fi
 
-# Move the first existing source dir onto dest (no-op if none exist).
-seed_from_image_cache() {
-  local dest="$1"
-  shift
-  local src
-  for src in "$@"; do
-    if [[ -d "$src" ]]; then
-      echo "Using $src as a starting point"
-      mkdir -p "$(dirname "$dest")"
-      mv "$src" "$dest"
-      return 0
-    fi
-  done
-}
-
 # Use packages baked into the agent image as a cache, but only when the workspace
 # is not on local ssd or in memory — moving many small files between disks is
 # slower than extracting/linking from the package manager cache.
 if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   if [[ "$USE_PNPM" == true ]]; then
-    seed_from_image_cache ./node_modules "${PNPM_IMAGE_CACHE}/node_modules"
-    seed_from_image_cache ./.pnpm-store "${PNPM_IMAGE_CACHE}/.pnpm-store"
+    copy_first_available ./node_modules "${PNPM_IMAGE_CACHE}/node_modules"
+    copy_first_available ./.pnpm-store "${PNPM_IMAGE_CACHE}/.pnpm-store"
     export npm_config_store_dir="${KIBANA_DIR:-$(pwd)}/.pnpm-store"
   else
-    seed_from_image_cache ./node_modules "${YARN_IMAGE_CACHE}/node_modules"
-    seed_from_image_cache ./.yarn-local-mirror "${YARN_IMAGE_CACHE}/.yarn-local-mirror"
+    copy_first_available ./node_modules "${YARN_IMAGE_CACHE}/node_modules"
+    copy_first_available ./.yarn-local-mirror "${YARN_IMAGE_CACHE}/.yarn-local-mirror"
   fi
 
   # Check if there's a cache artifact uploaded from a previous step
@@ -84,11 +69,7 @@ if ! ("${BOOTSTRAP_CMD[@]}" "${BOOTSTRAP_PARAMS[@]}"); then
   rm -rf node_modules
 
   echo "--- ${BOOTSTRAP_LABEL}, attempt 2"
-  if [[ "$USE_PNPM" == true ]]; then
-    pnpm kbn bootstrap --force-install
-  else
-    yarn kbn bootstrap --force-install
-  fi
+  "${BOOTSTRAP_CMD[@]}" "${BOOTSTRAP_PARAMS[@]}" --force-install
 fi
 
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
