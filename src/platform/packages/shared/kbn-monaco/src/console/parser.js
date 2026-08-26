@@ -88,6 +88,9 @@ export const createParser = () => {
       if (i < 0) {
         error(errorMessage || 'Expected \'' + upTo + '\'');
       }
+      // Example: `"query": """...""",` can be followed by more fields in the same body.
+      // If the closing `"""` is stored as the request end, autocomplete below it shows request
+      // methods or no suggestions instead of body fields.
       const afterClosingDelimiter = i + upTo.length;
       ch = text.charAt(afterClosingDelimiter);
       at = afterClosingDelimiter + 1;
