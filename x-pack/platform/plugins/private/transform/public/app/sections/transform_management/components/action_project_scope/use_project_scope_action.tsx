@@ -38,9 +38,13 @@ const getInitialProjectRouting = (
   return hasSameProjectRouting ? firstProjectRouting : defaultProjectRouting;
 };
 
+interface UseProjectScopeActionArgs {
+  onUpdateSuccess?: () => void;
+}
+
 export type ProjectScopeAction = ReturnType<typeof useProjectScopeAction>;
 
-export const useProjectScopeAction = () => {
+export const useProjectScopeAction = ({ onUpdateSuccess }: UseProjectScopeActionArgs = {}) => {
   const { cps } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const cpsManager = cps?.cpsManager;
@@ -156,13 +160,25 @@ export const useProjectScopeAction = () => {
       return;
     }
 
-    updateTransformsProjectScope({
-      projectRouting: targetProjectRouting,
-      transformsInfo: items.map(({ id }) => ({ id })),
-    });
+    updateTransformsProjectScope(
+      {
+        projectRouting: targetProjectRouting,
+        transformsInfo: items.map(({ id }) => ({ id })),
+      },
+      {
+        onSuccess: (results) => {
+          const didAllTransformsUpdate = Object.values(results).every((result) => result.success);
+
+          if (didAllTransformsUpdate) {
+            setItems([]);
+            onUpdateSuccess?.();
+          }
+        },
+      }
+    );
     setModalVisible(false);
     setFlyoutVisible(false);
-  }, [items, targetProjectRouting, updateTransformsProjectScope]);
+  }, [items, onUpdateSuccess, targetProjectRouting, updateTransformsProjectScope]);
 
   return {
     availableProjects,

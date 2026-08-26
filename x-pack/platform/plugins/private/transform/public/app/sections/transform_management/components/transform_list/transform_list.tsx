@@ -125,6 +125,7 @@ export const TransformList: FC<TransformListProps> = ({
   const [searchError, setSearchError] = useState<string | undefined>();
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
   const [transformSelection, setTransformSelection] = useState<TransformListRow[]>([]);
+  const [selectionResetCounter, setSelectionResetCounter] = useState(0);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
   const bulkStartAction = useStartAction(false, transformNodes);
   const bulkDeleteAction = useDeleteAction(false);
@@ -132,7 +133,13 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkResetAction = useResetAction(false);
   const bulkStopAction = useStopAction(false);
   const bulkScheduleNowAction = useScheduleNowAction(false, transformNodes);
-  const bulkProjectScopeAction = useProjectScopeAction();
+  const clearTransformSelection = useCallback(() => {
+    setTransformSelection([]);
+    setSelectionResetCounter((counter) => counter + 1);
+  }, []);
+  const bulkProjectScopeAction = useProjectScopeAction({
+    onUpdateSuccess: clearTransformSelection,
+  });
 
   const capabilities = useTransformCapabilities();
 
@@ -401,6 +408,7 @@ export const TransformList: FC<TransformListProps> = ({
       {singleActionModals}
 
       <EuiInMemoryTable
+        key={selectionResetCounter}
         allowNeutralSort={false}
         className="transform__TransformTable"
         columns={columns}
