@@ -70,7 +70,7 @@ steps:
   - name: handle_decision
     type: console
     with:
-      message: 'Decision recorded for conversation {{ event.conversationId }}'
+      message: Decision recorded
 \`\`\``,
           values: {
             triggerId: ConversationMetadataUpdatedTriggerId,
@@ -92,7 +92,7 @@ steps:
   - name: notify
     type: console
     with:
-      message: 'Severity changed on conversation {{ event.conversationId }}'
+      message: Severity changed
 \`\`\``,
           values: {
             triggerId: ConversationMetadataUpdatedTriggerId,
