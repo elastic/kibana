@@ -22,6 +22,10 @@ import type { TemplatesSubClient } from './templates/client';
 import { createTemplatesSubClient } from './templates/client';
 import type { FieldDefinitionsSubClient } from './field_definitions/client';
 import { createFieldDefinitionsSubClient } from './field_definitions/client';
+import type { EnsureAuthorizedToUpdateParams } from './cases/ensure_authorized_to_update';
+import { ensureAuthorizedToUpdate } from './cases/ensure_authorized_to_update';
+
+const clientArgsByCasesClient = new WeakMap<CasesClient, CasesClientArgs>();
 
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.
@@ -37,6 +41,7 @@ export class CasesClient {
   private readonly _fieldDefinitions: FieldDefinitionsSubClient;
 
   constructor(args: CasesClientArgs) {
+    clientArgsByCasesClient.set(this, args);
     this._casesClientInternal = createCasesClientInternal(args);
     this._cases = createCasesSubClient(args, this, this._casesClientInternal);
     this._attachments = createAttachmentsSubClient(args, this, this._casesClientInternal);
@@ -96,6 +101,18 @@ export class CasesClient {
     return this._metrics;
   }
 }
+
+export const authorizeWorkflowRun = (
+  casesClient: CasesClient,
+  params: EnsureAuthorizedToUpdateParams
+): Promise<void> => {
+  const clientArgs = clientArgsByCasesClient.get(casesClient);
+  if (!clientArgs) {
+    throw new Error('Cases client is not initialized.');
+  }
+
+  return ensureAuthorizedToUpdate(params, clientArgs);
+};
 
 /**
  * Creates a {@link CasesClient} for interacting with the cases entities

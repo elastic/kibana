@@ -9,22 +9,23 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { AuditLogger, SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { preprocessAlertInputs } from '@kbn/workflows-management-plugin/server';
 import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
+  CASE_SAVED_OBJECT,
   CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
   CASES_WORKFLOW_EXECUTION_SOURCE,
-  CasesWorkflowExecutionMetadataSchema,
-} from '../../../common/types/api/workflow/v1';
+} from '../../../common/constants';
+import { CasesWorkflowExecutionMetadataSchema } from '../../../common/types/api/workflow/v1';
 import type {
   CaseWorkflowRunOrigin,
   RunCaseWorkflowRequest,
   RunCaseWorkflowResponse,
 } from '../../../common/types/api';
+import { AttachmentType } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
+import { authorizeWorkflowRun } from '../../client/client';
 import type { CasesRequestHandlerContext } from '../../types';
-import { validateOrigin, validateMultiCaseOrigin } from './validate_origin';
+import { getSelectedAlertPairs, validateOrigin, validateMultiCaseOrigin } from './validate_origin';
 
 interface RunWorkflowParams {
   workflowId: string;
@@ -39,12 +40,6 @@ interface CasesWorkflowRunServiceDeps {
   management: WorkflowsServerPluginSetup['management'];
   logger: Logger;
   audit: SecurityPluginSetup['audit'];
-  /**
-   * Returns true when the current license is active and meets the minimum
-   * tier required by Workflows Management (Enterprise). Evaluated on every
-   * request so that mid-session license changes are reflected immediately.
-   */
-  isLicenseValid: () => boolean;
   onWorkflowStarted?: (event: CasesWorkflowStartedEvent) => Promise<void>;
 }
 
@@ -63,20 +58,12 @@ export class CasesWorkflowRunService {
   private readonly management: WorkflowsServerPluginSetup['management'];
   private readonly logger: Logger;
   private readonly audit: SecurityPluginSetup['audit'];
-  private readonly isLicenseValid: () => boolean;
   private readonly onWorkflowStarted?: (event: CasesWorkflowStartedEvent) => Promise<void>;
 
-  constructor({
-    management,
-    logger,
-    audit,
-    isLicenseValid,
-    onWorkflowStarted,
-  }: CasesWorkflowRunServiceDeps) {
+  constructor({ management, logger, audit, onWorkflowStarted }: CasesWorkflowRunServiceDeps) {
     this.management = management;
     this.logger = logger;
     this.audit = audit;
-    this.isLicenseValid = isLicenseValid;
     this.onWorkflowStarted = onWorkflowStarted;
   }
 
@@ -126,9 +113,8 @@ export class CasesWorkflowRunService {
       throw Boom.forbidden('Workflows are not available.');
     }
 
-    // Require an active Enterprise license — matches the gate on the Workflows Management
-    // public execution route (withAvailabilityCheck → wrapRouteWithLicenseCheck).
-    if (!this.isLicenseValid()) {
+    const { license } = await context.licensing;
+    if (!license.isAvailable || !license.isActive || !license.hasAtLeast('enterprise')) {
       throw Boom.forbidden('Workflows require an active Enterprise license.');
     }
 
@@ -137,7 +123,7 @@ export class CasesWorkflowRunService {
     // All-or-nothing: throws 403 if the caller lacks cases:<owner>/updateCase on any case.
     // Authorizes before reporting not-found errors so an unauthorized caller cannot learn
     // which IDs exist. One privilege round-trip for all owners via ensureAuthorized.
-    await casesClient.cases.ensureAuthorizedToUpdate({ ids: caseIds });
+    await authorizeWorkflowRun(casesClient, { ids: caseIds });
 
     // For single-case runs, fetch the case to validate sub-entity origins and alert membership.
     // For multi-case runs, only cases.case origin is legal — no case fetch is needed.
@@ -148,12 +134,20 @@ export class CasesWorkflowRunService {
         inputs: body.inputs,
       });
     } else {
-      const theCase = await casesClient.cases.get({ id: caseIds[0], includeComments: true });
+      const theCase = await casesClient.cases.get({ id: caseIds[0] });
+      const attachedAlerts =
+        getSelectedAlertPairs(body.inputs).length > 0
+          ? await casesClient.attachments.getAllDocumentsAttachedToCase({
+              caseId: caseIds[0],
+              attachmentTypes: [AttachmentType.alert],
+            })
+          : [];
       validateOrigin({
         origin: body.origin,
         caseId: caseIds[0],
         inputs: body.inputs,
         theCase,
+        attachedAlerts,
       });
     }
 
@@ -178,12 +172,6 @@ export class CasesWorkflowRunService {
         : {};
     const mergedInputs = { ...body.inputs, event: { ...event, caseIds } };
 
-    const processedInputs = await preprocessAlertInputs(
-      mergedInputs,
-      context,
-      spaceId,
-      this.logger
-    );
     const metadata = CasesWorkflowExecutionMetadataSchema.parse({
       schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
       source: CASES_WORKFLOW_EXECUTION_SOURCE,
@@ -195,14 +183,15 @@ export class CasesWorkflowRunService {
     // is scheduled (truly fire-and-forget). executeWorkflow always waits ≥1 s for the execution
     // document to appear even when waitForCompletion=false, which adds measurable latency to
     // every interactive "run workflow from a case" click.
-    const workflowExecutionId = await this.management.runWorkflow(
-      toWorkflowExecutionEngineModel(workflow),
-      spaceId,
-      processedInputs,
-      request,
-      undefined,
-      metadata
-    );
+    const { workflowExecutionId, inputs: processedInputs } =
+      await this.management.runWorkflowWithAlertPreprocessing({
+        workflow: toWorkflowExecutionEngineModel(workflow),
+        spaceId,
+        inputs: mergedInputs,
+        request,
+        preprocessingContext: context,
+        metadata,
+      });
     // One audit event per case keeps the audit trail queryable by individual case ID.
     this.logWorkflowRunAuditEvents({
       auditLogger,

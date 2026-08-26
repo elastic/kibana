@@ -14,7 +14,8 @@ import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
 } from '@kbn/agent-builder-sml-plugin/server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { CustomRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
@@ -68,6 +69,7 @@ import {
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
 import type {
   SearchExecutionsViewParams,
   SearchWorkflowExecutionsParams,
@@ -193,6 +195,26 @@ export interface BulkScheduleWorkflowItem {
   metadata?: WorkflowExecutionEventDispatchMetadata;
 }
 
+export type AlertPreprocessingContext = Pick<
+  CustomRequestHandlerContext<{ alerting: AlertingApiRequestHandlerContext }>,
+  'core' | 'alerting'
+>;
+
+export interface RunWorkflowWithAlertPreprocessingParams {
+  workflow: WorkflowExecutionEngineModel;
+  spaceId: string;
+  inputs: Record<string, unknown>;
+  request: KibanaRequest;
+  preprocessingContext: AlertPreprocessingContext;
+  triggeredBy?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface RunWorkflowWithAlertPreprocessingResult {
+  workflowExecutionId: string;
+  inputs: Record<string, unknown>;
+}
+
 const DEFAULT_EXECUTE_WORKFLOW_COMPLETION_TIMEOUT_SEC = 120;
 const INITIAL_EXECUTE_WORKFLOW_WAIT_MS = 1_000;
 const EXECUTE_WORKFLOW_CHECK_INTERVAL_MS = 2_500;
@@ -253,7 +275,8 @@ export class WorkflowsManagementApi {
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    public readonly isWorkflowsAvailable: boolean
+    public readonly isWorkflowsAvailable: boolean,
+    private readonly logger: Logger
   ) {}
 
   private async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
@@ -484,6 +507,36 @@ export class WorkflowsManagementApi {
       request
     );
     return executeResponse.workflowExecutionId;
+  }
+
+  /**
+   * Preprocesses alert inputs and starts a workflow without waiting for its execution document.
+   */
+  public async runWorkflowWithAlertPreprocessing({
+    workflow,
+    spaceId,
+    inputs,
+    request,
+    preprocessingContext,
+    triggeredBy,
+    metadata,
+  }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
+    const processedInputs = await preprocessAlertInputs(
+      inputs,
+      preprocessingContext,
+      spaceId,
+      this.logger
+    );
+    const workflowExecutionId = await this.runWorkflow(
+      workflow,
+      spaceId,
+      processedInputs,
+      request,
+      triggeredBy,
+      metadata
+    );
+
+    return { workflowExecutionId, inputs: processedInputs };
   }
 
   public async executeWorkflow(params: ExecuteWorkflowParams): Promise<ExecuteWorkflowResult> {

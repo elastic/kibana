@@ -9,8 +9,13 @@
 
 import { WORKFLOW_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
+import {
+  type WorkflowDetailDto,
+  type WorkflowExecutionEngineModel,
+  WorkflowsManagementApiActions,
+} from '@kbn/workflows';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowNotFoundError,
@@ -20,14 +25,23 @@ import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/se
 import { z } from '@kbn/zod/v4';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
-import { type SmlIndexAttachmentFn, WorkflowsManagementApi } from './workflows_management_api';
+import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
+import {
+  type AlertPreprocessingContext,
+  type SmlIndexAttachmentFn,
+  WorkflowsManagementApi,
+} from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
+
+jest.mock('./routes/executions/utils/preprocess_alert_inputs');
 
 describe('WorkflowsManagementApi', () => {
   let api: WorkflowsManagementApi;
   let mockWorkflowsService: jest.Mocked<WorkflowsService>;
   let mockRequest: KibanaRequest;
   let mockWorkflowsExecutionEngine: jest.Mocked<WorkflowsExecutionEnginePluginStart>;
+  const logger = loggingSystemMock.createLogger();
+  const mockPreprocessAlertInputs = jest.mocked(preprocessAlertInputs);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,6 +53,7 @@ describe('WorkflowsManagementApi', () => {
       workflowExecutionId: 'sched-exec-id',
     });
     mockWorkflowsExecutionEngine.bulkScheduleWorkflow.mockResolvedValue([]);
+    mockPreprocessAlertInputs.mockImplementation(async (inputs) => inputs);
 
     mockWorkflowsService = {
       getWorkflow: jest.fn(),
@@ -58,7 +73,7 @@ describe('WorkflowsManagementApi', () => {
       getWorkflowsExecutionEngine: () => mockWorkflowsExecutionEngine,
     } as any;
 
-    api = new WorkflowsManagementApi(mockWorkflowsService, true);
+    api = new WorkflowsManagementApi(mockWorkflowsService, true, logger);
     const mockZodSchema = createMockZodSchema();
     mockWorkflowsService.getWorkflowZodSchema.mockResolvedValue(mockZodSchema);
     mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([]);
@@ -630,6 +645,64 @@ steps:
     });
   });
 
+  describe('runWorkflowWithAlertPreprocessing', () => {
+    it('preprocesses alert inputs with the request context before starting the workflow', async () => {
+      const workflow = {
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Test workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+        },
+        yaml: 'name: Test workflow',
+      } as WorkflowExecutionEngineModel;
+      const inputs = {
+        event: {
+          triggerType: 'alert',
+          alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
+        },
+      };
+      const processedInputs = {
+        event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }] },
+        investigation: 'case-1',
+      };
+      const context = {} as AlertPreprocessingContext;
+      const metadata = { caseIds: ['case-1'] };
+      mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
+
+      await expect(
+        api.runWorkflowWithAlertPreprocessing({
+          workflow,
+          spaceId: 'default',
+          inputs,
+          request: mockRequest,
+          preprocessingContext: context,
+          metadata,
+        })
+      ).resolves.toEqual({
+        workflowExecutionId: 'test-exec-id',
+        inputs: processedInputs,
+      });
+
+      expect(mockPreprocessAlertInputs).toHaveBeenCalledWith(inputs, context, 'default', logger);
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        workflow,
+        {
+          event: processedInputs.event,
+          spaceId: 'default',
+          inputs: { investigation: 'case-1' },
+          triggeredBy: undefined,
+          metadata,
+        },
+        mockRequest
+      );
+    });
+  });
+
   describe('executeWorkflow', () => {
     const workflowDefinition = {
       version: '1' as const,
@@ -1107,7 +1180,7 @@ steps:
     });
 
     it('does not notify SML when setSmlIndexAttachment has not been called', async () => {
-      const freshApi = new WorkflowsManagementApi(mockWorkflowsService, true);
+      const freshApi = new WorkflowsManagementApi(mockWorkflowsService, true, logger);
       mockWorkflowsService.createWorkflow.mockResolvedValue(createWorkflowDto());
 
       await freshApi.createWorkflow({ yaml: 'name: Test' }, 'default', mockRequest);

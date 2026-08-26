@@ -5,14 +5,35 @@
  * 2.0.
  */
 
+import type { DocumentResponse } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
-import { validateOrigin, validateMultiCaseOrigin } from './validate_origin';
+import { getAlertInfoFromComments } from '../../common/utils';
+import {
+  validateOrigin as validateOriginWithAttachments,
+  validateMultiCaseOrigin,
+} from './validate_origin';
 
 const theCase = {
   id: 'case-1',
   observables: [] as Array<{ id: string }>,
   comments: [] as unknown[],
 } as unknown as Case;
+
+const validateOrigin = (
+  params: Omit<Parameters<typeof validateOriginWithAttachments>[0], 'attachedAlerts'>
+): void => {
+  const attachedAlerts: DocumentResponse = getAlertInfoFromComments(params.theCase.comments).map(
+    ({ id, index }) => ({
+      id,
+      index,
+      attached_at: '2026-08-26T00:00:00.000Z',
+    })
+  );
+  validateOriginWithAttachments({
+    ...params,
+    attachedAlerts,
+  });
+};
 
 // ── cases.case origin ─────────────────────────────────────────────────────────
 
@@ -140,7 +161,7 @@ describe('cases.alert origin', () => {
         inputs: {},
         theCase: caseWithAlerts,
       })
-    ).toThrow('All selected alerts must belong to the case.');
+    ).toThrow('Alert workflow origins require at least one selected alert.');
   });
 
   it('throws when a selected alert is not attached', () => {
@@ -219,7 +240,7 @@ describe('cases.alerts origin', () => {
         inputs: {},
         theCase: caseWithAlerts,
       })
-    ).toThrow('All selected alerts must belong to the case.');
+    ).toThrow('Alert workflow origins require at least one selected alert.');
   });
 
   it('passes when all selected alerts are attached', () => {

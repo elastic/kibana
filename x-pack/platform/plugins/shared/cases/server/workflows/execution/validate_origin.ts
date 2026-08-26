@@ -6,15 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import type { CaseWorkflowRunOrigin } from '../../../common/types/api';
+import type { CaseWorkflowRunOrigin, DocumentResponse } from '../../../common/types/api';
 import {
   ALERT_WORKFLOW_ORIGIN_TYPE,
   ALERTS_WORKFLOW_ORIGIN_TYPE,
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
-} from '../../../common/types/api/workflow/v1';
+} from '../../../common/constants';
 import type { Case } from '../../../common/types/domain';
-import { isAlertAttachmentType, toStringArray } from '../../../common/utils/attachments';
 
 const getRecord = (value: unknown): Record<string, unknown> | undefined =>
   typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;
@@ -42,39 +41,6 @@ export const getSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPai
         alert !== undefined && typeof alert._id === 'string' && typeof alert._index === 'string'
     )
     .map((alert) => ({ _id: alert._id as string, _index: alert._index as string }));
-};
-
-/**
- * Builds the set of `"id|index"` pairs that are attached to the case as alerts.
- * Both legacy (`alertId` + `index`) and unified (`attachmentId` + `metadata.index`)
- * attachment shapes are handled. Parallel arrays are zipped positionally.
- */
-const getAttachedAlertPairSet = (comments: NonNullable<Case['comments']>): Set<string> => {
-  const pairs = new Set<string>();
-
-  for (const comment of comments) {
-    if (isAlertAttachmentType(comment.type)) {
-      let ids: string[] = [];
-      let indices: string[] = [];
-
-      if ('alertId' in comment) {
-        // Legacy v1 alert attachment: alertId and index are parallel fields.
-        ids = toStringArray(comment.alertId);
-        indices = toStringArray((comment as Record<string, unknown>).index ?? []);
-      } else if ('attachmentId' in comment) {
-        // Unified v2 alert attachment: id is attachmentId, index lives in metadata.index.
-        ids = toStringArray(comment.attachmentId);
-        const meta = getRecord((comment as Record<string, unknown>).metadata);
-        indices = meta ? toStringArray(meta.index) : [];
-      }
-
-      for (let i = 0; i < ids.length; i++) {
-        pairs.add(`${ids[i]}|${indices[i] ?? ''}`);
-      }
-    }
-  }
-
-  return pairs;
 };
 
 /**
@@ -125,11 +91,13 @@ export const validateOrigin = ({
   caseId,
   inputs,
   theCase,
+  attachedAlerts,
 }: {
   origin: CaseWorkflowRunOrigin;
   caseId: string;
   inputs: Record<string, unknown>;
   theCase: Case;
+  attachedAlerts: DocumentResponse;
 }): void => {
   // Step 1 — origin-entity membership checks
   if (origin.type === CASE_WORKFLOW_ORIGIN_TYPE || origin.type === ALERTS_WORKFLOW_ORIGIN_TYPE) {
@@ -146,7 +114,7 @@ export const validateOrigin = ({
   // regardless of origin type, using (id, index) pairs for precise matching.
   const selectedPairs = getSelectedAlertPairs(inputs);
   if (selectedPairs.length > 0) {
-    const attachedPairs = getAttachedAlertPairSet(theCase.comments ?? []);
+    const attachedPairs = new Set(attachedAlerts.map(({ id, index }) => `${id}|${index}`));
     if (selectedPairs.some(({ _id, _index }) => !attachedPairs.has(`${_id}|${_index}`))) {
       throw Boom.badRequest('All selected alerts must belong to the case.');
     }
@@ -162,6 +130,6 @@ export const validateOrigin = ({
     origin.type === ALERTS_WORKFLOW_ORIGIN_TYPE
   ) {
     // Alert-based origins require at least one selected alert in inputs.
-    throw Boom.badRequest('All selected alerts must belong to the case.');
+    throw Boom.badRequest('Alert workflow origins require at least one selected alert.');
   }
 };

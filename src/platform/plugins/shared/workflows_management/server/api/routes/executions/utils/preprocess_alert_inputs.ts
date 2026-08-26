@@ -19,9 +19,7 @@ import type {
   AlertTriggerInput,
 } from '../../../../../common/types/alert_types';
 import { buildAlertEvent } from '../../../../../common/utils/build_alert_event';
-import type { WorkflowsRequestHandlerContext } from '../../../../types';
-
-export type AlertPreprocessingContext = Pick<WorkflowsRequestHandlerContext, 'core' | 'alerting'>;
+import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
 /**
  * Extracts rule information from an alert's _source

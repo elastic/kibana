@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { MAX_CASES_PER_WORKFLOW_RUN } from '../../../constants';
 import {
   CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
   CASES_WORKFLOW_EXECUTION_SOURCE,
-  CasesWorkflowExecutionMetadataSchema,
-} from './v1';
+  MAX_CASES_PER_WORKFLOW_RUN,
+} from '../../../constants';
+import { CasesWorkflowExecutionMetadataSchema } from './v1';
 
 const validMetadata = {
   schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
@@ -38,7 +38,7 @@ describe('CasesWorkflowExecutionMetadataSchema', () => {
 
   it.each([
     ['schema version', { ...validMetadata, schemaVersion: 2 }],
-    ['source', { ...validMetadata, source: 'securitySolution' }],
+    ['source namespace', { ...validMetadata, source: 'securitySolution' }],
     ['empty caseIds array', { ...validMetadata, caseIds: [] }],
     [
       'origin type',

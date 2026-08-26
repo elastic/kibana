@@ -6,21 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_CASES_PER_WORKFLOW_RUN } from '../../../constants';
-
-export const CASES_WORKFLOW_EXECUTION_SOURCE = 'cases' as const;
-export const CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION = 1 as const;
-export const MAX_CASE_WORKFLOW_RUN_ID_LENGTH = 1024;
-export const CASE_WORKFLOW_ORIGIN_TYPE = 'cases.case' as const;
-export const OBSERVABLE_WORKFLOW_ORIGIN_TYPE = 'cases.observable' as const;
-export const ALERT_WORKFLOW_ORIGIN_TYPE = 'cases.alert' as const;
-export const ALERTS_WORKFLOW_ORIGIN_TYPE = 'cases.alerts' as const;
-export const CASE_WORKFLOW_RUN_ORIGIN_TYPES = [
-  CASE_WORKFLOW_ORIGIN_TYPE,
-  OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
-  ALERT_WORKFLOW_ORIGIN_TYPE,
-  ALERTS_WORKFLOW_ORIGIN_TYPE,
-] as const;
+import {
+  CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
+  CASES_WORKFLOW_EXECUTION_SOURCE,
+  CASE_WORKFLOW_RUN_ORIGIN_TYPES,
+  MAX_CASES_PER_WORKFLOW_RUN,
+  MAX_CASE_WORKFLOW_RUN_ID_LENGTH,
+} from '../../../constants';
 
 export const CaseWorkflowRunOriginSchema = z
   .object({
