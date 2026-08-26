@@ -1217,6 +1217,8 @@
       "@kbn/enterprise-search-plugin/*": ["./x-pack/solutions/search/plugins/enterprise_search/*"],
       "@kbn/entities-caue-plugin": ["./x-pack/solutions/observability/plugins/entities_caue"],
       "@kbn/entities-caue-plugin/*": ["./x-pack/solutions/observability/plugins/entities_caue/*"],
+      "@kbn/entities-runtime-caue-plugin": ["./x-pack/solutions/observability/plugins/entities_runtime_caue"],
+      "@kbn/entities-runtime-caue-plugin/*": ["./x-pack/solutions/observability/plugins/entities_runtime_caue/*"],
       "@kbn/entity-store": ["./x-pack/platform/plugins/shared/entity_store"],
       "@kbn/entity-store/*": ["./x-pack/platform/plugins/shared/entity_store/*"],
       "@kbn/error-boundary-example-plugin": ["./examples/error_boundary"],

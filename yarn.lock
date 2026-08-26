@@ -6507,6 +6507,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/entities-runtime-caue-plugin@link:x-pack/solutions/observability/plugins/entities_runtime_caue":
+  version "0.0.0"
+  uid ""
+
 "@kbn/entity-store@link:x-pack/platform/plugins/shared/entity_store":
   version "0.0.0"
   uid ""
