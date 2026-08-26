@@ -455,7 +455,12 @@ run(
           if (result.passed) {
             const tests = result.testCount > 0 ? ` · ${result.testCount} tests` : '';
             jestProgress.writeResult(
-              line('jest', '✓', `${jestUnitFiles.length} test files${tests}`, jestProgress.elapsed())
+              line(
+                'jest',
+                '✓',
+                `${jestUnitFiles.length} test files${tests}`,
+                jestProgress.elapsed()
+              )
             );
           } else {
             jestProgress.writeResult(line('jest', '✗', 'failed', jestProgress.elapsed()));
