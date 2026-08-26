@@ -233,14 +233,14 @@ Rules:
   "evidence": [
     {
       "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
-      "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+      "esql_query": "FROM metrics-* | WHERE service.name == \"orders-api\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
       "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
     },
     {
       "description": "The pool is acquired with a 1ms timeout and the handler re-raises on failure.",
       "code": {
         "source": "github_connector",
-        "repo": "acme/checkout-service",
+        "repo": "acme/orders-api",
         "path": "src/db/pool.ts",
         "host": "github.com",
         "ref": "9f2c1ab3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9"
@@ -326,7 +326,7 @@ not end the investigation. Keep working after calling it.
 
 ```json
 {
-  "summary": "No prior incidents found for checkout-service in memory. Starting context collection.",
+  "summary": "No prior incidents found for orders-api in memory. Starting context collection.",
   "hypotheses": []
 }
 ```
@@ -335,7 +335,7 @@ not end the investigation. Keep working after calling it.
 
 ```json
 {
-  "summary": "Checkout service latency spiked at 14:02, coinciding with a deploy. Three candidates to investigate.",
+  "summary": "orders-api latency spiked at 14:02, coinciding with a deploy. Three candidates to investigate.",
   "hypotheses": [
     {
       "candidate": "Connection pool exhaustion after the 14:02 deploy",
@@ -343,12 +343,12 @@ not end the investigation. Keep working after calling it.
       "status": "investigating"
     },
     {
-      "candidate": "Disk saturation on the checkout-service hosts",
+      "candidate": "Disk saturation on the orders-api hosts",
       "confidence": 0.2,
       "status": "investigating"
     },
     {
-      "candidate": "Downstream payment-service degradation",
+      "candidate": "Downstream payments-service degradation",
       "confidence": 0.3,
       "status": "investigating"
     }
@@ -360,7 +360,7 @@ not end the investigation. Keep working after calling it.
 
 ```json
 {
-  "summary": "Disk saturation ruled out; pool exhaustion confirmed — its utilization spike matches the deploy. Checking payment-service next.",
+  "summary": "Disk saturation ruled out; pool exhaustion confirmed — its utilization spike matches the deploy. Checking payments-service next.",
   "hypotheses": [
     {
       "candidate": "Connection pool exhaustion after the 14:02 deploy",
@@ -370,26 +370,26 @@ not end the investigation. Keep working after calling it.
       "evidence": [
         {
           "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
-          "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+          "esql_query": "FROM metrics-* | WHERE service.name == \"orders-api\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     },
     {
-      "candidate": "Disk saturation on the checkout-service hosts",
+      "candidate": "Disk saturation on the orders-api hosts",
       "confidence": 0.05,
       "status": "dismissed",
       "reason": "IOPS and disk queue depth stayed flat throughout the incident window.",
       "evidence": [
         {
           "description": "IOPS and queue depth stayed flat across the whole window.",
-          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"checkout-*\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
+          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"orders-api-*\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     },
     {
-      "candidate": "Downstream payment-service degradation",
+      "candidate": "Downstream payments-service degradation",
       "confidence": 0.3,
       "status": "investigating"
     }
@@ -411,39 +411,39 @@ not end the investigation. Keep working after calling it.
       "evidence": [
         {
           "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
-          "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+          "esql_query": "FROM metrics-* | WHERE service.name == \"orders-api\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     },
     {
-      "candidate": "Disk saturation on the checkout-service hosts",
+      "candidate": "Disk saturation on the orders-api hosts",
       "confidence": 0.05,
       "status": "dismissed",
       "reason": "IOPS and disk queue depth stayed flat throughout the incident window.",
       "evidence": [
         {
           "description": "IOPS and queue depth stayed flat across the whole window.",
-          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"checkout-*\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
+          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"orders-api-*\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     },
     {
-      "candidate": "Downstream payment-service degradation",
+      "candidate": "Downstream payments-service degradation",
       "confidence": 0.1,
       "status": "dismissed",
-      "reason": "payment-service error rate and latency stayed normal throughout the incident window.",
+      "reason": "payments-service error rate and latency stayed normal throughout the incident window.",
       "evidence": [
         {
-          "description": "payment-service error rate and p99 latency stayed at baseline throughout.",
-          "esql_query": "FROM traces-* | WHERE service.name == \"payment-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == \"failure\", p99 = PERCENTILE(duration, 99) BY BUCKET(@timestamp, 5 minute)",
+          "description": "payments-service error rate and p99 latency stayed at baseline throughout.",
+          "esql_query": "FROM traces-* | WHERE service.name == \"payments-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == \"failure\", p99 = PERCENTILE(duration, 99) BY BUCKET(@timestamp, 5 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
     }
   ],
-  "conclusion": "The 14:02 deploy reduced the connection pool's max size, and checkout-service exhausted the smaller pool under normal load.",
+  "conclusion": "The 14:02 deploy reduced the connection pool's max size, and orders-api exhausted the smaller pool under normal load.",
   "recommendations": [
     {
       "title": "Revert the pool-size config change, or raise it back above the previous value",
@@ -451,12 +451,12 @@ not end the investigation. Keep working after calling it.
     },
     {
       "title": "Add an alert on connection pool utilization exceeding 80%",
-      "description": "Would have caught this before checkout was fully blocked."
+      "description": "Would have caught this before orders-api was fully blocked."
     }
   ],
   "blind_spots": [
     {
-      "title": "No profiling data for the checkout-service process",
+      "title": "No profiling data for the orders-api process",
       "description": "Would have confirmed whether the pool exhaustion was compounded by a leak versus pure demand."
     }
   ],
@@ -465,11 +465,11 @@ not end the investigation. Keep working after calling it.
       "field": "severity",
       "from": "60-high",
       "to": "80-critical",
-      "reason": "Checkout is fully blocked for every user who reaches it, not intermittently degraded as triaged.",
+      "reason": "orders-api is fully blocked for every user who reaches it, not intermittently degraded as triaged.",
       "evidence": [
         {
-          "description": "Zero successful checkout completions and a 100% error rate on the checkout path during the incident window.",
-          "esql_query": "FROM traces | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS total = COUNT(*), failures = COUNT(*) WHERE event.outcome == \"failure\"",
+          "description": "Zero successful order completions and a 100% error rate on the orders path during the incident window.",
+          "esql_query": "FROM traces | WHERE service.name == \"orders-api\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS total = COUNT(*), failures = COUNT(*) WHERE event.outcome == \"failure\"",
           "time_range": { "from": "2026-07-28T14:00:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
@@ -478,11 +478,13 @@ not end the investigation. Keep working after calling it.
   "impact": {
     "entities": [
       {
-        "name": "checkout-service",
+        "name": "orders-api",
         "type": "service",
+        "feature_id": "orders-api-service",
+        "stream_name": "logs-generic.acme-prod",
         "evidence": {
-          "description": "checkout-service error rate during incident window",
-          "esql_query": "FROM traces-* | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == \"failure\" BY BUCKET(@timestamp, 5 minute)",
+          "description": "orders-api error rate during incident window",
+          "esql_query": "FROM traces-* | WHERE service.name == \"orders-api\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == \"failure\" BY BUCKET(@timestamp, 5 minute)",
           "time_range": { "from": "2026-07-28T14:00:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       }
@@ -526,7 +528,7 @@ entry has a `title` stating the action, an optional `description` for why it hel
 to carry it out, and an optional `code` field with the raw command/config/code (no markdown fences —
 just the source). For example:
 
-- `{ "title": "Roll back the deployment that introduced the regression", "code": "kubectl rollout undo deployment/checkout-service" }`
+- `{ "title": "Roll back the deployment that introduced the regression", "code": "kubectl rollout undo deployment/orders-api" }`
 - `{ "title": "Increase the connection pool size in the service's Docker Compose config", "code": "environment:\n  - DB_MAX_POOL_SIZE=50" }`
 - `{ "title": "Add monitoring to catch this earlier next time", "description": "Alert when connection pool utilization exceeds 80% for 5 minutes." }`
 
