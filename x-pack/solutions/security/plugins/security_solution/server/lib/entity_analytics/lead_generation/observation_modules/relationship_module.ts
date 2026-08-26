@@ -32,19 +32,18 @@ const MODULE_WEIGHT = OBSERVATION_MODULE_WEIGHTS.entity_relationships;
 const MGET_CHUNK_SIZE = 1000;
 
 const CONNECTED_TO_RISK_CRITICAL_BASE = 45;
-const CONNECTED_TO_RISK_HIGH_BASE = 30;
-const CONNECTED_TO_RISK_FRACTION_BONUS = 35;
-const CONNECTED_TO_RISK_MAX_SCORE = 100;
+const CONNECTED_TO_RISK_HIGH_BASE = 25;
+const CONNECTED_TO_RISK_FRACTION_BONUS = 30;
 const CONNECTED_TO_RISK_CONFIDENCE = 0.6;
 
 const INFREQUENT_ACCESS_CRITICAL_POINTS = 80;
-const INFREQUENT_ACCESS_HIGH_POINTS = 55;
+const INFREQUENT_ACCESS_HIGH_POINTS = 60;
 const INFREQUENT_ACCESS_CONFIDENCE = 0.6;
 
 const RELATIONSHIP_HISTORY_CONCURRENCY = 10;
 const NEW_CONTROL_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
 const NEW_CONTROL_CRITICAL_SCORE = 85;
-const NEW_CONTROL_HIGH_SCORE = 60;
+const NEW_CONTROL_HIGH_SCORE = 70;
 const NEW_CONTROL_CONFIDENCE = 0.7;
 
 interface RelationshipModuleDeps {
@@ -269,9 +268,9 @@ const getEntityRiskLevel = (entity: LeadEntity) => {
 /**
  * Fires when an entity communicates with one or more entities that are currently
  * High/Critical risk — circumstantial contamination via a lateral channel. The
- * worst peer's risk tier sets the base; the fraction of communication peers that
- * are risky raises it, so a mostly-compromised neighborhood outscores a hub that
- * merely touches a few risky peers among many.
+ * worst peer's risk tier sets the base; the fraction of resolved communication
+ * peers that are risky raises it, so a mostly-compromised neighborhood outscores
+ * a hub that merely touches a few risky peers among many.
  */
 const buildConnectedToRiskObservation = (
   entity: LeadEntity,
@@ -283,9 +282,11 @@ const buildConnectedToRiskObservation = (
 
   const criticalRiskEntities: string[] = [];
   const highRiskEntities: string[] = [];
+  let resolvedPeerCount = 0;
   for (const peerId of communicationPeers) {
     const peer = entitiesMap.get(peerId);
     if (peer) {
+      resolvedPeerCount++;
       const riskLevel = getEntityRiskLevel(peer);
       if (riskLevel === 'Critical') {
         criticalRiskEntities.push(peerId);
@@ -301,13 +302,10 @@ const buildConnectedToRiskObservation = (
   const worstTier = criticalRiskEntities.length > 0 ? 'critical' : 'high';
   const base =
     worstTier === 'critical' ? CONNECTED_TO_RISK_CRITICAL_BASE : CONNECTED_TO_RISK_HIGH_BASE;
-  const riskyFraction = riskyCount / communicationPeers.length;
+  const riskyFraction = riskyCount / resolvedPeerCount;
   return makeObservation(entity, MODULE_ID, {
     type: 'connected_to_risk',
-    score: Math.min(
-      CONNECTED_TO_RISK_MAX_SCORE,
-      Math.round(base + riskyFraction * CONNECTED_TO_RISK_FRACTION_BONUS)
-    ),
+    score: Math.round(base + riskyFraction * CONNECTED_TO_RISK_FRACTION_BONUS),
     severity: worstTier === 'critical' ? 'high' : 'medium',
     confidence: CONNECTED_TO_RISK_CONFIDENCE,
     description: `${entityTypeLabel(entity)} ${

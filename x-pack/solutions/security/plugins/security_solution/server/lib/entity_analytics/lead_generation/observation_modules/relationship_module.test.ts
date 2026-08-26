@@ -204,8 +204,8 @@ describe('createRelationshipModule', () => {
       const observation = observations.find((o) => o.type === 'connected_to_risk');
 
       expect(observation).toBeDefined();
-      // High base 30 + full fraction bonus 35 (1/1 peers risky) = 65
-      expect(observation?.score).toBe(65);
+      // High base 25 + full fraction bonus 30 (1/1 peers risky) = 55
+      expect(observation?.score).toBe(55);
       expect(observation?.severity).toBe('medium');
       expect(observation?.confidence).toBe(0.6);
       expect(observation?.metadata.high_risk_entities).toEqual([highRiskConnection.id]);
@@ -225,8 +225,8 @@ describe('createRelationshipModule', () => {
       const observations = await collect([entity, criticalConnection]);
       const observation = observations.find((o) => o.type === 'connected_to_risk');
 
-      // Critical base 45 + full fraction bonus 35 (1/1 peers risky) = 80
-      expect(observation?.score).toBe(80);
+      // Critical base 45 + full fraction bonus 30 (1/1 peers risky) = 75
+      expect(observation?.score).toBe(75);
       expect(observation?.severity).toBe('high');
     });
 
@@ -261,8 +261,8 @@ describe('createRelationshipModule', () => {
       const observations = await collect([entity, criticalConnection, highRiskConnection]);
       const observation = observations.find((o) => o.type === 'connected_to_risk');
 
-      // Worst tier Critical → base 45 + full fraction bonus 35 (2/2 peers risky) = 80
-      expect(observation?.score).toBe(80);
+      // Worst tier Critical → base 45 + full fraction bonus 30 (2/2 peers risky) = 75
+      expect(observation?.score).toBe(75);
       expect(observation?.severity).toBe('high');
       expect(observation?.metadata.critical_risk_entities).toEqual([criticalConnection.id]);
       expect(observation?.metadata.high_risk_entities).toEqual([highRiskConnection.id]);
@@ -284,8 +284,8 @@ describe('createRelationshipModule', () => {
       const observations = await collect([entity, criticalConnection, benignConnection]);
       const observation = observations.find((o) => o.type === 'connected_to_risk');
 
-      // base 45 + round(0.5 * 35) fraction bonus (1 of 2 peers risky) = 63
-      expect(observation?.score).toBe(63);
+      // base 45 + round(0.5 * 30) fraction bonus (1 of 2 resolved peers risky) = 60
+      expect(observation?.score).toBe(60);
       expect(observation?.metadata.critical_risk_entities).toEqual([criticalConnection.id]);
       expect(observation?.metadata.high_risk_entities).toEqual([]);
       expect(observation?.metadata.total_communicating_count).toBe(2);
@@ -309,9 +309,30 @@ describe('createRelationshipModule', () => {
       const observations = await collect([entity, criticalConnection, ...benignPeers]);
       const observation = observations.find((o) => o.type === 'connected_to_risk');
 
-      // base 45 + round(0.1 * 35) = 49 — a lone risky peer among many barely moves the score.
-      expect(observation?.score).toBe(49);
+      // base 45 + round(0.1 * 30) = 48 — a lone risky peer among many barely moves the score.
+      expect(observation?.score).toBe(48);
       expect(observation?.metadata.total_communicating_count).toBe(10);
+    });
+
+    it('does not treat unresolved peer IDs as a clean neighborhood', async () => {
+      const criticalConnection = buildEntity({
+        type: 'host',
+        name: 'dc-01',
+        riskLevel: 'Critical',
+      });
+      const entity = buildEntity({
+        relationships: {
+          communicates_with: { ids: [criticalConnection.id, 'host:unknown'] },
+        },
+      });
+
+      const observations = await collect([entity, criticalConnection]);
+      const observation = observations.find((o) => o.type === 'connected_to_risk');
+
+      // Unresolved IDs are excluded from the fraction: 1/1 resolved risky → 75, not 1/2 → 60.
+      expect(observation?.score).toBe(75);
+      expect(observation?.metadata.critical_risk_entities).toEqual([criticalConnection.id]);
+      expect(observation?.metadata.total_communicating_count).toBe(2);
     });
   });
 
@@ -373,7 +394,7 @@ describe('createRelationshipModule', () => {
       expect(observation?.severity).toBe('high');
     });
 
-    it('emits score 55 and medium severity for a single High-tier target', async () => {
+    it('emits score 60 and medium severity for a single High-tier target', async () => {
       const highTarget = buildEntity({ type: 'host', name: 'web-01', riskLevel: 'High' });
       const entity = buildEntity({
         relationships: { accesses_infrequently: { ids: [highTarget.id] } },
@@ -382,7 +403,7 @@ describe('createRelationshipModule', () => {
       const observations = await collect([entity, highTarget]);
       const observation = observations.find((o) => o.type === 'sensitive_infrequent_access');
 
-      expect(observation?.score).toBe(55);
+      expect(observation?.score).toBe(60);
       expect(observation?.severity).toBe('medium');
       expect(observation?.metadata.high_accessed_entities).toEqual([highTarget.id]);
       expect(observation?.metadata.critical_accessed_entities).toEqual([]);
@@ -400,8 +421,8 @@ describe('createRelationshipModule', () => {
       const observations = await collect([entity, ...highTargets]);
       const observation = observations.find((o) => o.type === 'sensitive_infrequent_access');
 
-      // Worst tier is High → 55, regardless of how many High-tier targets there are.
-      expect(observation?.score).toBe(55);
+      // Worst tier is High → 60, regardless of how many High-tier targets there are.
+      expect(observation?.score).toBe(60);
       expect(observation?.metadata.high_accessed_entities).toHaveLength(3);
     });
 
@@ -566,7 +587,7 @@ describe('createRelationshipModule', () => {
       const observations = await collect([entity, target]);
       const observation = observations.find((o) => o.type === 'new_control_over_critical_asset');
 
-      expect(observation?.score).toBe(60);
+      expect(observation?.score).toBe(70);
       expect(observation?.severity).toBe('high');
     });
   });
