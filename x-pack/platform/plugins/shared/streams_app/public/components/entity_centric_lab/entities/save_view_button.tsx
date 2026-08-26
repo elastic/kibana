@@ -61,11 +61,17 @@ interface Props {
   /**
    * Update the loaded view in place with the given state. `makeDefault` reflects
    * the "Set as default" toggle: `true` marks it default, `false` clears it if it
-   * was the default (no-op otherwise).
+   * was the default (no-op otherwise). `storeTime` reflects the "Store time with
+   * view" toggle: when `true` the parent captures the current time range.
    */
-  readonly onUpdate: (state: SavedViewState, makeDefault: boolean) => void;
+  readonly onUpdate: (state: SavedViewState, makeDefault: boolean, storeTime: boolean) => void;
   /** Save the given state as a brand-new named view (parent then switches to it). */
-  readonly onSaveAsNew: (name: string, state: SavedViewState, makeDefault: boolean) => void;
+  readonly onSaveAsNew: (
+    name: string,
+    state: SavedViewState,
+    makeDefault: boolean,
+    storeTime: boolean
+  ) => void;
   /** Show the "Set as default" toggle (ElasticOn only). */
   readonly showMakeDefault?: boolean;
   /** Whether the currently loaded view is already the default. */
@@ -90,6 +96,7 @@ export const SaveViewButton = ({
   const [mode, setMode] = useState<SaveMode>('update');
   const [name, setName] = useState('');
   const [makeDefault, setMakeDefault] = useState(false);
+  const [storeTime, setStoreTime] = useState(false);
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabSaveViewButtonTitle' });
 
   const openModal = useCallback(() => {
@@ -100,6 +107,9 @@ export const SaveViewButton = ({
     // Pre-check the toggle when re-saving a view that's already the default so
     // an "update" doesn't silently drop its default status.
     setMakeDefault(Boolean(loadedView) && isLoadedViewDefault);
+    // Reflect the loaded view's stored-time preference so an "update" preserves
+    // it unless the user flips the toggle.
+    setStoreTime(Boolean(loadedView?.state.storeTime));
     setIsOpen(true);
   }, [loadedView, isLoadedViewDefault]);
 
@@ -119,15 +129,25 @@ export const SaveViewButton = ({
 
   const handleConfirm = useCallback(() => {
     if (loadedView && mode === 'update') {
-      onUpdate(currentState, showMakeDefault && makeDefault);
+      onUpdate(currentState, showMakeDefault && makeDefault, storeTime);
       setIsOpen(false);
       return;
     }
     const trimmed = name.trim().slice(0, MAX_VIEW_NAME_LENGTH);
     if (!trimmed) return;
-    onSaveAsNew(trimmed, currentState, showMakeDefault && makeDefault);
+    onSaveAsNew(trimmed, currentState, showMakeDefault && makeDefault, storeTime);
     setIsOpen(false);
-  }, [loadedView, mode, name, onUpdate, onSaveAsNew, currentState, showMakeDefault, makeDefault]);
+  }, [
+    loadedView,
+    mode,
+    name,
+    onUpdate,
+    onSaveAsNew,
+    currentState,
+    showMakeDefault,
+    makeDefault,
+    storeTime,
+  ]);
 
   const showNameField = !loadedView || mode === 'new';
   const isConfirmDisabled = showNameField && !name.trim();
@@ -269,6 +289,28 @@ export const SaveViewButton = ({
                 </EuiText>
               </>
             ) : null}
+            <EuiSpacer size="m" />
+            <EuiSwitch
+              label={i18n.translate(
+                'xpack.streams.entityCentricLab.savedViews.saveViewButton.storeTime',
+                { defaultMessage: 'Store time with view' }
+              )}
+              checked={storeTime}
+              onChange={(event) => setStoreTime(event.target.checked)}
+              data-test-subj="entityCentricLabSaveViewButtonStoreTime"
+            />
+            <EuiSpacer size="xs" />
+            <EuiText size="xs" color="subdued">
+              <p>
+                {i18n.translate(
+                  'xpack.streams.entityCentricLab.savedViews.saveViewButton.storeTimeHelp',
+                  {
+                    defaultMessage:
+                      'This changes the time filter to the currently selected time each time the view is loaded.',
+                  }
+                )}
+              </p>
+            </EuiText>
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButtonEmpty onClick={closeModal}>

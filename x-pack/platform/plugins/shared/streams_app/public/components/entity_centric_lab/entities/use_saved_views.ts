@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import type { ActiveTagFilters, EntityCategoryId } from './fake_entities';
+import type { Filter } from '@kbn/es-query';
+import type { ActiveExtraFilters, ActiveTagFilters, EntityCategoryId } from './fake_entities';
 import { EMPTY_TAG_FILTERS, TAG_KEYS, isKnownCategoryId } from './fake_entities';
 
 /**
@@ -59,6 +60,29 @@ export interface SavedViewState {
   readonly viewMode: ViewMode;
   readonly search: string;
   readonly filters: ActiveTagFilters;
+  /**
+   * Entity-type-specific "extra" facet selections (e.g. Hosts → OS / Cloud
+   * provider / Service name), keyed by attribute. ElasticOn only; empty
+   * elsewhere. Optional for backward compatibility with views saved before
+   * this field existed.
+   */
+  readonly extraFilters?: ActiveExtraFilters;
+  /**
+   * The search bar's "+ Add filter" chips. ElasticOn only; empty elsewhere.
+   * Optional for backward compatibility.
+   */
+  readonly queryFilters?: Filter[];
+  /**
+   * "Store time with view": when `true`, loading the view resets the shared
+   * time filter to {@link timeRange} (mirrors Kibana's saved-search behavior).
+   * When `false`/absent the view leaves the current time range untouched.
+   */
+  readonly storeTime?: boolean;
+  /**
+   * The time range captured when the view was saved with {@link storeTime} on.
+   * Stored as-is (supports relative like `now-15m` and absolute values).
+   */
+  readonly timeRange?: { readonly from: string; readonly to: string };
 }
 
 export interface SavedView {
@@ -128,6 +152,29 @@ const parseFilters = (value: unknown): ActiveTagFilters => {
   return next as ActiveTagFilters;
 };
 
+const parseExtraFilters = (value: unknown): ActiveExtraFilters => {
+  if (!value || typeof value !== 'object') return {};
+  const source = value as Record<string, unknown>;
+  const next: Record<string, readonly string[]> = {};
+  for (const [key, entry] of Object.entries(source)) {
+    if (Array.isArray(entry) && entry.every((item) => typeof item === 'string')) {
+      next[key] = entry as readonly string[];
+    }
+  }
+  return next;
+};
+
+const parseQueryFilters = (value: unknown): Filter[] =>
+  Array.isArray(value) ? (value as Filter[]) : [];
+
+const parseTimeRange = (value: unknown): { from: string; to: string } | undefined => {
+  if (!value || typeof value !== 'object') return undefined;
+  const source = value as Record<string, unknown>;
+  return typeof source.from === 'string' && typeof source.to === 'string'
+    ? { from: source.from, to: source.to }
+    : undefined;
+};
+
 const parseState = (value: unknown): SavedViewState | undefined => {
   if (!value || typeof value !== 'object') return undefined;
   const source = value as Record<string, unknown>;
@@ -152,6 +199,10 @@ const parseState = (value: unknown): SavedViewState | undefined => {
     viewMode: isViewMode(source.viewMode) ? source.viewMode : 'grid',
     search: typeof source.search === 'string' ? source.search : '',
     filters: parseFilters(source.filters),
+    extraFilters: parseExtraFilters(source.extraFilters),
+    queryFilters: parseQueryFilters(source.queryFilters),
+    storeTime: source.storeTime === true,
+    timeRange: parseTimeRange(source.timeRange),
   };
 };
 
@@ -326,6 +377,12 @@ export interface UseSavedViewsResult {
   readonly saveView: (name: string, state: SavedViewState) => SavedView;
   readonly updateViewState: (id: string, state: SavedViewState) => void;
   readonly renameView: (id: string, name: string) => void;
+  /** Toggle a view's "store time" flag; pass `timeRange` when enabling. */
+  readonly setViewStoreTime: (
+    id: string,
+    storeTime: boolean,
+    timeRange?: { from: string; to: string }
+  ) => void;
   readonly deleteView: (id: string) => void;
   readonly setCurrentViewId: (id: string | null) => void;
   /** Mark a view as the default (`null` clears it). */
@@ -385,6 +442,29 @@ export const useSavedViews = (): UseSavedViewsResult => {
     writeViews(next);
   }, []);
 
+  // Flip a view's "store time" flag (from the Manage modal). Capturing the
+  // range is the caller's job — pass `timeRange` when enabling; it's cleared
+  // when disabling.
+  const setViewStoreTime = useCallback(
+    (id: string, storeTime: boolean, timeRange?: { from: string; to: string }) => {
+      const next = readViews().map((view) =>
+        view.id === id
+          ? {
+              ...view,
+              updatedAt: Date.now(),
+              state: {
+                ...view.state,
+                storeTime,
+                timeRange: storeTime ? timeRange ?? view.state.timeRange : undefined,
+              },
+            }
+          : view
+      );
+      writeViews(next);
+    },
+    []
+  );
+
   const deleteView = useCallback((id: string) => {
     writeViews(readViews().filter((view) => view.id !== id));
     if (readCurrentViewId() === id) writeCurrentViewId(null);
@@ -406,6 +486,7 @@ export const useSavedViews = (): UseSavedViewsResult => {
     saveView,
     updateViewState,
     renameView,
+    setViewStoreTime,
     deleteView,
     setCurrentViewId,
     setDefaultView,
@@ -428,6 +509,30 @@ const canonicalFilters = (filters: ActiveTagFilters): Record<string, readonly st
   return out;
 };
 
+// Drop empty selections and sort so `{ os: [] }` equals `{}` and value
+// order doesn't spuriously light the "Modified" badge.
+const canonicalExtraFilters = (
+  extra: ActiveExtraFilters = {}
+): Record<string, readonly string[]> => {
+  const out: Record<string, readonly string[]> = {};
+  for (const key of Object.keys(extra).sort()) {
+    const values = extra[key] ?? [];
+    if (values.length > 0) out[key] = [...values].sort();
+  }
+  return out;
+};
+
+// Reduce each "+ Add filter" chip to the fields that actually affect the
+// in-memory filtering (see `entityMatchesFilters`), ignoring volatile bits
+// like `$state` and index refs so re-loading a view doesn't read as modified.
+const canonicalQueryFilters = (filters: readonly Filter[] = []) =>
+  filters.map((filter) => ({
+    key: filter.meta?.key ?? null,
+    negate: Boolean(filter.meta?.negate),
+    disabled: Boolean(filter.meta?.disabled),
+    query: (filter.meta?.params as { query?: unknown } | undefined)?.query ?? null,
+  }));
+
 const canonicalState = (state: SavedViewState) => ({
   category: state.category,
   cloudProvider: state.cloudProvider,
@@ -436,6 +541,14 @@ const canonicalState = (state: SavedViewState) => ({
   viewMode: state.viewMode,
   search: state.search,
   filters: canonicalFilters(state.filters),
+  extraFilters: canonicalExtraFilters(state.extraFilters),
+  queryFilters: canonicalQueryFilters(state.queryFilters),
+  storeTime: Boolean(state.storeTime),
+  // Only compare the captured range when the view stores time — otherwise a
+  // stray value shouldn't light the "Modified" badge.
+  timeRange: state.storeTime
+    ? { from: state.timeRange?.from ?? '', to: state.timeRange?.to ?? '' }
+    : null,
 });
 
 export const areStatesEqual = (a: SavedViewState, b: SavedViewState): boolean => {

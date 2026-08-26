@@ -224,7 +224,10 @@ const StarredSectionAction = ({ coreStart }: { coreStart: CoreStart }) => {
  * its own lab mode (the modes are mutually exclusive), so only one ever emits
  * content for a given panel.
  */
-export const registerIntegrationsNavFooter = (coreStart: CoreStart): void => {
+export const registerIntegrationsNavFooter = (
+  coreStart: CoreStart,
+  getTime?: () => { from: string; to: string }
+): void => {
   const root = globalThis as unknown as Record<string, SidePanelSlotRenderer | undefined>;
   root[SIDE_PANEL_FOOTER_GLOBAL_KEY] = (openerNode) =>
     openerNode?.id === INFRASTRUCTURE_PANEL_ID ? (
@@ -244,7 +247,8 @@ export const registerIntegrationsNavFooter = (coreStart: CoreStart): void => {
   >;
   sectionActionRoot[SIDE_PANEL_SECTION_ACTION_GLOBAL_KEY] = (sectionId) => {
     if (sectionId === STARRED_SECTION_ID) return <StarredSectionAction coreStart={coreStart} />;
-    if (sectionId === SAVED_VIEWS_SECTION_ID) return <SavedViewsSectionAction coreStart={coreStart} />;
+    if (sectionId === SAVED_VIEWS_SECTION_ID)
+      return <SavedViewsSectionAction coreStart={coreStart} getTime={getTime} />;
     return null;
   };
 };

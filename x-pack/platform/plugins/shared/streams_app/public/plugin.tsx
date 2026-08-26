@@ -338,7 +338,10 @@ export class StreamsAppPlugin
     // out of the boot path; the renderer no-ops for other panels/modes.
     import('./components/entity_centric_lab/integrations/nav_footer').then(
       ({ registerIntegrationsNavFooter }) => {
-        registerIntegrationsNavFooter(coreStart);
+        registerIntegrationsNavFooter(coreStart, () => {
+          const { from, to } = pluginsStart.data.query.timefilter.timefilter.getTime();
+          return { from, to };
+        });
       }
     );
 

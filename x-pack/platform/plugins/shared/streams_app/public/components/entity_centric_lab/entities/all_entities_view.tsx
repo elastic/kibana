@@ -573,7 +573,21 @@ export const AllEntitiesView = ({
     setActiveTagFilters(view.state.filters);
     setViewMode(view.state.viewMode);
     setSearch(view.state.search);
-  }, [isLatest, loadViewId, savedViewsList, setActiveTagFilters, setCategoryTab, setViewMode]);
+    setActiveExtraFilters(view.state.extraFilters ?? EMPTY_EXTRA_FILTERS);
+    setLabFilters(view.state.queryFilters ?? []);
+    // "Store time with view": reset the shared time filter to the captured range.
+    if (view.state.storeTime && view.state.timeRange) {
+      updateTimeRange({ from: view.state.timeRange.from, to: view.state.timeRange.to });
+    }
+  }, [
+    isLatest,
+    loadViewId,
+    savedViewsList,
+    setActiveTagFilters,
+    setCategoryTab,
+    setViewMode,
+    updateTimeRange,
+  ]);
 
   // Latest: if the loaded view is deleted (e.g. from the nav's "Manage saved
   // views" modal), its id no longer resolves but `?loadView` lingers in the URL.
@@ -835,6 +849,14 @@ export const AllEntitiesView = ({
     [agentBuilder, notifications, charts, renderEntityDashboard]
   );
 
+  // Latest: the view currently loaded from the nav (`?loadView=<id>`), if it
+  // still resolves. Drives the Save button's "update vs save-as-new" choice and
+  // the "Unsaved changes" badge.
+  const loadedView = useMemo(
+    () => (loadViewId ? savedViewsList.find((view) => view.id === loadViewId) : undefined),
+    [loadViewId, savedViewsList]
+  );
+
   // Snapshot of everything that makes up a "view" — feeds both the
   // "Modified" indicator and the payload written when the user hits
   // Save / Update. `null` category is the cross-category page.
@@ -849,6 +871,17 @@ export const AllEntitiesView = ({
       viewMode,
       search,
       filters: activeTagFilters,
+      // ElasticOn-only dimensions (empty elsewhere) — tracked so the
+      // "Unsaved changes" badge lights when they change and Save/Update
+      // persists them.
+      extraFilters: activeExtraFilters,
+      queryFilters: labFilters,
+      // "Store time with view" is a per-view preference, so mirror the loaded
+      // view's flag. When it's on, the live time range is part of the snapshot
+      // (so changing the picker lights the "Unsaved changes" badge); when off,
+      // time is left out of the comparison entirely.
+      storeTime: loadedView?.state.storeTime ?? false,
+      timeRange: loadedView?.state.storeTime ? { from: rangeFrom, to: rangeTo } : undefined,
     }),
     [
       categoryScope,
@@ -858,26 +891,34 @@ export const AllEntitiesView = ({
       viewMode,
       search,
       activeTagFilters,
+      activeExtraFilters,
+      labFilters,
+      loadedView,
+      rangeFrom,
+      rangeTo,
     ]
   );
 
-  // Latest: the view currently loaded from the nav (`?loadView=<id>`), if it
-  // still resolves. Drives the Save button's "update vs save-as-new" choice and
-  // the "Unsaved changes" badge.
-  const loadedView = useMemo(
-    () => (loadViewId ? savedViewsList.find((view) => view.id === loadViewId) : undefined),
-    [loadViewId, savedViewsList]
-  );
   const isLoadedViewModified = loadedView
     ? !areStatesEqual(loadedView.state, currentViewState)
     : false;
 
+  // Fold the "Store time with view" choice into the state written on Save /
+  // Update: capture the live time range when on, strip it when off.
+  const withStoredTime = useCallback(
+    (state: SavedViewState, storeTime: boolean): SavedViewState =>
+      storeTime
+        ? { ...state, storeTime: true, timeRange: { from: rangeFrom, to: rangeTo } }
+        : { ...state, storeTime: false, timeRange: undefined },
+    [rangeFrom, rangeTo]
+  );
+
   // Update the loaded view in place with the current on-page state. Stays on the
   // same view (URL keeps its `?loadView`); the store change clears the badge.
   const handleUpdateLoadedView = useCallback(
-    (state: SavedViewState, makeDefault: boolean) => {
+    (state: SavedViewState, makeDefault: boolean, storeTime: boolean) => {
       if (!loadedView) return;
-      savedViewsApi.updateViewState(loadedView.id, state);
+      savedViewsApi.updateViewState(loadedView.id, withStoredTime(state, storeTime));
       // Reflect the "Set as default" toggle: promote to default when checked,
       // and demote when unchecked but this view was the standing default. Leave
       // an unrelated default untouched.
@@ -887,21 +928,21 @@ export const AllEntitiesView = ({
         savedViewsApi.setDefaultView(null);
       }
     },
-    [loadedView, savedViewsApi]
+    [loadedView, savedViewsApi, withStoredTime]
   );
 
   // Save the current state as a brand-new view, then switch to it: point the URL
   // at the new id so it becomes the loaded view (and highlights in the nav). The
   // new view's category is the current category, so only the query changes.
   const handleSaveAsNewView = useCallback(
-    (name: string, state: SavedViewState, makeDefault: boolean) => {
-      const view = savedViewsApi.saveView(name, state);
+    (name: string, state: SavedViewState, makeDefault: boolean, storeTime: boolean) => {
+      const view = savedViewsApi.saveView(name, withStoredTime(state, storeTime));
       if (makeDefault) savedViewsApi.setDefaultView(view.id);
       const params = new URLSearchParams(location.search);
       params.set('loadView', view.id);
       history.push({ pathname: location.pathname, search: `?${params.toString()}` });
     },
-    [savedViewsApi, history, location.pathname, location.search]
+    [savedViewsApi, history, location.pathname, location.search, withStoredTime]
   );
 
   // Apply a saved view. Two flows:
@@ -938,6 +979,11 @@ export const AllEntitiesView = ({
         setActiveTagFilters(view.state.filters);
         setViewMode(view.state.viewMode);
         setSearch(view.state.search);
+        setActiveExtraFilters(view.state.extraFilters ?? EMPTY_EXTRA_FILTERS);
+        setLabFilters(view.state.queryFilters ?? []);
+        if (view.state.storeTime && view.state.timeRange) {
+          updateTimeRange({ from: view.state.timeRange.from, to: view.state.timeRange.to });
+        }
         consumePendingSearch();
         return;
       }
@@ -968,6 +1014,7 @@ export const AllEntitiesView = ({
       setActiveTagFilters,
       setCategoryTab,
       setViewMode,
+      updateTimeRange,
     ]
   );
 
