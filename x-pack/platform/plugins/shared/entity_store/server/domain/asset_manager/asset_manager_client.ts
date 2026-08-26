@@ -31,6 +31,7 @@ import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilien
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
+import { deleteLegacyRemoteStateSavedObjects } from '../saved_objects/remote_log_extraction_state/types';
 import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
@@ -328,6 +329,11 @@ export class AssetManagerClient {
         namespace: this.namespace,
       }),
       this.globalStateClient.delete(),
+      deleteLegacyRemoteStateSavedObjects({
+        soClient: this.savedObjectsClient,
+        namespace: this.namespace,
+        logger: this.logger,
+      }),
     ]);
 
     this.logger.debug(
