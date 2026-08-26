@@ -26,10 +26,10 @@ import {
   MAX_TITLE_LENGTH,
   MAX_RULE_NAME_LENGTH,
   MAX_SUFFIX_LENGTH,
-  SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
+import { getCaseSettings } from '../../../common/utils/case_settings';
 import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case, CaseSeverity } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
@@ -88,11 +88,6 @@ const NONE_CASE_CONNECTOR = {
   type: ConnectorTypes.none,
   fields: null,
 } as const;
-
-const getDefaultCaseSettings = (owner: string) => ({
-  syncAlerts: owner === SECURITY_SOLUTION_OWNER,
-  extractObservables: owner === SECURITY_SOLUTION_OWNER,
-});
 
 const getAssigneesFromTemplate = (
   assignees: Array<{ uid: string }> | undefined,
@@ -885,6 +880,7 @@ export class CasesConnectorExecutor {
     const builtCustomFields = buildCustomFieldsForRequest(customFieldsConfigurations).filter(
       (customField) => !legacyKeysWithV2Values?.has(customField.key)
     );
+    const { syncAlerts, extractObservables } = getCaseSettings(params.owner);
 
     const baseRequest: Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } = {
       id: caseId,
@@ -893,7 +889,7 @@ export class CasesConnectorExecutor {
       title: title ?? this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: resolvedConnector ?? { ...NONE_CASE_CONNECTOR },
       // Template settings keys are individually optional; merge over owner defaults so syncAlerts is always set.
-      settings: { ...getDefaultCaseSettings(params.owner), ...v2Template.settings },
+      settings: { syncAlerts, extractObservables, ...v2Template.settings },
       ...getAssigneesFromTemplate(v2Template.assignees, hasPlatinumLicenseOrGreater),
       owner: params.owner,
       customFields: builtCustomFields,
@@ -971,6 +967,8 @@ export class CasesConnectorExecutor {
       })
     );
 
+    const { syncAlerts, extractObservables } = getCaseSettings(params.owner);
+
     return {
       id: caseId,
       description:
@@ -981,7 +979,7 @@ export class CasesConnectorExecutor {
         caseFieldsFromTemplate?.title ??
         this.getCasesTitle(params, flattenGrouping, oracleRecord.counter),
       connector: caseFieldsFromTemplate?.connector ?? { ...NONE_CASE_CONNECTOR },
-      settings: caseFieldsFromTemplate?.settings ?? getDefaultCaseSettings(params.owner),
+      settings: caseFieldsFromTemplate?.settings ?? { syncAlerts, extractObservables },
       ...getAssigneesFromTemplate(caseFieldsFromTemplate?.assignees, hasPlatinumLicenseOrGreater),
       ...(caseFieldsFromTemplate?.severity ? { severity: caseFieldsFromTemplate?.severity } : {}),
       ...(caseFieldsFromTemplate?.category ? { category: caseFieldsFromTemplate?.category } : null),
