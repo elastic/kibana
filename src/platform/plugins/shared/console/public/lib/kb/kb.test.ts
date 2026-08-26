@@ -206,4 +206,60 @@ describe('Knowledge base', () => {
       );
     });
   });
+
+  describe('WHEN a mapping field name collides with a global rule', () => {
+    it('SHOULD prefer mapping wildcard suggestions through endpoint scope links', () => {
+      const api = kb._test.loadApisFromJson({
+        es: {
+          globals: {
+            query: {
+              bool: {},
+              match: {},
+            },
+          },
+          endpoints: {
+            put_mapping: {
+              data_autocomplete_rules: {
+                properties: {
+                  '*': {
+                    analyzer: 'standard',
+                    type: {
+                      __one_of: ['keyword', 'text'],
+                    },
+                  },
+                },
+              },
+            },
+            'indices.put_mapping': {
+              data_autocomplete_rules: {
+                __scope_link: 'put_mapping',
+              },
+            },
+          },
+        },
+      });
+      kb._test.setActiveApi(api);
+      const context = {
+        otherTokenValues: [],
+        endpointComponentResolver: kb.getEndpointBodyCompleteComponents,
+        globalComponentResolver: kb.getGlobalAutocompleteComponents,
+      } as AutoCompleteContext & {
+        endpointComponentResolver: typeof kb.getEndpointBodyCompleteComponents;
+        globalComponentResolver: typeof kb.getGlobalAutocompleteComponents;
+      };
+
+      populateContext(
+        ['{', 'properties', '{', 'query', '{'],
+        context,
+        null,
+        true,
+        kb.getEndpointBodyCompleteComponents('indices.put_mapping')
+      );
+
+      const suggestionNames = context.autoCompleteSet?.map(({ name }) => name);
+      expect(suggestionNames).toEqual(expect.arrayContaining(['analyzer', 'type']));
+      expect(suggestionNames).not.toContain('bool');
+      expect(suggestionNames).not.toContain('match');
+    });
+  });
 });
