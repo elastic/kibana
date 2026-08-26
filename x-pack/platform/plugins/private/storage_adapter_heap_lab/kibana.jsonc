@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/storage-adapter-heap-lab-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "TEMPORARY, DO NOT MERGE. Experiment plugin to measure ES heap/shard cost of @kbn/storage-adapter indices at scale (elastic/kibana-team#3973).",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "storageAdapterHeapLab",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

@@ -1,0 +1,180 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * TEMPORARY experiment driver (DO NOT MERGE) for elastic/kibana-team#3973.
+ *
+ * Ramps up the number of @kbn/storage-adapter indices via the heap-lab plugin
+ * endpoint, sampling ES heap / shard / field-count between steps so we can plot
+ * heap growth against #shards and #fields.
+ *
+ * Usage (local dev Kibana started with --no-base-path):
+ *   node x-pack/platform/plugins/private/storage_adapter_heap_lab/scripts/run_experiment.js
+ *
+ * Configuration via env vars:
+ *   KIBANA_URL         default http://localhost:5601
+ *   KBN_USER/KBN_PASS  default elastic/changeme (basic auth, local dev)
+ *   KBN_API_KEY        if set, used instead of basic auth (serverless)
+ *   NUM_FIELDS         fields per index/document           (default 100)
+ *   DOCS_PER_INDEX     documents inserted per index        (default 10)
+ *   STEP_INDICES       indices created per ramp step        (default 25)
+ *   STEPS              number of ramp steps                 (default 20)
+ *   STABILIZE_MS       wait after each step before sampling (default 30000)
+ *   SETTLE_MS          short pause before first sample      (default 2000)
+ *   INDEX_PREFIX       index name prefix                    (default heaplab)
+ *   OUT                CSV output path                      (default ./heaplab_results.csv)
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+const KIBANA_URL = process.env.KIBANA_URL || 'http://localhost:5601';
+const KBN_USER = process.env.KBN_USER || 'elastic';
+const KBN_PASS = process.env.KBN_PASS || 'changeme';
+const KBN_API_KEY = process.env.KBN_API_KEY || '';
+
+const NUM_FIELDS = Number(process.env.NUM_FIELDS || 100);
+const DOCS_PER_INDEX = Number(process.env.DOCS_PER_INDEX || 10);
+const STEP_INDICES = Number(process.env.STEP_INDICES || 25);
+const STEPS = Number(process.env.STEPS || 20);
+const STABILIZE_MS = Number(process.env.STABILIZE_MS || 30000);
+const SETTLE_MS = Number(process.env.SETTLE_MS || 2000);
+const INDEX_PREFIX = process.env.INDEX_PREFIX || 'heaplab';
+const OUT = process.env.OUT || path.resolve(process.cwd(), 'heaplab_results.csv');
+
+const authHeader = KBN_API_KEY
+  ? `ApiKey ${KBN_API_KEY}`
+  : `Basic ${Buffer.from(`${KBN_USER}:${KBN_PASS}`).toString('base64')}`;
+
+const baseHeaders = {
+  'content-type': 'application/json',
+  'kbn-xsrf': 'true',
+  'x-elastic-internal-origin': 'heap-lab',
+  authorization: authHeader,
+};
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function call(method, endpoint, body) {
+  const response = await fetch(`${KIBANA_URL}${endpoint}`, {
+    method,
+    headers: baseHeaders,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const text = await response.text();
+  if (!response.ok) {
+    throw new Error(`${method} ${endpoint} -> ${response.status}: ${text.slice(0, 500)}`);
+  }
+  return text ? JSON.parse(text) : {};
+}
+
+const generate = (numIndices) =>
+  call('POST', '/internal/storage_adapter_heap_lab/generate', {
+    numIndices,
+    numFields: NUM_FIELDS,
+    numDocs: DOCS_PER_INDEX,
+    indexPrefix: INDEX_PREFIX,
+  });
+
+const stats = () => call('GET', '/internal/storage_adapter_heap_lab/stats');
+
+const maxHeap = (nodes) =>
+  nodes.reduce(
+    (acc, n) => ({
+      bytes: Math.max(acc.bytes, n.heapUsedBytes || 0),
+      percent: Math.max(acc.percent, n.heapUsedPercent || 0),
+    }),
+    { bytes: 0, percent: 0 }
+  );
+
+const CSV_HEADER = [
+  'iso_time',
+  'phase',
+  'step',
+  'cumulative_indices_requested',
+  'indices_count',
+  'shards_total',
+  'total_field_count',
+  'total_dedup_field_count',
+  'docs_count',
+  'store_size_bytes',
+  'heap_used_bytes_max',
+  'heap_used_percent_max',
+].join(',');
+
+function appendRow(row) {
+  fs.appendFileSync(OUT, row.join(',') + '\n');
+}
+
+async function sample(phase, step, cumulativeIndices) {
+  const s = await stats();
+  const heap = maxHeap(s.nodes || []);
+  const row = [
+    s.timestamp,
+    phase,
+    step,
+    cumulativeIndices,
+    s.indicesCount,
+    s.shardsTotal,
+    s.totalFieldCount,
+    s.totalDeduplicatedFieldCount,
+    s.docsCount,
+    s.storeSizeBytes,
+    heap.bytes,
+    heap.percent,
+  ];
+  appendRow(row);
+  // eslint-disable-next-line no-console
+  console.log(
+    `[${phase}] step ${step} | idx=${s.indicesCount} shards=${s.shardsTotal} fields=${
+      s.totalFieldCount
+    } heap=${(heap.bytes / 1024 / 1024).toFixed(0)}MB (${heap.percent}%)`
+  );
+  return s;
+}
+
+async function main() {
+  // eslint-disable-next-line no-console
+  console.log(
+    `heap-lab experiment -> ${KIBANA_URL}\n` +
+      `  fields/index=${NUM_FIELDS} docs/index=${DOCS_PER_INDEX} step=${STEP_INDICES} steps=${STEPS} stabilize=${STABILIZE_MS}ms\n` +
+      `  output=${OUT}`
+  );
+
+  fs.writeFileSync(OUT, CSV_HEADER + '\n');
+
+  await sample('baseline', 0, 0);
+
+  let cumulative = 0;
+  for (let step = 1; step <= STEPS; step++) {
+    const startedAt = Date.now();
+    const result = await generate(STEP_INDICES);
+    cumulative += STEP_INDICES;
+    // eslint-disable-next-line no-console
+    console.log(
+      `  created step ${step}: +${STEP_INDICES} indices (${result.totalDocs} docs) in ${result.elapsedMs}ms`
+    );
+
+    await sleep(SETTLE_MS);
+    await sample('immediate', step, cumulative);
+
+    await sleep(STABILIZE_MS);
+    await sample('stabilized', step, cumulative);
+
+    // eslint-disable-next-line no-console
+    console.log(`  step ${step} wall time ${Date.now() - startedAt}ms\n`);
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(`Done. Results written to ${OUT}`);
+}
+
+main().catch((err) => {
+  // eslint-disable-next-line no-console
+  console.error('Experiment failed:', err.message);
+  process.exit(1);
+});
