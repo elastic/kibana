@@ -17,6 +17,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { SpanStatusCode } from '@opentelemetry/api';
 import { estimateTokens } from '@kbn/agent-builder-genai-utils';
 import { withActiveInferenceSpan } from '@kbn/inference-tracing';
+import { describeError } from '../core/describe_error';
 import { resolveIdentity } from '../core/resolve_identity';
 import { recallMemory } from '../core/recall_memory';
 import { MEMORY_SKILL_ID } from '../skills/memory_skill';
@@ -133,29 +134,28 @@ export const registerMemoryHook = ({
               MEMORY_HOOK_SPAN_NAME,
               { attributes: EMPTY_RECALL_ATTRIBUTES },
               async (span) => {
-                const { request, nextInput, agentConfiguration, spaceId } = context;
-                if (!isRecallEnabled(agentConfiguration)) {
-                  span?.setAttribute('agent_memory.recall.outcome', 'skipped_not_enabled');
-                  return {};
-                }
-
-                // ── Identity check — fail open if no user context ─────────────────
-                const identity = resolveIdentity({ request, security: getCoreSecurity() });
-                if (!identity) {
-                  span?.setAttribute('agent_memory.recall.outcome', 'skipped_no_identity');
-                  return {};
-                }
-
-                // ── Build query from user message (trimmed for cost) ───────────────
-                const query = nextInput.message.slice(0, MAX_QUERY_LENGTH);
-                if (!query.trim()) {
-                  span?.setAttribute('agent_memory.recall.outcome', 'skipped_empty_query');
-                  return {};
-                }
-
-                // ── Recall + render — any error fails open ─────────────────────────
-                let block: string;
                 try {
+                  const { request, nextInput, agentConfiguration, spaceId } = context;
+                  if (!isRecallEnabled(agentConfiguration)) {
+                    span?.setAttribute('agent_memory.recall.outcome', 'skipped_not_enabled');
+                    return {};
+                  }
+
+                  // ── Identity check — fail open if no user context ───────────────
+                  const identity = resolveIdentity({ request, security: getCoreSecurity() });
+                  if (!identity) {
+                    span?.setAttribute('agent_memory.recall.outcome', 'skipped_no_identity');
+                    return {};
+                  }
+
+                  // ── Build query from user message (trimmed for cost) ─────────────
+                  const query = nextInput.message.slice(0, MAX_QUERY_LENGTH);
+                  if (!query.trim()) {
+                    span?.setAttribute('agent_memory.recall.outcome', 'skipped_empty_query');
+                    return {};
+                  }
+
+                  // ── Recall + render — any error fails open ───────────────────────
                   const result = await recallMemory({
                     storage: getStorage(getCurrentUserEsClient(request)),
                     params: { query, limit: HOOK_RECALL_LIMIT, space_id: spaceId, identity },
@@ -165,7 +165,7 @@ export const registerMemoryHook = ({
                     span?.setAttribute('agent_memory.recall.outcome', 'no_memories');
                     return {};
                   }
-                  block = renderUntrustedBlock(result.memories);
+                  const block = renderUntrustedBlock(result.memories);
                   span?.setAttributes({
                     'agent_memory.recall.outcome': 'injected',
                     'agent_memory.recall.memory_count': result.memories.length,
@@ -173,25 +173,35 @@ export const registerMemoryHook = ({
                     'agent_memory.injection.characters': block.length,
                     'agent_memory.injection.estimated_tokens_per_llm_call': estimateTokens(block),
                   });
-                } catch {
-                  logger.warn('Memory hook recall failed (fail open)');
-                  span?.setAttribute('agent_memory.recall.outcome', 'error');
+
+                  // ── Inject with untrusted label (G5) ─────────────────────────────
+                  const existingContext = nextInput.attachment_context;
+                  return {
+                    nextInput: {
+                      ...nextInput,
+                      attachment_context: existingContext
+                        ? `${block}\n\n${existingContext}`
+                        : block,
+                    },
+                  };
+                } catch (error) {
+                  const errorDescription = describeError(error);
+                  logger.warn(`Memory hook failed open (${errorDescription})`);
+                  span?.setAttributes({
+                    'agent_memory.recall.outcome': 'error',
+                    'agent_memory.recall.error': errorDescription,
+                  });
                   span?.recordException(new Error('Memory recall failed'));
                   span?.setStatus({ code: SpanStatusCode.ERROR });
-                  throw new Error('Memory recall failed');
+                  // withActiveSpan marks resolved callbacks as OK. End this error
+                  // span before returning so that status cannot be overwritten.
+                  span?.end();
+                  return {};
                 }
-
-                // ── Inject with untrusted label (G5) ───────────────────────────────
-                const existingContext = nextInput.attachment_context;
-                return {
-                  nextInput: {
-                    ...nextInput,
-                    attachment_context: existingContext ? `${block}\n\n${existingContext}` : block,
-                  },
-                };
               }
             );
-          } catch {
+          } catch (error) {
+            logger.warn(`Memory hook failed open (${describeError(error)})`);
             return {};
           }
         },

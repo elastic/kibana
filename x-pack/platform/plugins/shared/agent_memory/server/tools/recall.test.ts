@@ -24,10 +24,12 @@ const asInternalUser = { _tag: 'kibana-system' } as unknown as ElasticsearchClie
 const storage = { getClient: jest.fn() };
 const getStorage = jest.fn().mockReturnValue(storage);
 const getCoreSecurity = jest.fn().mockReturnValue({});
+const logger = { warn: jest.fn() };
 const mockContext = {
   request: {},
   spaceId: 'space-1',
   esClient: { asCurrentUser, asInternalUser },
+  logger,
 } as unknown as ToolHandlerContext;
 
 describe('createRecallTool', () => {
@@ -57,6 +59,7 @@ describe('createRecallTool', () => {
     expect(getStorage).not.toHaveBeenCalledWith(asInternalUser);
     expect(recallMemory).toHaveBeenCalledWith({
       storage,
+      logger,
       params: {
         query: 'preferences',
         category: undefined,

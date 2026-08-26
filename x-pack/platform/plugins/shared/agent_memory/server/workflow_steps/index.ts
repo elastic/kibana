@@ -104,6 +104,7 @@ export const registerMemoryWorkflowSteps = (
 
         const result = await recallMemory({
           storage: getStorage(getCurrentUserEsClient(request)),
+          logger: context.logger,
           params: { query, category, tags, limit, space_id: spaceId, identity },
         });
 

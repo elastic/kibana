@@ -228,13 +228,14 @@ describe('agent memory injection hook tracing', () => {
     expect(span.attributes).toEqual(
       expect.objectContaining({
         'agent_memory.recall.outcome': 'error',
+        'agent_memory.recall.error': 'kind=Error',
         'agent_memory.recall.memory_count': 0,
         'agent_memory.injection.characters': 0,
         'agent_memory.injection.estimated_tokens_per_llm_call': 0,
       })
     );
     expect(span.status.code).toBe(SpanStatusCode.ERROR);
-    expect(logger.warn).toHaveBeenCalledWith('Memory hook recall failed (fail open)');
+    expect(logger.warn).toHaveBeenCalledWith('Memory hook failed open (kind=Error)');
     expect(JSON.stringify(logger.warn.mock.calls)).not.toContain(sensitiveMarker);
     expect(JSON.stringify(logger.warn.mock.calls)).not.toContain(rawErrorMessage);
     expect(JSON.stringify(span.attributes)).not.toContain(sensitiveMarker);
@@ -251,5 +252,37 @@ describe('agent memory injection hook tracing', () => {
     expect(JSON.stringify(span.events)).not.toContain(sensitiveMarker);
     expect(JSON.stringify(span.events)).not.toContain(rawErrorMessage);
     expect(JSON.stringify(span.attributes)).not.toContain('Peer-reviewed sources');
+  });
+
+  it('fails open on unexpected hook errors without exposing their messages', async () => {
+    const sensitiveMarker = 'SENSITIVE_IDENTITY_MARKER_9d2b';
+    mockResolveIdentity.mockImplementation(() => {
+      throw new Error(`identity lookup leaked ${sensitiveMarker}`);
+    });
+
+    await expect(runHook()).resolves.toEqual({});
+
+    const span = getHookSpan();
+    expect(span.attributes).toEqual(
+      expect.objectContaining({
+        'agent_memory.recall.outcome': 'error',
+        'agent_memory.recall.error': 'kind=Error',
+      })
+    );
+    expect(span.status.code).toBe(SpanStatusCode.ERROR);
+    expect(logger.warn).toHaveBeenCalledWith('Memory hook failed open (kind=Error)');
+    expect(JSON.stringify(logger.warn.mock.calls)).not.toContain(sensitiveMarker);
+    expect(JSON.stringify(span.attributes)).not.toContain(sensitiveMarker);
+    expect(JSON.stringify(span.events)).not.toContain(sensitiveMarker);
+    expect(span.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: 'exception',
+          attributes: expect.objectContaining({
+            'exception.message': 'Memory recall failed',
+          }),
+        }),
+      ])
+    );
   });
 });

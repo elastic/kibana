@@ -80,6 +80,7 @@ Fails open: if the memory service is unavailable, returns an empty list without 
 
     const result = await recallMemory({
       storage: getStorage(context.esClient.asCurrentUser),
+      logger: context.logger,
       params: {
         query,
         category,

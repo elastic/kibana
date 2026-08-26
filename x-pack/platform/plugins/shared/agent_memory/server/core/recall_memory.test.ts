@@ -5,7 +5,29 @@
  * 2.0.
  */
 
+import { errors, type DiagnosticResult } from '@elastic/elasticsearch';
 import { recallMemory } from './recall_memory';
+
+const createResponseError = (): errors.ResponseError =>
+  new errors.ResponseError({
+    statusCode: 503,
+    body: {
+      error: {
+        type: 'inference_service_unavailable',
+        reason: 'semantic inference failed for private memory content',
+      },
+    },
+    headers: {},
+    warnings: [],
+    meta: {
+      aborted: false,
+      attempts: 1,
+      connection: null,
+      context: null,
+      name: 'agent-memory-test',
+      request: {} as DiagnosticResult['meta']['request'],
+    },
+  });
 
 const lexicalResponse = {
   columns: [
@@ -94,7 +116,7 @@ describe('recallMemory', () => {
   it('fails open after both recall attempts fail without logging memory content', async () => {
     const esql = jest
       .fn()
-      .mockRejectedValueOnce(new Error('hybrid failed for private memory content'))
+      .mockRejectedValueOnce(createResponseError())
       .mockRejectedValueOnce(new Error('keyword failed for private memory content'));
     const logger = { warn: jest.fn() };
     const storage = { getClient: () => ({ esql }) } as never;
@@ -109,6 +131,15 @@ describe('recallMemory', () => {
 
     expect(esql).toHaveBeenCalledTimes(2);
     expect(logger.warn).toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenNthCalledWith(
+      1,
+      'Agent Memory hybrid recall failed; retrying with keyword-only retrieval ' +
+        '(kind=ResponseError status_code=503 type=inference_service_unavailable)'
+    );
+    expect(logger.warn).toHaveBeenNthCalledWith(
+      2,
+      'Agent Memory keyword recall fallback failed; returning empty results (kind=Error)'
+    );
     expect(JSON.stringify(logger.warn.mock.calls)).not.toContain('private memory content');
   });
 });

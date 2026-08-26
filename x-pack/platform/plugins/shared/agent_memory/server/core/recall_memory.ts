@@ -14,6 +14,7 @@ import {
   buildHybridRecallPipeline,
   buildKeywordRecallPipeline,
 } from '../recall/build_retriever';
+import { describeError } from './describe_error';
 
 export interface RecallMemoryParams {
   query: string;
@@ -63,7 +64,7 @@ export const recallMemory = async ({
 }: {
   storage: MemoryStorage;
   params: RecallMemoryParams;
-  logger?: Logger;
+  logger: Pick<Logger, 'warn'>;
 }): Promise<RecallMemoryResult> => {
   const { query, category, tags, space_id, identity } = params;
   const limit = Math.min(params.limit ?? DEFAULT_LIMIT, MAX_LIMIT);
@@ -119,15 +120,23 @@ export const recallMemory = async ({
 
   try {
     return await searchWithPipeline(buildHybridRecallPipeline({ query, limit }));
-  } catch {
-    logger?.warn('Agent Memory hybrid recall failed; retrying with keyword-only retrieval');
+  } catch (error) {
+    logger.warn(
+      `Agent Memory hybrid recall failed; retrying with keyword-only retrieval (${describeError(
+        error
+      )})`
+    );
   }
 
   try {
     return await searchWithPipeline(buildKeywordRecallPipeline({ query, limit }));
-  } catch {
+  } catch (error) {
     // Fail open: an unreachable memory service must never stop the agent (G5, D-security).
-    logger?.warn('Agent Memory keyword recall fallback failed; returning empty results');
+    logger.warn(
+      `Agent Memory keyword recall fallback failed; returning empty results (${describeError(
+        error
+      )})`
+    );
     return { memories: [] };
   }
 };

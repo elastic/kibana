@@ -33,6 +33,7 @@ describe('Agent Memory AI Index integration', () => {
     author_kind: 'profile_uid' as const,
   };
   const spaceId = 'agent-memory-integration-space';
+  const logger = loggerMock.create();
   beforeAll(async () => {
     const { startES } = createTestServers({
       adjustTimeout: jest.setTimeout,
@@ -50,7 +51,6 @@ describe('Agent Memory AI Index integration', () => {
 
     esServer = await startES();
     esClient = esServer.es.getClient();
-    const logger = loggerMock.create();
     await ensureAgentMemoryMappingsComponentTemplate({
       esClient: esClient as unknown as ElasticsearchClient,
       logger,
@@ -223,6 +223,7 @@ describe('Agent Memory AI Index integration', () => {
 
     const unconstrainedRecall = await recallMemory({
       storage,
+      logger,
       params: {
         query: semanticQuery,
         space_id: spaceId,
@@ -234,6 +235,7 @@ describe('Agent Memory AI Index integration', () => {
 
     const recalled = await recallMemory({
       storage,
+      logger,
       params: {
         query: semanticQuery,
         tags: ['incident-response'],
@@ -246,6 +248,7 @@ describe('Agent Memory AI Index integration', () => {
 
     const excludedByTags = await recallMemory({
       storage,
+      logger,
       params: {
         query: semanticQuery,
         tags: ['incident-response', 'project:other'],

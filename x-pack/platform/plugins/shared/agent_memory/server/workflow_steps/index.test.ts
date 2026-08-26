@@ -27,6 +27,7 @@ const storage = { storage: true };
 const coreSecurity = { coreSecurity: true };
 const identity = { author: 'profile-user-1', author_kind: 'profile_uid' as const };
 const abortSignal = new AbortController().signal;
+const logger = { warn: jest.fn() };
 
 const registerStepDefinition = jest.fn();
 const getStorage = jest.fn().mockReturnValue(storage);
@@ -37,6 +38,7 @@ const createContext = (input: Record<string, unknown>) =>
   ({
     input,
     abortSignal,
+    logger,
     contextManager: {
       getFakeRequest: () => request,
       getContext: () => ({ workflow: { spaceId: 'space-1' } }),
@@ -107,6 +109,7 @@ describe('registerMemoryWorkflowSteps', () => {
     expect(getStorage).toHaveBeenCalledWith(currentUserEsClient);
     expect(recallMemory).toHaveBeenCalledWith({
       storage,
+      logger,
       params: {
         query: 'preferences',
         category: 'preferences',

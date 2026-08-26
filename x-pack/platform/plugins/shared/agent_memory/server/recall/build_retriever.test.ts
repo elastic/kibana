@@ -6,6 +6,7 @@
  */
 
 import {
+  RRF_RANK_CONSTANT,
   buildBeliefFilter,
   buildHybridRecallPipeline,
   buildKeywordRecallPipeline,
@@ -63,9 +64,12 @@ describe('Agent Memory ES|QL recall builders', () => {
   });
 
   it('builds a parameterized hybrid FORK and FUSE pipeline', () => {
+    const limit = 10;
+    const candidateLimit = limit * 2;
+    const defaultMinScore = 1 / (RRF_RANK_CONSTANT + candidateLimit);
     const request = buildHybridRecallPipeline({
       query: 'preferred sources',
-      limit: 10,
+      limit,
     }).toRequest();
 
     expect(request.query).toContain('FORK');
@@ -73,8 +77,9 @@ describe('Agent Memory ES|QL recall builders', () => {
     expect(request.query).toContain('MATCH(description,');
     expect(request.query).toContain('MATCH(content.semantic,');
     expect(request.query).toContain('3.0 / (30.0 + age_days)');
-    expect(request.query).toContain('FUSE RRF WITH {"rank_constant": 20}');
-    expect(request.query).toContain('WHERE _score >= 0.05');
+    expect(request.query).toContain(`FUSE RRF WITH {"rank_constant": ${RRF_RANK_CONSTANT}}`);
+    expect(request.query).toContain(`WHERE _score >= ${defaultMinScore}`);
+    expect(defaultMinScore).toBeLessThanOrEqual(1 / (RRF_RANK_CONSTANT + 1));
     expect(request.query).toContain('LIMIT 20');
     expect(request.query).toContain('LIMIT 10');
     expect(request.params).toEqual([
@@ -84,14 +89,15 @@ describe('Agent Memory ES|QL recall builders', () => {
     ]);
   });
 
-  it('allows the hybrid score floor to be tuned', () => {
+  it('allows the hybrid score floor to be tuned by single-leg rank cutoff', () => {
+    const rankCutoff = 5;
     const request = buildHybridRecallPipeline({
       query: 'preferred sources',
       limit: 10,
-      minScore: 0.07,
+      rankCutoff,
     }).toRequest();
 
-    expect(request.query).toContain('WHERE _score >= 0.07');
+    expect(request.query).toContain(`WHERE _score >= ${1 / (RRF_RANK_CONSTANT + rankCutoff)}`);
   });
 
   it('builds a keyword fallback without semantic fusion', () => {
