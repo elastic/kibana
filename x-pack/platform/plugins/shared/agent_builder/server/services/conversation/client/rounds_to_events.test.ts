@@ -13,7 +13,7 @@ import {
   EventActorType,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
-import { roundsToEvents } from './rounds_to_events';
+import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
 
 const baseRound = (overrides: Partial<ConversationRound> = {}): ConversationRound => ({
   id: 'round-1',
@@ -158,5 +158,20 @@ describe('roundsToEvents', () => {
       'round-2::execution_started',
       'round-2::execution_terminated',
     ]);
+  });
+});
+
+describe('isRoundDerivedEventId', () => {
+  it.each(roundsToEvents(baseConversation([baseRound()])).map((event) => event.id as string))(
+    'recognizes round-derived id %p',
+    (id) => {
+      expect(isRoundDerivedEventId(id)).toBe(true);
+    }
+  );
+
+  it('rejects ids that are not round-derived', () => {
+    expect(isRoundDerivedEventId('some-additive-error')).toBe(false);
+    expect(isRoundDerivedEventId('::user_message::follow-up')).toBe(false);
+    expect(isRoundDerivedEventId('')).toBe(false);
   });
 });

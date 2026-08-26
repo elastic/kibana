@@ -384,6 +384,15 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 | \`recovering_timeframe\` | string | optional | Time window for recovering evaluation, e.g. 5m, 15m. |
 | \`operation\` | \\"set_state_transition\\" | required |  |
 
+#### \`operation: \\"set_dashboards\\"\`
+
+Use \`set_dashboards\` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a \`dashboard\` artifact (\`{ id, type: \\"dashboard\\", data: { dashboardId } }\`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| \`operation\` | \\"set_dashboards\\" | required |  |
+| \`dashboard_ids\` | string[] | required | Dashboard saved-object IDs to link as investigation artifacts on the rule. Each ID must be an existing dashboard the current user can read. Replaces previously linked dashboards. Pass an empty array to unlink all dashboards. (max items: 100) |
+
 #### \`operation: \\"validate\\"\`
 
 Use \`validate\` as the last operation to confirm the rule is complete and ready to save.
