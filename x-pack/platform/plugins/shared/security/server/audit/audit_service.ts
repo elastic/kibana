@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  distinctUntilKeyChanged,
-  map,
-  merge,
-  shareReplay,
-  startWith,
-  Subject,
-  withLatestFrom,
-} from 'rxjs';
+import { distinctUntilKeyChanged, map, merge, shareReplay, Subject, withLatestFrom } from 'rxjs';
 
 import type {
   HttpServiceSetup,
@@ -125,16 +117,14 @@ export class AuditService {
     ).pipe(shareReplay(1));
 
     const writeAccess$ = auditLogPath
-      ? state$.pipe(
-          map(({ writeAccess }) => writeAccess),
-          startWith(undefined)
-        )
+      ? state$.pipe(map(({ writeAccess }) => writeAccess))
       : undefined;
 
     // Report the plugin as degraded while the audit log cannot be written, so the lost audit
     // trail shows up in /api/status rather than having to be inferred.
     status.set(getAuditStatus$({ writeAccess$, derivedStatus$: status.derivedStatus$ }));
 
+    // Configure logging during setup and when the license changes
     logging.configure(
       state$.pipe(
         map(({ features, writeAccess }) =>
@@ -245,8 +235,13 @@ export const createLoggingConfig =
   ) =>
   (features: Pick<SecurityLicenseFeatures, 'allowAuditLogging'>): LoggerContextConfigInput => {
     if (writeAccess && !writeAccess.granted) {
+      // Audit events are dropped rather than redirected to stdout on purpose: they carry usernames,
+      // IPs and session ids that the audit sink is held to different access and retention rules for,
+      // and at one record per authenticated request they would flood the main log.
       return {
         appenders: {
+          // Core rejects a logger referencing an appender that is not in the map, so the key has to
+          // exist even though the logger is `off`. Console is the filler that writes nothing.
           auditTrailAppender: { type: 'console' as const, layout: { type: 'json' as const } },
         },
         loggers: [{ name: 'audit.ecs', level: 'off' as const, appenders: ['auditTrailAppender'] }],

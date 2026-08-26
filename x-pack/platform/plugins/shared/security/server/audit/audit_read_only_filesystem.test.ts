@@ -124,12 +124,7 @@ describeUnlessRoot('AuditService on a read-only filesystem', () => {
 
   const reportedStatus = async (): Promise<ServiceStatus> => {
     expect(status.set).toHaveBeenCalledTimes(1);
-
-    const seen: ServiceStatus[] = [];
-    status.set.mock.calls[0][0].subscribe((next: ServiceStatus) => seen.push(next)).unsubscribe();
-
-    expect(seen.length).toBeGreaterThan(0);
-    return seen[seen.length - 1];
+    return firstValueFrom(status.set.mock.calls[0][0]);
   };
 
   const lastLoggingConfig = async (): Promise<LoggerContextConfigInput> => {

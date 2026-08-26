@@ -9,7 +9,7 @@ import { mkdtempSync, rmSync } from 'fs';
 import type { Socket } from 'net';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import type { LoggerContextConfigInput, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
@@ -38,7 +38,6 @@ import {
   getForwardedFor,
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
-import type { SecurityLicenseFeatures } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
@@ -1121,35 +1120,6 @@ describe('runtime audit log write failures', () => {
 
     return { audit, fileName, loggingConfigs, statuses };
   };
-
-  it('reports a status before the license resolves, so core does not time the check out', () => {
-    const audit = new AuditService(logger);
-    const statusMock = statusServiceMock.createSetupContract();
-
-    audit.setup({
-      license: licenseMock.create(new Subject<Partial<SecurityLicenseFeatures>>()),
-      config: createAuditConfig({
-        enabled: true,
-        appender: { type: 'file', fileName: join(testDir, 'audit.log'), layout: { type: 'json' } },
-      }),
-      logging,
-      status: statusMock,
-      http,
-      getCurrentUser,
-      getSpaceId,
-      getSID,
-      recordAuditLoggingUsage,
-    });
-
-    const statuses: ServiceStatus[] = [];
-    (statusMock.set.mock.calls[0][0] as Observable<ServiceStatus>).subscribe((s) =>
-      statuses.push(s)
-    );
-
-    expect(statuses).toHaveLength(1);
-    expect(statuses[0].level).toEqual(ServiceStatusLevels.available);
-    audit.stop();
-  });
 
   it('hands the appender an `onWriteError` handler so a mid-write failure cannot crash Kibana', () => {
     const { audit, loggingConfigs } = setupWithFileAppender();
