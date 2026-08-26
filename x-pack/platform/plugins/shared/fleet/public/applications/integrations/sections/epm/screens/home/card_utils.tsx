@@ -155,10 +155,18 @@ export const mapToCard = ({
       isDeprecated = true;
     }
 
-    const url = getHref('integration_details_overview', {
-      pkgkey: `${item.name}-${version}`,
-      ...(item.integration ? { integration: item.integration } : {}),
-    });
+    // Content packages have no add-integration flow; keep linking to the overview page.
+    // All other package types (integration, input) go straight to the add-integration page.
+    const url =
+      item.type === 'content'
+        ? getHref('integration_details_overview', {
+            pkgkey: `${item.name}-${version}`,
+            ...(item.integration ? { integration: item.integration } : {}),
+          })
+        : getHref('add_integration_to_policy', {
+            pkgkey: `${item.name}-${version}`,
+            ...(item.integration ? { integration: item.integration } : {}),
+          });
 
     uiInternalPathUrl = url;
   }
