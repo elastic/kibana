@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { experimentalBadge } from '../../components/experimental_badge';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { RuleLibraryList } from './rule_library_list';
 
 const RULE_LIBRARY_PAGE_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pageTitle', {
   defaultMessage: 'Rule library',
@@ -29,26 +29,7 @@ export const RuleLibraryPage = () => {
         spacing="bleed"
       />
       <EuiSpacer size="m" />
-      <EuiEmptyPrompt
-        data-test-subj="ruleLibraryEmptyPrompt"
-        iconType="indexOpen"
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.alertingV2.ruleLibrary.emptyTitle"
-              defaultMessage="No rule templates"
-            />
-          </h2>
-        }
-        body={
-          <p>
-            <FormattedMessage
-              id="xpack.alertingV2.ruleLibrary.emptyBody"
-              defaultMessage="Rule templates are provided by Fleet integrations. Update or install integrations to view available rule templates."
-            />
-          </p>
-        }
-      />
+      <RuleLibraryList />
     </div>
   );
 };

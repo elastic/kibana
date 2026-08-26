@@ -32,6 +32,7 @@ import { AiIndexRegistry } from './ai_indices/registry';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
+import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { registerStepDefinitions } from './step_types';
 
 export class ContextEnginePlugin
@@ -59,6 +60,10 @@ export class ContextEnginePlugin
     setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
+
+    setupDeps.workflowsExtensions.registerStepDefinition(
+      createVerifyKiStepDefinition(coreSetup, this.logger.get('ki_verification'))
+    );
 
     coreSetup.uiSettings.registerGlobal({
       [CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID]: {

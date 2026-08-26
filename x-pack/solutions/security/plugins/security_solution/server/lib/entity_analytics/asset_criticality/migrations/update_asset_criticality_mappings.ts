@@ -13,6 +13,7 @@ export const updateAssetCriticalityMappings = async ({
   auditLogger,
   logger,
   getStartServices,
+  spaceId,
 }: EntityAnalyticsMigrationsParams) => {
   const [coreStart] = await getStartServices();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -26,6 +27,6 @@ export const updateAssetCriticalityMappings = async ({
   const shouldMigrateMappings = await migrationClient.isMappingsMigrationRequired();
   if (shouldMigrateMappings) {
     logger.info('Migrating Asset Criticality mappings');
-    await migrationClient.migrateMappings();
+    await migrationClient.migrateMappings(spaceId);
   }
 };

@@ -28,7 +28,13 @@ const signal = (ruleUuid: string): SignalEntry => ({
   },
 });
 
-const feature = (feature_id: string) => ({ feature_id, name: feature_id, stream_name: 'logs' });
+const feature = (feature_id: string) => ({
+  feature_id,
+  type: 'entity',
+  subtype: 'service',
+  name: feature_id,
+  stream_name: 'logs',
+});
 
 const event = (
   eventId: string,
@@ -42,6 +48,7 @@ const event = (
   causal_features: causal.map(feature),
   blast_radius: blast.map((id) => ({
     type: 'dependency' as const,
+    subtype: 'http',
     feature_id: id,
     source: 'a',
     target: 'b',

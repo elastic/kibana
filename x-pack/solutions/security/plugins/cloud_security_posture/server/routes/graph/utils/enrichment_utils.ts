@@ -8,7 +8,7 @@
 import { createHash } from 'crypto';
 import { castArray } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
+import { resolveLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import type { EntityEnrichmentFields } from '../fetch_entity_enrichment';
 
 /**
@@ -62,25 +62,28 @@ export const filterDocDataToIds = (
 };
 
 /**
- * Checks if the entities latest index exists.
- * Previously checked for lookup mode (required for LOOKUP JOIN), but since
- * enrichment now uses follow-up queries, only existence matters.
+ * Resolves the concrete entities latest index name to query, or null when no
+ * live index exists for the space. Legacy-aware: un-migrated deployments still
+ * hold `.entities.v2.latest.security_{space}` while the
+ * `entityStore.migrateLegacySecurityAssets` feature flag is off, and LOOKUP JOIN
+ * consumers need whichever concrete name is live.
  */
-export const checkIfEntitiesIndexExists = async (
+export const resolveEntitiesIndexName = async (
   esClient: IScopedClusterClient,
   logger: Logger,
   spaceId: string
-): Promise<boolean> => {
-  const indexName = getEntitiesLatestIndexName(spaceId);
+): Promise<string | null> => {
   try {
+    const indexName = await resolveLatestEntitiesIndexName(esClient.asInternalUser, spaceId);
     const exists = await esClient.asInternalUser.indices.exists({ index: indexName });
     if (!exists) {
       logger.debug(`Entities index ${indexName} does not exist`);
+      return null;
     }
-    return exists;
+    return indexName;
   } catch (error) {
-    logger.error(`Error checking entities index ${indexName}: ${error.message}`);
-    return false;
+    logger.error(`Error resolving entities index for space ${spaceId}: ${error.message}`);
+    return null;
   }
 };
 
