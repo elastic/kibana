@@ -55,10 +55,12 @@ export const useCasesLocalStorage = <T,>(
     };
     selfListenerRef.current = listener;
 
-    if (!syncListeners.has(lsKey)) {
-      syncListeners.set(lsKey, new Set());
+    let keyListeners = syncListeners.get(lsKey);
+    if (!keyListeners) {
+      keyListeners = new Set();
+      syncListeners.set(lsKey, keyListeners);
     }
-    syncListeners.get(lsKey)!.add(listener);
+    keyListeners.add(listener);
 
     return () => {
       syncListeners.get(lsKey)?.delete(listener);
