@@ -1427,6 +1427,8 @@ x-pack/solutions/security/packages/kbn-securitysolution-list-utils @elastic/secu
 x-pack/solutions/security/packages/kbn-securitysolution-lists-common @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-t-grid @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-securitysolution-utils @elastic/security-detection-engineering
+x-pack/solutions/security/packages/mitre-attack/mitre-attack-common @elastic/security-detection-engineering
+x-pack/solutions/security/packages/mitre-attack/mitre-attack-server @elastic/security-detection-engineering
 x-pack/solutions/security/packages/navigation @elastic/security-pds-deployment
 x-pack/solutions/security/packages/security-ai-prompts @elastic/security-threat-hunting
 x-pack/solutions/security/packages/side-nav @elastic/security-pds-deployment
