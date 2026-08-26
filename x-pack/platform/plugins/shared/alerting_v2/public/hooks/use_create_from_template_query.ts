@@ -6,8 +6,9 @@
  */
 
 import { useHistory, useLocation } from 'react-router-dom';
-import { useService } from '@kbn/core-di-browser';
+import { useService, CoreStart } from '@kbn/core-di-browser';
 import { useQuery } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { RuleTemplatesApi } from '../services/rule_templates_api';
 
@@ -18,8 +19,13 @@ export const useCreateFromTemplateQuery = (
   const location = useLocation();
   const history = useHistory();
   const ruleTemplatesApi = useService(RuleTemplatesApi);
+  const { toasts } = useService(CoreStart('notifications'));
 
   const templateId = new URLSearchParams(location.search).get('templateId');
+
+  const clearTemplateIdFromUrl = () => {
+    history.replace({ pathname: location.pathname, search: '' });
+  };
 
   useQuery({
     queryKey: ['ruleTemplate', templateId],
@@ -29,7 +35,15 @@ export const useCreateFromTemplateQuery = (
     refetchOnWindowFocus: false,
     onSuccess: (template) => {
       openCreateFromTemplateFlyout(template);
-      history.replace({ pathname: location.pathname, search: '' });
+      clearTemplateIdFromUrl();
+    },
+    onError: (error: Error) => {
+      toasts.addError(error, {
+        title: i18n.translate('xpack.alertingV2.hooks.useCreateFromTemplateQuery.errorMessage', {
+          defaultMessage: 'Failed to load rule template',
+        }),
+      });
+      clearTemplateIdFromUrl();
     },
   });
 };

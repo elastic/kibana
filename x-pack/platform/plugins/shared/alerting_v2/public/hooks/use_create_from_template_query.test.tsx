@@ -52,12 +52,16 @@ const createWrapper = (history: ReturnType<typeof createMemoryHistory>) => {
 describe('useCreateFromTemplateQuery', () => {
   const mockGetRuleTemplate = jest.fn();
   const mockOpenCreateFromTemplateFlyout = jest.fn();
+  const mockAddError = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseService.mockImplementation((token: unknown) => {
       if (token === RuleTemplatesApi) {
         return { getRuleTemplate: mockGetRuleTemplate };
+      }
+      if (token === 'notifications') {
+        return { toasts: { addError: mockAddError } };
       }
       return {};
     });
@@ -78,6 +82,7 @@ describe('useCreateFromTemplateQuery', () => {
       expect(mockOpenCreateFromTemplateFlyout).toHaveBeenCalledWith(mockTemplate);
     });
     expect(history.location.search).toBe('');
+    expect(mockAddError).not.toHaveBeenCalled();
   });
 
   it('does not fetch a template when templateId is absent', async () => {
@@ -92,5 +97,25 @@ describe('useCreateFromTemplateQuery', () => {
     });
     expect(mockGetRuleTemplate).not.toHaveBeenCalled();
     expect(mockOpenCreateFromTemplateFlyout).not.toHaveBeenCalled();
+  });
+
+  it('toasts an error and strips templateId from the URL when the fetch fails', async () => {
+    const fetchError = new Error('template not found');
+    mockGetRuleTemplate.mockRejectedValue(fetchError);
+    const history = createMemoryHistory({
+      initialEntries: ['/?templateId=missing-template'],
+    });
+
+    renderHook(() => useCreateFromTemplateQuery(mockOpenCreateFromTemplateFlyout), {
+      wrapper: createWrapper(history),
+    });
+
+    await waitFor(() => {
+      expect(mockAddError).toHaveBeenCalledWith(fetchError, {
+        title: 'Failed to load rule template',
+      });
+    });
+    expect(mockOpenCreateFromTemplateFlyout).not.toHaveBeenCalled();
+    expect(history.location.search).toBe('');
   });
 });
