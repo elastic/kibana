@@ -123,7 +123,6 @@ ${generateRuleOperationsDoc()}
   It will resolve a default time field if one is not specified.
   If the query references an unknown index or field, the tool will return an error
   with the Elasticsearch error message. Inspect the error, fix the query, and retry.
-- If \`set_query\` fails with a time-field error, use \`set_time_field\` to specify the timestamp column explicitly, then retry \`set_query\`. Do not guess the field name — ask the user which column to use.
 - If grouping fields are set after a query, they are validated against the query's
   output columns. Use fields that appear in the query results.
 
