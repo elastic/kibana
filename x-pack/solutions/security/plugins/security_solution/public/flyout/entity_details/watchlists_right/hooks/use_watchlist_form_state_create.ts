@@ -57,7 +57,8 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
     isNameTooLong ||
     isDescriptionTooLong ||
     isRiskModifierInvalid ||
-    !ruleBasedSource.isValid;
+    !ruleBasedSource.isValid ||
+    ruleBasedSource.isValidatingTimestamp;
 
   return {
     watchlist,

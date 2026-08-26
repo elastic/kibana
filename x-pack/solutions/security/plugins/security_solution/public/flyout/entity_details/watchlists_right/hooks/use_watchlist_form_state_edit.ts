@@ -94,7 +94,8 @@ export const useEditWatchlistFormState = ({
     isNameTooLong ||
     isDescriptionTooLong ||
     isRiskModifierInvalid ||
-    !ruleBasedSource.isValid;
+    !ruleBasedSource.isValid ||
+    ruleBasedSource.isValidatingTimestamp;
 
   return {
     watchlist,
