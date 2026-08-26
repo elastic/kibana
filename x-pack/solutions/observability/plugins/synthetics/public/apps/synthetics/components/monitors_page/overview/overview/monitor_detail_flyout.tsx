@@ -268,11 +268,11 @@ export function LoadingState() {
 }
 
 function DetailFlyoutStatusHistory({
-  configId,
+  monitorId,
   location,
   remoteName,
 }: {
-  configId: string;
+  monitorId: string;
   location: string;
   remoteName?: string;
 }) {
@@ -287,7 +287,7 @@ function DetailFlyoutStatusHistory({
         to="now"
         brushable={false}
         periodCaption={LAST_24H_TEXT}
-        monitorId={configId}
+        monitorId={monitorId}
         locationLabel={location}
         remoteName={remoteName}
       />
@@ -317,6 +317,10 @@ export function MonitorDetailFlyout(props: Props) {
     return allConfigs.find((ov) => ov.configId === configId);
   }, [overviewStatus, configId]);
 
+  // Ping-backed charts query `monitor.id`. For project monitors that is
+  // `custom_heartbeat_id` (`monitorQueryId`), not the saved-object UUID.
+  const monitorQueryId = monitor?.monitorQueryId ?? id;
+
   const isRemote = Boolean(monitor?.remote);
   // Heartbeat / Elastic Agent monitors have no Synthetics saved object, so they
   // are read-only in this app just like remote (CCS) monitors.
@@ -325,8 +329,14 @@ export function MonitorDetailFlyout(props: Props) {
 
   const setLocation = useCallback(
     (locId: string, locLabel: string) =>
-      onLocationChange({ id, configId, location: locLabel, locationId: locId, spaces }),
-    [onLocationChange, id, configId, spaces]
+      onLocationChange({
+        id: monitorQueryId,
+        configId,
+        location: locLabel,
+        locationId: locId,
+        spaces,
+      }),
+    [onLocationChange, monitorQueryId, configId, spaces]
   );
 
   const detailLink = useMonitorDetailLocator({
@@ -571,7 +581,7 @@ export function MonitorDetailFlyout(props: Props) {
               spaceId={crossSpaceId}
             />
             <FlyoutSummaryKPIs
-              monitorId={id}
+              monitorId={monitorQueryId}
               locationLabel={props.location}
               from="now-30d"
               to="now"
@@ -579,7 +589,7 @@ export function MonitorDetailFlyout(props: Props) {
               remoteName={monitor?.remote?.remoteName}
             />
             <DetailFlyoutStatusHistory
-              configId={configId}
+              monitorId={monitorQueryId}
               location={props.location}
               remoteName={monitor?.remote?.remoteName}
             />
@@ -588,7 +598,7 @@ export function MonitorDetailFlyout(props: Props) {
         {selectedTab === 'performance' &&
           (canRenderDurationChart ? (
             <DetailFlyoutDurationChart
-              id={id}
+              id={monitorQueryId}
               location={props.location}
               allLocations={monitor?.locations ?? []}
               remoteName={monitor?.remote?.remoteName}
@@ -610,7 +620,7 @@ export function MonitorDetailFlyout(props: Props) {
               configId={configId}
               monitor={{
                 ...currentMonitorObject,
-                id,
+                id: monitorQueryId,
               }}
               loading={Boolean(isLoading)}
             />

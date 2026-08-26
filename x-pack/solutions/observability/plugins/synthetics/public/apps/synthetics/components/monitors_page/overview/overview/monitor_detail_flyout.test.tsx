@@ -907,4 +907,65 @@ describe('duration chart attributes', () => {
     }
     expect(embeddableCall[0].attributes[0].time.from).toBe('now-12h');
   });
+
+  it('queries ping series by monitorQueryId when it differs from configId (project monitors)', () => {
+    exploratoryViewEmbeddableMock.mockClear();
+
+    const { getByText } = render<{
+      exploratoryView: { ExploratoryViewEmbeddable: typeof exploratoryViewEmbeddableMock };
+    }>(
+      <MonitorDetailFlyout
+        configId="01435ca1-2c1f-44de-ba4e-b0a7bd14ef5c"
+        id="01435ca1-2c1f-44de-ba4e-b0a7bd14ef5c"
+        location="US Central QA"
+        locationId="us_central_qa"
+        onClose={jest.fn()}
+        onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
+      />,
+      {
+        core: {
+          exploratoryView: { ExploratoryViewEmbeddable: exploratoryViewEmbeddableMock },
+        },
+        state: {
+          monitorDetails: {
+            syntheticsMonitor: {
+              config_id: '01435ca1-2c1f-44de-ba4e-b0a7bd14ef5c',
+              created_at: moment().subtract(3, 'days').toISOString(),
+            },
+          },
+          overviewStatus: {
+            status: {
+              upConfigs: {
+                '01435ca1-2c1f-44de-ba4e-b0a7bd14ef5c-us_central_qa': {
+                  monitorQueryId: 'elastic-us-central-qa-flyout-duration-chart-default',
+                  configId: '01435ca1-2c1f-44de-ba4e-b0a7bd14ef5c',
+                  name: 'Elastic.co US Central QA',
+                  type: 'http',
+                  schedule: '1',
+                  tags: ['flyout-duration-chart'],
+                  isEnabled: true,
+                  isStatusAlertEnabled: false,
+                  overallStatus: 'up',
+                  locations: [{ id: 'us_central_qa', label: 'US Central QA', status: 'up' }],
+                },
+              },
+              downConfigs: {},
+              pendingConfigs: {},
+              disabledConfigs: {},
+            },
+          },
+        },
+      }
+    );
+
+    fireEvent.click(getByText('Performance'));
+    const embeddableCall = exploratoryViewEmbeddableMock.mock.calls[0];
+    if (!embeddableCall) {
+      throw new Error('Expected the duration chart embeddable to render');
+    }
+    expect(embeddableCall[0].attributes[0].reportDefinitions['monitor.id']).toEqual([
+      'elastic-us-central-qa-flyout-duration-chart-default',
+    ]);
+  });
 });
