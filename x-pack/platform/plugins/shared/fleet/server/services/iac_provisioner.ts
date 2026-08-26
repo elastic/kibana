@@ -263,31 +263,21 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         enabled: Boolean(tls?.certificate && tls?.key),
         certificate: tls?.certificate,
         key: tls?.key,
-        // Unset keeps Mozilla roots (ECH / Let's Encrypt). A single custom CA
-        // is enough: Serverless cluster CAs are not self-signed, so the Agent
-        // sets allowPartialTrustChain when any CA is present.
+        // Unset keeps Mozilla roots (ECH / Let's Encrypt).
         certificateAuthorities: tls?.ca,
       })
     );
-    const customCAs = tlsConfig.certificateAuthorities;
-    const allowPartialTrustChain = Array.isArray(customCAs)
-      ? customCAs.length > 0
-      : Boolean(customCAs);
     return new Agent({
       connect: {
         cert: tlsConfig.certificate,
         key: tlsConfig.key,
-        ca: customCAs,
+        ca: tlsConfig.certificateAuthorities,
         // Always verify the server certificate. SslConfig.rejectUnauthorized
         // carries server-side client-auth semantics and defaults to false —
         // not applicable to an outbound client connection.
         rejectUnauthorized: true,
-        // cluster-internal-cas contains ECP cluster CAs (issued by MKI
-        // Intermediate CA 1), not self-signed roots. Node/OpenSSL will not
-        // treat them as trust anchors unless partial-chain is enabled. Same
-        // as UIAM / usage-reporting. Omit when no custom CA is set so ECH
-        // keeps Mozilla roots and full-chain verification.
-        ...(allowPartialTrustChain ? { allowPartialTrustChain: true } : {}),
+        // The trust bundle is the cluster CA, not a root. Same as UIAM.
+        ...(tls?.ca ? { allowPartialTrustChain: true } : {}),
       },
     });
   }
