@@ -461,7 +461,9 @@ async function executor(
   // use HTTP sourced, except when the service is JSON (for testing)
   if (useTestMessage) {
     actualMessage = TEST_MESSAGE;
-    actualHTMLMessage = TEST_MESSAGE;
+    if (actualHTMLMessage != null) {
+      actualHTMLMessage = TEST_MESSAGE;
+    }
   }
 
   actualMessage = trimMessageIfRequired(

@@ -1213,7 +1213,7 @@ describe('execute()', () => {
     expect(emailSent.content.message).toBe(
       'This is a test email from Kibana\n\n---\n\nThis message was sent by Elastic.'
     );
-    expect(emailSent.content.messageHTML).toBe('This is a test email from Kibana');
+    expect(emailSent.content.messageHTML).toBe(null);
   });
 
   test('ensure parameters are as expected with HTML message from trusted notifications source', async () => {
