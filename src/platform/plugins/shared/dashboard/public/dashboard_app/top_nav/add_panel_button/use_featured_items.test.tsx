@@ -39,7 +39,7 @@ describe('useFeaturedItems', () => {
     id: 'ACTION_CREATE_ESQL_CHART',
     order: 40,
     getDisplayName: () => 'Create visualization (query)',
-    getIconType: () => 'editorCodeBlock',
+    getIconType: () => 'code',
     getDisplayNameTooltip: () => 'Build with the ES|QL editor',
     execute: jest.fn(),
   };
