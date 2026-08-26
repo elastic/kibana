@@ -94,6 +94,7 @@ export const createRemoteHostRunCommandStepDefinition = ({ getActionsStart }: De
       );
 
       if (result.status === 'running') {
+        logCommandStreams(context.logger, result);
         return {
           state: {
             jobId: result.jobId,
