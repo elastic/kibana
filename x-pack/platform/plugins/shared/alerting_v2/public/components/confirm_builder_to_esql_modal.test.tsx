@@ -9,7 +9,10 @@ import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ConfirmBuilderToEsqlModal } from './confirm_builder_to_esql_modal';
+import {
+  ConfirmBuilderToEsqlModal,
+  CONFIRM_BUILDER_TO_ESQL_VARIANT,
+} from './confirm_builder_to_esql_modal';
 
 describe('ConfirmBuilderToEsqlModal', () => {
   const onConfirm = jest.fn();
@@ -19,7 +22,7 @@ describe('ConfirmBuilderToEsqlModal', () => {
     jest.clearAllMocks();
   });
 
-  describe('switch variant (default)', () => {
+  describe('user-initiated variant (default)', () => {
     it('renders with the expected title and description', () => {
       render(<ConfirmBuilderToEsqlModal onConfirm={onConfirm} onCancel={onCancel} />);
 
@@ -44,11 +47,11 @@ describe('ConfirmBuilderToEsqlModal', () => {
     });
   });
 
-  describe('unparseable variant', () => {
+  describe('incompatible-query variant', () => {
     it('renders with the unparseable title and description', () => {
       render(
         <ConfirmBuilderToEsqlModal
-          variant="unparseable"
+          variant={CONFIRM_BUILDER_TO_ESQL_VARIANT.INCOMPATIBLE_QUERY}
           onConfirm={onConfirm}
           onCancel={onCancel}
         />
@@ -63,7 +66,7 @@ describe('ConfirmBuilderToEsqlModal', () => {
     it('calls onConfirm when the confirm button is clicked', async () => {
       render(
         <ConfirmBuilderToEsqlModal
-          variant="unparseable"
+          variant={CONFIRM_BUILDER_TO_ESQL_VARIANT.INCOMPATIBLE_QUERY}
           onConfirm={onConfirm}
           onCancel={onCancel}
         />

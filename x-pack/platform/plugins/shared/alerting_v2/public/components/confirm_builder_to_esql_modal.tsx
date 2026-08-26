@@ -9,11 +9,14 @@ import React from 'react';
 import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const SWITCH_TITLE = i18n.translate('xpack.alertingV2.confirmBuilderToEsqlModal.switchTitle', {
-  defaultMessage: 'Switch to ES|QL mode?',
-});
+const USER_INITIATED_TITLE = i18n.translate(
+  'xpack.alertingV2.confirmBuilderToEsqlModal.switchTitle',
+  {
+    defaultMessage: 'Switch to ES|QL mode?',
+  }
+);
 
-const SWITCH_DESCRIPTION = i18n.translate(
+const USER_INITIATED_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.confirmBuilderToEsqlModal.switchDescription',
   {
     defaultMessage:
@@ -21,12 +24,12 @@ const SWITCH_DESCRIPTION = i18n.translate(
   }
 );
 
-const UNPARSEABLE_TITLE = i18n.translate(
+const INCOMPATIBLE_QUERY_TITLE = i18n.translate(
   'xpack.alertingV2.confirmBuilderToEsqlModal.unparseableTitle',
   { defaultMessage: 'Rule cannot be opened in builder mode' }
 );
 
-const UNPARSEABLE_DESCRIPTION = i18n.translate(
+const INCOMPATIBLE_QUERY_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.confirmBuilderToEsqlModal.unparseableDescription',
   {
     defaultMessage:
@@ -42,22 +45,31 @@ const CANCEL_BUTTON = i18n.translate('xpack.alertingV2.confirmBuilderToEsqlModal
   defaultMessage: 'Cancel',
 });
 
-export type ConfirmBuilderToEsqlVariant = 'switch' | 'unparseable';
+export const CONFIRM_BUILDER_TO_ESQL_VARIANT = {
+  USER_INITIATED: 'user-initiated',
+  INCOMPATIBLE_QUERY: 'incompatible-query',
+} as const;
 
 export interface ConfirmBuilderToEsqlModalProps {
   onCancel: () => void;
   onConfirm: () => void;
-  variant?: ConfirmBuilderToEsqlVariant;
+  variant?: 'user-initiated' | 'incompatible-query';
 }
 
 export const ConfirmBuilderToEsqlModal: React.FC<ConfirmBuilderToEsqlModalProps> = ({
   onCancel,
   onConfirm,
-  variant = 'switch',
+  variant = CONFIRM_BUILDER_TO_ESQL_VARIANT.USER_INITIATED,
 }) => {
   const confirmModalTitleId = useGeneratedHtmlId();
-  const title = variant === 'unparseable' ? UNPARSEABLE_TITLE : SWITCH_TITLE;
-  const description = variant === 'unparseable' ? UNPARSEABLE_DESCRIPTION : SWITCH_DESCRIPTION;
+  const title =
+    variant === CONFIRM_BUILDER_TO_ESQL_VARIANT.INCOMPATIBLE_QUERY
+      ? INCOMPATIBLE_QUERY_TITLE
+      : USER_INITIATED_TITLE;
+  const description =
+    variant === CONFIRM_BUILDER_TO_ESQL_VARIANT.INCOMPATIBLE_QUERY
+      ? INCOMPATIBLE_QUERY_DESCRIPTION
+      : USER_INITIATED_DESCRIPTION;
 
   return (
     <EuiConfirmModal

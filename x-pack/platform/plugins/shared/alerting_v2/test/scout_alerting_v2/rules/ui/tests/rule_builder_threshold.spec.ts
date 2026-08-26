@@ -209,10 +209,62 @@ test.describe(
     }) => {
       let ruleId: string | undefined;
 
-      await test.step('create a rule without builder_type', async () => {
+      await test.step('create a builder rule then clear builder_type via upsert', async () => {
         const created = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
-            metadata: { name: 'esql-only-rule' },
+            metadata: { name: 'was-builder-rule', builder_type: 'threshold' },
+            query: {
+              format: 'composed',
+              base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
+              breach: { segment: '| WHERE count > 5' },
+            },
+            time_field: '@timestamp',
+          })
+        );
+        ruleId = created.id;
+        await apiServices.alertingV2.rules.upsert(
+          ruleId,
+          buildCreateRuleData({
+            metadata: { name: 'was-builder-rule' },
+            query: {
+              format: 'composed',
+              base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
+              breach: { segment: '| WHERE count > 5' },
+            },
+            time_field: '@timestamp',
+          })
+        );
+      });
+
+      await test.step('open rule for editing', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+      });
+
+      await test.step('verify flyout opens in ES|QL mode (no builder switch button)', async () => {
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+        await expect(page.testSubj.locator('composeDiscoverSwitchToEsql')).toBeHidden();
+      });
+    });
+
+    test('builder-to-esql: unparseable query shows confirmation modal', async ({
+      page,
+      apiServices,
+      pageObjects,
+    }) => {
+      let ruleId: string | undefined;
+
+      await test.step('create builder rule with unparseable query', async () => {
+        const created = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            metadata: { name: 'unparseable-builder-rule', builder_type: 'threshold' },
+            query: {
+              format: 'composed',
+              base: `FROM ${TEST_INDEX} | STATS COUNT(*) BY host.name`,
+              breach: { segment: '| WHERE `COUNT(*)` > 3.0' },
+            },
+            time_field: '@timestamp',
           })
         );
         ruleId = created.id;
@@ -224,8 +276,61 @@ test.describe(
         await pageObjects.composeDiscover.openEditFlyout(ruleId!);
       });
 
-      await test.step('verify flyout opens in ES|QL mode (no builder switch button)', async () => {
+      await test.step('confirmation modal appears', async () => {
+        await expect(page.testSubj.locator('alertingV2ConfirmBuilderToEsqlModal')).toBeVisible({
+          timeout: 30_000,
+        });
+      });
+
+      await test.step('confirm opens flyout in ES|QL mode', async () => {
+        await page.getByRole('button', { name: 'Open in ES|QL mode' }).click();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+        await expect(page.testSubj.locator('composeDiscoverSwitchToEsql')).toBeHidden();
+      });
+    });
+
+    test('builder-to-esql: switch toggle shows confirmation modal', async ({
+      page,
+      apiServices,
+      pageObjects,
+    }) => {
+      let ruleId: string | undefined;
+
+      await test.step('create a valid builder rule', async () => {
+        const created = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            metadata: { name: 'switch-modal-rule', builder_type: 'threshold' },
+            query: {
+              format: 'composed',
+              base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
+              breach: { segment: '| WHERE count > 5' },
+            },
+            time_field: '@timestamp',
+          })
+        );
+        ruleId = created.id;
+      });
+
+      await test.step('open rule for editing in builder mode', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+      });
+
+      await test.step('click ES|QL switch button', async () => {
+        await page.testSubj.locator('composeDiscoverSwitchToEsql').click();
+      });
+
+      await test.step('confirmation modal appears', async () => {
+        await expect(page.testSubj.locator('alertingV2ConfirmBuilderToEsqlModal')).toBeVisible({
+          timeout: 10_000,
+        });
+      });
+
+      await test.step('confirm switches to ES|QL mode', async () => {
+        await page.getByRole('button', { name: 'Open in ES|QL mode' }).click();
+        await expect(page.testSubj.locator('alertingV2ConfirmBuilderToEsqlModal')).toBeHidden();
         await expect(page.testSubj.locator('composeDiscoverSwitchToEsql')).toBeHidden();
       });
     });

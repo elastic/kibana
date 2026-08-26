@@ -12,7 +12,6 @@ import type {
 } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
-import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -24,22 +23,10 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
-import { ConfirmBuilderToEsqlModal } from '../components/confirm_builder_to_esql_modal';
+import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
-
-const tryParseBuilderState = (
-  type: string,
-  query: string,
-  recoveryQuery?: string
-): BuilderState | null => {
-  const definition = RULE_BUILDER_REGISTRY[type];
-  if (definition?.parseState) {
-    return definition.parseState(query, recoveryQuery);
-  }
-  return null;
-};
 
 const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
   ...template.rule,
@@ -83,11 +70,26 @@ export const useComposeDiscoverFlyout = ({
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
-  const [pendingEsqlFallback, setPendingEsqlFallback] = useState<{
-    rule: RuleApiResponse;
-    mode: ComposeDiscoverMode;
-  } | null>(null);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
+
+  const openInEsql = useCallback((rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
+    setTargetRule(rule);
+    setFlyoutMode(mode);
+    setBuilderType(null);
+    setInitialBuilderState(undefined);
+    setFlyoutOpen(true);
+  }, []);
+
+  const handleConfirmSwitch = useCallback(() => {
+    setBuilderType(null);
+    setInitialBuilderState(undefined);
+  }, []);
+
+  const { resolveBuilderMode, requestEsqlFallback, requestSwitchToEsql, confirmationModal } =
+    useBuilderToEsqlTransition({
+      onConfirmEsqlFallback: openInEsql,
+      onConfirmSwitch: handleConfirmSwitch,
+    });
 
   const createRuleMutation = useCreateRule();
   const setupNotificationsMutation = useSetupRuleNotifications();
@@ -169,67 +171,23 @@ export const useComposeDiscoverFlyout = ({
     [notifications.toasts]
   );
 
-  const openRuleFlyout = useCallback((rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
-    if (rule.metadata.builder_type) {
-      const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
-      const recoveryQuery = rule.query
-        ? getRecoverEsqlQuery(rule.query, rule.recovery_strategy)
-        : undefined;
-      const state = query
-        ? tryParseBuilderState(rule.metadata.builder_type, query, recoveryQuery)
-        : null;
-      if (state && typeof state === 'object') {
-        const stateWithTimeField = { ...state, timeField: rule.time_field ?? '@timestamp' };
+  const openRuleFlyout = useCallback(
+    (rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
+      const result = resolveBuilderMode(rule);
+      if (result === 'esql') {
+        openInEsql(rule, mode);
+      } else if (result === 'esql-fallback') {
+        requestEsqlFallback(rule, mode);
+      } else {
         setTargetRule(rule);
         setFlyoutMode(mode);
-        setBuilderType(rule.metadata.builder_type);
-        setInitialBuilderState(stateWithTimeField);
+        setBuilderType(result.builderType);
+        setInitialBuilderState(result.initialBuilderState);
         setFlyoutOpen(true);
-        return;
       }
-      setPendingEsqlFallback({ rule, mode });
-      return;
-    }
-
-    setTargetRule(rule);
-    setFlyoutMode(mode);
-    setBuilderType(null);
-    setInitialBuilderState(undefined);
-    setFlyoutOpen(true);
-  }, []);
-
-  const confirmEsqlFallback = useCallback(() => {
-    if (!pendingEsqlFallback) return;
-    const { rule, mode } = pendingEsqlFallback;
-    setTargetRule(rule);
-    setFlyoutMode(mode);
-    setBuilderType(null);
-    setInitialBuilderState(undefined);
-    setPendingEsqlFallback(null);
-    setFlyoutOpen(true);
-  }, [pendingEsqlFallback]);
-
-  const cancelEsqlFallback = useCallback(() => {
-    setPendingEsqlFallback(null);
-  }, []);
-
-  const [showSwitchConfirmation, setShowSwitchConfirmation] = useState(false);
-
-  const handleSwitchToEsql = useCallback(() => {
-    if (!targetRule) return;
-    setShowSwitchConfirmation(true);
-  }, [targetRule]);
-
-  const confirmSwitchToEsql = useCallback(() => {
-    if (!targetRule) return;
-    setShowSwitchConfirmation(false);
-    setBuilderType(null);
-    setInitialBuilderState(undefined);
-  }, [targetRule]);
-
-  const cancelSwitchToEsql = useCallback(() => {
-    setShowSwitchConfirmation(false);
-  }, []);
+    },
+    [resolveBuilderMode, openInEsql, requestEsqlFallback]
+  );
 
   const openEditFlyout = useCallback(
     (rule: RuleApiResponse) => openRuleFlyout(rule, 'edit'),
@@ -281,7 +239,7 @@ export const useComposeDiscoverFlyout = ({
       services={ruleFormServices}
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
-      onSwitchToEsql={builderType ? handleSwitchToEsql : undefined}
+      onSwitchToEsql={builderType ? requestSwitchToEsql : undefined}
       onCreateRule={(payload, ruleNotifications) =>
         createRuleMutation.mutate(
           { payload },
@@ -321,20 +279,6 @@ export const useComposeDiscoverFlyout = ({
         setupNotificationsMutation.isLoading ||
         updateRuleMutation.isLoading
       }
-    />
-  ) : null;
-
-  const confirmationModal = pendingEsqlFallback ? (
-    <ConfirmBuilderToEsqlModal
-      variant="unparseable"
-      onConfirm={confirmEsqlFallback}
-      onCancel={cancelEsqlFallback}
-    />
-  ) : showSwitchConfirmation ? (
-    <ConfirmBuilderToEsqlModal
-      variant="switch"
-      onConfirm={confirmSwitchToEsql}
-      onCancel={cancelSwitchToEsql}
     />
   ) : null;
 
