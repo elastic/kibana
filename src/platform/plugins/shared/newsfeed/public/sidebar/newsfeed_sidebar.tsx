@@ -21,6 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
 import type { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
+import { useIsServerless } from '@kbn/react-env';
 import type { NewsfeedApi } from '../lib/api';
 import type { FetchResult, NewsfeedItem } from '../types';
 import { NewsEmptyPrompt } from '../components/empty_news';
@@ -28,7 +29,6 @@ import { NewsLoadingPrompt } from '../components/loading_news';
 
 export interface NewsfeedSidebarServices {
   newsfeedApi: NewsfeedApi;
-  isServerless: boolean;
   hasCustomBranding$: Observable<boolean>;
 }
 
@@ -38,10 +38,10 @@ export interface NewsfeedSidebarProps extends NewsfeedSidebarServices {
 
 export const NewsfeedSidebar = ({
   newsfeedApi,
-  isServerless,
   hasCustomBranding$,
   onClose,
 }: NewsfeedSidebarProps) => {
+  const isServerless = useIsServerless();
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
   const hasCustomBranding = useObservable(hasCustomBranding$, false);
 

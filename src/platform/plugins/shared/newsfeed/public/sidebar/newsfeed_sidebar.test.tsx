@@ -18,6 +18,12 @@ import type { NewsfeedApi } from '../lib/api';
 import type { FetchResult, NewsfeedItem } from '../types';
 import { NewsfeedSidebar } from './newsfeed_sidebar';
 
+jest.mock('@kbn/react-env', () => ({
+  useIsServerless: jest.fn().mockReturnValue(false),
+}));
+
+import { useIsServerless } from '@kbn/react-env';
+
 // SidebarHeader reads the panel context for its heading id, so the real components need a
 // provider. Supplying one keeps the real header/body in the tree rather than mocking them out.
 const panelContext = { headingId: 'newsfeedSidebarHeading', setOnFocusRescue: jest.fn() };
@@ -42,13 +48,7 @@ const createFetchResult = (overrides: Partial<FetchResult> = {}): FetchResult =>
   ...overrides,
 });
 
-const renderSidebar = ({
-  fetchResult,
-  isServerless = false,
-}: {
-  fetchResult?: FetchResult | null;
-  isServerless?: boolean;
-} = {}) => {
+const renderSidebar = ({ fetchResult }: { fetchResult?: FetchResult | null } = {}) => {
   const fetchResults$ = new BehaviorSubject<FetchResult | void | null>(
     fetchResult !== undefined ? fetchResult : null
   );
@@ -58,12 +58,7 @@ const renderSidebar = ({
 
   const result = renderWithKibanaRenderContext(
     <SidebarPanelContext.Provider value={panelContext}>
-      <NewsfeedSidebar
-        newsfeedApi={newsfeedApi}
-        isServerless={isServerless}
-        hasCustomBranding$={of(false)}
-        onClose={onClose}
-      />
+      <NewsfeedSidebar newsfeedApi={newsfeedApi} hasCustomBranding$={of(false)} onClose={onClose} />
     </SidebarPanelContext.Provider>
   );
 
@@ -94,12 +89,14 @@ describe('NewsfeedSidebar', () => {
   });
 
   test('shows version label for non-serverless', () => {
-    renderSidebar({ fetchResult: createFetchResult(), isServerless: false });
+    jest.mocked(useIsServerless).mockReturnValue(false);
+    renderSidebar({ fetchResult: createFetchResult() });
     expect(screen.getByText(/Version 9\.5\.0/)).toBeInTheDocument();
   });
 
   test('hides version label for serverless', () => {
-    renderSidebar({ fetchResult: createFetchResult(), isServerless: true });
+    jest.mocked(useIsServerless).mockReturnValue(true);
+    renderSidebar({ fetchResult: createFetchResult() });
     expect(screen.queryByText(/Version/)).not.toBeInTheDocument();
   });
 

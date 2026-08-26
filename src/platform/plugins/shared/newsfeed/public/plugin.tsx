@@ -26,14 +26,12 @@ export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']
 export class NewsfeedPublicPlugin
   implements Plugin<NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart>
 {
-  private readonly isServerless: boolean;
   private readonly kibanaVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
   private readonly stop$ = new Rx.ReplaySubject<void>(1);
   private newsfeedApi?: NewsfeedApi;
 
   constructor(initializerContext: PluginInitializerContext<NewsfeedPluginBrowserConfig>) {
-    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     const config = initializerContext.config.get();
     this.config = Object.freeze({
@@ -55,16 +53,10 @@ export class NewsfeedPublicPlugin
 
       // getStartServices() resolves only after start() returns, so the API is assigned by now.
       const newsfeedApi = this.newsfeedApi!;
-      const { isServerless } = this;
       const { hasCustomBranding$ } = coreStart.customBranding;
 
       return (props: SidebarComponentProps) => (
-        <NewsfeedSidebar
-          {...props}
-          newsfeedApi={newsfeedApi}
-          isServerless={isServerless}
-          hasCustomBranding$={hasCustomBranding$}
-        />
+        <NewsfeedSidebar {...props} newsfeedApi={newsfeedApi} hasCustomBranding$={hasCustomBranding$} />
       );
     };
 

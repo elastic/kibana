@@ -15,6 +15,7 @@
     "@kbn/core-chrome-sidebar-components",
     "@kbn/core-chrome-sidebar-context",
     "@kbn/core-chrome-sidebar-mocks",
+    "@kbn/react-env",
     "@kbn/test-jest-helpers",
   ],
   "exclude": [
