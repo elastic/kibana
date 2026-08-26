@@ -448,9 +448,12 @@ async function executor(
   }
 
   // use the test message for HTTP sourced, except when the service is JSON (for testing)
+  // or for Elastic Cloud trial deployments using the cloud email proxy
   const isSourceHttp = source?.type === ActionExecutionSourceType.HTTP_REQUEST;
   const isJSONService = config.service === JSON_TRANSPORT_SERVICE;
-  const useTestMessage = isSourceHttp && !isJSONService;
+  const isCloudService = config.service === AdditionalEmailServices.ELASTIC_CLOUD;
+  const isTrial = !!(await isElasticCloudTrial?.());
+  const useTestMessage = (isSourceHttp && !isJSONService) || (isCloudService && isTrial);
 
   let actualMessage: string | null | undefined = params.message;
   let actualHTMLMessage: string | null | undefined = params.messageHTML;
@@ -485,14 +488,7 @@ async function executor(
     actualMessage = `${actualMessage}${EMAIL_FOOTER_DIVIDER}${footerMessage}`;
   }
 
-  // use TEST_MESSAGE for cloud trials and HTTP sourced, except when
-  // the service is JSON (for testing)
-  const subject =
-    config.service === AdditionalEmailServices.ELASTIC_CLOUD && (await isElasticCloudTrial?.())
-      ? prefixTrialSubject(TEST_MESSAGE)
-      : useTestMessage
-      ? TEST_MESSAGE
-      : params.subject;
+  const subject = getSubject();
 
   const sendEmailOptions: SendEmailOptions = {
     connectorId: actionId,
@@ -547,6 +543,17 @@ async function executor(
   }
 
   return { status: 'ok', data: result, actionId };
+
+  // use TEST_MESSAGE when required, also adding the trial prefix if needed
+  function getSubject() {
+    const sub = useTestMessage ? TEST_MESSAGE : params.subject;
+
+    if (isTrial && isCloudService) {
+      return prefixTrialSubject(sub);
+    }
+
+    return sub;
+  }
 }
 
 // utilities
