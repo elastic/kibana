@@ -46,20 +46,40 @@ describe('invalidateAPIKeys', () => {
     await expect(invalidateAPIKeys([])).rejects.toThrow('Missing security plugin');
   });
 
-  it('returns null immediately if any chunk invalidateAsInternalUser call returns null', async () => {
+  it('returns null immediately if the first chunk invalidateAsInternalUser call returns null', async () => {
     const ids = Array.from({ length: 2500 }, (_, i) => `key-${i}`);
 
-    invalidateAsInternalUserMock
-      .mockResolvedValueOnce({
-        invalidated_api_keys: ['key-1'],
-        previously_invalidated_api_keys: [],
-        error_count: 0,
-      })
-      .mockResolvedValueOnce(null);
+    invalidateAsInternalUserMock.mockResolvedValueOnce(null);
 
     const res = await invalidateAPIKeys(ids);
 
     expect(res).toBeNull();
+    expect(invalidateAsInternalUserMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns partial aggregated result and stops processing when a later chunk returns null', async () => {
+    const ids = Array.from({ length: 3000 }, (_, i) => `key-${i}`);
+
+    invalidateAsInternalUserMock
+      .mockResolvedValueOnce({
+        invalidated_api_keys: ['key-1'],
+        previously_invalidated_api_keys: ['key-prev-1'],
+        error_count: 0,
+      })
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        invalidated_api_keys: ['key-should-not-be-reached'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+
+    const res = await invalidateAPIKeys(ids);
+
+    expect(res).toEqual({
+      invalidated_api_keys: ['key-1'],
+      previously_invalidated_api_keys: ['key-prev-1'],
+      error_count: 0,
+    });
     expect(invalidateAsInternalUserMock).toHaveBeenCalledTimes(2);
   });
 
