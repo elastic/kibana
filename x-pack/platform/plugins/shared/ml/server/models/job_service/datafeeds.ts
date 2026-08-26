@@ -403,14 +403,17 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
         try {
           await mlClient.startDatafeed({ datafeed_id: datafeedId });
         } catch (error) {
-          const previous = results[jobId] ?? { success: false, datafeedId };
-          const restartError = (error as { body?: unknown }).body ?? error;
-          results[jobId] = {
-            ...previous,
-            datafeedId: previous.datafeedId ?? datafeedId,
-            success: false,
-            restartError,
-          };
+          // Ignore 409 — the datafeed may already be started.
+          if (error.statusCode !== 409) {
+            const previous = results[jobId] ?? { success: false, datafeedId };
+            const restartError = error.body ?? error;
+            results[jobId] = {
+              ...previous,
+              datafeedId: previous.datafeedId ?? datafeedId,
+              success: false,
+              restartError,
+            };
+          }
         }
       }
     }
