@@ -31,3 +31,4 @@ export const SIGNIFICANT_EVENT_KI_TYPE = 'significant_event' as const;
 export const WORKFLOW_KI_TYPE = 'workflow' as const;
 export const RULE_KI_TYPE = 'alerting_v2_rule' as const;
 export const ACTION_POLICY_KI_TYPE = 'alerting_v2_action_policy' as const;
+export const AGENT_MEMORY_KI_TYPE = 'agent_memory' as const;
