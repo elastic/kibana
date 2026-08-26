@@ -138,6 +138,7 @@ describe('IacProvisionerService', () => {
         // Server certs must always be verified, regardless of what SslConfig
         // says — its rejectUnauthorized is a server-side client-auth setting.
         rejectUnauthorized: true,
+        allowPartialTrustChain: true,
       }),
     });
   });
@@ -162,6 +163,7 @@ describe('IacProvisionerService', () => {
         key: undefined,
         ca: '/path/ca.crt',
         rejectUnauthorized: true,
+        allowPartialTrustChain: true,
       }),
     });
   });
@@ -267,8 +269,8 @@ describe('IacProvisionerService', () => {
   });
 
   it('passes an array of CA paths through to the outbound Agent', async () => {
-    // kibana-controller injects both cluster-internal-cas and the MKI
-    // intermediate so rejectUnauthorized: true can complete the chain.
+    // A list of CA paths is valid config (kibana-controller may inject more
+    // than one). Partial-chain is still required so cluster CAs verify.
     mockConfig({
       api: {
         url: 'https://cloud-iac-provisioner.cloud-iac-provisioner.svc.cluster.local',
@@ -296,6 +298,7 @@ describe('IacProvisionerService', () => {
           '/mnt/elastic-internal/http-certs/ca.crt',
         ],
         rejectUnauthorized: true,
+        allowPartialTrustChain: true,
       }),
     });
   });
@@ -325,6 +328,11 @@ describe('IacProvisionerService', () => {
         rejectUnauthorized: true,
       }),
     });
+    // Full-chain Mozilla verification must stay in place for Let's Encrypt.
+    expect(
+      (mockedAgent.mock.calls[0][0] as { connect: { allowPartialTrustChain?: boolean } }).connect
+        .allowPartialTrustChain
+    ).toBeUndefined();
   });
 
   it('maps a body that fails to read to IacProvisionerUnavailableError', async () => {
@@ -421,6 +429,10 @@ describe('IacProvisionerService', () => {
         rejectUnauthorized: true,
       }),
     });
+    expect(
+      (mockedAgent.mock.calls[0][0] as { connect: { allowPartialTrustChain?: boolean } }).connect
+        .allowPartialTrustChain
+    ).toBeUndefined();
   });
 });
 
