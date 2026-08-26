@@ -31,10 +31,35 @@ export interface UseEpisodesTableDataResult {
 
 const PAGE_SIZE = 100;
 
+/**
+ * ECS source-event columns the v1 alerts table shows by default. In v2 they live
+ * inside the flattened `data`, so we extract them into same-named columns (the
+ * `data::keyword` + JSON_EXTRACT route, same as the KPIs).
+ */
+export const ECS_DATA_COLUMNS = [
+  'host.name',
+  'user.name',
+  'process.name',
+  'file.name',
+  'source.ip',
+  'destination.ip',
+];
+
+const stripJsonQuotes = (value: string): string => value.replace(/^"|"$/g, '');
+
 // The episodes list is the page's query (the `$.alert-episodes` view), time-scoped
-// and capped. Unlike the KPIs there's no aggregation — we want the episode rows.
-const buildEpisodesTableQuery = (baseEsql: string): string =>
-  composeEsqlQuery(baseEsql, [TIME_RANGE_ESQL_FILTER], [`LIMIT ${PAGE_SIZE}`]);
+// and capped. Unlike the KPIs there's no aggregation — we want the episode rows,
+// plus the ECS columns pulled out of `data`.
+const buildEpisodesTableQuery = (baseEsql: string): string => {
+  const evalExpr = ECS_DATA_COLUMNS.map(
+    (field) => `\`${field}\` = JSON_EXTRACT(data::keyword, "$['${field}']")`
+  ).join(', ');
+  return composeEsqlQuery(
+    baseEsql,
+    [TIME_RANGE_ESQL_FILTER],
+    [`EVAL ${evalExpr}`, `LIMIT ${PAGE_SIZE}`]
+  );
+};
 
 const INITIAL_STATE: UseEpisodesTableDataResult = {
   rows: [],
@@ -91,6 +116,13 @@ export const useEpisodesTableData = (
           const record: Record<string, unknown> = {};
           columnNames.forEach((name, columnIndex) => {
             record[name] = row[columnIndex];
+          });
+          // Extracted `data` values come back as JSON strings — unquote for display.
+          ECS_DATA_COLUMNS.forEach((column) => {
+            const value = record[column];
+            if (typeof value === 'string') {
+              record[column] = stripJsonQuotes(value);
+            }
           });
           const id = (record['episode.id'] as string | undefined) ?? String(index);
           return { id, raw: { _id: id, _source: record }, flattened: record };

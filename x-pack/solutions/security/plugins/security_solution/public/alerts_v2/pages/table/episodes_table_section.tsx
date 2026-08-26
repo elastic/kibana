@@ -17,7 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
-import { UnifiedDataTable, DataLoadingState, type SortOrder } from '@kbn/unified-data-table';
+import {
+  UnifiedDataTable,
+  DataLoadingState,
+  type SortOrder,
+  type CustomGridColumnsConfiguration,
+} from '@kbn/unified-data-table';
 import { useKibana } from '../../../common/lib/kibana';
 import { EsqlInspectButton } from '../kpis/esql_inspect_button';
 import { useEpisodesTableData } from './use_episodes_table_data';
@@ -27,11 +32,65 @@ const TITLE = i18n.translate('xpack.securitySolution.alertsV2.episodesTable.titl
 });
 const TITLE_ID = 'alertsV2EpisodesTableTitle';
 
-/** Columns the view provides; tags/assignee (action-derived) come in a later step. */
-const DEFAULT_COLUMNS = ['@timestamp', 'episode.status', 'severity', 'rule.id', 'duration'];
+/**
+ * The v1 alerts table's default columns, mapped to v2. Omitted vs v1: Risk Score
+ * and Reason (don't exist in v2) and Assignees (needs the `.alert-actions` fold,
+ * not on the view). `rule.id` stands in for the rule-name column (v2 has no name).
+ * The ECS columns are extracted from `data` by the data hook.
+ */
+const DEFAULT_COLUMNS = [
+  '@timestamp',
+  'rule.id',
+  'severity',
+  'host.name',
+  'user.name',
+  'process.name',
+  'file.name',
+  'source.ip',
+  'destination.ip',
+];
 const SAMPLE_SIZE = 100;
 const GRID_HEIGHT = 500;
 const NO_SORT: SortOrder[] = [];
+
+/** Human-readable column headers, mirroring the v1 alerts table labels. */
+const COLUMN_DISPLAY_NAMES: Record<string, string> = {
+  '@timestamp': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.timestamp', {
+    defaultMessage: 'Last seen',
+  }),
+  'rule.id': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.rule', {
+    defaultMessage: 'Rule',
+  }),
+  severity: i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.severity', {
+    defaultMessage: 'Severity',
+  }),
+  'host.name': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.host', {
+    defaultMessage: 'Host name',
+  }),
+  'user.name': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.user', {
+    defaultMessage: 'User name',
+  }),
+  'process.name': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.process', {
+    defaultMessage: 'Process name',
+  }),
+  'file.name': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.file', {
+    defaultMessage: 'File name',
+  }),
+  'source.ip': i18n.translate('xpack.securitySolution.alertsV2.episodesTable.columns.sourceIp', {
+    defaultMessage: 'Source IP',
+  }),
+  'destination.ip': i18n.translate(
+    'xpack.securitySolution.alertsV2.episodesTable.columns.destinationIp',
+    { defaultMessage: 'Destination IP' }
+  ),
+};
+
+const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = Object.fromEntries(
+  Object.entries(COLUMN_DISPLAY_NAMES).map(([columnId, displayAsText]) => [
+    columnId,
+    ({ column }) => ({ ...column, displayAsText }),
+  ])
+);
 
 export interface EpisodesTableSectionProps {
   /** The page's ES|QL query — the table lists episodes from it. */
@@ -104,6 +163,7 @@ export const EpisodesTableSection = ({ query, timeRange }: EpisodesTableSectionP
             ariaLabelledBy={TITLE_ID}
             columns={columns}
             columnsMeta={columnsMeta}
+            customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
             dataView={dataView}
             rows={rows}
             loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
