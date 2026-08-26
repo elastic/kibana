@@ -38,12 +38,12 @@ describe('getExecutionStatusVisual', () => {
 
   it('returns danger icon for FAILED', () => {
     const { iconType } = getExecutionStatusVisual(mockTheme, ExecutionStatus.FAILED);
-    expect(iconType).toBe('crossInACircleFilled');
+    expect(iconType).toBe('error');
   });
 
   it('returns danger icon for TIMED_OUT', () => {
     const { iconType } = getExecutionStatusVisual(mockTheme, ExecutionStatus.TIMED_OUT);
-    expect(iconType).toBe('crossInACircleFilled');
+    expect(iconType).toBe('error');
   });
 
   it('returns spinner play icon for RUNNING', () => {
@@ -69,7 +69,7 @@ describe('getExecutionStatusVisual', () => {
 
   it('returns subdued icon for CANCELLED', () => {
     const { iconType } = getExecutionStatusVisual(mockTheme, ExecutionStatus.CANCELLED);
-    expect(iconType).toBe('crossInACircleFilled');
+    expect(iconType).toBe('error');
   });
 
   it('returns clock icon for PENDING', () => {

@@ -8,11 +8,12 @@
  */
 
 import _ from 'lodash';
-import { SharedComponent } from '.';
+import { SharedComponent } from './shared_component';
 import type {
   AutocompleteComponent,
   AutocompleteMatch,
   AutocompleteMatchResult,
+  AutocompleteNextGroup,
   AutocompleteTermDefinition,
 } from './autocomplete_component';
 import type { AutoCompleteContext } from '../types';
@@ -29,7 +30,10 @@ type ObjectComponentContext = AutoCompleteContext & {
   ) => AutocompleteComponent[] | undefined | null;
 };
 
-type MatchResultWithNextArray = AutocompleteMatchResult & { next: AutocompleteComponent[] };
+type MatchResultWithNextArray = AutocompleteMatchResult & {
+  next: AutocompleteComponent[];
+  nextGroups?: AutocompleteNextGroup[];
+};
 
 export class ObjectComponent extends SharedComponent {
   constants: AutocompleteComponent[];
@@ -72,21 +76,28 @@ export class ObjectComponent extends SharedComponent {
       }
     });
 
-    // try to link to GLOBAL rules
-    const globalRules = context.globalComponentResolver(token, false);
-    if (globalRules) {
-      result.next.push(...globalRules);
+    // Constants preempt pattern rules, so patterns are only consulted when no
+    // constant child matched.
+    if (!result.next.length) {
+      _.each(this.patternsAndWildCards, function (component) {
+        const componentResult = component.match(token, context, editor);
+        if (componentResult && componentResult.next) {
+          result.next.push(...asArray(componentResult.next));
+        }
+      });
     }
 
-    if (result.next.length) {
-      return result;
-    }
-    _.each(this.patternsAndWildCards, function (component) {
-      const componentResult = component.match(token, context, editor);
-      if (componentResult && componentResult.next) {
-        result.next.push(...asArray(componentResult.next));
+    // Same-name GLOBAL rules are kept as a fallback branch: the engine drops
+    // their suggestions after the walk when the explicit branch above produced
+    // suggestions of its own (see populateContext in engine.ts).
+    const explicitMatches = result.next.slice();
+    const globalRules = context.globalComponentResolver(token, false);
+    if (globalRules?.length) {
+      result.next.push(...globalRules);
+      if (explicitMatches.length) {
+        result.nextGroups = [{ next: explicitMatches }, { next: globalRules, fallback: true }];
       }
-    });
+    }
 
     return result;
   }
