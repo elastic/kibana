@@ -162,7 +162,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
         {extraHeaderContent && <EuiFlexItem grow={false}>{extraHeaderContent}</EuiFlexItem>}
       </EuiFlexGroup>
 
-      <div css={[styles.wrapper, !wrapLines && styles.noWrap]}>
+      <div css={[styles.wrapper, wrapLines ? styles.wrap : styles.noWrap]}>
         <div
           role="tree"
           aria-label={i18n.translate('unifiedDataTable.jsonTreeViewer.treeAriaLabel', {
