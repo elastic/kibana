@@ -180,8 +180,6 @@ type AwsServiceStaticEntry = Omit<
   defaultEnabledInputs?: string[];
 };
 
-// TODO aws_cloudwatch_input_otel for otel versions
-
 const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Application Integration ──────────────────────────────
   {
@@ -502,6 +500,81 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'management_governance',
     packageName: 'aws_logs',
   },
+
+  // ── aws_cloudwatch_input_otel package — OTel metrics (managed integration) ──
+  // Input package: signal type is declared on each policy template (pt.type = 'metrics').
+  {
+    id: 'ec2_otel',
+    name: 'Amazon EC2',
+    category: 'compute',
+    dataFormat: 'otel',
+    policyTemplate: 'aws.ec2',
+    packageName: 'aws_cloudwatch_input_otel',
+  },
+  {
+    id: 'lambda_otel',
+    name: 'AWS Lambda',
+    category: 'compute',
+    dataFormat: 'otel',
+    policyTemplate: 'aws.lambda',
+    packageName: 'aws_cloudwatch_input_otel',
+  },
+  {
+    id: 'rds_otel',
+    name: 'Amazon RDS',
+    category: 'databases',
+    dataFormat: 'otel',
+    policyTemplate: 'aws.rds',
+    packageName: 'aws_cloudwatch_input_otel',
+  },
+  {
+    id: 'sqs_otel',
+    name: 'Amazon SQS',
+    category: 'application_integration',
+    dataFormat: 'otel',
+    policyTemplate: 'aws.sqs',
+    packageName: 'aws_cloudwatch_input_otel',
+  },
+  {
+    id: 'elb_alb_otel',
+    name: 'Application Load Balancer',
+    category: 'networking_content_delivery',
+    dataFormat: 'otel',
+    policyTemplate: 'aws.elb',
+    packageName: 'aws_cloudwatch_input_otel',
+  },
+  {
+    id: 'elb_clb_otel',
+    name: 'Classic Load Balancer',
+    category: 'networking_content_delivery',
+    dataFormat: 'otel',
+    policyTemplate: 'aws.elb_classic',
+    packageName: 'aws_cloudwatch_input_otel',
+  },
+  {
+    id: 'elb_nlb_otel',
+    name: 'Network Load Balancer',
+    category: 'networking_content_delivery',
+    dataFormat: 'otel',
+    policyTemplate: 'aws.elb_network',
+    packageName: 'aws_cloudwatch_input_otel',
+  },
+  {
+    id: 'elb_gwlb_otel',
+    name: 'Gateway Load Balancer',
+    category: 'networking_content_delivery',
+    dataFormat: 'otel',
+    policyTemplate: 'aws.elb_gateway',
+    packageName: 'aws_cloudwatch_input_otel',
+  },
+  {
+    id: 'ecs_otel',
+    name: 'Amazon ECS',
+    category: 'containers',
+    dataFormat: 'otel',
+    policyTemplate: 'aws.ecs',
+    packageName: 'aws_cloudwatch_input_otel',
+  },
 ];
 
 /**
@@ -552,6 +625,12 @@ export function buildAwsServiceMatrix(
 
         if (!name && (pt as any)?.title) {
           name = (pt as any).title as string;
+        }
+
+        // Input packages declare signal type on the policy template itself (no data_streams).
+        const ptType = (pt as any)?.type as string | undefined;
+        if (ptType === 'logs' || ptType === 'metrics') {
+          signalTypesSet.add(ptType as SignalType);
         }
 
         // Collect all data streams for this policy template, excluding any blocked ones.
