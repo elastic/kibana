@@ -1,5 +1,5 @@
 {
-  "sha1": "51fc8fbd89452e2d2fc2dab19ba9610c67c54084",
+  "sha1": "7e1292cdb01a6d691cb03e078d148fc8a730f2be",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2042,56 +2042,56 @@
     {
       "id": "2a3330f8808a2d4-14af16ecf5b4c6e",
       "title": "Agent Builder — alerting V2 SML type access limited privilege user can search alerting v2 rule and action policy SML types",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 265,
+        "line": 266,
         "column": 6
       }
     },
     {
       "id": "2a3330f8808a2d4-1f9e47bf5893431",
       "title": "Agent Builder — alerting V2 SML type access limited privilege user can filter SML search to the rule type",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 284,
+        "line": 285,
         "column": 16
       }
     },
     {
       "id": "2a3330f8808a2d4-8d801d629dbe51a",
       "title": "Agent Builder — alerting V2 SML type access limited privilege user can filter SML search to the action policy type",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 299,
+        "line": 300,
         "column": 16
       }
     },
     {
       "id": "2a3330f8808a2d4-c9f7c69fdc70c1b",
       "title": "Agent Builder — alerting V2 SML type access user with agent builder read but without alerting v2 read cannot see rule or action policy SML hits",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 269,
+        "line": 270,
         "column": 24
       }
     },

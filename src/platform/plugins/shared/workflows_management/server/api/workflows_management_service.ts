@@ -51,6 +51,7 @@ import type {
 } from '@kbn/workflows/types/v1';
 import type {
   LogSearchResult,
+  WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginStart,
 } from '@kbn/workflows-execution-engine/server';
 import type {
@@ -150,6 +151,7 @@ export class WorkflowsService {
   private workflowStorage!: WorkflowStorage;
   private taskScheduler!: WorkflowTaskScheduler;
   private esClient!: ElasticsearchClient;
+  private workflowExecutionsDataClient!: WorkflowExecutionsDataClient;
   private validationService!: WorkflowValidationService;
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
@@ -246,9 +248,15 @@ export class WorkflowsService {
       getActionsClientWithRequest: this.getActionsClientWithRequest,
     });
 
+    const { workflowExecutionsDataClient, stepExecutionsDataClient } =
+      this.workflowsExecutionEngine.__internalStorage;
+    this.workflowExecutionsDataClient = workflowExecutionsDataClient;
+
     this.executionQueryService = new WorkflowExecutionQueryService({
       logger: this.logger,
       esClient: this.esClient,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
+      stepExecutionsDataClient,
       workflowEventLoggerService: this.workflowsExecutionEngine.workflowEventLoggerService,
     });
 
@@ -256,13 +264,13 @@ export class WorkflowsService {
       logger: this.logger,
       workflowStorage: this.workflowStorage,
       esClient: this.esClient,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
     });
 
     await this.initializeChangeHistoryService(coreStart);
 
     this.crudService = new WorkflowCrudService({
       logger: this.logger,
-      esClient: this.esClient,
       workflowStorage: this.workflowStorage,
       getSecurity: () => this.coreStart.security,
       workflowsExtensions: this.workflowsExtensions,
@@ -271,6 +279,8 @@ export class WorkflowsService {
       validationService: this.validationService,
       getCoreStart: () => this.coreStart,
       changeHistoryService: this.changeHistoryService,
+      workflowExecutionsDataClient: this.workflowExecutionsDataClient,
+      stepExecutionsDataClient,
     });
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
