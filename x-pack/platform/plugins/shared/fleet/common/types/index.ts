@@ -61,7 +61,7 @@ export interface FleetConfigType {
       tls?: {
         certificate?: string;
         key?: string;
-        ca?: string | string[];
+        ca?: string;
       };
     };
   };
