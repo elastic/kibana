@@ -222,10 +222,15 @@ export const useDashboardMenuItems = ({
   const [undoDisabled, setUndoDisabled] = useState<boolean>(false);
   const [redoDisabled, setRedoDisabled] = useState<boolean>(false);
   useEffect(() => {
-    dashboardInternalApi.disabledActions$.subscribe(({ undo, redo }) => {
-      setUndoDisabled(undo);
-      setRedoDisabled(redo);
-    });
+    const disabledActionsSubscription = dashboardInternalApi.disabledActions$.subscribe(
+      ({ undo, redo }) => {
+        setUndoDisabled(undo);
+        setRedoDisabled(redo);
+      }
+    );
+    return () => {
+      disabledActionsSubscription.unsubscribe();
+    };
   }, [dashboardInternalApi.disabledActions$]);
 
   const historyConfig = useMemo(() => {
