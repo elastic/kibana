@@ -1,8 +1,7 @@
 {
-  "sha1": "ad20bee7efcd8345f5092950f2a81c36d2b7f35e",
+  "sha1": "3f67ed9cce7cc777d3306a29766463b7cad92e09",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -623,7 +622,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 832,
+        "line": 867,
         "column": 20
       }
     },
@@ -637,7 +636,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 877,
+        "line": 912,
         "column": 16
       }
     },
@@ -651,7 +650,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1070,
+        "line": 1105,
         "column": 26
       }
     },
@@ -665,7 +664,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1121,
+        "line": 1156,
         "column": 70
       }
     },
@@ -679,7 +678,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 1173,
+        "line": 1208,
         "column": 29
       }
     },
@@ -1113,6 +1112,38 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_create_api.spec.ts",
         "line": 182,
         "column": 86
+      }
+    },
+    {
+      "id": "3799adb9e67b0de-8d46479da760ad0",
+      "title": "Agent Builder — conversations events persistence newly created conversations are stored events-native (schema_version + empty events on _source, matched by GET)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_events_persistence_api.spec.ts",
+        "line": 59,
+        "column": 40
+      }
+    },
+    {
+      "id": "3799adb9e67b0de-eadfde8ecef00bd",
+      "title": "Agent Builder — conversations events persistence a completed round is persisted as a stored events projection that GET serves verbatim",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_events_persistence_api.spec.ts",
+        "line": 85,
+        "column": 11
       }
     },
     {
@@ -2225,6 +2256,104 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
         "line": 281,
         "column": 7
+      }
+    },
+    {
+      "id": "77cc53b0f4999ef-72e64b9c786e575",
+      "title": "Agent Builder — per-space default agent starts with no assignment in a fresh space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/space_default_agent_api.spec.ts",
+        "line": 205,
+        "column": 19
+      }
+    },
+    {
+      "id": "77cc53b0f4999ef-95cdc8e988543a6",
+      "title": "Agent Builder — per-space default agent rejects assigning an agent id that does not resolve in the space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/space_default_agent_api.spec.ts",
+        "line": 212,
+        "column": 9
+      }
+    },
+    {
+      "id": "77cc53b0f4999ef-8b881c732044a95",
+      "title": "Agent Builder — per-space default agent assignment is readable by everyone and does not filter the agents API (UI-only)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/space_default_agent_api.spec.ts",
+        "line": 234,
+        "column": 9
+      }
+    },
+    {
+      "id": "77cc53b0f4999ef-0e32e7b1389cb8b",
+      "title": "Agent Builder — per-space default agent another space is unaffected by SPACE_A assignment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/space_default_agent_api.spec.ts",
+        "line": 282,
+        "column": 9
+      }
+    },
+    {
+      "id": "77cc53b0f4999ef-4ccb4912a555599",
+      "title": "Agent Builder — per-space default agent restricted users cannot mutate the space assignment (403)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/space_default_agent_api.spec.ts",
+        "line": 290,
+        "column": 17
+      }
+    },
+    {
+      "id": "77cc53b0f4999ef-f9f12e7dac05bce",
+      "title": "Agent Builder — per-space default agent does not auto-clear the assignment when the pinned agent is deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/space_default_agent_api.spec.ts",
+        "line": 302,
+        "column": 22
+      }
+    },
+    {
+      "id": "77cc53b0f4999ef-1317b0a35bd9a4e",
+      "title": "Agent Builder — per-space default agent clearing an assignment explicitly succeeds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/space_default_agent_api.spec.ts",
+        "line": 310,
+        "column": 27
       }
     },
     {
