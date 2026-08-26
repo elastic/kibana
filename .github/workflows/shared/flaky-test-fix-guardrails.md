@@ -10,14 +10,16 @@ The fix — whether you are proposing one, writing an original patch, or revisin
   - The one shape that is not masking: making teardown idempotent (e.g. tolerating a 404 when deleting a resource that may not exist) is a correctness fix and stays legitimate.
 - **A timeout bump is a last-resort fix**: it makes the test pass without explaining what was slow, so it can hide a real regression and leaves the next reader nothing to work from. Investigate what never happened — confirm the slow operation is intrinsic to the product (e.g. index creation, SLO calculation) rather than a missing `waitForResponse` / `waitForSelector` upstream — and reach for a bump only once every other explanation is exhausted. A slow Jest render is the one exception; see the Jest guardrails below.
 - **Never reach for test-side async hooks (`await`, `waitFor`, `waitUntil`) alone when there is evidence of a production-side race**: this is the most common pattern that looks like a fix but isn't — popular precisely because it appears principled, but it lets the test wait _longer_ without fixing the race.
+- **Wait on readiness signals instead of retrying outcomes.** When the state the test must wait on has no DOM footprint (e.g. an async parse in a worker), prefer a small application-side change that exposes one (a `data-test-subj` or attribute) over re-issuing actions until the outcome looks right.
 - **Don't weaken assertions**: making assertions more lenient or narrowing their scope just to make the test pass hides regressions instead of catching them.
+- **Correct the assertion when the assertion is the bug**: it expects something the product never promised, such as a fixed order or an exact count. Replacing a wrong expectation with a right one is a fix, not a weakening.
 - **Don't reduce coverage surface**: don't skip or exclude the test to make the failure go away — for a functional test that means stripping tags so it stops running in certain environments (e.g. Cloud) or project types (e.g. serverless Security), and for a unit test it means `describe.skip` / `it.skip`. "It's flaky here" is not a reason; a real reason it shouldn't run there is.
 - **Use the framework's documented public API only.** Never widen a framework package's public surface to enable a fix — e.g. exporting an internal tag-computation helper instead of using the documented `tags` constants. If the documented API can't express the fix, that's a feature request for the framework's owning team, not something a fix PR should smuggle in.
-- **Follow the testing best practices in `docs/extend/testing/`** (`scout-best-practices.md`, `ui-best-practices.md`, `api-best-practices.md`), even where the surrounding test file predates them: existing retry-wrapped code nearby — a neighboring test or a sibling helper in the same file — is legacy to fix, not a pattern to copy or "mirror".
+- **Don't copy a legacy pattern from nearby code**: existing retry-wrapped code in a neighboring test or a sibling helper in the same file is legacy to fix, not a pattern to copy or "mirror".
 
 #### Functional tests (Scout, FTR, Cypress)
 
-- **Wait on readiness signals instead of retrying outcomes.** When the state the test must wait on has no DOM footprint (e.g. an async parse in a worker), prefer a small application-side change that exposes one (a `data-test-subj` or attribute) over re-issuing actions until the outcome looks right.
+- **Follow the testing best practices in `docs/extend/testing/`** (`scout-best-practices.md`, `ui-best-practices.md`, `api-best-practices.md`), even where the surrounding test file predates them.
 
 #### Jest and React Testing Library
 
@@ -26,7 +28,6 @@ The fix — whether you are proposing one, writing an original patch, or revisin
   - Render the component already in the state you want to check, instead of clicking your way there.
   - Test a smaller unit: one component, a hook, or a plain function, not a whole page.
   - Mock every heavy child the test does not assert on. Mocking only some of them usually does not save enough.
-  - Correct the assertion when the assertion is the bug — it expects something the product never promised, such as a fixed order or an exact count. Replacing a wrong expectation with a right one is a fix, not a weakening.
   - Fix the underlying defect when there is one: a missing `await`, a value that genuinely arrives later so its assertion belongs inside `waitFor`, data that is not deterministic, or a product bug the test exposed.
 
   What does not hold is leaving the slow render in place and only changing how the test waits for it — swapping the wrapper for a lighter provider while the same component still mounts, or retuning `userEvent` / `act` / `waitFor` such as `delay: null`. Those help only when the render is already cheap. `.agents/skills/enzyme-to-rtl/SKILL.md` covers `fireEvent` versus `userEvent`, mocking heavy EUI children, and fake timers.
