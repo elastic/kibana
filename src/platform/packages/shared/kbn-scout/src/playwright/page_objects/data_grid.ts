@@ -514,7 +514,7 @@ export class DataGrid {
     await expandButton.waitFor({ state: 'visible' });
     await expandButton.scrollIntoViewIfNeeded();
     await expandButton.hover();
-    await expandButton.click({ delay: 50 });
+    await expandButton.click();
   }
 
   async openGridDisplaySettings() {
