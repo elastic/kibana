@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
 import type { InvalidateAPIKeyResult } from '@kbn/core-security-server';
 import { API_KEY_INVALIDATION_BATCH_SIZE } from '../../constants';
 import { appContextService } from '../app_context';
@@ -24,7 +23,6 @@ export async function invalidateAPIKeys(ids: string[]): Promise<InvalidateAPIKey
     };
   }
 
-  const idBatches = chunk(ids, API_KEY_INVALIDATION_BATCH_SIZE);
   const aggregated: InvalidateAPIKeyResult = {
     invalidated_api_keys: [],
     previously_invalidated_api_keys: [],
@@ -32,20 +30,21 @@ export async function invalidateAPIKeys(ids: string[]): Promise<InvalidateAPIKey
   };
   const errorDetails: NonNullable<InvalidateAPIKeyResult['error_details']> = [];
 
-  for (const batch of idBatches) {
+  for (let start = 0; start < ids.length; start += API_KEY_INVALIDATION_BATCH_SIZE) {
+    const batch = ids.slice(start, start + API_KEY_INVALIDATION_BATCH_SIZE);
     const res = await security.authc.apiKeys.invalidateAsInternalUser({
       ids: batch,
     });
 
-    if (res) {
-      aggregated.invalidated_api_keys.push(...(res.invalidated_api_keys ?? []));
-      aggregated.previously_invalidated_api_keys.push(
-        ...(res.previously_invalidated_api_keys ?? [])
-      );
-      aggregated.error_count += res.error_count ?? 0;
-      if (res.error_details && res.error_details.length > 0) {
-        errorDetails.push(...res.error_details);
-      }
+    if (!res) {
+      return null;
+    }
+
+    aggregated.invalidated_api_keys.push(...(res.invalidated_api_keys ?? []));
+    aggregated.previously_invalidated_api_keys.push(...(res.previously_invalidated_api_keys ?? []));
+    aggregated.error_count += res.error_count ?? 0;
+    if (res.error_details && res.error_details.length > 0) {
+      errorDetails.push(...res.error_details);
     }
   }
 

@@ -46,6 +46,23 @@ describe('invalidateAPIKeys', () => {
     await expect(invalidateAPIKeys([])).rejects.toThrow('Missing security plugin');
   });
 
+  it('returns null immediately if any chunk invalidateAsInternalUser call returns null', async () => {
+    const ids = Array.from({ length: 2500 }, (_, i) => `key-${i}`);
+
+    invalidateAsInternalUserMock
+      .mockResolvedValueOnce({
+        invalidated_api_keys: ['key-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      })
+      .mockResolvedValueOnce(null);
+
+    const res = await invalidateAPIKeys(ids);
+
+    expect(res).toBeNull();
+    expect(invalidateAsInternalUserMock).toHaveBeenCalledTimes(2);
+  });
+
   it('chunks ids into API_KEY_INVALIDATION_BATCH_SIZE batches and makes N separate calls', async () => {
     const totalKeys = API_KEY_INVALIDATION_BATCH_SIZE * 2 + 500; // e.g. 2500 keys -> 3 chunks
     const ids = Array.from({ length: totalKeys }, (_, i) => `key-${i}`);
@@ -74,6 +91,30 @@ describe('invalidateAPIKeys', () => {
     });
 
     expect(res?.invalidated_api_keys).toEqual(ids);
+  });
+
+  it('handles an exact multiple of API_KEY_INVALIDATION_BATCH_SIZE without creating a trailing empty chunk', async () => {
+    const totalKeys = API_KEY_INVALIDATION_BATCH_SIZE * 2; // e.g. 2000 keys -> exactly 2 chunks
+    const ids = Array.from({ length: totalKeys }, (_, i) => `key-${i}`);
+
+    invalidateAsInternalUserMock.mockImplementation(
+      async ({ ids: batchIds }: { ids: string[] }) => ({
+        invalidated_api_keys: batchIds,
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      })
+    );
+
+    const res = await invalidateAPIKeys(ids);
+
+    expect(invalidateAsInternalUserMock).toHaveBeenCalledTimes(2);
+    expect(invalidateAsInternalUserMock).toHaveBeenNthCalledWith(1, {
+      ids: ids.slice(0, API_KEY_INVALIDATION_BATCH_SIZE),
+    });
+    expect(invalidateAsInternalUserMock).toHaveBeenNthCalledWith(2, {
+      ids: ids.slice(API_KEY_INVALIDATION_BATCH_SIZE, API_KEY_INVALIDATION_BATCH_SIZE * 2),
+    });
+    expect(res?.invalidated_api_keys.length).toBe(2000);
   });
 
   it('correctly merges results across multiple chunks (invalidated, previously_invalidated, error_count, error_details)', async () => {
@@ -118,17 +159,24 @@ describe('invalidateAPIKeys', () => {
   it('omits error_details from the result when total error_count is 0 across all chunks', async () => {
     const ids = Array.from({ length: 1500 }, (_, i) => `key-${i}`);
 
-    invalidateAsInternalUserMock.mockResolvedValue({
-      invalidated_api_keys: ['key-1'],
-      previously_invalidated_api_keys: [],
-      error_count: 0,
-    });
+    invalidateAsInternalUserMock
+      .mockResolvedValueOnce({
+        invalidated_api_keys: ['key-chunk-1'],
+        previously_invalidated_api_keys: ['prev-chunk-1'],
+        error_count: 0,
+      })
+      .mockResolvedValueOnce({
+        invalidated_api_keys: ['key-chunk-2'],
+        previously_invalidated_api_keys: ['prev-chunk-2'],
+        error_count: 0,
+      });
 
     const res = await invalidateAPIKeys(ids);
 
+    expect(invalidateAsInternalUserMock).toHaveBeenCalledTimes(2);
     expect(res).toEqual({
-      invalidated_api_keys: ['key-1', 'key-1'],
-      previously_invalidated_api_keys: [],
+      invalidated_api_keys: ['key-chunk-1', 'key-chunk-2'],
+      previously_invalidated_api_keys: ['prev-chunk-1', 'prev-chunk-2'],
       error_count: 0,
     });
     expect(res).not.toHaveProperty('error_details');
@@ -136,31 +184,63 @@ describe('invalidateAPIKeys', () => {
 
   it('executes chunk requests strictly sequentially, not concurrently', async () => {
     const ids = Array.from({ length: 2500 }, (_, i) => `key-${i}`);
-    const activeCalls: number[] = [];
+    const deferreds: Array<{ resolve: (val: any) => void }> = [];
     let maxConcurrent = 0;
     let currentConcurrent = 0;
 
-    invalidateAsInternalUserMock.mockImplementation(async () => {
+    invalidateAsInternalUserMock.mockImplementation(() => {
       currentConcurrent++;
       maxConcurrent = Math.max(maxConcurrent, currentConcurrent);
-      activeCalls.push(currentConcurrent);
-
-      // Add delay to allow concurrent execution to overlap if it were parallel
-      await new Promise((resolve) => setTimeout(resolve, 20));
-
-      currentConcurrent--;
-      return {
-        invalidated_api_keys: [],
-        previously_invalidated_api_keys: [],
-        error_count: 0,
-      };
+      return new Promise((resolve) => {
+        deferreds.push({
+          resolve: (val: any) => {
+            currentConcurrent--;
+            resolve(val);
+          },
+        });
+      });
     });
 
-    await invalidateAPIKeys(ids);
+    const invalidatePromise = invalidateAPIKeys(ids);
 
+    await new Promise((resolve) => process.nextTick(resolve));
+    expect(invalidateAsInternalUserMock).toHaveBeenCalledTimes(1);
+    expect(maxConcurrent).toBe(1);
+
+    deferreds[0].resolve({
+      invalidated_api_keys: ['chunk-1'],
+      previously_invalidated_api_keys: [],
+      error_count: 0,
+    });
+
+    await new Promise((resolve) => process.nextTick(resolve));
+    expect(invalidateAsInternalUserMock).toHaveBeenCalledTimes(2);
+    expect(maxConcurrent).toBe(1);
+
+    deferreds[1].resolve({
+      invalidated_api_keys: ['chunk-2'],
+      previously_invalidated_api_keys: [],
+      error_count: 0,
+    });
+
+    await new Promise((resolve) => process.nextTick(resolve));
     expect(invalidateAsInternalUserMock).toHaveBeenCalledTimes(3);
     expect(maxConcurrent).toBe(1);
-    expect(activeCalls).toEqual([1, 1, 1]);
+
+    deferreds[2].resolve({
+      invalidated_api_keys: ['chunk-3'],
+      previously_invalidated_api_keys: [],
+      error_count: 0,
+    });
+
+    const res = await invalidatePromise;
+
+    expect(res).toEqual({
+      invalidated_api_keys: ['chunk-1', 'chunk-2', 'chunk-3'],
+      previously_invalidated_api_keys: [],
+      error_count: 0,
+    });
+    expect(maxConcurrent).toBe(1);
   });
 
   it('rethrows error if underlying invalidateAsInternalUser fails', async () => {
