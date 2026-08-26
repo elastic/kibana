@@ -14,6 +14,7 @@ import {
   type Plugin,
   type PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
   PND_API_PRIVILEGE_READ,
@@ -33,6 +34,7 @@ import { registerOwner } from './managed_workflows/register_owner';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { WatchesService } from './services/watches/watches_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
+import { agentType, ensureAgentSafe, registerAgentType } from './agent';
 
 export class PndPlugin
   implements Plugin<PndPluginSetup, PndPluginStart, PndSetupDependencies, PndStartDependencies>
@@ -52,7 +54,7 @@ export class PndPlugin
 
   setup(
     coreSetup: CoreSetup<PndStartDependencies, PndPluginStart>,
-    { features, workflowsExtensions, workflowsManagement }: PndSetupDependencies
+    { agentBuilder, features, workflowsExtensions, workflowsManagement }: PndSetupDependencies
   ): PndPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('PND plugin is disabled');
@@ -64,6 +66,7 @@ export class PndPlugin
     this.workflowsManagementApi = workflowsManagement.management;
 
     registerOwner({ workflowsExtensions });
+    registerAgentType(agentBuilder);
 
     features.registerKibanaFeature({
       id: PND_FEATURE_ID,
@@ -107,6 +110,12 @@ export class PndPlugin
       return {};
     }
 
+    void ensureAgentSafe({
+      agentBuilder: plugins.agentBuilder,
+      spaceId: DEFAULT_SPACE_ID,
+      logger: this.logger,
+    });
+
     const management = this.workflowsManagementApi
       ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
       : undefined;
@@ -127,7 +136,15 @@ export class PndPlugin
       management,
       managedWorkflows,
       this.logger,
-      this.config.ui.useMockData
+      this.config.ui.useMockData,
+      {
+        ensureAgentForSpace: plugins.agentBuilder
+          ? (spaceId) =>
+              ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
+          : undefined,
+        agentBuilder: plugins.agentBuilder,
+        agentTypes: [agentType],
+      }
     );
 
     return {};

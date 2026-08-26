@@ -83,6 +83,10 @@ export const SKILLS_SECTION_SUBTITLE = i18n.translate(
   { defaultMessage: "what this Watch's Workers can use" }
 );
 
+export const SKILLS_VIEW_ALL = i18n.translate('xpack.pnd.watches.settings.skills.viewAll', {
+  defaultMessage: 'View all skills',
+});
+
 export const GATES_SECTION_TITLE = i18n.translate('xpack.pnd.watches.settings.gates.sectionTitle', {
   defaultMessage: 'Approval gates',
 });
@@ -314,6 +318,10 @@ export const COL_WORKER = i18n.translate('xpack.pnd.watches.settings.col.worker'
 
 export const COL_SKILL = i18n.translate('xpack.pnd.watches.settings.col.skill', {
   defaultMessage: 'Skill',
+});
+
+export const COL_DESCRIPTION = i18n.translate('xpack.pnd.watches.settings.col.description', {
+  defaultMessage: 'Description',
 });
 
 export const COL_ENABLED = i18n.translate('xpack.pnd.watches.settings.col.enabled', {

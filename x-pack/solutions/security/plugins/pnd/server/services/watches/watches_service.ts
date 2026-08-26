@@ -18,17 +18,14 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import {
-  getManagedWorkflowSelectorVisibilityContext,
-  type WorkflowDetailDto,
-  type WorkflowListItemDto,
-} from '@kbn/workflows';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
-  WATCH_TAG,
   compareWatchesForDisplay,
   GetWatchResponse,
   ListWatchesResponse,
+  WATCH_TAG,
   type ApprovalRequirement,
   type Watch,
   type WatchAutonomyLevel,
@@ -43,31 +40,15 @@ import {
 } from '../../managed_workflows/watch_registry';
 import { normalizeWorkflowTriggerType, projectWorkflowToWatch } from './project_watch';
 import type { WatchWorkflowsManagementClient } from './watch_workflows_management_client';
+import { buildAgentLookup, SkillsProjectionService } from '../utils';
 import {
   getWatch as getStoredWatch,
   listSkills as listStoredSkills,
   listWatches as listStoredWatches,
   listWorkers as listStoredWorkers,
-  setSkillEnabled as setStoredSkillEnabled,
   setWorkerEnabled as setStoredWorkerEnabled,
 } from '../watch_store/watch_store';
-import { PND_MANAGED_WORKFLOW_OWNER_ID } from '../../../common/constants';
-
-const WATCH_VISIBILITY_CONTEXT = getManagedWorkflowSelectorVisibilityContext('watch');
-
-const toWatchListItem = (detail: WorkflowDetailDto): WorkflowListItemDto => ({
-  id: detail.id,
-  name: detail.name,
-  description: detail.description ?? '',
-  enabled: detail.enabled,
-  managed: detail.managed,
-  managedBy: detail.managedBy,
-  definition: detail.definition,
-  createdAt: detail.createdAt,
-  tags: detail.definition?.tags ?? [],
-  valid: detail.valid,
-  history: undefined,
-});
+import { fetchWatchWorkflows, toWatchListItem } from './fetch_watch_workflows';
 
 const projectNotInstalledWatch = (watch: Watch): Watch => structuredClone(watch);
 
@@ -117,14 +98,40 @@ export type WatchUpdateResult =
   | { outcome: 'failed' };
 
 export class WatchesService {
+  private readonly agentTypeMap: ReadonlyMap<string, AgentTypeDefinition>;
+  private readonly skillsProjectionService?: SkillsProjectionService;
+
   constructor(
     private readonly management: WatchWorkflowsManagementClient | undefined,
     private readonly managedWorkflows:
       | Promise<PluginScopedManagedWorkflowsApi | undefined>
       | undefined,
     private readonly logger: Logger,
-    private readonly useMockData: boolean
-  ) {}
+    private readonly useMockData: boolean,
+    private readonly agentOpts: {
+      /** Lazy ensure of the shared thin agent for the caller's space. */
+      ensureAgentForSpace?: (spaceId: string) => Promise<void>;
+      agentBuilder?: AgentBuilderPluginStart;
+      /** Code-registered agent types owned by this plugin, used for skill base resolution. */
+      agentTypes?: readonly AgentTypeDefinition[];
+    } = {}
+  ) {
+    this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
+    this.skillsProjectionService = management
+      ? new SkillsProjectionService(
+          management,
+          managedWorkflows,
+          logger,
+          agentOpts.agentBuilder,
+          agentOpts.agentTypes
+        )
+      : undefined;
+    if (!useMockData && !management) {
+      logger.warn(
+        'WatchesService: Workflows Management is unavailable — falling back to mock data'
+      );
+    }
+  }
 
   private requireManagement(): WatchWorkflowsManagementClient {
     if (!this.management) {
@@ -144,11 +151,21 @@ export class WatchesService {
     return managedWorkflows;
   }
 
+  private async ensureAgent(spaceId: string): Promise<void> {
+    await this.agentOpts.ensureAgentForSpace?.(spaceId);
+  }
+
+  private async buildAgentLookup(request: KibanaRequest) {
+    if (!this.agentOpts.agentBuilder) return undefined;
+    return buildAgentLookup(this.agentOpts.agentBuilder, this.agentTypeMap, request, this.logger);
+  }
+
   /* ---------------------------------------------------------------------- */
   /* Reads                                                                  */
   /* ---------------------------------------------------------------------- */
 
-  async list(spaceId: string): Promise<ListWatchesResponse> {
+  async list(request: KibanaRequest, spaceId: string): Promise<ListWatchesResponse> {
+    await this.ensureAgent(spaceId);
     if (this.useMockData) {
       const watches = await this.withWorkflowEnablement(listStoredWatches(), spaceId);
       return ListWatchesResponse.parse({ watches: [...watches].sort(compareWatchesForDisplay) });
@@ -156,81 +173,25 @@ export class WatchesService {
 
     const managedWorkflows = await this.requireManagedWorkflows();
     const management = this.requireManagement();
-    // Managed catalog watches opt into `selector:watch` visibility; custom
-    // unmanaged watches still match via tag `watch` under managedFilter `all`.
-    // Default getWorkflows managedFilter is 'unmanaged' — must request 'all'.
-    const result = await management.getWorkflows(
-      {
-        tags: [WATCH_TAG],
-        size: 100,
-        page: 1,
-        enabled: [true, false],
-        managedFilter: 'all',
-        visibilityContext: [WATCH_VISIBILITY_CONTEXT],
-      },
-      spaceId,
-      { includeExecutionHistory: true, includeManagedExecutionHistory: true }
-    );
+    const [{ items, notInstalledRegistrations }, agents] = await Promise.all([
+      fetchWatchWorkflows(management, managedWorkflows, spaceId, this.logger, {
+        includeExecutionHistory: true,
+      }),
+      this.buildAgentLookup(request),
+    ]);
 
-    const statuses = await Promise.all(
-      watchRegistry.list().map(async (registration) => ({
-        registration,
-        status: await managedWorkflows.getWorkflowStatus(registration.id, {
-          spaceId,
-          workflowIdSuffix: spaceId,
-        }),
-      }))
-    );
-    const registrationByDocumentId = new Map(
-      statuses.map(({ registration, status }) => [status.workflowId, registration])
-    );
-    const watches = result.results
-      .filter((item) => {
-        const tags = item.tags?.length ? item.tags : item.definition?.tags ?? [];
-        const isLegacyGlobalWatch =
-          item.managedBy === PND_MANAGED_WORKFLOW_OWNER_ID &&
-          watchRegistry.get(item.id) !== undefined;
-        return tags.includes(WATCH_TAG) && !isLegacyGlobalWatch;
-      })
-      .map((item) => {
-        const watch = projectWorkflowToWatch(item);
-        const registration = registrationByDocumentId.get(item.id);
-        return registration ? { ...watch, id: registration.id } : watch;
-      });
-
-    const watchIds = new Set(watches.map(({ id }) => id));
-    const missingCatalog = await Promise.all(
-      statuses
-        .filter(({ registration }) => !watchIds.has(registration.id))
-        .map(async ({ registration, status }) => {
-          // The PND catalog is the registry, not Workflows search visibility. Installed watches
-          // omitted from getWorkflows (selector filter, pagination) must still appear.
-          if (status.installed) {
-            try {
-              const detail = await management.getWorkflow(status.workflowId, spaceId);
-              if (detail) {
-                return {
-                  ...projectWorkflowToWatch(toWatchListItem(detail)),
-                  id: registration.id,
-                };
-              }
-            } catch (error) {
-              this.logger.debug(
-                `Failed to project installed watch ${registration.id}: ${
-                  error instanceof Error ? error.message : String(error)
-                }`
-              );
-            }
-          }
-          return projectNotInstalledWatch(registration.watch);
-        })
-    );
-    watches.push(...missingCatalog);
+    const watches = items.map((item) => projectWorkflowToWatch(item, agents));
+    watches.push(...notInstalledRegistrations.map((r) => projectNotInstalledWatch(r.watch)));
 
     return ListWatchesResponse.parse({ watches: watches.sort(compareWatchesForDisplay) });
   }
 
-  async get(watchId: string, spaceId: string): Promise<GetWatchResponse | undefined> {
+  async get(
+    request: KibanaRequest,
+    watchId: string,
+    spaceId: string
+  ): Promise<GetWatchResponse | undefined> {
+    await this.ensureAgent(spaceId);
     if (this.useMockData) {
       const stored = getStoredWatch(watchId);
       if (!stored) {
@@ -348,11 +309,11 @@ export class WatchesService {
         finishedAt: run.finishedAt,
         duration: run.duration,
       }));
-      const projectedWatch = projectWorkflowToWatch({
-        ...listItem,
-        history,
-        tags: detail.definition?.tags,
-      });
+      const agents = await this.buildAgentLookup(request);
+      const projectedWatch = projectWorkflowToWatch(
+        { ...listItem, history, tags: detail.definition?.tags },
+        agents
+      );
       const watch = registration ? { ...projectedWatch, id: registration.id } : projectedWatch;
 
       // Attach step summaries for the latest few runs
@@ -464,7 +425,7 @@ export class WatchesService {
       if (!detail) return { outcome: 'not-found' };
       await management.updateWorkflow(watchId, { enabled }, spaceId, request);
     }
-    const response = await this.get(watchId, spaceId);
+    const response = await this.get(request, watchId, spaceId);
     return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
   }
 
@@ -528,7 +489,7 @@ export class WatchesService {
     if (patch.enabled != null) {
       if (!status.installed) {
         if (!patch.enabled) {
-          const response = await this.get(registration.id, spaceId);
+          const response = await this.get(request, registration.id, spaceId);
           return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
         }
 
@@ -559,7 +520,7 @@ export class WatchesService {
       );
     }
 
-    const response = await this.get(registration.id, spaceId);
+    const response = await this.get(request, registration.id, spaceId);
     return response ? { outcome: 'updated', response } : { outcome: 'not-found' };
   }
 
@@ -571,15 +532,21 @@ export class WatchesService {
     return listStoredWorkers();
   }
 
-  listSkills(): WatchSkill[] {
-    return listStoredSkills();
+  async listSkills(request: KibanaRequest, spaceId: string): Promise<WatchSkill[]> {
+    if (this.useMockData) {
+      return listStoredSkills();
+    }
+
+    await this.ensureAgent(spaceId);
+
+    if (this.skillsProjectionService) {
+      return await this.skillsProjectionService.list(request, spaceId);
+    }
+
+    return [];
   }
 
   setWorkerEnabled(workerId: string, enabled: boolean): WatchWorker | undefined {
     return setStoredWorkerEnabled(workerId, enabled);
-  }
-
-  setSkillEnabled(skillId: string, enabled: boolean): WatchSkill | undefined {
-    return setStoredSkillEnabled(skillId, enabled);
   }
 }

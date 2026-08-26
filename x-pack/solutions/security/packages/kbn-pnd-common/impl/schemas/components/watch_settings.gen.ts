@@ -85,10 +85,7 @@ export const WatchSkill = lazySchema(() =>
      * ISO 8601 timestamp of last invocation, or null when never invoked
      */
     lastRun: z.string().nullable(),
-    /**
-     * Global flag. Effective enablement is this AND the per-watch attachment flag.
-     */
-    enabled: z.boolean(),
+    summary: z.string().optional(),
     /**
      * Omitted for generally available skills; badge shown otherwise
      */

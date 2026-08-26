@@ -6,17 +6,28 @@
  */
 
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
   EuiText,
-  EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import type { WatchSkill, WatchSkillAttachment } from '@kbn/pnd-common';
+
+const tableNoOuterBordersCss = css`
+  thead {
+    display: none;
+  }
+  tbody tr:first-child td {
+    border-top: none;
+  }
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+`;
+import type { WatchCallableRef, WatchSkill } from '@kbn/pnd-common';
 import { useSkills } from '../../../hooks/use_skills_api';
 import { formatRelativeTime } from './format_relative_time';
 import * as sectionI18n from '../translations';
@@ -25,7 +36,6 @@ import * as skillI18n from '../skills/translations';
 
 interface SkillRow {
   skillId: string;
-  attachedEnabled: boolean;
   skill: WatchSkill | undefined;
 }
 
@@ -34,18 +44,12 @@ interface SkillRow {
  * line is enablement plus when it last ran.
  */
 const statusLine = (row: SkillRow): string => {
-  const { skill, attachedEnabled } = row;
+  const { skill } = row;
   if (!skill) {
     return i18n.STATUS_UNAVAILABLE;
   }
-  if (!skill.enabled) {
-    return i18n.STATUS_DISABLED_GLOBALLY;
-  }
-  if (!attachedEnabled) {
-    return i18n.STATUS_DISABLED;
-  }
 
-  const parts = [i18n.STATUS_ENABLED];
+  const parts = [];
   if (skill.lastRun) {
     parts.push(i18n.lastRunStatus(formatRelativeTime(skill.lastRun)));
   }
@@ -53,19 +57,17 @@ const statusLine = (row: SkillRow): string => {
 };
 
 interface WatchSkillsTableProps {
-  attachments: WatchSkillAttachment[];
-  onToggle: (skillId: string, enabled: boolean) => void;
+  attachments: WatchCallableRef[];
 }
 
-export const WatchSkillsTable: React.FC<WatchSkillsTableProps> = ({ attachments, onToggle }) => {
+export const WatchSkillsTable: React.FC<WatchSkillsTableProps> = ({ attachments }) => {
   const { data } = useSkills();
 
   const rows = useMemo<SkillRow[]>(() => {
     const byId = new Map((data?.skills ?? []).map((skill) => [skill.id, skill]));
-    return attachments.map(({ skillId, enabled }) => ({
-      skillId,
-      attachedEnabled: enabled,
-      skill: byId.get(skillId),
+    return attachments.map(({ id }) => ({
+      skillId: id,
+      skill: byId.get(id),
     }));
   }, [attachments, data?.skills]);
 
@@ -73,15 +75,14 @@ export const WatchSkillsTable: React.FC<WatchSkillsTableProps> = ({ attachments,
     () => [
       {
         field: 'skillId',
-        name: i18n.COL_SKILL,
+        name: '',
         render: (skillId: string, row: SkillRow) => {
-          const isGloballyOff = row.skill != null && !row.skill.enabled;
           return (
             <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiText size="s" color={isGloballyOff ? 'subdued' : undefined}>
+                    <EuiText size="s">
                       <strong>{skillI18n.skillName(skillId)}</strong>
                     </EuiText>
                   </EuiFlexItem>
@@ -105,37 +106,13 @@ export const WatchSkillsTable: React.FC<WatchSkillsTableProps> = ({ attachments,
           );
         },
       },
-      {
-        field: 'attachedEnabled',
-        name: i18n.COL_ENABLED,
-        width: '100px',
-        align: 'right',
-        render: (attachedEnabled: boolean, row: SkillRow) => {
-          const isGloballyOff = row.skill != null && !row.skill.enabled;
-          const control = (
-            <EuiSwitch
-              checked={attachedEnabled && !isGloballyOff}
-              disabled={isGloballyOff}
-              showLabel={false}
-              label={skillI18n.enableSkillAriaLabel(skillI18n.skillName(row.skillId))}
-              data-test-subj={`pndWatchSkillToggle-${row.skillId}`}
-              onChange={(event) => onToggle(row.skillId, event.target.checked)}
-            />
-          );
-
-          return isGloballyOff ? (
-            <EuiToolTip content={i18n.STATUS_DISABLED_GLOBALLY}>{control}</EuiToolTip>
-          ) : (
-            control
-          );
-        },
-      },
     ],
-    [onToggle]
+    []
   );
 
   return (
     <EuiBasicTable
+      css={tableNoOuterBordersCss}
       items={rows}
       columns={columns}
       tableLayout="auto"

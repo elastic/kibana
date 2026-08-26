@@ -11,12 +11,11 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSwitch,
   EuiText,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import type { WatchSkill } from '@kbn/pnd-common';
-import { useSkills, useToggleSkill } from '../../../hooks/use_skills_api';
+import { useSkills } from '../../../hooks/use_skills_api';
 import { formatRelativeTime } from '../components/format_relative_time';
 import { WatchBadges } from '../components/watch_badges';
 import * as sectionI18n from '../translations';
@@ -24,7 +23,6 @@ import * as i18n from './translations';
 
 export const SkillsTable: React.FC = () => {
   const { data, isLoading, error } = useSkills();
-  const { mutate: toggleSkill } = useToggleSkill();
 
   const columns = useMemo<Array<EuiBasicTableColumn<WatchSkill>>>(
     () => [
@@ -32,7 +30,6 @@ export const SkillsTable: React.FC = () => {
         field: 'id',
         name: i18n.COL_SKILL,
         render: (_id: string, skill: WatchSkill) => {
-          const description = i18n.skillDescription(skill.id);
           return (
             <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -53,10 +50,10 @@ export const SkillsTable: React.FC = () => {
                   ) : null}
                 </EuiFlexGroup>
               </EuiFlexItem>
-              {description ? (
+              {skill.summary ? (
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
-                    {description}
+                    {skill.summary}
                   </EuiText>
                 </EuiFlexItem>
               ) : null}
@@ -82,23 +79,8 @@ export const SkillsTable: React.FC = () => {
           </EuiText>
         ),
       },
-      {
-        field: 'enabled',
-        name: i18n.COL_ENABLED,
-        width: '100px',
-        align: 'right',
-        render: (enabled: boolean, skill: WatchSkill) => (
-          <EuiSwitch
-            checked={enabled}
-            showLabel={false}
-            label={i18n.enableSkillAriaLabel(i18n.skillName(skill.id))}
-            data-test-subj={`pndSkillToggle-${skill.id}`}
-            onChange={(event) => toggleSkill({ skillId: skill.id, enabled: event.target.checked })}
-          />
-        ),
-      },
     ],
-    [toggleSkill]
+    []
   );
 
   return (
