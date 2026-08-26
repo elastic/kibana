@@ -9,6 +9,7 @@ import {
   WorkflowsManagementApiActions,
   WorkflowsManagementOperationPrivileges,
 } from '@kbn/workflows';
+import { MAX_CASES_PER_WORKFLOW_RUN } from '../../../../common/constants';
 import { createCasesClientMock } from '../../../client/mocks';
 import type { CasesWorkflowRunService } from '../../../workflows/execution/service';
 import {
@@ -50,11 +51,11 @@ describe('run workflow route', () => {
   it('delegates to the Cases workflow service and returns its result', async () => {
     const request = {
       params: {
-        case_id: 'case-1',
         workflow_id: 'workflow-1',
       },
       body: {
-        inputs: { event: { caseId: 'case-1' } },
+        caseIds: ['case-1'],
+        inputs: { event: { caseIds: ['case-1'] } },
         origin: { type: 'cases.case', id: 'case-1' },
       },
     };
@@ -72,7 +73,6 @@ describe('run workflow route', () => {
     } as unknown as Parameters<typeof route.handler>[0]);
 
     expect(service.run).toHaveBeenCalledWith({
-      caseId: 'case-1',
       workflowId: 'workflow-1',
       body: request.body,
       request,
@@ -88,31 +88,79 @@ describe('run workflow route', () => {
     });
   });
 
-  it('rejects oversized workflow inputs', () => {
-    expect(() =>
-      runCaseWorkflowBodySchema.validate({
-        inputs: { value: 'a'.repeat(1_000_001) },
-        origin: { type: 'cases.case', id: 'case-1' },
-      })
-    ).toThrow('Workflow inputs cannot exceed 1000000 bytes.');
+  describe('body schema', () => {
+    const validBody = {
+      caseIds: ['case-1'],
+      inputs: {},
+      origin: { type: 'cases.case', id: 'case-1' },
+    };
+
+    it('accepts a valid single-case body', () => {
+      expect(() => runCaseWorkflowBodySchema.validate(validBody)).not.toThrow();
+    });
+
+    it(`accepts exactly ${MAX_CASES_PER_WORKFLOW_RUN} case ids (the cap)`, () => {
+      const ids = Array.from({ length: MAX_CASES_PER_WORKFLOW_RUN }, (_, i) => `case-${i}`);
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: ids })
+      ).not.toThrow();
+    });
+
+    it('rejects an empty caseIds array', () => {
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: [] })
+      ).toThrow();
+    });
+
+    it(`rejects more than ${MAX_CASES_PER_WORKFLOW_RUN} case ids`, () => {
+      const ids = Array.from({ length: MAX_CASES_PER_WORKFLOW_RUN + 1 }, (_, i) => `case-${i}`);
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: ids })
+      ).toThrow();
+    });
+
+    it('rejects duplicate case ids', () => {
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: ['case-1', 'case-1'] })
+      ).toThrow('caseIds must not contain duplicates.');
+    });
+
+    it('rejects a case id that exceeds the maximum length', () => {
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({ ...validBody, caseIds: ['a'.repeat(1025)] })
+      ).toThrow();
+    });
+
+    it('rejects oversized workflow inputs', () => {
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({
+          ...validBody,
+          inputs: { value: 'a'.repeat(1_000_001) },
+        })
+      ).toThrow('Workflow inputs cannot exceed 1000000 bytes.');
+    });
+
+    it('rejects invalid origins', () => {
+      expect(() =>
+        runCaseWorkflowBodySchema.validate({
+          ...validBody,
+          origin: { type: 'cases.comment', id: 'comment-1' },
+        })
+      ).toThrow();
+    });
   });
 
-  it('rejects invalid origins', () => {
-    expect(() =>
-      runCaseWorkflowBodySchema.validate({
-        inputs: {},
-        origin: { type: 'cases.bogus', id: 'bogus-1' },
-      })
-    ).toThrow();
-  });
+  describe('params schema', () => {
+    it('accepts a valid workflow_id', () => {
+      expect(() =>
+        runCaseWorkflowParamsSchema.validate({ workflow_id: 'workflow-1' })
+      ).not.toThrow();
+    });
 
-  it.each(['case_id', 'workflow_id'] as const)('rejects an oversized %s', (parameter) => {
-    expect(() =>
-      runCaseWorkflowParamsSchema.validate({
-        case_id: 'case-1',
-        workflow_id: 'workflow-1',
-        [parameter]: 'a'.repeat(1025),
-      })
-    ).toThrow();
+    it('rejects an oversized workflow_id', () => {
+      expect(() =>
+        runCaseWorkflowParamsSchema.validate({ workflow_id: 'a'.repeat(1025) })
+      ).toThrow();
+    });
   });
 });

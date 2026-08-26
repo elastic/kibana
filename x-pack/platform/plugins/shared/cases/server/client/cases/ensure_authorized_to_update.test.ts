@@ -13,15 +13,19 @@ import { ensureAuthorizedToUpdate } from './ensure_authorized_to_update';
 
 describe('ensureAuthorizedToUpdate', () => {
   const clientArgs = createCasesClientMockArgs();
-  const theCase = mockCases[0];
+  const caseA = mockCases[0];
+  const caseB = mockCases[1];
 
   beforeEach(() => {
     jest.clearAllMocks();
-    clientArgs.services.caseService.getCase.mockResolvedValue(theCase);
   });
 
   it('authorizes using the updateCase privilege (cases:<owner>/updateCase) with a workflow-run audit action', async () => {
-    await ensureAuthorizedToUpdate({ id: theCase.id }, clientArgs);
+    clientArgs.services.caseService.getCases.mockResolvedValue({
+      saved_objects: [caseA],
+    });
+
+    await ensureAuthorizedToUpdate({ ids: [caseA.id] }, clientArgs);
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
       // The operation reuses WriteOperations.UpdateCase as the privilege name so the
@@ -34,15 +38,79 @@ describe('ensureAuthorizedToUpdate', () => {
         ecsType: 'access',
         savedObjectType: CASE_SAVED_OBJECT,
       }),
-      entities: [{ id: theCase.id, owner: theCase.attributes.owner }],
+      entities: [{ id: caseA.id, owner: caseA.attributes.owner }],
     });
   });
 
+  it('issues a single authorization call carrying all entities for multi-case requests', async () => {
+    clientArgs.services.caseService.getCases.mockResolvedValue({
+      saved_objects: [caseA, caseB],
+    });
+
+    await ensureAuthorizedToUpdate({ ids: [caseA.id, caseB.id] }, clientArgs);
+
+    expect(clientArgs.services.caseService.getCases).toHaveBeenCalledTimes(1);
+    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
+    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entities: expect.arrayContaining([
+          { id: caseA.id, owner: caseA.attributes.owner },
+          { id: caseB.id, owner: caseB.attributes.owner },
+        ]),
+      })
+    );
+  });
+
   it('propagates authorization failures', async () => {
+    clientArgs.services.caseService.getCases.mockResolvedValue({
+      saved_objects: [caseA],
+    });
     clientArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('not authorized'));
 
-    await expect(ensureAuthorizedToUpdate({ id: theCase.id }, clientArgs)).rejects.toThrow(
+    await expect(ensureAuthorizedToUpdate({ ids: [caseA.id] }, clientArgs)).rejects.toThrow(
       'not authorized'
     );
+  });
+
+  it('rejects with forbidden (not not-found) when all requested cases fail to load', async () => {
+    // Simulates all ids producing SO errors — e.g., the caller supplied bogus ids or ids from
+    // another space. We must reject with 403, not 404, so an unauthorized caller cannot learn
+    // which ids exist.
+    const soError = {
+      id: 'missing-case',
+      type: 'cases',
+      error: { statusCode: 404, error: 'Not Found', message: 'Saved object not found' },
+    };
+    clientArgs.services.caseService.getCases.mockResolvedValue(
+      { saved_objects: [soError] } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.getCases>>
+    );
+
+    // ensureAuthorized({ entities: [] }) passes vacuously — the explicit guard rejects
+    // with 403 before calling ensureAuthorized, so the authorization mock is never called.
+    await expect(ensureAuthorizedToUpdate({ ids: ['missing-case'] }, clientArgs)).rejects.toThrow(
+      'Unauthorized to run workflow on case'
+    );
+    expect(clientArgs.authorization.ensureAuthorized).not.toHaveBeenCalled();
+  });
+
+  it('surfaces not-found errors after authorization when at least one case resolves', async () => {
+    // A mix of one valid + one missing case: authorization runs (and succeeds) over the
+    // valid case, then the missing case surfaces as a 404. This ordering prevents the
+    // unauthorized caller from learning about the missing case via a 404 before
+    // the 403 fires on the unauthorized owner.
+    const soError = {
+      id: 'missing-case',
+      type: 'cases',
+      error: { statusCode: 404, error: 'Not Found', message: 'Saved object not found' },
+    };
+    clientArgs.services.caseService.getCases.mockResolvedValue(
+      { saved_objects: [caseA, soError] } as unknown as Awaited<ReturnType<typeof clientArgs.services.caseService.getCases>>
+    );
+
+    await expect(
+      ensureAuthorizedToUpdate({ ids: [caseA.id, 'missing-case'] }, clientArgs)
+    ).rejects.toThrow();
+    // Authorization was called first (with the valid case), before the 404.
+    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledTimes(1);
   });
 });

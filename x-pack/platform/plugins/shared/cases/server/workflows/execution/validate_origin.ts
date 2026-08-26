@@ -27,7 +27,7 @@ interface AlertPair {
  * required: entries missing either value are silently dropped so they can
  * never accidentally match an attached pair.
  */
-const getSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPair[] => {
+export const getSelectedAlertPairs = (inputs: Record<string, unknown>): AlertPair[] => {
   const event = getRecord(inputs.event);
   if (!event || !Array.isArray(event.alertIds)) {
     return [];
@@ -73,6 +73,39 @@ const getAttachedAlertPairSet = (comments: NonNullable<Case['comments']>): Set<s
   }
 
   return pairs;
+};
+
+/**
+ * Validates origin rules for a **multi-case** run (`caseIds.length > 1`).
+ *
+ * Only `cases.case` origin type is legal for multi-case runs. Sub-entity origins
+ * (`cases.observable`, `cases.alert`, `cases.alerts`) each reference an entity
+ * within exactly one case and therefore require `caseIds.length === 1`.
+ *
+ * Alert inputs (`inputs.event.alertIds`) are also rejected for multi-case runs:
+ * alert membership is verified per-case, so there is no meaningful check to
+ * perform across N cases.
+ */
+export const validateMultiCaseOrigin = ({
+  origin,
+  caseIds,
+  inputs,
+}: {
+  origin: CaseWorkflowRunOrigin;
+  caseIds: string[];
+  inputs: Record<string, unknown>;
+}): void => {
+  if (origin.type !== CASE_WORKFLOW_ORIGIN_TYPE) {
+    throw Boom.badRequest(
+      `Workflow origin type "${origin.type}" can only be used with a single case.`
+    );
+  }
+  if (!caseIds.includes(origin.id)) {
+    throw Boom.badRequest('Workflow origin id must be one of the requested case ids.');
+  }
+  if (getSelectedAlertPairs(inputs).length > 0) {
+    throw Boom.badRequest('Alert inputs can only be used with a single case.');
+  }
 };
 
 /**

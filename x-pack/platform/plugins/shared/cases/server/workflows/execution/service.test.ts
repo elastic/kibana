@@ -43,13 +43,13 @@ describe('CasesWorkflowRunService', () => {
     comments: [],
   } as unknown as Case;
   const defaultBody: RunCaseWorkflowRequest = {
-    inputs: { event: { caseId: 'case-1' } },
+    caseIds: ['case-1'],
+    inputs: { event: { caseIds: ['case-1'] } },
     origin: { type: 'cases.case', id: 'case-1' },
   };
 
   const run = (body: RunCaseWorkflowRequest = defaultBody) =>
     service.run({
-      caseId: 'case-1',
       workflowId: 'workflow-1',
       body,
       request,
@@ -81,7 +81,7 @@ describe('CasesWorkflowRunService', () => {
       activityStatus: 'succeeded',
     });
 
-    expect(casesClient.cases.ensureAuthorizedToUpdate).toHaveBeenCalledWith({ id: 'case-1' });
+    expect(casesClient.cases.ensureAuthorizedToUpdate).toHaveBeenCalledWith({ ids: ['case-1'] });
     expect(casesClient.cases.ensureAuthorizedToUpdate.mock.invocationCallOrder[0]).toBeLessThan(
       management.runWorkflow.mock.invocationCallOrder[0]
     );
@@ -90,31 +90,30 @@ describe('CasesWorkflowRunService', () => {
     expect(management.runWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'workflow-1', name: 'Investigate case' }),
       'default',
-      defaultBody.inputs,
+      // The server injects event.caseIds — the authorized set, not whatever the client sent.
+      { event: { caseIds: ['case-1'] } },
       request,
       undefined,
       {
         schemaVersion: 1,
         source: 'cases',
-        caseId: 'case-1',
+        caseIds: ['case-1'],
         origin: defaultBody.origin,
       }
     );
     // preflightWorkflowExecution runs before the workflow to enforce the user-action limit.
     expect(casesClient.userActions.preflightWorkflowExecution).toHaveBeenCalledWith({
-      caseId: 'case-1',
+      caseIds: ['case-1'],
     });
     // recordWorkflowExecution persists the activity log entry after a successful run.
     expect(casesClient.userActions.recordWorkflowExecution).toHaveBeenCalledWith(
       expect.objectContaining({
-        caseId: 'case-1',
+        caseIds: ['case-1'],
         workflow: expect.objectContaining({
           id: 'workflow-1',
           name: 'Investigate case',
           executionId: 'execution-1',
         }),
-        // Note: owner is no longer passed from the service — recordWorkflowExecution
-        // fetches it from the case SO to prevent privilege escalation.
         origin: defaultBody.origin,
       })
     );
@@ -124,7 +123,145 @@ describe('CasesWorkflowRunService', () => {
           action: 'case_workflow_run',
           outcome: 'success',
         }),
+        kibana: expect.objectContaining({
+          saved_object: expect.objectContaining({ id: 'case-1' }),
+        }),
       })
+    );
+  });
+
+  describe('multi-case runs', () => {
+    const multiCaseBody: RunCaseWorkflowRequest = {
+      caseIds: ['case-a', 'case-b', 'case-c'],
+      inputs: { event: { caseIds: ['case-a', 'case-b', 'case-c'] } },
+      origin: { type: 'cases.case', id: 'case-a' },
+    };
+
+    it('fires exactly one workflow execution for N cases with server-owned event.caseIds', async () => {
+      await expect(run(multiCaseBody)).resolves.toEqual({
+        workflowExecutionId: 'execution-1',
+        activityStatus: 'succeeded',
+      });
+      expect(management.runWorkflow).toHaveBeenCalledTimes(1);
+      expect(management.runWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
+        'default',
+        // Server overwrites event.caseIds to the authorized set.
+        { event: { caseIds: ['case-a', 'case-b', 'case-c'] } },
+        request,
+        undefined,
+        expect.objectContaining({ caseIds: ['case-a', 'case-b', 'case-c'] })
+      );
+    });
+
+    it('does NOT call casesClient.cases.get for multi-case runs (avoids N×fetch)', async () => {
+      await run(multiCaseBody);
+      expect(casesClient.cases.get).not.toHaveBeenCalled();
+    });
+
+    it('passes all caseIds to preflightWorkflowExecution', async () => {
+      await run(multiCaseBody);
+      expect(casesClient.userActions.preflightWorkflowExecution).toHaveBeenCalledWith({
+        caseIds: ['case-a', 'case-b', 'case-c'],
+      });
+    });
+
+    it('passes all caseIds to recordWorkflowExecution', async () => {
+      await run(multiCaseBody);
+      expect(casesClient.userActions.recordWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ caseIds: ['case-a', 'case-b', 'case-c'] })
+      );
+    });
+
+    it('emits one audit event per case on success', async () => {
+      await run(multiCaseBody);
+      expect(auditLog).toHaveBeenCalledTimes(3);
+      for (const id of ['case-a', 'case-b', 'case-c']) {
+        expect(auditLog).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'case_workflow_run', outcome: 'success' }),
+            kibana: expect.objectContaining({ saved_object: expect.objectContaining({ id }) }),
+          })
+        );
+      }
+    });
+
+    it('emits one audit event per case on failure', async () => {
+      management.runWorkflow.mockRejectedValue(new Error('execution failed'));
+      await expect(run(multiCaseBody)).rejects.toThrow('execution failed');
+      expect(auditLog).toHaveBeenCalledTimes(3);
+      for (const id of ['case-a', 'case-b', 'case-c']) {
+        expect(auditLog).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'case_workflow_run', outcome: 'failure' }),
+            kibana: expect.objectContaining({ saved_object: expect.objectContaining({ id }) }),
+          })
+        );
+      }
+    });
+
+    // SECURITY REGRESSION TEST: a user authorized on case-a but not case-b must NOT be able
+    // to start a workflow that acts on case-b.
+    it('refuses to start the workflow when the caller is not authorized on all cases', async () => {
+      casesClient.cases.ensureAuthorizedToUpdate.mockRejectedValue(
+        new Error('Unauthorized: case-b')
+      );
+
+      await expect(run(multiCaseBody)).rejects.toThrow('Unauthorized: case-b');
+      expect(management.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects a multi-case run with a non-case origin type', async () => {
+      await expect(
+        run({
+          caseIds: ['case-a', 'case-b'],
+          inputs: {},
+          origin: { type: 'cases.observable', id: 'obs-1' },
+        })
+      ).rejects.toThrow('can only be used with a single case');
+      expect(management.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects a multi-case run where origin.id is not in caseIds', async () => {
+      await expect(
+        run({
+          caseIds: ['case-a', 'case-b'],
+          inputs: {},
+          origin: { type: 'cases.case', id: 'not-in-list' },
+        })
+      ).rejects.toThrow('Workflow origin id must be one of the requested case ids.');
+      expect(management.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects a multi-case run with alert inputs', async () => {
+      await expect(
+        run({
+          caseIds: ['case-a', 'case-b'],
+          inputs: { event: { alertIds: [{ _id: 'a-1', _index: '.alerts' }] } },
+          origin: { type: 'cases.case', id: 'case-a' },
+        })
+      ).rejects.toThrow('Alert inputs can only be used with a single case.');
+      expect(management.runWorkflow).not.toHaveBeenCalled();
+    });
+  });
+
+  it('overwrites client-supplied event.caseIds with the authorized set', async () => {
+    // A client that sends a superset in inputs cannot widen the blast radius
+    // beyond the ids it declared in body.caseIds (and was authorized for).
+    await run({
+      caseIds: ['case-1'],
+      inputs: { event: { caseIds: ['case-1', 'case-evil'], triggerType: 'manual' } },
+      origin: { type: 'cases.case', id: 'case-1' },
+    });
+
+    expect(management.runWorkflow).toHaveBeenCalledWith(
+      expect.anything(),
+      'default',
+      // event.caseIds is forced to the authorized set; other event fields are preserved.
+      { event: { caseIds: ['case-1'], triggerType: 'manual' } },
+      request,
+      undefined,
+      expect.anything()
     );
   });
 
@@ -159,15 +296,15 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('rejects a case origin that does not match the route case', async () => {
-    await expect(run({ inputs: {}, origin: { type: 'cases.case', id: 'case-2' } })).rejects.toThrow(
-      'Workflow origin id must match case id "case-1".'
-    );
+    await expect(
+      run({ caseIds: ['case-1'], inputs: {}, origin: { type: 'cases.case', id: 'case-2' } })
+    ).rejects.toThrow('Workflow origin id must match case id "case-1".');
     expect(management.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('rejects an observable that does not belong to the case', async () => {
     await expect(
-      run({ inputs: {}, origin: { type: 'cases.observable', id: 'observable-1' } })
+      run({ caseIds: ['case-1'], inputs: {}, origin: { type: 'cases.observable', id: 'observable-1' } })
     ).rejects.toThrow('Observable "observable-1" does not belong to case "case-1".');
     expect(management.runWorkflow).not.toHaveBeenCalled();
   });
@@ -180,6 +317,7 @@ describe('CasesWorkflowRunService', () => {
 
     await expect(
       run({
+        caseIds: ['case-1'],
         inputs: { event: { observables: [{ id: 'observable-1' }] } },
         origin: { type: 'cases.observable', id: 'observable-1' },
       })
@@ -196,6 +334,7 @@ describe('CasesWorkflowRunService', () => {
 
     await expect(
       run({
+        caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-99', _index: '.alerts' }] } },
         origin: { type: 'cases.case', id: 'case-1' },
       })
@@ -212,6 +351,7 @@ describe('CasesWorkflowRunService', () => {
 
     await expect(
       run({
+        caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-99', _index: '.alerts' }] } },
         origin: { type: 'cases.observable', id: 'observable-1' },
       })
@@ -227,6 +367,7 @@ describe('CasesWorkflowRunService', () => {
 
     await expect(
       run({
+        caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-2', _index: '.alerts' }] } },
         origin: { type: 'cases.alert', id: 'alert-2' },
       })
@@ -244,6 +385,7 @@ describe('CasesWorkflowRunService', () => {
 
     await expect(
       run({
+        caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts-spoofed' }] } },
         origin: { type: 'cases.alert', id: 'alert-1' },
       })
@@ -262,6 +404,7 @@ describe('CasesWorkflowRunService', () => {
 
     await expect(
       run({
+        caseIds: ['case-1'],
         inputs: { event: { alertIds: [{ _id: 'alert-1', _index: '.alerts' }] } },
         origin: { type: 'cases.alert', id: 'alert-2' },
       })
@@ -280,6 +423,7 @@ describe('CasesWorkflowRunService', () => {
 
     await expect(
       run({
+        caseIds: ['case-1'],
         inputs: {
           event: {
             alertIds: [

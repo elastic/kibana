@@ -20,11 +20,10 @@ import {
 import type { RunCaseWorkflowRequest, RunCaseWorkflowResponse } from '../../../common/types/api';
 import type { CasesClient } from '../../client';
 import type { CasesRequestHandlerContext } from '../../types';
-import { validateOrigin } from './validate_origin';
+import { validateOrigin, validateMultiCaseOrigin } from './validate_origin';
 import { buildActivityOrigin } from './build_activity_origin';
 
 interface RunWorkflowParams {
-  caseId: string;
   workflowId: string;
   body: RunCaseWorkflowRequest;
   request: KibanaRequest;
@@ -59,7 +58,6 @@ export class CasesWorkflowRunService {
   }
 
   public async run({
-    caseId,
     workflowId,
     body,
     request,
@@ -67,11 +65,11 @@ export class CasesWorkflowRunService {
     casesClient,
     spaceId,
   }: RunWorkflowParams): Promise<RunCaseWorkflowResponse> {
+    const { caseIds } = body;
     const auditLogger = this.audit.asScoped(request);
 
     try {
       return await this.runWorkflow({
-        caseId,
         workflowId,
         body,
         request,
@@ -81,9 +79,9 @@ export class CasesWorkflowRunService {
         auditLogger,
       });
     } catch (error) {
-      this.logWorkflowRunAuditEvent({
+      this.logWorkflowRunAuditEvents({
         auditLogger,
-        caseId,
+        caseIds,
         workflowId,
         outcome: 'failure',
         error,
@@ -93,7 +91,6 @@ export class CasesWorkflowRunService {
   }
 
   private async runWorkflow({
-    caseId,
     workflowId,
     body,
     request,
@@ -112,17 +109,34 @@ export class CasesWorkflowRunService {
       throw Boom.forbidden('Workflows require an active Enterprise license.');
     }
 
-    await casesClient.cases.ensureAuthorizedToUpdate({ id: caseId });
-    const theCase = await casesClient.cases.get({ id: caseId, includeComments: true });
-    validateOrigin({
-      origin: body.origin,
-      caseId,
-      inputs: body.inputs,
-      theCase,
-    });
+    const { caseIds } = body;
 
-    // Fail fast before anything irreversible: check the per-case user-action limit.
-    await casesClient.userActions.preflightWorkflowExecution({ caseId });
+    // All-or-nothing: throws 403 if the caller lacks cases:<owner>/updateCase on any case.
+    // Authorizes before reporting not-found errors so an unauthorized caller cannot learn
+    // which IDs exist. One privilege round-trip for all owners via ensureAuthorized.
+    await casesClient.cases.ensureAuthorizedToUpdate({ ids: caseIds });
+
+    // For single-case runs, fetch the case to validate sub-entity origins and alert membership.
+    // For multi-case runs, only cases.case origin is legal — no case fetch is needed.
+    let theCase: Awaited<ReturnType<typeof casesClient.cases.get>> | undefined;
+    if (caseIds.length > 1) {
+      validateMultiCaseOrigin({
+        origin: body.origin,
+        caseIds,
+        inputs: body.inputs,
+      });
+    } else {
+      theCase = await casesClient.cases.get({ id: caseIds[0], includeComments: true });
+      validateOrigin({
+        origin: body.origin,
+        caseId: caseIds[0],
+        inputs: body.inputs,
+        theCase,
+      });
+    }
+
+    // Fail fast before anything irreversible: check the per-case user-action limit for all cases.
+    await casesClient.userActions.preflightWorkflowExecution({ caseIds });
 
     const workflow = await this.management.getWorkflow(workflowId, spaceId);
     if (!workflow) {
@@ -135,11 +149,21 @@ export class CasesWorkflowRunService {
       throw Boom.badRequest('Workflow is disabled. Enable it to run it.');
     }
 
-    const processedInputs = await preprocessAlertInputs(body.inputs, context, spaceId, this.logger);
+    // The server owns event.caseIds: overwrite any client-supplied value so the set the workflow
+    // sees is exactly the set that was authorized. Preserve other event fields (e.g. triggerType,
+    // alertIds) that preprocessAlertInputs reads.
+    const rawEvent = body.inputs.event;
+    const event =
+      typeof rawEvent === 'object' && rawEvent !== null && !Array.isArray(rawEvent)
+        ? (rawEvent as Record<string, unknown>)
+        : {};
+    const mergedInputs = { ...body.inputs, event: { ...event, caseIds } };
+
+    const processedInputs = await preprocessAlertInputs(mergedInputs, context, spaceId, this.logger);
     const metadata = CasesWorkflowExecutionMetadataSchema.parse({
       schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
       source: CASES_WORKFLOW_EXECUTION_SOURCE,
-      caseId,
+      caseIds,
       origin: body.origin,
     });
 
@@ -155,9 +179,10 @@ export class CasesWorkflowRunService {
       undefined,
       metadata
     );
-    this.logWorkflowRunAuditEvent({
+    // One audit event per case keeps the audit trail queryable by individual case ID.
+    this.logWorkflowRunAuditEvents({
       auditLogger,
-      caseId,
+      caseIds,
       workflowId,
       workflowExecutionId,
       outcome: 'success',
@@ -167,7 +192,7 @@ export class CasesWorkflowRunService {
     // A failure to record must NOT be reported as an execution failure — the run did succeed.
     try {
       await casesClient.userActions.recordWorkflowExecution({
-        caseId,
+        caseIds,
         workflow: {
           id: workflow.id,
           name: workflow.name,
@@ -182,31 +207,33 @@ export class CasesWorkflowRunService {
           error instanceof Error ? error.message : String(error)
         }`
       );
-      this.logAuditEvent(auditLogger, {
-        message: `Failed to record workflow [${workflowId}] execution [${workflowExecutionId}] in case [${caseId}] activity`,
-        event: {
-          action: 'case_workflow_activity_create',
-          category: ['database'],
-          type: ['creation'],
-          outcome: 'failure',
-        },
-        error: { message: error instanceof Error ? error.message : String(error) },
-        kibana: { saved_object: { type: CASE_SAVED_OBJECT, id: caseId } },
-      });
+      for (const caseId of caseIds) {
+        this.logAuditEvent(auditLogger, {
+          message: `Failed to record workflow [${workflowId}] execution [${workflowExecutionId}] in case [${caseId}] activity`,
+          event: {
+            action: 'case_workflow_activity_create',
+            category: ['database'],
+            type: ['creation'],
+            outcome: 'failure',
+          },
+          error: { message: error instanceof Error ? error.message : String(error) },
+          kibana: { saved_object: { type: CASE_SAVED_OBJECT, id: caseId } },
+        });
+      }
       return { workflowExecutionId, activityStatus: 'failed' };
     }
   }
 
-  private logWorkflowRunAuditEvent({
+  private logWorkflowRunAuditEvents({
     auditLogger,
-    caseId,
+    caseIds,
     workflowId,
     workflowExecutionId,
     outcome,
     error,
   }: {
     auditLogger: AuditLogger;
-    caseId: string;
+    caseIds: string[];
     workflowId: string;
     workflowExecutionId?: string;
     outcome: 'success' | 'failure';
@@ -215,30 +242,32 @@ export class CasesWorkflowRunService {
     const executionDetail = workflowExecutionId
       ? ` with execution ID [${workflowExecutionId}]`
       : '';
-    this.logAuditEvent(auditLogger, {
-      message: `User ${
-        outcome === 'success' ? 'started' : 'failed to start'
-      } workflow [${workflowId}] from case [${caseId}]${executionDetail}`,
-      event: {
-        action: 'case_workflow_run',
-        category: ['database'],
-        type: ['creation'],
-        outcome,
-      },
-      ...(error
-        ? {
-            error: {
-              message: error instanceof Error ? error.message : String(error),
-            },
-          }
-        : {}),
-      kibana: {
-        saved_object: {
-          type: CASE_SAVED_OBJECT,
-          id: caseId,
+    for (const caseId of caseIds) {
+      this.logAuditEvent(auditLogger, {
+        message: `User ${
+          outcome === 'success' ? 'started' : 'failed to start'
+        } workflow [${workflowId}] from case [${caseId}]${executionDetail}`,
+        event: {
+          action: 'case_workflow_run',
+          category: ['database'],
+          type: ['creation'],
+          outcome,
         },
-      },
-    });
+        ...(error
+          ? {
+              error: {
+                message: error instanceof Error ? error.message : String(error),
+              },
+            }
+          : {}),
+        kibana: {
+          saved_object: {
+            type: CASE_SAVED_OBJECT,
+            id: caseId,
+          },
+        },
+      });
+    }
   }
 
   private logAuditEvent(auditLogger: AuditLogger, event: Parameters<AuditLogger['log']>[0]): void {
