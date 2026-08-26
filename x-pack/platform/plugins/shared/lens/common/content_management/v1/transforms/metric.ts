@@ -46,9 +46,7 @@ export const getUpdatedMetricState = (
     };
   }
 
-  // An empty prefix is the legacy `None` choice rather than an absent value, so it has to
-  // survive the move for downstream consumers to resolve the name as hidden
-  if (secondaryPrefix !== undefined && newState.secondaryLabel === undefined) {
+  if (secondaryPrefix && !newState.secondaryLabel) {
     newState = {
       ...newState,
       secondaryLabel: secondaryPrefix,
