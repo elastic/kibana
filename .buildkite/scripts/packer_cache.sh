@@ -8,12 +8,7 @@ source .buildkite/scripts/common/setup_node.sh
 
 export FORCE_BOOTSTRAP_REMOTE_CACHE=true
 
-# Same dual-cache / dual-PM contract as bootstrap.sh: yarn on legacy branches, pnpm when lockfile present.
-if [[ -f pnpm-lock.yaml ]]; then
-  pnpm kbn bootstrap
-else
-  yarn kbn bootstrap
-fi
+yarn kbn bootstrap
 
 cd .buildkite && npm ci && cd ..
 

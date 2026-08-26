@@ -5,7 +5,7 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 # Dual-cache agent images (elastic/ci-agent-images) bake one tree per package manager:
-#   pnpm -> ~/.cache/kibana/pnpm/{.pnpm-store,node_modules,Cypress}
+#   pnpm -> ~/.cache/kibana/pnpm/{.pnpm-store,node_modules}
 #   yarn -> ~/.kibana/{node_modules,.yarn-local-mirror}   (legacy layout, unchanged)
 # Detect the checkout's package manager so the same bootstrap (and VM image) works on
 # main (pnpm) and legacy release branches (yarn).
