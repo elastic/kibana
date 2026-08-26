@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
+import { InvestigationUnavailableError } from '@kbn/nightshift-investigations-plugin/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 /**
@@ -53,9 +54,11 @@ export const triggerInvestigationWorkflow = async ({
     });
     investigationId = response.investigation_id;
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    logger.warn(`Investigation trigger failed for event "${event_uuid}": ${message}`);
-    return undefined;
+    if (err instanceof InvestigationUnavailableError) {
+      logger.warn(`Investigation trigger failed for event "${event_uuid}": ${err.message}`);
+      return undefined;
+    }
+    throw err;
   }
 
   logger.info(

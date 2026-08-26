@@ -25,7 +25,8 @@ import type {
 } from '../../common';
 
 import { InvestigationNotFoundError } from './errors';
-export { InvestigationNotFoundError };
+import { InvestigationUnavailableError } from './investigation_unavailable_error';
+export { InvestigationNotFoundError, InvestigationUnavailableError };
 
 const SORT_FIELD_MAP: Record<
   NonNullable<ListInvestigationsRequest['sort_field']>,
@@ -138,11 +139,11 @@ export class NightshiftInvestigationsClient {
     context = {},
   }: StartInvestigationRequest): Promise<StartInvestigationResponse> {
     if (!this.workflowsManagement) {
-      throw new Error('workflowsManagement is not available');
+      throw new InvestigationUnavailableError('workflowsManagement is not available');
     }
 
     if (!this.agentBuilder) {
-      throw new Error('agentBuilder is not available');
+      throw new InvestigationUnavailableError('agentBuilder is not available');
     }
 
     const spaceId = this.getSpaceId();
@@ -158,7 +159,7 @@ export class NightshiftInvestigationsClient {
       this.logger.error(
         `Investigation workflow "${SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID}" is not installed in space "${spaceId}"`
       );
-      throw new Error('Investigations are not configured in this space');
+      throw new InvestigationUnavailableError('Investigations are not configured in this space');
     }
 
     const inputs = {

@@ -14,6 +14,7 @@ import type { InvestigationStatus } from '../../common';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
   InvestigationNotFoundError,
+  InvestigationUnavailableError,
   NightshiftInvestigationsClient,
 } from './investigations_client';
 
@@ -520,15 +521,15 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('throws when the workflow is not installed', async () => {
+  it('throws InvestigationUnavailableError when the workflow is not installed', async () => {
     mockManagement.getWorkflow.mockResolvedValue(null);
 
     await expect(makeClient().start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
-      'Investigations are not configured in this space'
+      InvestigationUnavailableError
     );
   });
 
-  it('throws when agentBuilder is not available', async () => {
+  it('throws InvestigationUnavailableError when agentBuilder is not available', async () => {
     const client = new NightshiftInvestigationsClient(
       mockRequest,
       mockWorkflowsManagement,
@@ -539,7 +540,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
 
     await expect(client.start({ subject: { type: 'alert', id: 'alert-1' } })).rejects.toThrow(
-      'agentBuilder is not available'
+      InvestigationUnavailableError
     );
   });
 });

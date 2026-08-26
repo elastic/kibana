@@ -7,6 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
+import { InvestigationUnavailableError } from '@kbn/nightshift-investigations-plugin/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { triggerInvestigationWorkflow } from './trigger_investigation_workflow';
 
@@ -135,10 +136,12 @@ describe('triggerInvestigationWorkflow', () => {
     expect(result).toBeUndefined();
   });
 
-  it('returns undefined and logs a warning when client.start() throws', async () => {
+  it('returns undefined and logs a warning when client.start() throws InvestigationUnavailableError', async () => {
     const start = jest
       .fn()
-      .mockRejectedValue(new Error('Investigations are not configured in this space'));
+      .mockRejectedValue(
+        new InvestigationUnavailableError('Investigations are not configured in this space')
+      );
     const nightshiftInvestigations = {
       getInvestigationsClient: jest.fn().mockReturnValue({ start }),
     } as unknown as NightshiftInvestigationsServerStart;
@@ -155,5 +158,21 @@ describe('triggerInvestigationWorkflow', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Investigation trigger failed')
     );
+  });
+
+  it('rethrows unexpected errors from client.start()', async () => {
+    const start = jest.fn().mockRejectedValue(new Error('Elasticsearch connection refused'));
+    const nightshiftInvestigations = {
+      getInvestigationsClient: jest.fn().mockReturnValue({ start }),
+    } as unknown as NightshiftInvestigationsServerStart;
+
+    await expect(
+      triggerInvestigationWorkflow({
+        nightshiftInvestigations,
+        request: createRequest(),
+        logger: createLogger(),
+        event: createEvent(),
+      })
+    ).rejects.toThrow('Elasticsearch connection refused');
   });
 });
