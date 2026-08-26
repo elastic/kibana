@@ -7,7 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isScoutTestsOnlyDiff, isScoutPathOnlyDiff } from './selective_scout';
+import { isScoutTestPath, isScoutTestsOnlyDiff, isScoutPathOnlyDiff } from './selective_scout';
+
+describe('isScoutTestPath', () => {
+  it('returns true for specs, co-located helpers, fixtures and generated manifests', () => {
+    expect(
+      isScoutTestPath('src/platform/plugins/shared/discover/test/scout/ui/tests/foo.spec.ts')
+    ).toBe(true);
+    expect(
+      isScoutTestPath('src/platform/plugins/shared/discover/test/scout/ui/helpers/build_query.ts')
+    ).toBe(true);
+    expect(
+      isScoutTestPath(
+        'src/platform/plugins/shared/discover/test/scout/ui/fixtures/page_objects/landing.ts'
+      )
+    ).toBe(true);
+    expect(
+      isScoutTestPath('src/platform/plugins/shared/discover/test/scout/.meta/ui/configs.json')
+    ).toBe(true);
+    expect(
+      isScoutTestPath(
+        'x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/chat.spec.ts'
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for files outside a Scout test scope', () => {
+    expect(
+      isScoutTestPath('src/platform/plugins/shared/discover/public/application/main.tsx')
+    ).toBe(false);
+    expect(
+      isScoutTestPath('src/platform/plugins/shared/discover/test/scout_setup/playwright.config.ts')
+    ).toBe(false);
+    expect(isScoutTestPath('src/platform/packages/shared/kbn-scout/src/index.ts')).toBe(false);
+  });
+});
 
 describe('isScoutTestsOnlyDiff', () => {
   it('returns false for an empty diff (no signal)', () => {
