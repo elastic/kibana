@@ -1,21 +1,9 @@
 {
-  "sha1": "db8bca9eeff0da47a519a7394da17967e25d348d",
+  "sha1": "274b791ee2325720288d1ff21ae15ee1e7af7964",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "17a1cfdc955352f-554076c4cd62fb3",
-      "title": "Unload lens_basic archives for search_examples",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "examples/search_examples/test/scout_examples/ui/tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "df10ec4d06aa91e-ef23b1ace86d1c8",
       "title": "Load logstash + lens_basic archives for search_examples",
@@ -142,6 +130,17 @@
         "file": "examples/search_examples/test/scout_examples/ui/tests/sql_search_example.spec.ts",
         "line": 14,
         "column": 39
+      }
+    },
+    {
+      "id": "17a1cfdc955352f-554076c4cd62fb3",
+      "title": "Unload lens_basic archives for search_examples",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

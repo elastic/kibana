@@ -453,18 +453,12 @@ export class SyntheticsAppPage {
     // re-queries the now-existing monitors and renders the populated overview
     // header before clicking the date picker's apply/refresh button.
     await this.navigateToOverview(refreshInterval);
-    await expect(this.page.testSubj.locator('superDatePickerApplyTimeButton')).toBeVisible({
-      timeout: 30_000,
-    });
-    await this.page.evaluate(() => {
-      const refreshButton = document.querySelector<HTMLButtonElement>(
-        '[data-test-subj="superDatePickerApplyTimeButton"]'
-      );
-      if (!refreshButton) {
-        throw new Error('The overview refresh button is not mounted');
-      }
-      refreshButton.click();
-    });
+    // The URL's auto-refresh interval plus late-mounting banners re-render the
+    // toolbar while the overview settles, detaching the apply button mid-click.
+    // Re-resolve and retry the click instead of a single attempt.
+    await expect(async () => {
+      await this.page.testSubj.locator('superDatePickerApplyTimeButton').click({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
     await this.waitForLoadingToFinish();
   }
 

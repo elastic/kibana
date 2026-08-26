@@ -1,23 +1,9 @@
 {
   "sha1": "5201ff61da7dc4bc356eb35f2103214410fd7b00",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "cf54e1b20d6357b-1f97aad70eeb339",
-      "title": "Teardown uptime test data",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/global.teardown.ts",
-        "line": 5,
-        "column": 1
-      }
-    },
     {
       "id": "6393a5cc96ae333-5ac88d9d8aa60c3",
       "title": "Ingest uptime test data",
@@ -419,6 +405,19 @@
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/uptime_spaces.spec.ts",
         "line": 35,
         "column": 78
+      }
+    },
+    {
+      "id": "cf54e1b20d6357b-1f97aad70eeb339",
+      "title": "Teardown uptime test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

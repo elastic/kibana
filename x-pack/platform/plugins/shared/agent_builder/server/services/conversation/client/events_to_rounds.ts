@@ -6,6 +6,7 @@
  */
 
 import type {
+  Conversation,
   ConversationRound,
   ConversationRoundAuthor,
   ExecutionTerminatedEvent,
@@ -17,9 +18,17 @@ import {
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
+  isEventsNativeVersion,
 } from '@kbn/agent-builder-common';
+import { ROUND_DERIVED_EVENT_ID_SUFFIXES } from './rounds_to_events';
 
-const EXECUTION_ID_SUFFIX = '::execution';
+/** Rounds derived from events timeline with a fallback to rounds if no events are present. */
+export const roundsForContext = (conversation: Conversation): ConversationRound[] =>
+  isEventsNativeVersion(conversation.schema_version) &&
+  conversation.events &&
+  conversation.events.length > 0
+    ? eventsToRounds(conversation.events)
+    : conversation.rounds;
 
 /**
  * Reconstructs rounds from a timeline.
@@ -75,8 +84,8 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
  * conversion round-trips, otherwise fall back to the execution id.
  */
 const roundIdFromExecutionId = (executionId: string): string =>
-  executionId.endsWith(EXECUTION_ID_SUFFIX)
-    ? executionId.slice(0, -EXECUTION_ID_SUFFIX.length)
+  executionId.endsWith(ROUND_DERIVED_EVENT_ID_SUFFIXES.execution)
+    ? executionId.slice(0, -ROUND_DERIVED_EVENT_ID_SUFFIXES.execution.length)
     : executionId;
 
 const toRoundInput = (userMessage: UserMessageEvent): RoundInput => userMessage.data;
