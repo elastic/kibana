@@ -60,7 +60,7 @@ describe('ApiKeysCpsCallout', () => {
 
     expect(await screen.findByTestId('apiKeysCpsCallout')).toBeInTheDocument();
     expect(
-      screen.getByText("Elasticsearch API keys don't work across linked projects")
+      screen.getByText('Elasticsearch API keys are limited to this project')
     ).toBeInTheDocument();
     expect(screen.getByTestId('apiKeysCpsCalloutLearnMoreLink')).toHaveAttribute(
       'href',

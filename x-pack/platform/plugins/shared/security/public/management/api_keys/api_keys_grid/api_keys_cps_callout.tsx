@@ -66,13 +66,13 @@ export const ApiKeysCpsCallout: FunctionComponent<ApiKeysCpsCalloutProps> = ({ c
         color="primary"
         iconType="info"
         title={i18n.translate('xpack.security.management.apiKeys.cpsCallout.title', {
-          defaultMessage: "Elasticsearch API keys don't work across linked projects",
+          defaultMessage: 'Elasticsearch API keys are limited to this project',
         })}
         data-test-subj="apiKeysCpsCallout"
       >
         <FormattedMessage
           id="xpack.security.management.apiKeys.cpsCallout.description"
-          defaultMessage="API keys created on this page are Elasticsearch API keys and can't be used for cross-project search across this project's linked projects. To programmatically access linked projects, use an Elastic Cloud API key instead. {learnMoreLink}"
+          defaultMessage="Keys created on this page don't work with cross-project search. They return results from this project only. To search across linked projects programmatically, create an Elastic Cloud API key with Elasticsearch and Kibana API access. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <EuiLink
@@ -83,7 +83,7 @@ export const ApiKeysCpsCallout: FunctionComponent<ApiKeysCpsCalloutProps> = ({ c
               >
                 <FormattedMessage
                   id="xpack.security.management.apiKeys.cpsCallout.learnMoreLinkText"
-                  defaultMessage="Learn more about Elastic Cloud API keys"
+                  defaultMessage="Learn more"
                 />
               </EuiLink>
             ),
