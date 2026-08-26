@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { LeadEntity } from '../types';
-import { createEntityProfileModule } from './entity_profile_module';
+import { createEntityAttributesModule } from './entity_attributes_module';
 import { PRIVILEGED_USER_WATCHLIST_ID } from './utils';
 
 const logger = loggingSystemMock.createLogger();
@@ -15,9 +15,7 @@ const logger = loggingSystemMock.createLogger();
 interface EntityRecordOverrides {
   type?: string;
   name?: string;
-  behaviors?: Record<string, unknown>;
   attributes?: Record<string, unknown>;
-  relationships?: Record<string, unknown>;
   lifecycle?: Record<string, unknown>;
   criticality?: string;
 }
@@ -25,9 +23,7 @@ interface EntityRecordOverrides {
 const buildEntity = ({
   type = 'user',
   name = 'alice',
-  behaviors,
   attributes,
-  relationships,
   lifecycle,
   criticality,
 }: EntityRecordOverrides = {}): LeadEntity => {
@@ -37,74 +33,26 @@ const buildEntity = ({
     type,
     name,
     record: {
-      entity: { id, type, name, behaviors, attributes, relationships, lifecycle },
+      entity: { id, type, name, attributes, lifecycle },
       ...(criticality ? { asset: { criticality } } : {}),
     } as unknown as LeadEntity['record'],
   };
 };
 
 const collect = (entity: LeadEntity) => {
-  const module = createEntityProfileModule({ logger });
+  const module = createEntityAttributesModule({ logger });
   return module.collect([entity]);
 };
 
-describe('createEntityProfileModule', () => {
+describe('createEntityAttributesModule', () => {
   it('is always enabled', () => {
-    expect(createEntityProfileModule({ logger }).isEnabled()).toBe(true);
+    expect(createEntityAttributesModule({ logger }).isEnabled()).toBe(true);
   });
 
-  it('exposes the entity_profile module weight', () => {
-    expect(createEntityProfileModule({ logger }).config.weight).toBe(0.5);
-  });
-
-  it('emits an unfamiliar_access observation when infrequent access exceeds the threshold', async () => {
-    const entity = buildEntity({
-      relationships: { accesses_infrequently: ['host:a', 'host:b', 'host:c'] },
-    });
-
-    const observations = await collect(entity);
-    const unfamiliar = observations.find((o) => o.type === 'unfamiliar_access');
-
-    expect(unfamiliar).toBeDefined();
-    expect(unfamiliar?.metadata.infrequent_access_count).toBe(3);
-    expect(unfamiliar?.description).toContain('3 infrequently-used entities');
-  });
-
-  it('does not emit unfamiliar_access below the threshold', async () => {
-    const entity = buildEntity({ relationships: { accesses_infrequently: ['host:a'] } });
-
-    const observations = await collect(entity);
-
-    expect(observations.find((o) => o.type === 'unfamiliar_access')).toBeUndefined();
-  });
-
-  it('emits behavioral observations for brute force, new country, and usb device', async () => {
-    const entity = buildEntity({
-      behaviors: {
-        brute_force_victim: true,
-        new_country_login: true,
-        used_usb_device: true,
-      },
-    });
-
-    const observations = await collect(entity);
-    const types = observations.map((o) => o.type);
-
-    expect(types).toContain('brute_force_target');
-    expect(types).toContain('new_country_login');
-    expect(types).toContain('usb_device_use');
-  });
-
-  it('emits broad_communication when communication peers exceed the threshold', async () => {
-    const entity = buildEntity({
-      relationships: { communicates_with: Array.from({ length: 9 }, (_, i) => `host:${i}`) },
-    });
-
-    const observations = await collect(entity);
-    const broad = observations.find((o) => o.type === 'broad_communication');
-
-    expect(broad).toBeDefined();
-    expect(broad?.metadata.communication_peer_count).toBe(9);
+  it('exposes the entity_attributes module id and weight', () => {
+    const { config } = createEntityAttributesModule({ logger });
+    expect(config.id).toBe('entity_attributes');
+    expect(config.weight).toBe(0.4);
   });
 
   it('emits newly_observed_entity when first_seen is within the window', async () => {
@@ -166,7 +114,7 @@ describe('createEntityProfileModule', () => {
     expect(observations.find((o) => o.type === 'governance_gap')).toBeUndefined();
   });
 
-  it('returns no observations for an entity with an empty profile', async () => {
+  it('returns no observations for an entity with empty attributes', async () => {
     const observations = await collect(buildEntity());
 
     expect(observations).toHaveLength(0);
