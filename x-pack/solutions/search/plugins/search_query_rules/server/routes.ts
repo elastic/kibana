@@ -384,12 +384,15 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       validate: {
         params: schema.object({
           indexName: schema.string(),
+        }),
+        query: schema.object({
           documentId: schema.string(),
         }),
       },
     },
     errorHandler(logger)(async (context, request, response) => {
-      const { indexName, documentId } = request.params;
+      const { indexName } = request.params;
+      const { documentId } = request.query;
       const core = await context.core;
       const {
         client: { asCurrentUser },
