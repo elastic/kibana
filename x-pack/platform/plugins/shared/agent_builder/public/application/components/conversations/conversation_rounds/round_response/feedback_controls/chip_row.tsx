@@ -70,9 +70,11 @@ export const ChipRow: React.FC<ChipRowProps> = ({ vote, selected, onToggle }) =>
     <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiText size="s">
-          {i18n.translate('xpack.agentBuilder.feedback.chipRow.pickOptions', {
-            defaultMessage: 'Pick any of the following options',
-          })}
+          <strong>
+            {i18n.translate('xpack.agentBuilder.feedback.chipRow.pickOptions', {
+              defaultMessage: 'Pick any of the following options',
+            })}
+          </strong>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
