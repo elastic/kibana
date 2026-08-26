@@ -318,14 +318,24 @@ describe('project watch', () => {
       });
 
       it('tags the harvested alerts once a decision is recorded', () => {
-        expect(tagSteps).toHaveLength(1);
+        expect(tagSteps.map(({ name }) => name)).toEqual([
+          'mark_alerts_dismissed',
+          'mark_alerts_applied',
+        ]);
 
-        const [tagStep] = tagSteps;
-        expect(tagStep.name).toBe('mark_alerts_reviewed');
-        expect(tagStep.if).toContain('steps.review_tuning.output.response.approved != null');
-        expect(String(tagStep.with?.tags_to_add)).toContain('consts.dismissed_tags');
-        expect(String(tagStep.with?.tags_to_add)).toContain('consts.applied_tags');
-        expect(String(tagStep.with?.tags_to_add)).not.toContain('reviewed_only_tags');
+        const [dismissed, applied] = tagSteps;
+        expect(dismissed.if).toContain('steps.review_tuning.output.response.approved == false');
+        expect(dismissed.with?.tags_to_add).toBe('${{ consts.dismissed_tags }}');
+        expect(applied.if).toContain('steps.review_tuning.output.response.approved == true');
+        expect(applied.with?.tags_to_add).toBe('${{ consts.applied_tags }}');
+      });
+
+      // The tag API requires an array; only a value that is exactly one `${{ }}`
+      // expression survives templating as an array instead of a string.
+      it('passes tags_to_add as a single expression, never a template', () => {
+        for (const step of tagSteps) {
+          expect(String(step.with?.tags_to_add)).toMatch(/^\$\{\{ [\w.]+ \}\}$/);
+        }
       });
 
       it('declares dismissed and applied tag sets', () => {
@@ -361,9 +371,9 @@ describe('project watch', () => {
           .map((column) => column.trim().replace(/`/g, ''));
 
         expect(columns).toContain('alert_ids');
-        expect(tagSteps[0].with?.alert_ids).toContain(
-          `foreach.item.${columns.indexOf('alert_ids')}`
-        );
+        for (const step of tagSteps) {
+          expect(step.with?.alert_ids).toContain(`foreach.item.${columns.indexOf('alert_ids')}`);
+        }
       });
     });
 
