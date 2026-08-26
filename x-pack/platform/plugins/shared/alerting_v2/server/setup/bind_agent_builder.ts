@@ -19,6 +19,7 @@ import { createActionPolicySmlType } from '../agent_builder/sml/action_policy_sm
 import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { AttachmentTypeToken } from '../agent_builder/tokens';
 import { ActionPolicyClient } from '../lib/action_policy_client';
+import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { EpisodesClient } from '../lib/episodes_client';
 import { PrivilegeChecker } from '../lib/services/privilege_checker/privilege_checker';
@@ -70,6 +71,10 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
         logger: loggerService.forSubsystem('agentBuilder'),
         getActionPolicyClient: (context) =>
           resolveRequestScoped(injection, context.request, ActionPolicyClient),
+        getExecutionHistoryClient: (context) =>
+          resolveRequestScoped(injection, context.request, ActionPolicyExecutionHistoryClient),
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
       }) as AttachmentTypeDefinition,
     [LoggerServiceToken, CoreStart('injection')]
   );
