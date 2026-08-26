@@ -18,6 +18,7 @@ import { queryKeys } from '../query_keys';
 import { mutationKeys } from '../mutation_keys';
 import { useKibana } from './use_kibana';
 import { useAgentBuilderServices } from './use_agent_builder_service';
+import { useConversation } from './use_conversation';
 
 export const useConversationAccessControlProfiles = ({
   uids,
@@ -51,13 +52,8 @@ export const hasInviteMembersSummary = (accessControl: ConversationAccessControl
   );
 };
 
-export const useInviteMembersSummary = ({ conversationId }: { conversationId: string }) => {
-  const { conversationsService } = useAgentBuilderServices();
-  const { data: conversation } = useQuery({
-    queryKey: queryKeys.conversations.byId(conversationId),
-    enabled: Boolean(conversationId),
-    queryFn: () => conversationsService.get({ conversationId }),
-  });
+export const useInviteMembersSummary = () => {
+  const { conversation } = useConversation();
 
   const accessControl = normalizeConversationAccessControl(conversation?.access_control);
   const hasSummary = hasInviteMembersSummary(accessControl);
@@ -121,6 +117,7 @@ export const useUpdateConversationAccessControl = ({
               }
             : current
       );
+      // Refresh conversation list caches too: they are independent from the byId cache and may surface access-control-derived state such as public/private mode.
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
 
       onSuccess?.(normalizedAccessControl);

@@ -335,9 +335,7 @@ describe('ConversationShareButton', () => {
     );
 
     expect(membersSummary).toBeInTheDocument();
-    expect(mockUseInviteMembersSummary).toHaveBeenCalledWith({
-      conversationId: 'conversation-1',
-    });
+    expect(mockUseInviteMembersSummary).toHaveBeenCalledWith();
     expect(
       screen.queryByTestId('agentBuilderConversationInviteMemberAvatar-member-1')
     ).not.toBeInTheDocument();

@@ -199,7 +199,6 @@ const ConversationSharePopover: React.FC<{
     <EuiPopover
       button={
         <ConversationSharePopoverButton
-          conversationId={conversation.id}
           canUpdateAccessControl={canUpdateAccessControl}
           onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
         />

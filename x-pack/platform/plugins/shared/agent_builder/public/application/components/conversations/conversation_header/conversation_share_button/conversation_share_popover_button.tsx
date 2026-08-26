@@ -130,11 +130,10 @@ const InviteMembersSummaryButton: React.FC<{
 };
 
 export const ConversationSharePopoverButton: React.FC<{
-  conversationId: string;
   canUpdateAccessControl: boolean;
   onClick: () => void;
-}> = ({ conversationId, canUpdateAccessControl, onClick }) => {
-  const { profiles, extraCount, shouldShowSummary } = useInviteMembersSummary({ conversationId });
+}> = ({ canUpdateAccessControl, onClick }) => {
+  const { profiles, extraCount, shouldShowSummary } = useInviteMembersSummary();
 
   if (!shouldShowSummary) {
     if (!canUpdateAccessControl) {
