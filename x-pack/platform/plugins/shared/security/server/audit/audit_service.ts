@@ -190,6 +190,7 @@ export class AuditService {
             (user && {
               id: user.profile_uid,
               name: user.username,
+              ...(user.email ? { email: user.email } : {}),
               roles: user.roles as string[],
             }) ||
             event.user,

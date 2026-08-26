@@ -24,9 +24,6 @@ export interface LogFileWriteError {
  * Called when a file-backed appender cannot write, instead of letting the failure reach the
  * process as an `uncaughtException`.
  *
- * Providing a handler opts that appender instance into surviving write failures. Without one, write
- * failures keep their default behavior of crashing the process.
- *
  * @public
  */
 export type LogFileWriteErrorHandler = (error: LogFileWriteError) => void;

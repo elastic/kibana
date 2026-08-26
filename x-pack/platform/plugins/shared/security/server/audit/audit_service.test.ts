@@ -245,6 +245,40 @@ describe('#asScoped', () => {
     audit.stop();
   });
 
+  it('includes user.email when the current user has an email', async () => {
+    const getCurrentUserWithEmail = jest.fn().mockReturnValue({
+      username: 'jdoe',
+      roles: ['admin'],
+      profile_uid: 'uid',
+      email: 'jdoe@example.com',
+    });
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      status,
+      http,
+      getCurrentUser: getCurrentUserWithEmail,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    const request = httpServerMock.createKibanaRequest();
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+    });
+    expect(logger.info).toHaveBeenLastCalledWith(
+      'MESSAGE',
+      expect.objectContaining({
+        user: { id: 'uid', name: 'jdoe', email: 'jdoe@example.com', roles: ['admin'] },
+      })
+    );
+    audit.stop();
+  });
+
   it('logs event enriched with meta data from fake request', async () => {
     const audit = new AuditService(logger);
     const auditSetup = audit.setup({
