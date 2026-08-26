@@ -23,7 +23,6 @@ import type {
 } from '../../../common/types/api';
 import { AttachmentType } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
-import { authorizeWorkflowRun } from '../../client/client';
 import type { CasesRequestHandlerContext } from '../../types';
 import { getSelectedAlertPairs, validateOrigin, validateMultiCaseOrigin } from './validate_origin';
 
@@ -123,7 +122,7 @@ export class CasesWorkflowRunService {
     // All-or-nothing: throws 403 if the caller lacks cases:<owner>/updateCase on any case.
     // Authorizes before reporting not-found errors so an unauthorized caller cannot learn
     // which IDs exist. One privilege round-trip for all owners via ensureAuthorized.
-    await authorizeWorkflowRun(casesClient, { ids: caseIds });
+    await casesClient.cases.ensureAuthorizedToRunWorkflow({ ids: caseIds });
 
     // For single-case runs, fetch the case to validate sub-entity origins and alert membership.
     // For multi-case runs, only cases.case origin is legal — no case fetch is needed.
@@ -162,15 +161,18 @@ export class CasesWorkflowRunService {
       throw Boom.badRequest('Workflow is disabled. Enable it to run it.');
     }
 
-    // The server owns event.caseIds: overwrite any client-supplied value so the set the workflow
-    // sees is exactly the set that was authorized. Preserve other event fields (e.g. triggerType,
-    // alertIds) that preprocessAlertInputs reads.
-    const rawEvent = body.inputs.event;
-    const event =
+    // Strip any client-supplied event.caseIds so the client cannot pre-seed the value;
+    // the server re-injects the authorized set via eventOverrides after preprocessing.
+    const { event: rawEvent, ...otherInputs } = body.inputs;
+    const strippedEvent =
       typeof rawEvent === 'object' && rawEvent !== null && !Array.isArray(rawEvent)
-        ? (rawEvent as Record<string, unknown>)
-        : {};
-    const mergedInputs = { ...body.inputs, event: { ...event, caseIds } };
+        ? (({ caseIds: _dropped, ...rest }: Record<string, unknown>) => rest)(
+            rawEvent as Record<string, unknown>
+          )
+        : rawEvent;
+    const sanitizedInputs = strippedEvent !== undefined
+      ? { ...otherInputs, event: strippedEvent }
+      : otherInputs;
 
     const metadata = CasesWorkflowExecutionMetadataSchema.parse({
       schemaVersion: CASES_WORKFLOW_EXECUTION_METADATA_SCHEMA_VERSION,
@@ -183,14 +185,19 @@ export class CasesWorkflowRunService {
     // is scheduled (truly fire-and-forget). executeWorkflow always waits ≥1 s for the execution
     // document to appear even when waitForCompletion=false, which adds measurable latency to
     // every interactive "run workflow from a case" click.
+    //
+    // eventOverrides injects the server-owned caseIds into `event` *after* alert preprocessing
+    // runs. preprocessAlertInputs replaces the whole `event` object with the alert-event shape,
+    // so pre-merging caseIds into event (before the call) would silently drop them on alert runs.
     const { workflowExecutionId, inputs: processedInputs } =
       await this.management.runWorkflowWithAlertPreprocessing({
         workflow: toWorkflowExecutionEngineModel(workflow),
         spaceId,
-        inputs: mergedInputs,
+        inputs: sanitizedInputs,
         request,
         preprocessingContext: context,
         metadata,
+        eventOverrides: { caseIds },
       });
     // One audit event per case keeps the audit trail queryable by individual case ID.
     this.logWorkflowRunAuditEvents({

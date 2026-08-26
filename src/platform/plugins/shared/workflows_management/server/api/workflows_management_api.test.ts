@@ -701,6 +701,58 @@ steps:
         mockRequest
       );
     });
+
+    it('merges eventOverrides into event after preprocessing so caller-owned fields survive event replacement', async () => {
+      const workflow = {
+        id: 'workflow-123',
+        name: 'Test workflow',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Test workflow',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+        },
+        yaml: 'name: Test workflow',
+      } as WorkflowExecutionEngineModel;
+      const inputs = {
+        event: {
+          triggerType: 'alert',
+          alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
+        },
+      };
+      // preprocessAlertInputs replaces the whole event — caseIds would be lost without overrides.
+      const processedInputs = {
+        event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }] },
+      };
+      const context = {} as AlertPreprocessingContext;
+      const eventOverrides = { caseIds: ['case-1'] };
+      mockPreprocessAlertInputs.mockResolvedValue(processedInputs);
+
+      const result = await api.runWorkflowWithAlertPreprocessing({
+        workflow,
+        spaceId: 'default',
+        inputs,
+        request: mockRequest,
+        preprocessingContext: context,
+        eventOverrides,
+      });
+
+      // finalInputs should have the merged event (processedInputs.event + eventOverrides).
+      expect(result.inputs).toEqual({
+        event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }], caseIds: ['case-1'] },
+      });
+
+      // The engine receives the merged event, not the bare preprocessed one.
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        workflow,
+        expect.objectContaining({
+          event: { triggerType: 'alert', alerts: [{ id: 'alert-1' }], caseIds: ['case-1'] },
+        }),
+        mockRequest
+      );
+    });
   });
 
   describe('executeWorkflow', () => {

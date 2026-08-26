@@ -56,6 +56,8 @@ import {
 import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
+import type { EnsureAuthorizedToRunWorkflowParams } from './ensure_authorized_to_run_workflow';
+import { ensureAuthorizedToRunWorkflow } from './ensure_authorized_to_run_workflow';
 import { withUsageCounter } from '../usage_counters';
 
 /**
@@ -163,6 +165,12 @@ export interface CasesSubClient {
    * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
    */
   getApplicableFields(params: GetApplicableFieldsParams): Promise<ApplicableFieldsResponse>;
+  /**
+   * Authorizes the caller to run a workflow against all the given case IDs (all-or-nothing).
+   * Uses `cases:<owner>/updateCase` as the privilege name, emitting a `case_workflow_run_authz`
+   * audit action so no misleading "case updated" record is written.
+   */
+  ensureAuthorizedToRunWorkflow(params: EnsureAuthorizedToRunWorkflowParams): Promise<void>;
 }
 
 // Keep this exhaustive so every new client method requires an explicit telemetry decision.
@@ -188,6 +196,7 @@ const usageCounterByMethod = {
   deleteObservable: 'delete_observable',
   bulkAddObservables: 'bulk_add_observables',
   getApplicableFields: null,
+  ensureAuthorizedToRunWorkflow: null,
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
 /**
@@ -262,6 +271,8 @@ export const createCasesSubClient = (
     ),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),
+    ensureAuthorizedToRunWorkflow: (params: EnsureAuthorizedToRunWorkflowParams) =>
+      ensureAuthorizedToRunWorkflow(params, clientArgs),
   };
 
   return Object.freeze(casesSubClient);

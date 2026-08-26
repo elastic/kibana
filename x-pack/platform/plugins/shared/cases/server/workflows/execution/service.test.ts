@@ -10,12 +10,9 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { DocumentResponse, RunCaseWorkflowRequest } from '../../../common/types/api';
 import type { Case } from '../../../common/types/domain';
-import { authorizeWorkflowRun } from '../../client/client';
 import { createCasesClientMock } from '../../client/mocks';
 import type { CasesRequestHandlerContext } from '../../types';
 import { CasesWorkflowRunService } from './service';
-
-jest.mock('../../client/client', () => ({ authorizeWorkflowRun: jest.fn() }));
 
 describe('CasesWorkflowRunService', () => {
   const request = httpServerMock.createKibanaRequest();
@@ -24,7 +21,7 @@ describe('CasesWorkflowRunService', () => {
   const auditLogger = audit.asScoped(request);
   const auditLog = auditLogger.log as jest.MockedFunction<typeof auditLogger.log>;
   const casesClient = createCasesClientMock();
-  const mockAuthorizeWorkflowRun = jest.mocked(authorizeWorkflowRun);
+  
   const onWorkflowStarted = jest.fn();
   let workflowsAvailable = true;
   let licenseValid = true;
@@ -81,7 +78,7 @@ describe('CasesWorkflowRunService', () => {
     jest.clearAllMocks();
     workflowsAvailable = true;
     licenseValid = true;
-    mockAuthorizeWorkflowRun.mockResolvedValue();
+    casesClient.cases.ensureAuthorizedToRunWorkflow.mockResolvedValue();
     casesClient.cases.get.mockResolvedValue(theCase);
     casesClient.attachments.getAllDocumentsAttachedToCase.mockResolvedValue([]);
     management.getWorkflow.mockResolvedValue({
@@ -100,19 +97,24 @@ describe('CasesWorkflowRunService', () => {
   it('starts the workflow with server-owned metadata', async () => {
     await expect(run()).resolves.toEqual({ workflowExecutionId: 'execution-1' });
 
-    expect(mockAuthorizeWorkflowRun).toHaveBeenCalledWith(casesClient, { ids: ['case-1'] });
+    expect(casesClient.cases.ensureAuthorizedToRunWorkflow).toHaveBeenCalledWith({
+      ids: ['case-1'],
+    });
     expect(casesClient.cases.get).toHaveBeenCalledWith({ id: 'case-1' });
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
-    expect(mockAuthorizeWorkflowRun.mock.invocationCallOrder[0]).toBeLessThan(
-      management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]
-    );
+    expect(
+      casesClient.cases.ensureAuthorizedToRunWorkflow.mock.invocationCallOrder[0]
+    ).toBeLessThan(management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]);
     expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
       workflow: expect.objectContaining({ id: 'workflow-1', name: 'Investigate case' }),
       spaceId: 'default',
-      // The server injects event.caseIds — the authorized set, not whatever the client sent.
-      inputs: { event: { caseIds: ['case-1'] } },
+      // Client-supplied event.caseIds is stripped from inputs; the server re-injects the
+      // authorized set via eventOverrides (applied after alert preprocessing so it survives
+      // preprocessAlertInputs's event replacement).
+      inputs: { event: {} },
       request,
       preprocessingContext: context,
+      eventOverrides: { caseIds: ['case-1'] },
       metadata: {
         schemaVersion: 1,
         source: 'cases',
@@ -122,7 +124,9 @@ describe('CasesWorkflowRunService', () => {
     });
     expect(onWorkflowStarted).toHaveBeenCalledWith({
       caseIds: ['case-1'],
-      inputs: defaultBody.inputs,
+      // processedInputs from the mock: client caseIds stripped, eventOverrides not applied
+      // (the mock returns `inputs` as-is).
+      inputs: { event: {} },
       origin: defaultBody.origin,
       workflow: {
         id: 'workflow-1',
@@ -173,13 +177,15 @@ describe('CasesWorkflowRunService', () => {
     });
     expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
       expect.objectContaining({
+        // caseIds is passed via eventOverrides, not pre-merged into inputs.event, so that it
+        // survives alert preprocessing which replaces the entire event object.
         inputs: {
           event: {
             triggerType: 'alert',
             alertIds: [{ _id: 'alert-1', _index: '.alerts' }],
-            caseIds: ['case-1'],
           },
         },
+        eventOverrides: { caseIds: ['case-1'] },
         preprocessingContext: context,
       })
     );
@@ -201,8 +207,9 @@ describe('CasesWorkflowRunService', () => {
       expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
         expect.objectContaining({
           spaceId: 'default',
-          // Server overwrites event.caseIds to the authorized set.
-          inputs: { event: { caseIds: ['case-a', 'case-b', 'case-c'] } },
+          // Client-supplied event.caseIds is stripped; authorized set goes via eventOverrides.
+          inputs: { event: {} },
+          eventOverrides: { caseIds: ['case-a', 'case-b', 'case-c'] },
           request,
           metadata: expect.objectContaining({ caseIds: ['case-a', 'case-b', 'case-c'] }),
         })
@@ -244,7 +251,7 @@ describe('CasesWorkflowRunService', () => {
     // SECURITY REGRESSION TEST: a user authorized on case-a but not case-b must NOT be able
     // to start a workflow that acts on case-b.
     it('refuses to start the workflow when the caller is not authorized on all cases', async () => {
-      mockAuthorizeWorkflowRun.mockRejectedValue(new Error('Unauthorized: case-b'));
+      casesClient.cases.ensureAuthorizedToRunWorkflow.mockRejectedValue(new Error('Unauthorized: case-b'));
 
       await expect(run(multiCaseBody)).rejects.toThrow('Unauthorized: case-b');
       expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
@@ -284,9 +291,11 @@ describe('CasesWorkflowRunService', () => {
     });
   });
 
-  it('overwrites client-supplied event.caseIds with the authorized set', async () => {
+  it('strips client-supplied event.caseIds and re-injects the authorized set via eventOverrides', async () => {
     // A client that sends a superset in inputs cannot widen the blast radius
     // beyond the ids it declared in body.caseIds (and was authorized for).
+    // Client caseIds are dropped from inputs; the authorized set is re-applied after
+    // alert preprocessing via eventOverrides so it survives event object replacement.
     await run({
       caseIds: ['case-1'],
       inputs: { event: { caseIds: ['case-1', 'case-evil'], triggerType: 'manual' } },
@@ -295,8 +304,9 @@ describe('CasesWorkflowRunService', () => {
 
     expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith(
       expect.objectContaining({
-        // event.caseIds is forced to the authorized set; other event fields are preserved.
-        inputs: { event: { caseIds: ['case-1'], triggerType: 'manual' } },
+        // Client-supplied caseIds stripped; triggerType preserved; authorized set in eventOverrides.
+        inputs: { event: { triggerType: 'manual' } },
+        eventOverrides: { caseIds: ['case-1'] },
         request,
       })
     );
@@ -317,7 +327,7 @@ describe('CasesWorkflowRunService', () => {
   });
 
   it('rejects execution when the case update is unauthorized', async () => {
-    mockAuthorizeWorkflowRun.mockRejectedValue(new Error('not authorized'));
+    casesClient.cases.ensureAuthorizedToRunWorkflow.mockRejectedValue(new Error('not authorized'));
 
     await expect(run()).rejects.toThrow('not authorized');
     expect(management.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();

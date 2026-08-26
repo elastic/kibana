@@ -208,6 +208,13 @@ export interface RunWorkflowWithAlertPreprocessingParams {
   preprocessingContext: AlertPreprocessingContext;
   triggeredBy?: string;
   metadata?: Record<string, unknown>;
+  /**
+   * Fields to merge into `event` *after* alert preprocessing. Use this to inject
+   * server-owned values (e.g. `caseIds`) that alert preprocessing would otherwise
+   * overwrite, because `preprocessAlertInputs` replaces the whole `event` object with
+   * the expanded alert-event shape.
+   */
+  eventOverrides?: Record<string, unknown>;
 }
 
 export interface RunWorkflowWithAlertPreprocessingResult {
@@ -511,6 +518,10 @@ export class WorkflowsManagementApi {
 
   /**
    * Preprocesses alert inputs and starts a workflow without waiting for its execution document.
+   *
+   * When `eventOverrides` is supplied, its keys are merged into `event` *after* preprocessing.
+   * This is needed because `preprocessAlertInputs` replaces the whole `event` object with the
+   * expanded alert-event shape, so any caller-owned event fields must be re-applied afterwards.
    */
   public async runWorkflowWithAlertPreprocessing({
     workflow,
@@ -520,6 +531,7 @@ export class WorkflowsManagementApi {
     preprocessingContext,
     triggeredBy,
     metadata,
+    eventOverrides,
   }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
     const processedInputs = await preprocessAlertInputs(
       inputs,
@@ -527,16 +539,32 @@ export class WorkflowsManagementApi {
       spaceId,
       this.logger
     );
+
+    const finalInputs =
+      eventOverrides != null
+        ? {
+            ...processedInputs,
+            event: {
+              ...(typeof processedInputs.event === 'object' &&
+              processedInputs.event !== null &&
+              !Array.isArray(processedInputs.event)
+                ? (processedInputs.event as Record<string, unknown>)
+                : {}),
+              ...eventOverrides,
+            },
+          }
+        : processedInputs;
+
     const workflowExecutionId = await this.runWorkflow(
       workflow,
       spaceId,
-      processedInputs,
+      finalInputs,
       request,
       triggeredBy,
       metadata
     );
 
-    return { workflowExecutionId, inputs: processedInputs };
+    return { workflowExecutionId, inputs: finalInputs };
   }
 
   public async executeWorkflow(params: ExecuteWorkflowParams): Promise<ExecuteWorkflowResult> {
