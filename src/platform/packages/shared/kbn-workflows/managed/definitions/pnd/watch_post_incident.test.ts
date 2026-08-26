@@ -130,6 +130,7 @@ interface ParsedTrigger {
 
 interface ParsedWorkflow {
   name?: string;
+  settings?: { timeout?: string };
   steps?: ParsedStep[];
   triggers?: ParsedTrigger[];
 }
@@ -492,6 +493,22 @@ describe('watch_post_incident.yaml always-park (kibana-tjil.1)', () => {
 describe('watch_post_incident.yaml alwaysGate structural invariant', () => {
   it('declares await_apply_tuning at the top level', () => {
     expect(stepNames(parsed.steps)).toContain('await_apply_tuning');
+  });
+
+  // 30d, not the 72h default. Expiry FAILS the step, which is fail-closed.
+  it('waits 30 days at the tuning gate before failing closed', () => {
+    expect(getStep('await_apply_tuning').timeout).toBe('30d');
+  });
+
+  // The engine's default `settings.timeout` is 6h from **run** start. Idle HITL resume takes
+  // min(step timeout, workflow timeout), so omitting this expires a recently parked gate as
+  // soon as the Post-Incident run itself is 6h old — even though the step still says 30d.
+  it('sets the workflow timeout to 30d so the run clock cannot undercut the HITL wait', () => {
+    expect(parsed.settings?.timeout).toBe('30d');
+  });
+
+  it('bumps the managed version, so the workflow timeout reaches an installed stack', () => {
+    expect(PND_WATCH_POST_INCIDENT_WORKFLOW.version).toBeGreaterThan(13);
   });
 
   it('never wraps await_apply_tuning in an if step', () => {

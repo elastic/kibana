@@ -73,6 +73,7 @@ interface ParsedStep {
 interface ParsedWorkflow {
   consts?: Record<string, unknown>;
   name?: string;
+  settings?: { timeout?: string };
   steps?: ParsedStep[];
 }
 
@@ -584,6 +585,17 @@ describe('watch_floor.yaml self-contained gate prompts (A7)', () => {
       });
     }
   );
+
+  // The engine's default `settings.timeout` is 6h from **run** start. Idle HITL resume takes
+  // min(step timeout, workflow timeout), so omitting this expires a recently parked gate as
+  // soon as the Floor run itself is 6h old — even though the step still says 30d.
+  it('sets the workflow timeout to 30d so the run clock cannot undercut the HITL wait', () => {
+    expect(parsed.settings?.timeout).toBe('30d');
+  });
+
+  it('bumps the managed version, so the workflow timeout reaches an installed stack', () => {
+    expect(PND_WATCH_FLOOR_WORKFLOW.version).toBeGreaterThan(18);
+  });
 
   describe.each([
     ['reason_open_investigation', 'await_open_investigation'],
