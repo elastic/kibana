@@ -81,7 +81,7 @@ describe('DeferredDataClientBundle', () => {
         })
       );
 
-      bundle.initSetup(coreSetup);
+      void bundle.initSetup(coreSetup);
       const startPromise = bundle.initStart(coreStart);
 
       expect(innerBundle.initStart).not.toHaveBeenCalled();
@@ -110,7 +110,7 @@ describe('DeferredDataClientBundle', () => {
 
     it('returns the same singleton instance on repeated calls', async () => {
       await bundle.initSetup(coreSetup);
-      bundle.initStart(coreStart);
+      void bundle.initStart(coreStart);
 
       expect(bundle.createWorkflowDataClient()).toBe(bundle.createWorkflowDataClient());
     });
@@ -127,8 +127,8 @@ describe('DeferredDataClientBundle', () => {
       innerClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
       innerBundle.createWorkflowDataClient.mockReturnValue(innerClient);
 
-      bundle.initSetup(coreSetup);
-      bundle.initStart(coreStart);
+      void bundle.initSetup(coreSetup);
+      void bundle.initStart(coreStart);
 
       const client = bundle.createWorkflowDataClient();
       const searchPromise = client.search({ query: { match_all: {} } });
@@ -188,7 +188,7 @@ describe('DeferredDataClientBundle', () => {
 
     it('returns the same singleton instance on repeated calls', async () => {
       await bundle.initSetup(coreSetup);
-      bundle.initStart(coreStart);
+      void bundle.initStart(coreStart);
 
       expect(bundle.createStepDataClient()).toBe(bundle.createStepDataClient());
     });
@@ -205,8 +205,8 @@ describe('DeferredDataClientBundle', () => {
       innerClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
       innerBundle.createStepDataClient.mockReturnValue(innerClient);
 
-      bundle.initSetup(coreSetup);
-      bundle.initStart(coreStart);
+      void bundle.initSetup(coreSetup);
+      void bundle.initStart(coreStart);
 
       const client = bundle.createStepDataClient();
       const searchPromise = client.search({ query: { match_all: {} } });
