@@ -40,6 +40,8 @@ import { ScheduleEmailFlyout } from './schedule_email_flyout';
 import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
 import { ScorecardReport } from './scorecard';
 import { ClientsReport, FrustrationReport, FunnelReport, UsersReport } from './thin_reports';
+import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
+import { useSyncOpenWithTourStep } from '../rum_tour/use_sync_open_with_tour_step';
 
 const filterChip = (label: string, value?: string) => (value ? [{ label, value }] : []);
 
@@ -79,6 +81,7 @@ export function RumReportView({ templateId }: { templateId: string }) {
   const [aiOpen, setAiOpen] = useState(false);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const captureRef = useRef<HTMLDivElement>(null);
+  useSyncOpenWithTourStep('scheduleEmail', setScheduleOpen);
 
   const piiOn = includePii === 'true';
   const compareMode = compare === 'none' ? 'none' : 'previous';
@@ -290,24 +293,26 @@ export function RumReportView({ templateId }: { templateId: string }) {
       <div ref={captureRef} className="uxRumReportCapture">
         <AiReportPanel report={data} expanded={aiOpen} />
         <EuiSpacer size="m" />
-        <ReportCover
-          report={data}
-          filterChips={chips}
-          canNextWeek={canGoToNextCalendarWeek(rangeFrom)}
-          isThisWeek={isCurrentCalendarWeek(rangeFrom)}
-          onPrevWeek={() => {
-            const period = shiftCalendarWeek(rangeFrom, -1);
-            if (period) {
-              pushRumPath(history, `/reports/${templateId}`, period);
-            }
-          }}
-          onNextWeek={() => {
-            const period = shiftCalendarWeek(rangeFrom, 1);
-            if (period) {
-              pushRumPath(history, `/reports/${templateId}`, period);
-            }
-          }}
-        />
+        <UxTourAnchor stepId="reportView" display="block">
+          <ReportCover
+            report={data}
+            filterChips={chips}
+            canNextWeek={canGoToNextCalendarWeek(rangeFrom)}
+            isThisWeek={isCurrentCalendarWeek(rangeFrom)}
+            onPrevWeek={() => {
+              const period = shiftCalendarWeek(rangeFrom, -1);
+              if (period) {
+                pushRumPath(history, `/reports/${templateId}`, period);
+              }
+            }}
+            onNextWeek={() => {
+              const period = shiftCalendarWeek(rangeFrom, 1);
+              if (period) {
+                pushRumPath(history, `/reports/${templateId}`, period);
+              }
+            }}
+          />
+        </UxTourAnchor>
         <EuiSpacer />
         {noRows ? (
           <EuiEmptyPrompt

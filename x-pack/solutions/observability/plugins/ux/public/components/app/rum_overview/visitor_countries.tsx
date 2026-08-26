@@ -28,6 +28,7 @@ import type { RumCountryRow } from '../../../../common/rum_app';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { VITAL_P75_HELP } from '../../../utils/vital_help';
 import { VitalColumnName } from '../../../utils/vital_help_label';
+import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
 import { VisitorCountryMap } from './visitor_country_map';
 
 const LCP_POOR_MS = 4000;
@@ -193,111 +194,117 @@ export function VisitorCountriesPanel({
   ];
 
   return (
-    <EuiPanel hasBorder paddingSize="m" data-test-subj="uxOverviewVisitorCountries">
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.ux.overview.countriesTitle', {
-                defaultMessage: 'Visitors by country',
+    <UxTourAnchor stepId="countryMap" display="block">
+      <EuiPanel hasBorder paddingSize="m" data-test-subj="uxOverviewVisitorCountries">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('xpack.ux.overview.countriesTitle', {
+                  defaultMessage: 'Visitors by country',
+                })}
+              </h3>
+            </EuiTitle>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.ux.overview.countriesSubtitle', {
+                defaultMessage:
+                  'Volume, LCP, and errors by client.geo. Filter Overview or open Sessions for a country.',
               })}
-            </h3>
-          </EuiTitle>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.ux.overview.countriesSubtitle', {
+            </EuiText>
+          </EuiFlexItem>
+          {activeLocation && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="uxOverviewCountryClear"
+                size="xs"
+                iconType="cross"
+                onClick={() => pushRumPath(history, '/', { location: '' })}
+              >
+                {i18n.translate('xpack.ux.overview.countries.clear', {
+                  defaultMessage: 'Clear country filter',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+
+        {activeLocation && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="primary"
+              title={i18n.translate('xpack.ux.overview.countries.activeFilter', {
+                defaultMessage: 'Filtered to {name} ({iso})',
+                values: {
+                  name: activeRow?.name ?? activeLocation,
+                  iso: activeLocation,
+                },
+              })}
+            >
+              <EuiLink
+                data-test-subj="uxOverviewCountryActiveSessions"
+                onClick={() =>
+                  pushRumPath(
+                    history,
+                    '/session-replay',
+                    sessionsPatch({ location: activeLocation })
+                  )
+                }
+              >
+                {i18n.translate('xpack.ux.overview.countries.openFilteredSessions', {
+                  defaultMessage: 'View sessions in this country',
+                })}
+              </EuiLink>
+            </EuiCallOut>
+          </>
+        )}
+
+        <EuiSpacer size="s" />
+
+        {countries.length === 0 ? (
+          <EuiText size="s" color="subdued" style={{ color: euiTheme.colors.subduedText }}>
+            {i18n.translate('xpack.ux.overview.countries.empty', {
               defaultMessage:
-                'Volume, LCP, and errors by client.geo. Filter Overview or open Sessions for a country.',
+                'No client.geo.country_iso_code on documents in this range. Stamp geo on ingest or generators.',
             })}
           </EuiText>
-        </EuiFlexItem>
-        {activeLocation && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="uxOverviewCountryClear"
-              size="xs"
-              iconType="cross"
-              onClick={() => pushRumPath(history, '/', { location: '' })}
-            >
-              {i18n.translate('xpack.ux.overview.countries.clear', {
-                defaultMessage: 'Clear country filter',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+        ) : (
+          <EuiFlexGroup gutterSize="m" alignItems="flexStart">
+            <EuiFlexItem grow={4} style={{ minWidth: 280 }}>
+              <VisitorCountryMap
+                countries={countries}
+                activeLocation={activeLocation}
+                onFilter={(isoCode) => pushRumPath(history, '/', { location: isoCode })}
+                onSessions={(isoCode) =>
+                  pushRumPath(history, '/session-replay', sessionsPatch({ location: isoCode }))
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={6} style={{ minWidth: 320 }}>
+              <EuiBasicTable
+                data-test-subj="uxOverviewCountriesTable"
+                tableCaption={i18n.translate('xpack.ux.overview.countriesCaption', {
+                  defaultMessage: 'Visitors by country',
+                })}
+                items={pageOfItems}
+                columns={columns}
+                pagination={{
+                  pageIndex: currentPageIndex,
+                  pageSize,
+                  totalItemCount: countries.length,
+                  pageSizeOptions: COUNTRY_PAGE_SIZE_OPTIONS,
+                }}
+                onChange={onTableChange}
+                rowProps={(row) => ({
+                  className: row.isoCode === activeLocation ? 'euiTableRow-isSelected' : undefined,
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         )}
-      </EuiFlexGroup>
-
-      {activeLocation && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            color="primary"
-            title={i18n.translate('xpack.ux.overview.countries.activeFilter', {
-              defaultMessage: 'Filtered to {name} ({iso})',
-              values: {
-                name: activeRow?.name ?? activeLocation,
-                iso: activeLocation,
-              },
-            })}
-          >
-            <EuiLink
-              data-test-subj="uxOverviewCountryActiveSessions"
-              onClick={() =>
-                pushRumPath(history, '/session-replay', sessionsPatch({ location: activeLocation }))
-              }
-            >
-              {i18n.translate('xpack.ux.overview.countries.openFilteredSessions', {
-                defaultMessage: 'View sessions in this country',
-              })}
-            </EuiLink>
-          </EuiCallOut>
-        </>
-      )}
-
-      <EuiSpacer size="s" />
-
-      {countries.length === 0 ? (
-        <EuiText size="s" color="subdued" style={{ color: euiTheme.colors.subduedText }}>
-          {i18n.translate('xpack.ux.overview.countries.empty', {
-            defaultMessage:
-              'No client.geo.country_iso_code on documents in this range. Stamp geo on ingest or generators.',
-          })}
-        </EuiText>
-      ) : (
-        <EuiFlexGroup gutterSize="m" alignItems="flexStart">
-          <EuiFlexItem grow={4} style={{ minWidth: 280 }}>
-            <VisitorCountryMap
-              countries={countries}
-              activeLocation={activeLocation}
-              onFilter={(isoCode) => pushRumPath(history, '/', { location: isoCode })}
-              onSessions={(isoCode) =>
-                pushRumPath(history, '/session-replay', sessionsPatch({ location: isoCode }))
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={6} style={{ minWidth: 320 }}>
-            <EuiBasicTable
-              data-test-subj="uxOverviewCountriesTable"
-              tableCaption={i18n.translate('xpack.ux.overview.countriesCaption', {
-                defaultMessage: 'Visitors by country',
-              })}
-              items={pageOfItems}
-              columns={columns}
-              pagination={{
-                pageIndex: currentPageIndex,
-                pageSize,
-                totalItemCount: countries.length,
-                pageSizeOptions: COUNTRY_PAGE_SIZE_OPTIONS,
-              }}
-              onChange={onTableChange}
-              rowProps={(row) => ({
-                className: row.isoCode === activeLocation ? 'euiTableRow-isSelected' : undefined,
-              })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-    </EuiPanel>
+      </EuiPanel>
+    </UxTourAnchor>
   );
 }

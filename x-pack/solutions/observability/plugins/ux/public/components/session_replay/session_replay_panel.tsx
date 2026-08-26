@@ -47,7 +47,9 @@ import { fetchSessionReplaySessions } from '../../services/rest/session_replay_a
 import { mergeRumSearch, pushRumPath } from '../../utils/rum_search';
 import { TabTrendChart } from '../app/rum_overview/tab_trend_chart';
 import { useRumPageLoading } from '../app/rum_dashboard/rum_page_loading';
+import { UX_SESSION_REPLAY_ROW_PREFIX } from '../app/rum_tour/tour_steps';
 import { UxTourAnchor } from '../app/rum_tour/ux_tour_anchor';
+import { UxTourReplayState } from '../app/rum_tour/ux_tour_context';
 import { LiveSessionsPanel } from './live_sessions_panel';
 import {
   JourneyTrail,
@@ -617,6 +619,7 @@ export function SessionReplayPanel() {
           icon: 'play',
           type: 'icon',
           available: (item) => item.hasReplay,
+          'data-test-subj': 'uxSessionPlay',
           onClick: (item) => openPlayer(item.sessionId),
         },
       ],
@@ -675,8 +678,11 @@ export function SessionReplayPanel() {
     });
   }, [history]);
 
+  const tourReplayId = sessions.find((session) => session.hasReplay)?.sessionId;
+
   return (
     <>
+      <UxTourReplayState loading={loading} sessionId={tourReplayId} />
       <TabTrendChart accessor="sessions" />
       <EuiSpacer />
       <LiveSessionsPanel />
@@ -974,6 +980,9 @@ export function SessionReplayPanel() {
             rowProps={(item) => ({
               onClick: () => openDetail(item.sessionId),
               style: { cursor: 'pointer' },
+              'data-test-subj': item.hasReplay
+                ? `${UX_SESSION_REPLAY_ROW_PREFIX}${item.sessionId}`
+                : `uxSessionRow-${item.sessionId}`,
             })}
             noItemsMessage={i18n.translate('xpack.ux.sessions.empty', {
               defaultMessage:

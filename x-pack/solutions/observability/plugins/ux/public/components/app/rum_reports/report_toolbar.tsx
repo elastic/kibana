@@ -18,6 +18,7 @@ import {
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { mergeRumSearch } from '../../../utils/rum_search';
 import { exportReportPdf } from './export_report_pdf';
+import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
 
 const downloadCsv = (filename: string, csv: string) => {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -225,15 +226,17 @@ export function ReportToolbar({
         )}
         {onScheduleEmail && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="uxReportScheduleEmail"
-              iconType="mail"
-              onClick={onScheduleEmail}
-            >
-              {i18n.translate('xpack.ux.reports.toolbar.scheduleEmailButtonLabel', {
-                defaultMessage: 'Schedule email',
-              })}
-            </EuiButtonEmpty>
+            <UxTourAnchor stepId="scheduleEmail">
+              <EuiButtonEmpty
+                data-test-subj="uxReportScheduleEmail"
+                iconType="mail"
+                onClick={onScheduleEmail}
+              >
+                {i18n.translate('xpack.ux.reports.toolbar.scheduleEmailButtonLabel', {
+                  defaultMessage: 'Schedule email',
+                })}
+              </EuiButtonEmpty>
+            </UxTourAnchor>
           </EuiFlexItem>
         )}
         {onCreateAlert && (

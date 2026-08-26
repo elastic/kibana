@@ -26,6 +26,8 @@ import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
 import { css } from '@emotion/react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { UxTourAnchor } from '../app/rum_tour/ux_tour_anchor';
+import { useSyncOpenWithTourStep } from '../app/rum_tour/use_sync_open_with_tour_step';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionReplayEvents } from '../../services/rest/session_replay_api';
 import {
@@ -950,6 +952,18 @@ export function SessionPlayerPage() {
     });
   }, []);
 
+  const setInspectingFromTour = useCallback((open: boolean) => {
+    setInspecting(open);
+    if (open && playingRef.current) {
+      replayerRef.current?.pause();
+      setPlaying(false);
+    }
+    if (!open) {
+      setInspected(null);
+    }
+  }, []);
+  useSyncOpenWithTourStep('playerInspect', setInspectingFromTour);
+
   // Hover/click the reconstructed DOM (rrweb iframe) to highlight + describe nodes.
   useEffect(() => {
     if (!inspecting || !ready) {
@@ -1245,73 +1259,57 @@ export function SessionPlayerPage() {
             </div>
 
             <div css={styles.controls}>
-              <div
-                ref={timelineRef}
-                css={styles.timeline}
-                onClick={onTimelineClick}
-                onKeyDown={(event) => {
-                  if (event.key === 'ArrowLeft') {
-                    event.preventDefault();
-                    seekToPct(progressPct - 5);
-                  } else if (event.key === 'ArrowRight') {
-                    event.preventDefault();
-                    seekToPct(progressPct + 5);
-                  } else if (event.key === 'Home') {
-                    event.preventDefault();
-                    seekToPct(0);
-                  } else if (event.key === 'End') {
-                    event.preventDefault();
-                    seekToPct(100);
-                  }
-                }}
-                tabIndex={controlsDisabled ? -1 : 0}
-                role="slider"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={Math.round(progressPct)}
-                aria-label={i18n.translate('xpack.ux.sessionReplay.player.timelineAria', {
-                  defaultMessage: 'Replay progress',
-                })}
-                data-test-subj="uxSessionReplayTimeline"
-              >
-                <div css={styles.played} style={{ width: `${progressPct}%` }} />
-                {markers.map((marker, index) => (
-                  <div
-                    key={`${marker.kind}-${index}`}
-                    css={styles.marker}
-                    style={{
-                      left: `${marker.pct}%`,
-                      background:
-                        marker.kind === 'page'
-                          ? euiTheme.colors.accent
-                          : euiTheme.colors.textSubdued,
-                    }}
-                    title={marker.label}
-                  />
-                ))}
-                <div css={styles.cursor} style={{ left: `${progressPct}%` }} />
-              </div>
-
-              <div css={styles.metaRow}>
-                <EuiToolTip
-                  content={
-                    playing
-                      ? i18n.translate('xpack.ux.sessionReplay.player.pause', {
-                          defaultMessage: 'Pause',
-                        })
-                      : i18n.translate('xpack.ux.sessionReplay.player.play', {
-                          defaultMessage: 'Play',
-                        })
-                  }
-                  disableScreenReaderOutput
+              <UxTourAnchor stepId="player" display="block">
+                <div
+                  ref={timelineRef}
+                  css={styles.timeline}
+                  onClick={onTimelineClick}
+                  onKeyDown={(event) => {
+                    if (event.key === 'ArrowLeft') {
+                      event.preventDefault();
+                      seekToPct(progressPct - 5);
+                    } else if (event.key === 'ArrowRight') {
+                      event.preventDefault();
+                      seekToPct(progressPct + 5);
+                    } else if (event.key === 'Home') {
+                      event.preventDefault();
+                      seekToPct(0);
+                    } else if (event.key === 'End') {
+                      event.preventDefault();
+                      seekToPct(100);
+                    }
+                  }}
+                  tabIndex={controlsDisabled ? -1 : 0}
+                  role="slider"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={Math.round(progressPct)}
+                  aria-label={i18n.translate('xpack.ux.sessionReplay.player.timelineAria', {
+                    defaultMessage: 'Replay progress',
+                  })}
+                  data-test-subj="uxSessionReplayTimeline"
                 >
-                  <EuiButtonIcon
-                    display="fill"
-                    size="m"
-                    iconType={playing ? 'pause' : 'play'}
-                    onClick={togglePlay}
-                    isDisabled={controlsDisabled}
-                    aria-label={
+                  <div css={styles.played} style={{ width: `${progressPct}%` }} />
+                  {markers.map((marker, index) => (
+                    <div
+                      key={`${marker.kind}-${index}`}
+                      css={styles.marker}
+                      style={{
+                        left: `${marker.pct}%`,
+                        background:
+                          marker.kind === 'page'
+                            ? euiTheme.colors.accent
+                            : euiTheme.colors.textSubdued,
+                      }}
+                      title={marker.label}
+                    />
+                  ))}
+                  <div css={styles.cursor} style={{ left: `${progressPct}%` }} />
+                </div>
+
+                <div css={styles.metaRow}>
+                  <EuiToolTip
+                    content={
                       playing
                         ? i18n.translate('xpack.ux.sessionReplay.player.pause', {
                             defaultMessage: 'Pause',
@@ -1320,96 +1318,116 @@ export function SessionPlayerPage() {
                             defaultMessage: 'Play',
                           })
                     }
-                    data-test-subj="uxSessionReplayPlayPause"
-                  />
-                </EuiToolTip>
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      display="fill"
+                      size="m"
+                      iconType={playing ? 'pause' : 'play'}
+                      onClick={togglePlay}
+                      isDisabled={controlsDisabled}
+                      aria-label={
+                        playing
+                          ? i18n.translate('xpack.ux.sessionReplay.player.pause', {
+                              defaultMessage: 'Pause',
+                            })
+                          : i18n.translate('xpack.ux.sessionReplay.player.play', {
+                              defaultMessage: 'Play',
+                            })
+                      }
+                      data-test-subj="uxSessionReplayPlayPause"
+                    />
+                  </EuiToolTip>
 
-                <EuiToolTip
-                  content={i18n.translate('xpack.ux.sessionReplay.player.restart', {
-                    defaultMessage: 'Restart',
-                  })}
-                  disableScreenReaderOutput
-                >
-                  <EuiButtonIcon
-                    display="empty"
-                    size="m"
-                    iconType="refresh"
-                    onClick={restart}
-                    isDisabled={controlsDisabled}
-                    aria-label={i18n.translate('xpack.ux.sessionReplay.player.restart', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.ux.sessionReplay.player.restart', {
                       defaultMessage: 'Restart',
                     })}
-                    data-test-subj="uxSessionReplayRestart"
-                  />
-                </EuiToolTip>
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      display="empty"
+                      size="m"
+                      iconType="refresh"
+                      onClick={restart}
+                      isDisabled={controlsDisabled}
+                      aria-label={i18n.translate('xpack.ux.sessionReplay.player.restart', {
+                        defaultMessage: 'Restart',
+                      })}
+                      data-test-subj="uxSessionReplayRestart"
+                    />
+                  </EuiToolTip>
 
-                <EuiToolTip
-                  content={i18n.translate('xpack.ux.sessionReplay.player.inspect', {
-                    defaultMessage: 'Inspect element',
-                  })}
-                  disableScreenReaderOutput
-                >
-                  <EuiButtonIcon
-                    display={inspecting ? 'fill' : 'empty'}
-                    size="m"
-                    iconType="inspect"
-                    onClick={toggleInspect}
+                  <UxTourAnchor stepId="playerInspect">
+                    <EuiToolTip
+                      content={i18n.translate('xpack.ux.sessionReplay.player.inspect', {
+                        defaultMessage: 'Inspect element',
+                      })}
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        display={inspecting ? 'fill' : 'empty'}
+                        size="m"
+                        iconType="inspect"
+                        onClick={toggleInspect}
+                        isDisabled={controlsDisabled}
+                        isSelected={inspecting}
+                        aria-label={i18n.translate('xpack.ux.sessionReplay.player.inspect', {
+                          defaultMessage: 'Inspect element',
+                        })}
+                        data-test-subj="uxSessionReplayInspectToggle"
+                      />
+                    </EuiToolTip>
+                  </UxTourAnchor>
+
+                  <EuiText size="s" css={styles.clock} data-test-subj="uxSessionReplayClock">
+                    {formatClock(currentMs)}
+                    <span style={{ opacity: 0.55 }}> / {formatClock(totalMs)}</span>
+                  </EuiText>
+
+                  <EuiButtonGroup
+                    legend={i18n.translate('xpack.ux.sessionReplay.player.speedLegend', {
+                      defaultMessage: 'Playback speed',
+                    })}
+                    options={[
+                      { id: '1', label: '1×' },
+                      { id: '2', label: '2×' },
+                      { id: '4', label: '4×' },
+                    ]}
+                    idSelected={speed}
+                    onChange={(id) => setSpeed(id)}
+                    buttonSize="compressed"
                     isDisabled={controlsDisabled}
-                    isSelected={inspecting}
-                    aria-label={i18n.translate('xpack.ux.sessionReplay.player.inspect', {
-                      defaultMessage: 'Inspect element',
-                    })}
-                    data-test-subj="uxSessionReplayInspectToggle"
                   />
-                </EuiToolTip>
 
-                <EuiText size="s" css={styles.clock} data-test-subj="uxSessionReplayClock">
-                  {formatClock(currentMs)}
-                  <span style={{ opacity: 0.55 }}> / {formatClock(totalMs)}</span>
-                </EuiText>
-
-                <EuiButtonGroup
-                  legend={i18n.translate('xpack.ux.sessionReplay.player.speedLegend', {
-                    defaultMessage: 'Playback speed',
-                  })}
-                  options={[
-                    { id: '1', label: '1×' },
-                    { id: '2', label: '2×' },
-                    { id: '4', label: '4×' },
-                  ]}
-                  idSelected={speed}
-                  onChange={(id) => setSpeed(id)}
-                  buttonSize="compressed"
-                  isDisabled={controlsDisabled}
-                />
-
-                <EuiToolTip
-                  content={i18n.translate('xpack.ux.sessionReplay.player.skipIdleTooltip', {
-                    defaultMessage:
-                      'Jump over gaps longer than 2 seconds with no recorded activity',
-                  })}
-                >
-                  <EuiSwitch
-                    compressed
-                    label={i18n.translate('xpack.ux.sessionReplay.player.skipIdleToggleSwitch', {
-                      defaultMessage: 'Skip idle',
+                  <EuiToolTip
+                    content={i18n.translate('xpack.ux.sessionReplay.player.skipIdleTooltip', {
+                      defaultMessage:
+                        'Jump over gaps longer than 2 seconds with no recorded activity',
                     })}
-                    checked={skipIdle}
-                    onChange={(event) => setSkipIdle(event.target.checked)}
-                    disabled={controlsDisabled}
-                    data-test-subj="uxSessionReplaySkipIdle"
-                  />
-                </EuiToolTip>
+                  >
+                    <EuiSwitch
+                      compressed
+                      label={i18n.translate('xpack.ux.sessionReplay.player.skipIdleToggleSwitch', {
+                        defaultMessage: 'Skip idle',
+                      })}
+                      checked={skipIdle}
+                      onChange={(event) => setSkipIdle(event.target.checked)}
+                      disabled={controlsDisabled}
+                      data-test-subj="uxSessionReplaySkipIdle"
+                    />
+                  </EuiToolTip>
 
-                <div css={styles.metaSpacer} />
+                  <div css={styles.metaSpacer} />
 
-                <EuiBadge color="hollow">
-                  {i18n.translate('xpack.ux.sessionReplay.player.eventCount', {
-                    defaultMessage: '{count} events',
-                    values: { count: eventCount },
-                  })}
-                </EuiBadge>
-              </div>
+                  <EuiBadge color="hollow">
+                    {i18n.translate('xpack.ux.sessionReplay.player.eventCount', {
+                      defaultMessage: '{count} events',
+                      values: { count: eventCount },
+                    })}
+                  </EuiBadge>
+                </div>
+              </UxTourAnchor>
             </div>
           </EuiPanel>
         )}

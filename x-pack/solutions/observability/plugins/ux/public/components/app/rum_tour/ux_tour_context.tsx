@@ -11,10 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
-import { serviceNameFromPath, uxAppPath } from '../../../utils/ux_app_path';
+import { serviceNameFromPath, uxAppPath, uxSessionIdFromPath } from '../../../utils/ux_app_path';
 import {
   firstAppNameFromDom,
-  suffixForUxTab,
+  firstReplaySessionIdFromDom,
+  isOnStepLocation,
+  pathnameForTourLocation,
   UX_PRODUCT_TOUR_STEPS,
   UX_PRODUCT_TOUR_STORAGE_KEY,
   type UxTourStep,
@@ -26,6 +28,8 @@ const TOUR_HELP = i18n.translate('xpack.ux.tour.helpButtonTooltip', {
 
 export type UxTourInventoryStatus = 'unknown' | 'loading' | 'empty' | 'ready';
 
+export type UxTourReplayStatus = 'unknown' | 'loading' | 'empty' | 'ready';
+
 export interface UxTourContextValue {
   isActive: boolean;
   toursEnabled: boolean;
@@ -36,6 +40,7 @@ export interface UxTourContextValue {
   nextStep: () => void;
   startTour: () => void;
   setInventoryStatus: (status: UxTourInventoryStatus) => void;
+  setReplayStatus: (status: UxTourReplayStatus, sessionId?: string) => void;
 }
 
 const UxTourContext = createContext<UxTourContextValue | null>(null);
@@ -53,6 +58,8 @@ export function UxTourProvider({ children }: { children: React.ReactNode }) {
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [inventoryStatus, setInventoryStatus] = useState<UxTourInventoryStatus>('unknown');
+  const [replayStatus, setReplayStatusState] = useState<UxTourReplayStatus>('unknown');
+  const [replaySessionId, setReplaySessionId] = useState<string | undefined>();
 
   const stepsTotal = UX_PRODUCT_TOUR_STEPS.length;
   const stepConfig = UX_PRODUCT_TOUR_STEPS[currentStep - 1];
@@ -69,6 +76,16 @@ export function UxTourProvider({ children }: { children: React.ReactNode }) {
   const startTour = useCallback(() => {
     setCurrentStep(1);
     setIsActive(true);
+  }, []);
+
+  const setReplayStatus = useCallback((status: UxTourReplayStatus, sessionId?: string) => {
+    setReplayStatusState(status);
+    if (status === 'ready' && sessionId) {
+      setReplaySessionId(sessionId);
+    }
+    if (status === 'empty') {
+      setReplaySessionId(undefined);
+    }
   }, []);
 
   useEffect(() => {
@@ -100,6 +117,7 @@ export function UxTourProvider({ children }: { children: React.ReactNode }) {
       }
       return;
     }
+
     const serviceName = serviceNameFromPath(location.pathname) ?? firstAppNameFromDom();
     if (!serviceName) {
       if (inventoryStatus === 'empty') {
@@ -107,8 +125,33 @@ export function UxTourProvider({ children }: { children: React.ReactNode }) {
       }
       return;
     }
-    const pathname = uxAppPath(serviceName, suffixForUxTab(stepConfig.location));
-    if (location.pathname !== pathname) {
+
+    if (stepConfig.location === 'session-player') {
+      if (stepConfig.optional && replayStatus === 'empty') {
+        nextStep();
+        return;
+      }
+      if (isOnStepLocation(location.pathname, 'session-player')) {
+        return;
+      }
+      const sessionId =
+        replaySessionId ?? uxSessionIdFromPath(location.pathname) ?? firstReplaySessionIdFromDom();
+      if (!sessionId) {
+        const listPath = uxAppPath(serviceName, '/session-replay');
+        if (location.pathname !== listPath) {
+          history.push({ pathname: listPath, search: location.search });
+        }
+        return;
+      }
+      const pathname = pathnameForTourLocation(serviceName, 'session-player', sessionId);
+      if (pathname && location.pathname !== pathname) {
+        history.push({ pathname, search: location.search });
+      }
+      return;
+    }
+
+    const pathname = pathnameForTourLocation(serviceName, stepConfig.location, replaySessionId);
+    if (pathname && location.pathname !== pathname) {
       history.push({ pathname, search: location.search });
     }
   }, [
@@ -119,6 +162,8 @@ export function UxTourProvider({ children }: { children: React.ReactNode }) {
     location.pathname,
     location.search,
     nextStep,
+    replaySessionId,
+    replayStatus,
     stepConfig,
   ]);
 
@@ -133,8 +178,19 @@ export function UxTourProvider({ children }: { children: React.ReactNode }) {
       nextStep,
       startTour,
       setInventoryStatus,
+      setReplayStatus,
     }),
-    [currentStep, finishTour, isActive, nextStep, startTour, stepConfig, stepsTotal, toursEnabled]
+    [
+      currentStep,
+      finishTour,
+      isActive,
+      nextStep,
+      setReplayStatus,
+      startTour,
+      stepConfig,
+      stepsTotal,
+      toursEnabled,
+    ]
   );
 
   return <UxTourContext.Provider value={value}>{children}</UxTourContext.Provider>;
@@ -145,6 +201,27 @@ export function UxTourInventoryState({ status }: { status: UxTourInventoryStatus
   useEffect(() => {
     tour?.setInventoryStatus(status);
   }, [status, tour]);
+  return null;
+}
+
+export function UxTourReplayState({
+  loading,
+  sessionId,
+}: {
+  loading: boolean;
+  sessionId?: string;
+}) {
+  const tour = useUxTour();
+  useEffect(() => {
+    if (!tour?.isActive) {
+      return;
+    }
+    if (loading) {
+      tour.setReplayStatus('loading');
+      return;
+    }
+    tour.setReplayStatus(sessionId ? 'ready' : 'empty', sessionId);
+  }, [loading, sessionId, tour]);
   return null;
 }
 

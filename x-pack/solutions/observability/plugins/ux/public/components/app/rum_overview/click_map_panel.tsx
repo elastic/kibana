@@ -31,6 +31,7 @@ import { fetchRumClickMap } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { ClickMapStage } from './click_map_stage';
 import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
+import { useUxTour } from '../rum_tour/ux_tour_context';
 
 const clickMapTitle = i18n.translate('xpack.ux.overview.clickMap.title', {
   defaultMessage: 'Click map',
@@ -46,11 +47,15 @@ export function ClickMapPanel() {
     urlParams: { start, end, rangeFrom, rangeTo },
   } = useLegacyUrlParams();
   const isLongRange = isClickMapLongRange(start ?? rangeFrom, end ?? rangeTo);
-  const [isOpen, setIsOpen] = useState(!isLongRange);
+  const tour = useUxTour();
+  const tourOpen = Boolean(
+    tour?.isActive && tour.toursEnabled && tour.stepConfig?.stepId === 'clickMap'
+  );
+  const [isOpen, setIsOpen] = useState(!isLongRange || tourOpen);
 
   useEffect(() => {
-    setIsOpen(!isLongRange);
-  }, [isLongRange]);
+    setIsOpen(tourOpen || !isLongRange);
+  }, [isLongRange, tourOpen]);
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj="uxClickMapPanel">
