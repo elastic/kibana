@@ -215,8 +215,15 @@ export async function deleteVersionSpecificFleetServerPoliciesForVersions(
 
 /**
  * Returns the set of agent minor versions (e.g. `"9.4"`) currently assigned to variant policies
- * for the given parent agent policy ids, keyed by parent id. Queries `.fleet-agents` by
- * `policy_base_id` so it works even if `policy_id` has already been updated.
+ * for the given parent agent policy ids, keyed by parent id.
+ *
+ * Two-step approach, mirroring the sweep path so both paths are consistent:
+ *   1. Query `.fleet-policies` (by `policy_base_id`) to enumerate the variant `policy_id`s that
+ *      currently exist for these parents.
+ *   2. Query `.fleet-agents` by those exact `policy_id` values — the same field the sweep uses —
+ *      so agents enrolled by a downlevel fleet-server that may not have `policy_base_id` set are
+ *      also counted. Querying directly on `.fleet-agents` by `policy_base_id` would miss them,
+ *      reopening the Half-B gap for that subset. See https://github.com/elastic/kibana/issues/283077
  *
  * Used by `deployPolicies` to ensure that a parent policy update refreshes every variant that
  * actually serves an enrolled agent, not just those in the default bounded set.
@@ -230,11 +237,14 @@ export async function getAgentAssignedVersionsForPolicies(
     return result;
   }
 
-  const response = await esClient.search<
+  // Step 1: enumerate the variant policy_ids that currently exist in .fleet-policies.
+  // Driving from .fleet-policies is cheaper than a prefix/wildcard scan on .fleet-agents
+  // and is compatible with `search.allow_expensive_queries: false`.
+  const policiesResponse = await esClient.search<
     unknown,
-    { agents_by_policy_id: { buckets: Array<{ key: string }> } }
+    { variant_policy_ids: { buckets: Array<{ key: string }> } }
   >({
-    index: '.fleet-agents',
+    index: AGENT_POLICY_INDEX,
     ignore_unavailable: true,
     size: 0,
     query: {
@@ -243,17 +253,48 @@ export async function getAgentAssignedVersionsForPolicies(
       },
     },
     aggs: {
-      agents_by_policy_id: {
+      variant_policy_ids: {
         terms: {
           field: 'policy_id',
-          // one bucket per versioned policy id; each parent can have at most a handful
           size: parentPolicyIds.length * 20,
         },
       },
     },
   });
 
-  const buckets = response.aggregations?.agents_by_policy_id?.buckets ?? [];
+  const variantIds = (policiesResponse.aggregations?.variant_policy_ids?.buckets ?? [])
+    .map((b) => b.key)
+    .filter((id) => splitVersionSuffixFromPolicyId(id).version !== null);
+
+  if (variantIds.length === 0) {
+    return result;
+  }
+
+  // Step 2: query .fleet-agents by the exact variant policy_ids — same field the sweep uses.
+  // This catches agents enrolled by a downlevel fleet-server that have no policy_base_id.
+  const agentsResponse = await esClient.search<
+    unknown,
+    { agents_by_policy_id: { buckets: Array<{ key: string }> } }
+  >({
+    index: '.fleet-agents',
+    ignore_unavailable: true,
+    size: 0,
+    query: {
+      bool: {
+        filter: [{ terms: { policy_id: variantIds } }],
+      },
+    },
+    aggs: {
+      agents_by_policy_id: {
+        terms: {
+          field: 'policy_id',
+          size: variantIds.length,
+        },
+      },
+    },
+  });
+
+  const buckets = agentsResponse.aggregations?.agents_by_policy_id?.buckets ?? [];
   for (const { key } of buckets) {
     const { baseId, version } = splitVersionSuffixFromPolicyId(key);
     if (version === null) continue;

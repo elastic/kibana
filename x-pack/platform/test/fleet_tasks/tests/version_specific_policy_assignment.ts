@@ -424,9 +424,11 @@ export default function (providerContext: FtrProviderContextWithServices) {
     // deployed variants in the bounded set. An agent on 9.4 with Kibana on 9.6 and an integration
     // requiring `^9.4.0` would never receive an updated variant after a secret rotation.
     //
-    // The fix replaces `inputs_for_versions` with a live aggregation on `.fleet-agents.policy_base_id`.
-    // This test verifies the new mechanism: a policy update refreshes an out-of-set variant when
-    // at least one agent is enrolled on it, regardless of whether inputs_for_versions is populated.
+    // The fix replaces `inputs_for_versions` with a live two-step agg: enumerate variant policy_ids
+    // from `.fleet-policies` by `policy_base_id`, then count agents on those ids in `.fleet-agents`
+    // by `policy_id` (catches downlevel-enrolled agents without `policy_base_id`). This test verifies
+    // that a policy update refreshes an out-of-set variant when at least one agent is enrolled on it,
+    // regardless of whether inputs_for_versions is populated.
 
     it('Half B: a policy update refreshes an out-of-set variant for which an agent is enrolled', async () => {
       const outOfSetVariantId = `${policyId}${AGENT_POLICY_VERSION_SEPARATOR}7.17`;
@@ -446,9 +448,11 @@ export default function (providerContext: FtrProviderContextWithServices) {
         refresh: 'wait_for',
       });
 
-      // Create an agent already on the variant. policy_base_id must be set so that
-      // getAgentAssignedVersionsForPolicies (which queries .fleet-agents by policy_base_id) finds it
-      // and includes '7.17' in the deploy version set for the next deployPolicies call.
+      // Create an agent already on the variant. getAgentAssignedVersionsForPolicies first queries
+      // .fleet-policies by policy_base_id to enumerate existing variant ids, then queries
+      // .fleet-agents by those exact policy_id values — so it also catches agents that have no
+      // policy_base_id (downlevel fleet-server enrollment). The agent here has policy_base_id set
+      // since it goes through the normal enrollment path.
       await createAgentDoc(providerContext, 'agent-old', outOfSetVariantId, '7.17.0', true, {
         policy_base_id: policyId,
       });

@@ -418,25 +418,48 @@ describe('getAgentAssignedVersionsForPolicies', () => {
     expect(result.size).toBe(0);
   });
 
-  it('queries .fleet-agents by policy_base_id and groups version suffixes by parent id', async () => {
-    esClient.search.mockResolvedValue({
+  it('returns an empty map without querying .fleet-agents when no variants exist in .fleet-policies', async () => {
+    // Step 1 returns no variant buckets → early return, step 2 never runs.
+    esClient.search.mockResolvedValueOnce({
+      aggregations: { variant_policy_ids: { buckets: [] } },
+    });
+
+    const result = await getAgentAssignedVersionsForPolicies(esClient, ['policy-1']);
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(result.size).toBe(0);
+  });
+
+  it('queries .fleet-policies by policy_base_id then .fleet-agents by policy_id, grouping version suffixes by parent id', async () => {
+    // Step 1: .fleet-policies returns the variant ids that exist for these parents.
+    esClient.search.mockResolvedValueOnce({
       aggregations: {
-        agents_by_policy_id: {
+        variant_policy_ids: {
           buckets: [
             { key: 'policy-1#9.4' },
             { key: 'policy-1#8.18' },
             { key: 'policy-2#9.4' },
-            { key: 'policy-1' }, // base-id bucket — should be ignored (no version suffix)
+            { key: 'policy-1' }, // base-id doc — filtered out (no version suffix)
           ],
+        },
+      },
+    });
+    // Step 2: .fleet-agents by policy_id — includes an agent without policy_base_id (downlevel enrollment).
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        agents_by_policy_id: {
+          buckets: [{ key: 'policy-1#9.4' }, { key: 'policy-1#8.18' }, { key: 'policy-2#9.4' }],
         },
       },
     });
 
     const result = await getAgentAssignedVersionsForPolicies(esClient, ['policy-1', 'policy-2']);
 
-    expect(esClient.search).toHaveBeenCalledWith(
+    // Step 1 must query .fleet-policies by policy_base_id.
+    expect(esClient.search).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
-        index: '.fleet-agents',
+        index: '.fleet-policies',
         size: 0,
         query: {
           bool: {
@@ -445,10 +468,22 @@ describe('getAgentAssignedVersionsForPolicies', () => {
         },
       })
     );
+    // Step 2 must query .fleet-agents by the exact variant policy_ids from step 1 (not policy_base_id).
+    // This catches downlevel-enrolled agents that lack a policy_base_id field.
+    expect(esClient.search).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        index: '.fleet-agents',
+        size: 0,
+        query: {
+          bool: {
+            filter: [{ terms: { policy_id: ['policy-1#9.4', 'policy-1#8.18', 'policy-2#9.4'] } }],
+          },
+        },
+      })
+    );
     expect(result.get('policy-1')).toEqual(new Set(['9.4', '8.18']));
     expect(result.get('policy-2')).toEqual(new Set(['9.4']));
-    // base-id bucket ('policy-1' without suffix) must not add a version entry
-    expect([...(result.get('policy-1') ?? [])]).not.toContain(undefined);
   });
 });
 
