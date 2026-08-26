@@ -20,6 +20,7 @@ import {
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiLoadingChart,
   EuiNotificationBadge,
   EuiPanel,
@@ -477,21 +478,14 @@ function ImpactEntityRow({
         )}
         {hasQuery && (
           <EuiFlexItem grow={false}>
-            <EuiToolTip
+            <EuiIconTip
+              type="visLine"
+              size="s"
+              color="subdued"
               content={i18n.translate('xpack.nightshift.investigation.impactEntityChartAvailable', {
                 defaultMessage: 'Chart available',
               })}
-            >
-              <EuiIcon
-                type="visLine"
-                size="s"
-                color="subdued"
-                aria-label={i18n.translate(
-                  'xpack.nightshift.investigation.impactEntityChartAvailableAriaLabel',
-                  { defaultMessage: 'Chart available' }
-                )}
-              />
-            </EuiToolTip>
+            />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
