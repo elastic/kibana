@@ -173,6 +173,8 @@ export {
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   type ConversationRound,
+  type ConversationRoundFeedback,
+  type FeedbackChipId,
   type Conversation,
   type ConversationOrigin,
   type ConversationRoundAuthor,
