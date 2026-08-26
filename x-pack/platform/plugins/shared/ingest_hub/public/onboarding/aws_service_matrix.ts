@@ -863,6 +863,11 @@ export function buildAwsServiceMatrix(
           varDefsByInput[ptInputType] = inputPkgInfo.varDefsByInput[ptInputType];
           inputs = [ptInputType];
           defaultEnabledInputs.push(ptInputType);
+          // Input packages (e.g. otelcol) have no pt.inputs[] so the IDF derivation below
+          // cannot run and leaves identityFederationSupported as undefined. The gate is
+          // !== false, so undefined would incorrectly show IDF. Default to false until the
+          // package manifest explicitly signals support.
+          identityFederationSupported = false;
         }
 
         // Derive union requiredConfig / optionalConfig.
