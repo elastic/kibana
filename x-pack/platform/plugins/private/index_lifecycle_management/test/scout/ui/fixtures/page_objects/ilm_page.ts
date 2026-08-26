@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ScoutPage } from '@kbn/scout';
 
 const ILM_APP_PATH = 'management/data/index_lifecycle_management';
@@ -23,7 +24,7 @@ export class IlmPage {
   readonly kibanaLogo;
 
   constructor(private readonly page: ScoutPage) {
-    this.pageHeader = page.testSubj.locator('ilmPageHeader');
+    this.pageHeader = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title);
     this.createPolicyButton = page.testSubj.locator('createPolicyButton');
     this.savePolicyButton = page.testSubj.locator('savePolicyButton');
     this.policyNameField = page.testSubj.locator('policyNameField');

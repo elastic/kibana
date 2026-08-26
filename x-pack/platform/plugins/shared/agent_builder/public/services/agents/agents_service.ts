@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { buildPath, type HttpSetup } from '@kbn/core-http-browser';
 import type { AgentAccessControl } from '@kbn/agent-builder-common';
 import type {
   AgentAccessControlUpdateRequest,
@@ -17,13 +17,19 @@ import type {
   CreateAgentResponse,
   DeleteAgentResponse,
   GetAgentAccessControlResponse,
+  GetAgentAiIndicesResponse,
   GetAgentResponse,
+  ListAgentAiIndicesResponse,
   ListAgentResponse,
   ListAgentResponseItem,
   UpdateAgentAccessControlResponse,
   UpdateAgentResponse,
 } from '../../../common/http_api/agents';
-import { publicApiPath } from '../../../common/constants';
+import { internalApiPath, publicApiPath } from '../../../common/constants';
+
+/** Static, so it does not read as a dynamic http path. */
+const AGENT_AI_INDICES_LIST_PATH = `${internalApiPath}/agents/_ai_indices`;
+const AGENT_AI_INDICES_BY_ID_PATH = `${internalApiPath}/agents/{id}/_ai_indices`;
 
 export class AgentService {
   private readonly http: HttpSetup;
@@ -45,6 +51,22 @@ export class AgentService {
    */
   async get(id: string): Promise<GetAgentResponse> {
     return await this.http.get<GetAgentResponse>(`${publicApiPath}/agents/${id}`);
+  }
+
+  /**
+   * Lists the effective AI indices for each listed agent, with type-contributed ones flagged.
+   */
+  async listAgentAiIndices(): Promise<ListAgentAiIndicesResponse> {
+    return await this.http.get<ListAgentAiIndicesResponse>(AGENT_AI_INDICES_LIST_PATH);
+  }
+
+  /**
+   * Returns the effective AI indices for one agent, with type-contributed ones flagged.
+   */
+  async getAgentAiIndices(id: string): Promise<GetAgentAiIndicesResponse> {
+    return await this.http.get<GetAgentAiIndicesResponse>(
+      buildPath(AGENT_AI_INDICES_BY_ID_PATH, { id })
+    );
   }
 
   /**
