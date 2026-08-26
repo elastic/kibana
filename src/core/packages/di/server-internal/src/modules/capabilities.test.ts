@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Container, ContainerModule } from 'inversify';
+import { type Container } from 'inversify';
+import { KibanaContainerModule } from '@kbn/core-di';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 import { injectionServiceMock, setup } from '@kbn/core-di-mocks';
 import {
@@ -36,7 +37,7 @@ describe('loadCapabilities', () => {
     capabilitiesStart = capabilitiesServiceMock.createStartContract();
     request = httpServerMock.createKibanaRequest();
     container = injection.getContainer();
-    container.load(new ContainerModule(loadCapabilities));
+    container.load(new KibanaContainerModule(loadCapabilities));
     container.bind(CoreSetup('capabilities')).toConstantValue(capabilitiesSetup);
     container.bind(CoreStart('capabilities')).toConstantValue(capabilitiesStart);
     container.bind(Request).toConstantValue(request);
