@@ -66,7 +66,7 @@ export const ConversationsPage: React.FC = () => {
   );
 
   const onClickCard = useCallback(
-    (id: Investigation['id']) => {
+    (id: Investigation['recordId']) => {
       setSelectedIdForDetails(id);
     },
     [setSelectedIdForDetails]

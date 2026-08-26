@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
-import type { CardActionType } from '../actions/base_actions';
+import type { BaseActionsProps } from '../actions';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { ConversationDetailsFlyoutHeader } from './flyout_header';
 import { ConversationDetailsFlyoutBody } from './flyout_body';
@@ -18,7 +18,7 @@ import { DETAILS_FLYOUT_LABELS } from './translations';
 export interface ConversationDetailsFlyoutProps {
   investigation: Investigation;
   onClose: () => void;
-  onClickAction: (action: CardActionType, recordId: Investigation['recordId']) => void;
+  onClickAction: BaseActionsProps['onClickAction'];
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   onOpenChat: () => void;
 }

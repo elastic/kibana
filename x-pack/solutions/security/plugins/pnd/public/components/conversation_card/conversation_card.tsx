@@ -60,6 +60,12 @@ export const ConversationCard = memo<ConversationCardProps>(
         hasBorder={false}
         hasShadow={false}
         onClick={() => onClickCard(investigation.id)}
+        onKeyDown={(event: React.KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClickCard(investigation.id);
+          }
+        }}
       >
         <EuiFlexGroup
           alignItems="flexStart"

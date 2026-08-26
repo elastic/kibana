@@ -69,7 +69,7 @@ export type CardActionType = 'openIncident' | 'dismiss' | 'assign';
 export interface BaseActionsProps {
   investigation: Investigation;
   isFlyout?: boolean;
-  onClickAction: (action: CardActionType, conversationId: Investigation['recordId']) => void;
+  onClickAction: (action: CardActionType, recordId: Investigation['recordId']) => void;
   onClickRecommendedAction?: ConversationsActionsGroupProps['onClickRecommendedAction'];
   'data-test-subj'?: string;
 }
@@ -119,8 +119,7 @@ export const BaseActions = memo<BaseActionsProps>(
                 name: investigation.primaryActionLabel ?? '',
                 onClick: () =>
                   onClickRecommendedAction({
-                    recordId: investigation.recordId,
-                    recommendedAction: investigation.recommendedAction,
+                    id: investigation.id,
                   }),
               },
             ]

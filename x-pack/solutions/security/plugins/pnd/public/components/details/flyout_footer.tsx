@@ -8,13 +8,13 @@
 import React, { memo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
-import { BaseActions, type CardActionType } from '../actions';
+import { BaseActions, type BaseActionsProps } from '../actions';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 
 export interface ConversationDetailsFlyoutFooterProps {
   investigation: Investigation;
-  onClickAction: (action: CardActionType, recordId: Investigation['recordId']) => void;
+  onClickAction: BaseActionsProps['onClickAction'];
   onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   onOpenChat: () => void;
 }
