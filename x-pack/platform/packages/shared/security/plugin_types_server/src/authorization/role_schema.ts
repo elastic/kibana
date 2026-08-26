@@ -321,11 +321,12 @@ const FEATURE_NAME_VALUE_REGEX = /^[a-zA-Z0-9_-]+$/;
  * feature Kibana privileges. None of the entries should apply to the same spaces.
  */
 export const getKibanaRoleSchema = (
-  getBasePrivilegeNames: () => { global: string[]; space: string[] },
-  // Memoize: resolving base privilege names rebuilds the full privilege map on every call.
-  getMemoizedBasePrivilegeNames = _.once(getBasePrivilegeNames)
-) =>
-  schema.arrayOf(
+  getBasePrivilegeNames: () => { global: string[]; space: string[] }
+) => {
+  // Resolving base privilege names rebuilds the full privilege map; do it once per schema.
+  const getMemoizedBasePrivilegeNames = _.once(getBasePrivilegeNames);
+
+  return schema.arrayOf(
     schema.object(
       {
         /**
@@ -434,17 +435,19 @@ export const getKibanaRoleSchema = (
     {
       maxSize: 1000,
       validate(value) {
-        for (const [indexA, valueA] of value.entries()) {
-          for (const valueB of value.slice(indexA + 1)) {
-            const spaceIntersection = _.intersection(valueA.spaces, valueB.spaces);
-            if (spaceIntersection.length !== 0) {
-              return `more than one privilege is applied to the following spaces: [${spaceIntersection}]`;
+        const claimed = new Set<string>();
+        for (const { spaces } of value) {
+          for (const space of spaces) {
+            if (claimed.has(space)) {
+              return `more than one privilege is applied to the following spaces: [${space}]`;
             }
+            claimed.add(space);
           }
         }
       },
     }
   );
+};
 
 export type ElasticsearchPrivilegesType = TypeOf<typeof elasticsearchRoleSchema>;
 export type KibanaPrivilegesType = TypeOf<ReturnType<typeof getKibanaRoleSchema>>;
