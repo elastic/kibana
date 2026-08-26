@@ -55,6 +55,12 @@ import { initEncryptedSavedObjects, initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
+import type { ThreatIntelRuntime } from './threat_intel/wiring';
+import {
+  createThreatIntelRuntime,
+  setupThreatIntel,
+  startThreatIntel,
+} from './threat_intel/wiring';
 import { initUiSettings } from './ui_settings';
 import { registerDeprecations } from './deprecations';
 import {
@@ -158,10 +164,6 @@ import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../common/siem_migrations/c
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
-import { registerRoutes as registerThreatIntelRoutes } from './threat_intel/routes';
-import { registerThreatIntelInferenceFeatures } from './threat_intel/inference_features';
-import { ensureThreatIntelBootstrap } from './threat_intel/setup/bootstrap_threat_intel';
-import { createDeferred } from './threat_intel/lib/deferred';
 import { THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
@@ -228,18 +230,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private defendCpsEnabled = false;
   private platformCpsEnabled = false;
 
-  /**
-   * Threat intel routes are registered in `setup()` but depend on start-time
-   * services and a one-time bootstrap. We capture only the start plugins the
-   * route getters actually read and expose them via lazy getters so a request
-   * cannot resolve them before `start()` runs. Narrowed to those four so the
-   * full 20+ plugin start bundle is not held alive for the plugin's lifetime.
-   */
-  private threatIntelStartPlugins?: Pick<
-    SecuritySolutionPluginStartDependencies,
-    'spaces' | 'inference' | 'searchInferenceEndpoints' | 'taskManager'
-  >;
-  private readonly threatIntelBootstrapReady = createDeferred();
+  /** Cross-lifecycle state for the threat-intel supply pipeline. */
+  private threatIntelRuntime: ThreatIntelRuntime = createThreatIntelRuntime();
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -342,6 +334,17 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
   }
 
+  /**
+   * Threat-intel supply pipeline setup. Gated on
+   * `threatIntelSupplyEnabled`. Does not install managed workflows (that
+   * lands in the follow-up PR that folds into the existing install-then-ready
+   * path).
+   */
+  /**
+   * Threat-intel supply pipeline start. Captures optional spaces /
+   * inference / actions / taskManager contracts, heals an empty catalog, and
+   * schedules the promote task. Does not install managed workflows.
+   */
   public setup(
     core: SecuritySolutionPluginCoreSetupDependencies,
     plugins: SecuritySolutionPluginSetupDependencies
@@ -532,23 +535,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       (context, request) => requestContextFactory.create(context, request)
     );
 
-    if (experimentalFeatures.threatIntelSupplyEnabled) {
-      // Inference features let operators pick a model per enrichment stage in
-      // Stack Management; no-op when `searchInferenceEndpoints` is unavailable.
-      registerThreatIntelInferenceFeatures(plugins.searchInferenceEndpoints, logger);
-
-      // Routes are registered now, but their start-time services and the
-      // one-time bootstrap are resolved lazily in `start()`.
-      registerThreatIntelRoutes({
-        router,
-        logger,
-        getSpacesService: () => this.threatIntelStartPlugins?.spaces?.spacesService,
-        getInference: () => this.threatIntelStartPlugins?.inference,
-        getSearchInferenceEndpoints: () => this.threatIntelStartPlugins?.searchInferenceEndpoints,
-        getTaskManager: () => this.threatIntelStartPlugins?.taskManager,
-        getBootstrapReady: () => this.threatIntelBootstrapReady.promise,
-      });
-    }
 
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
@@ -893,6 +879,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
 
+    setupThreatIntel({
+      experimentalFeatures,
+      plugins,
+      core,
+      logger: this.logger,
+      runtime: this.threatIntelRuntime,
+    });
+
     setupAlertsCapabilitiesSwitcher({
       core,
       logger: this.logger,
@@ -923,34 +917,6 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.start(core, plugins);
 
-    if (config.experimentalFeatures.threatIntelSupplyEnabled) {
-      // Publish start services to the route getters registered in `setup()`.
-      this.threatIntelStartPlugins = plugins;
-
-      // A bootstrap failure must not crash Kibana. Routes that touch plugin-owned
-      // indices observe the rejection via `getBootstrapReady()` and return 503;
-      // the LLM enrichment routes do not gate on it at all. This no-op handler
-      // marks the shared promise handled so a failure does not surface as an
-      // unhandled rejection at startup (before any request has awaited it).
-      this.threatIntelBootstrapReady.promise.catch(() => {});
-
-      // Fire-and-forget: startup must not block on the bootstrap. Route handlers
-      // await `getBootstrapReady()` so requests cannot touch plugin-owned indices
-      // before their templates apply.
-      ensureThreatIntelBootstrap({
-        esClient: core.elasticsearch.client.asInternalUser,
-        logger,
-      }).then(
-        () => this.threatIntelBootstrapReady.resolve(),
-        (err) => {
-          logger.error(
-            `Threat intelligence bootstrap failed: ${err instanceof Error ? err.message : err}`
-          );
-          this.threatIntelBootstrapReady.reject(err);
-        }
-      );
-    }
-
     if (plugins.workflowsExtensions) {
       // Install once in the global space, then mark ready (install is awaited before ready inside
       // the helper). Fire-and-forget: startup must not block on it.
@@ -974,6 +940,14 @@ export class Plugin implements ISecuritySolutionPlugin {
         forwardCasesAlertStatusToSecuritySolution(securityEventBus, logger, request, payload);
       });
     }
+
+    startThreatIntel({
+      experimentalFeatures: this.config.experimentalFeatures,
+      plugins,
+      core,
+      logger: this.logger,
+      runtime: this.threatIntelRuntime,
+    });
 
     const savedObjectsClient = new SavedObjectsClient(
       core.savedObjects.createInternalRepository([

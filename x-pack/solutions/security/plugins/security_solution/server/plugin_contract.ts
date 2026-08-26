@@ -120,6 +120,7 @@ export interface SecuritySolutionPluginStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
   workflowsManagement?: WorkflowsServerPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }
 
 export interface SecuritySolutionPluginSetup {
