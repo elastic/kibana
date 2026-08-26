@@ -48,11 +48,6 @@ export const ConversationsPage: React.FC = () => {
     string | undefined
   >(undefined);
 
-  const [, setRecommendedActionModalState] = useState<{
-    type: Investigation['recommendedAction'] | null;
-    recordId: Investigation['recordId'] | null;
-  }>({ type: null, recordId: null });
-
   const [selectedIdForDetails, setSelectedIdForDetails] = useState<string | undefined>(undefined);
   const [modalState, setModalState] = useState<{
     type: CardActionType | null;
@@ -78,7 +73,6 @@ export const ConversationsPage: React.FC = () => {
     useCallback(
       ({ recordId, recommendedAction }) => {
         setSelectedIdForRecommendedAction(recordId);
-        setRecommendedActionModalState({ type: recommendedAction, recordId });
       },
       [setSelectedIdForRecommendedAction]
     );
