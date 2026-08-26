@@ -129,10 +129,22 @@ export const prefetchPreviousStatusesByQuery = async (
 }> => {
   const boolQuery: estypes.QueryDslBoolQuery = { filter: query };
   if (excludeStatus !== undefined) {
-    // Pre-filter docs where the modern field already matches the target status.
-    // Legacy-only docs (signal.status) pass through and are filtered post-fetch
-    // by the route so cross-field docs are never incorrectly excluded.
-    boolQuery.must_not = { term: { [ALERT_WORKFLOW_STATUS]: excludeStatus } };
+    // Exclude confirmed no-ops at ES level using the same precedence as extractWorkflowStatus:
+    // 1. Modern field (kibana.alert.workflow_status) takes precedence — exclude if it equals target.
+    // 2. Legacy-only docs (signal.status, no modern field) — exclude if signal.status equals target
+    //    AND the modern field is absent, so we do not exclude docs where both fields are present
+    //    but disagree (modern field wins and they are genuinely transitioning).
+    // This ensures truncated only counts potentially-transitioning docs, preventing the
+    // || truncated condition from firing for all-legacy-no-op requests over 10,000 documents.
+    boolQuery.must_not = [
+      { term: { [ALERT_WORKFLOW_STATUS]: excludeStatus } },
+      {
+        bool: {
+          must: [{ term: { 'signal.status': excludeStatus } }],
+          must_not: [{ exists: { field: ALERT_WORKFLOW_STATUS } }],
+        },
+      },
+    ];
   }
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
