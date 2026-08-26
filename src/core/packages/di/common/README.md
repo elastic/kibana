@@ -58,6 +58,9 @@ The internal module provided by the core services solves those problems by intro
 
 The services marked as globally available will be registered in the global scope so that every plugin scope will inherit them. They will be resolved dynamically through the bound context so that the services bound in the request scope can inject request-scope dependencies.
 
+For the plugin developers, there is a dedicated service `Scope` that provides an isolated container where they can place interim services like HTTP requests or session data.
+Those interim services can then be accessed by other services from any plugin, but only in the request scope to minimize the risk of a memory leak or exposing session data.
+
 ## Usage
 ### Get Started
 To get started, just create an empty plugin and declare a named export called `module` in your `index.ts`:
@@ -545,6 +548,38 @@ And it is also available from the `toDynamicValue` and `toFactory` bindings:
 
     return response.data;
   })());
+```
+
+### Interim Services
+The `Scope` service can be used to register interim services that are available only during a short-lived session, like HTTP request handling.
+It provides two additional methods:
+- `expose` to bind a service that will be available to the services from other plugins, but only in the request scope.
+- `dispose` to dispose of the request scope and unbind all the services bound in it.
+
+```ts
+import { createToken, KibanaContainerModule, OnSetup, Scope } from '@kbn/core-di';
+import { Request, Response, Router } from '@kbn/core-di-server';
+import type { RouteDefinition } from './definition';
+
+export const Route = createToken<RouteDefinition>('Route');
+
+export const module = new KibanaContainerModule(({ onSetup }) => {
+  onSetup(Route, Router, ({ inject }, route, router) => {
+    router.register({
+      ...route,
+      handler: inject(Scope, async (scope, request, response) => {
+        scope.expose(Request).toConstantValue(request);
+        scope.expose(Response).toConstantValue(response);
+
+        try {
+          return await scope.get(route, { autobind: true }).handle();
+        } finally {
+          scope.dispose();
+        }
+      }),
+    });
+  });
+});
 ```
 
 ## Examples
