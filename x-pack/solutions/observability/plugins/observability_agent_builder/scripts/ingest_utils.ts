@@ -103,7 +103,7 @@ export async function downloadFile(url: string, destPath: string): Promise<void>
 
 export async function extractZip(zipPath: string, destDir: string): Promise<void> {
   const zip = new AdmZip(zipPath);
-  await zip.extractAllTo(destDir);
+  await zip.extractAllToAsync(destDir);
 }
 
 // ---------------------------------------------------------------------------

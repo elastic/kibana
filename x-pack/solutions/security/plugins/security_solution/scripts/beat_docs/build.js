@@ -137,7 +137,7 @@ const convertSchemaToHash = (schema, beatFields) => {
 const manageZipFields = async (beat, filePath, beatFields) => {
   try {
     const zip = new AdmZip(filePath);
-    zip.extractAllTo(beat.outputDir);
+    await zip.extractAllToAsync(beat.outputDir);
     console.log('building fields', beat.index);
     const obj = parse(
       fs.readFileSync(`${beat.outputDir}/winlogbeat-${BEATS_VERSION}-windows-x86_64/fields.yml`, {

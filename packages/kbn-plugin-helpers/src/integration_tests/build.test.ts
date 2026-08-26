@@ -90,7 +90,7 @@ describe('scripts/generate_plugin', () => {
   `);
 
     const zip = new AdmZip(PLUGIN_ARCHIVE);
-    zip.extractAllTo(TMP_DIR);
+    await zip.extractAllToAsync(TMP_DIR);
 
     const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
     files.sort((a, b) => a.localeCompare(b));
@@ -171,7 +171,7 @@ describe('scripts/generate_plugin', () => {
     expect(logs).toContain('plugin archive created');
 
     const zip = new AdmZip(PLUGIN_ARCHIVE);
-    zip.extractAllTo(TMP_DIR);
+    await zip.extractAllToAsync(TMP_DIR);
 
     const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
 
