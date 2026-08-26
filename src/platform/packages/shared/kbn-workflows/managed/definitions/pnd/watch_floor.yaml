@@ -16,6 +16,11 @@ enabled: true
 tags:
   - watch
   - watch-floor
+settings:
+  # 30d, matching each waitForInput. The engine default is 6h from run start; idle HITL
+  # resume takes min(step timeout, workflow timeout), so omitting this expires a recently
+  # parked gate as soon as the Floor run itself is 6h old.
+  timeout: 30d
 # Fires on a real security.attackDiscoveryCreated event (AD 2.0 only, opt-in per space)
 # and stays manually runnable. The custom trigger's `on.condition` is fail-open by design:
 # it only requires an attack-discovery id to be present, and the engine's default

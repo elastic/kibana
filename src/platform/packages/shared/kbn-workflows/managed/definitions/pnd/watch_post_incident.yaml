@@ -19,6 +19,11 @@ enabled: true
 tags:
   - watch
   - watch-post-incident
+settings:
+  # 30d, matching await_apply_tuning. The engine default is 6h from run start; idle HITL
+  # resume takes min(step timeout, workflow timeout), so omitting this expires a recently
+  # parked gate as soon as the Post-Incident run itself is 6h old.
+  timeout: 30d
 # Subscribes to the CLAIM, not the lifecycle fact, and stays manually runnable.
 #
 # This watch used to subscribe to pnd.incidentClosed, which says only "an incident closed" (D14/P3)
