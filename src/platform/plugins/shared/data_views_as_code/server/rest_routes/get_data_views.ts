@@ -15,9 +15,6 @@ import { BASE_PATH, INITIAL_REST_VERSION } from './constants';
 
 import type { RegisterRouteArgs } from './types';
 
-const GET_DATA_VIEWS_AS_CODE_PATH = BASE_PATH;
-const MAX_SEARCH_QUERY_LENGTH = 1000;
-
 export const registerGetDataViewsAsCodeRoute = ({
   router,
   getStartServices,
@@ -25,7 +22,7 @@ export const registerGetDataViewsAsCodeRoute = ({
 }: RegisterRouteArgs) =>
   router.versioned
     .get({
-      path: GET_DATA_VIEWS_AS_CODE_PATH,
+      path: BASE_PATH,
       access: 'internal',
       enableQueryVersion: true,
       description: 'Get all data views paginated',
@@ -42,7 +39,7 @@ export const registerGetDataViewsAsCodeRoute = ({
         validate: {
           request: {
             query: asCodePaginationParamsSchema.extend({
-              query: z.string().max(MAX_SEARCH_QUERY_LENGTH).optional().meta({
+              query: z.string().optional().meta({
                 description:
                   'Filters results by `name` and `index_pattern` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-simple-query-string-query) syntax.',
               }),
