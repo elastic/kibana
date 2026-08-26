@@ -184,6 +184,9 @@ EOF
 
   GCS_SA_CDN_URL="$(vault_get gcs-sa-cdn-prod cdn)"
   export GCS_SA_CDN_URL
+
+  GCS_SA_CDN_AUDIENCE="$(vault_get gcs-sa-cdn-prod audience)"
+  export GCS_SA_CDN_AUDIENCE
 }
 
 # Setup Failed Test Reporter Elasticsearch credentials
