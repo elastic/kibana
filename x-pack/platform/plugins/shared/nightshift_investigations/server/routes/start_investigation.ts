@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { INVESTIGATION_SUBJECT_TYPES } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const startInvestigationRoute = createNightshiftInvestigationsServerRoute({
@@ -29,7 +30,7 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   params: z.object({
     body: z.object({
       subject: z.object({
-        type: z.enum(['significant_event', 'alert']),
+        type: z.enum(INVESTIGATION_SUBJECT_TYPES),
         id: z.string().min(1).max(500),
       }),
       concurrency_key: z.string().max(500).optional(),

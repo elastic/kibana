@@ -6,11 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { notFound } from '@hapi/boom';
 import {
+  EMITTED_INVESTIGATION_STATUSES,
   INVESTIGATION_COMPLETED_TRIGGER_ID,
   INVESTIGATION_FAILED_TRIGGER_ID,
   INVESTIGATION_STARTED_TRIGGER_ID,
 } from '../../common/workflows/triggers';
+import { InvestigationNotFoundError } from '../client/investigations_client';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute({
@@ -31,46 +34,62 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       id: z.string().min(1).max(500),
     }),
     body: z.object({
-      status: z.enum(['running', 'completed', 'failed']),
-      started_at: z.string().min(1).max(64),
-      subject: z.object({
-        type: z.enum(['significant_event', 'alert']),
-        id: z.string().max(500),
-      }),
+      status: z.enum(EMITTED_INVESTIGATION_STATUSES),
     }),
   }),
-  handler: async ({ request, params, getTriggerEmitter }) => {
+  handler: async ({ request, params, getInvestigationsClient, getTriggerEmitter }) => {
     const emitter = getTriggerEmitter(request);
     if (!emitter) {
-      return { emitted: false };
+      return { accepted: false };
     }
 
-    const completedAt = new Date().toISOString();
+    // Identity comes from the execution document, never from the request body, so a caller
+    // cannot emit lifecycle events attributed to a subject it made up.
+    let execution;
+    try {
+      execution = await getInvestigationsClient(request).get(params.path.id);
+    } catch (error) {
+      if (error instanceof InvestigationNotFoundError) {
+        throw notFound(error.message);
+      }
+      throw error;
+    }
+
+    const { subject, started_at: startedAt } = execution;
     const base = {
       investigation_id: params.path.id,
-      subject: params.body.subject,
-      started_at: params.body.started_at,
+      subject,
+      started_at: startedAt ?? new Date().toISOString(),
     };
 
-    if (params.body.status === 'running') {
-      emitter(INVESTIGATION_STARTED_TRIGGER_ID, {
-        ...base,
-        status: 'running',
-      });
-    } else if (params.body.status === 'completed') {
-      emitter(INVESTIGATION_COMPLETED_TRIGGER_ID, {
-        ...base,
-        status: 'completed',
-        completed_at: completedAt,
-      });
-    } else {
-      emitter(INVESTIGATION_FAILED_TRIGGER_ID, {
-        ...base,
-        status: 'failed',
-        completed_at: completedAt,
-      });
+    switch (params.body.status) {
+      case 'running':
+        emitter(INVESTIGATION_STARTED_TRIGGER_ID, { ...base, status: 'running' });
+        break;
+      case 'completed':
+        emitter(INVESTIGATION_COMPLETED_TRIGGER_ID, {
+          ...base,
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+        });
+        break;
+      case 'failed':
+        emitter(INVESTIGATION_FAILED_TRIGGER_ID, {
+          ...base,
+          status: 'failed',
+          completed_at: new Date().toISOString(),
+        });
+        break;
+      default: {
+        // TypeScript errors here when a status is added to EMITTED_INVESTIGATION_STATUSES
+        // without a matching case above.
+        const exhaustiveCheck: never = params.body.status;
+        throw new Error(`Unsupported investigation lifecycle status: ${exhaustiveCheck}`);
+      }
     }
 
-    return { emitted: true };
+    // Emission is fire-and-forget (the workflow step uses on-failure: continue), so this
+    // acknowledges enqueue rather than delivery.
+    return { accepted: true };
   },
 });

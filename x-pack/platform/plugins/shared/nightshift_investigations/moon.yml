@@ -27,7 +27,6 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
-  - '@kbn/i18n'
   - '@kbn/scout'
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-common'

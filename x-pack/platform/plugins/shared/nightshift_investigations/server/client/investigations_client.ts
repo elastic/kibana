@@ -96,21 +96,20 @@ function isTerminalStatus(status: InvestigationStatus): boolean {
   return status === 'completed' || status === 'failed' || status === 'cancelled';
 }
 
-function recoverSubjectFromInput(
-  input: Record<string, unknown> | undefined
-): InvestigationSubject | undefined {
+function recoverSubjectFromInput(input: Record<string, unknown> | undefined): InvestigationSubject {
   const ctx = input?.context;
-  if (!isPlainObject(ctx)) return undefined;
-  if (ctx.source === 'significant_event') {
-    return {
-      type: 'significant_event',
-      id: String(ctx.significant_event_id ?? ctx.event_id ?? ''),
-    };
+  if (isPlainObject(ctx)) {
+    if (ctx.source === 'significant_event') {
+      return {
+        type: 'significant_event',
+        id: String(ctx.significant_event_id ?? ctx.event_id ?? ''),
+      };
+    }
+    if (ctx.source === 'alert') {
+      return { type: 'alert', id: String(ctx.alert_id ?? '') };
+    }
   }
-  if (ctx.source === 'alert') {
-    return { type: 'alert', id: String(ctx.alert_id ?? '') };
-  }
-  return undefined;
+  return { type: 'manual', id: '' };
 }
 
 export interface NightshiftInvestigationsClientDeps {
@@ -259,7 +258,7 @@ export class NightshiftInvestigationsClient {
 
     return {
       investigation_id: investigationId,
-      subject: subject ?? { type: 'significant_event', id: '' },
+      subject,
       status,
       started_at: execution.startedAt,
       completed_at: isTerminal ? execution.finishedAt : undefined,

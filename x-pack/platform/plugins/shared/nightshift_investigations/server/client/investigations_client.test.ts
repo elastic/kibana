@@ -157,10 +157,18 @@ describe('NightshiftInvestigationsClient.get()', () => {
       expect(result.subject).toEqual({ type: 'alert', id: 'alert-99' });
     });
 
-    it('falls back to empty significant_event when context is missing', async () => {
+    it('falls back to a manual subject when context is missing', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(makeExecution());
       const result = await makeClient().get('inv-1');
-      expect(result.subject).toEqual({ type: 'significant_event', id: '' });
+      expect(result.subject).toEqual({ type: 'manual', id: '' });
+    });
+
+    it('falls back to a manual subject when the source is unrecognized', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({ context: { inputs: { context: { source: 'chat' } } } })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.subject).toEqual({ type: 'manual', id: '' });
     });
   });
 

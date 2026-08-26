@@ -121,15 +121,15 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'nightshift-investigations.completed',
-    schemaHash: '168b8b2b884bd5ecc648f55b3c1ba06ea16605b7f21de97a2af7740bd2ba57e7',
+    schemaHash: 'f64a968859397a432fdb9881e065cdd40c381770e420c2589d74e48b6949282d',
   },
   {
     id: 'nightshift-investigations.failed',
-    schemaHash: '82ef02c9cfc9fa4f69b875120656a9a5df723505428072e35992994d4ddd31da',
+    schemaHash: '0ecc173660f7b0ef2b5f2ac468aac79649665bdfc527fdac121ba63b1d7c4d16',
   },
   {
     id: 'nightshift-investigations.started',
-    schemaHash: '86776184ae8839d2fce80a314a90bcde10e08e152b9322286a498346b1ed98fd',
+    schemaHash: '1f92f7f4b4c5c5b8076add4b0c40f27e676362785fbdbc18bfa18aae966fb1ca',
   },
   {
     id: 'significant-events.eventCreated',

@@ -7,95 +7,105 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { nightshiftInvestigationsRouteRepository } from '.';
+import { InvestigationNotFoundError } from '../client/investigations_client';
 
 const endpoint = 'POST /internal/nightshift/investigations/{id}/lifecycle_events' as const;
 const { handler } = nightshiftInvestigationsRouteRepository[endpoint];
 const mockRequest = {} as KibanaRequest;
 
-const makeResources = (emitter: jest.Mock | undefined, params: Record<string, unknown>) => ({
+const makeClient = (overrides: Record<string, unknown> = {}) => ({
+  get: jest.fn().mockResolvedValue({
+    investigation_id: 'exec-1',
+    subject: { type: 'alert', id: 'alert-1' },
+    started_at: '2024-01-01T00:00:00Z',
+    status: 'running',
+    ...overrides,
+  }),
+});
+
+const makeResources = (
+  emitter: jest.Mock | undefined,
+  params: Record<string, unknown>,
+  client?: Record<string, unknown>
+) => ({
   request: mockRequest,
   params,
-  getInvestigationsClient: jest.fn(),
+  getInvestigationsClient: jest.fn().mockReturnValue(client ?? makeClient()),
   getTriggerEmitter: jest.fn().mockReturnValue(emitter),
 });
 
-it('emits the started trigger with the expected payload', async () => {
+it('emits the started trigger with identity taken from the execution', async () => {
   const emitter = jest.fn();
   const resources = makeResources(emitter, {
     path: { id: 'exec-1' },
-    body: {
-      status: 'running',
-      started_at: '2024-01-01T00:00:00Z',
-      subject: { type: 'significant_event', id: 'event-1' },
-    },
+    body: { status: 'running' },
   });
 
   const result = await handler(resources as never);
 
-  expect(result).toEqual({ emitted: true });
+  expect(result).toEqual({ accepted: true });
   expect(emitter).toHaveBeenCalledWith('nightshift-investigations.started', {
     investigation_id: 'exec-1',
-    status: 'running',
-    subject: { type: 'significant_event', id: 'event-1' },
+    subject: { type: 'alert', id: 'alert-1' },
     started_at: '2024-01-01T00:00:00Z',
+    status: 'running',
   });
 });
 
-it('emits the completed trigger with the expected payload', async () => {
+it('emits the completed trigger with a completed_at timestamp', async () => {
   const emitter = jest.fn();
   const resources = makeResources(emitter, {
     path: { id: 'exec-1' },
-    body: {
-      status: 'completed',
-      started_at: '2024-01-01T00:00:00Z',
-      subject: { type: 'alert', id: 'alert-1' },
-    },
+    body: { status: 'completed' },
   });
 
   const result = await handler(resources as never);
 
-  expect(result).toEqual({ emitted: true });
-  expect(emitter).toHaveBeenCalledWith('nightshift-investigations.completed', {
-    investigation_id: 'exec-1',
-    status: 'completed',
-    subject: { type: 'alert', id: 'alert-1' },
-    started_at: '2024-01-01T00:00:00Z',
-    completed_at: expect.any(String),
-  });
+  expect(result).toEqual({ accepted: true });
+  expect(emitter).toHaveBeenCalledWith(
+    'nightshift-investigations.completed',
+    expect.objectContaining({ status: 'completed', completed_at: expect.any(String) })
+  );
 });
 
 it('emits the failed trigger when status is failed', async () => {
   const emitter = jest.fn();
   const resources = makeResources(emitter, {
-    path: { id: 'exec-2' },
-    body: {
-      status: 'failed',
-      started_at: '2024-01-01T00:00:00Z',
-      subject: { type: 'significant_event', id: '' },
-    },
+    path: { id: 'exec-1' },
+    body: { status: 'failed' },
   });
 
   const result = await handler(resources as never);
 
-  expect(result).toEqual({ emitted: true });
-  expect(emitter).toHaveBeenCalledWith('nightshift-investigations.failed', {
-    investigation_id: 'exec-2',
-    status: 'failed',
-    subject: { type: 'significant_event', id: '' },
-    started_at: '2024-01-01T00:00:00Z',
-    completed_at: expect.any(String),
+  expect(result).toEqual({ accepted: true });
+  expect(emitter).toHaveBeenCalledWith(
+    'nightshift-investigations.failed',
+    expect.objectContaining({ status: 'failed', completed_at: expect.any(String) })
+  );
+});
+
+it('rejects with 404 when the execution is not an investigation', async () => {
+  const client = makeClient();
+  client.get.mockRejectedValue(new InvestigationNotFoundError('nope'));
+  const resources = makeResources(
+    jest.fn(),
+    {
+      path: { id: 'not-an-investigation' },
+      body: { status: 'completed' },
+    },
+    client
+  );
+
+  await expect(handler(resources as never)).rejects.toMatchObject({
+    output: { statusCode: 404 },
   });
 });
 
 it('is a no-op when no trigger emitter is available', async () => {
   const resources = makeResources(undefined, {
-    path: { id: 'exec-3' },
-    body: {
-      status: 'completed',
-      started_at: '2024-01-01T00:00:00Z',
-      subject: { type: 'alert', id: 'alert-2' },
-    },
+    path: { id: 'exec-1' },
+    body: { status: 'completed' },
   });
 
-  await expect(handler(resources as never)).resolves.toEqual({ emitted: false });
+  await expect(handler(resources as never)).resolves.toEqual({ accepted: false });
 });

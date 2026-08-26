@@ -50,10 +50,6 @@ steps:
         x-elastic-internal-origin: 'kibana'
       body:
         status: 'running'
-        started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-        subject:
-          type: "{{ inputs.context.source | default: 'significant_event' }}"
-          id: "{{ inputs.context.significant_event_id | default: inputs.context.event_id | default: inputs.context.alert_id | default: '' }}"
     on-failure:
       continue: true
 
@@ -643,10 +639,6 @@ steps:
         x-elastic-internal-origin: 'kibana'
       body:
         status: 'completed'
-        started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-        subject:
-          type: "{{ inputs.context.source | default: 'significant_event' }}"
-          id: "{{ inputs.context.significant_event_id | default: inputs.context.event_id | default: inputs.context.alert_id | default: '' }}"
     on-failure:
       continue: true
 
@@ -660,10 +652,6 @@ steps:
         x-elastic-internal-origin: 'kibana'
       body:
         status: 'failed'
-        started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-        subject:
-          type: "{{ inputs.context.source | default: 'significant_event' }}"
-          id: "{{ inputs.context.significant_event_id | default: inputs.context.event_id | default: inputs.context.alert_id | default: '' }}"
     on-failure:
       continue: true
 

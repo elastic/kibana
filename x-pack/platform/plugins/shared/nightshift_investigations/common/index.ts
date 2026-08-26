@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export type InvestigationSubjectType = 'significant_event' | 'alert';
+import type { InvestigationSubjectType } from './workflows/triggers';
+
+export { INVESTIGATION_SUBJECT_TYPES, type InvestigationSubjectType } from './workflows/triggers';
 
 export interface InvestigationSubject {
   type: InvestigationSubjectType;

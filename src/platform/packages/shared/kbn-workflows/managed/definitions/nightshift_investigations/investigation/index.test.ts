@@ -14,7 +14,7 @@ interface WorkflowStep {
   name: string;
   type?: string;
   if?: string;
-  with?: { body?: { subject?: { id?: string } } };
+  with?: { body?: { status?: string } };
 }
 
 const investigation = parse(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.yaml) as {
@@ -29,17 +29,18 @@ const requireStep = (name: string): WorkflowStep => {
 
 describe('investigation lifecycle contracts', () => {
   it('emits lifecycle events and fails unsuccessful executions', () => {
-    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(7);
+    expect(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW.version).toBe(8);
     expect(investigation.steps[0].name).toBe('emit_investigation_started');
 
-    for (const stepName of [
-      'emit_investigation_started',
-      'emit_investigation_completed',
-      'emit_investigation_failed',
-    ]) {
+    const expectedStatuses: Record<string, string> = {
+      emit_investigation_started: 'running',
+      emit_investigation_completed: 'completed',
+      emit_investigation_failed: 'failed',
+    };
+    for (const [stepName, status] of Object.entries(expectedStatuses)) {
       const step = requireStep(stepName);
       expect(step.type).toBe('kibana.request');
-      expect(step.with?.body?.subject?.id).toContain('inputs.context.event_id');
+      expect(step.with?.body).toEqual({ status });
     }
 
     expect(investigation.steps[investigation.steps.length - 1]).toMatchObject({

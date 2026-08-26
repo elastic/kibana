@@ -9,25 +9,36 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
+export const INVESTIGATION_SUBJECT_TYPES = ['significant_event', 'alert', 'manual'] as const;
+export type InvestigationSubjectType = (typeof INVESTIGATION_SUBJECT_TYPES)[number];
+
 export const INVESTIGATION_STARTED_TRIGGER_ID = 'nightshift-investigations.started' as const;
 export const INVESTIGATION_COMPLETED_TRIGGER_ID = 'nightshift-investigations.completed' as const;
 export const INVESTIGATION_FAILED_TRIGGER_ID = 'nightshift-investigations.failed' as const;
 
+export const EMITTED_INVESTIGATION_STATUSES = ['running', 'completed', 'failed'] as const;
+
 const subjectSchema = z.object({
-  type: z.enum(['significant_event', 'alert']).describe('Kind of entity being investigated.'),
-  id: z.string().describe('Identifier of the investigated entity.'),
+  type: z
+    .enum(INVESTIGATION_SUBJECT_TYPES)
+    .describe('Kind of entity being investigated. "manual" for runs without a subject.'),
+  id: z.string().describe('Identifier of the investigated entity. Empty for manual runs.'),
 });
 
 const baseInvestigationSchema = z.object({
   investigation_id: z.string().describe('ID of the investigation (the workflow execution ID).'),
   status: z
-    .enum(['pending', 'running', 'completed', 'failed', 'cancelled'])
-    .describe('Current lifecycle status of the investigation.'),
+    .enum(EMITTED_INVESTIGATION_STATUSES)
+    .describe('Lifecycle status of the investigation at emit time.'),
   subject: subjectSchema.describe('The entity this investigation is about.'),
   started_at: z.string().describe('When the investigation started (ISO 8601 timestamp).'),
 });
 
 export type InvestigationsTriggerBasePayload = z.infer<typeof baseInvestigationSchema>;
+
+const startedSchema = baseInvestigationSchema.extend({
+  status: z.literal('running').describe('Always "running" for this trigger.'),
+});
 
 const completedSchema = baseInvestigationSchema.extend({
   status: z.literal('completed').describe('Always "completed" for this trigger.'),
@@ -39,11 +50,12 @@ const failedSchema = baseInvestigationSchema.extend({
   completed_at: z.string().describe('When the investigation finished (ISO 8601 timestamp).'),
 });
 
+export type InvestigationStartedTriggerPayload = z.infer<typeof startedSchema>;
 export type InvestigationCompletedTriggerPayload = z.infer<typeof completedSchema>;
 export type InvestigationFailedTriggerPayload = z.infer<typeof failedSchema>;
 
 export interface InvestigationsTriggerPayloadMap {
-  [INVESTIGATION_STARTED_TRIGGER_ID]: InvestigationsTriggerBasePayload;
+  [INVESTIGATION_STARTED_TRIGGER_ID]: InvestigationStartedTriggerPayload;
   [INVESTIGATION_COMPLETED_TRIGGER_ID]: InvestigationCompletedTriggerPayload;
   [INVESTIGATION_FAILED_TRIGGER_ID]: InvestigationFailedTriggerPayload;
 }
@@ -64,7 +76,7 @@ steps:
 export const investigationStartedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: INVESTIGATION_STARTED_TRIGGER_ID,
   stability: 'tech_preview',
-  eventSchema: baseInvestigationSchema,
+  eventSchema: startedSchema,
   title: i18n.translate('xpack.nightshift.workflowTriggers.investigationStarted.title', {
     defaultMessage: 'Nightshift investigations - Investigation started',
   }),
