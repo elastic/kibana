@@ -100,7 +100,11 @@ export const tags = {
       search: getPlaywrightTagsFor('serverless', 'search', 'local'),
       observability: {
         complete: getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
-        logs_essentials: getPlaywrightTagsFor('serverless', 'observability_logs_essentials', 'local'),
+        logs_essentials: getPlaywrightTagsFor(
+          'serverless',
+          'observability_logs_essentials',
+          'local'
+        ),
       },
       security: {
         complete: getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
