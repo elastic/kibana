@@ -491,6 +491,34 @@ export default function ({ getService }: FtrProviderContext) {
                     );
                 });
 
+                it('rejects rules with duplicate values in meta.arch', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: arch = "x86,x86" condition: true }
+                      rule rule2 { meta: arch = "arm64, arm64" condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 2 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.arch" value "x86,x86" on rule "rule1", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.arch" value "arm64, arm64" on rule "rule2", only "x86" and\/or "arm64" are allowed in a comma separated list/
+                      )
+                    );
+                });
+
                 it('rejects rules with multiple meta.arch fields set', async () => {
                   await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
                     customYaraSignatureApiCall.path
@@ -682,6 +710,40 @@ export default function ({ getService }: FtrProviderContext) {
                     );
                 });
 
+                it('rejects rules with duplicate values in meta.os', async () => {
+                  await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
+                    customYaraSignatureApiCall.path
+                  )
+                    .set('kbn-xsrf', 'true')
+                    .send(
+                      customYaraSignatureApiCall.getBody(`
+                      rule rule1 { meta: os = "Windows,Windows" condition: true }
+                      rule rule2 { meta: os = "Linux, Linux" condition: true }
+                      rule rule3 { meta: os = "Windows, Linux, Windows" condition: true }
+                      `)
+                    )
+                    .expect(400)
+                    .expect(anEndpointArtifactError)
+                    .expect(
+                      anErrorMessageWith(/Invalid YARA rules \(libyara [0-9.]+\), 3 errors found:/)
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 2\] Invalid "meta.os" value "Windows,Windows" on rule "rule1", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 3\] Invalid "meta.os" value "Linux, Linux" on rule "rule2", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    )
+                    .expect(
+                      anErrorMessageWith(
+                        /\[line 4\] Invalid "meta.os" value "Windows, Linux, Windows" on rule "rule3", only "Windows", "Linux" and\/or "MacOS" are allowed in a comma separated list/
+                      )
+                    );
+                });
+
                 it('rejects rules with multiple meta.os fields set', async () => {
                   await globalWriteAccessTestAgent[customYaraSignatureApiCall.method](
                     customYaraSignatureApiCall.path
@@ -778,7 +840,7 @@ export default function ({ getService }: FtrProviderContext) {
                           new RegExp(
                             `\\[line 2\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
                               ', '
-                            )}" on rule "rule1", Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
+                            )}" on rule "rule1". Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
                           )
                         )
                       )
@@ -787,7 +849,7 @@ export default function ({ getService }: FtrProviderContext) {
                           new RegExp(
                             `\\[line 3\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
                               ', '
-                            )}" on rule "rule2", Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
+                            )}" on rule "rule2". Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
                           )
                         )
                       )
@@ -796,7 +858,7 @@ export default function ({ getService }: FtrProviderContext) {
                           new RegExp(
                             `\\[line 4\\] "meta.os" value "[\\w, ]+" is different from "os_types" value "${osTypes.join(
                               ', '
-                            )}" on rule "rule3", Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
+                            )}" on rule "rule3". Set meta.os to the same OSes \\(using "Windows", "Linux" and\\/or "MacOS"\\) or drop the meta.os field`
                           )
                         )
                       );

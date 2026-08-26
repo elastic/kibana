@@ -14,6 +14,8 @@ const VALID_META_ARCH_VALUES = ['x86', 'arm64'];
 const VALID_META_SCAN_TYPE_VALUE = 'Memory';
 const VALID_META_OS_VALUES = ['Windows', 'Linux', 'MacOS'];
 
+const hasDuplicateValues = (values: string[]): boolean => new Set(values).size !== values.length;
+
 export const validateYaraRuleContentByteLength = (value: string): string | void => {
   const byteLength = Buffer.byteLength(value, 'utf8');
 
@@ -137,7 +139,11 @@ const validateMetaArchField = (
   if (rule.meta.arch !== undefined) {
     const values = rule.meta.arch.split(',').map((value) => value.trim());
 
-    if (values.length > 2 || values.some((value) => !VALID_META_ARCH_VALUES.includes(value))) {
+    if (
+      values.length > 2 ||
+      hasDuplicateValues(values) ||
+      values.some((value) => !VALID_META_ARCH_VALUES.includes(value))
+    ) {
       const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
       const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
         textLines,
@@ -187,7 +193,11 @@ const validateMetaOsField = (
     const values = rule.meta.os.split(',').map((value) => value.trim());
 
     // Validate values
-    if (values.length > 3 || values.some((value) => !VALID_META_OS_VALUES.includes(value))) {
+    if (
+      values.length > 3 ||
+      hasDuplicateValues(values) ||
+      values.some((value) => !VALID_META_OS_VALUES.includes(value))
+    ) {
       const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
       const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
         textLines,
@@ -223,7 +233,7 @@ const validateMetaOsField = (
             rule.meta.os
           }" is different from "os_types" value "${osTypes.join(', ')}" on rule "${
             rule.identifier
-          }", Set meta.os to the same OSes (using "Windows", "Linux" and\/or "MacOS") or drop the meta.os field`,
+          }". Set meta.os to the same OSes (using "Windows", "Linux" and\/or "MacOS") or drop the meta.os field`,
           line: lineNumber,
           severity: 'error',
         });

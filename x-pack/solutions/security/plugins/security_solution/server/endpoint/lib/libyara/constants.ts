@@ -6,7 +6,7 @@
  */
 
 /**
- * Meta keys are completely arbitary in a YARA rule, but we are interested in the following keys:
+ * Meta keys are completely arbitrary in a YARA rule, but we are interested in the following keys:
  * - os: The operating system of the rule.
  * - arch: The architecture of the rule.
  * - scan_type: The scan type of the rule.
