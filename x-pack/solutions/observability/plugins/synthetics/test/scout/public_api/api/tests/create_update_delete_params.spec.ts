@@ -116,7 +116,7 @@ interface ParamBody {
  */
 apiTest.describe(
   'AddEditParams',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     let adminHeaders: Record<string, string>;
     let editorHeaders: Record<string, string>;

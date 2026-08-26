@@ -60,7 +60,7 @@ const UPTIME_READ_ROLE: KibanaRole = {
  */
 apiTest.describe(
   'AddNewMonitorsUI permissions and warnings',
-  { tag: tags.stateful.classic },
+  { tag: tags.local.stateful.classic },
   () => {
     let editorHeaders: Record<string, string>;
     let uptimeAllHeaders: Record<string, string>;

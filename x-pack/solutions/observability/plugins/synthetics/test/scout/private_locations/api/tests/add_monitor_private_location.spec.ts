@@ -45,7 +45,7 @@ interface ServiceLocation {
  *
  * `@local-stateful-classic` only: the FTR original was tagged `skipCloud`.
  */
-apiTest.describe('PrivateLocationAddMonitor', { tag: tags.stateful.classic }, () => {
+apiTest.describe('PrivateLocationAddMonitor', { tag: tags.local.stateful.classic }, () => {
   let editorHeaders: Record<string, string>;
   let privateLocation: ScoutPrivateLocation;
   let spaceId: string;

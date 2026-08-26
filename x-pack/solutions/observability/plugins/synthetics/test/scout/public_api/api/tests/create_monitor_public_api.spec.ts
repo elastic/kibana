@@ -32,7 +32,7 @@ import {
 apiTest.describe(
   'AddNewMonitorsPublicAPI - Public locations',
   {
-    tag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
   },
   () => {
     let editorHeaders: Record<string, string>;

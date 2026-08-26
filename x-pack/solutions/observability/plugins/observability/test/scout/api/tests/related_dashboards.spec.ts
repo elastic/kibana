@@ -108,7 +108,9 @@ interface RelatedDashboardsResponse {
 
 apiTest.describe(
   'Observability related dashboards',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  // Local-only (no `@cloud-*`): the source FTR was `skipCloud` + `skipMKI`, and
+  // the data-forge ingest + alert-firing wait is too heavy/slow for Cloud/MKI.
+  { tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete] },
   () => {
     let headers: Record<string, string>;
     let ruleId: string;

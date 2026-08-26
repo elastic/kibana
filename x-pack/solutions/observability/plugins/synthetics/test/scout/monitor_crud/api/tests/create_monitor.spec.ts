@@ -32,7 +32,7 @@ import { httpMonitorFixture } from '../../../common/fixtures/data/http_monitor';
 apiTest.describe(
   'AddNewMonitorsUI',
   {
-    tag: [...tags.stateful.classic, ...tags.serverless.observability.complete],
+    tag: [...tags.local.stateful.classic, ...tags.local.serverless.observability.complete],
   },
   () => {
     let editorHeaders: Record<string, string>;
