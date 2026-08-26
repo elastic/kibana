@@ -15,6 +15,7 @@ import { useShowRelatedAlertsByAncestry } from './use_show_related_alerts_by_anc
 import { licenseService } from '../../../../../common/hooks/use_license';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ALERT_ANCESTORS_ID } from '../../../../../../common/field_maps/field_names';
+import { ANCESTOR_INDEX } from '../../../main/constants/field_names';
 import { useIsAnalyzerEnabled } from '../../../../../detections/hooks/use_is_analyzer_enabled';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
@@ -52,6 +53,16 @@ const hitWithAncestorsPreview: DataTableRecord = {
   isAnchor: false,
 } as unknown as DataTableRecord;
 
+const hitWithQualifiedAncestorsPreview: DataTableRecord = {
+  id: 'event-id',
+  raw: { _id: 'event-id', _index: '.preview.alerts-security.alerts-default' },
+  flattened: {
+    [ALERT_ANCESTORS_ID]: 'ancestors-id',
+    [ANCESTOR_INDEX]: 'linked_local_project:.ds-logs-endpoint.events-default',
+  },
+  isAnchor: false,
+} as unknown as DataTableRecord;
+
 describe('useShowRelatedAlertsByAncestry', () => {
   let hookResult: RenderHookResult<
     UseShowRelatedAlertsByAncestryResult,
@@ -70,6 +81,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
     expect(hookResult.result.current).toEqual({
       show: false,
       ancestryDocumentId: 'event-id',
+      ancestryDocumentIndex: 'index',
     });
   });
 
@@ -84,6 +96,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
     expect(hookResult.result.current).toEqual({
       show: false,
       ancestryDocumentId: 'event-id',
+      ancestryDocumentIndex: 'index',
     });
   });
 
@@ -99,6 +112,7 @@ describe('useShowRelatedAlertsByAncestry', () => {
     expect(hookResult.result.current).toEqual({
       show: true,
       ancestryDocumentId: 'event-id',
+      ancestryDocumentIndex: 'index',
     });
   });
 
@@ -114,6 +128,23 @@ describe('useShowRelatedAlertsByAncestry', () => {
     expect(hookResult.result.current).toEqual({
       show: true,
       ancestryDocumentId: 'ancestors-id',
+      ancestryDocumentIndex: '.preview.alerts-security.alerts-default',
+    });
+  });
+
+  it('should return the project-qualified ancestor index when previewing a rule off a linked document', () => {
+    (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
+    licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+    hookResult = renderHook(() =>
+      useShowRelatedAlertsByAncestry({
+        hit: hitWithQualifiedAncestorsPreview,
+      })
+    );
+
+    expect(hookResult.result.current).toEqual({
+      show: true,
+      ancestryDocumentId: 'ancestors-id',
+      ancestryDocumentIndex: 'linked_local_project:.ds-logs-endpoint.events-default',
     });
   });
 });

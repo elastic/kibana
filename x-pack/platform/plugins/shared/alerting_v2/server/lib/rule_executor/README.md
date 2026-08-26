@@ -143,10 +143,14 @@ Top-level strategy fields (sit alongside `query` on the rule, not inside it):
 | Task timeout | `xpack.alerting_v2.rules.run.timeout`, defaults to `DEFAULT_RULE_EXECUTION_TIMEOUT` (`5m`) | [`task_definition.ts`](task_definition.ts) |
 | Schedule | Per rule | [`schedule.ts`](schedule.ts) |
 | Max alerts per run | `xpack.alerting_v2.rules.run.alerts.max`, default and ceiling `10000` | [`config.ts`](../../config.ts) |
+| JSON query row cap | Internal `NON_STREAMING_MAX_ROWS` (`1000`); applied on the JSON path as `LIMIT min(alerts.max, NON_STREAMING_MAX_ROWS)` | [`config.ts`](../../config.ts) |
+| ES\|QL response format | `xpack.alerting_v2.esql.responseFormat`, `json` or `arrow`, defaults to `json` | [`config.ts`](../../config.ts) |
 
 `xpack.alerting_v2.rules.run.timeout`, when set, applies uniformly to the rule executor task. The rule executor task definition owns this via its `resolveTimeout` hook, which resolves the value as `config → DEFAULT_RULE_EXECUTION_TIMEOUT`; other task types (dispatcher, telemetry, API-key invalidation) omit the hook and keep their static `timeout`. The resolved value is applied where tasks are registered with Task Manager in [`setup/bind_tasks.ts`](../../setup/bind_tasks.ts).
 
-`ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
+`ExecuteRuleQueryStep` unconditionally appends `\| LIMIT <max>` to the breach query before execution. The LIMIT is `alerts.max` on the Arrow path and `min(alerts.max, NON_STREAMING_MAX_ROWS)` on the JSON path, so a transport choice cannot silently change the product-level alerts cap. ES|QL takes the min across multiple `LIMIT` commands, so an author-supplied smaller limit still wins.
+
+`xpack.alerting_v2.esql.responseFormat` selects how `QueryService.executeQueryStream` fetches results. `json` (default) runs the single-shot JSON query and yields the full result set as one in-memory batch; `arrow` streams self-contained Arrow record batches.
 
 ## Pipeline state
 

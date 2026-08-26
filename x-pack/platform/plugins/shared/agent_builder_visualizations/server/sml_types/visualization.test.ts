@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
+import { VISUALIZATION_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { visualizationSmlType } from './visualization';
 
 jest.mock('@kbn/lens-embeddable-utils', () => ({
@@ -41,8 +42,8 @@ describe('visualizationSmlType', () => {
   });
 
   describe('id', () => {
-    it('equals visualization', () => {
-      expect(visualizationSmlType.id).toBe('visualization');
+    it('equals VISUALIZATION_KI_TYPE', () => {
+      expect(visualizationSmlType.id).toBe(VISUALIZATION_KI_TYPE);
     });
   });
 
