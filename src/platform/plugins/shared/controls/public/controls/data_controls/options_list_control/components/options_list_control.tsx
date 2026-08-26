@@ -71,10 +71,14 @@ const optionListControlStyles = {
         outline: `none !important`,
       },
     }),
-  filterButtonText: css({
-    flexGrow: 1,
-    textAlign: 'left',
-  }),
+  filterButtonText: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flexGrow: 1,
+      textAlign: 'left',
+      // Override EUI's default placeholder color (textColorDisabled = #798EAF, 3.33:1 contrast)
+      // to meet WCAG 2.2 SC 1.4.3 minimum contrast ratio of 4.5:1
+      color: euiTheme.colors.textSubdued,
+    }),
   inputButtonOverride: css({
     width: '100%',
     height: '100%',
@@ -232,6 +236,7 @@ export const OptionsListControl = ({
       value={hasSelections || existsSelected ? selectionDisplayNode : ''}
       placeholder={displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder()}
       css={styles.filterButton}
+      textProps={{ css: styles.filterButtonText }}
       onClick={() => setPopoverOpen(!isPopoverOpen)}
       aria-label={label}
       aria-expanded={isPopoverOpen}
