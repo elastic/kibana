@@ -8,5 +8,5 @@
 import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
 
 export const MigrationId = NonEmptyString.describe(
-  'The id of the rule migration. Use get_all_rule_migration_stats to resolve a name to its id.'
+  'The id of a rule migration or a dashboard migration.'
 );

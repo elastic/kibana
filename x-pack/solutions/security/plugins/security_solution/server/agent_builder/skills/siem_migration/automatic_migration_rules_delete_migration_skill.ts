@@ -23,7 +23,7 @@ import {
 import { RULE_MIGRATION_SKILLS } from './rules/skill_ids';
 
 export const automaticMigrationRulesDeleteMigrationSkill = defineSkillType({
-  id: 'automatic-migration-rules-delete-migration',
+  id: RULE_MIGRATION_SKILLS.DELETE,
   name: 'automatic-migration-rules-delete-migration',
   basePath: 'skills/security/siem_migrations',
   description: `Permanently delete an Automatic Rule Migration and all its associated rule items and resources.
