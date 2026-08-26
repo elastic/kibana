@@ -513,3 +513,33 @@ describe('script/style removal respects exact tag names', () => {
     expect(stripHtml('<p>a</p><script/><p>b</p>')).toContain('a');
   });
 });
+
+describe('tag stripping is idempotent', () => {
+  // A single pass is not enough: removing a tag can reassemble a new one from the text
+  // on either side. CodeQL flags single-pass tag removal for this reason.
+  it.each([
+    ['single reassembly', '<scr<script>ipt>payload'],
+    ['double reassembly', '<scr<scr<script>ipt>ipt>payload'],
+    ['triple reassembly', '<scr<scr<scr<script>ipt>ipt>ipt>payload'],
+  ])('leaves no script tag after %s', (_label, input) => {
+    const out = stripHtml(input);
+    expect(out.toLowerCase()).not.toContain('<script');
+    expect(out).not.toContain('<scr');
+  });
+
+  it('leaves no tag-like fragment even on deeply adversarial nesting', () => {
+    const input = `${'<scr'.repeat(20)}<script>${'ipt>'.repeat(20)}payload`;
+    const out = stripHtml(input);
+    expect(out.toLowerCase()).not.toContain('<script');
+    expect(out).not.toContain('<scr');
+  });
+
+  it('still leaves ordinary prose comparisons alone', () => {
+    expect(stripHtml('<p>5 < 10 and 3 > 1</p>')).toBe('5 < 10 and 3 > 1');
+  });
+
+  it('is stable, so a second pass over the output changes nothing', () => {
+    const once = stripHtml('<scr<script>ipt>payload <p>text</p>');
+    expect(stripHtml(once)).toBe(once);
+  });
+});

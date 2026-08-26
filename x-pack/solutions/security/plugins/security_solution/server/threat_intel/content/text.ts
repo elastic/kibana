@@ -65,6 +65,30 @@ const capInput = (html: string): string =>
  */
 const TAG_PATTERN = /<[a-z!?/][^>]*>/gi;
 
+/** Bound on the fixpoint loop below. Far above any real nesting depth. */
+const MAX_TAG_STRIP_PASSES = 8;
+
+/**
+ * Removes tags repeatedly until the string stops changing.
+ *
+ * A single pass is not enough, and not only in theory: removing a tag can reassemble a
+ * new one out of the text on either side of it. `<scr<script>ipt>` becomes `<script>`
+ * once the inner tag is gone, which is what the nested-angle-bracket test covers and
+ * what CodeQL's incomplete-multi-character-sanitization rule flags.
+ *
+ * After the bound, any remaining `<` is replaced outright, so no reassembled tag can
+ * survive regardless of how adversarial the input is.
+ */
+const stripTags = (input: string, replacement: string): string => {
+  let out = input;
+  for (let pass = 0; pass < MAX_TAG_STRIP_PASSES; pass += 1) {
+    const next = out.replace(TAG_PATTERN, replacement);
+    if (next === out) return out;
+    out = next;
+  }
+  return out.replace(/</g, replacement);
+};
+
 const stripScriptAndStyle = (html: string): string =>
   html
     // `(?=[\s/>])` and not `\b`: `\b` also matches before a hyphen, so a valid custom
@@ -87,7 +111,7 @@ export const stripHtml = (html: string | undefined | null): string => {
   // Drop the most expensive substrings up front (script/style bodies)
   // before falling through to the generic tag stripper.
   const withoutScripts = stripScriptAndStyle(capped);
-  const withoutTags = withoutScripts.replace(TAG_PATTERN, ' ');
+  const withoutTags = stripTags(withoutScripts, ' ');
   const decoded = decodeEntities(withoutTags);
   return collapseWhitespace(decoded);
 };
@@ -197,7 +221,7 @@ const splitHtmlBySections = (html: string): Array<{ kind: SectionKind; html: str
     // Decode entities before classifying: `Indicators&nbsp;of&nbsp;Compromise` is a
     // completely ordinary heading, and classifying the raw form read it as prose, so
     // its anchor hrefs were dropped instead of lifted.
-    const headingText = collapseWhitespace(decodeEntities(m[2].replace(TAG_PATTERN, ' ')));
+    const headingText = collapseWhitespace(decodeEntities(stripTags(m[2], ' ')));
     const classified = classifyHeader(headingText);
 
     if (classified !== 'prose') {
@@ -289,20 +313,20 @@ export const htmlToStructured = (html: string | undefined | null): string => {
         /<a\b[^>]*?\shref\s*=\s*(?:["']([^"']+)["']|([^\s"'>]+))[^>]*>([\s\S]*?)<\/a>/gi,
         (_m, quotedHref: string | undefined, bareHref: string | undefined, inner: string) => {
           const href = quotedHref ?? bareHref ?? '';
-          const text = inner.replace(TAG_PATTERN, ' ').trim();
+          const text = stripTags(inner, ' ').trim();
           return `${text} ${href} `;
         }
       );
     } else {
       // Prose: collapse anchor to its visible text only.
       s = s.replace(/<a\s[^>]*>([\s\S]*?)<\/a>/gi, (_m, inner: string) => {
-        return `${inner.replace(TAG_PATTERN, ' ').trim()} `;
+        return `${stripTags(inner, ' ').trim()} `;
       });
     }
 
     // 4. Headings → "## text\n"
     s = s.replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, (_m, inner: string) => {
-      const text = inner.replace(TAG_PATTERN, ' ').trim();
+      const text = stripTags(inner, ' ').trim();
       return text ? `\n## ${collapseWhitespace(text)}\n` : '';
     });
 
@@ -312,7 +336,7 @@ export const htmlToStructured = (html: string | undefined | null): string => {
       const cellPattern = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi;
       let cellMatch: RegExpExecArray | null;
       while ((cellMatch = cellPattern.exec(inner)) !== null) {
-        const cellContent = cellMatch[1].replace(TAG_PATTERN, ' ').trim();
+        const cellContent = stripTags(cellMatch[1], ' ').trim();
         cellTexts.push(collapseWhitespace(cellContent));
       }
       return cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n';
@@ -320,7 +344,7 @@ export const htmlToStructured = (html: string | undefined | null): string => {
 
     // 6. List items → "- text\n"
     s = s.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_m, inner: string) => {
-      const text = inner.replace(TAG_PATTERN, ' ').trim();
+      const text = stripTags(inner, ' ').trim();
       return text ? `\n- ${collapseWhitespace(text)}\n` : '';
     });
 
@@ -337,7 +361,7 @@ export const htmlToStructured = (html: string | undefined | null): string => {
     let previous: string;
     do {
       previous = s;
-      s = s.replace(TAG_PATTERN, '');
+      s = stripTags(s, '');
     } while (s !== previous);
 
     processedParts.push(s);
