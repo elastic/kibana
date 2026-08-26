@@ -1133,7 +1133,8 @@ export class RulesClient {
       }
 
       affectedCount += 1;
-      updatedRules.push({ ruleId: item.id, spaceId });
+      const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+      updatedRules.push({ ruleId: rule.id, spaceId, rule });
     }
 
     this.ruleEventPublisher.emitRuleUpdated(this.request, updatedRules);
