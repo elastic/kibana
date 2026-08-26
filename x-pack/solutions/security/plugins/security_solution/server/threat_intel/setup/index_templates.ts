@@ -1078,10 +1078,17 @@ const migrateExistingIndicatorTypeMappings = async (
       | Record<string, unknown>
       | undefined;
 
+    // Leaf paths, not parents. A parent object can exist while the leaf this
+    // migration writes does not, and `network`/`cryptocurrency` are objects whose
+    // presence proved nothing about `network.cidr` or `cryptocurrency.address`.
+    // `file.hash.sha512` was not checked at all.
+    const leaf = (parent: unknown, name: string) =>
+      (parent as { properties?: Record<string, unknown> } | undefined)?.properties?.[name];
     if (
       indicatorProps?.email &&
-      indicatorProps?.network &&
-      indicatorProps?.cryptocurrency &&
+      leaf(indicatorProps?.network, 'cidr') &&
+      leaf(indicatorProps?.cryptocurrency, 'address') &&
+      leaf(leaf(indicatorProps?.file, 'hash'), 'sha512') &&
       topLevelProps?.ioc_tier
     ) {
       return;
@@ -1198,7 +1205,20 @@ const migrateOneReportKeywordBounds = async (
         ?.properties?.iocs as { properties?: Record<string, unknown> }
     )?.properties ?? {}) as Record<string, { ignore_above?: number }>;
 
-    if (iocProps.value?.ignore_above) return;
+    // Must be at least as strict as `checkRequiredMapping`, which compares
+    // `ignore_above` by exact value and also requires the other fields this migration
+    // writes. A weaker predicate here deadlocks bootstrap permanently: the migration
+    // decides it has nothing to do, the verifier disagrees, and every retry repeats
+    // that, so the one-time readiness promise never resolves. `putMapping` is
+    // idempotent, so erring toward running it again costs nothing.
+    if (iocProps.value?.ignore_above === FEED_TEXT_IGNORE_ABOVE) {
+      const contentProps = (
+        indexMappings?.mappings?.properties?.content as
+          | { properties?: Record<string, unknown> }
+          | undefined
+      )?.properties;
+      if (contentProps?.body_is_title_fallback) return;
+    }
 
     await esClient.indices.putMapping({
       index: indexName,
@@ -1252,6 +1272,38 @@ const migrateExistingReportKeywordBounds = async (
   }
 };
 
+/**
+ * Applies the nested-objects ceiling, independently of the mapping half of the same
+ * migration. Separate request, separate failure mode, so it gets its own check.
+ */
+const ensureIndicatorNestedLimit = async (
+  esClient: ElasticsearchClient,
+  log: Logger
+): Promise<void> => {
+  try {
+    const settings = await esClient.indices.getSettings(
+      { index: THREAT_INTEL_INDICATORS_INDEX },
+      { ignore: [404] }
+    );
+    const current =
+      settings?.[THREAT_INTEL_INDICATORS_INDEX]?.settings?.index?.mapping?.nested_objects?.limit;
+    if (Number(current) === MAX_NESTED_OBJECTS) return;
+
+    await esClient.indices.putSettings({
+      index: THREAT_INTEL_INDICATORS_INDEX,
+      settings: { 'index.mapping.nested_objects.limit': MAX_NESTED_OBJECTS },
+    });
+    log.info(`Set nested_objects.limit on ${THREAT_INTEL_INDICATORS_INDEX}`);
+  } catch (err) {
+    log.error(
+      `Failed to set nested_objects.limit on ${THREAT_INTEL_INDICATORS_INDEX}: ${
+        (err as Error).message
+      }. A widely-cited indicator will start rejecting updates once sources[] crosses ` +
+        `the default limit.`
+    );
+  }
+};
+
 const migrateExistingIndicatorKeywordBounds = async (
   esClient: ElasticsearchClient,
   logger: Logger
@@ -1272,9 +1324,17 @@ const migrateExistingIndicatorKeywordBounds = async (
       | Record<string, unknown>
       | undefined;
 
-    // `sources_truncated` is the field this version introduces, so its absence is
-    // the marker for "not yet migrated".
-    if (topLevelProps?.sources_truncated) return;
+    // The mapping and the nested-object limit are two separate Elasticsearch
+    // requests, so one marker cannot speak for both. Keyed only to the mapping, a
+    // transient `putSettings` failure was unrecoverable: the retry saw
+    // `sources_truncated` present, returned early, and the nested limit stayed at the
+    // old value until a restart, after which indicator updates start failing once
+    // `sources[]` crosses it. Each half is now checked and applied independently.
+    const mappingDone = Boolean(topLevelProps?.sources_truncated);
+    if (mappingDone) {
+      await ensureIndicatorNestedLimit(esClient, log);
+      return;
+    }
 
     await esClient.indices.putMapping({
       index: THREAT_INTEL_INDICATORS_INDEX,
@@ -1314,12 +1374,9 @@ const migrateExistingIndicatorKeywordBounds = async (
       },
     });
 
-    // Settings are a separate API from mappings, and the nested ceiling only
-    // applies to an index that already exists via this call.
-    await esClient.indices.putSettings({
-      index: THREAT_INTEL_INDICATORS_INDEX,
-      settings: { 'index.mapping.nested_objects.limit': MAX_NESTED_OBJECTS },
-    });
+    // Separate request from the mapping above, so it has its own check and its own
+    // failure handling rather than riding on the mapping's marker.
+    await ensureIndicatorNestedLimit(esClient, log);
 
     log.info(
       `Migrated keyword bounds and nested limit on ${THREAT_INTEL_INDICATORS_INDEX} (v25 backfill)`
@@ -1452,8 +1509,11 @@ const REQUIRED_INDICATOR_FIELDS: readonly RequiredMapping[] = [
   { path: 'sources_truncated' },
   { path: 'ioc_tier' },
   { path: 'threat.indicator.email', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
-  { path: 'threat.indicator.network' },
-  { path: 'threat.indicator.cryptocurrency' },
+  // Leaves, not parents: the v23 migration writes these, and a parent object can
+  // exist without them.
+  { path: 'threat.indicator.network.cidr' },
+  { path: 'threat.indicator.cryptocurrency.address' },
+  { path: 'threat.indicator.file.hash.sha512' },
   { path: 'threat.indicator.url.full', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'threat.indicator.provider', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'source_report_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
@@ -1539,6 +1599,28 @@ const assertMigratedSchemaIsUsable = async (
   } catch (err) {
     missing.push(
       `${THREAT_INTEL_INDICATORS_INDEX}:<mapping unreadable: ${(err as Error).message}>`
+    );
+  }
+
+  // The nested ceiling is set by a separate request from the mapping that marks its
+  // migration done, so verify it separately too. Without this, a transient
+  // putSettings failure left the old lower limit in place and indicator updates
+  // started failing once sources[] crossed it.
+  try {
+    const indicatorSettings = await esClient.indices.getSettings(
+      { index: THREAT_INTEL_INDICATORS_INDEX },
+      { ignore: [404] }
+    );
+    const entry = indicatorSettings?.[THREAT_INTEL_INDICATORS_INDEX];
+    if (entry) {
+      const limit = entry.settings?.index?.mapping?.nested_objects?.limit;
+      if (Number(limit) !== MAX_NESTED_OBJECTS) {
+        missing.push(`${THREAT_INTEL_INDICATORS_INDEX}:<nested_objects.limit is ${String(limit)}>`);
+      }
+    }
+  } catch (err) {
+    missing.push(
+      `${THREAT_INTEL_INDICATORS_INDEX}:<settings unreadable: ${(err as Error).message}>`
     );
   }
 

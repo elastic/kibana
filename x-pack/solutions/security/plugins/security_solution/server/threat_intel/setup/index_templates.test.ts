@@ -106,8 +106,11 @@ const fullyMigratedIndicatorMappings = () => ({
         indicator: {
           properties: {
             email: { ignore_above: 2048 },
-            network: {},
-            cryptocurrency: {},
+            // Leaves, since the v23 migration writes these and the guard now checks
+            // them rather than their parents.
+            network: { properties: { cidr: {} } },
+            cryptocurrency: { properties: { address: {} } },
+            file: { properties: { hash: { properties: { sha512: {} } } } },
             provider: { ignore_above: 2048 },
             url: { properties: { full: { ignore_above: 2048 } } },
           },
@@ -125,9 +128,15 @@ const fullyMigratedIndicatorMappings = () => ({
 const runMigrations = async ({
   reportMappings = fullyMigratedReportMappings(),
   indicatorMappings = fullyMigratedIndicatorMappings(),
+  /**
+   * Indicator nested-objects limit. Defaults to the fully-migrated value; pass `null`
+   * for a pre-migration index. Not `undefined`, which would re-trigger this default.
+   */
+  indicatorNestedLimit = '10000' as string | null,
 }: {
   reportMappings?: Record<string, unknown>;
   indicatorMappings?: Record<string, unknown>;
+  indicatorNestedLimit?: string | null;
 } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.indices.exists.mockResolvedValue(true);
@@ -135,7 +144,16 @@ const runMigrations = async ({
   esClient.indices.getSettings.mockResolvedValue({
     [REPORT_INDEX]: { settings: { index: { hidden: 'true' } } },
     [THREAT_INTEL_SOURCES_INDEX]: { settings: { index: { hidden: 'true' } } },
-    [THREAT_INTEL_INDICATORS_INDEX]: { settings: { index: { hidden: 'true' } } },
+    [THREAT_INTEL_INDICATORS_INDEX]: {
+      settings: {
+        index: {
+          hidden: 'true',
+          ...(indicatorNestedLimit
+            ? { mapping: { nested_objects: { limit: indicatorNestedLimit } } }
+            : {}),
+        },
+      },
+    } as never,
   });
   esClient.indices.getMapping.mockImplementation((async (args: { index: string }) => ({
     [args.index]: {
@@ -298,7 +316,10 @@ describe('index_templates — migrations', () => {
     });
 
     it('raises the nested-objects ceiling on the existing index', async () => {
-      const { esClient } = await runMigrations({ indicatorMappings: preV25() });
+      const { esClient } = await runMigrations({
+        indicatorMappings: preV25(),
+        indicatorNestedLimit: null,
+      });
       expect(esClient.indices.putSettings).toHaveBeenCalledWith(
         expect.objectContaining({
           settings: { 'index.mapping.nested_objects.limit': 10000 },
@@ -622,6 +643,50 @@ describe('index_templates — post-migration schema check', () => {
   // The v26 migration changes a parameter on paths that already exist on a pre-v26
   // index, so an existence-only check could not tell a migrated index from an
   // unmigrated one and a failed v26 putMapping passed verification.
+  // The nested ceiling is a separate request from the mapping that marks its migration
+  // done, so a transient putSettings failure was unrecoverable: the retry saw the
+  // marker, returned early, and the old limit stayed until a restart.
+  it('fails when the nested-objects ceiling was never raised', async () => {
+    const { verificationError } = await runMigrations({ indicatorNestedLimit: null });
+    expect(verificationError?.message).toMatch(/nested_objects\.limit/);
+  });
+
+  it('repairs the nested ceiling even when the mapping half is already done', async () => {
+    // sources_truncated present (mapping done) but the limit missing: the old code
+    // returned early here and never retried the settings request.
+    const { esClient } = await runMigrations({ indicatorNestedLimit: null });
+    expect(esClient.indices.putSettings).toHaveBeenCalledWith(
+      expect.objectContaining({
+        settings: { 'index.mapping.nested_objects.limit': 10000 },
+      })
+    );
+  });
+
+  it.each([
+    ['threat.indicator.network.cidr', 'network'],
+    ['threat.indicator.cryptocurrency.address', 'cryptocurrency'],
+  ])('fails when the v23 leaf %s is missing', async (leafPath, parent) => {
+    const indicatorMappings = fullyMigratedIndicatorMappings();
+    (
+      indicatorMappings.properties.threat.properties.indicator.properties as Record<string, unknown>
+    )[parent] = {};
+
+    const { verificationError } = await runMigrations({ indicatorMappings });
+
+    expect(verificationError?.message).toContain(leafPath);
+  });
+
+  it('fails when file.hash.sha512 is missing', async () => {
+    const indicatorMappings = fullyMigratedIndicatorMappings();
+    delete (
+      indicatorMappings.properties.threat.properties.indicator.properties as Record<string, unknown>
+    ).file;
+
+    const { verificationError } = await runMigrations({ indicatorMappings });
+
+    expect(verificationError?.message).toContain('threat.indicator.file.hash.sha512');
+  });
+
   it('fails when a bounded field exists but lost its ignore_above', async () => {
     const mappings = fullyMigratedReportMappings();
     (mappings.properties.extracted.properties.iocs.properties as Record<string, unknown>).value =
