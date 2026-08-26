@@ -285,12 +285,12 @@ function parseImpactEsqlForChart(esql: string): {
     return { timestampField: namedBucket[1], metricField, normalizedQuery: esql };
   }
 
-  // Case 2: unaliased BUCKET — inject alias so Lens can reference the column by name
+  // Case 2: unaliased BUCKET — inject alias and strip SORT (Lens handles x-axis ordering;
+  // the SORT clause would reference the old column name and fail after the alias is added)
   if (/\bBY\b[^|]*?\bBUCKET\s*\(\s*@timestamp/si.test(esql)) {
-    const normalizedQuery = esql.replace(
-      /(BUCKET\s*\(\s*@timestamp[^)]*\))/i,
-      'time_bucket = $1'
-    );
+    const normalizedQuery = esql
+      .replace(/(BUCKET\s*\(\s*@timestamp[^)]*\))/i, 'time_bucket = $1')
+      .replace(/\s*\|\s*SORT\b[^\n|]*/gi, '');
     return { timestampField: 'time_bucket', metricField, normalizedQuery };
   }
 
