@@ -1589,7 +1589,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    "no_data_strategy 'last_known_status' preserves the prior episode status",
+    "no_data_strategy 'last_known_status' resets status_count to 0 while episode status is unchanged",
     async ({ apiServices }) => {
       const HOST = 'host-director-no-data-last-known';
 
@@ -1617,7 +1617,6 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
               query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name`,
             },
           },
-          // Use recovery_strategy 'none' so the recovery step never fires.
           recovery_strategy: 'none',
           no_data_strategy: 'last_known_status',
           state_transition: { pending_count: 10 },
@@ -1644,7 +1643,74 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       expect(noDataEvents.length).toBeGreaterThanOrEqual(1);
       for (const event of noDataEvents) {
         expect(event.episode?.status).toBe('pending');
+        expect(event.episode?.status_count).toBe(0);
       }
+    }
+  );
+
+  apiTest(
+    "no_data_strategy 'none' does not emit no_data events and status_count keeps incrementing on breach",
+    async ({ apiServices }) => {
+      const HOST = 'host-director-no-data-none';
+
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': HOST,
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          metadata: { name: 'director-no-data-none' },
+          query: {
+            format: 'standalone',
+            breach: {
+              query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${HOST}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          recovery_strategy: 'none',
+          no_data_strategy: 'none',
+          state_transition: { pending_count: 0 },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 3, {
+        episodeStatus: 'active',
+      });
+
+      const activeEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        episodeStatus: 'active',
+      });
+      const counts = [...activeEvents]
+        .sort((a, b) => Date.parse(a['@timestamp']) - Date.parse(b['@timestamp']))
+        .map((event) => event.episode?.status_count);
+
+      expect(counts.slice(0, 3)).toStrictEqual([1, 2, 3]);
+
+      // Remove data — with no_data_strategy 'none', no no_data events should
+      // be produced. The episode simply stops receiving new events.
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': HOST } },
+      });
+
+      // Wait for a couple more executor runs so absent-group classification
+      // has a chance to fire (it should not produce any no_data events).
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
+
+      const noDataEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'no_data',
+      });
+      expect(noDataEvents).toHaveLength(0);
     }
   );
 

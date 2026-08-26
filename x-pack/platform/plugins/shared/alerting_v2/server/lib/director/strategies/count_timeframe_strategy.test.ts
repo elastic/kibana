@@ -705,6 +705,10 @@ describe('CountTimeframeStrategy', () => {
     });
   });
 
+  // In production, no_data events are never emitted when no_data_strategy is 'none'
+  // because getNoDataEsqlQuery returns undefined and ClassifyAbsentGroupsStep skips
+  // no-data detection entirely. These tests document what the strategy would do if
+  // a no_data event reached it — the general staying-in-status path increments.
   describe("no_data event with no_data_strategy: 'none'", () => {
     const stateTransition: RuleResponse['state_transition'] = {
       pending_count: 3,
