@@ -53,8 +53,6 @@ const CHROME_SELECTORS = [
   '.sidebar',
   '.nav',
   '.menu',
-  '.footer',
-  '.header',
   '.related-posts',
   '.share',
   '.newsletter',
@@ -74,7 +72,17 @@ const CHROME_SELECTORS = [
  * Chrome that is only chrome at page level. Removed from outside the chosen container,
  * never from within it, so an article's own header, footer, or aside survives.
  */
-const PAGE_CHROME_SELECTORS = ['body > header', 'body > footer', 'body > aside'].join(', ');
+const PAGE_CHROME_SELECTORS = [
+  'body > header',
+  'body > footer',
+  'body > aside',
+  // The class-based equivalents, for the same reason as the elements: vendors write
+  // `<article><div class="header">Executive summary…</div>` just as often as
+  // `<article><header>`, so removing every descendant match deleted report content and
+  // skewed candidate scoring with it.
+  'body > .header',
+  'body > .footer',
+].join(', ');
 
 export const extractArticleHtml = (rawHtml: string): string => {
   if (!rawHtml) return rawHtml;
@@ -125,7 +133,12 @@ export const extractArticleHtml = (rawHtml: string): string => {
       if (b.length !== a.length) return b.length > a.length ? b : a;
       return b.priority < a.priority ? b : a;
     });
-    $container = $(best.el);
+    // An empty match must not win. A page with a stray `<article></article>` alongside
+    // the real report in a plain `<div>` otherwise returned nothing at all, because the
+    // empty article satisfied the selector loop and suppressed the body fallback.
+    if (best.length > 0) {
+      $container = $(best.el);
+    }
   }
 
   // Fall back to <body> — never return nothing.

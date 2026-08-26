@@ -289,3 +289,48 @@ describe('extractArticleHtml — article-owned semantic elements', () => {
     expect(out).not.toContain('skip links');
   });
 });
+
+describe('extractArticleHtml — class-based sections and empty candidates', () => {
+  // Vendors write `<div class="header">` as often as `<header>`, so scoping only the
+  // semantic elements to page level left the class equivalents deleting article content
+  // and skewing candidate scoring with it.
+  it('keeps a class-based header inside the article', () => {
+    const html =
+      '<body><article><div class="header">Summary names c2.evil.test</div><p>body</p></article></body>';
+    expect(extractArticleHtml(html)).toContain('c2.evil.test');
+  });
+
+  it('keeps a class-based footer inside the article', () => {
+    const html =
+      '<body><article><p>body</p><div class="footer">Source https://vendor.test/r</div></article></body>';
+    expect(extractArticleHtml(html)).toContain('vendor.test');
+  });
+
+  it('still removes a page-level class-based header', () => {
+    const html =
+      '<body><div class="header">Site nav junk</div><article><p>real c2.evil.test</p></article></body>';
+    const out = extractArticleHtml(html);
+    expect(out).toContain('c2.evil.test');
+    expect(out).not.toContain('Site nav junk');
+  });
+
+  it('still removes an unambiguous chrome class from inside the article', () => {
+    const html =
+      '<body><article><div class="newsletter">subscribe now</div><p>real c2.evil.test</p></article></body>';
+    const out = extractArticleHtml(html);
+    expect(out).toContain('c2.evil.test');
+    expect(out).not.toContain('subscribe now');
+  });
+
+  // An empty match satisfied the selector loop and suppressed the body fallback, so a
+  // stray `<article></article>` returned nothing at all.
+  it('falls back to body when the only candidate is empty', () => {
+    const html = '<body><article></article><div>actual report with c2.evil.test</div></body>';
+    expect(extractArticleHtml(html)).toContain('c2.evil.test');
+  });
+
+  it('falls back to body when every candidate is whitespace only', () => {
+    const html = '<body><article>   </article><main>  </main><div>c2.evil.test</div></body>';
+    expect(extractArticleHtml(html)).toContain('c2.evil.test');
+  });
+});

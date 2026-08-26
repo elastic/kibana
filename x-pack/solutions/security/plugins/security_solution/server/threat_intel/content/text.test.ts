@@ -543,3 +543,45 @@ describe('tag stripping is idempotent', () => {
     expect(stripHtml(once)).toBe(once);
   });
 });
+
+describe('htmlToStructured — implicit end tags', () => {
+  // HTML permits omitting </li>, </td>, </th> and </tr>. Requiring them made compact
+  // vendor markup fall through to generic tag removal, running adjacent indicators
+  // together into one token that no IOC pattern can match.
+  it('separates list items with omitted </li>', () => {
+    const out = htmlToStructured('<h2>IOCs</h2><ul><li>evil.com<li>bad.net</ul>');
+    expect(out).not.toContain('evil.combad.net');
+    expect(out).toContain('evil.com');
+    expect(out).toContain('bad.net');
+  });
+
+  it('still handles fully closed list items', () => {
+    const out = htmlToStructured('<h2>IOCs</h2><ul><li>evil.com</li><li>bad.net</li></ul>');
+    expect(out).toContain('evil.com');
+    expect(out).toContain('bad.net');
+  });
+
+  it('separates table cells with omitted </td>', () => {
+    const out = htmlToStructured('<h2>IOCs</h2><table><tr><td>evil.com<td>bad.net</tr></table>');
+    expect(out).not.toContain('evil.combad.net');
+    expect(out).toContain('evil.com');
+    expect(out).toContain('bad.net');
+  });
+
+  it('separates rows with omitted </tr>', () => {
+    const out = htmlToStructured(
+      '<h2>IOCs</h2><table><tr><td>evil.com<tr><td>bad.net</table>'
+    );
+    expect(out).toContain('evil.com');
+    expect(out).toContain('bad.net');
+    expect(out).not.toContain('evil.combad.net');
+  });
+
+  it('still handles fully closed tables', () => {
+    const out = htmlToStructured(
+      '<h2>IOCs</h2><table><tr><td>evil.com</td><td>bad.net</td></tr></table>'
+    );
+    expect(out).toContain('evil.com');
+    expect(out).toContain('bad.net');
+  });
+});

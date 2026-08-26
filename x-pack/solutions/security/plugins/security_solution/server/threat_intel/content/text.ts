@@ -330,22 +330,36 @@ export const htmlToStructured = (html: string | undefined | null): string => {
     });
 
     // 5. Table rows → "| cell | cell |\n"
-    s = s.replace(/<tr[^>]*>([\s\S]*?)<\/tr>/gi, (_m, inner: string) => {
-      const cellTexts: string[] = [];
-      const cellPattern = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi;
-      let cellMatch: RegExpExecArray | null;
-      while ((cellMatch = cellPattern.exec(inner)) !== null) {
-        const cellContent = stripTags(cellMatch[1], ' ').trim();
-        cellTexts.push(collapseWhitespace(cellContent));
+    //    `</tr>` is optional too, so terminate on the next row or the table close.
+    s = s.replace(
+      /<tr\b[^>]*>([\s\S]*?)(?=<tr\b|<\/tr>|<\/tbody\b|<\/thead\b|<\/table\b|$)/gi,
+      (_m, inner: string) => {
+        const cellTexts: string[] = [];
+        // `</td>` and `</th>` are optional in HTML, so terminate on the next cell or the
+        // row/table close rather than requiring the explicit end tag. Without this a
+        // compact table fell through to generic tag removal and its cells ran together,
+        // merging adjacent indicators into one unextractable token.
+        const cellPattern =
+          /<t[dh]\b[^>]*>([\s\S]*?)(?=<t[dh]\b|<\/t[dh]>|<\/tr\b|<\/tbody\b|<\/table\b|$)/gi;
+        let cellMatch: RegExpExecArray | null;
+        while ((cellMatch = cellPattern.exec(inner)) !== null) {
+          const cellContent = stripTags(cellMatch[1], ' ').trim();
+          cellTexts.push(collapseWhitespace(cellContent));
+        }
+        return cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n';
       }
-      return cellTexts.length > 0 ? `\n| ${cellTexts.join(' | ')} |\n` : '\n';
-    });
+    );
 
     // 6. List items → "- text\n"
-    s = s.replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_m, inner: string) => {
-      const text = stripTags(inner, ' ').trim();
-      return text ? `\n- ${collapseWhitespace(text)}\n` : '';
-    });
+    // `</li>` is optional too, and `<ul><li>evil.com<li>bad.net</ul>` is ordinary vendor
+    // markup. Requiring it merged the two into `evil.combad.net`.
+    s = s.replace(
+      /<li\b[^>]*>([\s\S]*?)(?=<li\b|<\/li>|<\/ul\b|<\/ol\b|$)/gi,
+      (_m, inner: string) => {
+        const text = stripTags(inner, ' ').trim();
+        return text ? `\n- ${collapseWhitespace(text)}\n` : '';
+      }
+    );
 
     // 7. Block-level elements → newline boundary.
     s = s.replace(
