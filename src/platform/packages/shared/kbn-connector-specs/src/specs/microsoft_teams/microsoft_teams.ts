@@ -17,6 +17,11 @@ import {
   ListChatsInputSchema,
   ListChatMessagesInputSchema,
   SearchMessagesInputSchema,
+  SendChannelMessageInputSchema,
+  SendChatMessageInputSchema,
+  UpdateMessageInputSchema,
+  GetUserInputSchema,
+  CreateChatInputSchema,
 } from './types';
 import type {
   ListJoinedTeamsInput,
@@ -25,6 +30,11 @@ import type {
   ListChatsInput,
   ListChatMessagesInput,
   SearchMessagesInput,
+  SendChannelMessageInput,
+  SendChatMessageInput,
+  UpdateMessageInput,
+  GetUserInput,
+  CreateChatInput,
 } from './types';
 /**
  * Returns the base path for user-scoped Microsoft Graph API endpoints.
@@ -45,7 +55,8 @@ export const MicrosoftTeams: ConnectorSpec = {
     id: '.microsoft-teams',
     displayName: 'Microsoft Teams (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.microsoftTeams.metadata.description', {
-      defaultMessage: 'Search Microsoft Teams channels, chats, and teams',
+      defaultMessage:
+        'Send messages to channels and chats, search conversations, and list teams, channels, and chats in Microsoft Teams',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -63,14 +74,14 @@ export const MicrosoftTeams: ConnectorSpec = {
         defaults: {
           provider: 'microsoft',
           scope:
-            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
+            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access ChannelMessage.Send Chat.ReadWrite',
         },
       },
       {
         type: 'oauth_authorization_code',
         defaults: {
           scope:
-            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
+            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access ChannelMessage.Send Chat.ReadWrite',
         },
         overrides: {
           meta: {
@@ -343,22 +354,217 @@ export const MicrosoftTeams: ConnectorSpec = {
         return response.data;
       },
     },
+
+    // https://learn.microsoft.com/en-us/graph/api/channel-post-messages
+    sendChannelMessage: {
+      isTool: true,
+      description:
+        'Post a new message to a Microsoft Teams channel. Returns the created message object including its id and webUrl. Use listJoinedTeams → listChannels to obtain teamId and channelId. Requires ChannelMessage.Send delegated permission or ChannelMessage.ReadWrite.All application permission (for app-only auth, grant via Azure AD app registration).',
+      input: SendChannelMessageInputSchema,
+      output: lazySchema(() =>
+        z
+          .object({
+            id: z.string().describe('ID of the created message'),
+            createdDateTime: z
+              .string()
+              .optional()
+              .describe('ISO 8601 timestamp when the message was created'),
+            webUrl: z.string().optional().describe('URL to open the message in Microsoft Teams'),
+            from: z.any().optional().describe('Sender information'),
+            body: z.any().optional().describe('Message body'),
+          })
+          .describe('Created Teams channel message')
+      ),
+      handler: async (ctx, input: SendChannelMessageInput) => {
+        ctx.log.debug(
+          `Microsoft Teams sending message to channel ${input.channelId} in team ${input.teamId}`
+        );
+        const requestBody: Record<string, unknown> = {
+          body: {
+            contentType: input.contentType ?? 'text',
+            content: input.content,
+          },
+        };
+        if (input.subject !== undefined) {
+          requestBody.subject = input.subject;
+        }
+        const response = await ctx.client.post(
+          `https://graph.microsoft.com/v1.0/teams/${encodeURIComponent(input.teamId)}/channels/${encodeURIComponent(input.channelId)}/messages`,
+          requestBody
+        );
+        return response.data;
+      },
+    },
+
+    // https://learn.microsoft.com/en-us/graph/api/chat-post-messages
+    sendChatMessage: {
+      isTool: true,
+      description:
+        'Send a message to a Microsoft Teams 1:1 or group chat. Returns the created message object. Use listChats to obtain an existing chatId, or createChat to open a new chat first. With delegated auth (bearer/OAuth authorization code/ears) the sender is the signed-in user. With app-only (client credentials) the tenant admin must grant Chat.ReadWrite.All application permission to the Azure AD app registration.',
+      input: SendChatMessageInputSchema,
+      output: lazySchema(() =>
+        z
+          .object({
+            id: z.string().describe('ID of the created message'),
+            createdDateTime: z
+              .string()
+              .optional()
+              .describe('ISO 8601 timestamp when the message was created'),
+            webUrl: z.string().optional().describe('URL to open the message in Microsoft Teams'),
+            from: z.any().optional().describe('Sender information'),
+            body: z.any().optional().describe('Message body'),
+          })
+          .describe('Created Teams chat message')
+      ),
+      handler: async (ctx, input: SendChatMessageInput) => {
+        ctx.log.debug(`Microsoft Teams sending message to chat ${input.chatId}`);
+        const requestBody = {
+          body: {
+            contentType: input.contentType ?? 'text',
+            content: input.content,
+          },
+        };
+        const response = await ctx.client.post(
+          `https://graph.microsoft.com/v1.0/chats/${encodeURIComponent(input.chatId)}/messages`,
+          requestBody
+        );
+        return response.data;
+      },
+    },
+
+    // https://learn.microsoft.com/en-us/graph/api/chatmessage-update
+    updateMessage: {
+      isTool: true,
+      description:
+        'Update the body of an existing Teams message. Works for both channel messages (provide teamId + channelId + messageId) and chat messages (provide chatId + messageId). Only the message body content can be changed — sender, timestamp, and other fields are immutable. The API returns no content on success.',
+      input: UpdateMessageInputSchema,
+      output: lazySchema(() =>
+        z
+          .object({ success: z.boolean().describe('true when the message was updated successfully') })
+          .describe('Update result')
+      ),
+      handler: async (ctx, input: UpdateMessageInput) => {
+        const isChannel =
+          input.teamId !== undefined && input.channelId !== undefined;
+        const isChatMsg = input.chatId !== undefined;
+        if (!isChannel && !isChatMsg) {
+          throw new Error(
+            'updateMessage requires either teamId + channelId (channel message) or chatId (chat message).'
+          );
+        }
+        const requestBody = {
+          body: {
+            contentType: input.contentType ?? 'text',
+            content: input.content,
+          },
+        };
+        const url = isChannel
+          ? `https://graph.microsoft.com/v1.0/teams/${encodeURIComponent(input.teamId!)}/channels/${encodeURIComponent(input.channelId!)}/messages/${encodeURIComponent(input.messageId)}`
+          : `https://graph.microsoft.com/v1.0/chats/${encodeURIComponent(input.chatId!)}/messages/${encodeURIComponent(input.messageId)}`;
+        ctx.log.debug(`Microsoft Teams updating message ${input.messageId}`);
+        await ctx.client.patch(url, requestBody);
+        return { success: true };
+      },
+    },
+
+    // https://learn.microsoft.com/en-us/graph/api/user-get
+    getUser: {
+      isTool: true,
+      description:
+        'Retrieve a Microsoft Teams / Azure AD user by their user ID (GUID) or user principal name (UPN, e.g. alice@contoso.com). Returns the user\'s id, displayName, mail, and userPrincipalName. Use the returned id with createChat or listChats (userId parameter). Works with all auth types.',
+      input: GetUserInputSchema,
+      output: lazySchema(() =>
+        z
+          .object({
+            id: z.string().describe('Azure AD object ID (GUID) of the user'),
+            displayName: z.string().optional().describe('Full display name of the user'),
+            mail: z.string().optional().describe('Primary email address'),
+            userPrincipalName: z.string().optional().describe('User principal name (UPN)'),
+            jobTitle: z.string().optional().describe('Job title'),
+            department: z.string().optional().describe('Department'),
+          })
+          .describe('Azure AD user object')
+      ),
+      handler: async (ctx, input: GetUserInput) => {
+        ctx.log.debug(`Microsoft Teams getting user ${input.userId}`);
+        const response = await ctx.client.get(
+          `https://graph.microsoft.com/v1.0/users/${encodeURIComponent(input.userId)}`,
+          {
+            params: {
+              $select: 'id,displayName,mail,userPrincipalName,jobTitle,department',
+            },
+          }
+        );
+        return response.data;
+      },
+    },
+
+    // https://learn.microsoft.com/en-us/graph/api/chat-post
+    createChat: {
+      isTool: true,
+      description:
+        'Create a new Microsoft Teams chat (1:1 or group). Returns the created chat object with its id, which can be passed to sendChatMessage. For a 1:1 chat, provide exactly one user ID in memberIds; the signed-in user is automatically included as a member. For a group chat, provide two or more user IDs. Use getUser to resolve an email address to a user ID before calling this action.',
+      input: CreateChatInputSchema,
+      output: lazySchema(() =>
+        z
+          .object({
+            id: z
+              .string()
+              .describe(
+                'ID of the created chat, for use with sendChatMessage and listChatMessages'
+              ),
+            chatType: z.string().optional().describe('Type of the chat: "oneOnOne" or "group"'),
+            webUrl: z.string().optional().describe('URL to open the chat in Microsoft Teams'),
+            topic: z.string().optional().describe('Display topic of the chat'),
+          })
+          .describe('Created Teams chat object')
+      ),
+      handler: async (ctx, input: CreateChatInput) => {
+        ctx.log.debug(`Microsoft Teams creating ${input.chatType} chat`);
+        const members = input.memberIds.map((userId) => ({
+          '@odata.type': '#microsoft.graph.aadUserConversationMember',
+          roles: ['owner'],
+          'user@odata.bind': `https://graph.microsoft.com/v1.0/users('${encodeURIComponent(userId)}')`,
+        }));
+        const requestBody: Record<string, unknown> = {
+          chatType: input.chatType,
+          members,
+        };
+        if (input.topic !== undefined) {
+          requestBody.topic = input.topic;
+        }
+        const response = await ctx.client.post('https://graph.microsoft.com/v1.0/chats', requestBody);
+        return response.data;
+      },
+    },
   },
 
   skill: [
     'Microsoft Teams connector — usage guidance:',
     '',
-    'NAVIGATION PATTERNS:',
+    'NAVIGATION PATTERNS (read):',
     '- Team channels: listJoinedTeams → listChannels (with teamId) → listChannelMessages (with teamId + channelId)',
     '- Direct/group chats: listChats → listChatMessages (with chatId)',
     '',
+    'SEND PATTERNS (write):',
+    '- Post to a channel: listJoinedTeams → listChannels → sendChannelMessage (with teamId + channelId + content)',
+    '- Send to an existing chat: listChats → sendChatMessage (with chatId + content)',
+    '- DM a user by email: getUser (with UPN/email) → createChat (with returned id as memberIds) → sendChatMessage (with returned chatId)',
+    '- Update a posted message: updateMessage (with messageId + teamId+channelId for channel, or chatId for chat)',
+    '',
     'AUTH DIFFERENCES (delegated vs app-only):',
     '- Delegated auth (bearer token or oauth_authorization_code or ears): userId is optional — omit it to operate as the signed-in user.',
-    '- App-only auth (client credentials): userId is REQUIRED for listJoinedTeams and listChats.',
-    '- searchMessages only works with delegated auth (bearer or oauth_authorization_code or ears); app-only (client credentials) is not supported.',
+    '- App-only auth (oauth_client_credentials or private_key_jwt): userId is REQUIRED for listJoinedTeams and listChats.',
+    '- searchMessages only works with delegated auth; app-only (client credentials) is not supported.',
+    '- sendChannelMessage with app-only auth requires the ChannelMessage.ReadWrite.All application permission granted in Azure AD.',
+    '- sendChatMessage and createChat with app-only auth require the Chat.ReadWrite.All application permission granted in Azure AD.',
+    '- The oauth_client_credentials scope "https://graph.microsoft.com/.default" passes through all permissions granted to the app registration — no scope change needed, but the permissions must be granted by the tenant admin.',
   ].join('\n'),
 
   test: {
+    // enabled must be explicitly set to true, otherwise the "Test connector"
+    // button stays disabled in the UI even though a handler is defined.
+    enabled: true,
     description: i18n.translate('core.kibanaConnectorSpecs.microsoftTeams.test.description', {
       defaultMessage: 'Verifies Microsoft Teams connection by listing joined teams',
     }),
