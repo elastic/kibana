@@ -882,6 +882,14 @@ export const AllEntitiesView = ({
     ]
   );
 
+  // ElasticOn drops the Geomap view mode. Hide its toggle option and, if a
+  // previously-persisted `geomap` selection is still around, fall back to the
+  // grid so the body doesn't render an unavailable view.
+  const viewModeOptions = isElasticOn
+    ? VIEW_MODE_OPTIONS.filter((option) => option.id !== 'geomap')
+    : VIEW_MODE_OPTIONS;
+  const effectiveViewMode: ViewMode = isElasticOn && viewMode === 'geomap' ? 'grid' : viewMode;
+
   return (
     <>
       <StreamsAppPageTemplate.Header
@@ -1126,8 +1134,8 @@ export const AllEntitiesView = ({
                           defaultMessage: 'View mode',
                         }
                       )}
-                      options={VIEW_MODE_OPTIONS}
-                      idSelected={viewMode}
+                      options={viewModeOptions}
+                      idSelected={effectiveViewMode}
                       onChange={(id) => setViewMode(id as ViewMode)}
                       isIconOnly
                       data-test-subj="entityCentricLabEntitiesViewModeToggle"
@@ -1135,14 +1143,15 @@ export const AllEntitiesView = ({
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiHorizontalRule margin="m" />
-                {viewMode === 'grid' ? (
+                {effectiveViewMode === 'grid' ? (
                   <GroupedGridView
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
                     selectedEntityName={selectedEntityName}
                     groupCloudByProvider={cloudHierarchyEnabled}
+                    enablePaletteColoring={isElasticOn}
                   />
-                ) : viewMode === 'geomap' ? (
+                ) : effectiveViewMode === 'geomap' ? (
                   <GeomapView
                     entities={filteredEntities}
                     onSelectEntity={openEntity}

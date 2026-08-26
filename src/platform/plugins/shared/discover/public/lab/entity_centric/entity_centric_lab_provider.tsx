@@ -37,15 +37,17 @@ export const EntityCentricLabProvider = ({ children }: PropsWithChildren<{}>) =>
   // once) so flipping the mode takes effect on re-render without depending on a
   // full page reload — a `useMemo(..., [uiSettings])` read is computed only at
   // mount, which left the panel stale after switching modes. Only the
-  // `entityCentric` mode (and its `latest` clone) drives Discover's
-  // customization; `off` and `infraShortTerm` both leave Discover untouched.
+  // `entityCentric` mode (and its `latest` / `elasticOn` clones) drives
+  // Discover's customization; `off` and `infraShortTerm` both leave Discover
+  // untouched.
   const labMode = useObservable(
     uiSettings.get$<LabMode>(LAB_MODE_SETTING, 'off'),
     uiSettings.get<LabMode>(LAB_MODE_SETTING, 'off')
   );
-  // `latest` is currently an exact clone of `entityCentric`; keep both wired to
-  // the same behavior so they can diverge later without re-plumbing.
-  const enabled = labMode === 'entityCentric' || labMode === 'latest';
+  // `latest` (and its `elasticOn` clone) are currently exact clones of
+  // `entityCentric`; keep them all wired to the same behavior so they can
+  // diverge later without re-plumbing.
+  const enabled = labMode === 'entityCentric' || labMode === 'latest' || labMode === 'elasticOn';
 
   // Two flyout slots so the shared flyout's parent/child session can dock
   // two entities side by side: `currentEntityName` is the parent (session

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -57,7 +57,12 @@ import {
   IntegrationStatRow,
   LabBadge,
   StarToggleButton,
+  useUsedTemplateCount,
 } from './integration_shared';
+import {
+  INTEGRATIONS_SESSION_TAG,
+  buildIntegrationScreenContextAttachment,
+} from './integration_chat_context';
 
 const QUALITY_META: Record<DataStreamQuality, { color: string; label: string }> = {
   good: {
@@ -780,6 +785,40 @@ const ResourcesSection = ({ integration }: { integration: FakeIntegration }) => 
  * SLO templates, anomaly detection jobs / AI skills, curated resources) with the "what's
  * there vs what still needs enabling" split.
  */
+/**
+ * Renders nothing — its only job is to publish the current integration to Agent
+ * Builder as ambient (hidden) screen context via `setChatConfig`, so any chat
+ * the user opens while on this page automatically sees the integration as
+ * background context. Kept as a dedicated component so the `useUsedTemplateCount`
+ * hook and effect run unconditionally (they only mount once we know the
+ * integration exists, i.e. past the parent's not-found early return). Ambient
+ * only: no visible pill (custom/visible attachments are rejected by
+ * `setChatConfig` — see `integration_chat_context.ts`).
+ */
+const IntegrationChatContext = ({ integration }: { integration: FakeIntegration }) => {
+  const {
+    dependencies: {
+      start: { agentBuilder },
+    },
+  } = useKibana();
+  const usedTemplateCount = useUsedTemplateCount(integration);
+
+  useEffect(() => {
+    if (!agentBuilder?.setChatConfig || !agentBuilder?.clearChatConfig) {
+      return;
+    }
+    agentBuilder.setChatConfig({
+      sessionTag: INTEGRATIONS_SESSION_TAG,
+      attachments: [buildIntegrationScreenContextAttachment(integration, usedTemplateCount)],
+    });
+    return () => {
+      agentBuilder.clearChatConfig();
+    };
+  }, [agentBuilder, integration, usedTemplateCount]);
+
+  return null;
+};
+
 export const IntegrationDetailView = () => {
   const {
     path: { integrationId },
@@ -840,6 +879,7 @@ export const IntegrationDetailView = () => {
 
   return (
     <>
+      <IntegrationChatContext integration={integration} />
       <StreamsAppPageTemplate.Header
         pageTitle={
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>

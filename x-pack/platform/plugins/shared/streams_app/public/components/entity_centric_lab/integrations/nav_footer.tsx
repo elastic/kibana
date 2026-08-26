@@ -49,13 +49,21 @@ import {
   useIntegrationsSearch,
 } from '@kbn/entity-centric-lab-flyout';
 import { ManageGroupsModal } from './favorites_group_modals';
+import {
+  LatestInventoryNavHeader,
+  SavedViewsSectionAction,
+} from '../entities/nav_latest';
 
 const LAB_MODE_SETTING = 'discover:labMode';
 const SUPER_SHORT_TERM = 'superShortTerm';
 // The Infrastructure panel-opener node id set in the Observability nav tree.
+// Shared with the Latest lab, whose panel (renamed "Inventory") reuses the same
+// panel-opener node id.
 const INFRASTRUCTURE_PANEL_ID = 'entities';
 // The "Starred integrations" section id set in the Observability nav tree.
 const STARRED_SECTION_ID = 'entityCentricLab-starredIntegrations';
+// The Latest lab's "Saved views" section id set in the Observability nav tree.
+const SAVED_VIEWS_SECTION_ID = 'entityCentricLab-savedViews';
 const SIDE_PANEL_FOOTER_GLOBAL_KEY = '__kbnSideNavPanelFooter__' as const;
 const SIDE_PANEL_HEADER_GLOBAL_KEY = '__kbnSideNavPanelHeader__' as const;
 const SIDE_PANEL_SECTION_ACTION_GLOBAL_KEY = '__kbnSideNavSectionAction__' as const;
@@ -207,8 +215,14 @@ const StarredSectionAction = ({ coreStart }: { coreStart: CoreStart }) => {
 };
 
 /**
- * Register the Infrastructure-panel header + footer renderers on `globalThis`.
- * Idempotent — safe to call once on plugin start.
+ * Register the Infrastructure/Inventory-panel header + footer renderers on
+ * `globalThis`. Idempotent — safe to call once on plugin start.
+ *
+ * The chrome side-nav extension slots are single-valued globals, so this one
+ * registration composes the renderers for *both* the super-short-term
+ * integrations panel and the Latest inventory panel. Each renderer self-gates on
+ * its own lab mode (the modes are mutually exclusive), so only one ever emits
+ * content for a given panel.
  */
 export const registerIntegrationsNavFooter = (coreStart: CoreStart): void => {
   const root = globalThis as unknown as Record<string, SidePanelSlotRenderer | undefined>;
@@ -218,13 +232,19 @@ export const registerIntegrationsNavFooter = (coreStart: CoreStart): void => {
     ) : null;
   root[SIDE_PANEL_HEADER_GLOBAL_KEY] = (openerNode) =>
     openerNode?.id === INFRASTRUCTURE_PANEL_ID ? (
-      <IntegrationsNavHeader coreStart={coreStart} />
+      <>
+        <IntegrationsNavHeader coreStart={coreStart} />
+        <LatestInventoryNavHeader coreStart={coreStart} />
+      </>
     ) : null;
 
   const sectionActionRoot = globalThis as unknown as Record<
     string,
     SectionActionRenderer | undefined
   >;
-  sectionActionRoot[SIDE_PANEL_SECTION_ACTION_GLOBAL_KEY] = (sectionId) =>
-    sectionId === STARRED_SECTION_ID ? <StarredSectionAction coreStart={coreStart} /> : null;
+  sectionActionRoot[SIDE_PANEL_SECTION_ACTION_GLOBAL_KEY] = (sectionId) => {
+    if (sectionId === STARRED_SECTION_ID) return <StarredSectionAction coreStart={coreStart} />;
+    if (sectionId === SAVED_VIEWS_SECTION_ID) return <SavedViewsSectionAction coreStart={coreStart} />;
+    return null;
+  };
 };

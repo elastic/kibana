@@ -260,7 +260,7 @@ export const getUiSettings: (
     }),
     value: 'off',
     type: 'select',
-    options: ['off', 'entityCentric', 'latest', 'infraShortTerm', 'superShortTerm'],
+    options: ['off', 'entityCentric', 'latest', 'elasticOn', 'infraShortTerm', 'superShortTerm'],
     optionLabels: {
       off: i18n.translate('discover.advancedSettings.labMode.optionOff', {
         defaultMessage: 'Off',
@@ -270,6 +270,9 @@ export const getUiSettings: (
       }),
       latest: i18n.translate('discover.advancedSettings.labMode.optionLatest', {
         defaultMessage: 'Latest',
+      }),
+      elasticOn: i18n.translate('discover.advancedSettings.labMode.optionElasticOn', {
+        defaultMessage: 'ElasticOn',
       }),
       infraShortTerm: i18n.translate('discover.advancedSettings.labMode.optionInfraShortTerm', {
         defaultMessage: 'Infra-short term',
@@ -281,12 +284,13 @@ export const getUiSettings: (
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.labMode.description', {
       defaultMessage:
-        'Experimental: pick a single prototype experience (only one can be active at a time). "Entity-centric" renders a panel of fake entity-centric log entries in Discover — clicking a service name opens an entity detail flyout — and exposes the full Entities section in the Observability nav. "Latest" is currently an exact clone of "Entity-centric" that we iterate on separately. "Infra-short term" adds no Discover customization; it renames the Entities section to "Infrastructure" and scopes it to All entities, Cloud, Databases and Kubernetes. "Super short term" surfaces integrations content only. Refresh the page after changing this setting.',
+        'Experimental: pick a single prototype experience (only one can be active at a time). "Entity-centric" renders a panel of fake entity-centric log entries in Discover — clicking a service name opens an entity detail flyout — and exposes the full Entities section in the Observability nav. "Latest" is currently an exact clone of "Entity-centric" that we iterate on separately. "ElasticOn" is currently an exact clone of "Latest" that we iterate on separately. "Infra-short term" adds no Discover customization; it renames the Entities section to "Infrastructure" and scopes it to All entities, Cloud, Databases and Kubernetes. "Super short term" surfaces integrations content only. Refresh the page after changing this setting.',
     }),
     schema: schema.oneOf([
       schema.literal('off'),
       schema.literal('entityCentric'),
       schema.literal('latest'),
+      schema.literal('elasticOn'),
       schema.literal('infraShortTerm'),
       schema.literal('superShortTerm'),
     ]),

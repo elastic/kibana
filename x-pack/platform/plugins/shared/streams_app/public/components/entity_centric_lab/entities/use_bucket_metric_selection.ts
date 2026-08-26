@@ -29,6 +29,7 @@ import {
   type BucketKey,
   type StatId,
 } from './bucket_metrics';
+import { DEFAULT_COLORING, normalizeColoring, type ColoringConfig } from './palette_coloring';
 
 // Bumped to v3 to force every bucket back to the shared "Entity
 // health" default. v2 already made Health the default, but any bucket
@@ -45,6 +46,12 @@ const DEFAULT_STAT: StatId = 'last';
 export interface BucketSelection {
   readonly metricId: string;
   readonly statId: StatId;
+  /**
+   * Optional value-ramp coloring config (ElasticOn only). Defaults to
+   * `DEFAULT_COLORING` (severity tones) so older persisted selections
+   * without this field keep their previous behavior.
+   */
+  readonly coloring: ColoringConfig;
 }
 
 interface StoredSelectionMap {
@@ -94,12 +101,20 @@ const writeStorage = (map: StoredSelectionMap): void => {
 const hydrate = (bucketKey: BucketKey): BucketSelection => {
   const stored = readStorage()[bucketKey];
   if (!isStoredSelection(stored)) {
-    return { metricId: getDefaultMetricId(bucketKey), statId: DEFAULT_STAT };
+    return {
+      metricId: getDefaultMetricId(bucketKey),
+      statId: DEFAULT_STAT,
+      coloring: DEFAULT_COLORING,
+    };
   }
   const metric = findMetric(bucketKey, stored.metricId);
   return {
     metricId: metric ? stored.metricId : getDefaultMetricId(bucketKey),
     statId: stored.statId,
+    // `coloring` is newer than v3 storage — coerce whatever's there (or
+    // nothing) into a valid config so pre-palette selections stay on
+    // severity tones.
+    coloring: normalizeColoring((stored as Partial<BucketSelection>).coloring),
   };
 };
 
