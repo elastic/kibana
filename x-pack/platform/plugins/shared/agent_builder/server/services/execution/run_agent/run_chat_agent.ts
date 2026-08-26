@@ -43,6 +43,9 @@ import {
   getPendingRound,
   evictInternalEvents,
   estimatePerRoundTokens,
+  emitExecutionStepEvents,
+  computeFreshRoundStepOffset,
+  resumedRoundStepOffset,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
 import {
@@ -423,7 +426,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       pendingRound,
       structuredOutput,
     }),
-    finalize(() => manualEvents$.complete())
+    finalize(() => manualEvents$.complete()),
+    shareReplay()
   );
 
   const processedInput: RoundInput = {
@@ -442,6 +446,21 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       ...(origin ? { origin: { type: origin.type } } : {}),
       ...(pendingRound ? { resumed: true } : {}),
     },
+  });
+
+  const initialStepSequence = pendingRound
+    ? resumedRoundStepOffset(pendingRound)
+    : computeFreshRoundStepOffset({
+        compactionResult,
+        relevantSkillsSelection,
+      });
+  emitExecutionStepEvents({
+    graphEvents$,
+    manualEvents$,
+    roundId,
+    executionId: `${roundId}::execution`,
+    triggerEventId: `${roundId}::user_message`,
+    initialSequence: initialStepSequence,
   });
 
   // Use provided overrides, or fall back to pending round's overrides (for HITL resume)

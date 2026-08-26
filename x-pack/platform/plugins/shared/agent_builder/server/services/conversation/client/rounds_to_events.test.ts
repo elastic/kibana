@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationRound,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import {
   ConversationOriginType,
   ConversationRoundStatus,
+  ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
@@ -159,15 +164,79 @@ describe('roundsToEvents', () => {
       'round-2::execution_terminated',
     ]);
   });
+
+  it('emits one execution_step per round.steps entry, indexed by sequence, between start and terminated', () => {
+    const steps: ConversationRoundStep[] = [
+      {
+        type: ConversationRoundStepType.reasoning,
+        reasoning: 'thinking',
+      } as ConversationRoundStep,
+      {
+        type: ConversationRoundStepType.toolCall,
+        tool_call_id: 'tc-1',
+        tool_id: 'platform.core.search',
+        params: { q: 'foo' },
+        results: [],
+      } as ConversationRoundStep,
+    ];
+
+    const events = roundsToEvents(baseConversation([baseRound({ steps })]));
+
+    // Boundary events sandwich two step events in `sequence` order.
+    expect(events.map((event) => event.type)).toEqual([
+      TimelineEventType.userMessage,
+      TimelineEventType.executionStarted,
+      TimelineEventType.executionStep,
+      TimelineEventType.executionStep,
+      TimelineEventType.executionTerminated,
+    ]);
+    expect(events.map((event) => event.id)).toEqual([
+      'round-1::user_message',
+      'round-1::execution_started',
+      'round-1::step::0',
+      'round-1::step::1',
+      'round-1::execution_terminated',
+    ]);
+
+    // Step events carry the exact step payload from round.steps + a matching sequence.
+    expect(events[2]).toMatchObject({
+      type: TimelineEventType.executionStep,
+      execution_id: 'round-1::execution',
+      trigger_event_id: 'round-1::user_message',
+      actor: { type: EventActorType.agent, id: 'agent-1' },
+      data: { step: steps[0], sequence: 0 },
+    });
+    expect(events[3]).toMatchObject({
+      type: TimelineEventType.executionStep,
+      data: { step: steps[1], sequence: 1 },
+    });
+
+    // v2 terminals no longer carry the `steps` blob: step data now lives on step events only.
+    expect(events[4]).toMatchObject({ type: TimelineEventType.executionTerminated });
+    const terminatedData = events[4].data as { steps?: unknown };
+    expect(terminatedData.steps).toBeUndefined();
+  });
 });
 
 describe('isRoundDerivedEventId', () => {
-  it.each(roundsToEvents(baseConversation([baseRound()])).map((event) => event.id as string))(
-    'recognizes round-derived id %p',
-    (id) => {
-      expect(isRoundDerivedEventId(id)).toBe(true);
-    }
-  );
+  it.each(
+    roundsToEvents(
+      baseConversation([
+        baseRound({
+          steps: [
+            { type: ConversationRoundStepType.reasoning, reasoning: 'r' } as ConversationRoundStep,
+          ],
+        }),
+      ])
+    ).map((event) => event.id as string)
+  )('recognizes round-derived id %p', (id) => {
+    expect(isRoundDerivedEventId(id)).toBe(true);
+  });
+
+  it('recognizes step ids at arbitrary sequences (the `::step::N` marker is a prefix, not a suffix)', () => {
+    expect(isRoundDerivedEventId('round-1::step::0')).toBe(true);
+    expect(isRoundDerivedEventId('round-42::step::12')).toBe(true);
+  });
 
   it('rejects ids that are not round-derived', () => {
     expect(isRoundDerivedEventId('some-additive-error')).toBe(false);

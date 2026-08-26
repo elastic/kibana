@@ -31,6 +31,7 @@ import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
   isRoundStartedEvent,
+  isRoundStepEvent,
   isConversationCreatedEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
@@ -63,6 +64,7 @@ import {
   createConversation$,
   startConversation$,
   appendRoundTerminated$,
+  streamRoundSteps$,
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
@@ -316,7 +318,7 @@ const handleConversationExecution = async ({
         : EMPTY;
 
       return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
-        filter((event) => !isRoundStartedEvent(event)),
+        filter((event) => !isRoundStartedEvent(event) && !isRoundStepEvent(event)),
         handleCancellation(abortSignal),
         tap((event) => {
           if (isConversationCreatedEvent(event) && !author) {
@@ -509,6 +511,13 @@ const buildPersistenceEvents = ({
   action?: ConversationAction;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
+  const roundStepEvents$ = agentEvents$.pipe(filter(isRoundStepEvent));
+
+  const stepStream$ = streamRoundSteps$({
+    conversation,
+    conversationClient,
+    roundStepEvents$,
+  });
 
   const isRegenerate = action === 'regenerate';
   const isResume = isPendingResumeConversation(conversation);
@@ -521,7 +530,7 @@ const buildPersistenceEvents = ({
         ? title$
         : undefined;
 
-    return roundStartedEvents$.pipe(
+    const twoPhase$ = roundStartedEvents$.pipe(
       concatMap((startEvent) =>
         concat(
           startConversation$({
@@ -538,24 +547,27 @@ const buildPersistenceEvents = ({
         )
       )
     );
+
+    return merge(stepStream$, twoPhase$);
   }
 
-  if (conversation.operation === 'CREATE') {
-    return createConversation$({
-      conversation,
-      conversationClient,
-      title$,
-      roundCompletedEvents$,
-    });
-  }
+  const endWrite$ =
+    conversation.operation === 'CREATE'
+      ? createConversation$({
+          conversation,
+          conversationClient,
+          title$,
+          roundCompletedEvents$,
+        })
+      : updateConversation$({
+          conversationClient,
+          conversation,
+          roundCompletedEvents$,
+          action,
+          title$: conversationNeedsTitle(conversation) ? title$ : undefined,
+        });
 
-  return updateConversation$({
-    conversationClient,
-    conversation,
-    roundCompletedEvents$,
-    action,
-    title$: conversationNeedsTitle(conversation) ? title$ : undefined,
-  });
+  return merge(stepStream$, endWrite$);
 };
 
 /**
@@ -606,7 +618,7 @@ const handleStandaloneExecution = async ({
   });
 
   return agentEvents$.pipe(
-    filter((event) => !isRoundStartedEvent(event)),
+    filter((event) => !isRoundStartedEvent(event) && !isRoundStepEvent(event)),
     handleCancellation(abortSignal),
     catchError((err) => {
       logger.error(`Error executing standalone agent: ${err.stack ?? err.message}`);

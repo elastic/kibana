@@ -15,6 +15,11 @@ export { getPendingRound } from './prompts';
 export { evictInternalEvents } from './evict_internal_events';
 export { formatAttachmentsMetadata } from './attachment_presentation';
 export {
+  emitExecutionStepEvents,
+  computeFreshRoundStepOffset,
+  resumedRoundStepOffset,
+} from './emit_execution_step_events';
+export {
   createResultTransformer,
   type CreateResultTransformerOptions,
   FS_TOOL_CALL_TOKEN_THRESHOLD,

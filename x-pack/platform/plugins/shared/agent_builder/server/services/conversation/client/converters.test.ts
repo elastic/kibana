@@ -1674,26 +1674,18 @@ describe('conversation model converters', () => {
       ]);
     });
 
-    it('discards events and schema_version supplied in the update payload', () => {
+    it('discards a schema_version supplied in the update payload (version is server-owned)', () => {
       const conversation = eventsNativeStored();
-      const injectedEvent: TimelineEvent = {
-        id: 'injected::user_message',
-        type: TimelineEventType.userMessage,
-        created_at: roundCreationDate,
-        actor: { type: EventActorType.user, id: 'attacker' },
-        data: { message: 'should be discarded' },
-      };
+      const originalEventIds = conversation.events!.map((event) => event.id);
 
       const updated = updateConversation({
         conversation,
-        // Cast: routes never accept these, but the strip must be defensive.
+        // Cast: routes never accept schema_version, but the strip must be defensive.
         update: {
           id: conversation.id,
           title: 'renamed',
-          events: [injectedEvent],
           schema_version: 42,
         } as Parameters<typeof updateConversation>[0]['update'] & {
-          events: TimelineEvent[];
           schema_version: number;
         },
         space: 'space',
@@ -1703,42 +1695,68 @@ describe('conversation model converters', () => {
       // Version comes from the stored conversation (re-stamped at the current
       // format), never from the payload.
       expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
-      // Injected event never appears in the reconciled output.
-      expect(updated.events?.some((event) => event.id === 'injected::user_message')).toBe(false);
+      // Reconciled events come from rounds; the same ids as before the update.
+      expect(updated.events?.map((event) => event.id)).toEqual(originalEventIds);
     });
 
-    it('does not promote a legacy conversation even if events/schema_version are supplied in the update', () => {
-      const conversation = legacyStored();
+    it('trusts events supplied in the update payload (appendEvents path derives rounds from them)', () => {
+      // `appendEvents` writes a new event batch into an events-native doc and passes it through
+      // `updateConversation.update.events`. The writer trusts that batch verbatim (dedup happens
+      // upstream in `appendEvents` itself); `rounds` is re-derived to keep both projections in sync.
+      const conversation = eventsNativeStored();
+      const appended: TimelineEvent = {
+        id: 'appended::user_message',
+        type: TimelineEventType.userMessage,
+        created_at: roundCreationDate,
+        actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+        data: { message: 'from appendEvents' },
+      };
 
       const updated = updateConversation({
         conversation,
-        // Same defensive strip on the legacy path: a payload cannot escalate.
         update: {
           id: conversation.id,
-          title: 'renamed',
-          events: [
-            {
-              id: 'attempt::user_message',
-              type: TimelineEventType.userMessage,
-              created_at: roundCreationDate,
-              actor: { type: EventActorType.user, id: 'attacker' },
-              data: { message: 'attempt' },
-            },
-          ],
-          schema_version: CONVERSATION_SCHEMA_VERSION,
+          events: [...conversation.events!, appended],
         } as Parameters<typeof updateConversation>[0]['update'] & {
           events: TimelineEvent[];
-          schema_version: number;
         },
         space: 'space',
         updateDate: new Date(updateDate),
       });
 
-      expect(updated.schema_version).toBeUndefined();
-      // Legacy conversations do not reconcile — they stay rounds-only end to
-      // end. `toEs` will further guarantee no events/schema_version are
-      // persisted for these docs.
-      expect(updated.events).toBeUndefined();
+      expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(updated.events?.some((event) => event.id === 'appended::user_message')).toBe(true);
+    });
+
+    it('promotes a legacy conversation to events-native when a caller supplies events (appendEvents on a legacy doc)', () => {
+      // Legacy docs stay rounds-only on plain updates (see the earlier test). Once a caller opts
+      // in by supplying an `events` array (i.e. an `appendEvents` write lands on a legacy doc),
+      // the doc self-heals to events-native with the caller's timeline as the source of truth.
+      const conversation = legacyStored();
+      const seededEvents: TimelineEvent[] = [
+        {
+          id: 'seed::user_message',
+          type: TimelineEventType.userMessage,
+          created_at: roundCreationDate,
+          actor: { type: EventActorType.user, id: 'user_id', username: 'user_name' },
+          data: { message: 'seed' },
+        },
+      ];
+
+      const updated = updateConversation({
+        conversation,
+        update: {
+          id: conversation.id,
+          events: seededEvents,
+        } as Parameters<typeof updateConversation>[0]['update'] & {
+          events: TimelineEvent[];
+        },
+        space: 'space',
+        updateDate: new Date(updateDate),
+      });
+
+      expect(updated.schema_version).toBe(CONVERSATION_SCHEMA_VERSION);
+      expect(updated.events?.map((event) => event.id)).toEqual(['seed::user_message']);
     });
 
     it('keeps events-native docs stamped with the native marker on update', () => {

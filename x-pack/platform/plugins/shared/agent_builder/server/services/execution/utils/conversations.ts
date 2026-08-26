@@ -7,26 +7,48 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { of, forkJoin, switchMap, from, ignoreElements, firstValueFrom } from 'rxjs';
+import {
+  of,
+  forkJoin,
+  switchMap,
+  from,
+  ignoreElements,
+  firstValueFrom,
+  bufferTime,
+  concatMap,
+  filter,
+} from 'rxjs';
 import type {
   Conversation,
   ConversationAccessControl,
   ConversationOrigin,
   RoundCompleteEvent,
   RoundStartedEvent,
+  RoundStepEvent,
   ConversationAction,
+  TimelineEvent,
   UserIdAndName,
   ChatEvent,
 } from '@kbn/agent-builder-common';
 import {
   ConversationParentRelation,
+  TimelineEventType,
   isConversationAlreadyExistsError,
   normalizeConversationAccessControl,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
-import { roundStartEvents, roundTerminatedEvent } from '../../conversation/client/rounds_to_events';
+import {
+  agentActor,
+  roundStartEvents,
+  roundStepEventId,
+  roundStepEvents,
+  roundTerminatedEvent,
+} from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
+
+export const STEP_FLUSH_MS = 500;
+export const STEP_FLUSH_MAX = 10;
 
 /**
  * Persist a new conversation and emit the corresponding event
@@ -227,6 +249,51 @@ export const startConversation$ = ({
   );
 };
 
+export const streamRoundSteps$ = ({
+  conversation,
+  conversationClient,
+  roundStepEvents$,
+}: {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  roundStepEvents$: Observable<RoundStepEvent>;
+}): Observable<ChatEvent> => {
+  return roundStepEvents$.pipe(
+    bufferTime(STEP_FLUSH_MS, null, STEP_FLUSH_MAX),
+    filter((batch) => batch.length > 0),
+    concatMap((batch) =>
+      from(
+        conversationClient.appendEvents(
+          {
+            id: conversation.id,
+            events: batch.map((event) => stepChatEventToTimelineEvent(event, conversation)),
+          },
+          { access: 'converse' }
+        )
+      )
+    ),
+    ignoreElements()
+  );
+};
+
+const stepChatEventToTimelineEvent = (
+  event: RoundStepEvent,
+  conversation: Pick<Conversation, 'agent_id'>
+): TimelineEvent => {
+  const { round_id: roundId, execution_id: executionId, step, sequence } = event.data;
+  return {
+    id: roundStepEventId(roundId, sequence),
+    type: TimelineEventType.executionStep,
+    // Timestamped at emission time; `eventsToRounds` sorts by `sequence`, not by `created_at`,
+    // so this is purely for observability/debug.
+    created_at: new Date().toISOString(),
+    actor: agentActor(conversation),
+    execution_id: executionId,
+    trigger_event_id: `${roundId}::user_message`,
+    data: { step, sequence },
+  };
+};
+
 export const appendRoundTerminated$ = ({
   conversation,
   conversationClient,
@@ -250,8 +317,9 @@ export const appendRoundTerminated$ = ({
             workspace_id: workspaceId,
           } = roundCompletedEvent.data;
 
+          const stepEvents = roundStepEvents(round, conversation);
           const terminated = roundTerminatedEvent(round, conversation);
-          const events = terminated ? [terminated] : [];
+          const events: TimelineEvent[] = [...stepEvents, ...(terminated ? [terminated] : [])];
 
           const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
 

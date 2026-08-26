@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import { lastValueFrom, of, toArray } from 'rxjs';
+import { lastValueFrom, of, Subject, toArray } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type {
   ChatEvent,
   Conversation,
   ConversationRoundAuthor,
+  ConversationRoundStep,
   RoundCompleteEvent,
   RoundStartedEvent,
+  RoundStepEvent,
 } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
   ConversationAccessControlMode,
   ConversationRoundStatus,
+  ConversationRoundStepType,
+  TimelineEventType,
   createConversationAlreadyExistsError,
   createConversationNotFoundError,
   DEFAULT_CONVERSATION_TITLE,
@@ -29,9 +33,11 @@ import {
 } from '../../../test_utils';
 import type { ConversationWithOperation } from './conversations';
 import {
+  STEP_FLUSH_MS,
   appendRoundTerminated$,
   getConversation,
   startConversation$,
+  streamRoundSteps$,
   updateConversation$,
 } from './conversations';
 
@@ -645,6 +651,141 @@ describe('conversations utils', () => {
         snapshot: [existingAttachment],
         produced: [producedAttachment],
       });
+    });
+
+    it('appends the full projected step events for the round alongside the terminated event (v2)', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-steps' }), 'UPDATE');
+      const steps: ConversationRoundStep[] = [
+        { type: ConversationRoundStepType.reasoning, reasoning: 'r' } as ConversationRoundStep,
+        {
+          type: ConversationRoundStepType.toolCall,
+          tool_call_id: 't1',
+          tool_id: 'platform.core.search',
+          params: {},
+          results: [],
+        } as ConversationRoundStep,
+      ];
+      const round = createRound({
+        id: 'round-x',
+        status: ConversationRoundStatus.completed,
+        steps,
+      });
+
+      await runEnd({
+        conversation,
+        conversationClient,
+        roundCompleteEvent: {
+          type: ChatEventType.roundComplete,
+          data: { round, resumed: false },
+        },
+      });
+
+      const [args] = conversationClient.appendEvents.mock.calls[0];
+      expect(args.events.map((event: { type: string; id: string }) => event.type)).toEqual([
+        TimelineEventType.executionStep,
+        TimelineEventType.executionStep,
+        TimelineEventType.executionTerminated,
+      ]);
+      expect(args.events.map((event: { id: string }) => event.id)).toEqual([
+        'round-x::step::0',
+        'round-x::step::1',
+        'round-x::execution_terminated',
+      ]);
+    });
+  });
+
+  describe('streamRoundSteps$', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const withOperation = (
+      conversation: Conversation,
+      operation: 'CREATE' | 'UPDATE'
+    ): ConversationWithOperation => ({ ...conversation, operation });
+
+    const stepEvent = (roundId: string, sequence: number): RoundStepEvent => ({
+      type: ChatEventType.executionStep,
+      data: {
+        round_id: roundId,
+        execution_id: `${roundId}::execution`,
+        step: {
+          type: ConversationRoundStepType.reasoning,
+          reasoning: `step-${sequence}`,
+        } as ConversationRoundStep,
+        sequence,
+      },
+    });
+
+    it('debounces a burst of step events into a single `appendEvents` call and dedupes by id', async () => {
+      const conversationClient = createConversationClientMock();
+      conversationClient.appendEvents.mockResolvedValue(createEmptyConversation({ id: 'c1' }));
+      const conversation = withOperation(createEmptyConversation({ id: 'c1' }), 'UPDATE');
+
+      const stepEvents$ = new Subject<RoundStepEvent>();
+      const done = lastValueFrom(
+        streamRoundSteps$({
+          conversation,
+          conversationClient,
+          roundStepEvents$: stepEvents$,
+        }).pipe(toArray())
+      );
+
+      stepEvents$.next(stepEvent('round-1', 0));
+      stepEvents$.next(stepEvent('round-1', 1));
+      stepEvents$.next(stepEvent('round-1', 2));
+
+      // Nothing flushed yet — the debounce window has not elapsed.
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+
+      jest.advanceTimersByTime(STEP_FLUSH_MS);
+      // Allow the microtask queue (concatMap -> from(promise)) to drain.
+      await Promise.resolve();
+
+      stepEvents$.complete();
+      await done;
+
+      expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+      const [args] = conversationClient.appendEvents.mock.calls[0];
+      // Ids follow the `${roundId}::step::${sequence}` convention shared with `roundStepEvents`
+      // so streamed and reconciled projections dedupe cleanly.
+      expect(args.events.map((event: { id: string }) => event.id)).toEqual([
+        'round-1::step::0',
+        'round-1::step::1',
+        'round-1::step::2',
+      ]);
+      expect(
+        args.events.every(
+          (event: { type: string }) => event.type === TimelineEventType.executionStep
+        )
+      ).toBe(true);
+    });
+
+    it('is side-effect only (emits no chat events into the outward stream)', async () => {
+      const conversationClient = createConversationClientMock();
+      conversationClient.appendEvents.mockResolvedValue(createEmptyConversation({ id: 'c1' }));
+      const conversation = withOperation(createEmptyConversation({ id: 'c1' }), 'UPDATE');
+
+      const stepEvents$ = new Subject<RoundStepEvent>();
+      const emittedPromise = lastValueFrom(
+        streamRoundSteps$({
+          conversation,
+          conversationClient,
+          roundStepEvents$: stepEvents$,
+        }).pipe(toArray())
+      );
+
+      stepEvents$.next(stepEvent('round-1', 0));
+      jest.advanceTimersByTime(STEP_FLUSH_MS);
+      await Promise.resolve();
+      stepEvents$.complete();
+
+      const emitted = await emittedPromise;
+      expect(emitted).toEqual([]);
     });
   });
 });
