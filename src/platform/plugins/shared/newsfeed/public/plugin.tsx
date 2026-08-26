@@ -94,13 +94,7 @@ export class NewsfeedPublicPlugin
 
     core.chrome.navControls.registerRight({
       order: 1000,
-      content: (
-        <NewsfeedNavButton
-          newsfeedApi={sharedApi}
-          isServerless={this.isServerless}
-          sidebar={core.chrome.sidebar}
-        />
-      ),
+      content: <NewsfeedNavButton newsfeedApi={sharedApi} sidebar={core.chrome.sidebar} />,
     });
 
     return {

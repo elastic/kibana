@@ -21,7 +21,6 @@ const whatsNewLabel = i18n.translate('newsfeed.headerButton.whatsNewLabel', {
 
 export interface Props {
   newsfeedApi: NewsfeedApi;
-  isServerless: boolean;
   sidebar: SidebarStart;
 }
 

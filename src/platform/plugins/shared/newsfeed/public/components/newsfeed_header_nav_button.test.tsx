@@ -60,7 +60,7 @@ const renderComponent = (fetchResult: FetchResult | null = createFetchResult()) 
 
   const result = render(
     <I18nProvider>
-      <NewsfeedNavButton newsfeedApi={newsfeedApi} isServerless={false} sidebar={sidebar} />
+      <NewsfeedNavButton newsfeedApi={newsfeedApi} sidebar={sidebar} />
     </I18nProvider>
   );
 
