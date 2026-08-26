@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlSearchHttpResponse, SmlSearchHttpResultItem } from '../../common/http_api/sml';
 import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH, SmlSearchFilterType } from '../../common/http_api/sml';
 import { smlSearchPath } from '../../common/constants';
@@ -17,7 +16,7 @@ import {
   SmlAuthzEnumerationIncompleteError,
   SmlCorpusTooLargeError,
 } from '../services/sml/sml_errors';
-import { READ_SECURITY } from './common';
+import { READ_SECURITY, getEffectiveFilters } from './common';
 
 const SML_SEARCH_SIZE_MAX = 1000;
 const SML_SEARCH_FILTER_ARRAY_MAX = 100;
@@ -96,10 +95,7 @@ export const registerSearchRoute = ({
         const { query, size, fields, constraints, filters } = request.body;
         const esClient = coreContext.elasticsearch.client;
 
-        const isExperimental = await coreContext.uiSettings.client.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        const effectiveFilters = isExperimental ? filters : { ...filters, types: ['connector'] };
+        const effectiveFilters = await getEffectiveFilters(coreContext.uiSettings.client, filters);
 
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';

@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type {
   SmlAutocompleteHttpResponse,
   SmlAutocompleteHttpResultItem,
@@ -19,7 +18,7 @@ import {
 import { smlAutocompletePath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
 import type { AgentBuilderSmlStartDependencies, AgentBuilderSmlPluginStart } from '../types';
-import { READ_SECURITY } from './common';
+import { READ_SECURITY, getEffectiveFilters } from './common';
 
 const SML_AUTOCOMPLETE_SIZE_MAX = 50;
 
@@ -78,10 +77,7 @@ export const registerAutocompleteRoute = ({
         const coreContext = await ctx.core;
         const esClient = coreContext.elasticsearch.client;
 
-        const isExperimental = await coreContext.uiSettings.client.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        const effectiveFilters = isExperimental ? filters : { ...filters, types: ['connector'] };
+        const effectiveFilters = await getEffectiveFilters(coreContext.uiSettings.client, filters);
 
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';

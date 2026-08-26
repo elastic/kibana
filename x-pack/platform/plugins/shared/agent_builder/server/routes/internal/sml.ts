@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
@@ -48,8 +49,12 @@ export function registerInternalSmlRoutes({
       const [coreStart, startDeps] = await coreSetup.getStartServices();
       const agentBuilderSml = startDeps.agentBuilderSml;
       const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
-      const esClient = (await ctx.core).elasticsearch.client;
+      const coreContext = await ctx.core;
+      const esClient = coreContext.elasticsearch.client;
       const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+      const isExperimental = await coreContext.uiSettings.client.get<boolean>(
+        AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+      );
       const conversationClient = await conversationsService.getScopedClient({ request });
 
       const conversationForAttach = await conversationClient.get(conversationId);
@@ -83,6 +88,15 @@ export function registerInternalSmlRoutes({
               entry_id: r.entry_id,
               attachment_type: r.attachment_type,
               message: r.message,
+            };
+          }
+
+          if (!isExperimental && r.attachment.type !== 'connector') {
+            return {
+              success: false,
+              entry_id: r.entry_id,
+              attachment_type: r.attachment.type,
+              message: `Attaching '${r.attachment.type}' items requires Agent Builder experimental features to be enabled`,
             };
           }
 
