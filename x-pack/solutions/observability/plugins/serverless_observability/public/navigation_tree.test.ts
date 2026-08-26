@@ -38,7 +38,8 @@ describe('Navigation Tree', () => {
     expect(body.length).toBeGreaterThan(0);
     const homeNode = body[0];
     expect(homeNode).toMatchObject({
-      title: 'Observability',
+      title: 'Home',
+      icon: 'home',
       link: 'observability-overview',
     });
   });

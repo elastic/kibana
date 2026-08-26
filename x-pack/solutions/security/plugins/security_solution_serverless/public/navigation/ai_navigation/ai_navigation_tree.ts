@@ -16,13 +16,6 @@ import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/lin
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
-import { AiNavigationIcon } from './icon';
-
-const SOLUTION_NAME = i18n.translate(
-  'xpack.securitySolutionServerless.aiNavigation.projectType.title',
-  { defaultMessage: 'Elastic AI SOC Engine' }
-);
-
 export const createAiNavigationTree = (
   core: CoreStart,
   chatExperience: AIChatExperience = AIChatExperience.Classic,
@@ -33,9 +26,10 @@ export const createAiNavigationTree = (
     {
       id: 'ease_home',
       link: securityLink(SecurityPageName.landing),
-      title: SOLUTION_NAME,
-      icon: AiNavigationIcon,
-      renderAs: 'home',
+      title: i18n.translate('xpack.securitySolutionServerless.aiNavigation.home', {
+        defaultMessage: 'Home',
+      }),
+      icon: 'home',
     },
     ...(chatExperience === AIChatExperience.Agent && showAgentBuilderNavAtTop
       ? [
