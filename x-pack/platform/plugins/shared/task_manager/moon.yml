@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/scout'
   - '@kbn/std'
+  - '@kbn/mock-idp-utils'
 tags:
   - plugin
   - prod

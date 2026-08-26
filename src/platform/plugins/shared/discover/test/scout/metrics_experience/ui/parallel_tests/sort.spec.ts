@@ -77,5 +77,99 @@ spaceTest.describe(
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
       });
     });
+
+    spaceTest('restores a non-default sort after a page reload', async ({ pageObjects, page }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      const { metricsExperience } = pageObjects;
+
+      await spaceTest.step('a fresh session defaults to ascending order', async () => {
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
+      });
+
+      await spaceTest.step('change the sort to descending', async () => {
+        await metricsExperience.setSortDirection('desc');
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
+      });
+
+      await spaceTest.step('wait for the sort to be persisted to local tab storage', async () => {
+        // Tab state is written to local storage on a trailing throttle, so an
+        // immediate reload could race the write. Poll storage until the sort
+        // lands to deterministically test "persisted sort survives a reload".
+        await expect.poll(() => metricsExperience.getPersistedSortDirection()).toBe('desc');
+      });
+
+      await spaceTest.step('the descending sort survives a full page reload', async () => {
+        await page.reload();
+        // The grid only mounts once the post-reload metrics fetch resolves, and a cold
+        // Discover re-init plus that fetch regularly exceeds the default 10s on serverless CI
+        // (matching `waitForDiscoverPage`'s own 30s allowance for the same reason).
+        await expect(metricsExperience.grid).toBeVisible({ timeout: 30_000 });
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
+      });
+    });
+
+    spaceTest('reflects a non-default sort in the URL', async ({ pageObjects, page }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      const { metricsExperience } = pageObjects;
+
+      await spaceTest.step('a fresh session carries no sort in the URL', async () => {
+        await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
+        expect(metricsExperience.getProfileState(page.url())).not.toContain('sortDirection');
+      });
+
+      await spaceTest.step('changing the sort writes it to the URL', async () => {
+        await metricsExperience.setSortDirection('desc');
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
+        // The URL is written through `kbnUrlControls`, which batches asynchronously and so is
+        // not settled by the time the grid has re-rendered.
+        await expect
+          .poll(() => metricsExperience.getProfileState(page.url()))
+          .toContain('sortDirection:desc');
+      });
+
+      await spaceTest.step('restoring the default sort strips it from the URL', async () => {
+        await metricsExperience.setSortDirection('asc');
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
+        await expect
+          .poll(() => metricsExperience.getProfileState(page.url()))
+          .not.toContain('sortDirection');
+      });
+    });
+
+    spaceTest('applies a sort supplied by the URL', async ({ pageObjects, page }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      const { metricsExperience } = pageObjects;
+
+      await metricsExperience.setSortDirection('desc');
+      await expect
+        .poll(() => metricsExperience.getProfileState(page.url()))
+        .toContain('sortDirection:desc');
+      // Wait for 'desc' to land in local storage before capturing the URL and then resetting,
+      // so the subsequent cleared-storage check is meaningful.
+      await expect.poll(() => metricsExperience.getPersistedSortDirection()).toBe('desc');
+      const descendingUrl = page.url();
+
+      await spaceTest.step('return the locally persisted sort to the default', async () => {
+        // Locally persisted state must disagree with the URL, otherwise a passing assertion
+        // below could be explained by local tab storage rather than by the URL.
+        await metricsExperience.setSortDirection('asc');
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
+        await expect
+          .poll(() => metricsExperience.getProfileState(page.url()))
+          .not.toContain('sortDirection');
+        // The default 'asc' is stripped from storage rather than written, so we cannot poll for
+        // its presence. Instead poll until sortDirection is absent, confirming the throttled
+        // tab-state write has settled before we navigate to the captured URL.
+        await expect.poll(() => metricsExperience.getPersistedSortDirection()).toBeUndefined();
+      });
+
+      await spaceTest.step('opening the captured URL applies its sort', async () => {
+        await page.goto(descendingUrl);
+        // See the reload test above for why a cold Discover re-init needs the longer timeout.
+        await expect(metricsExperience.grid).toBeVisible({ timeout: 30_000 });
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
+      });
+    });
   }
 );

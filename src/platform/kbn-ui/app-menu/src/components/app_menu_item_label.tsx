@@ -18,6 +18,7 @@ import {
   type IconType,
 } from '@elastic/eui';
 import { AppMenuBadge } from './app_menu_badge';
+import { asOptionalPlainText, asPlainText } from '../as_plain_text';
 
 interface AppMenuItemLabelProps {
   label: string;
@@ -38,6 +39,8 @@ export const AppMenuItemLabel = ({
   labelBadgeText,
   iconType,
 }: AppMenuItemLabelProps) => {
+  const badgeText = asOptionalPlainText(labelBadgeText);
+
   const icon = isLoading ? (
     <EuiLoadingSpinner size="m" data-test-subj={testId ? `${testId}-loading` : undefined} />
   ) : iconType ? (
@@ -49,11 +52,11 @@ export const AppMenuItemLabel = ({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           {icon && <EuiFlexItem grow={false}>{icon}</EuiFlexItem>}
-          <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-          {labelBadgeText && (
+          <EuiFlexItem grow={false}>{asPlainText(label)}</EuiFlexItem>
+          {badgeText && (
             <EuiFlexItem grow={false}>
               <AppMenuBadge
-                text={labelBadgeText}
+                text={badgeText}
                 data-test-subj={testId ? `${testId}-badge` : undefined}
               />
             </EuiFlexItem>
@@ -67,7 +70,7 @@ export const AppMenuItemLabel = ({
           component="span"
           data-test-subj={testId ? `${testId}-description` : undefined}
         >
-          <EuiTextTruncate text={description} />
+          <EuiTextTruncate text={asOptionalPlainText(description) ?? ''} />
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -46,11 +46,13 @@ describe('CustomizeCps', () => {
 
   const mockCpsManager = {
     fetchProjects: mockFetchProjects,
+    getConfigurationLinks: jest.fn(),
   };
 
-  const defaultSpace = {
+  const defaultSpace: { id: string; name: string; projectRouting?: string } = {
     id: 'test-space',
     name: 'Test Space',
+    projectRouting: '_alias:*',
   };
 
   const renderComponent = (
@@ -120,11 +122,11 @@ describe('CustomizeCps', () => {
 
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();
-      expect(await screen.findByText('ABCDE1234567890')).toBeInTheDocument();
-      expect(await screen.findByText('BADCE1234567890')).toBeInTheDocument();
 
-      expect(await getAllProjectsButton()).toBeInTheDocument();
-      expect(await getThisProjectButton()).toBeInTheDocument();
+      expect(await getProjectSwitchButton(originProject._id)).toBeEnabled();
+      expect(await getProjectContextMenuButton(originProject._id)).toBeEnabled();
+      expect(await getProjectSwitchButton(linkedProject._id)).toBeEnabled();
+      expect(await getProjectContextMenuButton(linkedProject._id)).toBeEnabled();
     });
 
     it('renders with a space that has no projectRouting', async () => {
@@ -132,6 +134,7 @@ describe('CustomizeCps', () => {
         id: 'test-space',
         name: 'Test Space',
       };
+
       renderComponent(spaceWithoutRouting);
 
       expect(await screen.findByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
@@ -166,12 +169,15 @@ describe('CustomizeCps', () => {
       const capabilities = {
         project_routing: { manage_space_default: false },
       };
+
       renderComponent(defaultSpace, mockOnChange, capabilities);
 
       expect(await screen.findByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
 
-      expect(await getAllProjectsButton()).toBeDisabled();
-      expect(await getThisProjectButton()).toBeDisabled();
+      expect(await getProjectSwitchButton(originProject._id)).toBeDisabled();
+      expect(await getProjectSwitchButton(linkedProject._id)).toBeDisabled();
+      expect(await getProjectContextMenuButton(originProject._id)).toBeDisabled();
+      expect(await getProjectContextMenuButton(linkedProject._id)).toBeDisabled();
     });
 
     it('allows the user to select project routing if the user has the manage_space_default capability', async () => {
@@ -180,6 +186,7 @@ describe('CustomizeCps', () => {
       const capabilities = {
         project_routing: { manage_space_default: true },
       };
+
       renderComponent(defaultSpace, mockOnChange, capabilities);
 
       expect(await screen.findByTestId('cpsDefaultScopePanel')).toBeInTheDocument();
@@ -187,23 +194,20 @@ describe('CustomizeCps', () => {
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();
 
-      await user.click(await getThisProjectButton());
+      await user.click(await getProjectSwitchButton(originProject._id));
 
-      expect(await screen.findByText('local_project')).toBeInTheDocument();
-      await waitFor(() =>
-        expect(screen.queryByText('linked_local_project')).not.toBeInTheDocument()
-      );
-      expect(mockOnChange).toHaveBeenCalledWith({
+      expect(mockOnChange).toHaveBeenLastCalledWith({
         id: 'test-space',
         name: 'Test Space',
-        projectRouting: '_alias:_origin',
+        projectRouting: `_alias:* AND (_id:* AND NOT _id:${originProject._id})`,
       });
 
-      await user.click(await getAllProjectsButton());
+      await user.click(await getProjectSwitchButton(originProject._id));
 
       expect(await screen.findByText('local_project')).toBeInTheDocument();
       expect(await screen.findByText('linked_local_project')).toBeInTheDocument();
-      expect(mockOnChange).toHaveBeenCalledWith({
+
+      expect(mockOnChange).toHaveBeenLastCalledWith({
         id: 'test-space',
         name: 'Test Space',
         projectRouting: '_alias:*',
@@ -211,11 +215,11 @@ describe('CustomizeCps', () => {
     });
   });
 
-  async function getAllProjectsButton() {
-    return await screen.findByRole('button', { name: `All projects` });
+  async function getProjectSwitchButton(projectId: string) {
+    return await screen.findByTestId(`projectPickerListItemSwitch-${projectId}`);
   }
 
-  async function getThisProjectButton() {
-    return await screen.findByRole('button', { name: `This project` });
+  async function getProjectContextMenuButton(projectId: string) {
+    return await screen.findByTestId(`projectPickerListItemContextMenu-${projectId}`);
   }
 });

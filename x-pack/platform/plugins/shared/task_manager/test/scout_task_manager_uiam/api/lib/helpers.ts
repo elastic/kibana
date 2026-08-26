@@ -16,6 +16,23 @@ export const TASK_MANAGER_INDEX = '.kibana_task_manager';
 
 export const taskDocId = (taskId: string) => `task:${taskId}`;
 
+export const parseTaskState = (raw: unknown): Record<string, unknown> => {
+  if (raw == null) {
+    return {};
+  }
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+  if (typeof raw === 'object') {
+    return raw as Record<string, unknown>;
+  }
+  return {};
+};
+
 /**
  * Reads the nested `task` attributes from a Task Manager concrete task document in ES.
  */

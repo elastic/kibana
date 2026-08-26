@@ -6,6 +6,7 @@
  */
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
@@ -13,7 +14,9 @@ import {
 } from '../../responder';
 import { useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_alert_response_actions_support';
 import { HostStatus } from '../../../../../../common/endpoint/types';
-import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
+import { getEventDetailsFieldValues } from '../../../../lib/endpoint/utils/get_event_details_field_values';
+import { useKibana } from '../../../../lib/kibana';
+import { HOST_ON_LINKED_PROJECT_TOOLTIP, ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { useUserPrivileges } from '../../../user_privileges';
 import type { AlertTableContextMenuItem } from '../../../../../detections/components/alerts_table/types';
 import { useGetAgentStatus } from '../../../../../management/hooks/agents/use_get_agent_status';
@@ -76,6 +79,26 @@ export const useHostIsolationAction = ({
     );
   }, [hostSupportsResponseActions, agentStatus]);
 
+  // Only meaningful when CPS is on: `cpsManager` is present solely on CPS-enabled deployments. Off
+  // CPS (including CCS deployments), an ancestor index can legitimately carry a remote-cluster prefix
+  // that `isNonLocalIndexName` would flag, so the check must be gated to avoid a false positive.
+  const isCpsEnabled = Boolean(useKibana().services.cps?.cpsManager);
+
+  // In a Cross-Project Search deployment an alert can be generated off a document that lives in a
+  // linked project even though the alert itself is stored locally. The host is then only visible to
+  // the origin via a fanned-out (project-routed) search, while response actions run origin-only and
+  // reject the host as not enrolled. Elasticsearch prefixes the source `_index` with the project
+  // alias, so a non-local ancestor index is the signal that the host belongs to a linked project.
+  const isHostFromLinkedProject = useMemo<boolean>(
+    () =>
+      isCpsEnabled &&
+      getEventDetailsFieldValues(
+        { category: 'kibana', field: 'kibana.alert.ancestors.index' },
+        detailsData
+      ).some(isNonLocalIndexName),
+    [isCpsEnabled, detailsData]
+  );
+
   return useMemo<AlertTableContextMenuItem[]>(() => {
     // If user has no Authz, then don't show the menu item at all
     if ((isHostIsolated && !canUnIsolateHost) || !canIsolateHost) {
@@ -91,7 +114,12 @@ export const useHostIsolationAction = ({
     };
 
     // Determine if menu item should be disabled
-    if (!doesHostSupportIsolation) {
+    if (isHostFromLinkedProject) {
+      // Checked first so its reason wins: agent status fans out and reports the linked host as
+      // enrolled, so the other branches below would otherwise show a misleading tooltip.
+      menuItem.disabled = true;
+      menuItem.toolTipContent = HOST_ON_LINKED_PROJECT_TOOLTIP;
+    } else if (!doesHostSupportIsolation) {
       menuItem.disabled = true;
       // If we were able to calculate the agentType and we have a reason why the host is does not
       // support response actions, then show that as the tooltip. Else, just show the normal "enroll" message
@@ -115,6 +143,7 @@ export const useHostIsolationAction = ({
     canIsolateHost,
     isHostAgentUnEnrolled,
     isolateHostHandler,
+    isHostFromLinkedProject,
     doesHostSupportIsolation,
     isLoading,
     isFetched,

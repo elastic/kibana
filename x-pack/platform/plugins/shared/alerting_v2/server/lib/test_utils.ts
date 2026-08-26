@@ -24,6 +24,7 @@ import type { AlertEvent } from '../resources/datastreams/alert_events';
 import type { RuleExecutionPipelineInput } from './rule_executor/execution_pipeline';
 import { createExecutionContext } from './execution_context';
 import type { RuleSavedObjectAttributes } from '../saved_objects';
+import { createLoggerService } from './services/logger_service/logger_service.mock';
 
 /**
  * Creates a mock Elasticsearch client.
@@ -125,6 +126,11 @@ export function createRuleExecutionPipelineInput(
     scheduledAt: '2025-01-01T00:00:00.000Z',
     executionUuid: 'execution-uuid',
     abortSignal: new AbortController().signal,
+    logger: createLoggerService().loggerService.forSubsystem('ruleExecutor').withLabels({
+      rule_id: 'rule-1',
+      space_id: 'default',
+      task_id: 'task-1',
+    }),
     ...overrides,
   };
 }
@@ -132,6 +138,11 @@ export function createRuleExecutionPipelineInput(
 export function createRulePipelineState(state?: Partial<RulePipelineState>): RulePipelineState {
   return {
     input: createRuleExecutionInput(),
+    logger: createLoggerService().loggerService.forSubsystem('ruleExecutor').withLabels({
+      rule_id: 'rule-1',
+      space_id: 'default',
+      task_id: 'task-1',
+    }),
     ...state,
   };
 }

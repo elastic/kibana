@@ -94,13 +94,12 @@ describe('queryNotifications', () => {
     });
   });
 
-  it('composes namespace, type, severity, and time-range filters', async () => {
+  it('composes namespace, type, and time-range filters', async () => {
     const { deps, search } = setup();
 
     await queryNotifications(deps, {
       namespace: 'inference',
       type: 'modelStatus',
-      severity: ['warning', 'error'],
       from: '2026-07-01T00:00:00.000Z',
       to: '2026-07-20T00:00:00.000Z',
     });
@@ -110,7 +109,6 @@ describe('queryNotifications', () => {
       expect.arrayContaining([
         { term: { namespace: 'inference' } },
         { term: { type: 'modelStatus' } },
-        { terms: { severity: ['warning', 'error'] } },
         {
           range: {
             '@timestamp': { gte: '2026-07-01T00:00:00.000Z', lte: '2026-07-20T00:00:00.000Z' },

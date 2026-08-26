@@ -23,6 +23,7 @@ import {
   PreconfiguredFleetServerHostsSchema,
   PreconfiguredFleetProxiesSchema,
   PreconfiguredSpaceSettingsSchema,
+  PreconfiguredDownloadSourcesSchema,
 } from './types';
 import { BULK_CREATE_MAX_ARTIFACTS_BYTES } from './services/artifacts/artifacts';
 
@@ -288,7 +289,11 @@ export const config: PluginConfigDescriptor = {
                 schema.object({
                   certificate: schema.maybe(schema.string()),
                   key: schema.maybe(schema.string()),
-                  ca: schema.maybe(schema.string()),
+                  // One path (agentless-style) or a list. Serverless mTLS needs
+                  // both cluster-internal-cas and the MKI intermediate.
+                  ca: schema.maybe(
+                    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+                  ),
                 })
               ),
             })
@@ -301,6 +306,7 @@ export const config: PluginConfigDescriptor = {
       fleetServerHosts: PreconfiguredFleetServerHostsSchema,
       proxies: PreconfiguredFleetProxiesSchema,
       spaceSettings: PreconfiguredSpaceSettingsSchema,
+      binaryDownloadSource: PreconfiguredDownloadSourcesSchema,
       agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
       eventIngestedEnabled: schema.boolean({ defaultValue: false }),
       setup: schema.maybe(

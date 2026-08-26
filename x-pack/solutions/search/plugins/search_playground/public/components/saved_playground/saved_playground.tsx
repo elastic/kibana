@@ -7,7 +7,8 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route, Routes } from '@kbn/shared-ux-router';
 
@@ -35,14 +36,12 @@ import { SearchMode } from '../search_mode/search_mode';
 import { SearchQueryMode } from '../query_mode/search_query_mode';
 
 import { SavedPlaygroundFetchError } from './saved_playground_fetch_error';
-import { EditPlaygroundNameModal } from './edit_name_modal';
 import { DeletePlaygroundModal } from './delete_playground_modal';
 import { SavePlaygroundModal } from './save_playground_modal';
 import { SearchPlaygroundSetupPage } from '../setup_page/search_playground_setup_page';
 
 enum SavedPlaygroundModals {
   None,
-  EditName,
   Delete,
   Copy,
 }
@@ -144,11 +143,30 @@ export const SavedPlayground = () => {
         viewMode={viewMode}
         onModeChange={handleModeChange}
         isActionsDisabled={false}
-        onSelectPageModeChange={handlePageModeChange}
-        onEditName={() => setShownModal(SavedPlaygroundModals.EditName)}
         onDeletePlayground={() => setShownModal(SavedPlaygroundModals.Delete)}
         onCopyPlayground={() => setShownModal(SavedPlaygroundModals.Copy)}
       />
+      {isSearchModeEnabled && (
+        <EuiFlexGroup
+          justifyContent="flexEnd"
+          css={({ euiTheme }) => ({ padding: euiTheme.size.s })}
+        >
+          <EuiFlexItem grow={false}>
+            <EuiSelect
+              data-test-subj="page-mode-select"
+              options={[
+                { value: PlaygroundPageMode.Chat, text: 'Chat' },
+                { value: PlaygroundPageMode.Search, text: 'Search' },
+              ]}
+              value={pageMode}
+              aria-label={i18n.translate('xpack.searchPlayground.header.pageModeSelectAriaLabel', {
+                defaultMessage: 'Page mode',
+              })}
+              onChange={(e) => handlePageModeChange(e.target.value as PlaygroundPageMode)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <Routes>
         {showSetupPage ? (
           <>
@@ -178,9 +196,6 @@ export const SavedPlayground = () => {
           </>
         )}
       </Routes>
-      {shownModal === SavedPlaygroundModals.EditName && (
-        <EditPlaygroundNameModal playgroundName={playgroundName} onClose={onCloseModal} />
-      )}
       {shownModal === SavedPlaygroundModals.Delete && (
         <DeletePlaygroundModal
           playgroundId={playgroundId}

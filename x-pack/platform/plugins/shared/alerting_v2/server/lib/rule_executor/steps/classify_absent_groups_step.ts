@@ -22,10 +22,6 @@ import { executeRecoveryQuery } from '../execute_recovery_query';
 import { fetchActiveAlertGroupHashes } from '../fetch_active_alert_group_hashes';
 import { forwardThenFinalize } from '../stream_utils';
 import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
-import {
   QueryServiceInternalToken,
   QueryServiceScopedSpaceRoutingToken,
 } from '../../services/query_service/tokens';
@@ -68,7 +64,6 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   private readonly maxQueryResponseSize: number;
 
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract,
     @inject(QueryServiceScopedSpaceRoutingToken)
     private readonly scopedQueryService: QueryServiceContract,
@@ -80,6 +75,8 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
+    const stepName = this.name;
+
     return forwardThenFinalize(streamState, {
       // Accumulate the full-run breach set as batches stream through.
       seed: new Set<string>(),
@@ -98,8 +95,8 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
           return undefined;
         }
 
-        this.logger.debug({
-          message: `[${this.name}] Emitting ${finalBatch.length} absence-based event(s) for rule ${lastState.input.ruleId}`,
+        lastState.logger.withLabels({ step: stepName }).debug({
+          message: `[${stepName}] Emitting ${finalBatch.length} absence-based event(s) for rule ${lastState.input.ruleId}`,
         });
 
         return {
@@ -143,7 +140,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
           queryService: this.scopedQueryService,
           rule,
           input,
-          logger: this.logger,
+          logger: state.logger.withLabels({ step: this.name }),
           maxResponseSize: this.maxQueryResponseSize,
         })
       : undefined;
@@ -156,6 +153,7 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
           activeGroups,
           breachedGroupHashes,
           dataPresentGroupHashes,
+          logger: state.logger.withLabels({ step: this.name }),
         })
       : [];
 
@@ -181,19 +179,21 @@ export class ClassifyAbsentGroupsStep implements RuleExecutionStep {
     activeGroups,
     breachedGroupHashes,
     dataPresentGroupHashes,
+    logger,
   }: {
     rule: RuleResponse;
     input: RulePipelineState['input'];
     activeGroups: ActiveAlertGroupHash[];
     breachedGroupHashes: ReadonlySet<string>;
     dataPresentGroupHashes?: ReadonlySet<string>;
+    logger: RulePipelineState['logger'];
   }): Promise<AlertEvent[]> {
     const effectiveQuery = getRecoverEsqlQuery(rule.query, rule.recovery_strategy);
 
     if (effectiveQuery) {
       return executeRecoveryQuery({
         queryService: this.scopedQueryService,
-        logger: this.logger,
+        logger,
         rule,
         effectiveQuery,
         input,

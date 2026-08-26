@@ -497,6 +497,7 @@ export class TaskManagerPlugin
       reset$: this.resetMetrics$,
       taskPollingLifecycle: this.taskPollingLifecycle,
       taskManagerMetricsCollector: this.taskManagerMetricsCollector,
+      definitions: this.definitions,
     }).subscribe((metric) => this.metrics$.next(metric));
 
     const taskScheduling = new TaskScheduling({

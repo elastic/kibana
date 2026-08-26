@@ -129,7 +129,7 @@ const entityStoreDsl = (entityIndex: string) =>
  * (which use the search strategy, not this intercept) are unaffected.
  */
 export const mockEntityStoreRiskScores = () => {
-  const entityIndex = '.entities.v2.latest.security_default-00001';
+  const entityIndex = '.entities.v2.latest.default-00001';
 
   cy.intercept('GET', ENTITY_STORE_ENTITIES_URL, (req) => {
     const entityTypesParam = req.query?.entity_types;

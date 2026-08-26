@@ -150,10 +150,15 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
           isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel) &&
           monitorsInLocation.length
         ) {
-          await checkPrivileges({
+          const privilegeResponse = await checkPrivileges({
             routeContext,
-            monitorsSpaces: monitorsInLocation.map(({ namespaces }) => namespaces![0]),
+            monitorsSpaces: [
+              ...new Set(monitorsInLocation.flatMap(({ namespaces }) => namespaces ?? [])),
+            ],
           });
+          if (privilegeResponse) {
+            return privilegeResponse;
+          }
         }
 
         newLocation = await repo.editPrivateLocation(locationId, {

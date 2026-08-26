@@ -14,7 +14,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -31,6 +30,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PROXY_MODE } from '../../../../../common/constants';
 import { ConfiguredByNodeWarning } from '../../components';
@@ -126,7 +126,7 @@ export class DetailPanel extends Component<Props> {
     }
     return (
       <>
-        <EuiCallOut
+        <KbnWarningCallout
           title={
             <FormattedMessage
               id="xpack.remoteClusters.detailPanel.deprecatedSettingsTitle"
@@ -136,42 +136,41 @@ export class DetailPanel extends Component<Props> {
               }}
             />
           }
-          color="warning"
-          iconType="question"
-        >
-          {/* A remote cluster is not editable if configured in elasticsearch.yml, so we direct the user to documentation instead */}
-          {isConfiguredByNode ? (
-            <FormattedMessage
-              id="xpack.remoteClusters.detailPanel.deprecatedSettingsConfiguredByNodeMessage"
-              defaultMessage="Edit the cluster to update the settings. {helpLink}"
-              values={{
-                helpLink: (
-                  <EuiLink href={proxyModeUrl} target="_blank">
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.deprecatedSettingsLearnMoreLinkLabel"
-                      defaultMessage="Learn more."
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.remoteClusters.detailPanel.deprecatedSettingsMessage"
-              defaultMessage="{editLink} to update the settings."
-              values={{
-                editLink: (
-                  <EuiLink {...reactRouterNavigate(history, `/edit/${clusterName}`)}>
-                    <FormattedMessage
-                      id="xpack.remoteClusters.detailPanel.deprecatedSettingsEditLinkLabel"
-                      defaultMessage="Edit the cluster"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          )}
-        </EuiCallOut>
+          text={
+            /* A remote cluster is not editable if configured in elasticsearch.yml, so we direct the user to documentation instead */
+            isConfiguredByNode ? (
+              <FormattedMessage
+                id="xpack.remoteClusters.detailPanel.deprecatedSettingsConfiguredByNodeMessage"
+                defaultMessage="Edit the cluster to update the settings. {helpLink}"
+                values={{
+                  helpLink: (
+                    <EuiLink href={proxyModeUrl} target="_blank">
+                      <FormattedMessage
+                        id="xpack.remoteClusters.detailPanel.deprecatedSettingsLearnMoreLinkLabel"
+                        defaultMessage="Learn more."
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.remoteClusters.detailPanel.deprecatedSettingsMessage"
+                defaultMessage="{editLink} to update the settings."
+                values={{
+                  editLink: (
+                    <EuiLink {...reactRouterNavigate(history, `/edit/${clusterName}`)}>
+                      <FormattedMessage
+                        id="xpack.remoteClusters.detailPanel.deprecatedSettingsEditLinkLabel"
+                        defaultMessage="Edit the cluster"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            )
+          }
+        />
         <EuiSpacer size="l" />
       </>
     );

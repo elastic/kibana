@@ -11,8 +11,6 @@ import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
   createRuleDataSchema,
-  isSignalQueryBreachOnly,
-  isSignalUsingStandaloneFormat,
   isStateTransitionAllowed,
   updateRuleDataSchema,
   type RuleKind,
@@ -32,6 +30,7 @@ import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
+import { ArtifactTypeRegistry } from '../artifact_types';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getInvalidRuleDataMessage,
@@ -77,6 +76,7 @@ import type {
 } from './types';
 import {
   assertImmutableUnchanged,
+  validateMergedRuleAttributes,
   buildUpdateRuleAttributes,
   groupCandidatesByInterval,
   isTaskMidRun,
@@ -145,7 +145,8 @@ export class RulesClient {
     @inject(RulesSavedObjectServiceInternalToken)
     private readonly rulesSavedObjectServiceInternal: RulesSavedObjectServiceContract,
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
+    @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry
   ) {
     this.config = pluginConfigAccessor.get<PluginConfig>();
   }
@@ -327,6 +328,7 @@ export class RulesClient {
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
+    this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
 
@@ -395,6 +397,9 @@ export class RulesClient {
   public async updateRule({ id, data, options }: UpdateRuleParams): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
+    if (parsed.artifacts !== undefined) {
+      this.artifactTypeRegistry.validate(parsed.artifacts ?? undefined);
+    }
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
@@ -420,18 +425,7 @@ export class RulesClient {
       version: ruleVersion,
     });
 
-    if (!isSignalUsingStandaloneFormat(nextAttrs)) {
-      throw Boom.badRequest('kind "signal" requires query.format "standalone".', {
-        code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
-        details: { rule_id: id, rule_kind: existingAttrs.kind },
-      });
-    }
-    if (!isSignalQueryBreachOnly(nextAttrs)) {
-      throw Boom.badRequest('Signal rules cannot set recovery_strategy or no_data_strategy.', {
-        code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
-        details: { rule_id: id, rule_kind: existingAttrs.kind },
-      });
-    }
+    validateMergedRuleAttributes(id, nextAttrs);
 
     await this.validateSchedule({
       updatedEvery: nextAttrs.schedule.every,
@@ -1139,7 +1133,8 @@ export class RulesClient {
       }
 
       affectedCount += 1;
-      updatedRules.push({ ruleId: item.id, spaceId });
+      const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+      updatedRules.push({ ruleId: rule.id, spaceId, rule });
     }
 
     this.ruleEventPublisher.emitRuleUpdated(this.request, updatedRules);
@@ -1392,6 +1387,7 @@ export class RulesClient {
     data: CreateRuleData;
   }): Promise<{ rule: RuleResponse; created: boolean }> {
     const parsed = this.parseRuleData(createRuleDataSchema, data, 'upsert');
+    this.artifactTypeRegistry.validate(parsed.artifacts);
 
     const exists = await this.ruleExists({ id });
 

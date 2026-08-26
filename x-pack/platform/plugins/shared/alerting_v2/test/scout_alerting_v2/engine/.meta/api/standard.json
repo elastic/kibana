@@ -1,8 +1,7 @@
 {
-  "sha1": "150a7d60a39cdcecdb34eb85ec9141f18d0b5a94",
+  "sha1": "7e1292cdb01a6d691cb03e078d148fc8a730f2be",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -300,8 +299,8 @@
       }
     },
     {
-      "id": "1cdf702b9453e98-f671f4e4f7de76d",
-      "title": "Director no_data_strategy 'recover' transitions the episode toward recovery via a no_data event",
+      "id": "1cdf702b9453e98-f90e3171bd2118a",
+      "title": "Director no_data_strategy 'recover' resolves the episode to inactive via a no_data event",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -930,8 +929,8 @@
       }
     },
     {
-      "id": "bac9f0172299fca-0e977e98fb99ba7",
-      "title": "Rule executor writes one breach event per matching ES|QL row",
+      "id": "bac9f0172299fca-aabe03296c46793",
+      "title": "Rule executor (json ES|QL response format) writes one breach event per matching ES|QL row",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -939,265 +938,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 60,
-        "column": 16
-      }
-    },
-    {
-      "id": "bac9f0172299fca-77d63b284d4de05",
-      "title": "Rule executor writes the columns returned by the query to the data field correctly",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 93,
-        "column": 27
-      }
-    },
-    {
-      "id": "bac9f0172299fca-ea445300011525e",
-      "title": "Rule executor populates rule, source, and scheduling fields on every breach event",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 145,
-        "column": 84
-      }
-    },
-    {
-      "id": "bac9f0172299fca-b3f74e144f14a8b",
-      "title": "Rule executor writes one event per group when grouping.fields is set",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 196,
-        "column": 9
-      }
-    },
-    {
-      "id": "bac9f0172299fca-58b42763926cd1b",
-      "title": "Rule executor groups multiple documents into the same group correctly",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 246,
-        "column": 9
-      }
-    },
-    {
-      "id": "bac9f0172299fca-9ee8192456d838b",
-      "title": "Rule executor produces stable group_hash for the same group across executions",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 316,
-        "column": 12
-      }
-    },
-    {
-      "id": "bac9f0172299fca-06a499fd5d06511",
-      "title": "Rule executor produces the correct breach events for match based queries without grouping",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 372,
-        "column": 84
-      }
-    },
-    {
-      "id": "bac9f0172299fca-e98ca3fdb0768e7",
-      "title": "Rule executor extracts severity from the ES|QL row onto breached events as a top-level field",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 431,
-        "column": 16
-      }
-    },
-    {
-      "id": "bac9f0172299fca-cd70e404df6d0ab",
-      "title": "Rule executor includes data within the lookback window even when older than schedule.every",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 516,
-        "column": 9
-      }
-    },
-    {
-      "id": "bac9f0172299fca-0764f6813bc9f63",
-      "title": "Rule executor excludes data outside the lookback window",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 560,
-        "column": 17
-      }
-    },
-    {
-      "id": "bac9f0172299fca-338ac7759c20be6",
-      "title": "Rule executor defaults the lookback window to schedule.every when no lookback is set",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 596,
-        "column": 23
-      }
-    },
-    {
-      "id": "bac9f0172299fca-0363349d4f603b0",
-      "title": "Rule executor uses the configured time_field for the lookback range filter",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 638,
-        "column": 25
-      }
-    },
-    {
-      "id": "bac9f0172299fca-885f62d064ffa5a",
-      "title": "Rule executor binds the ?_tstart and ?_tend reserved ES|QL params to the lookback window",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 699,
-        "column": 17
-      }
-    },
-    {
-      "id": "bac9f0172299fca-c6053795bdb7194",
-      "title": "Rule executor emits a recovered event under no_breach policy when a previously breaching group stops breaching",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 742,
-        "column": 9
-      }
-    },
-    {
-      "id": "bac9f0172299fca-fa0800ab5bed882",
-      "title": "Rule executor does not emit recovery events for kind: \"signal\" rules when previously matching groups stop matching",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 792,
-        "column": 98
-      }
-    },
-    {
-      "id": "bac9f0172299fca-3ce2ec1c498d5ab",
-      "title": "Rule executor does not emit recovery events for alert rules created without query.recovery",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 844,
-        "column": 15
-      }
-    },
-    {
-      "id": "bac9f0172299fca-abb4ea880831f4a",
-      "title": "Rule executor uses the configured recover query",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 893,
-        "column": 15
-      }
-    },
-    {
-      "id": "bac9f0172299fca-16553b9e65264e8",
-      "title": "Rule executor emits one recovery event per active group when recover query matches multiple",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 975,
-        "column": 7
-      }
-    },
-    {
-      "id": "bac9f0172299fca-c5365312942c071",
-      "title": "Rule executor does not recover a group when recover query returns no matching active group",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1083,
+        "line": 75,
         "column": 11
       }
     },
     {
-      "id": "bac9f0172299fca-94a2d710abff252",
-      "title": "Rule executor does not recover a group when recover query returns zero rows",
+      "id": "bac9f0172299fca-b3012bb15ed5dd6",
+      "title": "Rule executor (json ES|QL response format) writes the columns returned by the query to the data field correctly",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1205,13 +952,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1158,
-        "column": 12
+        "line": 110,
+        "column": 67
       }
     },
     {
-      "id": "bac9f0172299fca-33a7f656846de1b",
-      "title": "Rule executor recovery_strategy 'query' keeps breaching when data is present but neither breach nor recovery matches",
+      "id": "bac9f0172299fca-f483edb81189e44",
+      "title": "Rule executor (json ES|QL response format) populates rule, source, and scheduling fields on every breach event",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1219,125 +966,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1224,
-        "column": 12
-      }
-    },
-    {
-      "id": "bac9f0172299fca-889c074e882fcac",
-      "title": "Rule executor recovery_strategy 'no_breach' recovers absent groups with data and emits no_data for absent groups without data",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1321,
-        "column": 20
-      }
-    },
-    {
-      "id": "bac9f0172299fca-aaab4e7cfe3503b",
-      "title": "Rule executor recovery_strategy 'query' emits no_data for an absent group that has no data",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1428,
-        "column": 21
-      }
-    },
-    {
-      "id": "bac9f0172299fca-947ff96f9216405",
-      "title": "Rule executor recovery_strategy 'query' keeps a group breached when the breach and recovery queries both match it",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1495,
-        "column": 21
-      }
-    },
-    {
-      "id": "bac9f0172299fca-2c933d29b3535e0",
-      "title": "Rule executor emits recovery events only for groups that stop breaching when others keep breaching",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1560,
-        "column": 26
-      }
-    },
-    {
-      "id": "bac9f0172299fca-c995dce28cb9615",
-      "title": "Rule executor emits both breach and recovery events in the same execution when one group recovers and another keeps breaching",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1672,
-        "column": 26
-      }
-    },
-    {
-      "id": "bac9f0172299fca-12405d29a5db5c0",
-      "title": "Rule executor executes the concatenated base+breach block query for composed format rules",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1763,
-        "column": 26
-      }
-    },
-    {
-      "id": "bac9f0172299fca-28704b7e5598938",
-      "title": "Rule executor emits a recovered event using the composed recovery segment",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1812,
-        "column": 18
-      }
-    },
-    {
-      "id": "bac9f0172299fca-da2311c7b208073",
-      "title": "Rule executor emits recovery via strategy: \"no_breach\" when an active group stops matching the breach query",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1878,
+        "line": 164,
         "column": 13
       }
     },
     {
-      "id": "bac9f0172299fca-1462dc9dada6f00",
-      "title": "Rule executor writes zero events when the ES|QL query returns no rows",
+      "id": "bac9f0172299fca-0ab647a513e7b9a",
+      "title": "Rule executor (json ES|QL response format) writes one event per group when grouping.fields is set",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1345,13 +980,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1919,
-        "column": 5
+        "line": 219,
+        "column": 23
       }
     },
     {
-      "id": "bac9f0172299fca-13e2313a20c3188",
-      "title": "Rule executor a disabled rule writes no new events",
+      "id": "bac9f0172299fca-8e0346369738322",
+      "title": "Rule executor (json ES|QL response format) groups multiple documents into the same group correctly",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1359,13 +994,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 1939,
-        "column": 19
+        "line": 269,
+        "column": 10
       }
     },
     {
-      "id": "bac9f0172299fca-d716fd4b00f7e6f",
-      "title": "Rule executor resumes producing events after a disabled rule is re-enabled",
+      "id": "bac9f0172299fca-dacb199108f54b1",
+      "title": "Rule executor (json ES|QL response format) produces stable group_hash for the same group across executions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1373,78 +1008,923 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 2002,
+        "line": 343,
+        "column": 32
+      }
+    },
+    {
+      "id": "bac9f0172299fca-82032e19a8b90f7",
+      "title": "Rule executor (json ES|QL response format) produces the correct breach events for match based queries without grouping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 402,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-5229edf0fb4776a",
+      "title": "Rule executor (json ES|QL response format) extracts severity from the ES|QL row onto breached events as a top-level field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 464,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-bfd4ef885b2dcc1",
+      "title": "Rule executor (json ES|QL response format) includes data within the lookback window even when older than schedule.every",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 552,
+        "column": 18
+      }
+    },
+    {
+      "id": "bac9f0172299fca-cf8d83438a873f2",
+      "title": "Rule executor (json ES|QL response format) excludes data outside the lookback window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 597,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-cf1f64e40db4d2c",
+      "title": "Rule executor (json ES|QL response format) defaults the lookback window to schedule.every when no lookback is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 633,
+        "column": 26
+      }
+    },
+    {
+      "id": "bac9f0172299fca-800960f44dffd0f",
+      "title": "Rule executor (json ES|QL response format) uses the configured time_field for the lookback range filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 675,
+        "column": 28
+      }
+    },
+    {
+      "id": "bac9f0172299fca-a132d78b35bcd48",
+      "title": "Rule executor (json ES|QL response format) binds the ?_tstart and ?_tend reserved ES|QL params to the lookback window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 738,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-8a4d98d76b75734",
+      "title": "Rule executor (json ES|QL response format) emits a recovered event under no_breach policy when a previously breaching group stops breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 784,
+        "column": 18
+      }
+    },
+    {
+      "id": "bac9f0172299fca-c5592ac71e6a591",
+      "title": "Rule executor (json ES|QL response format) does not emit recovery events for kind: \"signal\" rules when previously matching groups stop matching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 838,
+        "column": 35
+      }
+    },
+    {
+      "id": "bac9f0172299fca-503190e8e2d38e9",
+      "title": "Rule executor (json ES|QL response format) does not emit recovery events for alert rules created without query.recovery",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 891,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-dfc3bd11a8e7397",
+      "title": "Rule executor (json ES|QL response format) uses the configured recover query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 942,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-0c001659a3ca48b",
+      "title": "Rule executor (json ES|QL response format) emits one recovery event per active group when recover query matches multiple",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1025,
+        "column": 16
+      }
+    },
+    {
+      "id": "bac9f0172299fca-29c6d87b379e127",
+      "title": "Rule executor (json ES|QL response format) does not recover a group when recover query returns no matching active group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1136,
+        "column": 35
+      }
+    },
+    {
+      "id": "bac9f0172299fca-52b42142eaa8017",
+      "title": "Rule executor (json ES|QL response format) does not recover a group when recover query returns zero rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1214,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-aafe27908deaaf5",
+      "title": "Rule executor (json ES|QL response format) recovery_strategy 'query' keeps breaching when data is present but neither breach nor recovery matches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1282,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-dda099774c568ca",
+      "title": "Rule executor (json ES|QL response format) recovery_strategy 'no_breach' recovers absent groups with data and emits no_data for absent groups without data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1381,
+        "column": 15
+      }
+    },
+    {
+      "id": "bac9f0172299fca-083075481475ed7",
+      "title": "Rule executor (json ES|QL response format) recovery_strategy 'query' emits no_data for an absent group that has no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1490,
+        "column": 33
+      }
+    },
+    {
+      "id": "bac9f0172299fca-90d4afdef25174a",
+      "title": "Rule executor (json ES|QL response format) recovery_strategy 'query' keeps a group breached when the breach and recovery queries both match it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1559,
+        "column": 33
+      }
+    },
+    {
+      "id": "bac9f0172299fca-aa530dc58bb5303",
+      "title": "Rule executor (json ES|QL response format) emits recovery events only for groups that stop breaching when others keep breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1627,
+        "column": 33
+      }
+    },
+    {
+      "id": "bac9f0172299fca-81092389e761b15",
+      "title": "Rule executor (json ES|QL response format) emits both breach and recovery events in the same execution when one group recovers and another keeps breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1748,
+        "column": 25
+      }
+    },
+    {
+      "id": "bac9f0172299fca-d5e9e38d944768b",
+      "title": "Rule executor (json ES|QL response format) executes the concatenated base+breach block query for composed format rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1844,
+        "column": 25
+      }
+    },
+    {
+      "id": "bac9f0172299fca-ed3efd4a68ff680",
+      "title": "Rule executor (json ES|QL response format) emits a recovered event using the composed recovery segment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1894,
+        "column": 35
+      }
+    },
+    {
+      "id": "bac9f0172299fca-694281382f7b099",
+      "title": "Rule executor (json ES|QL response format) emits recovery via strategy: \"no_breach\" when an active group stops matching the breach query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1964,
+        "column": 15
+      }
+    },
+    {
+      "id": "bac9f0172299fca-a241235515ee735",
+      "title": "Rule executor (json ES|QL response format) writes zero events when the ES|QL query returns no rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2013,
+        "column": 15
+      }
+    },
+    {
+      "id": "bac9f0172299fca-f168fd156e3639f",
+      "title": "Rule executor (json ES|QL response format) a disabled rule writes no new events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2032,
+        "column": 32
+      }
+    },
+    {
+      "id": "bac9f0172299fca-77f182b393bd0b4",
+      "title": "Rule executor (json ES|QL response format) resumes producing events after a disabled rule is re-enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2096,
+        "column": 12
+      }
+    },
+    {
+      "id": "bac9f0172299fca-4014687e774c535",
+      "title": "Rule executor (json ES|QL response format) no_data_strategy 'last_known_status' writes a no_data rule event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2180,
+        "column": 34
+      }
+    },
+    {
+      "id": "bac9f0172299fca-443ac9e85edd9af",
+      "title": "Rule executor (json ES|QL response format) no_data_strategy 'recover' writes a no_data rule event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2238,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-37de4832ce91dd9",
+      "title": "Rule executor (json ES|QL response format) no_data_strategy 'none' does not write no_data events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2303,
+        "column": 10
+      }
+    },
+    {
+      "id": "bac9f0172299fca-2bb9bf71ccce537",
+      "title": "Rule executor (json ES|QL response format) a deleted rule writes no new events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2348,
+        "column": 99
+      }
+    },
+    {
+      "id": "bac9f0172299fca-2046478833b77c6",
+      "title": "Rule executor (json ES|QL response format) an invalid ES|QL query writes no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2409,
+        "column": 31
+      }
+    },
+    {
+      "id": "bac9f0172299fca-38882c3e1318287",
+      "title": "Rule executor (arrow ES|QL response format) writes one breach event per matching ES|QL row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 75,
         "column": 11
       }
     },
     {
-      "id": "bac9f0172299fca-f8c52c5af75599c",
-      "title": "Rule executor no_data_strategy 'last_known_status' writes a no_data rule event",
+      "id": "bac9f0172299fca-2d87e39cb3dd39a",
+      "title": "Rule executor (arrow ES|QL response format) writes the columns returned by the query to the data field correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 2085,
-        "column": 11
+        "line": 110,
+        "column": 67
       }
     },
     {
-      "id": "bac9f0172299fca-0e4bc48e7b132d8",
-      "title": "Rule executor no_data_strategy 'recover' writes a no_data rule event",
+      "id": "bac9f0172299fca-ef6024e854f8ad6",
+      "title": "Rule executor (arrow ES|QL response format) populates rule, source, and scheduling fields on every breach event",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 2141,
-        "column": 9
+        "line": 164,
+        "column": 13
       }
     },
     {
-      "id": "bac9f0172299fca-2b1caf2ae7578fe",
-      "title": "Rule executor no_data_strategy 'none' does not write no_data events",
+      "id": "bac9f0172299fca-e358012a156b98d",
+      "title": "Rule executor (arrow ES|QL response format) writes one event per group when grouping.fields is set",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 2205,
-        "column": 27
+        "line": 219,
+        "column": 23
       }
     },
     {
-      "id": "bac9f0172299fca-ad19ddc9e83754c",
-      "title": "Rule executor a deleted rule writes no new events",
+      "id": "bac9f0172299fca-94148d600abe472",
+      "title": "Rule executor (arrow ES|QL response format) groups multiple documents into the same group correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 2252,
-        "column": 82
+        "line": 269,
+        "column": 10
       }
     },
     {
-      "id": "bac9f0172299fca-2c0ff1a827876c6",
-      "title": "Rule executor an invalid ES|QL query writes no events",
+      "id": "bac9f0172299fca-8dcf72069f911af",
+      "title": "Rule executor (arrow ES|QL response format) produces stable group_hash for the same group across executions",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
-        "line": 2158,
-        "column": 27
+        "line": 343,
+        "column": 32
+      }
+    },
+    {
+      "id": "bac9f0172299fca-b960599692d88ca",
+      "title": "Rule executor (arrow ES|QL response format) produces the correct breach events for match based queries without grouping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 402,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-4483a000813cc82",
+      "title": "Rule executor (arrow ES|QL response format) extracts severity from the ES|QL row onto breached events as a top-level field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 464,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-9f1bbe0523b8d66",
+      "title": "Rule executor (arrow ES|QL response format) includes data within the lookback window even when older than schedule.every",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 552,
+        "column": 18
+      }
+    },
+    {
+      "id": "bac9f0172299fca-1d749f3ccdbff29",
+      "title": "Rule executor (arrow ES|QL response format) excludes data outside the lookback window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 597,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-04a6c4cdce234c2",
+      "title": "Rule executor (arrow ES|QL response format) defaults the lookback window to schedule.every when no lookback is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 633,
+        "column": 26
+      }
+    },
+    {
+      "id": "bac9f0172299fca-452c1e26e2407b5",
+      "title": "Rule executor (arrow ES|QL response format) uses the configured time_field for the lookback range filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 675,
+        "column": 28
+      }
+    },
+    {
+      "id": "bac9f0172299fca-236d84f21ccc037",
+      "title": "Rule executor (arrow ES|QL response format) binds the ?_tstart and ?_tend reserved ES|QL params to the lookback window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 738,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-cbc62ce63616005",
+      "title": "Rule executor (arrow ES|QL response format) emits a recovered event under no_breach policy when a previously breaching group stops breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 784,
+        "column": 18
+      }
+    },
+    {
+      "id": "bac9f0172299fca-3f80077447c9bb5",
+      "title": "Rule executor (arrow ES|QL response format) does not emit recovery events for kind: \"signal\" rules when previously matching groups stop matching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 838,
+        "column": 35
+      }
+    },
+    {
+      "id": "bac9f0172299fca-df95e6360878f7c",
+      "title": "Rule executor (arrow ES|QL response format) does not emit recovery events for alert rules created without query.recovery",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 891,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-1a48067f3c68df6",
+      "title": "Rule executor (arrow ES|QL response format) uses the configured recover query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 942,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-3358d01ac944e0f",
+      "title": "Rule executor (arrow ES|QL response format) emits one recovery event per active group when recover query matches multiple",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1025,
+        "column": 16
+      }
+    },
+    {
+      "id": "bac9f0172299fca-9c3fb89089a0e04",
+      "title": "Rule executor (arrow ES|QL response format) does not recover a group when recover query returns no matching active group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1136,
+        "column": 35
+      }
+    },
+    {
+      "id": "bac9f0172299fca-077b594e77b0d8f",
+      "title": "Rule executor (arrow ES|QL response format) does not recover a group when recover query returns zero rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1214,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-5ec0524fb0eb287",
+      "title": "Rule executor (arrow ES|QL response format) recovery_strategy 'query' keeps breaching when data is present but neither breach nor recovery matches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1282,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-0f1bd061490e48f",
+      "title": "Rule executor (arrow ES|QL response format) recovery_strategy 'no_breach' recovers absent groups with data and emits no_data for absent groups without data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1381,
+        "column": 15
+      }
+    },
+    {
+      "id": "bac9f0172299fca-a5c9cb1f1d1f3e6",
+      "title": "Rule executor (arrow ES|QL response format) recovery_strategy 'query' emits no_data for an absent group that has no data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1490,
+        "column": 33
+      }
+    },
+    {
+      "id": "bac9f0172299fca-1bd8780435ee0f0",
+      "title": "Rule executor (arrow ES|QL response format) recovery_strategy 'query' keeps a group breached when the breach and recovery queries both match it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1559,
+        "column": 33
+      }
+    },
+    {
+      "id": "bac9f0172299fca-6eb6c011992705c",
+      "title": "Rule executor (arrow ES|QL response format) emits recovery events only for groups that stop breaching when others keep breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1627,
+        "column": 33
+      }
+    },
+    {
+      "id": "bac9f0172299fca-7bd09fb81503650",
+      "title": "Rule executor (arrow ES|QL response format) emits both breach and recovery events in the same execution when one group recovers and another keeps breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1748,
+        "column": 25
+      }
+    },
+    {
+      "id": "bac9f0172299fca-d10db0756ca698a",
+      "title": "Rule executor (arrow ES|QL response format) executes the concatenated base+breach block query for composed format rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1844,
+        "column": 25
+      }
+    },
+    {
+      "id": "bac9f0172299fca-2ceeb13d7eb0c52",
+      "title": "Rule executor (arrow ES|QL response format) emits a recovered event using the composed recovery segment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1894,
+        "column": 35
+      }
+    },
+    {
+      "id": "bac9f0172299fca-4dc0563b832e1d0",
+      "title": "Rule executor (arrow ES|QL response format) emits recovery via strategy: \"no_breach\" when an active group stops matching the breach query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 1964,
+        "column": 15
+      }
+    },
+    {
+      "id": "bac9f0172299fca-733479016230df8",
+      "title": "Rule executor (arrow ES|QL response format) writes zero events when the ES|QL query returns no rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2013,
+        "column": 15
+      }
+    },
+    {
+      "id": "bac9f0172299fca-10cc46304a7e18d",
+      "title": "Rule executor (arrow ES|QL response format) a disabled rule writes no new events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2032,
+        "column": 32
+      }
+    },
+    {
+      "id": "bac9f0172299fca-6d645b52e9671d0",
+      "title": "Rule executor (arrow ES|QL response format) resumes producing events after a disabled rule is re-enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2096,
+        "column": 12
+      }
+    },
+    {
+      "id": "bac9f0172299fca-cae3b64fba273ad",
+      "title": "Rule executor (arrow ES|QL response format) no_data_strategy 'last_known_status' writes a no_data rule event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2180,
+        "column": 34
+      }
+    },
+    {
+      "id": "bac9f0172299fca-f19b1748ad76a91",
+      "title": "Rule executor (arrow ES|QL response format) no_data_strategy 'recover' writes a no_data rule event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2238,
+        "column": 13
+      }
+    },
+    {
+      "id": "bac9f0172299fca-7e4d7fa4231b97e",
+      "title": "Rule executor (arrow ES|QL response format) no_data_strategy 'none' does not write no_data events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2303,
+        "column": 10
+      }
+    },
+    {
+      "id": "bac9f0172299fca-e45cc662c731079",
+      "title": "Rule executor (arrow ES|QL response format) a deleted rule writes no new events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2348,
+        "column": 99
+      }
+    },
+    {
+      "id": "bac9f0172299fca-a2f4236ad8fde57",
+      "title": "Rule executor (arrow ES|QL response format) an invalid ES|QL query writes no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_executor.spec.ts",
+        "line": 2409,
+        "column": 31
       }
     },
     {
@@ -1556,6 +2036,62 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history.spec.ts",
         "line": 455,
+        "column": 24
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-14af16ecf5b4c6e",
+      "title": "Agent Builder — alerting V2 SML type access limited privilege user can search alerting v2 rule and action policy SML types",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 266,
+        "column": 6
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-1f9e47bf5893431",
+      "title": "Agent Builder — alerting V2 SML type access limited privilege user can filter SML search to the rule type",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 285,
+        "column": 16
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-8d801d629dbe51a",
+      "title": "Agent Builder — alerting V2 SML type access limited privilege user can filter SML search to the action policy type",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 300,
+        "column": 16
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-c9f7c69fdc70c1b",
+      "title": "Agent Builder — alerting V2 SML type access user with agent builder read but without alerting v2 read cannot see rule or action policy SML hits",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 270,
         "column": 24
       }
     },

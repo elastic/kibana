@@ -25,11 +25,17 @@ export interface UseSubmitCaseProps {
   ) => Promise<void>;
   onSuccess?: (theCase: CaseUI) => void;
   attachments?: CaseAttachmentsWithoutOwner;
+  getAttachments?: (owner: string) => CaseAttachmentsWithoutOwner;
 }
 
 export type UseSubmitCaseValue = ReturnType<typeof useSubmitCase>;
 
-export const useSubmitCase = ({ attachments, afterCaseCreated, onSuccess }: UseSubmitCaseProps) => {
+export const useSubmitCase = ({
+  attachments,
+  getAttachments,
+  afterCaseCreated,
+  onSuccess,
+}: UseSubmitCaseProps) => {
   const { appId } = useApplication();
   const { mutateAsync: postCase, isLoading: isPostingCase } = usePostCase();
   const { mutateAsync: createAttachments, isLoading: isCreatingAttachments } =
@@ -42,20 +48,26 @@ export const useSubmitCase = ({ attachments, afterCaseCreated, onSuccess }: UseS
   const submitCase = useCallback(
     async (data: CasePostRequest, isValid: boolean) => {
       if (isValid) {
-        startTransaction({ appId, attachments });
-
         const theCase = await postCase({
           request: data,
         });
 
-        if (theCase && Array.isArray(attachments) && attachments.length > 0) {
-          await createAttachments({
-            caseId: theCase.id,
-            caseOwner: theCase.owner,
-            attachments,
-          });
+        if (theCase) {
+          const resolvedAttachments = getAttachments
+            ? getAttachments(theCase.owner)
+            : attachments ?? [];
 
-          trackAttachEvents(window.location.pathname, attachments);
+          startTransaction({ appId, attachments: resolvedAttachments });
+
+          if (resolvedAttachments.length > 0) {
+            await createAttachments({
+              caseId: theCase.id,
+              caseOwner: theCase.owner,
+              attachments: resolvedAttachments,
+            });
+
+            trackAttachEvents(window.location.pathname, resolvedAttachments);
+          }
         }
 
         if (afterCaseCreated && theCase) {
@@ -86,6 +98,7 @@ export const useSubmitCase = ({ attachments, afterCaseCreated, onSuccess }: UseS
       startTransaction,
       appId,
       attachments,
+      getAttachments,
       postCase,
       afterCaseCreated,
       onSuccess,
