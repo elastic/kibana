@@ -176,6 +176,8 @@ type AwsServiceStaticEntry = Omit<
   name?: string;
   /** Data stream ids to exclude from this policy template (e.g. firewall_metrics until agentless ships). */
   excludedDataStreams?: string[];
+  /** Override which inputs are enabled by default when the manifest doesn't differentiate. */
+  defaultEnabledInputs?: string[];
 };
 
 // TODO aws_cloudwatch_input_otel for otel versions
@@ -251,6 +253,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     ecfDataStream: 'cloudtrail',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     ecfOnly: true,
+    defaultEnabledInputs: ['aws-s3'],
     packageName: 'aws',
     ecfLogType: 'cloudtrail',
     ecfDedicatedTemplate: 'otel',
@@ -381,6 +384,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     ecfDataStream: 'vpcflow',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     ecfOnly: true,
+    defaultEnabledInputs: ['aws-s3'],
     packageName: 'aws',
     ecfLogType: 'vpcflow',
     ecfDedicatedTemplate: 'otel',
@@ -678,6 +682,15 @@ export function buildAwsServiceMatrix(
           defaultEnabled = defaultEnabledInputs.length > 0;
         }
 
+        // Static override: when set, restrict which inputs are on by default.
+        if (entry.defaultEnabledInputs) {
+          defaultEnabledInputs.splice(
+            0,
+            defaultEnabledInputs.length,
+            ...entry.defaultEnabledInputs.filter((i) => inputs?.includes(i) ?? true)
+          );
+        }
+
         // Collect per-input display titles from the policy template manifest.
         const ptInputs: any[] = (pt as any)?.inputs ?? [];
         for (const ptInput of ptInputs) {
@@ -750,6 +763,14 @@ export function buildAwsServiceMatrix(
         requiredConfig = ecfVarNames;
         optionalConfig = undefined;
       }
+
+      // For ECF-only entries that declare an explicit ecfDataStream (OTel twins that alias a
+      // multi-DS ECS policy template), restrict the data-stream list to just that one DS.
+      // Without this, e.g. s3access_otel would expose the full s3 PT's DS set ['s3','s3access'],
+      // causing a complex multi-DS settings panel instead of the simple single-ARN form.
+      if (entry.ecfOnly && entry.ecfDataStream && dataStreams.includes(entry.ecfDataStream)) {
+        dataStreams.splice(0, dataStreams.length, entry.ecfDataStream);
+      }
     }
 
     return {
@@ -782,14 +803,20 @@ export function buildAwsServiceMatrix(
 export function makeDsView(service: AwsServiceMatrixEntry, dsId: string): AwsServiceMatrixEntry {
   const dsInfo = service.varDefsByDataStream?.[dsId];
   if (!dsInfo) return service;
+  // ECF-only services have their requiredConfig/optionalConfig already simplified to just the
+  // trigger vars (bucket_arn / log_group_arn) at entry level in buildAwsServiceMatrix.
+  // Preserve that simplification rather than reverting to the full per-DS manifest vars.
+  const isEcfOnly =
+    service.deploymentMethods.length > 0 &&
+    service.deploymentMethods.every((m) => m.method === 'ecf');
   return {
     ...service,
     dataStreams: [dsId],
     signalTypes: dsInfo.type ? [dsInfo.type] : service.signalTypes,
     inputs: dsInfo.inputs,
-    defaultEnabledInputs: dsInfo.defaultEnabledInputs,
-    requiredConfig: dsInfo.requiredConfig,
-    optionalConfig: dsInfo.optionalConfig,
+    defaultEnabledInputs: isEcfOnly ? service.defaultEnabledInputs : dsInfo.defaultEnabledInputs,
+    requiredConfig: isEcfOnly ? service.requiredConfig : dsInfo.requiredConfig,
+    optionalConfig: isEcfOnly ? service.optionalConfig : dsInfo.optionalConfig,
     varDefsByInput: dsInfo.varDefsByInput,
     varDefsByDataStream: { [dsId]: dsInfo },
   };

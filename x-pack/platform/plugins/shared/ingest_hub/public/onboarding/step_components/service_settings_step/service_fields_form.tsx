@@ -333,7 +333,12 @@ export function ServiceFieldsForm({
     return (
       <>
         {dsInputs.map((input, idx) => {
-          const isEnabled = dsVars ? dsVars.enabledInputs.includes(input) : true;
+          const isEnabled = dsVars
+            ? dsVars.enabledInputs.includes(input)
+            : (dsView.defaultEnabledInputs?.length
+                ? dsView.defaultEnabledInputs
+                : dsInputs
+              ).includes(input);
           return (
             <React.Fragment key={input}>
               {idx > 0 && <EuiHorizontalRule margin="m" />}
