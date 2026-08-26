@@ -21,7 +21,7 @@ import { AlertsV2SearchBar } from './alerts_v2_search_bar';
 import { AlertsV2KpisSection } from './alerts_v2_kpis_section';
 import { useEsqlRowCount } from './use_esql_row_count';
 
-const DEFAULT_QUERY: AggregateQuery = { esql: 'FROM .rule-events' };
+const DEFAULT_QUERY: AggregateQuery = { esql: 'FROM $.alert-episodes' };
 const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-24h', to: 'now' };
 
 /**
