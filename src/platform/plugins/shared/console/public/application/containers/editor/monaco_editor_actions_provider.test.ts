@@ -2368,6 +2368,24 @@ describe('Editor actions provider', () => {
         expect(suggestions).toHaveLength(0);
       });
 
+      it('passes ES|QL triple-quote context to body completion filtering', async () => {
+        mockGetParsedRequests.mockResolvedValue(unterminatedRequest);
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [{ name: false }, { name: 'false' }];
+        });
+        const line = '  "query": """f';
+        const model = setup(['POST _query', '{', line], 3, line.length + 1);
+
+        const { suggestions } = await provideCompletionItems(model, {
+          lineNumber: 3,
+          column: line.length + 1,
+        });
+
+        expect(suggestions).toHaveLength(1);
+        expect(suggestions[0].label).toBe('false');
+      });
+
       it('still returns method completion items on an empty line outside triple quotes', async () => {
         mockGetParsedRequests.mockResolvedValue([{ startOffset: 0, endOffset: 14 }]);
         const model = setup(['GET _search', '{}', '']);

@@ -579,6 +579,503 @@ describe('autocomplete_utils', () => {
       });
     });
 
+    describe('WHEN completing a primitive value inside an auto-closed string', () => {
+      const buildModel = (
+        editorLines: string[],
+        wordUntilPosition: { startColumn: number; word: string }
+      ) =>
+        ({
+          getLineContent: (lineNumber: number) => editorLines[lineNumber - 1],
+          getValueInRange: jest.fn(
+            ({ startLineNumber, startColumn, endLineNumber, endColumn }: monaco.IRange) => {
+              if (startLineNumber === endLineNumber) {
+                return editorLines[startLineNumber - 1].slice(startColumn - 1, endColumn - 1);
+              }
+              const selectedLines = editorLines.slice(startLineNumber - 1, endLineNumber);
+              selectedLines[0] = selectedLines[0].slice(startColumn - 1);
+              selectedLines[selectedLines.length - 1] = selectedLines[
+                selectedLines.length - 1
+              ].slice(0, endColumn - 1);
+              return selectedLines.join('\n');
+            }
+          ),
+          getWordUntilPosition: () => wordUntilPosition,
+          getLineMaxColumn: (lineNumber: number) => editorLines[lineNumber - 1].length + 1,
+        } as unknown as monaco.editor.ITextModel);
+
+      // Simulates Monaco applying a completion item over its single-range form.
+      const acceptSuggestion = (editorLines: string[], item: monaco.languages.CompletionItem) => {
+        if (!item.range || !('startLineNumber' in item.range)) {
+          throw new Error('completion item must use the single-range form');
+        }
+        const { range } = item;
+        const line = editorLines[range.startLineNumber - 1];
+        return (
+          line.slice(0, range.startColumn - 1) + item.insertText + line.slice(range.endColumn - 1)
+        );
+      };
+
+      beforeEach(() => {
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [
+            { name: false },
+            { name: -1 },
+            { name: 0.5 },
+            { name: 1e-7 },
+            { name: 1e21 },
+            { name: 'false' },
+            { name: 'some_string_value' },
+          ] as unknown as AutoCompleteContext['autoCompleteSet'];
+        });
+      });
+
+      it('SHOULD cover the opening quote for primitive terms when completing mid-word', async () => {
+        const editorLines = ['GET _search', '{', '  "refresh": "f"'];
+        // Cursor after `f`, before the auto-closed closing quote.
+        const position = { lineNumber: 3, column: 16 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 15, word: 'f' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find(
+          (item) => item.label === 'false' && item.insertText === 'false'
+        );
+        const stringTerm = items.find((item) => item.label === 'some_string_value');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 14, // includes the opening quote
+          endLineNumber: 3,
+          endColumn: 17, // includes the auto-closed closing quote
+        });
+        expect(primitive?.filterText).toBe('"false');
+        expect(stringTerm?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 15, // string terms re-insert the quotes themselves
+          endLineNumber: 3,
+          endColumn: 17,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ refresh: false });
+        expect(acc).toBe('  "refresh": false');
+        expect(acceptSuggestion(editorLines, stringTerm!)).toBe('  "refresh": "some_string_value"');
+      });
+
+      it('SHOULD cover the opening quote and typed minus for negative primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": "-1"'];
+        // Monaco's word starts at `1`, after the JSON minus.
+        const position = { lineNumber: 3, column: 15 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 14, word: '1' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find((item) => item.label === '-1' && item.insertText === '-1');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12, // includes the opening quote and typed minus
+          endLineNumber: 3,
+          endColumn: 16,
+        });
+        expect(primitive?.filterText).toBe('"-1');
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: -1 });
+        expect(acc).toBe('  "value": -1');
+      });
+
+      it('SHOULD cover the opening quote and typed decimal prefix for numeric primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": "0."'];
+        // Cursor after `0.`, before the auto-closed closing quote; Monaco has no word at `.`.
+        const position = { lineNumber: 3, column: 15 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 15, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find((item) => item.label === '0.5' && item.insertText === '0.5');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12, // includes the opening quote and typed decimal prefix
+          endLineNumber: 3,
+          endColumn: 16,
+        });
+        expect(primitive?.filterText).toBe('"0.5');
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: 0.5 });
+        expect(acc).toBe('  "value": 0.5');
+      });
+
+      it('SHOULD suggest decimal primitive terms inside an array value', async () => {
+        const editorLines = ['GET _search', '{', '  "values": ["0."]'];
+        // Cursor after `0.`, before the auto-closed closing quote; Monaco has no word at `.`.
+        const position = { lineNumber: 3, column: 17 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 17, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find((item) => item.label === '0.5' && item.insertText === '0.5');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 14, // includes the opening quote and typed decimal prefix
+          endLineNumber: 3,
+          endColumn: 18,
+        });
+        expect(primitive?.filterText).toBe('"0.5');
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ values: [0.5] });
+        expect(acc).toBe('  "values": [0.5]');
+      });
+
+      it('SHOULD replace the whole quoted dotted value for string terms', async () => {
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [{ name: 'foo.bar' }];
+        });
+        const editorLines = ['GET _search', '{', '  "mode": "foo.b"'];
+        // Cursor after `b`, before the auto-closed closing quote.
+        const position = { lineNumber: 3, column: 17 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 16, word: 'b' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const stringTerm = items.find((item) => item.label === 'foo.bar');
+        expect(stringTerm?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12, // preserves the opening quote but replaces the full value prefix
+          endLineNumber: 3,
+          endColumn: 18,
+        });
+        expect(acceptSuggestion(editorLines, stringTerm!)).toBe('  "mode": "foo.bar"');
+      });
+
+      it('SHOULD replace the whole quoted punctuated value for non-dotted string terms', async () => {
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [{ name: 'foo-bar' }];
+        });
+        const editorLines = ['GET _search', '{', '  "mode": "foo-b"'];
+        // Cursor after `b`, before the auto-closed closing quote; Monaco's word starts after `-`.
+        const position = { lineNumber: 3, column: 17 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 16, word: 'b' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const stringTerm = items.find((item) => item.label === 'foo-bar');
+        expect(stringTerm?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 18,
+        });
+        expect(acceptSuggestion(editorLines, stringTerm!)).toBe('  "mode": "foo-bar"');
+      });
+
+      it('SHOULD NOT suggest primitive terms inside a triple-quoted value', async () => {
+        const editorLines = ['GET _search', '{', '  "value": """-1"""'];
+        // Cursor after `-1`, before the closing triple quote.
+        const position = { lineNumber: 3, column: 17 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 16, word: '1' }),
+          position,
+          1,
+          mockEditor,
+          1,
+          { isInsideTripleQuotedString: true }
+        );
+
+        expect(items.find((item) => item.label === '-1')).toBeUndefined();
+        expect(items.find((item) => item.label === '0.5')).toBeUndefined();
+        expect(items.find((item) => item.label === 'some_string_value')).toBeDefined();
+      });
+
+      it('SHOULD NOT suggest primitive terms inside an oversized triple-quoted value', async () => {
+        const pad = 'x'.repeat(100_001);
+        const lineContentBeforePosition = `  "pad": "${pad}", "value": """-1`;
+        const editorLines = ['GET _search', '{', `${lineContentBeforePosition}"""`];
+        // Cursor after `-1`, before the closing triple quote.
+        const position = {
+          lineNumber: 3,
+          column: lineContentBeforePosition.length + 1,
+        } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: lineContentBeforePosition.length, word: '1' }),
+          position,
+          1,
+          mockEditor,
+          1,
+          { isInsideTripleQuotedString: true }
+        );
+
+        expect(items.find((item) => item.label === '-1')).toBeUndefined();
+        expect(items.find((item) => item.label === '0.5')).toBeUndefined();
+        expect(items.find((item) => item.label === 'some_string_value')).toBeDefined();
+      });
+
+      it('SHOULD NOT suggest primitive terms inside a multiline triple-quoted value', async () => {
+        const editorLines = ['GET _search', '{', '  "value": """', '-1', '"""'];
+        // Cursor after `-1` in the multiline triple-quoted value.
+        const position = { lineNumber: 4, column: 3 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 2, word: '1' }),
+          position,
+          1,
+          mockEditor,
+          1,
+          { isInsideTripleQuotedString: true }
+        );
+
+        expect(items.find((item) => item.label === '-1')).toBeUndefined();
+        expect(items.find((item) => item.label === '0.5')).toBeUndefined();
+        expect(items.find((item) => item.label === 'some_string_value')).toBeDefined();
+      });
+
+      it('SHOULD NOT suggest primitive terms inside a multiline quoted value', async () => {
+        const editorLines = ['GET _search', '{', '  "value": "abc', 'def -'];
+        // Cursor after `-` on the continuation line of a quoted value whose
+        // opening quote lives on the previous line.
+        const position = { lineNumber: 4, column: 6 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 6, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        expect(items.find((item) => item.label === '-1')).toBeUndefined();
+        expect(items.find((item) => item.label === '0.5')).toBeUndefined();
+        expect(items.find((item) => item.label === 'some_string_value')).toBeDefined();
+      });
+
+      it('SHOULD cover both quotes when accepted straight from the trigger quote', async () => {
+        const editorLines = ['GET _search', '{', '  "refresh": ""'];
+        // Cursor between the auto-closed quotes, before typing anything.
+        const position = { lineNumber: 3, column: 15 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 15, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find(
+          (item) => item.label === 'false' && item.insertText === 'false'
+        );
+        const stringTerm = items.find((item) => item.label === 'some_string_value');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 14, // includes the opening quote
+          endLineNumber: 3,
+          endColumn: 16, // includes the auto-closed closing quote
+        });
+        expect(primitive?.filterText).toBe('"false');
+        expect(stringTerm?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 15,
+          endLineNumber: 3,
+          endColumn: 16,
+        });
+        expect(JSON.parse(`{${acceptSuggestion(editorLines, primitive!)}}`)).toEqual({
+          refresh: false,
+        });
+        expect(acceptSuggestion(editorLines, stringTerm!)).toBe('  "refresh": "some_string_value"');
+      });
+
+      it('SHOULD NOT shift the range when typing an unquoted value', async () => {
+        const editorLines = ['GET _search', '{', '  "refresh": f'];
+        const position = { lineNumber: 3, column: 15 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 14, word: 'f' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find(
+          (item) => item.label === 'false' && item.insertText === 'false'
+        );
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 14, // starts at the word: there is no quote to replace
+          endLineNumber: 3,
+          endColumn: 15,
+        });
+        expect(primitive?.filterText).toBeUndefined();
+        expect(acceptSuggestion(editorLines, primitive!)).toBe('  "refresh": false');
+      });
+
+      it('SHOULD replace a bare minus prefix for negative primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": -'];
+        const position = { lineNumber: 3, column: 13 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 13, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find((item) => item.label === '-1' && item.insertText === '-1');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 13,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: -1 });
+        expect(acc).toBe('  "value": -1');
+      });
+
+      it('SHOULD replace a bare decimal prefix for numeric primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": 0.'];
+        const position = { lineNumber: 3, column: 14 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 14, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find((item) => item.label === '0.5' && item.insertText === '0.5');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 14,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: 0.5 });
+        expect(acc).toBe('  "value": 0.5');
+      });
+
+      it('SHOULD repair a bare leading-dot decimal prefix for numeric primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": .5'];
+        const position = { lineNumber: 3, column: 14 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 13, word: '5' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find((item) => item.label === '0.5' && item.insertText === '0.5');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 14,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: 0.5 });
+        expect(acc).toBe('  "value": 0.5');
+      });
+
+      it('SHOULD replace a bare negative exponent prefix for numeric primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": 1e-'];
+        const position = { lineNumber: 3, column: 15 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 15, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find((item) => item.label === '1e-7' && item.insertText === '1e-7');
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 15,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: 1e-7 });
+        expect(acc).toBe('  "value": 1e-7');
+      });
+
+      it('SHOULD replace a bare positive exponent prefix for numeric primitive terms', async () => {
+        const editorLines = ['GET _search', '{', '  "value": 1e+'];
+        const position = { lineNumber: 3, column: 15 } as monaco.Position;
+
+        const items = await getBodyCompletionItems(
+          buildModel(editorLines, { startColumn: 15, word: '' }),
+          position,
+          1,
+          mockEditor
+        );
+
+        const primitive = items.find(
+          (item) => item.label === '1e+21' && item.insertText === '1e+21'
+        );
+        expect(primitive?.range).toEqual({
+          startLineNumber: 3,
+          startColumn: 12,
+          endLineNumber: 3,
+          endColumn: 15,
+        });
+        const acc = acceptSuggestion(editorLines, primitive!);
+        expect(JSON.parse(`{${acc}}`)).toEqual({ value: 1e21 });
+        expect(acc).toBe('  "value": 1e+21');
+      });
+
+      it.each(['1e-7', '1e+21'])(
+        'SHOULD complete sibling fields after an exponent primitive value %s',
+        async (exponentValue) => {
+          mockPopulateContext.mockImplementation((...args) => {
+            const [bodyTokens, context] = args[0];
+            context.autoCompleteSet =
+              bodyTokens.at(-1) === '{'
+                ? ([{ name: 'next_field' }] as unknown as AutoCompleteContext['autoCompleteSet'])
+                : [];
+          });
+          const editorLines = ['GET _search', '{', `  "value": ${exponentValue}, "`];
+          const position = {
+            lineNumber: 3,
+            column: editorLines[2].length + 1,
+          } as monaco.Position;
+
+          const items = await getBodyCompletionItems(
+            buildModel(editorLines, { startColumn: editorLines[2].length, word: '' }),
+            position,
+            1,
+            mockEditor
+          );
+
+          expect(items.map((item) => item.label)).toContain('next_field');
+        }
+      );
+    });
+
     it('ignores quotes inside comments when completing in the middle of a quoted field', async () => {
       mockPopulateContext.mockImplementation((...args) => {
         const context = args[0][1];
@@ -1012,6 +1509,62 @@ ${lineContentBeforePosition}`;
     it('returns empty string if name is undefined', () => {
       expect(getInsertText({ name: undefined } as ResultTerm, '', mockContext)).toBe('');
     });
+
+    it('SHOULD insert boolean and number names as JSON primitives', () => {
+      expect(getInsertText({ name: true }, '', mockContext)).toBe('true');
+      expect(getInsertText({ name: false }, '', mockContext)).toBe('false');
+      expect(getInsertText({ name: 0 }, '', mockContext)).toBe('0');
+      expect(getInsertText({ name: 42 }, '', mockContext)).toBe('42');
+      expect(getInsertText({ name: 'false' }, '', mockContext)).toBe('"false"');
+      expect(getInsertText({ name: '42' }, '', mockContext)).toBe('"42"');
+    });
+
+    it('SHOULD insert false and zero templates when addTemplate is true', () => {
+      const context = { ...mockContext, addTemplate: true };
+
+      expect(getInsertText({ name: 'disabled', template: false }, '', context)).toBe(
+        '"disabled": false'
+      );
+      expect(getInsertText({ name: 'retries', template: 0 }, '', context)).toBe('"retries": 0');
+    });
+
+    it('SHOULD preserve key-only insertion for empty and null templates', () => {
+      const context = { ...mockContext, addTemplate: true };
+
+      expect(getInsertText({ name: '_source', template: '' }, '', context)).toBe('"_source"');
+      expect(getInsertText({ name: 'field', template: null }, '', context)).toBe('"field"');
+    });
+
+    it.each([
+      { conditionalTemplate: false, expected: '"enabled": false' },
+      { conditionalTemplate: 0, expected: '"enabled": 0' },
+      { conditionalTemplate: '', expected: '"enabled"' },
+      { conditionalTemplate: null, expected: '"enabled"' },
+    ])(
+      'SHOULD use matching conditional template $conditionalTemplate instead of the default',
+      ({ conditionalTemplate, expected }) => {
+        const context: AutoCompleteContext = {
+          ...mockContext,
+          addTemplate: true,
+          endpoint: {
+            paramsAutocomplete: {
+              getTopLevelComponents: () => [],
+            },
+            bodyAutocompleteRootComponents: [],
+            data_autocomplete_rules: {
+              enabled: {
+                __one_of: [
+                  { __template: true },
+                  { __condition: { lines_regex: 'mode' }, __template: conditionalTemplate },
+                ],
+              },
+            },
+          },
+        };
+
+        expect(getInsertText({ name: 'enabled', template: true }, 'mode', context)).toBe(expected);
+      }
+    );
 
     it('does not add quotes around braces and brackets', () => {
       expect(
