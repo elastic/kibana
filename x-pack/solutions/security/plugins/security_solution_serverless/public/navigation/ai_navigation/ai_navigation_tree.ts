@@ -23,14 +23,6 @@ export const createAiNavigationTree = (
   showAgentBuilderNavAtTop: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
-    {
-      id: 'ease_home',
-      link: securityLink(SecurityPageName.landing),
-      title: i18n.translate('xpack.securitySolutionServerless.aiNavigation.home', {
-        defaultMessage: 'Home',
-      }),
-      icon: 'home',
-    },
     ...(chatExperience === AIChatExperience.Agent && showAgentBuilderNavAtTop
       ? [
           {

@@ -71,8 +71,8 @@ function createNavTree({
         : []),
       {
         link: 'observability-overview',
-        title: i18n.translate('xpack.observability.obltNav.home', {
-          defaultMessage: 'Home',
+        title: i18n.translate('xpack.observability.obltNav.overview', {
+          defaultMessage: 'Overview',
         }),
         icon: 'home',
       },

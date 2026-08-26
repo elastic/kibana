@@ -6,7 +6,6 @@
  */
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
@@ -41,14 +40,6 @@ export const createNavigationTree = async (
 
   return {
     body: [
-      {
-        id: 'security_solution_home',
-        link: securityLink(SecurityPageName.landing),
-        title: i18n.translate('xpack.securitySolutionServerless.nav.home', {
-          defaultMessage: 'Home',
-        }),
-        icon: 'home',
-      },
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
       contextEngineLink,
       {
