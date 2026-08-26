@@ -476,8 +476,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
-        "line": 269,
-        "column": 24
+        "line": 310,
+        "column": 1
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-d86c1bdd1fc4b98",
+      "title": "Agent Builder — alerting V2 SML type access user without alerting v2 read cannot see rule or action policy SML hits on a wildcard search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 325,
+        "column": 16
+      }
+    },
+    {
+      "id": "2a3330f8808a2d4-ee202b11d867308",
+      "title": "Agent Builder — alerting V2 SML type access limited privilege user still sees both types on a wildcard search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/sml_types_access.spec.ts",
+        "line": 335,
+        "column": 10
       }
     },
     {
