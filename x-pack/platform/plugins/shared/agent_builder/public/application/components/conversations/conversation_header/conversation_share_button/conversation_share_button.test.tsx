@@ -16,7 +16,7 @@ import type { ConversationWithPermissions } from '../../../../../../common/http_
 import {
   useConversation,
   useConversationPermissions,
-  useHasPersistedConversation,
+  useIsUnpersistedConversation,
 } from '../../../../hooks/use_conversation';
 import { useSuggestUsers } from '../../../../hooks/use_suggest_users';
 import {
@@ -30,7 +30,7 @@ import { ConversationShareButton } from './conversation_share_button';
 jest.mock('../../../../hooks/use_conversation', () => ({
   useConversation: jest.fn(),
   useConversationPermissions: jest.fn(),
-  useHasPersistedConversation: jest.fn(),
+  useIsUnpersistedConversation: jest.fn(),
 }));
 
 jest.mock('../../../../hooks/use_suggest_users', () => ({
@@ -54,7 +54,7 @@ jest.mock('../../../../hooks/use_experimental_features', () => ({
 
 const mockUseConversation = jest.mocked(useConversation);
 const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
-const mockUseHasPersistedConversation = jest.mocked(useHasPersistedConversation);
+const mockUseIsUnpersistedConversation = jest.mocked(useIsUnpersistedConversation);
 const mockUseSuggestUsers = jest.mocked(useSuggestUsers);
 const mockUseConversationAccessControlProfiles = jest.mocked(useConversationAccessControlProfiles);
 const mockUseInviteMembersSummary = jest.mocked(useInviteMembersSummary);
@@ -114,11 +114,13 @@ const baseConversation = {
 const renderShareButton = ({
   conversation = baseConversation,
   canUpdateAccessControl = true,
+  isUnpersistedConversation = false,
   isExperimentalFeaturesEnabled = true,
   inviteMembersSummary = { profiles: [], extraCount: 0, shouldShowSummary: false },
 }: {
   conversation?: ConversationWithPermissions;
   canUpdateAccessControl?: boolean;
+  isUnpersistedConversation?: boolean;
   isExperimentalFeaturesEnabled?: boolean;
   inviteMembersSummary?: ReturnType<typeof useInviteMembersSummary>;
 } = {}) => {
@@ -130,7 +132,7 @@ const renderShareButton = ({
     isError: false,
     error: null,
   });
-  mockUseHasPersistedConversation.mockReturnValue(Boolean(conversation));
+  mockUseIsUnpersistedConversation.mockReturnValue(isUnpersistedConversation);
   mockUseConversationPermissions.mockReturnValue({
     rename: false,
     delete: false,
@@ -167,6 +169,12 @@ describe('ConversationShareButton', () => {
 
   it('does not render without access-control update permission or shared members', () => {
     renderShareButton({ canUpdateAccessControl: false });
+
+    expect(screen.queryByTestId('agentBuilderConversationInviteButton')).not.toBeInTheDocument();
+  });
+
+  it('does not render while the conversation is unpersisted', () => {
+    renderShareButton({ isUnpersistedConversation: true });
 
     expect(screen.queryByTestId('agentBuilderConversationInviteButton')).not.toBeInTheDocument();
   });

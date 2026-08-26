@@ -29,7 +29,7 @@ import { getUserDisplayName, type UserProfileWithAvatar } from '@kbn/user-profil
 import {
   useConversation,
   useConversationPermissions,
-  useHasPersistedConversation,
+  useIsUnpersistedConversation,
 } from '../../../../hooks/use_conversation';
 import {
   hasInviteMembersSummary,
@@ -51,16 +51,16 @@ import { ConversationSharePopoverButton } from './conversation_share_popover_but
 const SEARCH_DEBOUNCE_MS = 200;
 
 export const ConversationShareButton: React.FC = () => {
-  const hasPersistedConversation = useHasPersistedConversation();
   const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { update_access_control: canUpdateAccessControl } = useConversationPermissions();
   const { conversation } = useConversation();
+  const isUnpersistedConversation = useIsUnpersistedConversation(conversation);
   const accessControl = normalizeConversationAccessControl(conversation?.access_control);
   const canOpenSharePopover = canUpdateAccessControl || hasInviteMembersSummary(accessControl);
 
   if (
     !conversation ||
-    !hasPersistedConversation ||
+    isUnpersistedConversation ||
     !canOpenSharePopover ||
     !isExperimentalFeaturesEnabled
   ) {
