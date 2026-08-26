@@ -20,7 +20,9 @@ const palette: PaletteOutput<CustomPaletteParams> = {
   },
 };
 
-// Remove legacy state properties as they should be removed in the initialize method
+// Current-state fixture. Initialize consumes secondaryPrefix, valuesTextAlign,
+// titleWeight, and secondaryLabelPosition. secondaryLabel is omitted because it
+// is optional leftover (kept as a render fallback), not because initialize deletes it.
 const fullState: Required<
   Omit<
     MetricVisualizationState,

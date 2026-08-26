@@ -67,6 +67,9 @@ describe('metric visualization', () => {
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   } as const;
 
+  // Current-state fixture. Initialize consumes secondaryPrefix, valuesTextAlign,
+  // titleWeight, and secondaryLabelPosition. secondaryLabel is omitted because it
+  // is optional leftover (kept as a render fallback), not because initialize deletes it.
   const fullState: Required<
     Omit<
       MetricVisualizationState,
@@ -116,6 +119,7 @@ describe('metric visualization', () => {
     return legacyState;
   };
 
+  // Same legacy omissions as fullState: secondaryLabel stays optional leftover.
   const fullStateWTrend: Required<
     Omit<
       MetricVisualizationState,
