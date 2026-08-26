@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { existsSync } from 'fs';
-import path from 'path';
-
 import { Agent, fetch as undiciFetch } from 'undici';
 
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
@@ -28,36 +25,6 @@ import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 
 const RENDER_ENDPOINT = '/api/v1/render';
 const RENDER_TIMEOUT_MS = 30_000;
-
-/**
- * Build the CA list for outbound mTLS.
- *
- * On Serverless the configured `tls.ca` file is cluster-internal-cas — the ECP
- * CA — which is issued by MKI, not a root. The MKI intermediate sits next to
- * the Kibana client cert at `dirname(certificate)/ca.crt`. Include it when
- * present so `rejectUnauthorized: true` can complete the chain.
- *
- * This extra CA is Serverless-only and only when `tls.ca` is already set.
- * Otherwise Node keeps the default Mozilla roots. ECH talks to a public
- * Let's Encrypt hostname; inventing a custom CA store from http-certs/ca.crt
- * would replace those roots and fail the handshake.
- */
-const resolveIacProvisionerCertificateAuthorities = (
-  tls: { certificate?: string; ca?: string } | undefined,
-  { isServerless }: { isServerless: boolean }
-): string | string[] | undefined => {
-  const configured = tls?.ca ? [tls.ca] : [];
-  if (isServerless && configured.length > 0 && tls?.certificate) {
-    const siblingCa = path.join(path.dirname(tls.certificate), 'ca.crt');
-    if (!configured.includes(siblingCa) && existsSync(siblingCa)) {
-      configured.push(siblingCa);
-    }
-  }
-  if (configured.length === 0) {
-    return undefined;
-  }
-  return configured.length === 1 ? configured[0] : configured;
-};
 
 /** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
 const formatIacProvisionerNetworkError = (error: unknown): string => {
@@ -296,9 +263,10 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         enabled: Boolean(tls?.certificate && tls?.key),
         certificate: tls?.certificate,
         key: tls?.key,
-        certificateAuthorities: resolveIacProvisionerCertificateAuthorities(tls, {
-          isServerless: Boolean(appContextService.getCloud()?.isServerlessEnabled),
-        }),
+        // Pass through as configured (string or string[]). Serverless needs
+        // both cluster-internal-cas and the MKI intermediate (http-certs/ca.crt);
+        // kibana-controller injects that list. Unset keeps Mozilla roots (ECH).
+        certificateAuthorities: tls?.ca,
       })
     );
     return new Agent({

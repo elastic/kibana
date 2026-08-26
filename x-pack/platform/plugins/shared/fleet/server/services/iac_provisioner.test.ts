@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import fs from 'fs';
-
 import { fetch as undiciFetch, Agent } from 'undici';
 
 import {
@@ -60,10 +58,7 @@ const jsonResponse = (status: number, body: unknown) =>
     json: async () => body,
   } as any);
 
-function mockConfig(
-  overrides: Record<string, unknown> = {},
-  cloud: { isCloudEnabled?: boolean; isServerlessEnabled?: boolean } = { isCloudEnabled: true }
-) {
+function mockConfig(overrides: Record<string, unknown> = {}) {
   jest.spyOn(appContextService, 'getConfig').mockReturnValue({
     agentless: { enabled: true },
     iacProvisioner: {
@@ -75,7 +70,7 @@ function mockConfig(
       ...overrides,
     },
   } as any);
-  jest.spyOn(appContextService, 'getCloud').mockReturnValue(cloud as any);
+  jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 }
 
 function mockLogger() {
@@ -271,121 +266,65 @@ describe('IacProvisionerService', () => {
     expect(errorLogged).toContain('unable to get issuer certificate');
   });
 
-  it('also trusts ca.crt next to the client certificate when that file exists', async () => {
-    // Serverless Kibana mounts the client cert at http-certs/tls.crt and the
-    // MKI intermediate at http-certs/ca.crt. cluster-internal-cas (the
-    // configured tls.ca) only has the cluster CA, which is itself issued by
-    // that MKI intermediate — without both, rejectUnauthorized: true fails
-    // the handshake.
-    const existsSync = jest.spyOn(fs, 'existsSync').mockImplementation((p) => {
-      return p === '/mnt/elastic-internal/http-certs/ca.crt';
-    });
-    mockConfig(
-      {
-        api: {
-          url: 'https://cloud-iac-provisioner.cloud-iac-provisioner.svc.cluster.local',
-          tls: {
-            certificate: '/mnt/elastic-internal/http-certs/tls.crt',
-            key: '/mnt/elastic-internal/http-certs/tls.key',
-            ca: '/mnt/elastic-internal/trust-bundle/ca.crt',
-          },
-        },
-      },
-      { isServerlessEnabled: true }
-    );
-    mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
-
-    try {
-      await iacProvisionerService.renderTemplate(RENDER_REQUEST);
-
-      expect(mockedAgent).toHaveBeenCalledWith({
-        connect: expect.objectContaining({
+  it('passes an array of CA paths through to the outbound Agent', async () => {
+    // kibana-controller injects both cluster-internal-cas and the MKI
+    // intermediate so rejectUnauthorized: true can complete the chain.
+    mockConfig({
+      api: {
+        url: 'https://cloud-iac-provisioner.cloud-iac-provisioner.svc.cluster.local',
+        tls: {
+          certificate: '/mnt/elastic-internal/http-certs/tls.crt',
+          key: '/mnt/elastic-internal/http-certs/tls.key',
           ca: [
             '/mnt/elastic-internal/trust-bundle/ca.crt',
             '/mnt/elastic-internal/http-certs/ca.crt',
           ],
-          rejectUnauthorized: true,
-        }),
-      });
-    } finally {
-      existsSync.mockRestore();
-    }
+        },
+      },
+    });
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
+    );
+
+    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+
+    expect(mockedAgent).toHaveBeenCalledWith({
+      connect: expect.objectContaining({
+        ca: [
+          '/mnt/elastic-internal/trust-bundle/ca.crt',
+          '/mnt/elastic-internal/http-certs/ca.crt',
+        ],
+        rejectUnauthorized: true,
+      }),
+    });
   });
 
-  it('does not replace Mozilla roots with http-certs/ca.crt on ECH', async () => {
+  it('does not replace Mozilla roots when tls.ca is unset', async () => {
     // ECH presents a client cert to the public proxy but must keep the default
     // CA store so Let's Encrypt on the hosted URL still verifies.
-    const existsSync = jest.spyOn(fs, 'existsSync').mockImplementation((p) => {
-      return p === '/mnt/elastic-internal/http-certs/ca.crt';
-    });
-    mockConfig(
-      {
-        api: {
-          url: 'https://cloud-iac-provisioner.eu-west-1.aws.svc.qa.elastic.cloud',
-          tls: {
-            certificate: '/mnt/elastic-internal/http-certs/tls.crt',
-            key: '/mnt/elastic-internal/http-certs/tls.key',
-          },
+    mockConfig({
+      api: {
+        url: 'https://cloud-iac-provisioner.eu-west-1.aws.svc.qa.elastic.cloud',
+        tls: {
+          certificate: '/mnt/elastic-internal/http-certs/tls.crt',
+          key: '/mnt/elastic-internal/http-certs/tls.key',
         },
       },
-      { isCloudEnabled: true }
-    );
+    });
     mockLogger();
     mockedFetch.mockResolvedValueOnce(
       jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
     );
 
-    try {
-      await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
 
-      expect(mockedAgent).toHaveBeenCalledWith({
-        connect: expect.objectContaining({
-          ca: undefined,
-          rejectUnauthorized: true,
-        }),
-      });
-    } finally {
-      existsSync.mockRestore();
-    }
-  });
-
-  it('does not append the sibling CA on ECH even when tls.ca is set', async () => {
-    const existsSync = jest.spyOn(fs, 'existsSync').mockImplementation((p) => {
-      return p === '/mnt/elastic-internal/http-certs/ca.crt';
+    expect(mockedAgent).toHaveBeenCalledWith({
+      connect: expect.objectContaining({
+        ca: undefined,
+        rejectUnauthorized: true,
+      }),
     });
-    mockConfig(
-      {
-        api: {
-          url: 'https://cloud-iac-provisioner.eu-west-1.aws.svc.qa.elastic.cloud',
-          tls: {
-            certificate: '/mnt/elastic-internal/http-certs/tls.crt',
-            key: '/mnt/elastic-internal/http-certs/tls.key',
-            ca: '/mnt/elastic-internal/trust-bundle/ca.crt',
-          },
-        },
-      },
-      { isCloudEnabled: true }
-    );
-    mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
-
-    try {
-      await iacProvisionerService.renderTemplate(RENDER_REQUEST);
-
-      expect(mockedAgent).toHaveBeenCalledWith({
-        connect: expect.objectContaining({
-          ca: '/mnt/elastic-internal/trust-bundle/ca.crt',
-          rejectUnauthorized: true,
-        }),
-      });
-    } finally {
-      existsSync.mockRestore();
-    }
   });
 
   it('maps a body that fails to read to IacProvisionerUnavailableError', async () => {
