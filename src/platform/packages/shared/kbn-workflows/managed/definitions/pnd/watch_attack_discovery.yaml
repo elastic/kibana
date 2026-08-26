@@ -1,0 +1,246 @@
+version: "1"
+name: Attack Discovery Worker
+description: >
+  Runs Attack Discovery on demand for the Watch Floor: retrieves recent security
+  alerts, generates discoveries with an LLM, and persists them to the shared
+  ad-hoc Attack Discovery index. The Watch Floor orchestrator owns the schedule
+  and invokes this worker via workflow.execute on each scheduled tick. The worker
+  drafts one investigation per discovered attack, or a single tracking
+  investigation when a run completes with no attacks.
+enabled: true
+tags:
+  - security
+  - watch-floor
+  - attack-discovery
+settings:
+  # Overlapping scheduled ticks would stack redundant AD generations, so drop a
+  # new run while one is already in flight.
+  concurrency:
+    key: watch-floor-attack-discovery
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          description: >
+            LLM connector UUID used for generation. When omitted, the server
+            resolves the configured default AI connector.
+        size:
+          type: number
+          default: 100
+          description: Maximum number of alerts to retrieve for the run.
+        start:
+          type: string
+          default: now-24h
+          description: Alert retrieval window start (Elasticsearch date math).
+        end:
+          type: string
+          default: now
+          description: Alert retrieval window end (Elasticsearch date math).
+        filter:
+          type: object
+          additionalProperties: true
+          description: Optional Elasticsearch DSL filter applied during alert retrieval.
+      additionalProperties: false
+# Declared in JSON Schema object format (not the legacy name/type array): the
+# legacy `array` type constrains items to string/number/boolean, so an array of
+# recommended-action objects is rejected by output validation at emit_result.
+# The object format lets recommended_actions be an array of objects.
+outputs:
+  properties:
+    discovery_count:
+      type: number
+    execution_uuid:
+      type: string
+    status:
+      type: string
+    recommended_actions:
+      type: array
+      description: Structured recommended actions accumulated across discoveries.
+      items:
+        type: object
+steps:
+  # Run the full pipeline (retrieve -> generate -> validate -> persist) in sync
+  # mode (the default), so the step blocks until the run is terminal and returns
+  # the discoveries inline. Running via the workflow (non-alerting) path persists
+  # to the shared ad-hoc AD index and creates no alerting rule / Attacks-page
+  # schedule. The step timeout bounds the wait for a slow generation.
+  - name: run_attack_discovery
+    type: security.attack-discovery.run
+    timeout: "10m"
+    with:
+      connector_id: "{{ inputs.connector_id }}"
+      alert_retrieval_mode: custom_query
+      size: "${{ inputs.size }}"
+      start: "{{ inputs.start }}"
+      end: "{{ inputs.end }}"
+      filter: "${{ inputs.filter }}"
+
+  # Accumulate the structured recommendations emitted for each discovery so the
+  # worker result can be consumed by a later human-in-the-loop translation task.
+  - name: initialize_recommended_actions
+    type: data.set
+    with:
+      recommended_actions: []
+
+  # One investigation per discovered attack: loop over the discoveries returned
+  # inline by the run step and draft a focused brief for each. Runs only on a
+  # terminal run that produced at least one discovery.
+  - name: write_investigations
+    type: foreach
+    if: >-
+      ${{ steps.run_attack_discovery.output.status == 'completed'
+        and steps.run_attack_discovery.output.discovery_count > 0 }}
+    foreach: "{{ steps.run_attack_discovery.output.attack_discoveries | json }}"
+    steps:
+      - name: recommend_actions
+        type: ai.agent
+        timeout: "10m"
+        with:
+          message: >
+            Use the [/recommended-actions](skill://recommended-actions) skill on
+            the Attack Discovery below. Recommend only justified actions, classify
+            each as Kibana-executable or analyst-manual, and return the required
+            structured output. Do not execute any action.
+
+            Attack Discovery:
+            {{ foreach.item | json }}
+          schema:
+            type: object
+            additionalProperties: false
+            properties:
+              recommended_actions:
+                type: array
+                description: Evidence-based actions recommended for this Attack Discovery.
+                items:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    action_type:
+                      type: string
+                      enum:
+                        - isolate_host
+                        - kill_process
+                        - hunt_process_persistence
+                        - create_case
+                        - set_asset_criticality
+                        - analyze_exfiltration_ips
+                        - revoke_user_account
+                        - enforce_step_up_auth
+                        - onboard_integration
+                    execution:
+                      type: string
+                      enum:
+                        - kibana_api
+                        - manual
+                    title:
+                      type: string
+                    rationale:
+                      type: string
+                    priority:
+                      type: string
+                      enum:
+                        - immediate
+                        - investigation
+                        - hardening
+                    targets:
+                      type: object
+                      additionalProperties: false
+                      properties:
+                        hosts:
+                          type: array
+                          items:
+                            type: string
+                        users:
+                          type: array
+                          items:
+                            type: string
+                        ips:
+                          type: array
+                          items:
+                            type: string
+                        alert_ids:
+                          type: array
+                          items:
+                            type: string
+                      required:
+                        - hosts
+                        - users
+                        - ips
+                        - alert_ids
+                    capability_ref:
+                      type: string
+                      enum:
+                        - endpoint.isolate
+                        - endpoint.kill_process
+                        - endpoint.running_procs
+                        - cases.create
+                        - asset_criticality.set
+                        - threat_hunting.exfil_ips
+                      description: Required for kibana_api actions and omitted for manual actions.
+                  required:
+                    - action_type
+                    - execution
+                    - title
+                    - rationale
+                    - priority
+                    - targets
+            required:
+              - recommended_actions
+
+      - name: collect_recommended_actions
+        type: data.set
+        with:
+          recommended_actions: >-
+            ${{ variables.recommended_actions
+              | concat: steps.recommend_actions.output.structured_output.recommended_actions }}
+
+      - name: write_investigation
+        type: ai.agent
+        timeout: "10m"
+        create-conversation: true
+        with:
+          message: >
+            Summarize the Attack Discovery below into a concise investigation
+            brief for a Tier-1 analyst: the likely attack narrative, the entities
+            involved, and the immediate next steps to verify or contain it.
+            Include a "Recommended actions" section grouped into
+            "Kibana-executable" and "Manual analyst actions". For every action,
+            render its title, priority, rationale, targets, and capability ref
+            when present. These are recommendations only; do not claim that any
+            action was executed.
+
+            Title: {{ foreach.item.title }}
+
+            Attack Discovery:
+            {{ foreach.item | json }}
+
+            Recommended actions:
+            {{ steps.recommend_actions.output.structured_output.recommended_actions | json }}
+
+  # When the run succeeds but finds no attacks, create a single investigation that
+  # tracks the clean run for the analyst timeline.
+  - name: write_empty_run_investigation
+    type: ai.agent
+    if: >-
+      ${{ steps.run_attack_discovery.output.status == 'completed'
+        and steps.run_attack_discovery.output.discovery_count == 0 }}
+    timeout: "10m"
+    create-conversation: true
+    with:
+      message: >
+        The scheduled Attack Discovery run completed successfully and found no
+        attacks in the alert window. Record a short note confirming the clean run
+        for the Tier-1 analyst timeline.
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      discovery_count: "${{ steps.run_attack_discovery.output.discovery_count | default: 0 }}"
+      execution_uuid: "{{ steps.run_attack_discovery.output.execution_uuid }}"
+      recommended_actions: "${{ variables.recommended_actions }}"
+      status: "{{ steps.run_attack_discovery.output.status }}"

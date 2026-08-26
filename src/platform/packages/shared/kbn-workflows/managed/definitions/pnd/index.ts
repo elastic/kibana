@@ -10,6 +10,7 @@
 import RULE_CREATION_YAML from './rule_creation.yaml';
 import RULE_PREVIEW_YAML from './rule_preview.yaml';
 import RULE_TUNING_YAML from './rule_tuning.yaml';
+import WATCH_ATTACK_DISCOVERY_YAML from './watch_attack_discovery.yaml';
 import WATCH_DARK_YAML from './watch_dark.yaml';
 import WATCH_DEEP_YAML from './watch_deep.yaml';
 import WATCH_DETECTION_YAML from './watch_detection.yaml';
@@ -25,6 +26,7 @@ export const PND_WATCH_DETECTION_WORKFLOW_ID = 'system-security-watch-detection'
 export const PND_RULE_PREVIEW_WORKFLOW_ID = 'system-security-rule-preview';
 export const PND_RULE_TUNING_WORKFLOW_ID = 'system-security-rule-tuning';
 export const PND_RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
+export const PND_WATCH_ATTACK_DISCOVERY_WORKFLOW_ID = 'system-security-watch-attack-discovery';
 
 const MANAGEMENT = {
   enablement: 'restorable',
@@ -50,7 +52,7 @@ export const PND_WATCH_FLOOR_WORKFLOW = {
   id: PND_WATCH_FLOOR_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 4,
+  version: 7,
   visibility: VISIBILITY,
   yaml: WATCH_FLOOR_YAML,
 } as const satisfies ManagedWorkflowDefinition;
@@ -125,6 +127,16 @@ export const PND_RULE_CREATION_WORKFLOW = {
   yaml: RULE_CREATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
+export const PND_WATCH_ATTACK_DISCOVERY_WORKFLOW = {
+  billable: false,
+  id: PND_WATCH_ATTACK_DISCOVERY_WORKFLOW_ID,
+  management: MANAGEMENT,
+  pluginId: PLUGIN_ID,
+  version: 6,
+  visibility: WORKER_VISIBILITY,
+  yaml: WATCH_ATTACK_DISCOVERY_YAML,
+} as const satisfies ManagedWorkflowDefinition;
+
 export const PND_WATCH_WORKFLOWS = [
   PND_WATCH_FLOOR_WORKFLOW,
   PND_WATCH_OFFICER_WORKFLOW,
@@ -142,4 +154,5 @@ export const PND_WATCH_WORKFLOW_IDS = [
   PND_RULE_PREVIEW_WORKFLOW_ID,
   PND_RULE_TUNING_WORKFLOW_ID,
   PND_RULE_CREATION_WORKFLOW_ID,
+  PND_WATCH_ATTACK_DISCOVERY_WORKFLOW_ID,
 ] as const;
