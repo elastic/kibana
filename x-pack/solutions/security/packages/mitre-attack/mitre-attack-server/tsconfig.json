@@ -15,6 +15,5 @@
   ],
   "kbn_references": [
     "@kbn/security-mitre-attack-common",
-    "@kbn/zod"
   ]
 }
