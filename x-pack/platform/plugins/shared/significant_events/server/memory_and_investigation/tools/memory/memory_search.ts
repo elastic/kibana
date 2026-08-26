@@ -9,8 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { SEARCH_MODES } from '../../../../common/queries';
 import { platformStreamsMemoryTools } from './tool_ids';
 import type { MemoryToolsOptions } from './types';
@@ -56,7 +56,7 @@ const memorySearchSchema = z.object({
 
 export const createMemorySearchTool = ({
   getMemoryService,
-}: MemoryToolsOptions): BuiltinToolDefinition<typeof memorySearchSchema> => ({
+}: MemoryToolsOptions): BuiltinSkillBoundedTool<typeof memorySearchSchema> => ({
   id: platformStreamsMemoryTools.memorySearch,
   type: ToolType.builtin,
   description:
@@ -64,7 +64,6 @@ export const createMemorySearchTool = ({
     'use memory_read to get full content of specific pages. ' +
     'Memory contains persistent knowledge accumulated across conversations.',
   schema: memorySearchSchema,
-  tags: ['memory'],
   handler: async ({ query, tags, categories, references, size, mode }, context) => {
     const memoryService = getMemoryService(context.esClient.asCurrentUser);
 

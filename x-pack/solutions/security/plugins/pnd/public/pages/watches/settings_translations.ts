@@ -9,8 +9,8 @@
  * Copy for the per-watch settings page.
  *
  * The API carries ids only, so every autonomy level, select option, approval gate, run outcome and
- * per-watch intro resolves to a message here. Keep the id maps in step with `WATCH_SETTINGS_SEED` in
- * `@kbn/pnd-common`.
+ * per-watch intro resolves to a message here. Keep the id maps in step with the managed watch
+ * catalog in `@kbn/pnd-common`.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -23,31 +23,11 @@ import {
 } from '@kbn/pnd-common';
 
 /* -------------------------------------------------------------------------- */
-/* Header and metrics                                                         */
+/* Header                                                                     */
 /* -------------------------------------------------------------------------- */
-
-export const ENABLED_BADGE = i18n.translate('xpack.pnd.watches.settings.enabledBadge', {
-  defaultMessage: 'Enabled',
-});
-
-export const DISABLED_BADGE = i18n.translate('xpack.pnd.watches.settings.disabledBadge', {
-  defaultMessage: 'Disabled',
-});
 
 export const ENABLED_SWITCH_LABEL = i18n.translate('xpack.pnd.watches.settings.enabledSwitch', {
   defaultMessage: 'Enabled',
-});
-
-export const METRIC_INCIDENTS_7D = i18n.translate('xpack.pnd.watches.settings.metric.incidents7d', {
-  defaultMessage: 'Incidents / 7d',
-});
-
-export const METRIC_ACCEPTED = i18n.translate('xpack.pnd.watches.settings.metric.accepted', {
-  defaultMessage: 'Accepted',
-});
-
-export const METRIC_TIME_SAVED = i18n.translate('xpack.pnd.watches.settings.metric.timeSaved', {
-  defaultMessage: 'Time saved',
 });
 
 /* -------------------------------------------------------------------------- */
@@ -62,16 +42,6 @@ export const AUTONOMY_SECTION_TITLE = i18n.translate(
 export const AUTONOMY_SECTION_SUBTITLE = i18n.translate(
   'xpack.pnd.watches.settings.autonomy.sectionSubtitle',
   { defaultMessage: 'applies to this watch only' }
-);
-
-export const GENERAL_SECTION_TITLE = i18n.translate(
-  'xpack.pnd.watches.settings.general.sectionTitle',
-  { defaultMessage: 'General' }
-);
-
-export const GENERAL_SECTION_SUBTITLE = i18n.translate(
-  'xpack.pnd.watches.settings.general.sectionSubtitle',
-  { defaultMessage: 'identity and top-level state' }
 );
 
 export const TRIGGERS_SECTION_TITLE = i18n.translate(
@@ -166,51 +136,9 @@ export const AUTONOMY_LEVEL_DESCRIPTIONS: Record<string, string> = {
 export const autonomyLevelName = (levelId: string): string =>
   AUTONOMY_LEVEL_NAMES[levelId] ?? levelId;
 
-export const AUTONOMY_GUARDRAILS_NOTE = i18n.translate(
-  'xpack.pnd.watches.settings.autonomy.guardrailsNote',
-  {
-    defaultMessage:
-      'Org guardrails still apply — actions outside the allow-list stay gated at any level.',
-  }
-);
-
-export const VIEW_GUARDRAILS = i18n.translate(
-  'xpack.pnd.watches.settings.autonomy.viewGuardrails',
-  {
-    defaultMessage: 'View guardrails',
-  }
-);
-
 export const AUTONOMY_RANGE_ARIA_LABEL = i18n.translate(
   'xpack.pnd.watches.settings.autonomy.rangeAriaLabel',
   { defaultMessage: 'Autonomy level' }
-);
-
-/* -------------------------------------------------------------------------- */
-/* General                                                                    */
-/* -------------------------------------------------------------------------- */
-
-export const RUN_AS_IDENTITY_LABEL = i18n.translate(
-  'xpack.pnd.watches.settings.general.runAsLabel',
-  { defaultMessage: 'Run-as identity' }
-);
-
-export const RUN_AS_IDENTITY_HELP = i18n.translate('xpack.pnd.watches.settings.general.runAsHelp', {
-  defaultMessage:
-    'The service account each run executes as. Editing depends on IAM run-as support.',
-});
-
-export const MVP_SCOPE_CALLOUT_TITLE = i18n.translate(
-  'xpack.pnd.watches.settings.general.mvpScopeTitle',
-  { defaultMessage: 'MVP scope' }
-);
-
-export const MVP_SCOPE_CALLOUT_BODY = i18n.translate(
-  'xpack.pnd.watches.settings.general.mvpScopeBody',
-  {
-    defaultMessage:
-      'Higher-autonomy controls are out of scope for October — basic boundaries only. Autonomy inheritance across org / space / Watch / Worker is still an open decision.',
-  }
 );
 
 /* -------------------------------------------------------------------------- */

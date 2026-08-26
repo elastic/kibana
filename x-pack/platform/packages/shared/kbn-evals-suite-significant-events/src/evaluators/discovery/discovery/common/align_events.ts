@@ -12,7 +12,7 @@ export const getConfirmedDetectionRuleUuids = (event: {
 }): Set<string> =>
   new Set(
     (event.signals ?? []).flatMap((s) =>
-      s.type === 'detection' && s.confirmed !== false && s.metadata?.rule_uuid
+      s.type === 'detection' && s.verdict === 'confirms' && s.metadata?.rule_uuid
         ? [s.metadata.rule_uuid]
         : []
     )
@@ -22,9 +22,9 @@ export const getConfirmedDetectionRuleUuids = (event: {
  * Assign each expected event key to the best-matching actual, ensuring no actual
  * is claimed twice. Matching priority:
  * 1. Exact event_id match (when the key carries an event_id)
- * 2. Highest count of shared confirmed detection-signal rule UUIDs
+ * 2. Highest count of shared confirming detection-signal rule UUIDs
  *
- * Refuted signals (confirmed === false) are excluded from overlap so dismissed events
+ * Non-confirming signals are excluded from overlap so dismissed events
  * do not compete against the correct open event when both share a rule UUID.
  *
  * Returns an array of matched actuals (or undefined) in the same order as `expected`.

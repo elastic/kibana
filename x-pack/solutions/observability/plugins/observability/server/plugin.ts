@@ -105,7 +105,7 @@ export class ObservabilityPlugin
       plugins.features.registerKibanaFeature(getCasesFeature(casesCapabilities, casesApiTags));
       plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
       plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
-      plugins.cases.attachmentFramework.registerUnified(observabilityAlertAttachmentType);
+      plugins.cases.attachmentFramework.registerAttachment(observabilityAlertAttachmentType);
     }
 
     plugins.features.registerKibanaFeature(getLogsFeature());

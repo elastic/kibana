@@ -1,21 +1,9 @@
 {
-  "sha1": "ec5ca74d4c806503e3c313598970584f68623f14",
+  "sha1": "a1d72db7ca50d9c5a01957af9b3b55ce5504560c",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "8bea2bd5c95a6e4-d82a0020fae5469",
-      "title": "Teardown Discover sidebar tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "a38a9adb5e6f0a9-62c28ccadd9bbd7",
       "title": "Setup Discover sidebar tests data",
@@ -321,8 +309,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 58,
-        "column": 44
+        "line": 65,
+        "column": 13
       }
     },
     {
@@ -341,8 +329,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 86,
-        "column": 30
+        "line": 91,
+        "column": 9
       }
     },
     {
@@ -361,8 +349,19 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/sidebar_runtime_fields.spec.ts",
-        "line": 110,
-        "column": 28
+        "line": 117,
+        "column": 25
+      }
+    },
+    {
+      "id": "8bea2bd5c95a6e4-d82a0020fae5469",
+      "title": "Teardown Discover sidebar tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/sidebar/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

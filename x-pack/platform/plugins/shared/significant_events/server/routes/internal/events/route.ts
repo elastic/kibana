@@ -11,9 +11,11 @@ import {
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   CHANGE_POINT_TYPES,
   severitySchema,
+  MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
   type ChangePointType,
   type Detection,
+  type InvestigationRunStatus,
   type SignificantEvent,
   type SignificantEventResponse,
   type LifecycleDetection,
@@ -24,6 +26,7 @@ import { z } from '@kbn/zod/v4';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
+import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
@@ -299,9 +302,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     }
 
     const executionId = await triggerInvestigationWorkflow({
-      workflowsManagement: server.workflowsManagement,
-      agentBuilder: server.agentBuilder,
-      spaces: server.spaces,
+      nightshiftInvestigations: server.nightshiftInvestigations,
       request,
       logger,
       event: hits[0],
@@ -351,10 +352,52 @@ const eventsUpdateRoute = createServerRoute({
   },
 });
 
+const investigationStatusesRoute = createServerRoute({
+  endpoint: 'POST /internal/significant_events/investigations/_status',
+  options: {
+    access: 'internal',
+    summary: 'Resolve the outcome of investigation runs',
+    description:
+      'Reports whether each investigation run is pending, complete, failed, or unavailable, resolved from its workflow execution. Missing executions are omitted from the response.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      workflow_execution_ids: z.array(z.string().max(MAX_ID_LENGTH)).max(1000),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+    getSpaceId,
+  }): Promise<{ statuses: Record<string, InvestigationRunStatus> }> => {
+    const { licensing } = await getScopedClients({ request });
+
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const statuses = await resolveInvestigationStatuses({
+      workflowsManagement: server.workflowsManagement,
+      spaceId: await getSpaceId(request),
+      workflowExecutionIds: params.body.workflow_execution_ids,
+      logger,
+    });
+
+    return { statuses };
+  },
+});
+
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
   ...eventsLifecycleRoute,
   ...eventsAttachInvestigationRoute,
   ...eventsTriggerInvestigationRoute,
   ...eventsUpdateRoute,
+  ...investigationStatusesRoute,
 };
