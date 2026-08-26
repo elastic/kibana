@@ -845,4 +845,66 @@ describe('duration chart attributes', () => {
     fireEvent.click(getByText('Performance'));
     expect(exploratoryViewEmbeddableMock).not.toHaveBeenCalled();
   });
+
+  it('renders the default window when the saved object 404s but overview metadata is available', () => {
+    exploratoryViewEmbeddableMock.mockClear();
+
+    const { getByText, queryByRole } = render<{
+      exploratoryView: { ExploratoryViewEmbeddable: typeof exploratoryViewEmbeddableMock };
+    }>(
+      <MonitorDetailFlyout
+        configId="cross-space-config-id"
+        id="cross-space-id"
+        location="US East"
+        locationId="us-east"
+        onClose={jest.fn()}
+        onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
+      />,
+      {
+        core: {
+          exploratoryView: { ExploratoryViewEmbeddable: exploratoryViewEmbeddableMock },
+        },
+        state: {
+          monitorDetails: {
+            syntheticsMonitor: null,
+            syntheticsMonitorLoading: false,
+            syntheticsMonitorError: {
+              body: { statusCode: 404, error: 'Not Found', message: 'Monitor not found' },
+            },
+          },
+          overviewStatus: {
+            status: {
+              upConfigs: {
+                'cross-space-config-id-us-east': {
+                  monitorQueryId: 'cross-space-id',
+                  configId: 'cross-space-config-id',
+                  name: 'Cross-space monitor',
+                  type: 'http',
+                  schedule: '1',
+                  tags: [],
+                  isEnabled: true,
+                  isStatusAlertEnabled: false,
+                  overallStatus: 'up',
+                  spaces: ['team-a'],
+                  locations: [{ id: 'us-east', label: 'US East', status: 'up' }],
+                },
+              },
+              downConfigs: {},
+              pendingConfigs: {},
+              disabledConfigs: {},
+            },
+          },
+        },
+      }
+    );
+
+    fireEvent.click(getByText('Performance'));
+    expect(queryByRole('progressbar')).not.toBeInTheDocument();
+    const embeddableCall = exploratoryViewEmbeddableMock.mock.calls[0];
+    if (!embeddableCall) {
+      throw new Error('Expected the duration chart embeddable to render');
+    }
+    expect(embeddableCall[0].attributes[0].time.from).toBe('now-12h');
+  });
 });

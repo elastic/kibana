@@ -389,6 +389,12 @@ export function MonitorDetailFlyout(props: Props) {
   const error = useSelector(selectSyntheticsMonitorError);
   const currentMonitorObject =
     monitorObject?.[ConfigKey.CONFIG_ID] === configId ? monitorObject : null;
+  // Duration chart reads pings by monitor.id, not the saved object. Wait for
+  // the matching SO so we don't apply a stale `created_at`, but still render
+  // (default 12h window) when the SO 404s — e.g. cross-space monitors whose
+  // overview metadata is already on `monitor`.
+  const canRenderDurationChart =
+    isReadOnly || Boolean(currentMonitorObject) || Boolean(monitor && error && !isLoading);
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
@@ -580,7 +586,7 @@ export function MonitorDetailFlyout(props: Props) {
           </>
         )}
         {selectedTab === 'performance' &&
-          (isReadOnly || currentMonitorObject ? (
+          (canRenderDurationChart ? (
             <DetailFlyoutDurationChart
               id={id}
               location={props.location}
