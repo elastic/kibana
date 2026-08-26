@@ -45,6 +45,11 @@ export const ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID = 'es-managed-bulk-agentless-o
 export const SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID =
   'es-managed-bulk-agentless-output-internal';
 
+export const AGENTLESS_MANAGED_BULK_OUTPUT_IDS: ReadonlySet<string> = new Set([
+  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+]);
+
 // Output ID for the private endpoint (PrivateLink) in serverless.
 // Injected by project-controller/kibana-controller when PrivateLink is enabled.
 export const SERVERLESS_PRIVATE_OUTPUT_ID = 'es-private-output';
