@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type IconColor, type IconType } from '@elastic/eui';
+import { type IconType, type EuiButtonEmptyProps } from '@elastic/eui';
 import type { RecommendedAction, Investigation } from '@kbn/pnd-common';
 
 export const getEmptyValue = () => '—';
@@ -21,7 +21,7 @@ export const getActionButtonIconProps = (
   investigation: Investigation
 ): {
   type: IconType;
-  color: IconColor;
+  color: EuiButtonEmptyProps['color'];
 } => {
   if (!investigation.recommendedAction) {
     return { type: 'flag', color: 'warning' };

@@ -7,8 +7,8 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
-  type IconColor,
   type IconType,
+  type EuiContextMenuItemProps,
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -25,7 +25,7 @@ import { getActionButtonIconProps } from '../helpers';
 interface ActionConfig {
   key: string;
   icon: IconType;
-  color?: IconColor;
+  color?: EuiContextMenuItemProps['color'];
   name: string;
   onClick: () => void;
   /** Inserts a horizontal rule before this item */
@@ -47,7 +47,7 @@ const useContextMenuItems = (
             }}
             key={key}
             icon={icon}
-            color={color as IconColor}
+            color={color}
             onClick={(ev) => {
               ev.stopPropagation();
               onClose();
