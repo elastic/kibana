@@ -20,6 +20,22 @@ import {
   INDICATOR_TYPE_CELL,
 } from '../../screens/threat_intelligence/indicators';
 
+const ADD_TO_TIMELINE_ACTION =
+  '[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]';
+
+const clickFlyoutAddToTimelineAction = (selector: string) => {
+  cy.get(selector).filter(':visible').first().scrollIntoView();
+  cy.get(selector).filter(':visible').first().realHover();
+
+  cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON)
+    .filter(':visible')
+    .should('have.length.at.least', 1)
+    .first()
+    .click();
+
+  cy.get(ADD_TO_TIMELINE_ACTION).should('be.visible').click();
+};
+
 /**
  * Add data to timeline from barchart legend menu item
  */
@@ -52,18 +68,14 @@ export const closeTimeline = () => {
  * Add data to timeline from flyout overview tab table
  */
 export const addToTimelineFromFlyoutOverviewTabTable = (fieldId?: string) => {
-  cy.get(`[data-test-subj^="cellActions-renderContent-${fieldId}"]`).first().trigger('mouseover');
-  cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON).click();
-  cy.get(`[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]`).click();
+  clickFlyoutAddToTimelineAction(`[data-test-subj^="cellActions-renderContent-${fieldId}"]`);
 };
 
 /**
  * Add data to timeline from flyout overview tab block
  */
 export const addToTimelineFromFlyoutOverviewTabBlock = () => {
-  cy.get(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM).first().trigger('mouseover');
-  cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON).click();
-  cy.get(`[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]`).click();
+  clickFlyoutAddToTimelineAction(FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM);
 };
 
 /**
