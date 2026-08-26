@@ -87,36 +87,6 @@ export class DispatcherService implements DispatcherServiceContract {
     const settled = new Date(startedAt.getTime() - SETTLE_BUFFER_SECONDS * 1_000);
     const windowEnd = maxEnd < settled ? maxEnd : settled;
 
-    if (windowEnd <= windowStart) {
-      // Only reachable when the persisted watermark sits more than OVERLAP_WINDOW_MINUTES ahead
-      // of the current clock — node clock skew, or corrupt task state.
-      logger.debug({
-        message: () =>
-          `windowEnd (${windowEnd.toISOString()}) ≤ windowStart ` +
-          `(${windowStart.toISOString()}); skipping scan.`,
-      });
-      return {
-        startedAt,
-        nextWatermark: resolvedWatermark,
-        // Carried forward, not acted on here: the hatch lives past this early return, so it
-        // can only fire once the clock catches up and the scan resumes.
-        nextStuckTicks: stuckTicks + 1,
-        pipelineResult: {
-          completed: true,
-          finalState: {
-            input: {
-              startedAt,
-              eventWatermark: resolvedWatermark,
-              windowStart,
-              windowEnd,
-              executionUuid: '',
-              signal,
-            },
-          },
-        },
-      };
-    }
-
     const executionUuid = uuidV4();
 
     // AbortSignal.any / AbortSignal.timeout are absent in the jsdom test env, so the TM signal
