@@ -103,7 +103,7 @@ export const AgentInstallSection = () => {
           <EuiFlexItem>
             <EuiPanel color="transparent" paddingSize="l">
               <AgentInstallPanel
-                icon="commandLine"
+                icon="code"
                 title={i18n.translate('xpack.searchGettingStarted.agentInstall.ide.title', {
                   defaultMessage: 'Build in your IDE',
                 })}
