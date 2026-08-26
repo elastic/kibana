@@ -68,6 +68,8 @@ import {
   OutputUnauthorizedError,
 } from '../errors';
 
+import { OUTPUT_ENCRYPTED_FIELDS } from '../saved_objects';
+
 import type { OutputType } from '../types';
 
 import { agentPolicyService } from './agent_policy';
@@ -863,20 +865,18 @@ class OutputService {
       });
     }
 
+    const encryptedFieldKeys = [...OUTPUT_ENCRYPTED_FIELDS].map((f) => f.key);
+
     return {
       items: preconfigured.map<Output>((so) =>
         outputSavedObjectToOutput({
           ...so,
-          attributes: omit(so.attributes, [
-            'ssl',
-            'password',
-            'kibana_api_key',
-          ]) as OutputSOAttributes,
+          attributes: omit(so.attributes, encryptedFieldKeys) as OutputSOAttributes,
         })
       ),
       total: preconfigured.length,
-      page: outputs.page,
-      perPage: outputs.per_page,
+      page: 1,
+      perPage: preconfigured.length,
     };
   }
 
