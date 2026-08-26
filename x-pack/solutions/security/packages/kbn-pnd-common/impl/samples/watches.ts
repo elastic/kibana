@@ -228,7 +228,7 @@ const darkWatchBase: Watch = {
 const deepWatchBase: Watch = {
   ...catalogEntry('watch_deep'),
   tags: [WATCH_TAG, WATCH_DEEP_TAG],
-  icon: 'console',
+  icon: 'commandLine',
   enabled: true,
   draft: false,
   managed: true,
@@ -277,7 +277,7 @@ const deepWatchBase: Watch = {
 const detectionWatchBase: Watch = {
   ...catalogEntry('watch_detection'),
   tags: [WATCH_TAG, WATCH_DETECTION_TAG],
-  icon: 'crosshairs',
+  icon: 'crosshair',
   enabled: true,
   draft: false,
   managed: true,
