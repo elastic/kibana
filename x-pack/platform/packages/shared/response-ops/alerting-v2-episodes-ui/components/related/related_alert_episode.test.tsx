@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { RelatedAlertEpisode } from './related_alert_episode';
 
 describe('RelatedAlertEpisode', () => {

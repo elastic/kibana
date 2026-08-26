@@ -41,11 +41,15 @@ export class VegaDebugInspectorViewService extends FtrService {
   public async navigateToDataViewerTab() {
     const dataViewerButton = await this.getOpenDataViewerButton();
     await dataViewerButton.click();
+    // EuiDataGrid renders its header before its row cells; wait for a row so that
+    // callers reading the grid don't snapshot it while it is still empty.
+    await this.testSubjects.existOrFail('dataGridRowCell');
   }
 
   public async navigateToSignalViewerTab() {
     const signalViewerButton = await this.getOpenSignalViewerButton();
     await signalViewerButton.click();
+    await this.testSubjects.existOrFail('dataGridRowCell');
   }
 
   public async navigateToSpecViewerTab() {

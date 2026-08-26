@@ -1,5 +1,5 @@
 {
-  "sha1": "cf547685f3418ff905cd5badbd517681e1ff55d0",
+  "sha1": "0121b2af0c16d873cab9b92beca05d41379ea843",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -221,8 +221,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 38,
-        "column": 25
+        "line": 37,
+        "column": 21
       }
     },
     {
@@ -241,7 +241,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 51,
+        "line": 49,
         "column": 12
       }
     },
@@ -261,8 +261,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 65,
-        "column": 69
+        "line": 63,
+        "column": 16
       }
     },
     {
@@ -281,8 +281,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 81,
-        "column": 22
+        "line": 78,
+        "column": 63
       }
     },
     {
@@ -301,7 +301,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 92,
+        "line": 90,
         "column": 12
       }
     },
@@ -321,7 +321,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 110,
+        "line": 107,
         "column": 14
       }
     },
@@ -341,8 +341,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 128,
-        "column": 69
+        "line": 125,
+        "column": 22
       }
     },
     {
@@ -361,8 +361,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 147,
-        "column": 22
+        "line": 143,
+        "column": 69
       }
     },
     {
@@ -381,8 +381,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 163,
-        "column": 11
+        "line": 159,
+        "column": 62
       }
     },
     {
@@ -401,8 +401,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 182,
-        "column": 83
+        "line": 178,
+        "column": 99
       }
     },
     {
@@ -421,7 +421,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 197,
+        "line": 194,
         "column": 12
       }
     },
@@ -441,8 +441,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 210,
-        "column": 12
+        "line": 207,
+        "column": 5
       }
     },
     {
@@ -461,7 +461,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 219,
+        "line": 216,
         "column": 12
       }
     },
@@ -481,8 +481,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 227,
-        "column": 72
+        "line": 224,
+        "column": 21
       }
     },
     {
@@ -501,7 +501,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 244,
+        "line": 241,
         "column": 14
       }
     },
@@ -521,8 +521,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 255,
-        "column": 16
+        "line": 251,
+        "column": 21
       }
     },
     {
@@ -541,8 +541,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
-        "line": 266,
-        "column": 22
+        "line": 263,
+        "column": 34
       }
     },
     {

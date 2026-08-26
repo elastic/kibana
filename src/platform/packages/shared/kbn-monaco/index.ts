@@ -9,7 +9,8 @@
 
 import './src/register_globals';
 
-export { monaco } from './src/monaco_imports';
+export { monaco, setClipboardContextMenuLabels } from './src/monaco_imports';
+export type { ClipboardContextMenuLabels } from './src/monaco_imports';
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';

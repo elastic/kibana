@@ -145,28 +145,26 @@ export function discoverQueryToComposed(inlinedQuery: string): {
  * Outcome of splitting a unified query for the form summary:
  *
  * - 'success'            — base and alert condition both identified
- * - 'no_alert_condition' — base defined, no alert condition (every row is a breach)
+ * - 'no_alert_condition' — base defined, no alert condition
  * - 'split_failed'       — heuristic could not isolate a base (empty base)
  * - 'empty'              — no query entered
  */
 export type SplitOutcome = 'success' | 'no_alert_condition' | 'split_failed' | 'empty';
 
+export type ComposedRuleQuery = Extract<RuleQuery, { format: 'composed' }>;
+
 export interface SplitRuleQueryResult {
-  query: RuleQuery;
+  query: ComposedRuleQuery;
   outcome: SplitOutcome;
 }
 
 /**
- * Maps a unified ES|QL query into the rule query shape for an alert rule,
- * alongside an outcome that drives the form summary copy/callouts.
+ * Maps a unified ES|QL query into a composed alert query and an outcome for
+ * the form summary.
  *
- * - `success` (base + alert condition) → `composed` (base + breach segment).
- * - `no_alert_condition` (base only, no WHERE) → `standalone`: the whole query
- *   is the breach query, so every returned row is a breach. The rule data schema
- *   permits `alert + standalone` (only `signal` is forced to standalone), so this
- *   is a first-class, savable rule rather than a blocked dead-end.
- * - `split_failed` / `empty` → `composed` so the summary can flag the state; these
- *   do not produce a savable base-only rule.
+ * - `success` — base and breach segment both set.
+ * - `no_alert_condition` — base set, empty breach segment.
+ * - `split_failed` / `empty` — incomplete split; summary flags the state.
  */
 export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult {
   const { base, alertBlock } = splitQuery(fullQuery);
@@ -182,36 +180,26 @@ export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult 
   }
   if (hasBase) {
     return {
-      query: { format: 'standalone', breach: { query: base } },
+      query: { format: 'composed', base, breach: { segment: '' } },
       outcome: 'no_alert_condition',
     };
   }
 
-  const query: RuleQuery = { format: 'composed', base, breach: { segment: alertBlock } };
-  return { query, outcome: hasAlert ? 'split_failed' : 'empty' };
+  return {
+    query: { format: 'composed', base, breach: { segment: alertBlock } },
+    outcome: hasAlert ? 'split_failed' : 'empty',
+  };
 }
 
 /**
- * After a create-mode unified-editor Apply, merges heuristic split output with
- * any recovery block from the sandbox when the query format is unchanged.
- * A format change (e.g. standalone no_where → composed after adding WHERE) drops recovery.
+ * Merges `splitResult` with `sandboxQuery.recovery` when the sandbox query is
+ * composed and already has a recovery block; otherwise returns `splitResult`.
  */
 export function resolveUnifiedAlertApplyQuery(
   sandboxQuery: RuleQuery,
-  splitResult: RuleQuery
-): RuleQuery {
-  if (
-    splitResult.format === 'composed' &&
-    sandboxQuery.format === 'composed' &&
-    sandboxQuery.recovery
-  ) {
-    return { ...splitResult, recovery: sandboxQuery.recovery };
-  }
-  if (
-    splitResult.format === 'standalone' &&
-    sandboxQuery.format === 'standalone' &&
-    sandboxQuery.recovery
-  ) {
+  splitResult: ComposedRuleQuery
+): ComposedRuleQuery {
+  if (sandboxQuery.format === 'composed' && sandboxQuery.recovery) {
     return { ...splitResult, recovery: sandboxQuery.recovery };
   }
   return splitResult;

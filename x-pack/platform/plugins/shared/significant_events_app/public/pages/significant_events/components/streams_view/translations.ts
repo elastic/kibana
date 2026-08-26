@@ -82,6 +82,15 @@ export const RUN_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   }
 );
 
+/** Onboard-stream tooltip, extended with the cross-project generation disclosure. */
+export const RUN_STREAM_ONBOARDING_CROSS_PROJECT_TOOLTIP = i18n.translate(
+  'xpack.significantEventsApp.streamsTree.runStreamOnboardingCrossProjectTooltip',
+  {
+    defaultMessage:
+      'Onboard stream. Analyzes data from all projects linked through cross-project search, regardless of the project scope configured for this space.',
+  }
+);
+
 export const STOP_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.significantEventsApp.streamsTree.stopStreamOnboardingButtonEmptyLabel',
   {
@@ -89,29 +98,9 @@ export const STOP_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   }
 );
 
-export const OCCURRENCES_CHART_TITLE = i18n.translate(
-  'xpack.significantEventsApp.streamsView.occurrencesChartTitle',
-  {
-    defaultMessage: 'Detected event occurrences',
-  }
-);
-
 export const ONBOARDING_FAILURE_TITLE = i18n.translate(
   'xpack.significantEventsApp.streamsView.onboardingErrorTitle',
   {
     defaultMessage: 'Could not onboard stream',
-  }
-);
-
-export const DISCOVER_INSIGHTS_BUTTON_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.discoverInsightsButtonLabel',
-  {
-    defaultMessage: 'Discover Insights',
-  }
-);
-export const DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL = i18n.translate(
-  'xpack.significantEventsApp.streamsView.discoverInsightsConfigAriaLabel',
-  {
-    defaultMessage: 'Configure discovery model',
   }
 );

@@ -196,33 +196,38 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('fans out integration-level condition to inputs in the full agent policy', async () => {
-      const integrationCondition = "${host.platform} == 'linux'";
-      const inputCondition = "${host.platform} != 'windows'";
-      const streamCondition = "${host.name} == 'mybox'";
+      const tempAgentPolicyId = await createAgentPolicy();
+      try {
+        const integrationCondition = "${host.platform} == 'linux'";
+        const inputCondition = "${host.platform} != 'windows'";
+        const streamCondition = "${host.name} == 'mybox'";
 
-      await createPackagePolicy({
-        name: `cond-full-${uuidv4()}`,
-        namespace: 'default',
-        policy_id: agentPolicyId,
-        condition: integrationCondition,
-        inputs: [
-          {
-            type: INPUT_TYPE,
-            enabled: true,
-            condition: inputCondition,
-            streams: [makeStream({ condition: streamCondition })],
-          },
-        ],
-        package: { name: PKG_NAME, version: PKG_VERSION },
-      });
+        await createPackagePolicy({
+          name: `cond-full-${uuidv4()}`,
+          namespace: 'default',
+          policy_id: tempAgentPolicyId,
+          condition: integrationCondition,
+          inputs: [
+            {
+              type: INPUT_TYPE,
+              enabled: true,
+              condition: inputCondition,
+              streams: [makeStream({ condition: streamCondition })],
+            },
+          ],
+          package: { name: PKG_NAME, version: PKG_VERSION },
+        });
 
-      const fullPolicy = await getFullAgentPolicy(agentPolicyId);
-      const input = fullPolicy.inputs.find((i: { type: string }) => i.type === INPUT_TYPE);
-      expect(input).to.be.ok();
-      // Integration- and input-level conditions AND-combine at the input; no template condition for this package.
-      expect(input.condition).to.eql(`(${integrationCondition}) and (${inputCondition})`);
-      // Stream-level condition emits as-is when there is no template stream condition.
-      expect(input.streams[0].condition).to.eql(streamCondition);
+        const fullPolicy = await getFullAgentPolicy(tempAgentPolicyId);
+        const input = fullPolicy.inputs.find((i: { type: string }) => i.type === INPUT_TYPE);
+        expect(input).to.be.ok();
+        // Integration- and input-level conditions AND-combine at the input; no template condition for this package.
+        expect(input.condition).to.eql(`(${integrationCondition}) and (${inputCondition})`);
+        // Stream-level condition emits as-is when there is no template stream condition.
+        expect(input.streams[0].condition).to.eql(streamCondition);
+      } finally {
+        await deleteAgentPolicy(tempAgentPolicyId);
+      }
     });
 
     it('rejects any condition on agentless package policies (400)', async () => {

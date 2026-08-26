@@ -16,7 +16,11 @@ import {
   MAX_ID_LENGTH,
   MAX_NAME_LENGTH,
 } from '@kbn/evals-plugin/common';
-import type { GenerateExperimentParams, GeneratedExperimentRun } from '@kbn/evals-plugin/server';
+import type {
+  EvalsPluginStart,
+  GenerateExperimentParams,
+  GeneratedExperimentRun,
+} from '@kbn/evals-plugin/server';
 
 export const EVALS_TOOLS_NAMESPACE = 'platform.evals';
 
@@ -165,6 +169,38 @@ export const toGenerateParams = (config: EvalExperimentConfig): GenerateExperime
     concurrency: config.concurrency,
     compare: config.compare,
   };
+};
+
+/**
+ * Rejects experiments pointing at datasets the active space can't see. The
+ * generated workflow calls space-prefixed APIs, so without this the run only
+ * fails once it is already executing.
+ */
+export const assertDatasetsVisible = async ({
+  datasetService,
+  spaceId,
+  datasetIds,
+}: {
+  datasetService: NonNullable<EvalsPluginStart['datasetService']>;
+  spaceId: string;
+  datasetIds: string[];
+}): Promise<void> => {
+  const datasetClient = datasetService.getClient({ spaceId });
+  const missing: string[] = [];
+
+  for (const datasetId of datasetIds) {
+    if (!(await datasetClient.datasetExists(datasetId))) {
+      missing.push(datasetId);
+    }
+  }
+
+  if (missing.length > 0) {
+    throw new EvalExperimentConfigError(
+      `Dataset(s) not found in this space: ${missing.join(
+        ', '
+      )}. Use list_eval_datasets to see the datasets available here.`
+    );
+  }
 };
 
 /**

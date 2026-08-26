@@ -356,6 +356,24 @@ export const GCP_SERVICE_ACCOUNT_SCOPE_HELP_TEXT = i18n.translate(
   }
 );
 
+export const API_KEY_QUERY_AUTHENTICATION_LABEL = i18n.translate(
+  'connectorSpecs.apiKeyQueryAuthentication.label',
+  {
+    defaultMessage: 'API key query authentication',
+  }
+);
+
+export const API_KEY_QUERY_LABEL = i18n.translate('connectorSpecs.apiKeyQuery.label', {
+  defaultMessage: 'API key',
+});
+
+export const API_KEY_QUERY_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.apiKeyQuery.requiredMessage',
+  {
+    defaultMessage: 'API key is required',
+  }
+);
+
 export const BEARER_WITH_TLS_AUTH_LABEL = i18n.translate('connectorSpecs.bearerWithTlsAuth.label', {
   defaultMessage: 'API token',
 });

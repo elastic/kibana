@@ -27,7 +27,6 @@ export class ActionInternal<
   public readonly order: number;
   public readonly MenuItem?: React.FC<ActionMenuItemProps<any>>;
   public readonly grouping?: PresentableGrouping<Context>;
-  public readonly showNotification?: boolean;
 
   public readonly isDisabled: Action<Context>['isDisabled'];
   public readonly getDisabledStateChangesSubject?: Action<Context>['getDisabledStateChangesSubject'];
@@ -43,7 +42,6 @@ export class ActionInternal<
     this.order = this.definition.order || 0;
     this.MenuItem = this.definition.MenuItem;
     this.grouping = this.definition.grouping;
-    this.showNotification = this.definition.showNotification;
     this.isDisabled = this.definition.isDisabled;
     this.errorLogged = false;
     this.extension = this.definition.extension;

@@ -26,14 +26,10 @@ export {
   addEpisodeAggregation,
   applyFilterState,
 } from './episodes_query';
-export type {
-  AlertEpisode,
-  AlertEpisodeEsqlRow,
-  EpisodesFilterState,
-  EpisodesSortState,
-} from './episodes_query';
+export type { AlertEpisodeEsqlRow, EpisodesFilterState, EpisodesSortState } from './episodes_query';
 
-export { buildEpisodeQuery } from './episode_query';
+export { buildEpisodeQuery, buildEpisodeGroupHashQuery } from './episode_query';
+export type { EpisodeGroupHashEsqlRow } from './episode_query';
 
 export { buildEpisodeEventsQuery, ALERT_EPISODE_EVENT_FIELDS } from './episode_events_query';
 export type { EpisodeEventRow } from './episode_events_query';

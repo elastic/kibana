@@ -8,8 +8,8 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { SkeletonDescriptor } from '@kbn/content-list-assembly';
 import type { ContentListItem } from '@kbn/content-list-provider';
+import type { SkeletonDescriptor } from './descriptor';
 
 /**
  * Default width used when a column does not declare one. Wide enough to

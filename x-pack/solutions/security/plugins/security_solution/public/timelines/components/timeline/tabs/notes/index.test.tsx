@@ -10,6 +10,8 @@ import { render } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../../common/mock';
 import { ReqStatus } from '../../../../../notes';
 import {
+  ADD_NOTE_BUTTON_TEST_ID,
+  DELETE_NOTE_BUTTON_TEST_ID,
   NOTES_LOADING_TEST_ID,
   TIMELINE_DESCRIPTION_COMMENT_TEST_ID,
 } from '../../../../../notes/components/test_ids';
@@ -179,6 +181,121 @@ describe('NotesTabContentComponent', () => {
 
     expect(mockAddError).toHaveBeenCalledWith(null, {
       title: FETCH_NOTES_ERROR,
+    });
+  });
+
+  describe('Super Timeline mode', () => {
+    const superTimelineSourceIds = ['tl-source-1', 'tl-source-2'];
+
+    const mockGlobalStateWithSuperTimeline: State = {
+      ...mockGlobalState,
+      timeline: {
+        ...mockGlobalState.timeline,
+        timelineById: {
+          ...mockGlobalState.timeline.timelineById,
+          [TimelineId.active]: {
+            ...mockGlobalState.timeline.timelineById[TimelineId.test],
+            isSuperTimeline: true,
+            superTimelineSourceIds,
+          },
+        },
+      },
+      notes: {
+        ...mockGlobalState.notes,
+        entities: {
+          'note-a': {
+            noteId: 'note-a',
+            note: 'Note from timeline 1',
+            timelineId: 'tl-source-1',
+            created: 1663882629000,
+            createdBy: 'elastic',
+            updated: 1663882629000,
+            updatedBy: 'elastic',
+            version: 'v1',
+          },
+          'note-b': {
+            noteId: 'note-b',
+            note: 'Note from timeline 2',
+            timelineId: 'tl-source-2',
+            created: 1663882630000,
+            createdBy: 'elastic',
+            updated: 1663882630000,
+            updatedBy: 'elastic',
+            version: 'v1',
+          },
+        },
+        ids: ['note-a', 'note-b'],
+        status: {
+          ...mockGlobalState.notes.status,
+          fetchNotesBySavedObjectIds: ReqStatus.Succeeded,
+        },
+      },
+    };
+
+    it('should NOT dispatch a notes fetch on mount (parent fetches eagerly for the badge)', () => {
+      // WHY: TabsContentComponent fetches super-timeline notes eagerly so the Notes tab badge is
+      // populated immediately. A second fetch here is redundant — the data is already in the store.
+      const mockStore = createMockStore(mockGlobalStateWithSuperTimeline);
+
+      render(
+        <TestProviders store={mockStore}>
+          <NotesTabContentComponent timelineId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      expect(mockDispatch).not.toHaveBeenCalled();
+    });
+
+    it('should hide the add-note input', () => {
+      const mockStore = createMockStore(mockGlobalStateWithSuperTimeline);
+
+      const { queryByTestId } = render(
+        <TestProviders store={mockStore}>
+          <NotesTabContentComponent timelineId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(ADD_NOTE_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('should hide the delete button on each note', () => {
+      const mockStore = createMockStore(mockGlobalStateWithSuperTimeline);
+
+      const { queryByTestId } = render(
+        <TestProviders store={mockStore}>
+          <NotesTabContentComponent timelineId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(`${DELETE_NOTE_BUTTON_TEST_ID}-0`)).not.toBeInTheDocument();
+      expect(queryByTestId(`${DELETE_NOTE_BUTTON_TEST_ID}-1`)).not.toBeInTheDocument();
+    });
+
+    it('should render an error callout when notes fetch fails in Super Timeline mode', () => {
+      // WHY: the old code had no ReqStatus.Failed render path in the Super Timeline branch,
+      // leaving the panel blank on a 403 or network error — no feedback for the user.
+      const mockStore = createMockStore({
+        ...mockGlobalStateWithSuperTimeline,
+        notes: {
+          ...mockGlobalStateWithSuperTimeline.notes,
+          status: {
+            ...mockGlobalStateWithSuperTimeline.notes.status,
+            fetchNotesBySavedObjectIds: ReqStatus.Failed,
+          },
+          error: {
+            ...mockGlobalStateWithSuperTimeline.notes.error,
+            fetchNotesBySavedObjectIds: { type: 'http', status: 403 },
+          },
+        },
+      });
+
+      const { getByTestId } = render(
+        <TestProviders store={mockStore}>
+          <NotesTabContentComponent timelineId={TimelineId.active} />
+        </TestProviders>
+      );
+
+      expect(getByTestId('super-timeline-notes-error')).toBeInTheDocument();
     });
   });
 

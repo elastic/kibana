@@ -31,7 +31,7 @@ export function getExecutionStatusVisual(
       return {
         color: euiTheme.colors.vis.euiColorVisSuccess0,
         bg: euiTheme.colors.backgroundBaseSuccess,
-        iconType: 'checkInCircleFilled',
+        iconType: 'checkCircleFill',
       };
     case ExecutionStatus.FAILED:
     case ExecutionStatus.TIMED_OUT:
@@ -51,7 +51,7 @@ export function getExecutionStatusVisual(
       return {
         color: euiTheme.colors.textSubdued,
         bg: euiTheme.colors.backgroundBaseSubdued,
-        iconType: 'minusInCircle',
+        iconType: 'minusCircle',
       };
     case ExecutionStatus.WAITING:
     case ExecutionStatus.WAITING_FOR_INPUT:

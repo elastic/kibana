@@ -1,8 +1,7 @@
 {
-  "sha1": "a60a12ce3c1894a1ad081f2b60418707960bb3ec",
+  "sha1": "5d26dbf2a7c330a1165145a49797c04a0431ac95",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -212,6 +211,22 @@
       }
     },
     {
+      "id": "098a1448dd39b16-63bffa83f24f2ab",
+      "title": "Agent Builder — edit agent from overview page edits the prompt from the overview flyout without a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/edit_agent_overview.spec.ts",
+        "line": 40,
+        "column": 28
+      }
+    },
+    {
       "id": "3cecc7b5bdec8e7-f93503c6f8b3a5a",
       "title": "Agent Builder — edit agent edit and clone agent journeys",
       "expectedStatus": "passed",
@@ -348,7 +363,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 7
       }
     },
@@ -361,7 +376,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 38,
+        "line": 39,
         "column": 7
       }
     },
@@ -374,7 +389,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 63,
+        "line": 64,
         "column": 13
       }
     },
@@ -387,7 +402,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 77,
+        "line": 78,
         "column": 11
       }
     },
@@ -400,8 +415,47 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 111,
+        "line": 112,
         "column": 9
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-f38a4af978bc4ca",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management edits a client through the row actions menu",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 133,
+        "column": 25
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-36311f4cb75a3c1",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management prefills the remote redirect type from stored HTTPS URIs",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 173,
+        "column": 9
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-58854346134b8b7",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management does not offer edit for a revoked client",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 194,
+        "column": 95
       }
     },
     {
@@ -413,8 +467,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 132,
-        "column": 25
+        "line": 213,
+        "column": 9
+      }
+    },
+    {
+      "id": "bd9da19748d56a0-7ca72e847a3eb59",
+      "title": "[NON-MKI] Agent Builder — MCP Clients management deletes a revoked client through the row actions menu",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
+        "line": 229,
+        "column": 22
       }
     },
     {
@@ -495,6 +562,48 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_error_handling.spec.ts",
         "line": 25,
         "column": 28
+      }
+    },
+    {
+      "id": "68458d257ac9b36-45d6adf763ad160",
+      "title": "Agent Builder — per-space default agent admin sets and clears the space default from the agents list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 76,
+        "column": 11
+      }
+    },
+    {
+      "id": "68458d257ac9b36-de662ae87232055",
+      "title": "Agent Builder — per-space default agent restricts a non-admin to the space default agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 100,
+        "column": 61
+      }
+    },
+    {
+      "id": "68458d257ac9b36-b7847fbf70756d4",
+      "title": "Agent Builder — per-space default agent admin still sees all agents when a space default is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/space_default_agent.spec.ts",
+        "line": 130,
+        "column": 15
       }
     }
   ]

@@ -9,7 +9,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,10 +22,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
 import { SeverityBadge } from '../../../pages/significant_events/components/severity_badge/severity_badge';
+import { getKnowledgeIndicatorTitle } from '../utils/get_knowledge_indicator_title';
 
 interface DeleteTableItemsModalProps {
   title: string;
@@ -46,13 +47,8 @@ export function DeleteTableItemsModal({
   const listItems = useMemo(
     () =>
       items.map((item) => {
-        const titleValue =
-          item.kind === 'feature'
-            ? item.feature.title ?? item.feature.id
-            : item.query.title ?? item.query.id;
-
         return {
-          title: titleValue,
+          title: getKnowledgeIndicatorTitle(item),
           description: (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               {item.kind === 'feature' ? (
@@ -86,7 +82,7 @@ export function DeleteTableItemsModal({
       <EuiModalBody>
         <EuiText>{CONSEQUENCE_MESSAGE}</EuiText>
         <EuiSpacer size="m" />
-        <EuiCallOut announceOnMount color="warning" iconType="warning" title={WARNING_MESSAGE} />
+        <KbnWarningCallout announceOnMount title={WARNING_MESSAGE} />
         <EuiSpacer size="m" />
         <div css={MODAL_TABLE_CSS} aria-label={TABLE_CONTENT_ARIA_LABEL}>
           <EuiDescriptionList type="column" listItems={listItems} compressed />

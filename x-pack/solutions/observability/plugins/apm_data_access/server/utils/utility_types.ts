@@ -39,6 +39,11 @@ export const KNOWN_MULTI_VALUED_FIELDS = [
   APM_EVENT_FIELDS_MAP.OTEL_SPAN_LINKS_SPAN_ID,
   APM_EVENT_FIELDS_MAP.SPAN_LINKS_TRACE_ID,
   APM_EVENT_FIELDS_MAP.SPAN_LINKS_SPAN_ID,
+  // gen_ai messages arrive as one array element per message and finish_reasons
+  // as one element per choice — collapsing them to the first element loses data.
+  APM_EVENT_FIELDS_MAP.ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
+  APM_EVENT_FIELDS_MAP.ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+  APM_EVENT_FIELDS_MAP.ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS,
 ] as const;
 
 export type KnownField = ValuesType<typeof CONCRETE_FIELDS>;

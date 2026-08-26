@@ -49,8 +49,10 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID]: {
     reviewIntervalMinutes: 10,
     discoveryBatchSize: 3,
-    triageBatchSize: 5,
     maxReviewPasses: 3,
+    flakyRuleDetectionThreshold: 10,
+    flakyRuleProbeAfterMinutes: 360,
+    flakyRuleExemptSeverityScore: 80,
   },
 };
 
@@ -99,6 +101,9 @@ function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
 
   return definition.yamlTemplate(representativeValues);
 }
+
+/** Matches the `__SCREAMING_SNAKE__` placeholders that yamlTemplate definitions substitute. */
+const UNREPLACED_TOKEN_PATTERN = /__[A-Z][A-Z0-9_]*__/g;
 
 function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): void {
   let parsedYaml: unknown;
@@ -187,6 +192,11 @@ describe('managedWorkflowDefinitions', () => {
       expect(typeof renderedYaml).toBe('string');
       expect(renderedYaml.trim()).not.toHaveLength(0);
       expect(renderedYaml).not.toContain('undefined');
+      // A token the template map never replaces stays behind as a valid YAML
+      // string, so it survives schema validation and ships a workflow pointing
+      // at the literal placeholder. Only a mismatch between the yaml text and
+      // the token keys can cause this, and nothing else would catch it.
+      expect(renderedYaml.match(UNREPLACED_TOKEN_PATTERN) ?? []).toEqual([]);
       assertWorkflowYamlIsValid(id, renderedYaml);
     }
   );

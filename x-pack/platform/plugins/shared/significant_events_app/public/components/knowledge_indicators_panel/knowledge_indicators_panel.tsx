@@ -18,8 +18,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import React from 'react';
 import { useFetchDiscoveryQueries } from '../../hooks/use_fetch_discovery_queries';
+import { useKibana } from '../../hooks/use_kibana';
 import { useStreamFeatures } from '../../hooks/use_stream_features';
 import { useStreamOnboardingStatus } from '../../hooks/use_stream_onboarding_status';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
@@ -84,6 +86,12 @@ function KnowledgeIndicatorCount({
 
 export function KnowledgeIndicatorsPanel({ streamName }: KnowledgeIndicatorsPanelProps) {
   const router = useSignificantEventsAppRouter();
+  const {
+    dependencies: {
+      start: { cps },
+    },
+  } = useKibana();
+  const isCpsMultiProject = useIsCpsMultiProject(cps?.cpsManager);
   const streamOnboardingResult = useStreamOnboardingStatus(streamName);
 
   const {
@@ -130,61 +138,83 @@ export function KnowledgeIndicatorsPanel({ streamName }: KnowledgeIndicatorsPane
     }
   );
 
-  const ariaLabel =
+  const viewAllAriaLabel =
     featuresIsLoading || queriesIsLoading
       ? i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.linkAriaLabelLoading', {
-          defaultMessage: 'View knowledge indicators for {streamName}: loading counts',
+          defaultMessage: 'View all knowledge indicators for {streamName}: loading counts',
           values: { streamName },
         })
       : i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.linkAriaLabel', {
           defaultMessage:
-            'View knowledge indicators for {streamName}: {featuresCount, plural, one {# feature} other {# features}}, {queriesCount, plural, one {# query} other {# queries}}',
+            'View all knowledge indicators for {streamName}: {featuresCount, plural, one {# feature} other {# features}}, {queriesCount, plural, one {# query} other {# queries}}',
           values: { streamName, featuresCount, queriesCount: queriesCount ?? 0 },
         });
 
   return (
-    <EuiLink
-      href={href}
-      data-test-subj="significantEventsAppKnowledgeIndicatorsPanelLink"
-      aria-label={ariaLabel}
-      css={css`
-        text-decoration: none;
-
-        &:hover,
-        &:focus {
-          text-decoration: none;
-        }
-      `}
+    <EuiPanel
+      hasBorder
+      hasShadow={false}
+      paddingSize="m"
+      data-test-subj="significantEventsAppKnowledgeIndicatorsPanel"
     >
-      <EuiPanel hasBorder hasShadow={false} paddingSize="m">
-        <EuiTitle size="xs">
-          <h2>
-            {i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.title', {
-              defaultMessage: 'Knowledge indicators',
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.title', {
+                defaultMessage: 'Knowledge indicators',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem />
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            href={href}
+            data-test-subj="significantEventsAppKnowledgeIndicatorsPanelLink"
+            aria-label={viewAllAriaLabel}
+          >
+            {i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.viewAll', {
+              defaultMessage: 'View all',
             })}
-          </h2>
-        </EuiTitle>
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <EuiSpacer size="m" />
+      {isCpsMultiProject && (
+        <EuiText
+          size="xs"
+          color="subdued"
+          data-test-subj="significantEventsAppKnowledgeIndicatorsProvenance"
+        >
+          <p>
+            {i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsPanel.provenance', {
+              defaultMessage:
+                'Generated from data across all projects linked through cross-project search.',
+            })}
+          </p>
+        </EuiText>
+      )}
 
-        <EuiFlexGroup gutterSize="l" responsive={false}>
-          <KnowledgeIndicatorCount
-            count={featuresError || featuresIsLoading ? undefined : featuresCount}
-            isLoading={featuresIsLoading}
-            isError={!!featuresError}
-            label={featuresLabel}
-            data-test-subj="significantEventsAppKnowledgeIndicatorsFeaturesCount"
-          />
-          <KnowledgeIndicatorCount
-            count={queriesError || queriesCount === undefined ? undefined : queriesCount}
-            isLoading={queriesIsLoading}
-            isFetching={queriesFetching}
-            isError={queriesError}
-            label={queriesLabel}
-            data-test-subj="significantEventsAppKnowledgeIndicatorsQueriesCount"
-          />
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiLink>
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="l" responsive={false}>
+        <KnowledgeIndicatorCount
+          count={featuresError || featuresIsLoading ? undefined : featuresCount}
+          isLoading={featuresIsLoading}
+          isError={!!featuresError}
+          label={featuresLabel}
+          data-test-subj="significantEventsAppKnowledgeIndicatorsFeaturesCount"
+        />
+        <KnowledgeIndicatorCount
+          count={queriesError || queriesCount === undefined ? undefined : queriesCount}
+          isLoading={queriesIsLoading}
+          isFetching={queriesFetching}
+          isError={queriesError}
+          label={queriesLabel}
+          data-test-subj="significantEventsAppKnowledgeIndicatorsQueriesCount"
+        />
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 }

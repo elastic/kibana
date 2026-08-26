@@ -10,7 +10,7 @@ jobs:
     if: github.repository == 'elastic/kibana'
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: 'elastic/kibana-github-actions'
           ref: main
@@ -60,3 +60,11 @@ jobs:
           all: 'true'
           project-number: 1326
           owner: 'elastic'
+      - name: Update every issue in project 2516 (https://github.com/orgs/elastic/projects/2516)
+        uses: ./actions/github-projects/map-labels
+        with:
+          github-token: ${{secrets.PM_GH_TOKEN}}
+          all: 'true'
+          project-number: 2516
+          owner: 'elastic'
+          mapping: 'mapping-sizes-and-impact-p2516.json'

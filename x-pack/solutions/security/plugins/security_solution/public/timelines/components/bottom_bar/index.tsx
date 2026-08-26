@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import * as i18n from './translations';
 import type { State } from '../../../common/store';
-import { selectTitleByTimelineById } from '../../store/selectors';
+import { selectTitleByTimelineById, selectIsSuperTimeline } from '../../store/selectors';
 import { AddTimelineButton } from './add_timeline_button';
 import { timelineActions } from '../../store';
 import { TimelineSaveStatus } from '../save_status';
@@ -45,6 +45,7 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
     );
 
     const title = useSelector((state: State) => selectTitleByTimelineById(state, timelineId));
+    const isSuperTimeline = useSelector((state: State) => selectIsSuperTimeline(state, timelineId));
 
     return (
       !hasFullScreenContent && (
@@ -53,9 +54,11 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(
             <EuiFlexItem grow={false}>
               <AddTimelineButton timelineId={timelineId} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <AddToFavoritesButton timelineId={timelineId} />
-            </EuiFlexItem>
+            {!isSuperTimeline && (
+              <EuiFlexItem grow={false}>
+                <AddToFavoritesButton timelineId={timelineId} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiLink
                 aria-label={i18n.OPEN_TIMELINE_BUTTON(title)}

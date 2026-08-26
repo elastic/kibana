@@ -25,6 +25,12 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
   exposeToBrowser: {
     rules: { minimumScheduleInterval: true },
   },
+  // Exposed as dynamic config solely for testing: it lets Scout tests
+  // flip the ES|QL response format at runtime via the `PUT /internal/core/_settings`
+  // API to exercise the Arrow path, instead of booting a dedicated Kibana instance.
+  dynamicConfig: {
+    esql: { responseFormat: true },
+  },
 };
 
 const pluginModule = new ContainerModule((options) => {
@@ -53,5 +59,5 @@ export type { FindActionPoliciesArgs } from './lib/action_policy_client';
  * on these codes; renaming or removing an entry is a breaking wire-contract
  * change (see the catalog file for details).
  */
-export { ALERTING_V2_ERROR_CODES } from './lib/errors/error_codes';
+export { ALERTING_ERROR_CODES } from './lib/errors/error_codes';
 export type { AlertingV2ErrorCode } from './lib/errors/error_codes';

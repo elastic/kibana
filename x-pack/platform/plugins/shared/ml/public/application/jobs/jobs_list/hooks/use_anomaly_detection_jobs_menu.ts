@@ -57,7 +57,7 @@ export const useAnomalyDetectionJobsMenu = ({
         label: i18n.translate('xpack.ml.jobsList.createNewJobButtonLabel', {
           defaultMessage: 'Create job',
         }),
-        iconType: 'plusInCircle' as const,
+        iconType: 'plusCircle' as const,
         run: navigateToCreateJob,
         disableButton: !canCreate,
         testId: 'mlCreateNewJobButton',
@@ -116,7 +116,7 @@ export const useAnomalyDetectionJobsMenu = ({
           label: i18n.translate('xpack.ml.suppliedConfigurationsManagementLabel', {
             defaultMessage: 'Supplied configurations',
           }),
-          iconType: 'plusInCircle' as const,
+          iconType: 'plusCircle' as const,
           run: redirectToSuppliedConfigurationsPage,
           testId: 'mlSuppliedConfigurationsButton',
         },

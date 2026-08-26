@@ -307,7 +307,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]formatted_duration[\/\\]tooltip[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]ja3_fingerprint[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]loading[\/\\]index.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]modal[\/\\]header[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]netflow[\/\\]netflow_columns[\/\\]duration_event_start_end.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]netflow[\/\\]netflow_columns[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]timelines[\/\\]components[\/\\]notes[\/\\]add_note[\/\\]index.tsx/,

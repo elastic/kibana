@@ -7,12 +7,12 @@
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import type { InMemoryConnector } from '@kbn/actions-plugin/server';
+import { CHAT_COMPLETION_TASK_TYPE } from '../../common/constants';
 import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,
 } from '../../common/type_guards';
 
-const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
 const KIBANA_CONNECTOR_PROPERTY = 'kibana-connector';
 
 // Inference ID prefixes for internal Elastic endpoints kept for backwards

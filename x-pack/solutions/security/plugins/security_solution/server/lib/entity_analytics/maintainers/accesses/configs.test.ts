@@ -129,4 +129,21 @@ describe('ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       }
     );
   });
+
+  describe('hostScopedUsersOnly flag', () => {
+    it('system_auth has hostScopedUsersOnly: true', () => {
+      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'system_auth');
+      expect(cfg?.hostScopedUsersOnly).toBe(true);
+    });
+
+    it('system_security has hostScopedUsersOnly: true', () => {
+      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'system_security');
+      expect(cfg?.hostScopedUsersOnly).toBe(true);
+    });
+
+    it('elastic_defend does NOT have hostScopedUsersOnly', () => {
+      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'elastic_defend');
+      expect(cfg?.hostScopedUsersOnly).toBeUndefined();
+    });
+  });
 });

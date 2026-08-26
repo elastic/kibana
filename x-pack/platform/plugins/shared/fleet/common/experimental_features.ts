@@ -36,6 +36,8 @@ const _allowedExperimentalValues = {
   enableOtelUI: true, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
   enableCloudOnboardingDeployments: false, // When enabled, the cloud-onboarding-deployment CRUD API is registered and available.
   enableIncludeTagsInEvents: false, // When enabled, the include_tags_in_events agent policy advanced setting is available in the UI.
+  enableOtlpOutput: false, // When enabled, OTLP output type is available for creation and management via the Fleet outputs API.
+  enableIntegrationCollectionTiles: false, // When enabled, packages sharing a `group` id are collapsed into a single collection tile in the integrations marketplace.
 };
 
 /**

@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
-import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { zipObject, groupBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -162,15 +163,13 @@ export const AnomalyDetectionPanel: FC<Props> = ({ anomalyTimelineService, setLa
 
   const errorDisplay = (
     <Fragment>
-      <EuiCallOut
+      <KbnDangerCallout
         title={i18n.translate('xpack.ml.overview.anomalyDetection.errorPromptTitle', {
           defaultMessage: 'An error occurred getting the anomaly detection jobs list.',
         })}
-        color="danger"
-        iconType="warning"
       >
         <pre>{errorMessage}</pre>
-      </EuiCallOut>
+      </KbnDangerCallout>
     </Fragment>
   );
 

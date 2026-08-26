@@ -211,25 +211,12 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       defaultMessage: 'Verifies Confluence Cloud connection by listing spaces',
     }),
     handler: async (ctx) => {
-      try {
-        const baseUrl = buildBaseUrl(ctx);
-        const response = await ctx.client.get(`${baseUrl}${CONFLUENCE_V2_PREFIX}/spaces`, {
-          params: { limit: 1 },
-        });
-        if (response.status !== 200) {
-          return {
-            ok: false,
-            message: 'Failed to connect to Confluence Cloud API',
-          };
-        }
-        return {
-          ok: true,
-          message: 'Successfully connected to Confluence Cloud',
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : String(error);
-        return { ok: false, message };
-      }
+      const baseUrl = buildBaseUrl(ctx);
+      await ctx.client.get(`${baseUrl}${CONFLUENCE_V2_PREFIX}/spaces`, {
+        params: { limit: 1 },
+      });
+      return {};
     },
+    enabled: true,
   },
 };

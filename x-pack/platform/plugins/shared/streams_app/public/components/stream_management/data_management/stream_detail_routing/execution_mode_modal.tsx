@@ -23,6 +23,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Condition } from '@kbn/streamlang';
@@ -43,10 +44,16 @@ export function ExecutionModeModal({
 }) {
   const [selectedMode, setSelectedMode] = useState<ExecutionMode>('draft');
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiModal onClose={onCancel} data-test-subj="streamsAppExecutionModeModal">
+    <EuiModal
+      onClose={onCancel}
+      data-test-subj="streamsAppExecutionModeModal"
+      aria-labelledby={modalTitleId}
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('xpack.streams.executionModeModal.title', {
             defaultMessage: 'Confirm stream creation',
           })}

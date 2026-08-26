@@ -18,7 +18,12 @@ import type { ActiveAlertGroupHash } from './queries';
 import { executeRecoveryQuery } from './execute_recovery_query';
 
 describe('executeRecoveryQuery', () => {
-  const { loggerService } = createLoggerService();
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
+
+  beforeEach(() => {
+    ({ loggerService, mockLogger } = createLoggerService());
+  });
 
   function setup() {
     const scoped = createQueryService();
@@ -51,24 +56,34 @@ describe('executeRecoveryQuery', () => {
       groupKeyFields: ['host.name'],
       fallbackSeed: 'unused',
     });
+    const input = createRuleExecutionInput();
 
     const events = await executeRecoveryQuery({
       queryService,
       logger: loggerService,
       rule,
       effectiveQuery: 'FROM logs-* | WHERE recovered = true',
-      input: createRuleExecutionInput(),
+      input,
       activeGroupHashes: toActive([recoveredHash]),
       breachedGroupHashes: new Set(),
     });
 
     expect(scopedEsClient.esql.query).toHaveBeenCalledWith(
       expect.objectContaining({ query: 'FROM logs-* | WHERE recovered = true' }),
-      expect.any(Object)
+      expect.objectContaining({ signal: input.executionContext.signal })
     );
     expect(events).toHaveLength(1);
     expect(events[0].status).toBe('recovered');
     expect(events[0].group_hash).toBe(recoveredHash);
+    expect(mockLogger.debug).toHaveBeenCalledWith(
+      'Executing recovery query',
+      expect.objectContaining({
+        labels: expect.objectContaining({ rule_id: input.ruleId }),
+      })
+    );
+    const debugMessage = (mockLogger.debug as jest.Mock).mock.calls[0][0] as string;
+    expect(debugMessage).not.toContain('FROM logs');
+    expect(debugMessage).not.toContain('recovered = true');
   });
 
   it('returns no events when the recovery query returns empty results', async () => {
@@ -141,6 +156,27 @@ describe('executeRecoveryQuery', () => {
       logger: loggerService,
       rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
       effectiveQuery: 'FROM logs-* | WHERE invalid syntax',
+      input: createRuleExecutionInput(),
+      activeGroupHashes: toActive(['hash-1']),
+      breachedGroupHashes: new Set(),
+    }).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+  });
+
+  it('marks content-length-exceeded recovery query errors as TaskErrorSource.USER', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
+    );
+
+    const error = await executeRecoveryQuery({
+      queryService,
+      logger: loggerService,
+      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      effectiveQuery: 'FROM logs-*',
       input: createRuleExecutionInput(),
       activeGroupHashes: toActive(['hash-1']),
       breachedGroupHashes: new Set(),

@@ -28,7 +28,6 @@
       "licensing",
       "observability",
       "observabilityShared",
-      "presentationUtil",
       "ruleRegistry",
       "share",
       "sloShared",
@@ -58,7 +57,8 @@
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",
-      "observabilityAgentBuilder"
+      "observabilityAgentBuilder",
+      "presentationUtil"
     ]
   }
 }

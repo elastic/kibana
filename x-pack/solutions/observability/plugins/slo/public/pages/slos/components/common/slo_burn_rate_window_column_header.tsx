@@ -54,7 +54,7 @@ export function SloBurnRateWindowColumnHeader({
         <EuiButtonEmpty
           data-test-subj={buttonTestSubj}
           size="xs"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopoverOpen((open) => !open)}
           css={{ fontWeight: 700 }}

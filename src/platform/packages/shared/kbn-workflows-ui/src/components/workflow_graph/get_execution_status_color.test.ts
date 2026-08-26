@@ -32,7 +32,7 @@ const mockTheme = {
 describe('getExecutionStatusVisual', () => {
   it('returns success icon for COMPLETED', () => {
     const { iconType, isSpinner } = getExecutionStatusVisual(mockTheme, ExecutionStatus.COMPLETED);
-    expect(iconType).toBe('checkInCircleFilled');
+    expect(iconType).toBe('checkCircleFill');
     expect(isSpinner).toBeUndefined();
   });
 
@@ -54,7 +54,7 @@ describe('getExecutionStatusVisual', () => {
 
   it('returns skipped icon for SKIPPED', () => {
     const { iconType } = getExecutionStatusVisual(mockTheme, ExecutionStatus.SKIPPED);
-    expect(iconType).toBe('minusInCircle');
+    expect(iconType).toBe('minusCircle');
   });
 
   it('returns clock icon for WAITING', () => {

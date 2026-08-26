@@ -34,7 +34,7 @@ import {
   MATCH_ACTION_POLICIES_FOR_RULE_RESPONSE,
 } from './match_action_policies_for_rule_oas_example';
 import { MATCHER_DATA_FIELDS_RESPONSE } from '../suggestions/matcher_data_fields_oas_example';
-import { ACTION_POLICY_TAGS_RESPONSE } from '../suggestions/action_policy_tags_oas_example';
+import { ACTION_POLICY_TAGS_RESPONSE } from './action_policy_tags_oas_example';
 
 describe('action policy OAS example payloads', () => {
   it('keeps create request example valid against createActionPolicyDataSchema', () => {

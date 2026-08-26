@@ -280,7 +280,7 @@ const bulkDeleteQueriesRoute = createServerRoute({
     // deleteQueries uninstalls rules before writing storage, so a mid-flight
     // throw can leave rules gone while stored links still reference them. Log
     // the backed rule IDs on failure so ops can reconcile manually.
-    const sigEventsLogger = logger.get('significant_events');
+    const sigEventsLogger = logger.get('significantEvents');
 
     let succeeded = 0;
     let failed = 0;

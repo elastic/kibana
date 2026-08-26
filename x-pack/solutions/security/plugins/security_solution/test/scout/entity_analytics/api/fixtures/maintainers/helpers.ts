@@ -18,19 +18,9 @@ import {
 } from './constants';
 
 /**
- * Polls GET /api/security/entity_store/status?include_components=true until the
- * top-level status is `running` AND every engine's component list shows all
- * resources `installed: true`, or throws on timeout.
- *
- * The plain `running` status flips before engines finish provisioning their
- * backing indices, aliases, templates, and pipelines. Waiting for component-level
- * readiness prevents `index_not_found_exception` races in tests that immediately
- * seed or refresh the latest alias after install.
- *
- * NOTE: `apiServices.entityAnalytics.waitForEntityStoreStatus()` checks only
- * the top-level status field, not per-component `installed` flags. This function
- * extends that check with component-level readiness and cannot be replaced by the
- * existing service without modifying the shared package.
+ * Polls until the entity store status is `running` AND every engine component
+ * shows `installed: true`. The plain `running` status flips before backing
+ * indices are ready, causing races in tests that seed immediately after install.
  */
 export const waitForEntityStoreRunning = async (
   apiClient: MaintainerApiClient,
@@ -90,11 +80,7 @@ export const waitForEntityStoreRunning = async (
   );
 };
 
-/**
- * Deletes all Entity Store data indices: latest, updates, and history snapshots.
- * Call in afterAll / afterEach to prevent stale data from leaking between
- * sequential test-target runs that share the same ES cluster.
- */
+/** Deletes all entity store indices (latest, updates, history) to prevent cross-run leakage. */
 export const clearEntityStoreIndices = async (esClient: EsClient) => {
   const resolved = await esClient.indices.resolveIndex({ name: HISTORY_INDEX_PATTERN });
   const historyIndices = resolved.indices.map((i) => i.name);
@@ -103,10 +89,7 @@ export const clearEntityStoreIndices = async (esClient: EsClient) => {
   await esClient.indices.delete({ index: toDelete, ignore_unavailable: true }, { ignore: [404] });
 };
 
-/**
- * API client shape required by triggerMaintainerRun.
- * Use this instead of importing Scout's ApiClient type.
- */
+/** Minimal API client shape for maintainer helpers. Avoids importing Scout's full ApiClient type. */
 export interface MaintainerApiClient {
   get(
     url: string,
@@ -129,39 +112,17 @@ interface SeedUserEntityOptions {
   entityId: string;
   namespace: string;
   email: string | string[];
-  /** entity.lifecycle.last_seen (the watermark field). Defaults to `timestamp` or now. */
   lastSeen?: string;
-  /** entity.lifecycle.first_seen. Defaults to `lastSeen`. */
   firstSeen?: string;
-  /** Back-compat alias used when lastSeen/firstSeen are not provided. */
+  /** Back-compat alias when lastSeen/firstSeen are not provided. */
   timestamp?: string;
-  /**
-   * Written to entity.source. Mirrors how extraction populates the field from
-   * event.module / data_stream.dataset (e.g. 'entityanalytics_okta'). Maintainers
-   * that filter by entity.source (like the supervises maintainer) will skip
-   * entities whose source does not match.
-   */
   entitySource?: string;
-  /**
-   * Optional relationship raw_identifier bag to seed under
-   * `entity.relationships.<key>.raw_identifiers.{user.{email,id,name},host.name}`.
-   *
-   * - `userEmails` / `userIds` / `userNames` → user → user maintainers (supervises, …),
-   *   resolved into `<key>.ids` as `user:<value>@<namespace>`.
-   * - `hostNames` → user → host maintainers (administers, …), resolved into
-   *   `<key>.ids` as a namespace-less `host:<name>`. Use this to seed a USER
-   *   actor that points at a HOST target.
-   */
+  /** Raw identifier bag seeded under `entity.relationships.<key>.raw_identifiers`. */
   relationship?: {
-    /** The relationship key, e.g. 'supervises' | 'administers'. */
     key: string;
-    /** Raw user emails placed under raw_identifiers.user.email. */
     userEmails?: string[];
-    /** Raw user ids placed under raw_identifiers.user.id. */
     userIds?: string[];
-    /** Raw user names placed under raw_identifiers.user.name. */
     userNames?: string[];
-    /** Raw host names placed under raw_identifiers.host.name (user → host targets). */
     hostNames?: string[];
   };
 }
@@ -233,30 +194,14 @@ export const seedUserEntity = async (
 
 interface SeedHostEntityOptions {
   entityId: string;
-  /** Host FQDN written to host.name (the entity's identity under the host EUID ranking). */
   hostName: string;
-  /**
-   * Optional relationship raw_identifier bag to seed under
-   * `entity.relationships.<relationshipKey>.raw_identifiers.host.name`. A
-   * raw_identifiers-based maintainer (administers, depends_on, supervises, …)
-   * resolves these into `<relationshipKey>.ids` as `host:<name>`.
-   */
+  /** Host names seeded under raw_identifiers.host.name. */
   relationship?: {
-    /** The relationship key, e.g. 'administers' | 'depends_on' | 'supervises'. */
     key: string;
-    /** Raw host names placed under raw_identifiers.host.name. */
     hostNames: string[];
   };
-  /** entity.lifecycle.last_seen (the watermark field). Defaults to now. */
   lastSeen?: string;
-  /** entity.lifecycle.first_seen. Defaults to lastSeen (or now). */
   firstSeen?: string;
-  /**
-   * Written to entity.source. Mirrors how extraction populates the field from
-   * event.module / data_stream.dataset (e.g. 'entityanalytics_ad'). Maintainers
-   * that filter by entity.source (like the administers maintainer) will skip
-   * entities whose source does not match.
-   */
   entitySource?: string;
 }
 
@@ -315,11 +260,8 @@ const getNestedValue = (obj: Record<string, unknown>, path: string): unknown =>
   }, obj);
 
 /**
- * Polls until an entity's `<relationshipKey>.ids` contains the expected target
- * EUID, or throws on timeout. Tolerates per-iteration transient ES errors (e.g.
- * `already_closed_exception` during fresh-engine replica settling).
- * Callers use `triggerMaintainerRun(..., { sync: true })` so the task has
- * already settled — the poll window absorbs ES refresh lag only.
+ * Polls until `entity.relationships.<key>.ids` contains the expected target EUID,
+ * or throws on timeout. Absorbs ES refresh lag and transient replica errors.
  */
 export const waitForRelationshipIds = async (
   esClient: EsClient,
@@ -361,14 +303,7 @@ export const waitForRelationshipIds = async (
   );
 };
 
-/**
- * Reads the current `<relationshipKey>.ids` array for an entity after a
- * synchronous maintainer run. Refreshes the alias first to ensure the latest
- * write is visible, then returns the IDs (empty array if absent).
- *
- * Use this for assertions that need the complete set of written IDs
- * (e.g. "exactly these two targets, and no phantom ones").
- */
+/** Returns the current `entity.relationships.<key>.ids` array for an entity (empty if absent). */
 export const getRelationshipIds = async (
   esClient: EsClient,
   relationshipKey: string,
@@ -386,11 +321,7 @@ export const getRelationshipIds = async (
   return normalizeKeywordList(getNestedValue(source, idsPath) ?? source[idsPath]);
 };
 
-/**
- * Asserts that an entity's `<relationshipKey>.ids` does NOT contain the given
- * target. Callers use `triggerMaintainerRun(..., { sync: true })` so the task
- * has already settled — poll with a short window to absorb ES refresh lag.
- */
+/** Asserts that `entity.relationships.<key>.ids` does NOT contain the given target EUID. */
 export const assertNoRelationshipId = async (
   esClient: EsClient,
   relationshipKey: string,
@@ -418,12 +349,8 @@ export const assertNoRelationshipId = async (
 };
 
 /**
- * Triggers a maintainer run by calling the async `run/{id}` endpoint.
- * The route calls `taskManager.runSoon()` — it does NOT wait for completion.
- *
- * Retries on 500 errors, which happen when the scheduler fires an automatic
- * run that overlaps with the manual trigger. Kibana wraps the actual
- * "currently running" error in a generic 500 body, so we retry on any 500.
+ * Triggers a maintainer run. Retries on 500s (scheduler overlap produces a
+ * generic 500; pass `sync: true` to block until the run completes).
  */
 export const triggerMaintainerRun = async (
   apiClient: MaintainerApiClient,
@@ -431,7 +358,6 @@ export const triggerMaintainerRun = async (
   maintainerId = 'automated-resolution',
   { maxRetries = 5, retryDelayMs = 1000, sync = false } = {}
 ) => {
-  // Use `sync: true` in tests that need a settled watermark before proceeding.
   const runUrl = sync
     ? `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(maintainerId)}?sync=true`
     : ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN(maintainerId);
@@ -455,4 +381,40 @@ export const triggerMaintainerRun = async (
 
     await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
   }
+};
+
+interface SeedLogDocumentOptions {
+  /** `logs-*` data-stream target; `op_type: 'create'` is required. */
+  index: string;
+  /** Written to `host.id` — becomes the `host:<id>` target EUID. */
+  hostId: string;
+  hostName: string;
+  /**
+   * Integration-specific fields merged into the document root. For plain-object
+   * mapped fields (e.g. `device.registered_owners`), pass flattened parallel
+   * arrays to match how Elasticsearch stores them at ingest time.
+   */
+  integrationFields: Record<string, unknown>;
+  /** Defaults to 5 minutes ago (within the 30d lookback window). */
+  timestamp?: string;
+}
+
+/** Seeds one log document with standard ECS host fields plus integration-specific fields. */
+export const seedLogDocument = async (
+  esClient: EsClient,
+  { index, hostId, hostName, integrationFields, timestamp }: SeedLogDocumentOptions
+): Promise<void> => {
+  const ts = timestamp ?? new Date(Date.now() - 5 * 60_000).toISOString();
+
+  await esClient.index({
+    index,
+    op_type: 'create',
+    refresh: 'wait_for',
+    document: {
+      '@timestamp': ts,
+      event: { kind: 'asset', category: ['host'] },
+      host: { id: hostId, name: hostName },
+      ...integrationFields,
+    },
+  });
 };

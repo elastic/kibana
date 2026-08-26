@@ -39,19 +39,14 @@ export const canonicalDiscoveryFromGroundTruth = ({
     '@timestamp': discovery['@timestamp'] ?? CANONICAL_TIMESTAMP,
     event_uuid: discovery.event_uuid ?? `${scenarioId}-canonical`,
     event_id: discovery.event_id ?? `${normalizeEventIdSegment(scenarioId)}__canonical`,
-    status: discovery.status ?? 'pending',
+    status: discovery.status ?? 'open',
     stream_names: streamNames,
     symptom_hypothesis: discovery.symptom_hypothesis ?? '',
     title: discovery.title ?? '',
     summary: discovery.summary ?? '',
     severity: discovery.severity ?? '20-low',
     confidence: discovery.confidence ?? 0,
-    // Strip discovery-side confirmation before judge evaluation.
-    ...(discovery.signals
-      ? {
-          signals: discovery.signals.map(({ confirmed: _omitted, ...rest }) => rest),
-        }
-      : {}),
+    ...(discovery.signals ? { signals: discovery.signals } : {}),
     ...(discovery.causal_features ? { causal_features: discovery.causal_features } : {}),
     ...(discovery.blast_radius ? { blast_radius: discovery.blast_radius } : {}),
   };

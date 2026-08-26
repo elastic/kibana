@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-agent'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/search-agent'
   description: Moon project for @kbn/search-agent
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: src/platform/packages/shared/kbn-search-agent
 dependsOn: []
 tags:

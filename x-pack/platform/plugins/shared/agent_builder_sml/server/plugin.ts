@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
 import type {
   AgentBuilderSmlPluginSetup,
   AgentBuilderSmlPluginStart,
@@ -18,6 +19,7 @@ import { registerUISettings } from './ui_settings';
 import { registerSearchRoute } from './routes/search';
 import { registerAutocompleteRoute } from './routes/autocomplete';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
+import { smlAiIndexDescription, smlIndexName } from './services/sml/sml_storage';
 import {
   registerSmlCrawlerTaskDefinition,
   scheduleSmlCrawlerTasks,
@@ -91,12 +93,9 @@ export class AgentBuilderSmlPlugin
       getSmlService,
     });
 
-    setupDeps.contextEngine?.registerAiIndex('elastic', {
-      description:
-        'Kibana resources available for use in Agent Builder, including dashboards, ' +
-        'visualizations, connectors, workflows, alerting rules, action policies, ' +
-        'and significant events.',
-      dest: { type: 'index', value: 'ai-index-idx-sml-data' },
+    setupDeps.contextEngine?.registerAiIndex(agentBuilderDefaultAiIndexId, {
+      description: smlAiIndexDescription,
+      dest: { type: 'index', value: smlIndexName },
       automations: [],
       sources: [],
     });

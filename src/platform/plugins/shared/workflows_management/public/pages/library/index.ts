@@ -9,3 +9,4 @@
 
 export { LibraryCatalogBrowserPage } from './catalog_browser_page';
 export { LibraryTemplateDetailPage } from './template_detail_page';
+export { LibraryTemplateImportPage } from './template_import_page';

@@ -50,7 +50,7 @@ describe('Navigation Tree', () => {
     });
 
     expect(navigation.body[0]).toMatchObject({
-      link: 'observability-overview:nightshift',
+      link: 'nightshift',
       icon: NightshiftNavigationIcon,
     });
     expect(navigation.body[1]).toMatchObject({
@@ -64,9 +64,7 @@ describe('Navigation Tree', () => {
       significantEventsAvailable: false,
     });
 
-    expect(
-      navigation.body.find((item) => item.link === 'observability-overview:nightshift')
-    ).toBeUndefined();
+    expect(navigation.body.find((item) => item.link === 'nightshift')).toBeUndefined();
   });
 
   it('lists Manage jobs to Stack Management anomaly detection jobs first under ML anomaly detection nav', () => {
@@ -101,9 +99,11 @@ describe('Navigation Tree', () => {
 
     const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
     const agentsNode = body.find((item) => item.link === 'agent_builder');
+    const contextEngineNode = body.find((item) => item.link === 'context_engine');
 
     expect(aiAssistantNode).toBeDefined();
     expect(agentsNode).toBeUndefined();
+    expect(contextEngineNode).toMatchObject({ icon: 'sparkles', link: 'context_engine' });
   });
 
   it('shows Agents and hides AI Assistant when AI Assistant is disabled', () => {
@@ -114,9 +114,14 @@ describe('Navigation Tree', () => {
 
     const aiAssistantNode = body.find((item) => item.link === 'observabilityAIAssistant');
     const agentsNode = body.find((item) => item.link === 'agent_builder');
+    const contextEngineNode = body.find((item) => item.link === 'context_engine');
+    const agentsIndex = body.findIndex((item) => item.link === 'agent_builder');
+    const contextEngineIndex = body.findIndex((item) => item.link === 'context_engine');
 
     expect(aiAssistantNode).toBeUndefined();
     expect(agentsNode).toBeDefined();
+    expect(contextEngineNode).toMatchObject({ icon: 'sparkles', link: 'context_engine' });
+    expect(contextEngineIndex).toBe(agentsIndex + 1);
   });
 
   it('hides GenAI Settings in admin settings when unavailable', () => {

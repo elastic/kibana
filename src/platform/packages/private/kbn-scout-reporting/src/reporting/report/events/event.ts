@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TestCase } from '@playwright/test/reporter';
 import type { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { BuildkiteMetadata, HostMetadata } from '../../../datasources';
+
+/** A test's final classification, once no more retries can happen. Mirrors `TestCase.outcome()`. */
+export type ScoutTestOutcome = ReturnType<TestCase['outcome']>;
 
 /**
  * Scout reporter event type
@@ -18,6 +22,8 @@ export enum ScoutReportEventAction {
   RUN_END = 'run-end',
   TEST_BEGIN = 'test-begin',
   TEST_END = 'test-end',
+  /** One per test, emitted at `onEnd` once every attempt (incl. retries) is known. */
+  TEST_OUTCOME = 'test-outcome',
   TEST_STEP_BEGIN = 'test-step-begin',
   TEST_STEP_END = 'test-step-end',
   ERROR = 'error',
@@ -76,6 +82,8 @@ export interface ScoutTestRunInfo {
     passes?: number;
     pending?: number;
     failures?: number;
+    /** Passed, but only after at least one failed attempt. A subset of `passes`. */
+    flaky?: number;
     total?: number;
   };
 }
@@ -101,7 +109,14 @@ export interface ScoutTestInfo {
   }>;
   expected_status?: string;
   duration?: number;
+  /** On `test-end`, this attempt's status. On `test-outcome`, the last attempt's status. */
   status?: string;
+  /** Zero-based attempt index; 0 is the first run, 1 the first retry. Present on `test-end`. */
+  attempt?: number;
+  /** Final classification, once the test can no longer be retried. Only on `test-outcome`. */
+  outcome?: ScoutTestOutcome;
+  /** Total number of attempts the test took. Only on `test-outcome`. */
+  attempts?: number;
   console_errors?: string;
   step?: {
     title: string;

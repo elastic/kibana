@@ -23,10 +23,6 @@ export interface CorrelationsDetailsProps {
    */
   scopeId: string;
   /**
-   * Whether the document is being displayed in a rule preview
-   */
-  isRulePreview: boolean;
-  /**
    * Callback to open an alert preview when clicking the preview button in the correlations table
    */
   onShowAlert: (id: string, indexName: string, title?: string) => void;
@@ -42,7 +38,7 @@ export interface CorrelationsDetailsProps {
  * This component is meant to be used in a tools flyout, with the new EUI flyout system.
  */
 export const CorrelationsDetails = memo(
-  ({ hit, scopeId, isRulePreview, onShowAlert, onShowAttack }: CorrelationsDetailsProps) => {
+  ({ hit, scopeId, onShowAlert, onShowAttack }: CorrelationsDetailsProps) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -59,7 +55,6 @@ export const CorrelationsDetails = memo(
           <CorrelationsDetailsView
             hit={hit}
             scopeId={scopeId}
-            isRulePreview={isRulePreview}
             onShowAlert={onShowAlert}
             onShowAttack={onShowAttack}
             useLegacyExpandableFlyout={false}

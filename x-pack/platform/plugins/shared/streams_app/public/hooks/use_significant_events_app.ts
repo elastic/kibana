@@ -15,17 +15,17 @@ const SIGNIFICANT_EVENTS_AVAILABILITY_QUERY_KEY = ['significantEventsAvailabilit
  * `isAvailable` flag from `GET /internal/significant_events/availability`.
  *
  * Gate any Significant Events UI behind `isAvailable`. When either the
- * significant_events or significantEventsApp plugin is absent, Streams keeps
+ * significantEvents or significantEventsApp plugin is absent, Streams keeps
  * working and SE UI stays hidden.
  *
  * `isLoading` is true while the availability request is in flight when the
- * significant_events plugin is present — wait on it before navigating away
+ * significantEvents plugin is present — wait on it before navigating away
  * on the basis of `isAvailable`.
  */
 export function useSignificantEventsApp() {
   const {
     dependencies: {
-      start: { significantEventsApp, significant_events: significantEvents },
+      start: { significantEventsApp, significantEvents },
     },
   } = useKibana();
 
@@ -35,7 +35,7 @@ export function useSignificantEventsApp() {
     queryKey: SIGNIFICANT_EVENTS_AVAILABILITY_QUERY_KEY,
     queryFn: ({ signal }: QueryFunctionContext) => {
       if (!repositoryClient) {
-        throw new Error('significant_events plugin is not available');
+        throw new Error('significantEvents plugin is not available');
       }
       return repositoryClient.fetch('GET /internal/significant_events/availability', {
         signal: signal ?? null,

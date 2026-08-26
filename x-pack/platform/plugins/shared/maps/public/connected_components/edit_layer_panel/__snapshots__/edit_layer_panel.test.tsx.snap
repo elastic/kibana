@@ -34,7 +34,7 @@ exports[`EditLayerPanel is rendered 1`] = `
         >
           <EuiIcon
             aria-hidden={true}
-            type="vector"
+            type="vectorSquare"
           />
         </EuiFlexItem>
         <EuiFlexItem>

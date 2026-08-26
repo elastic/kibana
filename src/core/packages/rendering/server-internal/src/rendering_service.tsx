@@ -213,7 +213,7 @@ export class RenderingService {
       globalSettingsUserValues = {},
       userSettingDarkMode,
       userSettingLocale,
-      userStorageValues = {},
+      userStorageResult = { available: false, values: {} },
     ] = await Promise.all(
       isAnonymousPage
         ? [uiSettings.client?.getRegistered() ?? {}]
@@ -233,7 +233,7 @@ export class RenderingService {
             Promise<Record<string, UserProvidedValues>>,
             Promise<DarkModeValue> | undefined,
             Promise<string> | undefined,
-            Promise<Record<string, unknown>>
+            Promise<{ available: boolean; values: Record<string, unknown> }>
           ])
     );
 
@@ -408,7 +408,7 @@ export class RenderingService {
           uiSettings: settings,
           globalUiSettings: globalSettings,
         },
-        userStorage: { values: userStorageValues },
+        userStorage: userStorageResult,
       },
     };
 
@@ -424,15 +424,19 @@ export class RenderingService {
 
   public async stop() {}
 
-  private async fetchUserStorage(request: KibanaRequest): Promise<Record<string, unknown>> {
+  private async fetchUserStorage(
+    request: KibanaRequest
+  ): Promise<{ available: boolean; values: Record<string, unknown> }> {
     const userStorage = this.userStorageStart;
-    if (!userStorage) return {};
+    if (!userStorage) return { available: false, values: {} };
 
+    // A `null` scoped client means the current user has no `profile_uid` and user storage is not available.
     const client = userStorage.asScoped(request);
-    if (!client) return {};
+    if (!client) return { available: false, values: {} };
 
     try {
-      return await client.getForInjection();
+      const values = await client.getForInjection();
+      return { available: true, values };
     } catch (err) {
       // Authorization errors are expected for users whose auth realm does not
       // grant access to user-storage saved objects (e.g. certain SAML configs).
@@ -442,7 +446,7 @@ export class RenderingService {
         SavedObjectsErrorHelpers.isNotAuthorizedError(err)
       ) {
         this.logger.debug(`User storage preload skipped (not authorized): ${err.message}`);
-        return {};
+        return { available: false, values: {} };
       }
 
       this.logger.error(`User storage preload failed: ${err.message}`);

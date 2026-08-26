@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
 import type {
-  SignificantEvent,
+  SignificantEventResponse,
   SignificantEventStatus,
   Severity,
 } from '@kbn/significant-events-schema';
@@ -23,6 +23,7 @@ interface UseFetchSignificantEventsParams {
   severity?: Severity[];
   stream?: string[];
   search?: string;
+  eventId?: string;
 }
 
 export const useFetchSignificantEvents = ({
@@ -32,49 +33,54 @@ export const useFetchSignificantEvents = ({
   severity,
   stream,
   search,
+  eventId,
 }: UseFetchSignificantEventsParams) => {
-  const {
-    dependencies: {
-      start: {
-        significant_events: { significantEventsRepositoryClient },
-      },
-    },
-  } = useKibana();
+  const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
   const showFetchErrorToast = useFetchErrorToast();
 
   const [pagination, setPagination] = useState({ page: 1, perPage: 25 });
 
   useEffect(() => {
     setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
-  }, [from, to, status, severity, stream, search]);
+  }, [from, to, status, severity, stream, search, eventId]);
 
-  const query = useQuery<PaginatedResponse<SignificantEvent>, Error>({
-    queryKey: [
-      'significantEvents',
-      pagination.page,
-      pagination.perPage,
-      from,
-      to,
-      status,
-      severity,
-      stream,
-      search,
-    ],
+  const query = useQuery<PaginatedResponse<SignificantEventResponse>, Error>({
+    // Deep-link lookups must not depend on time or filters. DateRangeRedirect writing
+    // rangeFrom/rangeTo rematerializes `from`/`to` and would otherwise refetch.
+    queryKey: eventId
+      ? ['significantEvents', 'event', eventId, pagination.page, pagination.perPage]
+      : [
+          'significantEvents',
+          pagination.page,
+          pagination.perPage,
+          from,
+          to,
+          status,
+          severity,
+          stream,
+          search,
+        ],
     queryFn: async ({
       signal,
-    }: QueryFunctionContext): Promise<PaginatedResponse<SignificantEvent>> => {
+    }: QueryFunctionContext): Promise<PaginatedResponse<SignificantEventResponse>> => {
+      const requestQuery = {
+        page: pagination.page,
+        perPage: pagination.perPage,
+        ...(eventId
+          ? { event_id: eventId }
+          : {
+              from: new Date(from).toISOString(),
+              to: new Date(to).toISOString(),
+              ...(status?.length ? { status } : {}),
+              ...(severity?.length ? { severity } : {}),
+              ...(stream?.length ? { stream } : {}),
+              ...(search ? { search } : {}),
+            }),
+      };
+
       return significantEventsRepositoryClient.fetch('GET /internal/significant_events/events', {
         params: {
-          query: {
-            page: pagination.page,
-            perPage: pagination.perPage,
-            from: new Date(from).toISOString(),
-            to: new Date(to).toISOString(),
-            ...(status?.length ? { status } : {}),
-            ...(severity?.length ? { severity } : {}),
-            ...(stream?.length ? { stream } : {}),
-            ...(search ? { search } : {}),
-          },
+          query: requestQuery,
         },
         signal: signal ?? null,
       });

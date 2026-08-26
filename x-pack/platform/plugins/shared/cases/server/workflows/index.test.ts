@@ -11,7 +11,10 @@ import { registerCaseWorkflowSteps } from '.';
 describe('registerCaseWorkflowSteps', () => {
   const registerWithFlag = (
     isCasesAttachmentsEnabled: boolean,
-    registry: UnifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry()
+    {
+      isTemplatesEnabled = true,
+      registry = new UnifiedAttachmentTypeRegistry(),
+    }: { isTemplatesEnabled?: boolean; registry?: UnifiedAttachmentTypeRegistry } = {}
   ) => {
     const workflowsExtensions = { registerStepDefinition: jest.fn() };
     const getCasesClient = jest.fn();
@@ -22,6 +25,7 @@ describe('registerCaseWorkflowSteps', () => {
       getCasesClient as never,
       registry,
       isCasesAttachmentsEnabled,
+      isTemplatesEnabled,
       waitForStartServices
     );
 
@@ -45,9 +49,19 @@ describe('registerCaseWorkflowSteps', () => {
   // snapshotting the attachment registry before solutions have registered.
   // Awaiting `waitForStartServices` inside the loader defers composition until
   // every setup has completed.
+  // `cases.setExtendedFields` is gated on the templates feature flag (same flag that gates field
+  // definitions and template CRUD). `cases.createCaseFromTemplate` is registered in both flag
+  // states, so the templates flag contributes exactly the +1 setExtendedFields loader.
+  it('registers the setExtendedFields step only when the templates feature is enabled', () => {
+    const disabled = registerWithFlag(false, { isTemplatesEnabled: false }).register;
+    const enabled = registerWithFlag(false, { isTemplatesEnabled: true }).register;
+
+    expect(enabled).toHaveBeenCalledTimes(disabled.mock.calls.length + 1);
+  });
+
   it('awaits start services inside the attachments-step loader before composing the schema', async () => {
     const registry = new UnifiedAttachmentTypeRegistry();
-    const { register, waitForStartServices } = registerWithFlag(true, registry);
+    const { register, waitForStartServices } = registerWithFlag(true, { registry });
 
     const loaderCall = register.mock.calls.find(([arg]) => typeof arg === 'function');
     expect(loaderCall).toBeDefined();

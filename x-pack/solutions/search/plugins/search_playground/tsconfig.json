@@ -1,14 +1,9 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
-  "include": [
-    "__mocks__/**/*",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*"
-  ],
+  "include": ["__mocks__/**/*", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core",
@@ -63,9 +58,9 @@
     "@kbn/react-query",
     "@kbn/evals-plugin",
     "@kbn/core-chrome-browser",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/app-header",
+    "@kbn/core-chrome-browser-context-mocks"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

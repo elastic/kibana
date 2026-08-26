@@ -14,7 +14,7 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ReactNode } from 'react';
 import type {
-  AppHeaderConfig,
+  ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
   GlobalSearchConfig,
@@ -39,7 +39,7 @@ const createStartContractMock = () => {
   const nextUserMenuState$ = new BehaviorSubject<ReactNode>(null);
   const nextContextSwitcherState$ = new BehaviorSubject<ReactNode>(null);
   const nextProjectPickerState$ = new BehaviorSubject<ReactNode>(null);
-  const nextAppHeaderState$ = new BehaviorSubject<AppHeaderConfig | undefined>(undefined);
+  const nextAppHeaderState$ = new BehaviorSubject<ChromeAppHeaderConfig | undefined>(undefined);
   const inlineAppHeaderState$ = new BehaviorSubject(false);
   let appHeaderRegistrationId = 0;
 
@@ -182,7 +182,7 @@ const createStartContractMock = () => {
       }),
       appHeader: lazyObject({
         get$: jest.fn().mockReturnValue(nextAppHeaderState$),
-        set: jest.fn((config: AppHeaderConfig) => {
+        set: jest.fn((config: ChromeAppHeaderConfig) => {
           const registrationId = ++appHeaderRegistrationId;
           nextAppHeaderState$.next(config);
           return () => {
