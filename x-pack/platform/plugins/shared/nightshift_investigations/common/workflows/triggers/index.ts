@@ -9,8 +9,12 @@ import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
-export const INVESTIGATION_SUBJECT_TYPES = ['significant_event', 'alert', 'manual'] as const;
+export const INVESTIGATION_SUBJECT_TYPES = ['significant_event', 'alert'] as const;
 export type InvestigationSubjectType = (typeof INVESTIGATION_SUBJECT_TYPES)[number];
+
+export const INVESTIGATION_TRIGGER_TYPES = ['automatic', 'manual'] as const;
+export type InvestigationTriggerType = (typeof INVESTIGATION_TRIGGER_TYPES)[number];
+export const DEFAULT_INVESTIGATION_TRIGGER_TYPE: InvestigationTriggerType = 'automatic';
 
 export const INVESTIGATION_STARTED_TRIGGER_ID = 'nightshift-investigations.started' as const;
 export const INVESTIGATION_COMPLETED_TRIGGER_ID = 'nightshift-investigations.completed' as const;
@@ -19,10 +23,8 @@ export const INVESTIGATION_FAILED_TRIGGER_ID = 'nightshift-investigations.failed
 export const EMITTED_INVESTIGATION_STATUSES = ['running', 'completed', 'failed'] as const;
 
 const subjectSchema = z.object({
-  type: z
-    .enum(INVESTIGATION_SUBJECT_TYPES)
-    .describe('Kind of entity being investigated. "manual" for runs without a subject.'),
-  id: z.string().describe('Identifier of the investigated entity. Empty for manual runs.'),
+  type: z.enum(INVESTIGATION_SUBJECT_TYPES).describe('Kind of entity being investigated.'),
+  id: z.string().describe('Identifier of the investigated entity.'),
 });
 
 const baseInvestigationSchema = z.object({
@@ -31,6 +33,9 @@ const baseInvestigationSchema = z.object({
     .enum(EMITTED_INVESTIGATION_STATUSES)
     .describe('Lifecycle status of the investigation at emit time.'),
   subject: subjectSchema.describe('The entity this investigation is about.'),
+  trigger_type: z
+    .enum(INVESTIGATION_TRIGGER_TYPES)
+    .describe('What initiated the investigation: automatic or manual.'),
   started_at: z.string().describe('When the investigation started (ISO 8601 timestamp).'),
 });
 
@@ -77,24 +82,27 @@ export const investigationStartedTriggerCommonDefinition: CommonTriggerDefinitio
   id: INVESTIGATION_STARTED_TRIGGER_ID,
   stability: 'tech_preview',
   eventSchema: startedSchema,
-  title: i18n.translate('xpack.nightshift.workflowTriggers.investigationStarted.title', {
-    defaultMessage: 'Nightshift investigations - Investigation started',
-  }),
+  title: i18n.translate(
+    'xpack.nightshiftInvestigations.workflowTriggers.investigationStarted.title',
+    {
+      defaultMessage: 'Nightshift investigations - Investigation started',
+    }
+  ),
   description: i18n.translate(
-    'xpack.nightshift.workflowTriggers.investigationStarted.description',
+    'xpack.nightshiftInvestigations.workflowTriggers.investigationStarted.description',
     { defaultMessage: 'Emitted when an investigation starts.' }
   ),
   documentation: {
     details: i18n.translate(
-      'xpack.nightshift.workflowTriggers.investigationStarted.documentation.details',
+      'xpack.nightshiftInvestigations.workflowTriggers.investigationStarted.documentation.details',
       {
         defaultMessage:
-          'Emitted when an investigation begins for any subject (significant event, alert, manual). Filter with KQL on event.* (e.g. event.subject.type).',
+          'Emitted when an investigation begins for any subject (significant event or alert). Filter with KQL on event.* (e.g. event.subject.type).',
       }
     ),
     examples: [
       i18n.translate(
-        'xpack.nightshift.workflowTriggers.investigationStarted.documentation.example',
+        'xpack.nightshiftInvestigations.workflowTriggers.investigationStarted.documentation.example',
         {
           defaultMessage: notifyExample(
             'Investigation started for {{event.subject.type}} {{event.subject.id}}'
@@ -111,16 +119,19 @@ export const investigationCompletedTriggerCommonDefinition: CommonTriggerDefinit
   id: INVESTIGATION_COMPLETED_TRIGGER_ID,
   stability: 'tech_preview',
   eventSchema: completedSchema,
-  title: i18n.translate('xpack.nightshift.workflowTriggers.investigationCompleted.title', {
-    defaultMessage: 'Nightshift investigations - Investigation completed',
-  }),
+  title: i18n.translate(
+    'xpack.nightshiftInvestigations.workflowTriggers.investigationCompleted.title',
+    {
+      defaultMessage: 'Nightshift investigations - Investigation completed',
+    }
+  ),
   description: i18n.translate(
-    'xpack.nightshift.workflowTriggers.investigationCompleted.description',
+    'xpack.nightshiftInvestigations.workflowTriggers.investigationCompleted.description',
     { defaultMessage: 'Emitted when an investigation finishes successfully.' }
   ),
   documentation: {
     details: i18n.translate(
-      'xpack.nightshift.workflowTriggers.investigationCompleted.documentation.details',
+      'xpack.nightshiftInvestigations.workflowTriggers.investigationCompleted.documentation.details',
       {
         defaultMessage:
           'Emitted when an investigation finishes with status completed. Use event.investigation_id to fetch the full investigation result.',
@@ -128,7 +139,7 @@ export const investigationCompletedTriggerCommonDefinition: CommonTriggerDefinit
     ),
     examples: [
       i18n.translate(
-        'xpack.nightshift.workflowTriggers.investigationCompleted.documentation.example',
+        'xpack.nightshiftInvestigations.workflowTriggers.investigationCompleted.documentation.example',
         {
           defaultMessage: notifyExample('Investigation {{event.investigation_id}} completed'),
           values: { triggerId: INVESTIGATION_COMPLETED_TRIGGER_ID },
@@ -143,15 +154,21 @@ export const investigationFailedTriggerCommonDefinition: CommonTriggerDefinition
   id: INVESTIGATION_FAILED_TRIGGER_ID,
   stability: 'tech_preview',
   eventSchema: failedSchema,
-  title: i18n.translate('xpack.nightshift.workflowTriggers.investigationFailed.title', {
-    defaultMessage: 'Nightshift investigations - Investigation failed',
-  }),
-  description: i18n.translate('xpack.nightshift.workflowTriggers.investigationFailed.description', {
-    defaultMessage: 'Emitted when an investigation fails.',
-  }),
+  title: i18n.translate(
+    'xpack.nightshiftInvestigations.workflowTriggers.investigationFailed.title',
+    {
+      defaultMessage: 'Nightshift investigations - Investigation failed',
+    }
+  ),
+  description: i18n.translate(
+    'xpack.nightshiftInvestigations.workflowTriggers.investigationFailed.description',
+    {
+      defaultMessage: 'Emitted when an investigation fails.',
+    }
+  ),
   documentation: {
     details: i18n.translate(
-      'xpack.nightshift.workflowTriggers.investigationFailed.documentation.details',
+      'xpack.nightshiftInvestigations.workflowTriggers.investigationFailed.documentation.details',
       {
         defaultMessage:
           'Emitted when an investigation finishes with status failed. Use event.investigation_id to fetch error details.',
@@ -159,7 +176,7 @@ export const investigationFailedTriggerCommonDefinition: CommonTriggerDefinition
     ),
     examples: [
       i18n.translate(
-        'xpack.nightshift.workflowTriggers.investigationFailed.documentation.example',
+        'xpack.nightshiftInvestigations.workflowTriggers.investigationFailed.documentation.example',
         {
           defaultMessage: notifyExample('Investigation {{event.investigation_id}} failed'),
           values: { triggerId: INVESTIGATION_FAILED_TRIGGER_ID },

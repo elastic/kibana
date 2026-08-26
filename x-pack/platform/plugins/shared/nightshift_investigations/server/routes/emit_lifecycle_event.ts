@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { notFound } from '@hapi/boom';
 import {
+  DEFAULT_INVESTIGATION_TRIGGER_TYPE,
   EMITTED_INVESTIGATION_STATUSES,
   INVESTIGATION_COMPLETED_TRIGGER_ID,
   INVESTIGATION_FAILED_TRIGGER_ID,
@@ -55,10 +56,16 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
       throw error;
     }
 
-    const { subject, started_at: startedAt } = execution;
+    const { subject, trigger_type, started_at: startedAt } = execution;
+    if (!subject) {
+      // Runs without an entity (bare manual workflow runs) have nothing to attribute the
+      // event to, so no lifecycle event is emitted.
+      return { accepted: false };
+    }
     const base = {
       investigation_id: params.path.id,
       subject,
+      trigger_type: trigger_type ?? DEFAULT_INVESTIGATION_TRIGGER_TYPE,
       started_at: startedAt ?? new Date().toISOString(),
     };
 

@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { InvestigationSubjectType } from './workflows/triggers';
+import type { InvestigationSubjectType, InvestigationTriggerType } from './workflows/triggers';
 
-export { INVESTIGATION_SUBJECT_TYPES, type InvestigationSubjectType } from './workflows/triggers';
+export {
+  INVESTIGATION_SUBJECT_TYPES,
+  type InvestigationSubjectType,
+  INVESTIGATION_TRIGGER_TYPES,
+  DEFAULT_INVESTIGATION_TRIGGER_TYPE,
+  type InvestigationTriggerType,
+} from './workflows/triggers';
 
 export interface InvestigationSubject {
   type: InvestigationSubjectType;
@@ -20,6 +26,10 @@ export interface InvestigationContext {
 
 export interface StartInvestigationRequest {
   subject: InvestigationSubject;
+  /**
+   * What initiated the investigation. Defaults to "automatic" when omitted.
+   */
+  trigger_type?: InvestigationTriggerType;
   /**
    * Caller-supplied prompt for the investigation agent. Falls back to a generic
    * message derived from the subject when omitted.
@@ -54,7 +64,9 @@ export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
 
 export interface GetInvestigationResponse {
   investigation_id: string;
-  subject: InvestigationSubject;
+  /** Undefined for runs initiated without a subject (e.g. a bare manual workflow run). */
+  subject?: InvestigationSubject;
+  trigger_type?: InvestigationTriggerType;
   status: InvestigationStatus;
   started_at?: string;
   completed_at?: string;
