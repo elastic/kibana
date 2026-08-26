@@ -41,10 +41,11 @@ directory added and the old one removed. Any directory added here by hand is rem
 
 ## How skills get registered
 
-`../elastic_skills.ts` scans this directory at plugin setup, loads each subdirectory through
-`@kbn/agent-builder-skill-loader`, and registers the result as a built-in skill under the
-`skills/elastic-skills` base path. Adding a skill here is all the registration it needs. A skill the
-loader rejects is logged and skipped so it cannot stop the others from registering.
+`../elastic_skills.ts` scans this directory, loading each subdirectory through
+`@kbn/agent-builder-skill-loader`. `../register_skills.ts` registers the result during this plugin's
+setup, alongside the skills this plugin defines in code, under the `skills/elastic-skills` base path.
+Adding a skill here is all the registration it needs. A skill the loader rejects is logged and
+skipped so it cannot stop the others from registering.
 
 Note that Kibana's distribution build strips files by name (`README.md`, `test.md`) and by parent
 directory (`docs/`, `tests/`), so a reference with one of those names loads from a development
