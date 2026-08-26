@@ -14,7 +14,11 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
-import type { AgentAvailabilityConfig, AgentTypeRegistry } from '@kbn/agent-builder-server/agents';
+import type {
+  AgentAvailabilityConfig,
+  AgentTypeRegistry,
+  AiIndexResolver,
+} from '@kbn/agent-builder-server/agents';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { defaultAiIndices } from './default_ai_indices';
@@ -57,6 +61,8 @@ export class AgentsService {
   private typeRegistry: AgentTypeRegistry;
   /** In-memory availability for persisted agents, keyed by agent id. Filled by `ensure`. */
   private readonly availabilityByAgentId = new Map<string, AgentAvailabilityConfig>();
+  /** Resolver for AI index details, registered at setup by the CE bridge plugin. */
+  private aiIndexResolver?: AiIndexResolver;
 
   private setupDeps?: AgentsServiceSetupDeps;
 
@@ -83,6 +89,12 @@ export class AgentsService {
       },
       registerType: (type) => {
         this.typeRegistry.register(type);
+      },
+      registerAiIndexResolver: (resolver) => {
+        if (this.aiIndexResolver) {
+          throw new Error('An AI index resolver is already registered');
+        }
+        this.aiIndexResolver = resolver;
       },
     };
   }
@@ -243,6 +255,7 @@ export class AgentsService {
       getAgentsUsingPlugins,
       removeSkillRefsFromAgents,
       getAgentsUsingSkills,
+      getAiIndexResolver: () => this.aiIndexResolver,
     };
   }
 }

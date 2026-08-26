@@ -48,6 +48,7 @@ import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 import type { AgentBuilderAnalytics, AgentBuilderTracking } from '../telemetry';
+import type { AiIndexResolver } from './ai_index_resolver';
 
 /**
  * Read/write conversation store contract exposed to agent handlers.
@@ -320,6 +321,13 @@ export interface AgentHandlerContext {
    * skill-invocation counts. Provided by the plugin when telemetry is wired.
    */
   trackingService?: AgentBuilderTracking;
+  /**
+   * Resolver for AI index details (name, description), registered by the
+   * `context_engine_agent_builder` bridge plugin. Absent when the bridge (or
+   * Context Engine) is not available; prompts then fall back to id-only
+   * rendering for non-default AI indices.
+   */
+  aiIndexResolver?: AiIndexResolver;
 }
 
 /**

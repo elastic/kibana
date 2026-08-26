@@ -6,34 +6,35 @@
  */
 
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { defaultAiIndices } from '../../../../agents/default_ai_indices';
+import type { AiIndexCatalogEntry } from '../../types';
 
 /**
  * Builds the AI INDICES section: what AI indices are, which ones this agent can reach, and how to
- * limit results to the current space. Returns an empty string when disabled or the agent has none.
+ * limit results to the current space. Renders from the catalog resolved once per run by
+ * `resolveAiIndexCatalog`. Returns an empty string when disabled or the agent has none.
  */
 export const getAiIndicesInstructions = ({
   enabled,
-  aiIndices,
+  catalog,
   spaceId,
 }: {
   enabled: boolean;
-  aiIndices: string[];
+  catalog: AiIndexCatalogEntry[];
   spaceId: string;
 }): string => {
-  if (!enabled || aiIndices.length === 0) {
+  if (!enabled || catalog.length === 0) {
     return '';
   }
 
-  const described = aiIndices.flatMap((id) => defaultAiIndices[id] ?? []);
-  const catalog: string[] = [];
-
-  if (described.length > 0) {
-    const entries = described.map(({ name, description, guidance }) =>
-      [`- \`${name}\` — ${description}`, guidance].filter(Boolean).join(' ')
+  // Nameless entries (id unresolved: no resolver, access denied, unknown id) are left out —
+  // the id is not a valid `FROM` target, and the generic `ai-index-*` guidance still applies.
+  const entries = catalog
+    .filter(({ name }) => name !== undefined)
+    .map(({ name, description, guidance }) =>
+      [`- \`${name}\`${description ? ` — ${description}` : ''}`, guidance].filter(Boolean).join(' ')
     );
-    catalog.push('Available to this agent:', entries.join('\n'));
-  }
+  const catalogSection =
+    entries.length > 0 ? `Available to this agent:\n\n${entries.join('\n')}` : '';
 
   const spaceFilter = {
     bool: {
@@ -53,7 +54,7 @@ An AI index stores Knowledge Indicators (KIs): context prepared for agents, such
 
 Search relevant AI indices before broader retrieval when their KIs may help. If they do not cover the question, continue with other relevant data or tools. Fields differ between AI indices, so check what an index holds before filtering on one.
 
-${catalog.join('\n\n')}
+${catalogSection}
 
 ### Space scoping
 

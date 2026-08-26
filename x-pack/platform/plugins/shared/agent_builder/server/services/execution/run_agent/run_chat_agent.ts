@@ -50,6 +50,7 @@ import {
   type RelevantSkillSelection,
 } from './utils/relevant_skills/select_relevant_skills';
 import { resolveConfiguration } from './utils/configuration';
+import { resolveAiIndexCatalog } from './utils/resolve_ai_index_catalog';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildPendingRoundActions } from './utils/build_pending_round_actions';
 import { computeContextBudget } from './utils/context_budget';
@@ -148,7 +149,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
 
   const model = await modelProvider.getDefaultModel();
-  const resolvedConfiguration = resolveConfiguration(agentConfiguration);
+  const baseConfiguration = resolveConfiguration(agentConfiguration);
+  const resolvedConfiguration = experimentalFeatures.aiIndices
+    ? {
+        ...baseConfiguration,
+        aiIndexCatalog: await resolveAiIndexCatalog({
+          aiIndices: baseConfiguration.aiIndices,
+          request,
+          resolver: context.aiIndexResolver,
+          logger,
+        }),
+      }
+    : baseConfiguration;
 
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
   // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default

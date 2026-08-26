@@ -19,6 +19,7 @@ import type {
   AgentTypeDefinition,
   AgentRegistry,
   AgentAvailabilityConfig,
+  AiIndexResolver,
 } from './agents';
 import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
@@ -129,6 +130,13 @@ export interface AgentsSetup {
    * that type inherit at resolution time.
    */
   registerType: (definition: AgentTypeDefinition) => void;
+  /**
+   * Register the resolver used to look up details (name, description) for the
+   * AI indices referenced by agent configurations. Expected to be registered by
+   * the `context_engine_agent_builder` bridge plugin; when absent, prompts fall
+   * back to id-only rendering for non-default AI indices.
+   */
+  registerAiIndexResolver: (resolver: AiIndexResolver) => void;
 }
 
 export interface AgentsStart {

@@ -161,7 +161,11 @@ describe('getResearchAgentPrompt', () => {
   it('omits the AI indices section when AI index instructions are disabled', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
-        configuration: { instructions: '', aiIndices: ['elastic'] },
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic'],
+          aiIndexCatalog: [{ id: 'elastic', name: 'sml-main', description: 'Kibana resources' }],
+        },
         experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       })
     );
@@ -172,7 +176,11 @@ describe('getResearchAgentPrompt', () => {
   it('renders the AI indices section with the running space when the agent declares one', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
-        configuration: { instructions: '', aiIndices: ['elastic'] },
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic'],
+          aiIndexCatalog: [{ id: 'elastic', name: 'sml-main', description: 'Kibana resources' }],
+        },
         experimentalFeatures: { aiIndices: true, bash: false, skills: false },
         spaceId: 'marketing',
       })
@@ -180,8 +188,29 @@ describe('getResearchAgentPrompt', () => {
     const system = asText(messages[0]);
 
     expect(system).toContain('## AI INDICES');
+    expect(system).toContain('`sml-main`');
     expect(system).toContain('"spaces":"marketing"');
     expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
+  });
+
+  it('renders every catalog entry, including custom AI indices', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic', 'my-custom'],
+          aiIndexCatalog: [
+            { id: 'elastic', name: 'sml-main', description: 'Kibana resources' },
+            { id: 'my-custom', name: 'ai-index-idx-custom', description: 'Support tickets' },
+          ],
+        },
+        experimentalFeatures: { aiIndices: true, bash: false, skills: false },
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).toContain('`sml-main`');
+    expect(system).toContain('`ai-index-idx-custom` — Support tickets');
   });
 
   it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content', async () => {
