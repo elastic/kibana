@@ -43,6 +43,5 @@ name or check the Automatic Migration UI.`,
         });
       }
     );
-
   }
 );

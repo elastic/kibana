@@ -63,7 +63,7 @@ export class AgentBuilderEvaluationChatClient {
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
     private readonly connectorId: string
-  ) { }
+  ) {}
 
   private async executeWithRetry<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
     return pRetry(fn, {

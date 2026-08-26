@@ -288,37 +288,34 @@ Please confirm you want to resume.`,
           await teardownMigration?.();
         });
 
-        evaluate(
-          'REPROCESSES failed rules',
-          async ({ evaluateDataset }) => {
-            await evaluateDataset({
-              dataset: {
-                name: 'agent builder: automatic-migration-reprocess-end-to-end',
-                description: `Validates that when the user asks to reprocess failed rules and supplies
+        evaluate('REPROCESSES failed rules', async ({ evaluateDataset }) => {
+          await evaluateDataset({
+            dataset: {
+              name: 'agent builder: automatic-migration-reprocess-end-to-end',
+              description: `Validates that when the user asks to reprocess failed rules and supplies
 the connector upfront, the start skill calls start_rule_migration with the correct
 retry settings in a single turn.`,
-                examples: [
-                  {
-                    input: {
-                      question: `Reprocess the failed rules in my Splunk Reprocess migration using Opus 4.6. Don't ask any questions.`,
-                    },
-                    output: {
-                      expected: `I have reprocessed the 3 failed rules in your "Splunk Reprocess" migration
-using the Opus 4.6 connector. The reprocessing is running asynchronously.`,
-                    },
-                    metadata: {
-                      query_intent: 'Reprocess Rule Migration - End-to-end with autoConfirm',
-                      expectedSkill: 'automatic-migration-rules-start-migration',
-                      autoConfirm: true,
-                      expectedToolId: 'security.siem_migration.start_rule_migration',
-                      requiredTerms: ['asynchronously'],
-                    },
+              examples: [
+                {
+                  input: {
+                    question: `Reprocess the failed rules in my Splunk Reprocess migration using Opus 4.6. Don't ask any questions.`,
                   },
-                ],
-              },
-            });
-          }
-        );
+                  output: {
+                    expected: `I have reprocessed the 3 failed rules in your "Splunk Reprocess" migration
+using the Opus 4.6 connector. The reprocessing is running asynchronously.`,
+                  },
+                  metadata: {
+                    query_intent: 'Reprocess Rule Migration - End-to-end with autoConfirm',
+                    expectedSkill: 'automatic-migration-rules-start-migration',
+                    autoConfirm: true,
+                    expectedToolId: 'security.siem_migration.start_rule_migration',
+                    requiredTerms: ['asynchronously'],
+                  },
+                },
+              ],
+            },
+          });
+        });
       });
 
       evaluate.describe('reprocesses not_fully_translated rules', () => {
@@ -344,39 +341,36 @@ using the Opus 4.6 connector. The reprocessing is running asynchronously.`,
           await teardownMigration?.();
         });
 
-        evaluate(
-          'REPROCESS not_fully_translated rules',
-          async ({ evaluateDataset }) => {
-            await evaluateDataset({
-              dataset: {
-                name: 'agent builder: automatic-migration-reprocess-not-fully-translated-end-to-end',
-                description: `Validates that when the user asks to reprocess partially translated rules
+        evaluate('REPROCESS not_fully_translated rules', async ({ evaluateDataset }) => {
+          await evaluateDataset({
+            dataset: {
+              name: 'agent builder: automatic-migration-reprocess-not-fully-translated-end-to-end',
+              description: `Validates that when the user asks to reprocess partially translated rules
 and supplies the connector upfront, the start skill calls start_rule_migration with
 retry: "not_fully_translated" in a single turn.
 The seeded migration has 2 partially translated and 1 untranslatable rule.`,
-                examples: [
-                  {
-                    input: {
-                      question: `Reprocess the partially translated rules in my Splunk Partial migration using Opus 4.6. Don't ask any questions.`,
-                    },
-                    output: {
-                      expected: `I have reprocessed the partially translated and untranslatable rules in your
-"Splunk Partial" migration using the Opus 4.6 connector. The reprocessing is running asynchronously.`,
-                    },
-                    metadata: {
-                      query_intent:
-                        'Reprocess not_fully_translated Rule Migration - End-to-end with autoConfirm',
-                      expectedSkill: 'automatic-migration-rules-start-migration',
-                      autoConfirm: true,
-                      expectedToolId: 'security.siem_migration.start_rule_migration',
-                      requiredTerms: ['asynchronously'],
-                    },
+              examples: [
+                {
+                  input: {
+                    question: `Reprocess the partially translated rules in my Splunk Partial migration using Opus 4.6. Don't ask any questions.`,
                   },
-                ],
-              },
-            });
-          }
-        );
+                  output: {
+                    expected: `I have reprocessed the partially translated and untranslatable rules in your
+"Splunk Partial" migration using the Opus 4.6 connector. The reprocessing is running asynchronously.`,
+                  },
+                  metadata: {
+                    query_intent:
+                      'Reprocess not_fully_translated Rule Migration - End-to-end with autoConfirm',
+                    expectedSkill: 'automatic-migration-rules-start-migration',
+                    autoConfirm: true,
+                    expectedToolId: 'security.siem_migration.start_rule_migration',
+                    requiredTerms: ['asynchronously'],
+                  },
+                },
+              ],
+            },
+          });
+        });
       });
 
       evaluate.describe('reprocesses selected rules by title', () => {
