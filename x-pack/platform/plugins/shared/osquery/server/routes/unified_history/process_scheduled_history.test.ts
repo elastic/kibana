@@ -132,6 +132,57 @@ describe('process_scheduled_history', () => {
       expect(result[0].packName).toBe('Test Pack');
     });
 
+    it('prefers agent cardinality over document counts for success and error', () => {
+      // Many documents from few agents: the badges must report agents, not docs.
+      const bucket = createMockBucket({
+        agent_count: { value: 2 },
+        success_count: { doc_count: 21, agents: { value: 2 } },
+        error_count: { doc_count: 4, agents: { value: 1 } },
+      });
+
+      const result = processScheduledHistory({
+        scheduledBuckets: [bucket],
+        packSOs: [createMockPackSO()],
+        spaceId: 'default',
+      });
+
+      expect(result[0].successCount).toBe(2);
+      expect(result[0].errorCount).toBe(1);
+    });
+
+    it('falls back to doc counts when cardinality sub-aggregations are absent', () => {
+      const bucket = createMockBucket({
+        success_count: { doc_count: 7 },
+        error_count: { doc_count: 3 },
+      });
+
+      const result = processScheduledHistory({
+        scheduledBuckets: [bucket],
+        packSOs: [createMockPackSO()],
+        spaceId: 'default',
+      });
+
+      expect(result[0].successCount).toBe(7);
+      expect(result[0].errorCount).toBe(3);
+    });
+
+    it('keeps a zero agent cardinality instead of falling through to doc_count', () => {
+      // `??` must not treat a legitimate 0 as missing, the way `||` would.
+      const bucket = createMockBucket({
+        success_count: { doc_count: 12, agents: { value: 0 } },
+        error_count: { doc_count: 5, agents: { value: 0 } },
+      });
+
+      const result = processScheduledHistory({
+        scheduledBuckets: [bucket],
+        packSOs: [createMockPackSO()],
+        spaceId: 'default',
+      });
+
+      expect(result[0].successCount).toBe(0);
+      expect(result[0].errorCount).toBe(0);
+    });
+
     it('returns empty array when no buckets', () => {
       const result = processScheduledHistory({
         scheduledBuckets: [],

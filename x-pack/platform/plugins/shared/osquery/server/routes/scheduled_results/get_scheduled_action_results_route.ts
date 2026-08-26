@@ -156,8 +156,9 @@ export const getScheduledActionResultsRoute = (
           const rowsCount = responsesBySchedule?.rows_count?.value ?? 0;
           const responsesBuckets = responsesBySchedule?.responses?.buckets;
 
-          // Agent counts from `cardinality(agent_id)`; `doc_count` fallback only
-          // for pre-upgrade aggregation shapes.
+          // The DSL requesting these sub-aggs ships in this same process, so the
+          // `doc_count` fallback only covers degraded aggregation shapes — it counts
+          // documents, i.e. the inflated numbers this route exists to fix.
           const successful =
             responsesBySchedule?.success_agents?.agents?.value ??
             responsesBuckets?.find((b) => b.key === 'success')?.doc_count ??

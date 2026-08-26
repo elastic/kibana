@@ -23,7 +23,8 @@ export interface ScheduledExecutionBucket {
   max_timestamp: { value: number; value_as_string: string };
   agent_count: { value: number };
   total_rows: { value: number };
-  // `agents.value` = agent cardinality; `doc_count` kept as pre-upgrade fallback.
+  // `agents.value` is the agent cardinality; `doc_count` counts documents and is only
+  // a fallback for degraded aggregation shapes, so it must not be preferred.
   success_count: { doc_count: number; agents?: { value: number } };
   error_count: { doc_count: number; agents?: { value: number } };
   pack_id?: LabelTermsAggregation;
