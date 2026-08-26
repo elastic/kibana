@@ -26,8 +26,8 @@ const MAIN_CAPABILITIES = ['capable', 'balanced'];
 const FAST_CAPABILITIES = ['efficient'];
 
 interface DerivedRecommendations {
-  recommended: string[];
-  fast: string[];
+  recommended?: string[];
+  fast?: string[];
 }
 
 type EndpointMetadata = {
@@ -115,11 +115,17 @@ export const deriveRecommendations = (
   const recommended = pickBestPerFamily(validated, MAIN_CAPABILITIES);
   const fast = pickBestPerFamily(validated, FAST_CAPABILITIES);
 
-  if (recommended.length === 0 || fast.length === 0) {
+  // Each list is applied independently: a partial EIS rollout (e.g. capable/balanced
+  // models tagged before any efficient model is validated) still updates the lists
+  // that are ready, rather than blocking both until both are non-empty.
+  if (recommended.length === 0 && fast.length === 0) {
     return null;
   }
 
-  return { recommended, fast };
+  return {
+    ...(recommended.length > 0 ? { recommended } : {}),
+    ...(fast.length > 0 ? { fast } : {}),
+  };
 };
 
 /**
@@ -213,32 +219,17 @@ export class RecommendedEndpointsPoller {
   private deriveRecommendationsWithLogging(
     endpoints: InferenceInferenceEndpointInfo[]
   ): DerivedRecommendations | null {
-    const eligible = endpoints.filter(isEligibleEndpoint);
-
-    if (!eligible.some((ep) => getMetadata(ep)?.capability != null)) {
-      this.logger.debug(
-        'EIS capability field not yet available; retaining static recommended list'
-      );
-      return null;
-    }
-    if (!eligible.some((ep) => getMetadata(ep)?.family != null)) {
-      this.logger.debug('EIS family field not yet available; retaining static recommended list');
-      return null;
-    }
-
     const result = deriveRecommendations(endpoints);
 
     if (!result) {
-      this.logger.warn(
-        'Derived recommended list is empty after AB validation gate; retaining current list'
+      this.logger.debug(
+        'EIS capability/family fields not yet available or no AB-validated models found; retaining static recommended list'
       );
       return null;
     }
 
     this.logger.debug(
-      `Derived recommendations — main: [${result.recommended.join(
-        ', '
-      )}], fast: [${result.fast.join(', ')}]`
+      `Derived recommendations — main: [${result.recommended?.join(', ') ?? 'unchanged'}], fast: [${result.fast?.join(', ') ?? 'unchanged'}]`
     );
     return result;
   }
@@ -246,20 +237,24 @@ export class RecommendedEndpointsPoller {
   private applyRecommendations(result: DerivedRecommendations | null) {
     if (!result) return;
 
-    const mainResult = this.features.updateRecommendedEndpoints(
-      AGENT_BUILDER_INFERENCE_FEATURE_ID,
-      result.recommended
-    );
-    if (!mainResult.ok) {
-      this.logger.warn(`Failed to update main recommended endpoints: ${mainResult.error}`);
+    if (result.recommended) {
+      const mainResult = this.features.updateRecommendedEndpoints(
+        AGENT_BUILDER_INFERENCE_FEATURE_ID,
+        result.recommended
+      );
+      if (!mainResult.ok) {
+        this.logger.warn(`Failed to update main recommended endpoints: ${mainResult.error}`);
+      }
     }
 
-    const fastResult = this.features.updateRecommendedEndpoints(
-      AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
-      result.fast
-    );
-    if (!fastResult.ok) {
-      this.logger.warn(`Failed to update fast recommended endpoints: ${fastResult.error}`);
+    if (result.fast) {
+      const fastResult = this.features.updateRecommendedEndpoints(
+        AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
+        result.fast
+      );
+      if (!fastResult.ok) {
+        this.logger.warn(`Failed to update fast recommended endpoints: ${fastResult.error}`);
+      }
     }
   }
 
