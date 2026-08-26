@@ -16,11 +16,11 @@ export function registerConversationWorkflowSteps(
   getConversationClient: (request: KibanaRequest) => Promise<ConversationClient>,
   isExperimentalEnabled: (request: KibanaRequest) => Promise<boolean>
 ) {
-  workflowsExtensions.registerTriggerDefinition(
-    conversationMetadataUpdatedTriggerCommonDefinition
-  );
+  workflowsExtensions.registerTriggerDefinition(conversationMetadataUpdatedTriggerCommonDefinition);
 
   for (const factory of conversationStepRegistry) {
-    workflowsExtensions.registerStepDefinition(factory(getConversationClient, isExperimentalEnabled));
+    workflowsExtensions.registerStepDefinition(
+      factory(getConversationClient, isExperimentalEnabled)
+    );
   }
 }

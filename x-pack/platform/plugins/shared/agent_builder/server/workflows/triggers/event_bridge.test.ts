@@ -32,7 +32,12 @@ describe('registerConversationWorkflowEventBridge', () => {
     mockClient = createWorkflowsClientMock();
     isExperimentalEnabled.mockResolvedValue(true);
     workflowsExtensions.getClient.mockResolvedValue(mockClient);
-    registerConversationWorkflowEventBridge(eventBus, workflowsExtensions, logger, isExperimentalEnabled);
+    registerConversationWorkflowEventBridge(
+      eventBus,
+      workflowsExtensions,
+      logger,
+      isExperimentalEnabled
+    );
   });
 
   it('forwards metadata patched events to workflows extensions', async () => {
@@ -88,7 +93,12 @@ describe('registerConversationWorkflowEventBridge', () => {
   it('does not emit the trigger when experimental features are disabled', async () => {
     isExperimentalEnabled.mockResolvedValue(false);
     const disabledBus = new ConversationEventBus();
-    registerConversationWorkflowEventBridge(disabledBus, workflowsExtensions, logger, isExperimentalEnabled);
+    registerConversationWorkflowEventBridge(
+      disabledBus,
+      workflowsExtensions,
+      logger,
+      isExperimentalEnabled
+    );
 
     disabledBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',
@@ -106,7 +116,12 @@ describe('registerConversationWorkflowEventBridge', () => {
     });
     workflowsExtensions.getClient.mockResolvedValue(failingClient);
     const failBus = new ConversationEventBus();
-    registerConversationWorkflowEventBridge(failBus, workflowsExtensions, logger, isExperimentalEnabled);
+    registerConversationWorkflowEventBridge(
+      failBus,
+      workflowsExtensions,
+      logger,
+      isExperimentalEnabled
+    );
 
     failBus.emitMetadataPatched(request, {
       conversationId: 'conv-1',

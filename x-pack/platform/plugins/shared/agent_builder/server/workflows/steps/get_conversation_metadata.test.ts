@@ -14,7 +14,10 @@ const experimentalDisabled = jest.fn().mockResolvedValue(false);
 describe('getConversationMetadataStepDefinition', () => {
   it('creates expected step definition structure', () => {
     const { getConversationClient } = createConversationClientMock();
-    const definition = getConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
+    const definition = getConversationMetadataStepDefinition(
+      getConversationClient,
+      experimentalEnabled
+    );
 
     expect(definition.id).toBe('agentBuilder.conversation.metadata.read');
     expect(typeof definition.handler).toBe('function');
@@ -30,7 +33,10 @@ describe('getConversationMetadataStepDefinition', () => {
       }),
     });
 
-    const definition = getConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
+    const definition = getConversationMetadataStepDefinition(
+      getConversationClient,
+      experimentalEnabled
+    );
     const context = createStepHandlerContext({
       input: { conversation_id: 'conv-1' },
       stepType: 'agentBuilder.conversation.metadata.read',
@@ -60,7 +66,10 @@ describe('getConversationMetadataStepDefinition', () => {
       }),
     });
 
-    const definition = getConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
+    const definition = getConversationMetadataStepDefinition(
+      getConversationClient,
+      experimentalEnabled
+    );
     const result = await definition.handler(
       createStepHandlerContext({ input: { conversation_id: 'child-conv' } })
     );
@@ -85,7 +94,10 @@ describe('getConversationMetadataStepDefinition', () => {
       }),
     });
 
-    const definition = getConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
+    const definition = getConversationMetadataStepDefinition(
+      getConversationClient,
+      experimentalEnabled
+    );
     const result = await definition.handler(
       createStepHandlerContext({ input: { conversation_id: 'conv-1' } })
     );
@@ -106,7 +118,10 @@ describe('getConversationMetadataStepDefinition', () => {
       get: jest.fn().mockRejectedValue(new Error('not found')),
     });
 
-    const definition = getConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
+    const definition = getConversationMetadataStepDefinition(
+      getConversationClient,
+      experimentalEnabled
+    );
     const result = await definition.handler(
       createStepHandlerContext({ input: { conversation_id: 'missing' } })
     );
@@ -118,14 +133,20 @@ describe('getConversationMetadataStepDefinition', () => {
 
   it('rejects input without conversation_id', () => {
     const { getConversationClient } = createConversationClientMock();
-    const definition = getConversationMetadataStepDefinition(getConversationClient, experimentalEnabled);
+    const definition = getConversationMetadataStepDefinition(
+      getConversationClient,
+      experimentalEnabled
+    );
 
     expect(definition.inputSchema.safeParse({}).success).toBe(false);
   });
 
   it('returns an error when experimental features are disabled', async () => {
     const { getConversationClient } = createConversationClientMock();
-    const definition = getConversationMetadataStepDefinition(getConversationClient, experimentalDisabled);
+    const definition = getConversationMetadataStepDefinition(
+      getConversationClient,
+      experimentalDisabled
+    );
 
     const result = await definition.handler(
       createStepHandlerContext({ input: { conversation_id: 'conv-1' } })
