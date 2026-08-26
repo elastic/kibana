@@ -533,6 +533,15 @@ export const ALERTING_LOG_CODES = {
    * until the next restart. The task type is carried in `labels.task_id`.
    */
   TASKS_SCHEDULE_FAILED: 'TASKS_SCHEDULE_FAILED',
+  /**
+   * The pending API-key invalidation background task run failed. Keys queued
+   * for invalidation remain until the next scheduled run.
+   */
+  TASKS_API_KEY_INVALIDATION_RUN_FAILED: 'TASKS_API_KEY_INVALIDATION_RUN_FAILED',
+
+  // ─────────────────────────────── Routes ──────────────────────────────
+  /** An alerting v2 HTTP route handler failed with an unexpected 5xx error. */
+  ROUTES_HANDLER_FAILED: 'ROUTES_HANDLER_FAILED',
 } as const;
 
 export type AlertingV2LogCode = (typeof ALERTING_LOG_CODES)[keyof typeof ALERTING_LOG_CODES];
