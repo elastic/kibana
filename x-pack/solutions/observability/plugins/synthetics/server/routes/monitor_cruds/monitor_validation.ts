@@ -40,6 +40,10 @@ import {
   DEFAULT_FIELDS,
   HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
 } from '../../../common/constants/monitor_defaults';
+import {
+  hasPublicServiceLocation,
+  monitorTypeRequiresPrivateLocations,
+} from '../../../common/utils/monitor_location_support';
 import { privateLocationCoversAllMonitorSpaces } from './monitor_locations_utils';
 
 type MonitorCodecType =
@@ -173,6 +177,18 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
           defaultMessage: 'source.inline.script: Script is required for {monitorType} monitor.',
           values: { monitorType },
         }),
+        payload: monitorFields,
+      };
+    }
+
+    if (
+      monitorTypeRequiresPrivateLocations(monitorType) &&
+      hasPublicServiceLocation(monitorFields.locations)
+    ) {
+      return {
+        valid: false,
+        reason: API_PUBLIC_LOCATION_ERROR,
+        details: API_PUBLIC_LOCATION_DETAILS,
         payload: monitorFields,
       };
     }
@@ -440,6 +456,10 @@ export function validateLocation(
   const hasPublicLocationsConfigured = (monitorFields.locations || []).length > 0;
   const hasPrivateLocationsConfigured = (monitorFields.privateLocations || []).length > 0;
 
+  if (monitorTypeRequiresPrivateLocations(monitorFields.type) && hasPublicLocationsConfigured) {
+    return API_PUBLIC_LOCATION_PROJECT_ERROR;
+  }
+
   if (hasPublicLocationsConfigured) {
     let invalidLocation = '';
     const hasValidPublicLocation = monitorFields.locations?.some((location) => {
@@ -591,6 +611,29 @@ export const LOCATION_REQUIRED_ERROR = i18n.translate(
   {
     defaultMessage:
       'At least one location is required, either elastic managed or private e.g locations: ["us-east"] or private_locations:["test private location"]',
+  }
+);
+
+const API_PUBLIC_LOCATION_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.apiPublicLocationErrorMessage',
+  {
+    defaultMessage: 'API Journey monitors cannot run on Elastic managed locations',
+  }
+);
+
+const API_PUBLIC_LOCATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.apiPublicLocationDetailsErrorMessage',
+  {
+    defaultMessage:
+      'API Journey monitors can only run on private locations. Remove Elastic managed locations from this monitor.',
+  }
+);
+
+const API_PUBLIC_LOCATION_PROJECT_ERROR = i18n.translate(
+  'xpack.synthetics.server.projectMonitors.apiPublicLocationErrorMessage',
+  {
+    defaultMessage:
+      'API Journey monitors can only run on private locations. Remove "locations" or replace them with "privateLocations".',
   }
 );
 

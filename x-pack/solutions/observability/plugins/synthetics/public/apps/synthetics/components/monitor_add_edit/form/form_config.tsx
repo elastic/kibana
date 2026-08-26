@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { FieldMeta } from '../types';
 import { ConfigKey, FormMonitorType } from '../types';
 import { AlertConfigKey } from '../constants';
-import { FIELD } from './field_config';
+import { API_PRIVATE_LOCATIONS_ONLY, FIELD } from './field_config';
 
 const DEFAULT_DATA_OPTIONS = (readOnly: boolean) => ({
   title: i18n.translate('xpack.synthetics.monitorConfig.section.dataOptions.title', {
@@ -320,7 +320,10 @@ export const FORM_CONFIG = (readOnly: boolean): FieldConfig => ({
     step1: [FIELD(readOnly)[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [
       FIELD(readOnly)[ConfigKey.NAME],
-      FIELD(readOnly)[ConfigKey.LOCATIONS],
+      {
+        ...FIELD(readOnly)[ConfigKey.LOCATIONS],
+        helpText: API_PRIVATE_LOCATIONS_ONLY,
+      },
       FIELD(readOnly)[`${ConfigKey.SCHEDULE}.number`],
       FIELD(readOnly)[ConfigKey.ENABLED],
       FIELD(readOnly)[ConfigKey.MAX_ATTEMPTS],

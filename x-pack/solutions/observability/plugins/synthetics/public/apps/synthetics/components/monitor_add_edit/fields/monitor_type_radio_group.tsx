@@ -16,6 +16,7 @@ import {
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 
 export type MonitorTypeRadioGroupProps = EuiKeyPadMenuItemProps & {
@@ -36,6 +37,7 @@ export type MonitorTypeRadioOption = EuiKeyPadMenuItemProps & {
   onChange: (id: string, value: string) => void;
   name: string;
   'data-test-subj': string;
+  disabledReason?: string;
 };
 
 export const MonitorType = ({
@@ -46,9 +48,11 @@ export const MonitorType = ({
   onChange,
   name,
   isSelected,
+  isDisabled,
+  disabledReason,
   'data-test-subj': dataTestSubj,
 }: MonitorTypeRadioOption) => {
-  return (
+  const item = (
     <EuiKeyPadMenuItem
       checkable="single"
       label={label}
@@ -57,6 +61,7 @@ export const MonitorType = ({
       onChange={onChange}
       name={name}
       isSelected={isSelected}
+      isDisabled={isDisabled}
       data-test-subj={dataTestSubj}
       css={{
         width: 'auto',
@@ -69,6 +74,12 @@ export const MonitorType = ({
       <EuiIcon type={icon} aria-hidden={true} />
     </EuiKeyPadMenuItem>
   );
+
+  if (isDisabled && disabledReason) {
+    return <EuiToolTip content={disabledReason}>{item}</EuiToolTip>;
+  }
+
+  return item;
 };
 
 export const MonitorTypeRadioGroup = ({
