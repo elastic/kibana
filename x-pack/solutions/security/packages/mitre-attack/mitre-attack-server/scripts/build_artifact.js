@@ -9,13 +9,13 @@ require('@kbn/setup-node-env');
 
 const fs = require('fs');
 const path = require('path');
-const { generateMitreArtifact } = require('../src/build_artifact/build_artifact');
+const { buildMitreArtifact } = require('../src/build_artifact/build_artifact');
 
 const ARTIFACT_PATH = path.join(__dirname, '../artifacts/mitre_artifact.json');
 
 async function main() {
   console.log('Fetching MITRE ATT&CK bundle…');
-  const entities = await generateMitreArtifact();
+  const entities = await buildMitreArtifact();
 
   const counts = {
     tactics: entities.filter((e) => e.type === 'tactic').length,

@@ -27,10 +27,12 @@ const toFrameworkVersion = (tag: string): string => tag.replace(/^ATT&CK-v/, '')
  * STIX bundle into MITRE entities, and validates the combined result. Entry point
  * for scripts/build_artifact.js, which writes the output to disk.
  */
-export const generateMitreArtifact = async (): Promise<MitreEntity[]> => {
+export const buildMitreArtifact = async (
+  versions: readonly string[] = MITRE_CONTENT_VERSIONS
+): Promise<MitreEntity[]> => {
   const allEntities: MitreEntity[] = [];
 
-  for (const tag of MITRE_CONTENT_VERSIONS) {
+  for (const tag of versions) {
     const bundle = await fetchStixBundle(tag);
     const entities = mapBundleToMitreEntities(bundle, 'enterprise', toFrameworkVersion(tag));
     allEntities.push(...entities);
