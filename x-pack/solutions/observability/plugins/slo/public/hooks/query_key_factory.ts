@@ -96,6 +96,7 @@ export const sloKeys = {
       to: Date;
     };
     groupBy?: string[];
+    projectRoutings?: string | null;
   }) => [...sloKeys.all, 'preview', params] as const,
   burnRateRules: (search: string) => [...sloKeys.all, 'burnRateRules', search],
   instances: (params: {

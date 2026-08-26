@@ -65,6 +65,7 @@ import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
 import { conversationIndexName } from '../../conversation/client/storage';
+import { roundsForContext } from '../../conversation';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -182,10 +183,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
   toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
+  const previousRounds = conversation ? roundsForContext(conversation) : [];
+
   // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
-    previousRounds: conversation?.rounds ?? [],
+    previousRounds,
+    nextInputAuthor: pendingRound?.author ?? author,
     context,
     action,
     metadata: conversation?.metadata,
@@ -347,6 +351,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
+    spaceId: context.spaceId,
     skills: filteredSkills,
     processedConversation,
     toolManager,

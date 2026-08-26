@@ -2298,6 +2298,11 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
 export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
   spaceId: string;
   leadsGenerated: number;
+  newLeads: number;
+  revisedLeads: number;
+  resurfacedLeads: number;
+  skippedLeads: number;
+  failedLeads: number;
   sourceType: string;
 }> = {
   eventType: 'lead_generation_execution',
@@ -2311,7 +2316,39 @@ export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
     leadsGenerated: {
       type: 'long',
       _meta: {
-        description: 'Number of leads successfully generated',
+        description:
+          'Number of prepared lead candidates in this run (after scoring and the maxLeads cap)',
+      },
+    },
+    newLeads: {
+      type: 'long',
+      _meta: {
+        description: 'Number of new leads in this run',
+      },
+    },
+    revisedLeads: {
+      type: 'long',
+      _meta: {
+        description: 'Number of reobserved leads with different observations',
+      },
+    },
+    resurfacedLeads: {
+      type: 'long',
+      _meta: {
+        description: 'Number of reobserved leads, without any observations changes',
+      },
+    },
+    skippedLeads: {
+      type: 'long',
+      _meta: {
+        description:
+          'Number of reobserved leads skipped because matching one was previously dismissed',
+      },
+    },
+    failedLeads: {
+      type: 'long',
+      _meta: {
+        description: 'Number of leads that failed to persist in the index',
       },
     },
     sourceType: {
