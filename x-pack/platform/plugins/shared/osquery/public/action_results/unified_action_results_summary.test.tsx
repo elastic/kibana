@@ -357,3 +357,59 @@ describe('UnifiedActionResultsSummary - Live polling', () => {
     );
   });
 });
+
+describe('UnifiedActionResultsSummary - Per-page agent details fetch', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockKibanaServices();
+  });
+
+  it('fetches agent details only for the agents on the current page, not all agentIds', async () => {
+    // The bulk Fleet lookup must send the page's 20 edge-derived ids, not all 100 agentIds.
+    const allAgentIds = Array.from({ length: 100 }, (_, index) => `agent-${index}`);
+    const pageAgentIds = allAgentIds.slice(0, 20);
+
+    useActionResultsMock.mockReturnValue({
+      data: {
+        edges: pageAgentIds.map((agentId, index) => ({
+          _id: `response-${index}`,
+          _index: '.logs-osquery_manager.action.responses',
+          fields: { 'agent.id': [agentId], completed_at: ['2026-08-26T00:00:00Z'] },
+        })),
+        total: 100,
+        aggregations: {
+          totalRowCount: 200,
+          totalResponded: 100,
+          successful: 100,
+          failed: 0,
+          pending: 0,
+        },
+        inspect: { dsl: [] },
+      },
+      isLoading: false,
+      isFetching: false,
+    } as never);
+
+    mockHttpPost.mockResolvedValue({ agents: [] });
+
+    const { container } = renderWithContext(
+      <UnifiedActionResultsSummary
+        actionId="test-action"
+        agentIds={allAgentIds}
+        startDate="2026-08-25T00:00:00Z"
+      />
+    );
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-test-subj="unifiedDataTable"]')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalledWith(
+        '/internal/osquery/fleet_wrapper/agents/_bulk',
+        expect.objectContaining({ body: JSON.stringify({ agentIds: pageAgentIds }) })
+      );
+    });
+    expect(mockHttpPost).toHaveBeenCalledTimes(1);
+  });
+});

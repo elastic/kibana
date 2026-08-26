@@ -5,21 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useKibana } from '../common/lib/kibana';
 import { UnifiedResultsTable } from './unified_results_table';
 import type { ResultsTableComponentProps } from './results_table_shared';
 
 export type { ResultsTableComponentProps };
 
-const ResultsTableSwitch: React.FC<ResultsTableComponentProps> = (props) => {
-  const { uiActions, unifiedSearch } = useKibana().services;
-
-  if (uiActions && unifiedSearch) {
-    return <UnifiedResultsTable {...props} />;
-  }
-
-  return null;
-};
-
-export const ResultsTable = React.memo(ResultsTableSwitch);
+// Alias kept for the historical import path; uiActions/unifiedSearch are required plugins.
+export const ResultsTable = UnifiedResultsTable;

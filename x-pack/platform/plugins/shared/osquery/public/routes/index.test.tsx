@@ -86,14 +86,12 @@ const LocationSpy = ({ onLocation }: { onLocation: (location: string) => void })
   return null;
 };
 
-const renderWithRouter = (path: string, onLocation: (location: string) => void = () => {}) => {
-  const features = { ...allowedExperimentalValues };
-
-  return render(
+const renderWithRouter = (path: string, onLocation: (location: string) => void = () => {}) =>
+  render(
     <EuiProvider>
       <IntlProvider locale="en">
         <QueryClientProvider client={createTestQueryClient()}>
-          <ExperimentalFeaturesProvider value={features}>
+          <ExperimentalFeaturesProvider value={allowedExperimentalValues}>
             <MemoryRouter initialEntries={[path]}>
               <Route path="*">
                 <LocationSpy onLocation={onLocation} />
@@ -105,7 +103,6 @@ const renderWithRouter = (path: string, onLocation: (location: string) => void =
       </IntlProvider>
     </EuiProvider>
   );
-};
 
 const resolveLocation = (path: string) => {
   let resolved = '';
@@ -183,6 +180,12 @@ describe('OsqueryAppRoutes', () => {
       expect(resolveLocation('/LIVE_QUERIES/abc-123')).toBe('/history/abc-123');
       expect(screen.getByTestId('live-query-details')).toBeInTheDocument();
     });
+  });
+
+  it('redirects /history/new to /new, preserving the query string and hash', () => {
+    // Hits the History sub-router's redirect; /live_queries/new maps straight to /new.
+    expect(resolveLocation('/history/new?packId=pack-1#top')).toBe('/new?packId=pack-1#top');
+    expect(screen.getByTestId('new-live-query')).toBeInTheDocument();
   });
 
   it('renders history page at /history', () => {

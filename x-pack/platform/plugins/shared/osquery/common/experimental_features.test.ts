@@ -20,7 +20,9 @@ describe('parseExperimentalConfigValue', () => {
   });
 
   it('should enable a valid feature flag', () => {
-    // `crossProjectSearch` defaults to false, so this asserts a real state change.
+    // Precondition: if the default flips to true, fail here instead of passing vacuously below.
+    expect(allowedExperimentalValues.crossProjectSearch).toBe(false);
+
     const { features, invalid } = parseExperimentalConfigValue(['crossProjectSearch']);
 
     expect(features.crossProjectSearch).toBe(true);
@@ -28,7 +30,6 @@ describe('parseExperimentalConfigValue', () => {
   });
 
   it('should report a graduated feature flag as invalid', () => {
-    // Graduated flags must no longer be accepted in xpack.osquery.enableExperimental.
     expect(parseExperimentalConfigValue(['queryHistoryRework']).invalid).toEqual([
       'queryHistoryRework',
     ]);
@@ -82,8 +83,7 @@ describe('getExperimentalAllowedValues', () => {
   });
 
   it('should return exactly the currently supported flags', () => {
-    // Pinned literally: adding or graduating a flag must be an explicit change here,
-    // and in the docs/config that reference these names.
+    // Pinned literally: adding or graduating a flag must be an explicit change here.
     expect(getExperimentalAllowedValues()).toEqual([
       'exportResults',
       'rruleScheduling',

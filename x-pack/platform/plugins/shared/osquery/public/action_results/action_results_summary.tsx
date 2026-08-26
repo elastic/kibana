@@ -5,21 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useKibana } from '../common/lib/kibana';
 import type { ActionResultsSummaryProps } from './types';
 import { UnifiedActionResultsSummary } from './unified_action_results_summary';
 
 export type { ActionResultsSummaryProps };
 
-const ActionResultsSummarySwitch: React.FC<ActionResultsSummaryProps> = (props) => {
-  const { uiActions } = useKibana().services;
-
-  if (uiActions) {
-    return <UnifiedActionResultsSummary {...props} />;
-  }
-
-  return null;
-};
-
-export const ActionResultsSummary = React.memo(ActionResultsSummarySwitch);
+// Alias kept for the historical import path; uiActions is a required plugin.
+export const ActionResultsSummary = UnifiedActionResultsSummary;
