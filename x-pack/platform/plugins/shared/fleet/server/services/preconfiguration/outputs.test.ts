@@ -13,6 +13,8 @@ import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
 
+import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../constants';
+
 import {
   createOrUpdatePreconfiguredOutputs,
   cleanPreconfiguredOutputs,
@@ -1289,7 +1291,7 @@ describe('Outputs preconfiguration', () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true } as Output,
             { id: 'output2', is_preconfigured: true } as Output,
@@ -1323,7 +1325,7 @@ describe('Outputs preconfiguration', () => {
       it('should delete deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true } as Output,
             { id: 'output2', is_preconfigured: true } as Output,
@@ -1351,7 +1353,7 @@ describe('Outputs preconfiguration', () => {
       it('should update default deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true, is_default: true } as Output,
             { id: 'output2', is_preconfigured: true, is_default_monitoring: true } as Output,
@@ -1381,6 +1383,51 @@ describe('Outputs preconfiguration', () => {
             is_preconfigured: false,
           }),
           { fromPreconfiguration: true }
+        );
+      });
+
+      it('should restore public default output when PrivateLink output was default and is removed from config', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        mockedOutputService.listPreconfigured.mockResolvedValue({
+          items: [
+            {
+              id: SERVERLESS_PRIVATE_OUTPUT_ID,
+              is_preconfigured: true,
+              is_default: true,
+              is_default_monitoring: true,
+            } as Output,
+          ],
+          page: 1,
+          perPage: 10000,
+          total: 1,
+        });
+
+        await cleanPreconfiguredOutputs(soClient, esClient, []);
+
+        // Should restore the public default
+        expect(mockedOutputService.update).toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          SERVERLESS_DEFAULT_OUTPUT_ID,
+          { is_default: true, is_default_monitoring: true },
+          { fromPreconfiguration: true }
+        );
+
+        // Should delete the PrivateLink output entirely so it cannot be re-enabled by mistake
+        expect(mockedOutputService.delete).toBeCalledWith(
+          SERVERLESS_PRIVATE_OUTPUT_ID,
+          expect.anything()
+        );
+
+        // Should NOT un-preconfigure (no ghost SO left behind)
+        expect(mockedOutputService.update).not.toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          SERVERLESS_PRIVATE_OUTPUT_ID,
+          expect.anything(),
+          expect.anything()
         );
       });
     });
