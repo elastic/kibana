@@ -60,6 +60,7 @@ function createNavTree({
   ingestHubAvailable,
   entityCentricLabEnabled,
   latestEnabled,
+  elasticOnEnabled,
   infraShortTermEnabled,
   superShortTermEnabled,
   favoritesState = { ungrouped: [], groups: [] },
@@ -79,6 +80,13 @@ function createNavTree({
   // `entityCentricLabEnabled` branch) but renames the panel to "Inventory" and
   // adds a "Saved views" section. Never affects any other mode.
   latestEnabled?: boolean;
+  // `elasticOn` is a clone of `latest` (so `latestEnabled` is also true for it):
+  // it inherits the whole Latest inventory experience, and then layers on
+  // ElasticOn-only changes gated behind this exclusive flag. Never affects Latest
+  // or any other mode. First ElasticOn-only change: the inventory is hosted under
+  // the "Infrastructure" nav item (replacing its default children) instead of a
+  // separate "Inventory" item.
+  elasticOnEnabled?: boolean;
   infraShortTermEnabled?: boolean;
   superShortTermEnabled?: boolean;
   favoritesState?: FavoritesState;
@@ -108,10 +116,16 @@ function createNavTree({
     Boolean(streamsAvailable) &&
     (Boolean(entityCentricLabEnabled) || infraShortTermMode || superShortTermMode);
 
-  // Latest renames the panel to "Inventory" (it's the entity inventory hub with
-  // saved views); the other infra modes keep "Infrastructure"; entity-centric
-  // keeps "Entities".
-  const entitiesPanelTitle = latestEnabled
+  // ElasticOn hosts the inventory under the "Infrastructure" nav item, so the
+  // panel is titled "Infrastructure". Latest renames it to "Inventory" (it's the
+  // entity inventory hub with saved views); the other infra modes keep
+  // "Infrastructure"; entity-centric keeps "Entities". (ElasticOn implies
+  // `latestEnabled`, so it must be checked first.)
+  const entitiesPanelTitle = elasticOnEnabled
+    ? i18n.translate('xpack.observability.obltNav.infrastructure', {
+        defaultMessage: 'Infrastructure',
+      })
+    : latestEnabled
     ? i18n.translate('xpack.observability.obltNav.inventory', {
         defaultMessage: 'Inventory',
       })
@@ -159,6 +173,12 @@ function createNavTree({
     normalizedQuery.length === 0 || integration.name.toLowerCase().includes(normalizedQuery);
   const filterByQuery = (integrations: IntegrationSummary[]): IntegrationSummary[] =>
     integrations.filter(matchesQuery);
+
+  // Latest lab reuses the same shared nav-search store (the modes are mutually
+  // exclusive). Here it filters, by label, both the "Saved views" list and the
+  // category items. Generic string matcher so it can be applied to either.
+  const matchesLatestSearch = (label: string): boolean =>
+    normalizedQuery.length === 0 || label.toLowerCase().includes(normalizedQuery);
 
   const favoriteIntegrationIds = [
     ...favoritesState.ungrouped,
@@ -421,22 +441,42 @@ function createNavTree({
   // can't run the apply logic themselves. Uses an absolute href because the
   // view id is dynamic (no static deep link exists). Hidden when there are no
   // views, to avoid an empty section header.
+  // Filter the saved views by the panel search query (Latest only).
+  const filteredSavedViews = savedViews.filter((view) => matchesLatestSearch(view.name));
+  // ElasticOn: surface the session-landing default first and mark it with a star
+  // glyph. `latest` never sets a default, so leave its list untouched. (The star
+  // survives the nav's sentence-case label formatter, which only touches the
+  // first character.)
+  const orderedSavedViews = elasticOnEnabled
+    ? [...filteredSavedViews].sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
+    : filteredSavedViews;
   const savedViewsSection =
-    latestEnabled && savedViews.length > 0
+    latestEnabled && orderedSavedViews.length > 0
       ? {
           id: 'entityCentricLab-savedViews',
           title: i18n.translate('xpack.observability.obltNav.savedViews', {
             defaultMessage: 'Saved views',
           }),
-          children: savedViews.map((view) => {
-            const categorySegment = view.category ? `/${view.category}` : '';
+          children: orderedSavedViews.map((view) => {
+            // Rebuild the exact route the view was saved on. Cloud views carry a
+            // provider (and optionally a service) sub-scope, so a view saved on
+            // `/entities/cloud/aws/s3` reloads that page — not the whole Cloud
+            // category.
+            let categorySegment = '';
+            if (view.category === 'cloud' && view.cloudProvider) {
+              categorySegment = view.cloudService
+                ? `/cloud/${view.cloudProvider}/${view.cloudService}`
+                : `/cloud/${view.cloudProvider}`;
+            } else if (view.category) {
+              categorySegment = `/${view.category}`;
+            }
             const path = `/app/streams/entities${categorySegment}?loadView=${encodeURIComponent(
               view.id
             )}`;
             return {
               id: `entityCentricLab-savedView-${view.id}`,
               href: toAbsoluteHref(path),
-              title: view.name,
+              title: elasticOnEnabled && view.isDefault ? `\u2605 ${view.name}` : view.name,
               // Active when the page URL still carries this view's `loadView`
               // id. The streams page keeps the param (rather than stripping it)
               // precisely so the loaded view stays highlighted here and survives
@@ -503,54 +543,218 @@ function createNavTree({
         : pathNameSerialized.startsWith(target);
     };
 
+  // Latest: keep the "Inventory" panel opener active for *any* entities route,
+  // independent of its children. The panel search (and the "manage saved views"
+  // delete) can filter out the category item matching the current page; without
+  // this, the panel would be left with no active node and the highlight would
+  // fall through to the broader "Streams" item (which also matches
+  // `/app/streams`), reading as being bounced from Inventory to Streams.
+  const latestEntitiesPanelGetIsActive = ({
+    pathNameSerialized,
+    prepend,
+  }: {
+    pathNameSerialized: string;
+    prepend: (path: string) => string;
+  }): boolean =>
+    pathNameSerialized.startsWith(prepend('/app/streams/entities')) ||
+    // "Manage entity types" is reached from the inventory toolbar and lives in
+    // this panel too, so keep the panel highlighted there instead of letting the
+    // route fall through to the Streams opener (which also matches `/app/streams`).
+    pathNameSerialized.startsWith(prepend('/app/streams/manage-entity-types'));
+
+  // Latest category nodes carry an explicit title (identical to their deep-link
+  // title) so the panel search can filter them against the same string that's
+  // displayed. Titles/filtering are Latest-only; the entity-centric nodes above
+  // are untouched.
   const latestEntitiesAllSection = {
     children: [
       {
         id: 'entityCentricLab-entitiesAll',
         link: 'streams:entitiesAll' as const,
+        title: i18n.translate('xpack.observability.obltNav.latest.allEntities', {
+          defaultMessage: 'All entities',
+        }),
         getIsActive: categoryGetIsActive('/app/streams/entities', true),
       },
-    ],
+    ].filter((child) => matchesLatestSearch(child.title)),
   };
 
-  const latestCategoryChildren = [
+  // Latest categories render as a flat, untitled group — but Cloud is pulled out
+  // into its own collapsible section (see `latestCloudSection`) and slotted back
+  // into its original position (after Services) by splitting the list in two.
+  const latestCategoryChildrenTop = [
     {
       id: 'entityCentricLab-entitiesHosts',
       link: 'streams:entitiesHosts' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.hosts', {
+        defaultMessage: 'Hosts',
+      }),
       getIsActive: categoryGetIsActive('/app/streams/entities/hosts'),
     },
     {
       id: 'entityCentricLab-entitiesKubernetes',
       link: 'streams:entitiesKubernetes' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.kubernetes', {
+        defaultMessage: 'Kubernetes',
+      }),
       getIsActive: categoryGetIsActive('/app/streams/entities/kubernetes'),
     },
     {
       id: 'entityCentricLab-entitiesDatabases',
       link: 'streams:entitiesDatabases' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.databases', {
+        defaultMessage: 'Databases',
+      }),
       getIsActive: categoryGetIsActive('/app/streams/entities/databases'),
     },
     {
       id: 'entityCentricLab-entitiesServices',
       link: 'streams:entitiesServices' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.services', {
+        defaultMessage: 'Services',
+      }),
       getIsActive: categoryGetIsActive('/app/streams/entities/services'),
     },
-    { ...cloudCategoryNode, getIsActive: categoryGetIsActive('/app/streams/entities/cloud') },
+  ].filter((child) => matchesLatestSearch(child.title));
+
+  const latestCategoryChildrenBottom = [
     {
       id: 'entityCentricLab-entitiesMiddlewares',
       link: 'streams:entitiesMiddlewares' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.middlewares', {
+        defaultMessage: 'Middlewares',
+      }),
       getIsActive: categoryGetIsActive('/app/streams/entities/middlewares'),
     },
     {
       id: 'entityCentricLab-entitiesLlms',
       link: 'streams:entitiesLlms' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.llms', {
+        defaultMessage: 'LLMs',
+      }),
       getIsActive: categoryGetIsActive('/app/streams/entities/llms'),
     },
     {
       id: 'entityCentricLab-entitiesOther',
       link: 'streams:entitiesOther' as const,
+      title: i18n.translate('xpack.observability.obltNav.latest.other', {
+        defaultMessage: 'Other',
+      }),
       getIsActive: categoryGetIsActive('/app/streams/entities/other'),
     },
+  ].filter((child) => matchesLatestSearch(child.title));
+
+  // Latest: Cloud is an inline, collapsible group *in the panel* (Cloud >
+  // AWS/GCP/Azure > services) rather than a flyout panelOpener or an in-page
+  // tree. The chrome mapper turns a titled section whose children are
+  // link-less + childful nodes into sub-groups (the one supported nesting level),
+  // so each provider becomes a collapsible sub-group of its service links.
+  // Provider rows are headers only (no landing link); the services deep-link to
+  // their pages. Search filters services by label (and shows a whole provider
+  // when its name — or "Cloud" — matches).
+  const latestCloudProviders = [
+    {
+      id: 'entityCentricLab-latestCloudAws',
+      label: 'AWS',
+      services: [
+        {
+          id: 'entityCentricLab-entitiesCloudAwsEc2',
+          link: 'streams:entitiesCloudAwsEc2' as const,
+          title: 'EC2',
+          path: '/app/streams/entities/cloud/aws/ec2',
+        },
+        {
+          id: 'entityCentricLab-entitiesCloudAwsLambda',
+          link: 'streams:entitiesCloudAwsLambda' as const,
+          title: 'Lambda',
+          path: '/app/streams/entities/cloud/aws/lambda',
+        },
+        {
+          id: 'entityCentricLab-entitiesCloudAwsS3',
+          link: 'streams:entitiesCloudAwsS3' as const,
+          title: 'S3',
+          path: '/app/streams/entities/cloud/aws/s3',
+        },
+      ],
+    },
+    {
+      id: 'entityCentricLab-latestCloudGcp',
+      label: 'GCP',
+      services: [
+        {
+          id: 'entityCentricLab-entitiesCloudGcpCompute',
+          link: 'streams:entitiesCloudGcpCompute' as const,
+          title: 'Compute Engine',
+          path: '/app/streams/entities/cloud/gcp/compute',
+        },
+        {
+          id: 'entityCentricLab-entitiesCloudGcpFunctions',
+          link: 'streams:entitiesCloudGcpFunctions' as const,
+          title: 'Cloud Functions',
+          path: '/app/streams/entities/cloud/gcp/functions',
+        },
+        {
+          id: 'entityCentricLab-entitiesCloudGcpStorage',
+          link: 'streams:entitiesCloudGcpStorage' as const,
+          title: 'Cloud Storage',
+          path: '/app/streams/entities/cloud/gcp/storage',
+        },
+      ],
+    },
+    {
+      id: 'entityCentricLab-latestCloudAzure',
+      label: 'Azure',
+      services: [
+        {
+          id: 'entityCentricLab-entitiesCloudAzureVm',
+          link: 'streams:entitiesCloudAzureVm' as const,
+          title: 'Virtual Machines',
+          path: '/app/streams/entities/cloud/azure/vm',
+        },
+        {
+          id: 'entityCentricLab-entitiesCloudAzureFunctions',
+          link: 'streams:entitiesCloudAzureFunctions' as const,
+          title: 'Functions',
+          path: '/app/streams/entities/cloud/azure/functions',
+        },
+        {
+          id: 'entityCentricLab-entitiesCloudAzureBlob',
+          link: 'streams:entitiesCloudAzureBlob' as const,
+          title: 'Blob Storage',
+          path: '/app/streams/entities/cloud/azure/blob',
+        },
+      ],
+    },
   ];
+
+  const latestCloudTitle = i18n.translate('xpack.observability.obltNav.latest.cloud', {
+    defaultMessage: 'Cloud',
+  });
+  const latestCloudSubGroups = latestCloudProviders
+    .map((provider) => {
+      const providerMatches =
+        matchesLatestSearch(latestCloudTitle) || matchesLatestSearch(provider.label);
+      const services = provider.services
+        .filter((service) => providerMatches || matchesLatestSearch(service.title))
+        .map((service) => ({
+          id: service.id,
+          link: service.link,
+          title: service.title,
+          getIsActive: categoryGetIsActive(service.path),
+        }));
+      // A childless, link-less node would be dropped by the mapper; skip empties.
+      return { id: provider.id, title: provider.label, children: services };
+    })
+    .filter((provider) => provider.children.length > 0);
+
+  const latestCloudSection =
+    latestCloudSubGroups.length > 0
+      ? {
+          id: 'entityCentricLab-latestCloudSection',
+          title: latestCloudTitle,
+          children: latestCloudSubGroups,
+        }
+      : null;
 
   const manageEntityTypesSection = {
     // Duplicate of the Streams panel's "Manage entity types" entry: the same
@@ -568,6 +772,20 @@ function createNavTree({
   // and gives the categories saved-view-aware highlighting. Infra-short-term
   // shows "All entities", the Cloud section (with AWS/GCP/Azure), then the
   // remaining flat categories (Databases, Kubernetes).
+  // ElasticOn drops the dedicated "Cloud" section (label + surrounding dividers)
+  // and folds AWS/GCP/Azure into the single flat category section. The chrome
+  // mapper renders flat links first and collapsible sub-groups last within a
+  // section, so the providers land at the bottom of the category list with no
+  // dividers bracketing them.
+  const elasticOnCategoryChildren = [
+    ...latestCategoryChildrenTop,
+    // ElasticOn-only: drop the "Other" catch-all category from the list.
+    ...latestCategoryChildrenBottom.filter(
+      (child) => child.id !== 'entityCentricLab-entitiesOther'
+    ),
+    ...latestCloudSubGroups,
+  ];
+
   const entitiesPanelChildren = superShortTermMode
     ? superShortTermPanelChildren
     : infraShortTermMode
@@ -578,14 +796,32 @@ function createNavTree({
           children: [databasesCategoryNode, kubernetesCategoryNode],
         },
       ]
+    : elasticOnEnabled
+    ? [
+        // ElasticOn: Saved views, All entities, then a single category section
+        // (flat categories + AWS/GCP/Azure collapsible groups, no "Cloud" label
+        // or surrounding dividers), then Manage entity types.
+        ...(savedViewsSection ? [savedViewsSection] : []),
+        ...(latestEntitiesAllSection.children.length > 0 ? [latestEntitiesAllSection] : []),
+        ...(elasticOnCategoryChildren.length > 0 ? [{ children: elasticOnCategoryChildren }] : []),
+        manageEntityTypesSection,
+      ]
     : latestEnabled
     ? [
-        // Latest leads with the "Saved views" section (when non-empty).
+        // Latest leads with the "Saved views" section (when non-empty), then
+        // "All entities", the first category group, the collapsible "Cloud"
+        // section (in its original ordinal spot), and the remaining categories.
+        // The search box can filter any of these down to nothing, so only
+        // include groups/sections that still have children — an empty group
+        // would render a stray container. "Manage entity types" always stays
+        // (it isn't a category).
         ...(savedViewsSection ? [savedViewsSection] : []),
-        latestEntitiesAllSection,
-        {
-          children: latestCategoryChildren,
-        },
+        ...(latestEntitiesAllSection.children.length > 0 ? [latestEntitiesAllSection] : []),
+        ...(latestCategoryChildrenTop.length > 0 ? [{ children: latestCategoryChildrenTop }] : []),
+        ...(latestCloudSection ? [latestCloudSection] : []),
+        ...(latestCategoryChildrenBottom.length > 0
+          ? [{ children: latestCategoryChildrenBottom }]
+          : []),
         manageEntityTypesSection,
       ]
     : [
@@ -595,6 +831,101 @@ function createNavTree({
         },
         manageEntityTypesSection,
       ];
+
+  // Universal Profiling stays available under the "Infrastructure" item in every
+  // mode. Extracted so ElasticOn can append it beneath the relocated inventory
+  // content while the default Infrastructure panel keeps it in place.
+  const universalProfilingSection = {
+    id: 'profiling',
+    title: i18n.translate('xpack.observability.obltNav.infrastructure.universalProfiling', {
+      defaultMessage: 'Universal Profiling',
+    }),
+    children: [
+      { link: 'profiling:stacktraces' as const },
+      { link: 'profiling:flamegraphs' as const },
+      { link: 'profiling:functions' as const },
+    ],
+  };
+
+  // The default "Infrastructure" panel (used by every mode except ElasticOn):
+  // the three infra touchpoints followed by Universal Profiling.
+  const metricsInfrastructureNode = {
+    id: 'metrics',
+    link: 'metrics:inventory' as const,
+    title: i18n.translate('xpack.observability.obltNav.infrastructure', {
+      defaultMessage: 'Infrastructure',
+    }),
+    renderAs: 'panelOpener' as const,
+    icon: 'productCloudInfra',
+    children: [
+      {
+        children: [
+          {
+            link: 'metrics:inventory' as const,
+            title: i18n.translate('xpack.observability.infrastructure.inventory', {
+              defaultMessage: 'Infrastructure inventory',
+            }),
+            getIsActive: ({
+              pathNameSerialized,
+              prepend,
+            }: {
+              pathNameSerialized: string;
+              prepend: (path: string) => string;
+            }) => {
+              return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
+            },
+          },
+          {
+            link: 'metrics:hosts' as const,
+            getIsActive: ({
+              pathNameSerialized,
+              prepend,
+            }: {
+              pathNameSerialized: string;
+              prepend: (path: string) => string;
+            }) => {
+              return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
+            },
+          },
+          {
+            link: 'metrics:metrics-explorer' as const,
+            title: i18n.translate('xpack.observability.obltNav.infrastructure.metricsExplorer', {
+              defaultMessage: 'Metrics explorer',
+            }),
+          },
+        ],
+      },
+      universalProfilingSection,
+    ],
+  };
+
+  // The entity inventory panel opener. It always keeps the node id `entities` so
+  // the side-nav slot wiring (search box header + "manage saved views" cog) stays
+  // bound to it regardless of where the panel is rendered. In ElasticOn it is the
+  // "Infrastructure" item itself (infra icon, Universal Profiling appended); in
+  // every other lab mode it is a separate item with the generic entity `cluster`
+  // icon.
+  const inventoryPanelNode = {
+    id: 'entities',
+    // Super-short-term lands on the starred integrations Overview; the other lab
+    // modes land on the "All entities" inventory.
+    link: superShortTermMode ? ('streams:integrations' as const) : ('streams:entitiesAll' as const),
+    // `cluster` reads as "connected things / a network of entities" — the closest
+    // generic-entity metaphor in the current EUI icon set. ElasticOn hosts the
+    // inventory under "Infrastructure", so it uses the infra icon instead.
+    icon: elasticOnEnabled ? 'productCloudInfra' : 'cluster',
+    title: entitiesPanelTitle,
+    renderAs: 'panelOpener' as const,
+    // Latest (and its ElasticOn clone): pin the panel active across all entities
+    // routes so a search/delete that hides the current category doesn't hand the
+    // highlight to Streams. Other modes keep default matching.
+    ...(latestEnabled ? { getIsActive: latestEntitiesPanelGetIsActive } : {}),
+    // ElasticOn relocates the inventory under "Infrastructure" and keeps
+    // Universal Profiling beneath the category list.
+    children: elasticOnEnabled
+      ? [...entitiesPanelChildren, universalProfilingSection]
+      : entitiesPanelChildren,
+  };
 
   const navTree: NavigationTreeDefinition = {
     body: [
@@ -641,31 +972,11 @@ function createNavTree({
         link: 'slo',
         icon: 'visGauge',
       },
-      ...(showEntitiesPanel
-        ? [
-            {
-              // Entity-centric / Infra-short-term lab: top-level panel that
-              // exposes the "All entities" landing page and the per-category
-              // sub-pages. Sits above Streams so the user lands on it first
-              // when a lab mode is enabled. In Infra-short-term mode it is
-              // titled "Infrastructure", scoped to a reduced category set, and
-              // drops the "Manage entity types" entry entirely.
-              id: 'entities',
-              // Super-short-term lands on the starred integrations Overview;
-              // the other lab modes land on the "All entities" inventory.
-              link: superShortTermMode
-                ? ('streams:integrations' as const)
-                : ('streams:entitiesAll' as const),
-              // `cluster` renders three connected circles — reads as
-              // "connected things / a network of entities" and is the closest
-              // generic-entity metaphor available in the current EUI icon set.
-              icon: 'cluster',
-              title: entitiesPanelTitle,
-              renderAs: 'panelOpener' as const,
-              children: entitiesPanelChildren,
-            },
-          ]
-        : []),
+      // Entity-centric / Infra-short-term / Latest labs: a top-level inventory
+      // panel that sits above Streams so the user lands on it first. ElasticOn is
+      // the exception — it hosts the same inventory under the "Infrastructure"
+      // item instead (see below), so this separate item is omitted there.
+      ...(showEntitiesPanel && !elasticOnEnabled ? [inventoryPanelNode] : []),
       ...(streamsAvailable
         ? [
             entityCentricLabEnabled
@@ -681,6 +992,35 @@ function createNavTree({
                   link: 'streams' as const,
                   icon: 'productStreamsWired',
                   renderAs: 'panelOpener' as const,
+                  // Latest/ElasticOn: entities routes belong to the Inventory /
+                  // Infrastructure panel, not Streams. The opener defaults to
+                  // matching any `/app/streams` route (which includes
+                  // `/entities`), so without this exclusion Streams claims the
+                  // highlight whenever the inventory panel is left with no active
+                  // child — e.g. after a saved view is deleted or filtered out.
+                  // In ElasticOn the inventory panel sits *after* Streams in the
+                  // body, so that stray level-1 match would otherwise win.
+                  getIsActive: ({
+                    pathNameSerialized,
+                    prepend,
+                  }: {
+                    pathNameSerialized: string;
+                    prepend: (path: string) => string;
+                  }) => {
+                    const root = prepend('/app/streams');
+                    if (!pathNameSerialized.startsWith(root)) return false;
+                    if (
+                      latestEnabled &&
+                      (pathNameSerialized.startsWith(`${root}/entities`) ||
+                        // "Manage entity types" belongs to the Inventory /
+                        // Infrastructure panel in these modes (it's reached from
+                        // the inventory toolbar); don't let Streams claim it.
+                        pathNameSerialized.startsWith(`${root}/manage-entity-types`))
+                    ) {
+                      return false;
+                    }
+                    return true;
+                  },
                   children: [
                     {
                       children: [
@@ -702,7 +1042,15 @@ function createNavTree({
                               pathNameSerialized === `${root}/` ||
                               (pathNameSerialized.startsWith(root) &&
                                 !pathNameSerialized.startsWith(`${root}/manage-entity-types`) &&
-                                !pathNameSerialized.startsWith(`${root}/significant-events`))
+                                !pathNameSerialized.startsWith(`${root}/significant-events`) &&
+                                // Latest: `/entities` is the Inventory panel's own
+                                // territory. Without this, "All streams" claims it
+                                // as active — so when the panel search hides the
+                                // current category, this (deeper) match wins and
+                                // the highlight jumps to the Streams panel.
+                                !(
+                                  latestEnabled && pathNameSerialized.startsWith(`${root}/entities`)
+                                ))
                             );
                           },
                         },
@@ -720,14 +1068,24 @@ function createNavTree({
                         },
                       ],
                     },
-                    {
-                      children: [
-                        {
-                          id: 'entityCentricLab-manage',
-                          link: 'streams:manageEntityTypes' as const,
-                        },
-                      ],
-                    },
+                    // "Manage entity types" is duplicated in the Streams panel and
+                    // the entity Inventory / Infrastructure panel. In Latest/ElasticOn
+                    // the route belongs to the inventory panel (reached from its
+                    // toolbar), so the Streams copy is dropped — otherwise this child
+                    // matches `/manage-entity-types` by default and keeps the Streams
+                    // panel active/displayed there. Entity-centric keeps it here.
+                    ...(latestEnabled
+                      ? []
+                      : [
+                          {
+                            children: [
+                              {
+                                id: 'entityCentricLab-manage',
+                                link: 'streams:manageEntityTypes' as const,
+                              },
+                            ],
+                          },
+                        ]),
                   ],
                 }
               : {
@@ -833,62 +1191,14 @@ function createNavTree({
           },
         ],
       },
-      {
-        id: 'metrics',
-        link: 'metrics:inventory',
-        title: i18n.translate('xpack.observability.obltNav.infrastructure', {
-          defaultMessage: 'Infrastructure',
-        }),
-        renderAs: 'panelOpener',
-        icon: 'productCloudInfra',
-        children: [
-          {
-            children: [
-              {
-                link: 'metrics:inventory',
-                title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                  defaultMessage: 'Infrastructure inventory',
-                }),
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
-                },
-              },
-              {
-                link: 'metrics:hosts',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/metrics/hosts'));
-                },
-              },
-              {
-                link: 'metrics:metrics-explorer',
-                title: i18n.translate(
-                  'xpack.observability.obltNav.infrastructure.metricsExplorer',
-                  {
-                    defaultMessage: 'Metrics explorer',
-                  }
-                ),
-              },
-            ],
-          },
-          {
-            id: 'profiling',
-            title: i18n.translate('xpack.observability.obltNav.infrastructure.universalProfiling', {
-              defaultMessage: 'Universal Profiling',
-            }),
-            children: [
-              {
-                link: 'profiling:stacktraces',
-              },
-              {
-                link: 'profiling:flamegraphs',
-              },
-              {
-                link: 'profiling:functions',
-              },
-            ],
-          },
-        ],
-      },
+      // The "Infrastructure" item. ElasticOn replaces its default children
+      // (Infrastructure inventory / Hosts / Metrics explorer) with the full
+      // entity inventory panel — same node, still id `entities` so the search +
+      // saved-views slots keep working — and appends Universal Profiling beneath
+      // it. Every other mode keeps the default Infrastructure panel. When streams
+      // isn't available the inventory can't be hosted, so fall back to the
+      // default panel.
+      elasticOnEnabled && showEntitiesPanel ? inventoryPanelNode : metricsInfrastructureNode,
       ...(showAiAssistant
         ? [
             {
@@ -1351,7 +1661,13 @@ function createNavTree({
 // `discover/server/ui_settings.ts`. Inlined here to avoid a cross-plugin
 // public import; the setting key is a stable public contract.
 const LAB_MODE_SETTING = 'discover:labMode';
-type LabMode = 'off' | 'entityCentric' | 'latest' | 'infraShortTerm' | 'superShortTerm';
+type LabMode =
+  | 'off'
+  | 'entityCentric'
+  | 'latest'
+  | 'elasticOn'
+  | 'infraShortTerm'
+  | 'superShortTerm';
 
 export const createDefinition = (
   coreStart: CoreStart,
@@ -1392,10 +1708,12 @@ export const createDefinition = (
           isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
           showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
           ingestHubAvailable,
-          // `latest` reuses the entity-centric panel but with Latest-only tweaks
-          // (see `latestEnabled` below).
-          entityCentricLabEnabled: labMode === 'entityCentric' || labMode === 'latest',
-          latestEnabled: labMode === 'latest',
+          // `latest` (and its `elasticOn` clone) reuse the entity-centric panel
+          // but with Latest-only tweaks (see `latestEnabled` below).
+          entityCentricLabEnabled:
+            labMode === 'entityCentric' || labMode === 'latest' || labMode === 'elasticOn',
+          latestEnabled: labMode === 'latest' || labMode === 'elasticOn',
+          elasticOnEnabled: labMode === 'elasticOn',
           infraShortTermEnabled: labMode === 'infraShortTerm',
           superShortTermEnabled: labMode === 'superShortTerm',
           favoritesState,

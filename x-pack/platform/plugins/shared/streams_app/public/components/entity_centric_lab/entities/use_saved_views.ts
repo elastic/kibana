@@ -42,6 +42,19 @@ export type ViewMode = 'grid' | 'list' | 'geomap';
 
 export interface SavedViewState {
   readonly category: EntityCategoryId | null;
+  /**
+   * Cloud provider (`aws` / `gcp` / `azure`) when the view was saved on a
+   * `/entities/cloud/{provider}` route, else `null`. Always paired with
+   * `category: 'cloud'`. Without this, a view saved on a cloud sub-page would
+   * only remember `category: 'cloud'` and reload the whole Cloud page.
+   */
+  readonly cloudProvider: string | null;
+  /**
+   * Cloud service (e.g. `s3`, `ec2`) when the view was saved on a
+   * `/entities/cloud/{provider}/{service}` route, else `null`. Requires
+   * `cloudProvider`.
+   */
+  readonly cloudService: string | null;
   readonly tab: CategoryTab;
   readonly viewMode: ViewMode;
   readonly search: string;
@@ -58,6 +71,13 @@ export interface SavedView {
 
 const SAVED_VIEWS_KEY = 'entityCentricLab.savedViews.v1';
 const CURRENT_VIEW_KEY = 'entityCentricLab.savedViews.currentId.v1';
+// The user's chosen "default" view — the one auto-loaded the first time the
+// Infrastructure landing is opened in a browser session (ElasticOn only).
+const DEFAULT_VIEW_KEY = 'entityCentricLab.savedViews.defaultId.v1';
+// Per-session guard so the default view is applied at most once per browser
+// session (sessionStorage clears when the tab/window closes). Kept here so the
+// storage keys stay in one place; consumed by the entities page's auto-load.
+const DEFAULT_APPLIED_SESSION_KEY = 'entityCentricLab.savedViews.defaultApplied.v1';
 
 // ---------------------------------------------------------------------------
 // Mirrored storage keys
@@ -120,6 +140,14 @@ const parseState = (value: unknown): SavedViewState | undefined => {
       : null;
   return {
     category,
+    // Cloud sub-scope only makes sense under the Cloud category; ignore stray
+    // values on any other category so the route reconstructs cleanly.
+    cloudProvider:
+      category === 'cloud' && typeof source.cloudProvider === 'string'
+        ? source.cloudProvider
+        : null,
+    cloudService:
+      category === 'cloud' && typeof source.cloudService === 'string' ? source.cloudService : null,
     tab: isCategoryTab(source.tab) ? source.tab : 'monitoring',
     viewMode: isViewMode(source.viewMode) ? source.viewMode : 'grid',
     search: typeof source.search === 'string' ? source.search : '',
@@ -178,6 +206,56 @@ const readCurrentViewId = (): string | null => {
     return window.localStorage.getItem(CURRENT_VIEW_KEY);
   } catch {
     return null;
+  }
+};
+
+const readDefaultViewId = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem(DEFAULT_VIEW_KEY);
+  } catch {
+    return null;
+  }
+};
+
+const writeDefaultViewId = (id: string | null): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    if (id === null) {
+      window.localStorage.removeItem(DEFAULT_VIEW_KEY);
+    } else {
+      window.localStorage.setItem(DEFAULT_VIEW_KEY, id);
+    }
+    // Same change event the nav + other bar instances listen on, so the
+    // "Default" marker updates everywhere without a reload.
+    window.dispatchEvent(new Event(CHANGE_EVENT));
+  } catch {
+    // See writeViews.
+  }
+};
+
+/**
+ * Has the default view already been auto-applied in this browser session?
+ * Backed by `sessionStorage` so it resets on a fresh session (new tab/window),
+ * which is exactly the "land on my default after a new session" trigger.
+ */
+export const hasAppliedDefaultThisSession = (): boolean => {
+  if (typeof window === 'undefined') return true;
+  try {
+    return window.sessionStorage.getItem(DEFAULT_APPLIED_SESSION_KEY) === '1';
+  } catch {
+    // If sessionStorage is unavailable, treat as "already applied" so we never
+    // fight the user with repeated redirects.
+    return true;
+  }
+};
+
+export const markDefaultAppliedThisSession = (): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.sessionStorage.setItem(DEFAULT_APPLIED_SESSION_KEY, '1');
+  } catch {
+    // ignore — worst case the default applies again next landing this session.
   }
 };
 
@@ -243,11 +321,15 @@ export interface UseSavedViewsResult {
   readonly views: readonly SavedView[];
   readonly currentViewId: string | null;
   readonly currentView: SavedView | undefined;
+  /** The view marked as the session-landing default, or `null` when unset. */
+  readonly defaultViewId: string | null;
   readonly saveView: (name: string, state: SavedViewState) => SavedView;
   readonly updateViewState: (id: string, state: SavedViewState) => void;
   readonly renameView: (id: string, name: string) => void;
   readonly deleteView: (id: string) => void;
   readonly setCurrentViewId: (id: string | null) => void;
+  /** Mark a view as the default (`null` clears it). */
+  readonly setDefaultView: (id: string | null) => void;
 }
 
 const generateId = (): string => {
@@ -259,6 +341,7 @@ const generateId = (): string => {
 export const useSavedViews = (): UseSavedViewsResult => {
   const [views, setViews] = useState<readonly SavedView[]>(() => readViews());
   const [currentViewId, setCurrentViewIdState] = useState<string | null>(() => readCurrentViewId());
+  const [defaultViewId, setDefaultViewIdState] = useState<string | null>(() => readDefaultViewId());
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -270,6 +353,7 @@ export const useSavedViews = (): UseSavedViewsResult => {
     const listener = () => {
       setViews(readViews());
       setCurrentViewIdState(readCurrentViewId());
+      setDefaultViewIdState(readDefaultViewId());
     };
     window.addEventListener(CHANGE_EVENT, listener);
     window.addEventListener('storage', listener);
@@ -304,9 +388,13 @@ export const useSavedViews = (): UseSavedViewsResult => {
   const deleteView = useCallback((id: string) => {
     writeViews(readViews().filter((view) => view.id !== id));
     if (readCurrentViewId() === id) writeCurrentViewId(null);
+    // A deleted view can't remain the default.
+    if (readDefaultViewId() === id) writeDefaultViewId(null);
   }, []);
 
   const setCurrentViewId = useCallback((id: string | null) => writeCurrentViewId(id), []);
+
+  const setDefaultView = useCallback((id: string | null) => writeDefaultViewId(id), []);
 
   const currentView = views.find((view) => view.id === currentViewId);
 
@@ -314,11 +402,13 @@ export const useSavedViews = (): UseSavedViewsResult => {
     views,
     currentViewId,
     currentView,
+    defaultViewId,
     saveView,
     updateViewState,
     renameView,
     deleteView,
     setCurrentViewId,
+    setDefaultView,
   };
 };
 
@@ -340,6 +430,8 @@ const canonicalFilters = (filters: ActiveTagFilters): Record<string, readonly st
 
 const canonicalState = (state: SavedViewState) => ({
   category: state.category,
+  cloudProvider: state.cloudProvider,
+  cloudService: state.cloudService,
   tab: state.tab,
   viewMode: state.viewMode,
   search: state.search,

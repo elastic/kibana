@@ -279,9 +279,18 @@ export interface NavSavedView {
   readonly id: string;
   readonly name: string;
   readonly category: string | null;
+  // Cloud sub-scope for views saved on a `/entities/cloud/{provider}[/{service}]`
+  // route. Drives a deep href so the view reloads its exact page instead of the
+  // whole Cloud category. Both `null` for non-cloud views.
+  readonly cloudProvider: string | null;
+  readonly cloudService: string | null;
+  // Whether this view is the ElasticOn session-landing default. Drives the nav's
+  // "Default" marker + sort-to-top. `false` for every view when no default is set.
+  readonly isDefault: boolean;
 }
 
 const SAVED_VIEWS_STORAGE_KEY = 'entityCentricLab.savedViews.v1';
+const SAVED_VIEWS_DEFAULT_KEY = 'entityCentricLab.savedViews.defaultId.v1';
 const SAVED_VIEWS_CHANGE_EVENT = 'entity-centric-lab:saved-views-changed';
 const GLOBAL_SAVED_VIEWS_KEY = '__kbnEntityCentricLab_savedViews__' as const;
 
@@ -290,7 +299,7 @@ interface SavedViewsSharedState {
   hydrated: boolean;
 }
 
-const parseSavedViews = (raw: string | null): NavSavedView[] => {
+const parseSavedViews = (raw: string | null, defaultId: string | null): NavSavedView[] => {
   if (!raw) return [];
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -300,9 +309,27 @@ const parseSavedViews = (raw: string | null): NavSavedView[] => {
       if (typeof entry !== 'object' || entry === null) continue;
       const candidate = entry as { id?: unknown; name?: unknown; state?: unknown };
       if (typeof candidate.id !== 'string' || typeof candidate.name !== 'string') continue;
-      const state = (candidate.state ?? {}) as { category?: unknown };
+      const state = (candidate.state ?? {}) as {
+        category?: unknown;
+        cloudProvider?: unknown;
+        cloudService?: unknown;
+      };
       const category = typeof state.category === 'string' ? state.category : null;
-      views.push({ id: candidate.id, name: candidate.name, category });
+      // Cloud sub-scope only applies under the Cloud category.
+      const cloudProvider =
+        category === 'cloud' && typeof state.cloudProvider === 'string'
+          ? state.cloudProvider
+          : null;
+      const cloudService =
+        category === 'cloud' && typeof state.cloudService === 'string' ? state.cloudService : null;
+      views.push({
+        id: candidate.id,
+        name: candidate.name,
+        category,
+        cloudProvider,
+        cloudService,
+        isDefault: candidate.id === defaultId,
+      });
     }
     return views;
   } catch {
@@ -310,10 +337,22 @@ const parseSavedViews = (raw: string | null): NavSavedView[] => {
   }
 };
 
+const readDefaultViewId = (): string | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem(SAVED_VIEWS_DEFAULT_KEY);
+  } catch {
+    return null;
+  }
+};
+
 const readSavedViews = (): NavSavedView[] => {
   if (typeof window === 'undefined') return [];
   try {
-    return parseSavedViews(window.localStorage.getItem(SAVED_VIEWS_STORAGE_KEY));
+    return parseSavedViews(
+      window.localStorage.getItem(SAVED_VIEWS_STORAGE_KEY),
+      readDefaultViewId()
+    );
   } catch {
     return [];
   }
@@ -340,7 +379,13 @@ const hydrateSavedViewsOnce = (): SavedViewsSharedState => {
     // the native `storage` event covers writes made in other tabs.
     window.addEventListener(SAVED_VIEWS_CHANGE_EVENT, emit);
     window.addEventListener('storage', (event) => {
-      if (event.key === null || event.key === SAVED_VIEWS_STORAGE_KEY) emit();
+      if (
+        event.key === null ||
+        event.key === SAVED_VIEWS_STORAGE_KEY ||
+        event.key === SAVED_VIEWS_DEFAULT_KEY
+      ) {
+        emit();
+      }
     });
   }
   return state;

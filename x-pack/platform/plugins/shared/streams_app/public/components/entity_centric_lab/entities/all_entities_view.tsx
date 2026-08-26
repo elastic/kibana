@@ -6,10 +6,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import {
-  EuiBadge,
   EuiBetaBadge,
   EuiButton,
   EuiButtonGroup,
@@ -20,7 +19,6 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiSuperDatePicker,
-  EuiText,
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
@@ -120,6 +118,8 @@ import {
   applyViewToStorage,
   areStatesEqual,
   consumePendingSearch,
+  hasAppliedDefaultThisSession,
+  markDefaultAppliedThisSession,
   useSavedViews,
   type SavedView,
   type SavedViewState,
@@ -337,6 +337,7 @@ export const AllEntitiesView = ({
   // component (cross-category) or just updates the query on the current route
   // (same-category).
   const location = useLocation();
+  const history = useHistory();
   const {
     core: { notifications, uiSettings },
     dependencies: {
@@ -356,11 +357,16 @@ export const AllEntitiesView = ({
     uiSettings.get<string>('discover:labMode', 'off')
   );
   const isInfraShortTerm = labMode === 'infraShortTerm';
-  // `latest` is a separate lab experience we iterate on independently of
-  // `entityCentric`. In Latest the Monitoring assets surface is gone, so the
-  // entity pages drop the Inventory/Monitoring tab strip and render the
-  // Inventory surface directly. This flag must never affect any other mode.
-  const isLatest = labMode === 'latest';
+  // `latest` (and its `elasticOn` clone) are separate lab experiences we iterate
+  // on independently of `entityCentric`. In these modes the Monitoring assets
+  // surface is gone, so the entity pages drop the Inventory/Monitoring tab strip
+  // and render the Inventory surface directly. This flag must never affect any
+  // other mode.
+  const isLatest = labMode === 'latest' || labMode === 'elasticOn';
+  // The "default view" affordance (Save dialog toggle, Manage star, auto-load on
+  // session landing) is ElasticOn-only per product scope; `latest` keeps saved
+  // views without a default.
+  const isElasticOn = labMode === 'elasticOn';
   // URL-state-backed time range, shared with every other Streams page
   // through the same `rangeFrom`/`rangeTo` search params. The lab dataset
   // is static so the picked range doesn't actually filter the entities
@@ -516,12 +522,59 @@ export const AllEntitiesView = ({
     setViewMode(view.state.viewMode);
     setSearch(view.state.search);
   }, [isLatest, loadViewId, savedViewsList, setActiveTagFilters, setCategoryTab, setViewMode]);
-  // The saved view currently referenced by the URL, if any — drives the
-  // "Viewing …" indicator in the toolbar (and its "Modified" hint).
-  const loadedView = useMemo(
-    () => (loadViewId ? savedViewsList.find((view) => view.id === loadViewId) : undefined),
-    [loadViewId, savedViewsList]
-  );
+
+  // Latest: if the loaded view is deleted (e.g. from the nav's "Manage saved
+  // views" modal), its id no longer resolves but `?loadView` lingers in the URL.
+  // That param is what tells the nav to *suppress* the category highlight (so the
+  // saved view highlights instead) — with the view gone, the panel is left with
+  // no active item and the highlight falls through to Streams, which reads as
+  // being bounced off the inventory page. Strip the stale param so the category
+  // re-activates and we stay put. Runs only when the id is truly orphaned, so it
+  // never fights an in-progress apply.
+  useEffect(() => {
+    if (!isLatest || !loadViewId) return;
+    if (savedViewsList.some((candidate) => candidate.id === loadViewId)) return;
+    const params = new URLSearchParams(location.search);
+    params.delete('loadView');
+    const nextSearch = params.toString();
+    history.replace({ pathname: location.pathname, search: nextSearch ? `?${nextSearch}` : '' });
+  }, [isLatest, loadViewId, savedViewsList, history, location.pathname, location.search]);
+
+  // ElasticOn: the first time the Infrastructure landing (`/entities`) is opened
+  // in a browser session, redirect to the user's default view (if any). We
+  // rewrite the route to the view's exact page + `?loadView` so the existing
+  // load effect applies its filters and the nav highlights it — identical to
+  // clicking the view in the nav. Gated by a per-session flag so subsequent
+  // visits keep the plain "All entities" landing reachable.
+  const { defaultViewId } = savedViewsApi;
+  useEffect(() => {
+    if (!isElasticOn) return;
+    // Only the cross-category landing — never a category or cloud sub-page the
+    // user navigated to on purpose.
+    if (categoryScope !== undefined) return;
+    if (loadViewId) return;
+    if (!defaultViewId) return;
+    if (hasAppliedDefaultThisSession()) return;
+    const view = savedViewsList.find((candidate) => candidate.id === defaultViewId);
+    // Mark applied even if the default was deleted out from under us, so we don't
+    // re-check on every render for the rest of the session.
+    markDefaultAppliedThisSession();
+    if (!view) return;
+    const {
+      category: viewCategory,
+      cloudProvider: viewProvider,
+      cloudService: viewService,
+    } = view.state;
+    let pathname = '/entities';
+    if (viewCategory === 'cloud' && viewProvider && viewService) {
+      pathname = `/entities/cloud/${viewProvider}/${viewService}`;
+    } else if (viewCategory === 'cloud' && viewProvider) {
+      pathname = `/entities/cloud/${viewProvider}`;
+    } else if (viewCategory) {
+      pathname = `/entities/${viewCategory}`;
+    }
+    history.replace({ pathname, search: `?loadView=${encodeURIComponent(view.id)}` });
+  }, [isElasticOn, categoryScope, loadViewId, defaultViewId, savedViewsList, history]);
 
   const filteredEntities = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -699,12 +752,67 @@ export const AllEntitiesView = ({
   const currentViewState = useMemo<SavedViewState>(
     () => ({
       category: categoryScope ?? null,
+      // Capture the cloud sub-scope so a view saved on e.g. `/entities/cloud/
+      // aws/s3` reloads that exact page rather than the whole Cloud category.
+      cloudProvider: cloudProviderScope ?? null,
+      cloudService: cloudServiceScope ?? null,
       tab: categoryTab,
       viewMode,
       search,
       filters: activeTagFilters,
     }),
-    [categoryScope, categoryTab, viewMode, search, activeTagFilters]
+    [
+      categoryScope,
+      cloudProviderScope,
+      cloudServiceScope,
+      categoryTab,
+      viewMode,
+      search,
+      activeTagFilters,
+    ]
+  );
+
+  // Latest: the view currently loaded from the nav (`?loadView=<id>`), if it
+  // still resolves. Drives the Save button's "update vs save-as-new" choice and
+  // the "Unsaved changes" badge.
+  const loadedView = useMemo(
+    () => (loadViewId ? savedViewsList.find((view) => view.id === loadViewId) : undefined),
+    [loadViewId, savedViewsList]
+  );
+  const isLoadedViewModified = loadedView
+    ? !areStatesEqual(loadedView.state, currentViewState)
+    : false;
+
+  // Update the loaded view in place with the current on-page state. Stays on the
+  // same view (URL keeps its `?loadView`); the store change clears the badge.
+  const handleUpdateLoadedView = useCallback(
+    (state: SavedViewState, makeDefault: boolean) => {
+      if (!loadedView) return;
+      savedViewsApi.updateViewState(loadedView.id, state);
+      // Reflect the "Set as default" toggle: promote to default when checked,
+      // and demote when unchecked but this view was the standing default. Leave
+      // an unrelated default untouched.
+      if (makeDefault) {
+        savedViewsApi.setDefaultView(loadedView.id);
+      } else if (savedViewsApi.defaultViewId === loadedView.id) {
+        savedViewsApi.setDefaultView(null);
+      }
+    },
+    [loadedView, savedViewsApi]
+  );
+
+  // Save the current state as a brand-new view, then switch to it: point the URL
+  // at the new id so it becomes the loaded view (and highlights in the nav). The
+  // new view's category is the current category, so only the query changes.
+  const handleSaveAsNewView = useCallback(
+    (name: string, state: SavedViewState, makeDefault: boolean) => {
+      const view = savedViewsApi.saveView(name, state);
+      if (makeDefault) savedViewsApi.setDefaultView(view.id);
+      const params = new URLSearchParams(location.search);
+      params.set('loadView', view.id);
+      history.push({ pathname: location.pathname, search: `?${params.toString()}` });
+    },
+    [savedViewsApi, history, location.pathname, location.search]
   );
 
   // Apply a saved view. Two flows:
@@ -720,8 +828,19 @@ export const AllEntitiesView = ({
     (view: SavedView) => {
       applyViewToStorage(view);
       const targetCategory = view.state.category ?? null;
+      const targetProvider = view.state.cloudProvider ?? null;
+      const targetService = view.state.cloudService ?? null;
       const sourceCategory = categoryScope ?? null;
-      if (sourceCategory === targetCategory) {
+      const sourceProvider = cloudProviderScope ?? null;
+      const sourceService = cloudServiceScope ?? null;
+      // The full route identity includes the cloud sub-scope — otherwise a jump
+      // between two cloud services (both `category: 'cloud'`) would be treated as
+      // "same route" and never navigate.
+      const isSameRoute =
+        sourceCategory === targetCategory &&
+        sourceProvider === targetProvider &&
+        sourceService === targetService;
+      if (isSameRoute) {
         // Same route → keep the mount, but sync in-memory state so the
         // UI updates without waiting for a remount. Also clear the
         // pending-search slot we just wrote — no navigation means no
@@ -735,6 +854,16 @@ export const AllEntitiesView = ({
       }
       if (targetCategory === null) {
         router.push('/entities', { path: {}, query: {} });
+      } else if (targetCategory === 'cloud' && targetProvider && targetService) {
+        router.push('/entities/cloud/{provider}/{service}', {
+          path: { provider: targetProvider, service: targetService },
+          query: {},
+        });
+      } else if (targetCategory === 'cloud' && targetProvider) {
+        router.push('/entities/cloud/{provider}', {
+          path: { provider: targetProvider },
+          query: {},
+        });
       } else {
         router.push('/entities/{category}', {
           path: { category: targetCategory },
@@ -742,7 +871,15 @@ export const AllEntitiesView = ({
         });
       }
     },
-    [categoryScope, router, setActiveTagFilters, setCategoryTab, setViewMode]
+    [
+      categoryScope,
+      cloudProviderScope,
+      cloudServiceScope,
+      router,
+      setActiveTagFilters,
+      setCategoryTab,
+      setViewMode,
+    ]
   );
 
   return (
@@ -835,7 +972,7 @@ export const AllEntitiesView = ({
       />
       <StreamsAppPageTemplate.Body>
         <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-          {isCloudScoped ? (
+          {isCloudScoped && !isLatest ? (
             <EuiFlexItem grow={false} css={CLOUD_SIDE_NAV_COLUMN}>
               <CloudSideNav providerScope={cloudProviderScope} serviceScope={cloudServiceScope} />
             </EuiFlexItem>
@@ -913,53 +1050,25 @@ export const AllEntitiesView = ({
                       data-test-subj="entityCentricLabEntitiesTimePicker"
                     />
                   </EuiFlexItem>
-                  {isLatest && loadedView ? (
-                    <EuiFlexItem grow={false}>
-                      {/*
-                        Which saved view is loaded (from the `?loadView` URL
-                        param — the same signal that highlights it in the nav).
-                        A "Modified" badge appears once the on-page state drifts
-                        from the saved snapshot, mirroring the full SavedViewsBar.
-                      */}
-                      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiIcon type="eye" size="s" color="subdued" />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="s" color="subdued">
-                            {i18n.translate(
-                              'xpack.streams.entityCentricLab.savedViews.viewingLabel',
-                              {
-                                defaultMessage: 'Viewing "{name}"',
-                                values: { name: loadedView.name },
-                              }
-                            )}
-                          </EuiText>
-                        </EuiFlexItem>
-                        {!areStatesEqual(loadedView.state, currentViewState) ? (
-                          <EuiFlexItem grow={false}>
-                            <EuiBadge color="warning">
-                              {i18n.translate(
-                                'xpack.streams.entityCentricLab.savedViews.modifiedBadgeLatest',
-                                { defaultMessage: 'Modified' }
-                              )}
-                            </EuiBadge>
-                          </EuiFlexItem>
-                        ) : null}
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  ) : null}
                   {isLatest ? (
                     <EuiFlexItem grow={false}>
                       {/*
                         Latest: the saved-views list lives in the left nav, so
-                        the toolbar only carries the save action. Naming happens
-                        in the button's prompt; the new view then shows up under
-                        "Saved views" in the nav (same localStorage store).
+                        the toolbar only carries the save action. When a view is
+                        loaded, Save offers to update it or fork a new one; the
+                        new/updated view shows up under "Saved views" in the nav
+                        (same localStorage store).
                       */}
                       <SaveViewButton
                         currentState={currentViewState}
-                        onSave={savedViewsApi.saveView}
+                        loadedView={loadedView}
+                        isModified={isLoadedViewModified}
+                        onUpdate={handleUpdateLoadedView}
+                        onSaveAsNew={handleSaveAsNewView}
+                        showMakeDefault={isElasticOn}
+                        isLoadedViewDefault={
+                          Boolean(loadedView) && savedViewsApi.defaultViewId === loadedView?.id
+                        }
                       />
                     </EuiFlexItem>
                   ) : null}
