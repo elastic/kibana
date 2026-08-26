@@ -240,6 +240,30 @@ describe('resolveRawSocket', () => {
     expect(resolveRawSocket(req)).toBe(streamSocket);
   });
 
+  // The end-to-end counterpart of this lives in the Scout pki_stress suite. Keeping a unit lock
+  // here means a regression surfaces without booting a PKI-over-HTTP/2 stack. See kibana#258232.
+  it('keeps reporting the peer certificate after the HTTP/2 stream is destroyed', () => {
+    const sessionSocket = new TLSSocket(new Socket());
+    const peerCertificate = { subject: 'CN=first_client' } as unknown as DetailedPeerCertificate;
+    jest.spyOn(sessionSocket, 'getPeerCertificate').mockReturnValue(peerCertificate);
+
+    const req = {
+      socket: new Socket(),
+      stream: { session: { socket: sessionSocket } },
+    } as unknown as Http2ServerRequest;
+
+    // Resolved once, eagerly, exactly as CoreKibanaRequest does in its constructor.
+    const socket = new KibanaSocket(resolveRawSocket(req));
+
+    // Simulate RST_STREAM: Node clears `stream.session` when the stream is destroyed. Had we
+    // captured `req.socket` (the stream-level Proxy) this is the point at which every TLS
+    // accessor would start returning null/undefined.
+    (req as unknown as { stream: { session: undefined } }).stream.session = undefined;
+
+    expect(socket.getPeerCertificate(true)).toBe(peerCertificate);
+    expect(socket.authorized).toBe(sessionSocket.authorized);
+  });
+
   it('falls back to req.socket when session.socket throws ERR_HTTP2_SOCKET_UNBOUND', () => {
     const streamSocket = new Socket();
     const req = {
