@@ -354,14 +354,12 @@ Use \`set_schedule\` to control how often the rule runs (\`every\`) and how far 
 
 #### \`operation: \\"set_query\\"\`
 
-Use \`set_query\` to define the ES|QL condition that should fire the rule. Optionally set how recovery is detected and what happens when data stops arriving.
+Use \`set_query\` to define the ES|QL query that should fire the rule. Use \`set_recovery_strategy\` and \`set_no_data_strategy\` to control recovery and no-data behavior separately.
 
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_query\\" | required |  |
 | \`query\` | { format: \\"composed\\", ... } \\\\| { format: \\"standalone\\", ... } | required | Detection query configuration. |
-| \`recovery_strategy\` | \\"no_breach\\" \\\\| \\"query\\" \\\\| \\"none\\" | optional |  |
-| \`no_data_strategy\` | \\"last_known_status\\" \\\\| \\"emit\\" \\\\| \\"recover\\" \\\\| \\"none\\" | optional |  |
 
 #### \`operation: \\"set_recovery_strategy\\"\`
 

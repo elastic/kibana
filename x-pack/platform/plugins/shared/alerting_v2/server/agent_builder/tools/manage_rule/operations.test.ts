@@ -254,63 +254,7 @@ describe('executeRuleOperations', () => {
       expect(result.queryColumns).toBeUndefined();
     });
 
-    it('stores recovery_strategy: "no_breach" on the rule data', async () => {
-      const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | STATS COUNT(*)' } },
-          recovery_strategy: 'no_breach',
-        },
-      ];
-
-      const result = await executeRuleOperations({}, ops);
-
-      expect(result.data.recovery_strategy).toBe('no_breach');
-    });
-
-    it('stores recovery_strategy: "query" and recovery block on the rule data', async () => {
-      const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
-          },
-          recovery_strategy: 'query',
-        },
-      ];
-
-      const result = await executeRuleOperations({}, ops);
-
-      expect(result.data.recovery_strategy).toBe('query');
-      expect((result.data.query as { recovery?: { query: string } }).recovery).toEqual({
-        query: 'FROM metrics-* | WHERE cpu < 0.5',
-      });
-    });
-
-    it('stores no_data_strategy and no_data block on the rule data', async () => {
-      const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-            no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
-          },
-          no_data_strategy: 'last_known_status',
-        },
-      ];
-
-      const result = await executeRuleOperations({}, ops);
-
-      expect(result.data.no_data_strategy).toBe('last_known_status');
-      expect((result.data.query as { no_data?: { query: string } }).no_data).toEqual({
-        query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name',
-      });
-    });
-
-    it('does not set recovery_strategy when omitted from set_query', async () => {
+    it('does not touch recovery_strategy or no_data_strategy', async () => {
       const ops: RuleOperation[] = [
         {
           operation: 'set_query',
@@ -324,7 +268,7 @@ describe('executeRuleOperations', () => {
       expect(result.data.no_data_strategy).toBeUndefined();
     });
 
-    it('preserves existing recovery_strategy when a subsequent set_query omits it', async () => {
+    it('preserves existing recovery_strategy when set_query runs', async () => {
       const existing: Partial<RuleAttachmentData> = { recovery_strategy: 'no_breach' };
       const ops: RuleOperation[] = [
         {
@@ -378,8 +322,9 @@ describe('executeRuleOperations', () => {
       ]);
     });
 
-    it('stores composed query with recovery segment and recovery_strategy', async () => {
+    it('stores composed query with recovery segment when paired with set_recovery_strategy', async () => {
       const ops: RuleOperation[] = [
+        { operation: 'set_recovery_strategy', recovery_strategy: 'query' },
         {
           operation: 'set_query',
           query: {
@@ -388,7 +333,6 @@ describe('executeRuleOperations', () => {
             breach: { segment: 'WHERE avg_cpu > 0.9' },
             recovery: { segment: 'WHERE avg_cpu < 0.5' },
           },
-          recovery_strategy: 'query',
         },
       ];
 
@@ -401,9 +345,10 @@ describe('executeRuleOperations', () => {
     });
   });
 
-  describe('set_query recovery cross-field validation', () => {
+  describe('recovery cross-field validation', () => {
     it('throws when recovery block is present but recovery_strategy is not "query"', async () => {
       const ops: RuleOperation[] = [
+        { operation: 'set_recovery_strategy', recovery_strategy: 'no_breach' },
         {
           operation: 'set_query',
           query: {
@@ -411,7 +356,6 @@ describe('executeRuleOperations', () => {
             breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
             recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
           },
-          recovery_strategy: 'no_breach',
         },
       ];
 
@@ -440,14 +384,7 @@ describe('executeRuleOperations', () => {
 
     it('throws when recovery_strategy is "query" but no recovery block is provided', async () => {
       const ops: RuleOperation[] = [
-        {
-          operation: 'set_query',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
-          },
-          recovery_strategy: 'query',
-        },
+        { operation: 'set_recovery_strategy', recovery_strategy: 'query' },
       ];
 
       const promise = executeRuleOperations({}, ops);
@@ -459,6 +396,7 @@ describe('executeRuleOperations', () => {
 
     it('passes when recovery_strategy is "query" and recovery block is provided', async () => {
       const ops: RuleOperation[] = [
+        { operation: 'set_recovery_strategy', recovery_strategy: 'query' },
         {
           operation: 'set_query',
           query: {
@@ -466,7 +404,6 @@ describe('executeRuleOperations', () => {
             breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
             recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' },
           },
-          recovery_strategy: 'query',
         },
       ];
 
@@ -475,7 +412,7 @@ describe('executeRuleOperations', () => {
     });
   });
 
-  describe('set_query no_data cross-field validation', () => {
+  describe('no_data cross-field validation', () => {
     it('throws when a no_data block is present but no_data_strategy is not set', async () => {
       const ops: RuleOperation[] = [
         {
@@ -501,8 +438,8 @@ describe('executeRuleOperations', () => {
             format: 'standalone',
             breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
           },
-          no_data_strategy: 'last_known_status',
         },
+        { operation: 'set_no_data_strategy', no_data_strategy: 'last_known_status' },
       ];
 
       const promise = executeRuleOperations({}, ops);
@@ -514,6 +451,7 @@ describe('executeRuleOperations', () => {
 
     it('passes when no_data_strategy is set and a no_data block is provided', async () => {
       const ops: RuleOperation[] = [
+        { operation: 'set_no_data_strategy', no_data_strategy: 'last_known_status' },
         {
           operation: 'set_query',
           query: {
@@ -521,7 +459,6 @@ describe('executeRuleOperations', () => {
             breach: { query: 'FROM metrics-* | WHERE cpu > 0.9' },
             no_data: { query: 'FROM heartbeat-* | STATS COUNT(*) BY host.name' },
           },
-          no_data_strategy: 'last_known_status',
         },
       ];
 
