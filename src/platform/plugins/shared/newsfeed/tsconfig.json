@@ -13,6 +13,9 @@
     "@kbn/config-schema",
     "@kbn/core-chrome-sidebar",
     "@kbn/core-chrome-sidebar-components",
+    "@kbn/core-chrome-sidebar-context",
+    "@kbn/core-chrome-sidebar-mocks",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

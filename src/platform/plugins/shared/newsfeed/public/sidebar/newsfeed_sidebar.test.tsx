@@ -8,31 +8,19 @@
  */
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { screen, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { BehaviorSubject, of } from 'rxjs';
 import moment from 'moment';
-import { I18nProvider } from '@kbn/i18n-react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { SidebarPanelContext } from '@kbn/core-chrome-sidebar-context';
 import type { NewsfeedApi } from '../lib/api';
 import type { FetchResult, NewsfeedItem } from '../types';
 import { NewsfeedSidebar } from './newsfeed_sidebar';
 
-// SidebarHeader and SidebarBody rely on SidebarPanelContext; provide a minimal mock.
-jest.mock('@kbn/core-chrome-sidebar-components', () => ({
-  SidebarHeader: ({ title, onClose }: { title: string; onClose?: () => void }) => (
-    <div data-test-subj="sidebarHeader">
-      <h2>{title}</h2>
-      {onClose && (
-        <button data-test-subj="sidebarHeaderCloseButton" onClick={onClose}>
-          Close
-        </button>
-      )}
-    </div>
-  ),
-  SidebarBody: ({ children }: { children: React.ReactNode }) => (
-    <div data-test-subj="sidebarBody">{children}</div>
-  ),
-}));
+// SidebarHeader reads the panel context for its heading id, so the real components need a
+// provider. Supplying one keeps the real header/body in the tree rather than mocking them out.
+const panelContext = { headingId: 'newsfeedSidebarHeading', setOnFocusRescue: jest.fn() };
 
 const createMockItem = (overrides: Partial<NewsfeedItem> = {}): NewsfeedItem => ({
   title: 'Test news item',
@@ -68,15 +56,15 @@ const renderSidebar = ({
   const newsfeedApi: NewsfeedApi = { fetchResults$, markAsRead };
   const onClose = jest.fn();
 
-  const result = render(
-    <I18nProvider>
+  const result = renderWithKibanaRenderContext(
+    <SidebarPanelContext.Provider value={panelContext}>
       <NewsfeedSidebar
         newsfeedApi={newsfeedApi}
         isServerless={isServerless}
         hasCustomBranding$={of(false)}
         onClose={onClose}
       />
-    </I18nProvider>
+    </SidebarPanelContext.Provider>
   );
 
   return { ...result, fetchResults$, onClose };
@@ -115,9 +103,16 @@ describe('NewsfeedSidebar', () => {
     expect(screen.queryByText(/Version/)).not.toBeInTheDocument();
   });
 
-  test('calls onClose when header close button is clicked', async () => {
+  test('renders the panel heading', () => {
+    renderSidebar({ fetchResult: createFetchResult() });
+    expect(
+      screen.getByRole('heading', { name: "What's new at Elastic", level: 2 })
+    ).toBeInTheDocument();
+  });
+
+  test('calls onClose when the header close button is clicked', async () => {
     const { onClose } = renderSidebar({ fetchResult: createFetchResult() });
-    await user.click(screen.getByTestId('sidebarHeaderCloseButton'));
+    await user.click(screen.getByRole('button', { name: 'Close side panel' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

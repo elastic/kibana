@@ -18,6 +18,7 @@ import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import type { NewsfeedApi } from './lib/api';
 import { getApi, NewsfeedApiEndpoint } from './lib/api';
 import { registerNewsfeedHandler } from './register_newsfeed_handler';
+import { createNewsfeedSidebarController } from './sidebar/controller';
 
 export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']>;
 export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']>;
@@ -90,11 +91,22 @@ export class NewsfeedPublicPlugin
     };
     this.newsfeedApi = sharedApi;
 
-    registerNewsfeedHandler({ core, api: sharedApi, isServerless: this.isServerless });
+    const sidebarController = createNewsfeedSidebarController({
+      sidebar: core.chrome.sidebar,
+      newsfeedApi: sharedApi,
+    });
+
+    registerNewsfeedHandler({ core, api: sharedApi, sidebarController });
 
     core.chrome.navControls.registerRight({
       order: 1000,
-      content: <NewsfeedNavButton newsfeedApi={sharedApi} sidebar={core.chrome.sidebar} />,
+      content: (
+        <NewsfeedNavButton
+          newsfeedApi={sharedApi}
+          isOpen$={sidebarController.isOpen$}
+          onToggle={sidebarController.toggle}
+        />
+      ),
     });
 
     return {

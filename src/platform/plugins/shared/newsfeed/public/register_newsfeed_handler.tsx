@@ -7,34 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shareReplay, tap, map } from 'rxjs';
+import { map } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
-import type { FetchResult } from './types';
 import type { NewsfeedApi } from './lib/api';
-import { openNewsfeedSidebar } from './sidebar/open';
+import type { NewsfeedSidebarController } from './sidebar/controller';
 
 export const registerNewsfeedHandler = ({
   core,
   api,
-  isServerless,
+  sidebarController,
 }: {
   core: CoreStart;
   api: NewsfeedApi;
-  isServerless: boolean;
+  sidebarController: NewsfeedSidebarController;
 }) => {
-  let lastFetchResult: FetchResult | null | void = null;
-  const handlerResults$ = api.fetchResults$.pipe(
-    tap((result) => {
-      lastFetchResult = result;
-    }),
-    shareReplay({ bufferSize: 1, refCount: true })
-  );
-  const handlerApi: NewsfeedApi = { ...api, fetchResults$: handlerResults$ };
-
   return core.chrome.next.registerNewsfeedHandler({
-    open: () => {
-      openNewsfeedSidebar(core.chrome.sidebar, handlerApi, lastFetchResult);
-    },
-    hasNew$: handlerResults$.pipe(map((result) => result?.hasNew ?? false)),
+    open: sidebarController.open,
+    hasNew$: api.fetchResults$.pipe(map((result) => result?.hasNew ?? false)),
   });
 };

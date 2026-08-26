@@ -10,10 +10,9 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip, type EuiToolTipRef } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SidebarStart } from '@kbn/core-chrome-sidebar';
+import type { Observable } from 'rxjs';
 import type { NewsfeedApi } from '../lib/api';
 import type { FetchResult } from '../types';
-import { toggleNewsfeedSidebar } from '../sidebar/open';
 
 const whatsNewLabel = i18n.translate('newsfeed.headerButton.whatsNewLabel', {
   defaultMessage: "What's new",
@@ -21,12 +20,15 @@ const whatsNewLabel = i18n.translate('newsfeed.headerButton.whatsNewLabel', {
 
 export interface Props {
   newsfeedApi: NewsfeedApi;
-  sidebar: SidebarStart;
+  /** Emits true while the newsfeed panel is showing. */
+  isOpen$: Observable<boolean>;
+  /** Show the newsfeed panel, or hide it if it is already showing. */
+  onToggle: () => void;
 }
 
-export const NewsfeedNavButton = ({ newsfeedApi, sidebar }: Props) => {
+export const NewsfeedNavButton = ({ newsfeedApi, isOpen$, onToggle }: Props) => {
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const tooltipRef = useRef<EuiToolTipRef>(null);
 
@@ -34,21 +36,19 @@ export const NewsfeedNavButton = ({ newsfeedApi, sidebar }: Props) => {
     return newsFetchResult ? newsFetchResult.hasNew : false;
   }, [newsFetchResult]);
 
+  // Focus is restored inside the subscription rather than an effect: by the time an effect ran,
+  // the panel would already have handed focus to the main content area.
   useEffect(() => {
-    const sub = sidebar.getCurrentAppId$().subscribe((appId) => {
-      const open = appId === 'newsfeed';
-      setSidebarOpen((prev) => {
-        // Restore focus to this button when the sidebar closes while focus was inside
-        if (prev && !open) {
-          if (document.activeElement?.matches(':focus-visible')) {
-            buttonRef.current?.focus();
-          }
+    const sub = isOpen$.subscribe((open) => {
+      setIsOpen((prev) => {
+        if (prev && !open && document.activeElement?.matches(':focus-visible')) {
+          buttonRef.current?.focus();
         }
         return open;
       });
     });
     return () => sub.unsubscribe();
-  }, [sidebar]);
+  }, [isOpen$]);
 
   useEffect(() => {
     const subscription = newsfeedApi.fetchResults$.subscribe((results) => {
@@ -59,11 +59,11 @@ export const NewsfeedNavButton = ({ newsfeedApi, sidebar }: Props) => {
 
   const handleClick = useCallback(() => {
     tooltipRef.current?.hideToolTip();
-    toggleNewsfeedSidebar(sidebar, newsfeedApi, newsFetchResult);
-  }, [sidebar, newsfeedApi, newsFetchResult]);
+    onToggle();
+  }, [onToggle]);
 
   // The tooltip stays mounted unconditionally: swapping it in and out would change the element
-  // type at this position, remounting the button and dropping focus when the sidebar closes.
+  // type at this position, remounting the button and dropping focus when the panel closes.
   return (
     <EuiToolTip ref={tooltipRef} content={whatsNewLabel} disableScreenReaderOutput>
       <EuiHeaderSectionItemButton
@@ -71,7 +71,7 @@ export const NewsfeedNavButton = ({ newsfeedApi, sidebar }: Props) => {
           buttonRef.current = node;
         }}
         data-test-subj={hasNew ? 'newsfeedHasUnread' : 'newsfeedAllRead'}
-        aria-expanded={sidebarOpen}
+        aria-expanded={isOpen}
         aria-haspopup="true"
         aria-label={
           hasNew
