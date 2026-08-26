@@ -203,7 +203,6 @@ export const createLensEmbeddableFactory = (
           cancelRequests: (reason) => {
             const abortController = internalApi.expressionAbortController$.getValue();
             abortController.abort(reason);
-            internalApi.updateAbortController(new AbortController());
           },
         }
       );
