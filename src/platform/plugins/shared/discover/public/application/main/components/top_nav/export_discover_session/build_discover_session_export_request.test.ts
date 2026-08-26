@@ -115,6 +115,44 @@ describe('buildDiscoverSessionExportRequest', () => {
     expect(tab.attributes.refreshInterval).toBeUndefined();
   });
 
+  it('preserves the saved time setting when no export override is provided', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMock],
+    });
+
+    await toolkit.initializeTabs();
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAttributes({
+        tabId: toolkit.getCurrentTab().id,
+        attributes: { timeRestore: true },
+      })
+    );
+    toolkit.internalState.dispatch(
+      internalStateActions.updateGlobalState({
+        tabId: toolkit.getCurrentTab().id,
+        globalState: {
+          timeRange: { from: 'now-30m', to: 'now' },
+          refreshInterval: { pause: true, value: 10000 },
+        },
+      })
+    );
+
+    const result = buildDiscoverSessionExportRequest({
+      getState: toolkit.internalState.getState,
+      runtimeStateManager: toolkit.runtimeStateManager,
+      services,
+      title: 'Saved Discover session',
+    });
+    const [tab] = result.attributes.tabs;
+
+    expect(tab.attributes.timeRestore).toBe(true);
+    expect(tab.attributes.timeRange).toEqual({ from: 'now-30m', to: 'now' });
+    expect(tab.attributes.refreshInterval).toEqual({ pause: true, value: 10000 });
+  });
+
   it('includes the current control state for server sanitization', async () => {
     const services = createDiscoverServicesMock();
     const toolkit = getDiscoverInternalStateMock({

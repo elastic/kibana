@@ -50,7 +50,7 @@ export const buildDiscoverSessionExportRequest = ({
   getState: () => DiscoverInternalState;
   runtimeStateManager: RuntimeStateManager;
   services: DiscoverServices;
-  includeCurrentTimeSettings: boolean;
+  includeCurrentTimeSettings?: boolean;
   tabId?: string;
   title: string;
 }): DiscoverSessionSanitizeRequest => {

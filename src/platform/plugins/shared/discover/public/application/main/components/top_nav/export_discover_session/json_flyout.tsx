@@ -9,13 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiSwitch,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiSwitch, useGeneratedHtmlId } from '@elastic/eui';
 import { ExportJsonFlyoutContent } from '@kbn/as-code-export-flyout-component';
 import { i18n } from '@kbn/i18n';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -37,11 +31,11 @@ interface ExportDiscoverSessionJsonFlyoutProps {
     exportCurrentTab: boolean,
     includeCurrentTimeSettings: boolean
   ) => DiscoverSessionSanitizeRequest;
-  initialIncludeCurrentTimeSettings: boolean;
   sanitizeExportJson: (state: DiscoverSessionSanitizeRequest) => Promise<{
     data: DiscoverSessionApiData;
     warnings: readonly string[];
   }>;
+  showIncludeCurrentTimeSettings: boolean;
   title: string;
   useConsoleUrl: SharePluginStart['url']['locators']['useUrl'];
 }
@@ -50,16 +44,14 @@ export const ExportDiscoverSessionJsonFlyout = ({
   canShowDevTools,
   closeFlyout,
   getExportJson,
-  initialIncludeCurrentTimeSettings,
   sanitizeExportJson,
+  showIncludeCurrentTimeSettings,
   title,
   useConsoleUrl,
 }: ExportDiscoverSessionJsonFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'discoverExportJsonFlyoutTitle' });
   const [exportCurrentTab, setExportCurrentTab] = useState(false);
-  const [includeCurrentTimeSettings, setIncludeCurrentTimeSettings] = useState(
-    initialIncludeCurrentTimeSettings
-  );
+  const [includeCurrentTimeSettings, setIncludeCurrentTimeSettings] = useState(false);
   const getSelectedExportJson = useCallback(
     () => getExportJson(exportCurrentTab, includeCurrentTimeSettings),
     [exportCurrentTab, getExportJson, includeCurrentTimeSettings]
@@ -95,20 +87,22 @@ export const ExportDiscoverSessionJsonFlyout = ({
                 onChange={(event) => setExportCurrentTab(event.target.checked)}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                compressed
-                checked={includeCurrentTimeSettings}
-                data-test-subj="discoverExportJsonCurrentTimeSettingsSwitch"
-                label={i18n.translate(
-                  'discover.exportJson.includeCurrentTimeSettingsToggleSwitch',
-                  {
-                    defaultMessage: 'Include current time settings',
-                  }
-                )}
-                onChange={(event) => setIncludeCurrentTimeSettings(event.target.checked)}
-              />
-            </EuiFlexItem>
+            {showIncludeCurrentTimeSettings && (
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  compressed
+                  checked={includeCurrentTimeSettings}
+                  data-test-subj="discoverExportJsonCurrentTimeSettingsSwitch"
+                  label={i18n.translate(
+                    'discover.exportJson.includeCurrentTimeSettingsToggleSwitch',
+                    {
+                      defaultMessage: 'Include current time settings',
+                    }
+                  )}
+                  onChange={(event) => setIncludeCurrentTimeSettings(event.target.checked)}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
         isTechnicalPreview

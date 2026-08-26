@@ -111,7 +111,9 @@ export const getExportAppMenuItem = ({
       getState,
       runtimeStateManager,
       services,
-      includeCurrentTimeSettings,
+      includeCurrentTimeSettings: persistedDiscoverSession
+        ? undefined
+        : includeCurrentTimeSettings,
       tabId: exportCurrentTab ? currentTab.id : undefined,
       title,
     });
@@ -140,10 +142,8 @@ export const getExportAppMenuItem = ({
         canShowDevTools={Boolean(services.capabilities.dev_tools?.show)}
         closeFlyout={onFinishAction}
         getExportJson={getExportJson}
-        initialIncludeCurrentTimeSettings={
-          persistedDiscoverSession?.tabs.some((tab) => tab.timeRestore) ?? true
-        }
         sanitizeExportJson={(state) => sanitizeDiscoverSession(services.http, state)}
+        showIncludeCurrentTimeSettings={!persistedDiscoverSession}
         title={getDiscoverSessionTitle()}
         useConsoleUrl={share.url.locators.useUrl}
       />
