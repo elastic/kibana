@@ -11,6 +11,11 @@ import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { AgentStat, LocationAgentStats } from '../../../../common/types';
+import {
+  countMonitorsByAssignedAgent,
+  isConditionShardedLocation,
+} from '../../../synthetics_service/private_location/assign_by_condition';
+import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
 
 const BYTES_PER_MIB = 1024 * 1024;
 
@@ -43,7 +48,7 @@ interface AgentLocalMetadata {
  * One entry per enrolled Fleet agent (`agent.id`) on the location's policy.
  * Host memory from agent metadata is optional; `metrics-system.*` fills gaps.
  */
-const getEnrolledAgents = async (
+export const getEnrolledAgents = async (
   server: SyntheticsServerSetup,
   agentPolicyId: string
 ): Promise<Map<string, EnrolledAgentMeta>> => {
@@ -198,15 +203,25 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
       syntheticsMonitorClient
     );
     const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
+    const packagePolicyService = new PackagePolicyService(server);
 
     const { elasticsearch } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
 
     return Promise.all(
       locations.map(async (location): Promise<LocationAgentStats> => {
-        const enrolled = await getEnrolledAgents(server, location.agentPolicyId).catch(
-          () => new Map<string, EnrolledAgentMeta>()
-        );
+        const isAgentSharding = isConditionShardedLocation(location);
+        const [enrolled, assignmentCounts] = await Promise.all([
+          getEnrolledAgents(server, location.agentPolicyId).catch(
+            () => new Map<string, EnrolledAgentMeta>()
+          ),
+          isAgentSharding
+            ? packagePolicyService
+                .listByAgentPolicy({ agentPolicyId: location.agentPolicyId })
+                .then((policies) => countMonitorsByAssignedAgent(policies, location.id))
+                .catch(() => new Map<string, number>())
+            : Promise.resolve(new Map<string, number>()),
+        ]);
 
         // Unique original-case host names for the metrics terms query.
         const metricHostNames = [
@@ -241,6 +256,7 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
               lastCheckinMessage: meta.lastCheckinMessage,
               platform: meta.platform,
               tags: meta.tags,
+              monitorsAssigned: isAgentSharding ? assignmentCounts.get(meta.agentId) ?? 0 : null,
             };
           })
           .sort((a, b) => {
@@ -253,6 +269,7 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
           locationLabel: location.label,
           agentPolicyId: location.agentPolicyId,
           agentPolicyName: policyNameById.get(location.agentPolicyId) ?? location.agentPolicyId,
+          isAgentSharding,
           agents,
         };
       })

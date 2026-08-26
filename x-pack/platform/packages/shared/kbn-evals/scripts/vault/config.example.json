@@ -4,12 +4,11 @@
   "owner": "REPLACE_ME",
   "environment": "local",
   "refresh_interval": "168h",
-  "litellm": {
-    "baseUrl": "https://elastic.litellm-prod.ai",
-    "virtualKey": "sk-REPLACE_ME",
-    "teamId": "REPLACE_ME"
+  "openrouter": {
+    "baseUrl": "https://openrouter.ai/api/v1",
+    "apiKey": "REPLACE_ME"
   },
-  "evaluationConnectorId": "litellm-llm-gateway-gpt-4o",
+  "evaluationConnectorId": "eis-google-gemini-3-1-pro",
   "evaluationsEs": {
     "url": "https://kbn-evals-serverless-ed035a.es.us-central1.gcp.elastic.cloud",
     "apiKey": "REPLACE_ME"

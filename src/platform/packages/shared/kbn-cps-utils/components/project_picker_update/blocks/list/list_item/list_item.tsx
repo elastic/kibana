@@ -23,11 +23,15 @@ import { i18n } from '@kbn/i18n';
 import capitalize from 'lodash/capitalize';
 import type { CPSProject } from '../../../../../types';
 import { getProjectTags, getSolutionIcon } from '../../../../utils';
+import type { ProjectPickerStateProviderProps } from '../../../state';
 
 export interface ProjectPickerListItemProps {
-  isReadOnly?: boolean;
+  controlsState: NonNullable<ProjectPickerStateProviderProps['controlsState']>;
   isSelected: boolean;
   isToggleDisabled?: boolean;
+  /** True while a filter/selection edit is awaiting server confirmation; disables all row interactions. */
+  isInteractionsDisabled?: boolean;
+  isOriginProject: boolean;
   toggleDisabledMessage: string;
   project: CPSProject;
   onContextMenu: (project: CPSProject, evt: React.MouseEvent<HTMLAnchorElement>) => void;
@@ -35,10 +39,16 @@ export interface ProjectPickerListItemProps {
   onLabelClick: (project: CPSProject, evt: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-export function ProjectPickerListItem({
-  isReadOnly,
+/** Builds the test subject for a project list item switch, keeping tests in sync with the rendered id. */
+export const getProjectPickerListItemSwitchTestSubj = (projectId: CPSProject['_id']): string =>
+  `projectPickerListItemSwitch-${projectId}`;
+
+export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
+  controlsState,
   isSelected,
   isToggleDisabled = false,
+  isInteractionsDisabled = false,
+  isOriginProject,
   toggleDisabledMessage,
   project,
   onContextMenu,
@@ -53,10 +63,14 @@ export function ProjectPickerListItem({
   const switchControl = (
     <EuiSwitch
       checked={isSelected}
-      disabled={isToggleDisabled || isReadOnly}
+      disabled={isToggleDisabled || isInteractionsDisabled || controlsState === 'disabled'}
       onChange={(evt) => onToggle(project, evt.target.checked)}
-      label={null}
-      data-test-subj={`projectPickerListItemSwitch-${project._id}`}
+      label={i18n.translate('cpsUtils.projectPicker.listItem.toggleLabel', {
+        defaultMessage: 'Include project {projectName}',
+        values: { projectName: project._alias },
+      })}
+      showLabel={false}
+      data-test-subj={getProjectPickerListItemSwitchTestSubj(project._id)}
       compressed
     />
   );
@@ -80,6 +94,15 @@ export function ProjectPickerListItem({
                   <p>{project._alias}</p>
                 </EuiText>
               </EuiFlexItem>
+              {isOriginProject && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>
+                    {i18n.translate('cpsUtils.projectPicker.listItem.originProject', {
+                      defaultMessage: 'This Project',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
               {Boolean(projectTags.length) && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge
@@ -102,47 +125,51 @@ export function ProjectPickerListItem({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" color="subdued">
-              {i18n.translate('cpsUtils.projectPicker.listItem.region', {
-                defaultMessage: '{provider}, {region}',
-                values: {
-                  provider: project._csp,
-                  region: project._region,
-                },
-              })}
+              {project._region && project._csp
+                ? i18n.translate('cpsUtils.projectPicker.listItem.region', {
+                    defaultMessage: '{provider}, {region}',
+                    values: {
+                      provider: project._csp,
+                      region: project._region,
+                    },
+                  })
+                : null}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {isToggleDisabled ? (
-              <EuiToolTip id={toggleTooltipId} content={toggleDisabledMessage}>
-                {switchControl}
+      {controlsState === 'hidden' ? null : (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              {isToggleDisabled ? (
+                <EuiToolTip id={toggleTooltipId} content={toggleDisabledMessage}>
+                  {switchControl}
+                </EuiToolTip>
+              ) : (
+                switchControl
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                id={contextMenuTooltipId}
+                content={i18n.translate('cpsUtils.projectPicker.listItem.contextMenu', {
+                  defaultMessage: 'Show context menu',
+                })}
+              >
+                <EuiButtonIcon
+                  iconType="ellipsis"
+                  isDisabled={isInteractionsDisabled || controlsState === 'disabled'}
+                  onClick={onContextMenu.bind(null, project)}
+                  aria-labelledby={contextMenuTooltipId}
+                  data-test-subj={`projectPickerListItemContextMenu-${project._id}`}
+                  color="text"
+                />
               </EuiToolTip>
-            ) : (
-              switchControl
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              id={contextMenuTooltipId}
-              content={i18n.translate('cpsUtils.projectPicker.listItem.contextMenu', {
-                defaultMessage: 'Show context menu',
-              })}
-            >
-              <EuiButtonIcon
-                iconType="ellipsis"
-                isDisabled={isReadOnly}
-                onClick={onContextMenu.bind(null, project)}
-                aria-labelledby={contextMenuTooltipId}
-                data-test-subj={`projectPickerListItemContextMenu-${project._id}`}
-                color="text"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
-}
+});

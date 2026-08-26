@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { AppHeaderBack, AppHeaderTab } from '@kbn/app-header';
 import React from 'react';
-import { SpanIcon } from '@kbn/apm-ui-shared';
 import { unifiedSearchBarPlaceholder } from '../../../../common/dependencies';
 import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { BetaBadge } from '../../shared/beta_badge';
+import { betaBadgeDescription } from '../../shared/beta_badge';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { ApmMainTemplate } from './apm_main_template';
 
@@ -27,59 +24,82 @@ interface Props {
 export function DependencyDetailTemplate({ children }: Props) {
   const {
     query,
-    query: { dependencyName, rangeFrom, rangeTo },
+    query: {
+      dependencyName,
+      rangeFrom,
+      rangeTo,
+      refreshInterval,
+      refreshPaused,
+      environment,
+      kuery,
+      comparisonEnabled,
+    },
   } = useApmParams('/dependencies');
 
   const router = useApmRouter();
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
   const path = useApmRoutePath();
 
-  const dependencyMetadataFetch = useFetcher(
-    (callApmApi) => {
-      if (!start || !end) {
-        return;
-      }
-
-      return callApmApi('GET /internal/apm/dependencies/metadata', {
-        params: {
-          query: {
-            dependencyName,
-            start,
-            end,
-          },
-        },
-      });
+  const inventoryHref = router.link('/dependencies/inventory', {
+    query: {
+      rangeFrom,
+      rangeTo,
+      refreshInterval,
+      refreshPaused,
+      environment,
+      kuery,
+      comparisonEnabled,
     },
-    [dependencyName, start, end]
-  );
+  });
 
-  const { data: { metadata } = {} } = dependencyMetadataFetch;
+  const operationsHref = router.link('/dependencies/operations', { query });
 
-  const tabs = [
+  const tabs: AppHeaderTab[] = [
     {
-      key: 'overview',
-      href: router.link('/dependencies/overview', {
-        query,
-      }),
+      id: 'overview',
       label: i18n.translate('xpack.apm.DependencyDetailOverview.title', {
         defaultMessage: 'Overview',
       }),
+      href: router.link('/dependencies/overview', { query }),
       isSelected: path === '/dependencies/overview',
+      'data-test-subj': 'apmDependencyDetailTab_overview',
     },
     {
-      key: 'operations',
-      href: router.link('/dependencies/operations', {
-        query,
-      }),
+      id: 'operations',
       label: i18n.translate('xpack.apm.DependencyDetailOperations.title', {
         defaultMessage: 'Operations',
       }),
+      href: operationsHref,
+      // Keep both clauses so the operation detail subpage keeps the Operations tab selected.
       isSelected: path === '/dependencies/operations' || path === '/dependencies/operation',
-      append: <BetaBadge icon="beta" />,
+      badge: { iconType: 'beta', tooltip: betaBadgeDescription },
+      'data-test-subj': 'apmDependencyDetailTab_operations',
     },
   ];
+
+  // On the operation detail subpage, mirror the breadcrumb-derived back menu that Chrome Next
+  // produces today: [Operations, Dependencies]. On the other tab pages a single inventory target
+  // matches the existing behaviour. Mounting an inline AppHeader suppresses the breadcrumb-derived
+  // fallback, so this must be explicit.
+  const backToInventory: AppHeaderBack = {
+    href: inventoryHref,
+    label: i18n.translate('xpack.apm.views.dependenciesInventory.title', {
+      defaultMessage: 'Dependencies',
+    }),
+  };
+
+  const back: AppHeaderBack | AppHeaderBack[] =
+    path === '/dependencies/operation'
+      ? [
+          {
+            href: operationsHref,
+            label: i18n.translate('xpack.apm.DependencyDetailOperations.title', {
+              defaultMessage: 'Operations',
+            }),
+          },
+          backToInventory,
+        ]
+      : backToInventory;
 
   return (
     <ApmIndexSettingsContextProvider>
@@ -91,24 +111,10 @@ export function DependencyDetailTemplate({ children }: Props) {
             searchBarPlaceholder={unifiedSearchBarPlaceholder}
           />
         }
-        pageHeader={{
+        header={{
+          title: dependencyName,
           tabs,
-          pageTitle: (
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h1>{dependencyName}</h1>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SpanIcon
-                  type={metadata?.spanType}
-                  subtype={metadata?.spanSubtype}
-                  role="presentation"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
+          back,
         }}
       >
         {children}

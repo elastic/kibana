@@ -200,16 +200,17 @@ test.describe.skip(
       await pageObjects.agentBuilder.closeMcpClientDetails();
     });
 
-    test('prefills the remote redirect type from a stored HTTPS URI', async ({
+    test('prefills the remote redirect type from stored HTTPS URIs', async ({
       apiClient,
       page,
       pageObjects,
     }) => {
       const clientName = uniqueClientName('scout-edit-remote');
+      const redirectUris = ['https://example.com/callback', 'https://other.example.com/callback'];
       const client = await createOAuthClient(apiClient, authHeaders, {
         clientName,
         clientType: 'confidential',
-        redirectUris: ['https://example.com/callback'],
+        redirectUris,
       });
       createdClientIds.push(client.id);
 
@@ -218,10 +219,9 @@ test.describe.skip(
       await pageObjects.agentBuilder.waitForMcpClientRow(client.id);
       await pageObjects.agentBuilder.openMcpClientEdit(client.id);
 
-      await expect(page.testSubj.locator('mcpClientRemoteUri-0')).toHaveValue(
-        'https://example.com/callback'
-      );
-      await expect(page.testSubj.locator('mcpClientRemoteUri-1')).toHaveCount(0);
+      await expect(page.testSubj.locator('mcpClientRemoteUri-0')).toHaveValue(redirectUris[0]);
+      await expect(page.testSubj.locator('mcpClientRemoteUri-1')).toHaveValue(redirectUris[1]);
+      await expect(page.testSubj.locator('mcpClientRemoteUri-2')).toHaveCount(0);
     });
 
     test('does not offer edit for a revoked client', async ({ apiClient, page, pageObjects }) => {

@@ -36,10 +36,10 @@ export type GetScopedClients = (params: {
 export interface RouteHandlerScopedClients extends SignificantEventsClients {
   scopedClusterClient: IScopedClusterClient;
   /**
-   * Client for reading *stream* data, routed across the CPS-connected projects of the active
-   * space. Use it whenever the target is a stream's ES|QL view or index pattern, which may
-   * resolve to a remote project. Everything the plugin owns (its hidden data streams) lives in
-   * the origin project and must keep using `scopedClusterClient`.
+   * Client for reading *stream* data, always routed across every CPS-linked project regardless of
+   * the active space's project routing expression. Use it whenever the target is a stream's ES|QL
+   * view or index pattern, which may resolve to a remote project. Everything the plugin owns (its
+   * hidden data streams) lives in the origin project and must keep using `scopedClusterClient`.
    */
   streamDataEsClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;

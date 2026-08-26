@@ -311,6 +311,15 @@ describe('autocomplete', () => {
       await suggest(statement, triggerOffset + 1, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'FROM index_d' });
     });
+    it('should send the columns query for the current subquery', async () => {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+      const statement =
+        'from outer_index | sort dateField desc | where coalesce(keywordField in (from inner_index | keep ';
+
+      await suggest(statement, statement.length, callbackMocks);
+
+      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'FROM inner_index' });
+    });
     it.each([
       ['EVAL incomplete assignment', 'FROM marker_eval_assignment | EVAL foo = 1, bar = '],
       ['EVAL function argument', 'FROM marker_eval_function | EVAL result = ROUND(doubleField, '],
@@ -1192,6 +1201,48 @@ describe('autocomplete', () => {
       'FROM kibana_sample_data_logs | WHERE agent NOT IN (FROM kibana_sample_data_logs)/',
       ['\n', 'AND $0', 'OR $0', '| ']
     );
+
+    it.each([
+      ['CASE', 'FROM index | WHERE CASE(doubleField IN /'],
+      ['COALESCE', 'FROM index | WHERE COALESCE(doubleField IN /'],
+    ])('suggests subqueries inside %s', async (_, query) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn(query)).map(({ text }) => text);
+
+      expect(suggestedTexts).toEqual(expect.arrayContaining(['(FROM $0)', '(ROW $0)', '(TS $0)']));
+    });
+
+    it.each([
+      ['CASE', 'FROM index | WHERE CASE(doubleField IN (FROM /), true, false)'],
+      ['COALESCE', 'FROM index | WHERE COALESCE(doubleField IN (FROM /), false)'],
+      [
+        'nested CASE and COALESCE',
+        'FROM index | WHERE CASE(COALESCE(doubleField IN (FROM /), false), true, false)',
+      ],
+      [
+        'nested COALESCE calls',
+        'FROM index | WHERE COALESCE(COALESCE(doubleField IN (FROM /), false), false)',
+      ],
+      [
+        'a non-condition CASE argument',
+        'FROM index | WHERE CASE(booleanField, doubleField IN (FROM /), false)',
+      ],
+      [
+        'a non-first COALESCE argument',
+        'FROM index | WHERE COALESCE(false, doubleField IN (FROM /))',
+      ],
+      [
+        'COALESCE inside a FROM subquery',
+        'FROM index, (TS timeseries_index | WHERE COALESCE(doubleField IN (FROM /)))',
+      ],
+    ])('suggests sources inside an IN subquery nested in %s', async (_, query) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn(query);
+      const suggestedTexts = suggestions.map(({ text }) => text);
+
+      expect(suggestedTexts).toEqual(expect.arrayContaining(['index', 'otherIndex']));
+      expect(suggestedTexts.some((text) => text.trim() === 'doubleField')).toBe(false);
+    });
   });
 
   describe('ROW operator expressions', () => {

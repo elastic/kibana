@@ -22,8 +22,8 @@ const toInputDetections = (events: Array<Partial<SignificantEvent>>): Array<Part
 
 /**
  * Canonical cascade significant event — the lean ground truth for the discovery agent eval.
- * Evidences carry the `esql_query` for grounding but are deliberately NOT pre-stamped `confirmed` —
- * the agent must run execute_esql during KI grounding and stamp `confirmed: true` from its own
+ * Evidences carry the `esql_query` for grounding but are deliberately NOT pre-stamped with a verdict —
+ * the agent must run execute_esql during KI grounding and stamp `verdict: "confirms"` from its own
  * query results before promoting. Every field here is seeded by one of the cascade `detections`, so
  * the canonical input and this expected answer stay self-consistent.
  */
@@ -34,9 +34,9 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
   event_id: LEDGER_DB_CASCADE_EVENT_ID,
   title: 'Ledger services — connection refused across balance, history, and payment paths',
   symptom_hypothesis:
-    'Customer transaction flows are failing because ledger database and cache dependencies refuse connections.',
+    'SQLState 08001 connection refused from transactionhistory to PostgreSQL is blocking ledger reads and cascading to frontend balance, history, payment, and deposit paths.',
   summary:
-    'balancereader, transactionhistory, and ledgerwriter are all returning connection-refused errors to the frontend, with concurrent cache errors in balancereader/transactionhistory and a SQL connection failure (SQLState 08001) in transactionhistory. Users cannot view account balances, cannot view transaction history, and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
+    'Frontend requests to transactionhistory, balancereader, and ledgerwriter fail with connection refused on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Users cannot view account balances or transaction history and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
   severity: '80-critical',
   confidence: 0.82,
   stream_names: ['logs'],
@@ -44,9 +44,9 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Found: SQLState 08001 connection refused from transactionhistory. Impact: transaction-history reads blocked. Verdict: confirms.',
+        'Found: SQLState 08001 connection refused from transactionhistory. Impact: transaction-history reads blocked.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "SQLState: 08001") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -63,9 +63,9 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Found: connection refused to transactionhistory:8080 on /transactions. Impact: users cannot view transaction history. Verdict: confirms.',
+        'Found: connection refused to transactionhistory:8080 on /transactions. Impact: users cannot view transaction history.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting transaction_list") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -82,9 +82,9 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
+        'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -101,9 +101,9 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Found: Cache error from transactionhistory and balancereader. Impact: balance and transaction-history lookups degraded. Verdict: confirms.',
+        'Found: Cache error from transactionhistory and balancereader. Impact: balance and transaction-history lookups degraded.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Cache error") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 2',
@@ -120,9 +120,9 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Found: Failed to retrieve account balance. Impact: payment and deposit submissions fail. Verdict: confirms.',
+        'Found: Failed to retrieve account balance. Impact: payment and deposit submissions fail.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Failed to retrieve account balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -139,9 +139,9 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Found: connection refused to ledgerwriter:8080 on deposit /transactions. Impact: users cannot complete deposits. Verdict: confirms.',
+        'Found: connection refused to ledgerwriter:8080 on deposit /transactions. Impact: users cannot complete deposits.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error submitting deposit") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -158,9 +158,9 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
-        'Found: connection refused to ledgerwriter:8080 on payment /transactions. Impact: users cannot complete payments. Verdict: confirms.',
+        'Found: connection refused to ledgerwriter:8080 on payment /transactions. Impact: users cannot complete payments.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error submitting payment") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -176,51 +176,63 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
     },
   ],
   causal_features: [
-    { feature_id: 'transactionhistory', name: 'transactionhistory', stream_name: 'logs' },
-    { feature_id: 'balancereader', name: 'balancereader', stream_name: 'logs' },
-    { feature_id: 'ledgerwriter', name: 'ledgerwriter', stream_name: 'logs' },
+    {
+      feature_id: 'transactionhistory',
+      type: 'entity',
+      subtype: 'service',
+      name: 'transactionhistory',
+      stream_name: 'logs',
+    },
+    {
+      feature_id: 'balancereader',
+      type: 'entity',
+      subtype: 'service',
+      name: 'balancereader',
+      stream_name: 'logs',
+    },
+    {
+      feature_id: 'ledgerwriter',
+      type: 'entity',
+      subtype: 'service',
+      name: 'ledgerwriter',
+      stream_name: 'logs',
+    },
   ],
   blast_radius: [
     {
       type: 'dependency',
-      feature_id: 'frontend-balancereader',
+      subtype: 'http',
+      feature_id: 'frontend-balancereader-http',
       source: 'frontend',
       target: 'balancereader',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'frontend-transactionhistory',
+      subtype: 'http',
+      feature_id: 'frontend-transactionhistory-http',
       source: 'frontend',
       target: 'transactionhistory',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'frontend-ledgerwriter',
+      subtype: 'http',
+      feature_id: 'frontend-ledgerwriter-http',
       source: 'frontend',
       target: 'ledgerwriter',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
       type: 'dependency',
-      feature_id: 'ledgerwriter-balancereader',
+      subtype: 'http',
+      feature_id: 'ledgerwriter-balancereader-http',
       source: 'ledgerwriter',
       target: 'balancereader',
-      stream_name: 'logs',
-    },
-    {
-      type: 'dependency',
-      feature_id: 'ledgerwriter-postgresql',
-      source: 'ledgerwriter',
-      target: 'postgresql',
-      stream_name: 'logs',
-    },
-    {
-      type: 'dependency',
-      feature_id: 'transactionhistory-postgresql',
-      source: 'transactionhistory',
-      target: 'postgresql',
+      protocol: 'http',
       stream_name: 'logs',
     },
   ],
@@ -244,9 +256,8 @@ const BENIGN_LOGIN_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
-      description:
-        'Found: successful login event, no error signature. Impact: none — volume spike only. Verdict: refutes.',
+      verdict: 'refutes',
+      description: 'Found: successful login activity. Impact: none observed.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Login Successful") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -261,7 +272,6 @@ const BENIGN_LOGIN_EVENT: Partial<SignificantEvent> = {
       },
     },
   ],
-  causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
 /** Benign signup spike — must stay a SEPARATE event from the failure cascade and from login. */
@@ -278,9 +288,8 @@ const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
-      description:
-        'Found: successful account creation, no error signature. Impact: none — volume spike only. Verdict: refutes.',
+      verdict: 'refutes',
+      description: 'Found: successful account creation activity. Impact: none observed.',
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Successfully created user") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -295,7 +304,6 @@ const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
       },
     },
   ],
-  causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
 const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
@@ -313,7 +321,7 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
         'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
       evidence: {
@@ -330,11 +338,20 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
       },
     },
   ],
-  causal_features: [{ feature_id: 'balancereader', name: 'balancereader', stream_name: 'logs' }],
+  causal_features: [
+    {
+      feature_id: 'balancereader',
+      type: 'entity',
+      subtype: 'service',
+      name: 'balancereader',
+      stream_name: 'logs',
+    },
+  ],
   blast_radius: [
     {
       type: 'dependency',
-      feature_id: 'frontend-balancereader',
+      subtype: 'http',
+      feature_id: 'frontend-balancereader-http',
       source: 'frontend',
       target: 'balancereader',
       stream_name: 'logs',
@@ -351,7 +368,7 @@ const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
     {
       type: 'detection',
       stream_name: 'logs',
-      confirmed: true,
+      verdict: 'confirms',
       description:
         'Found: connection refused to balancereader:8080 on /balances. Impact: users cannot view account balances. Verdict: confirms.',
       evidence: BALANCE_READER_ISOLATED_EVENT.signals?.[0]?.evidence,
@@ -379,13 +396,9 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     // Ground-truth continuation chains (ordered, by readable `rule_name`) the continuation eval
     // replays one rule per cycle. Each chain legitimately continues ONE event, so the agent
-    // should reuse a single event_id. `semantic` = same service + symptom, no rule_uuid overlap;
-    // `cascade` = upstream → downstreams across services, linked by dependency topology.
+    // should reuse a single event_id. `cascade` = upstream → downstreams across services, linked
+    // by dependency topology.
     continuationChains: {
-      semantic: [
-        'Frontend → Ledger Writer Payment Submission Error',
-        'Frontend → Ledger Writer Deposit Submission Error',
-      ],
       cascade: [
         'Transaction History Database SQL Connection Error',
         'Frontend → Transaction History Connection Failures',
@@ -393,7 +406,7 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter->postgresql SQLState 08001, cache errors, frontend connection-refused failures)]; unbacked authentication detections do not shape the cascade narrative',
+        'discoveries=[ledger-db-cascade (transactionhistory/balancereader/ledgerwriter linked by SQLState 08001, cache errors, and frontend connection-refused failures)]; unbacked authentication detections do not shape the cascade narrative',
       expected_confirmed_rule_uuids: {
         [LEDGER_DB_CASCADE_EVENT_ID]: LEDGER_DB_CASCADE_RULE_UUIDS,
       },
@@ -401,7 +414,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'symptom-hypothesis-sql-connection',
-          text: 'States one sentence connecting every grouped detection through the transactionhistory↔postgresql SQL connection failure (SQLState 08001 / failed JDBC connections). Uses confirming rows where available and compatible exact-query KI context for sparse rows, without presenting KI context as proof of current activity. Does not introduce another endpoint or claim a final root cause.',
+          text: 'States one sentence connecting every grouped detection through the evidenced database/connectivity cascade — SQLState 08001 or JDBC connection failures, cache errors, and frontend connection refusals/timeouts across transactionhistory, balancereader, and ledgerwriter. Uses confirming query rows and compatible KI context for sparse rows, without presenting KI context as proof of current activity or inventing dependency edges absent from grounding.',
           score: 3,
         },
         {
@@ -411,12 +424,12 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'cascade-full-grouping',
-          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed postgresql/cache failure hypothesis rather than split into separate service-scoped discoveries.',
+          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed database-connectivity and cache failure hypothesis rather than split into separate service-scoped discoveries.',
           score: 2,
         },
         {
           id: 'dependency-chain',
-          text: 'Names the dependency from transactionhistory to postgresql and the downstream impact on the frontend read/write paths across balancereader and ledgerwriter.',
+          text: 'Names KI-grounded dependency paths in the cascade — at minimum frontend→transactionhistory, frontend→balancereader, and frontend→ledgerwriter HTTP impacts, plus ledgerwriter→balancereader where topology supports it — and describes downstream user-journey impact across balance, transaction-history, payment, and deposit flows.',
           score: 1,
         },
         {
@@ -436,7 +449,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'grounding-verification',
-          text: 'Verifies key cascade signals via execute_esql during KI grounding and stamps confirmed: true from its own query results, rather than trusting pre-collected input evidence alone.',
+          text: 'Verifies key cascade signals via execute_esql during KI grounding and stamps `verdict: "confirms"` from its own query results, rather than trusting pre-collected input evidence alone.',
           score: 2,
         },
         {

@@ -19,7 +19,6 @@ import type {
   SmlTypeDefinition,
   SmlSearchFilters,
   SmlSearchConstraints,
-  MatchedDiscoveryLabel,
   SmlPermissions,
 } from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
@@ -133,6 +132,7 @@ class SmlServiceImpl implements SmlServiceInstance {
           logger,
           constraints,
           filters,
+          registeredTypeIds: this.registry.list().map(({ id }) => id),
         });
         return filterResultsByPermissions({
           searchResult: rawResults,
@@ -969,111 +969,83 @@ const searchSml = async ({
   };
 };
 
+// Every typed token must match, with the last one matched as a prefix.
+const buildTitlePrefixClause = (text: string): Record<string, unknown> => ({
+  match_bool_prefix: { title: { query: text, operator: 'and' } },
+});
+
+// `type` is a low-cardinality keyword, so a `prefix` query is cheap.
+const buildTypePrefixClause = (text: string): Record<string, unknown> => ({
+  prefix: { type: text.toLowerCase() },
+});
+
+const buildTypeTermsClause = (typeIds: string[]): Record<string, unknown> => ({
+  terms: { type: typeIds },
+});
+
 /**
- * Pick a highlight snippet from ES's per-subfield highlight object.
- * Returns the first non-empty snippet; absent if none.
+ * The abbreviation "conn" resolves to `['connector']`.
+ * Empty when no type is resolved.
  */
-const pickHighlightSnippet = (
-  highlight: Record<string, string[]> | undefined
-): string | undefined => {
-  if (!highlight) return undefined;
-  for (const snippets of Object.values(highlight)) {
-    if (snippets && snippets.length > 0) {
-      return snippets[0];
-    }
-  }
-  return undefined;
+const resolveTypeIds = (text: string, registeredTypeIds: string[]): string[] => {
+  const lowered = text.toLowerCase();
+  return registeredTypeIds.filter((id) => id.toLowerCase().startsWith(lowered));
 };
 
-const SML_LABEL_FIELDS = [
-  'discovery_labels.value',
-  'discovery_labels.value._2gram',
-  'discovery_labels.value._3gram',
-] as const;
-
-const SML_LABEL_INNER_HITS = {
-  _source: ['discovery_labels.value', 'discovery_labels.kind'],
-  size: 10,
-  highlight: {
-    type: 'unified',
-    number_of_fragments: 0,
-    pre_tags: ['<em>'],
-    post_tags: ['</em>'],
-    // No-op until elastic/elasticsearch#53744 is fixed; HTML-encodes source text.
-    encoder: 'html',
-    fields: {
-      'discovery_labels.value': {},
-    },
-  },
-} as const;
-
-const buildLabelBoolPrefixClause = (text: string): Record<string, unknown> => ({
-  multi_match: {
-    query: text,
-    type: 'bool_prefix',
-    operator: 'and',
-    fields: SML_LABEL_FIELDS,
-  },
-});
-
-const buildNestedLabelQuery = (text: string): Record<string, unknown> => ({
-  nested: {
-    path: 'discovery_labels',
-    query: buildLabelBoolPrefixClause(text),
-    inner_hits: SML_LABEL_INNER_HITS,
-  },
-});
-
 /**
- * Build the autocomplete query: nested `multi_match bool_prefix` against
- * `discovery_labels.value` (SAYT), requiring every typed token to match
- * (including the trailing partial, as a prefix).
- *
- * `type` and `title` are indexed as separate `discovery_labels` siblings, and
- * a nested query can't match tokens across siblings. So a "type/name" query
- * (e.g. "connector/s3", matching how results render) is split into two
- * nested queries ANDed together instead of one, each free to match a
- * different sibling — the type part is also constrained to `kind: 'type'`.
- * A bare trailing slash ("connector/") falls back to a single query so the
- * type value itself still matches.
- *
- * After trim: empty string or `*` → `match_all`.
+ * Build the autocomplete query. Results render as "type/title", so a slash splits
+ * the input: the left side must name a registered type, the right prefix-matches
+ * the title. A slash that names no type is part of the title, e.g.
+ * "sales/marketing".
  */
-const buildSmlAutocompleteQuery = (query: string): Record<string, unknown> => {
+const buildSmlAutocompleteQuery = (
+  query: string,
+  registeredTypeIds: string[]
+): Record<string, unknown> => {
   const trimmed = query.trim();
   if (trimmed === '' || trimmed === '*') {
     return { match_all: {} };
   }
 
   const slashIdx = trimmed.indexOf('/');
-  const namePart = slashIdx === -1 ? '' : trimmed.slice(slashIdx + 1).trim();
 
-  if (slashIdx === -1 || namePart === '') {
-    return buildNestedLabelQuery(trimmed);
+  // No slash typed yet: the text could be either half, so match against both.
+  if (slashIdx === -1) {
+    return {
+      bool: {
+        should: [buildTitlePrefixClause(trimmed), buildTypePrefixClause(trimmed)],
+        minimum_should_match: 1,
+      },
+    };
   }
 
   const typePart = trimmed.slice(0, slashIdx).trim();
-  const nameClause = buildNestedLabelQuery(namePart);
+  const namePart = trimmed.slice(slashIdx + 1).trim();
 
-  if (!typePart) {
-    return nameClause;
+  // A lone "/" carries no signal, thus, match everything
+  if (typePart === '' && namePart === '') {
+    return { match_all: {} };
   }
 
-  const typeClause = {
-    nested: {
-      path: 'discovery_labels',
-      query: {
-        bool: {
-          must: [
-            buildLabelBoolPrefixClause(typePart),
-            { term: { 'discovery_labels.kind': 'type' } },
-          ],
-        },
-      },
+  if (typePart === '') {
+    return buildTitlePrefixClause(namePart);
+  }
+
+  const typeIds = resolveTypeIds(typePart, registeredTypeIds);
+  if (typeIds.length === 0) {
+    return buildTitlePrefixClause(trimmed);
+  }
+
+  if (namePart === '') {
+    return { bool: { filter: [buildTypeTermsClause(typeIds)] } };
+  }
+
+  return {
+    bool: {
+      filter: [buildTypeTermsClause(typeIds)],
+      must: [buildTitlePrefixClause(namePart)],
     },
   };
-
-  return { bool: { must: [typeClause, nameClause] } };
 };
 
 /**
@@ -1087,6 +1059,7 @@ const autocompleteSml = async ({
   logger,
   constraints,
   filters,
+  registeredTypeIds,
 }: {
   query: string;
   size: number;
@@ -1095,6 +1068,8 @@ const autocompleteSml = async ({
   logger: Logger;
   constraints?: SmlSearchConstraints;
   filters?: SmlSearchFilters;
+  /** Used to tell a "type/name" query apart from a title that contains a slash. */
+  registeredTypeIds: string[];
 }): Promise<{ results: SmlAutocompleteResult[] }> => {
   logger.debug(
     `SML autocomplete: query=${JSON.stringify(
@@ -1103,7 +1078,7 @@ const autocompleteSml = async ({
   );
 
   try {
-    const smlQuery = buildSmlAutocompleteQuery(query);
+    const smlQuery = buildSmlAutocompleteQuery(query, registeredTypeIds);
 
     const filterClauses: Array<Record<string, unknown>> = [
       {
@@ -1132,6 +1107,8 @@ const autocompleteSml = async ({
           filter: filterClauses,
         },
       },
+      // Order will be arbitrary as every result scores the same.
+      sort: [{ _score: { order: 'desc' } }, { updated_at: 'desc' }, { id: 'asc' }],
       _source: ['id', 'type', 'title', 'origin', 'permissions'],
     });
 
@@ -1139,7 +1116,7 @@ const autocompleteSml = async ({
       .filter((hit) => hit._source != null)
       .map((hit) => {
         const source = hit._source!;
-        const result: SmlAutocompleteResult = {
+        return {
           id: source.id ?? '',
           type: source.type ?? '',
           title: source.title ?? '',
@@ -1147,44 +1124,6 @@ const autocompleteSml = async ({
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? emptyPermissions(),
         };
-        // Inner hits from the nested discovery_labels query: the specific entries
-        // that matched, with their ES-generated highlight snippet wrapping the
-        // matched span(s) in <em>...</em>.
-        const innerHits = (
-          hit as {
-            inner_hits?: Record<
-              string,
-              {
-                hits: {
-                  hits: Array<{
-                    _source: { value?: string; kind?: string };
-                    highlight?: Record<string, string[]>;
-                  }>;
-                };
-              }
-            >;
-          }
-        ).inner_hits;
-        const labelHits = innerHits?.discovery_labels?.hits?.hits;
-        if (labelHits && labelHits.length > 0) {
-          const matched: MatchedDiscoveryLabel[] = labelHits
-            .filter((h) => h._source?.value != null && h._source?.kind != null)
-            .map((h) => {
-              const entry: MatchedDiscoveryLabel = {
-                value: h._source.value!,
-                kind: h._source.kind!,
-              };
-              const snippet = pickHighlightSnippet(h.highlight);
-              if (snippet) {
-                entry.highlighted = snippet;
-              }
-              return entry;
-            });
-          if (matched.length > 0) {
-            result.matched_discovery_labels = matched;
-          }
-        }
-        return result;
       });
 
     logger.debug(`SML autocomplete: returned ${results.length} result(s)`);
@@ -1275,7 +1214,6 @@ const hydrateDocument = (source: SmlDocument): SmlDocument => {
   };
   if (source.description !== undefined) doc.description = source.description;
   if (source.tags !== undefined) doc.tags = source.tags;
-  if (source.discovery_labels !== undefined) doc.discovery_labels = source.discovery_labels;
   if (source.extended_attrs !== undefined) doc.extended_attrs = source.extended_attrs;
   if (source.user_id !== undefined) doc.user_id = source.user_id;
   if (source.references !== undefined) doc.references = source.references;

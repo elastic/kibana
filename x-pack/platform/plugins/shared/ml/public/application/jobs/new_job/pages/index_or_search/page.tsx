@@ -11,7 +11,6 @@ import { EuiFlexGroup, EuiFormRow, EuiPageBody, EuiPanel, EuiSpacer } from '@ela
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ProjectRouting } from '@kbn/es-query';
-import { useFetchProjects } from '@kbn/cps-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
@@ -68,14 +67,14 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
     }
   }, [cpsManager]);
 
-  const fetchProjects = useCallback(
-    (routing?: ProjectRouting) => {
-      return cpsManager?.fetchProjects(routing) ?? Promise.resolve(null);
-    },
+  const fetchProjectsByRouting = useCallback(
+    (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
     [cpsManager]
   );
 
-  const projects = useFetchProjects(fetchProjects, projectRouting);
+  const defaultProjectRoutingGetter = useCallback(() => {
+    return cpsManager?.getDefaultProjectRouting();
+  }, [cpsManager]);
 
   const onProjectRoutingChange = useCallback((newProjectRouting: ProjectRouting) => {
     setProjectRouting(newProjectRouting as string);
@@ -111,7 +110,7 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
           back={anomalyDetectionJobsBack}
         />
         <EuiPanel hasShadow={false} hasBorder>
-          {totalProjectCount > 1 && projects ? (
+          {totalProjectCount > 1 ? (
             <>
               <EuiFormRow
                 fullWidth
@@ -123,9 +122,10 @@ export const Page: FC<PageProps> = ({ nextStepPath, extraButtons }) => {
                 }
               >
                 <MlProjectPickerPanel
-                  projectRouting={projectRouting}
                   onProjectRoutingChange={onProjectRoutingChange}
-                  projects={projects}
+                  fetchProjectsByRouting={fetchProjectsByRouting}
+                  projectRouting={projectRouting}
+                  defaultProjectRoutingGetter={defaultProjectRoutingGetter}
                   totalProjectCount={totalProjectCount}
                   projectRoutingValueTestSubj="mlIndexOrSearchProjectRoutingValue"
                 />

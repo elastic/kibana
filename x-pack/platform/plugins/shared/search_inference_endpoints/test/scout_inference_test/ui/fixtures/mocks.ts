@@ -50,9 +50,14 @@ const endpointsAsConnectors = (endpoints: MockEndpoint[]) =>
       type: '.inference',
       config: {
         inferenceId: ep.inference_id,
+        providerConfig: {
+          model_id:
+            typeof ep.service_settings?.model_id === 'string'
+              ? ep.service_settings.model_id
+              : undefined,
+        },
         taskType: ep.task_type,
         service: ep.service,
-        serviceSettings: ep.service_settings,
         modelCreator: ep.metadata?.display?.model_creator,
       },
       capabilities: {},
@@ -106,7 +111,7 @@ export async function unmockInferenceEndpoints(page: ScoutPage) {
   await page.unroute(ENDPOINTS_ROUTE);
 }
 
-const REGION_POLICY_ROUTE = '**/internal/search_inference_endpoints/region_policy';
+const REGION_POLICY_ROUTE = /\/internal\/search_inference_endpoints\/region_policy(?:\?|$)/;
 
 export interface MockRegionPolicy {
   allowed_regions?: Array<{ csp: string; region: string }>;
@@ -116,8 +121,13 @@ export interface MockRegionPolicy {
 export interface RegionPolicyMockCounters {
   getRequestCount: number;
   putRequestCount: number;
+  forcePutRequestCount: number;
   deleteRequestCount: number;
 }
+
+const isForcePutRequest = (requestUrl: string): boolean => {
+  return new URL(requestUrl).searchParams.get('force') === 'true';
+};
 
 async function createRegionPolicyRouteMock(
   page: ScoutPage,
@@ -125,7 +135,8 @@ async function createRegionPolicyRouteMock(
     get: (counters: RegionPolicyMockCounters) => { status: number; body: unknown };
     put?: (
       counters: RegionPolicyMockCounters,
-      requestBody: MockRegionPolicy
+      requestBody: MockRegionPolicy,
+      isForce: boolean
     ) => { status: number; body: unknown };
     delete?: (counters: RegionPolicyMockCounters) => { status: number; body: unknown };
   }
@@ -133,6 +144,7 @@ async function createRegionPolicyRouteMock(
   const counters: RegionPolicyMockCounters = {
     getRequestCount: 0,
     putRequestCount: 0,
+    forcePutRequestCount: 0,
     deleteRequestCount: 0,
   };
   await page.route(REGION_POLICY_ROUTE, async (route) => {
@@ -143,8 +155,12 @@ async function createRegionPolicyRouteMock(
       await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
     } else if (method === 'PUT' && handlers.put) {
       counters.putRequestCount += 1;
+      const isForce = isForcePutRequest(route.request().url());
+      if (isForce) {
+        counters.forcePutRequestCount += 1;
+      }
       const requestBody = route.request().postDataJSON() as MockRegionPolicy;
-      const { status, body } = handlers.put(counters, requestBody);
+      const { status, body } = handlers.put(counters, requestBody, isForce);
       await route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
     } else if (method === 'DELETE' && handlers.delete) {
       counters.deleteRequestCount += 1;
@@ -223,6 +239,44 @@ export async function mockRegionPolicyDeleteConflict(
       status: 409,
       body: { message: 'Region policy is currently in use.' },
     }),
+  });
+}
+
+export async function mockRegionPolicyPutInUseConflict(
+  page: ScoutPage
+): Promise<RegionPolicyMockCounters> {
+  let currentPolicy: MockRegionPolicy | null = null;
+  return createRegionPolicyRouteMock(page, {
+    get: () =>
+      currentPolicy
+        ? {
+            status: 200,
+            body: { region_policy: currentPolicy, created_at: '2026-01-01T00:00:00Z' },
+          }
+        : { status: 404, body: { message: 'No region policy found' } },
+    put: (_counters, requestBody, isForce) => {
+      if (!isForce) {
+        return {
+          status: 409,
+          body: {
+            statusCode: 409,
+            error: 'Conflict',
+            message: 'Policy would deny endpoints currently in use.',
+            attributes: {
+              denied_endpoint_ids: ['.elser-2-elastic'],
+              referencing_pipelines: '.elser-2-elastic:region-policy-force-test',
+              referencing_indexes: ['.elser-2-elastic:region-policy-force-test-index'],
+            },
+          },
+        };
+      }
+      currentPolicy = requestBody;
+      return putRegionPolicyResponse(requestBody);
+    },
+    delete: () => {
+      currentPolicy = null;
+      return { status: 200, body: { acknowledged: true } };
+    },
   });
 }
 

@@ -20,8 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const resourceName1 = 'name-ng-1-Node';
   const resourceName2 = 'othername-june12-8-8-0-1';
 
-  // Failing: See https://github.com/elastic/kibana/issues/277860
-  describe.skip('Vulnerabilities Page - DataTable', function () {
+  describe('Vulnerabilities Page - DataTable', function () {
     this.tags(['cloud_security_posture_vulnerabilities']);
     let findings: typeof pageObjects.findings;
     let latestVulnerabilitiesTable: typeof findings.latestVulnerabilitiesTable;
@@ -38,12 +37,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.vulnerabilitiesIndex.add(vulnerabilitiesLatestMock);
 
       await findings.navigateToLatestVulnerabilitiesPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor(
         'Findings table to be loaded',
         async () =>
           (await latestVulnerabilitiesTable.getRowsCount()) === vulnerabilitiesLatestMock.length
       );
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {

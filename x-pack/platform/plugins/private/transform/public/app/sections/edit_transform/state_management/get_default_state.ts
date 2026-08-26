@@ -31,6 +31,9 @@ export const getDefaultState = (config?: TransformConfigUnion): State => ({
       validator: 'frequencyValidator',
     }),
 
+    // source.*
+    projectRouting: initializeFormField('projectRouting', 'source.project_routing', config),
+
     // dest.*
     destinationIndex: initializeFormField('destinationIndex', 'dest.index', config, {
       dependsOn: ['destinationIngestPipeline'],
