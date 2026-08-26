@@ -27,8 +27,10 @@ import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/rout
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
+  hasWorkflowReadPrivilege,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
+import { toExecutionSummaryDto } from './utils/to_execution_summary_dto';
 import { workflowIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -220,8 +222,12 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             sortField: request.query.sortField,
             sortOrder: request.query.sortOrder,
           };
+          const result = await api.getWorkflowExecutions(params, spaceId);
+          if (hasWorkflowReadPrivilege(request)) {
+            return response.ok({ body: result });
+          }
           return response.ok({
-            body: await api.getWorkflowExecutions(params, spaceId),
+            body: { ...result, results: result.results.map(toExecutionSummaryDto) },
           });
         } catch (error) {
           return handleRouteError(response, error);

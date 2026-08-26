@@ -73,6 +73,7 @@ describe('Execution Routes', () => {
     conflict: jest.fn((params?: any) => ({ type: 'conflict', ...params })),
   };
   const defaultAuthzResult = {
+    [WorkflowsManagementApiActions.read]: true,
     [WorkflowsManagementApiActions.readExecution]: true,
     [WorkflowsManagementApiActions.readManagedExecution]: true,
   };
@@ -583,6 +584,48 @@ describe('Execution Routes', () => {
 
       expect(result).toEqual({ type: 'ok', body: execution });
       expect(result.body.version).toBe(5);
+    });
+
+    it('should return a summary DTO (no yaml/definition/steps) when read privilege is absent', async () => {
+      const execution = {
+        id: 'ex-1',
+        managed: false,
+        status: 'completed',
+        startedAt: '2025-01-01T00:00:00Z',
+        finishedAt: '2025-01-01T00:01:00Z',
+        duration: 60000,
+        executedBy: 'user1',
+        triggeredBy: 'manual',
+        yaml: 'name: secret',
+        workflowDefinition: { steps: [] },
+        stepExecutions: [{ stepId: 'step-1', stepType: 'http.request' }],
+        context: { step1: { output: 'sensitive' } },
+      };
+      mockApi.getWorkflowExecution.mockResolvedValue(execution);
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { includeInput: false, includeOutput: false },
+        authzResult: {
+          [WorkflowsManagementApiActions.read]: false,
+          [WorkflowsManagementApiActions.readExecution]: true,
+          [WorkflowsManagementApiActions.readManagedExecution]: false,
+        },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(result).toMatchObject({ type: 'ok' });
+      expect(result.body).not.toHaveProperty('yaml');
+      expect(result.body).not.toHaveProperty('workflowDefinition');
+      expect(result.body).not.toHaveProperty('stepExecutions');
+      expect(result.body).not.toHaveProperty('context');
+      expect(result.body).toMatchObject({
+        id: 'ex-1',
+        status: 'completed',
+        executedBy: 'user1',
+        triggeredBy: 'manual',
+      });
     });
 
     it('should return not found when execution does not exist', async () => {

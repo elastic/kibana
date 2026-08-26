@@ -14,10 +14,12 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   assertCanReadManagedWorkflowExecution,
+  hasWorkflowReadPrivilege,
   WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
 } from '../utils/route_security';
 import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
+import { toExecutionSummaryDto } from './utils/to_execution_summary_dto';
 
 export function registerGetExecutionRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -67,7 +69,11 @@ export function registerGetExecutionRoute({ router, api, spaces }: RouteDependen
             return response.notFound();
           }
           assertCanReadManagedWorkflowExecution(request, workflowExecution);
-          return response.ok({ body: workflowExecution });
+          return response.ok({
+            body: hasWorkflowReadPrivilege(request)
+              ? workflowExecution
+              : toExecutionSummaryDto(workflowExecution),
+          });
         } catch (error) {
           return handleRouteError(response, error);
         }

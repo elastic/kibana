@@ -319,6 +319,44 @@ export interface WorkflowExecutionDto {
   version?: number;
 }
 
+/**
+ * A narrow execution view returned to callers who hold `readExecution` but not `read`.
+ *
+ * Includes fields that describe *what happened* (status, timing, who ran it, output) without
+ * exposing *how the workflow is built*. Omitted fields — `yaml`, `workflowDefinition`,
+ * `stepExecutions`, `stepId`, `context`, and `stepUsage` — all embed or reference the workflow
+ * definition and are only available to callers who also hold `read`.
+ */
+export interface WorkflowExecutionSummaryDto {
+  id: string;
+  spaceId: string;
+  workflowId?: string;
+  workflowName?: string;
+  managed?: boolean;
+  managedBy?: string | null;
+  originManagedWorkflowId?: string | null;
+  managedVersion?: number | null;
+  status: ExecutionStatus;
+  isTestRun: boolean;
+  startedAt: string;
+  finishedAt: string;
+  duration: number | null;
+  executedBy?: string;
+  triggeredBy?: string;
+  error: SerializedError | null;
+  traceId?: string;
+  entryTransactionId?: string;
+  /** Aggregated LLM token usage — does not reveal per-step structure. */
+  usage?: WorkflowTokenUsage;
+}
+
+export interface WorkflowExecutionSummaryListDto {
+  results: WorkflowExecutionSummaryDto[];
+  page: number;
+  size: number;
+  total: number;
+}
+
 export type WorkflowExecutionListItemDto = Omit<
   WorkflowExecutionDto,
   'stepExecutions' | 'yaml' | 'workflowDefinition'

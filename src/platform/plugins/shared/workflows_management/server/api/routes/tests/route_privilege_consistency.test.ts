@@ -155,6 +155,11 @@ const INTERNAL_READ_EXCEPTIONS: Record<string, string[]> = {
   // the caller. See WorkflowsManagementApi.resumeWorkflowExecution →
   // WorkflowExecutionQueryService.getWaitingStepExecutionId.
   'POST:/api/workflows/executions/{executionId}/resume': [WORKFLOWS_STEP_EXECUTIONS_INDEX],
+  // Managed-execution authorization checks read the parent workflow metadata but do not return it.
+  // `read` is an extendedPrivilege on these routes (not required), so it is not in authzResult
+  // during the test and the WORKFLOWS_INDEX read is not covered by the declared scope.
+  'GET:/api/workflows/workflow/{workflowId}/executions': [WORKFLOWS_INDEX],
+  'GET:/api/workflows/workflow/{workflowId}/executions/steps': [WORKFLOWS_INDEX],
 };
 
 /**
