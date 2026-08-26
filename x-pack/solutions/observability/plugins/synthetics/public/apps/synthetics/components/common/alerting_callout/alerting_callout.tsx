@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { syntheticsSettingsLocatorID } from '@kbn/observability-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -88,7 +88,7 @@ const MissingRulesCallout = ({
   missingConfig?: boolean;
   missingRules?: boolean;
 }) => {
-  const [isHidden, setIsHidden] = useSessionStorage('MissingRulesCalloutHidden', false);
+  const [isHidden, setIsHidden] = useLocalStorage('MissingRulesCalloutHidden', false);
 
   if ((!missingConfig && !missingRules) || isHidden) {
     return null;
