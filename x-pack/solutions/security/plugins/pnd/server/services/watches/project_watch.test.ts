@@ -341,14 +341,8 @@ describe('project watch', () => {
       it('declares dismissed and applied tag sets', () => {
         expect(tuning.consts).toEqual(
           expect.objectContaining({
-            dismissed_tags: [
-              'detection-watch:tuning-reviewed',
-              'detection-watch:tuning-dismissed',
-            ],
-            applied_tags: [
-              'detection-watch:tuning-reviewed',
-              'detection-watch:tuning-applied',
-            ],
+            dismissed_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-dismissed'],
+            applied_tags: ['detection-watch:tuning-reviewed', 'detection-watch:tuning-applied'],
           })
         );
         expect(tuning.consts).not.toHaveProperty('reviewed_only_tags');
