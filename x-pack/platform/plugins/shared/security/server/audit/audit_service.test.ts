@@ -206,7 +206,6 @@ describe('#asScoped', () => {
       kibanaRequestState: {
         requestId: 'REQUEST_ID',
         requestUuid: 'REQUEST_UUID',
-        startTime: Date.now(),
       },
     });
 
@@ -303,7 +302,6 @@ describe('#asScoped', () => {
       kibanaRequestState: {
         requestId: 'REQUEST_ID',
         requestUuid: 'REQUEST_UUID',
-        startTime: Date.now(),
       },
     });
 
@@ -339,7 +337,6 @@ describe('#asScoped', () => {
       kibanaRequestState: {
         requestId: 'REQUEST_ID',
         requestUuid: 'REQUEST_UUID',
-        startTime: Date.now(),
       },
     });
 
@@ -371,7 +368,6 @@ describe('#asScoped', () => {
       kibanaRequestState: {
         requestId: 'REQUEST_ID',
         requestUuid: 'REQUEST_UUID',
-        startTime: Date.now(),
       },
     });
 
