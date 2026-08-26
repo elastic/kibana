@@ -17,7 +17,6 @@ interface Options {
   /**
    * When true, the client automatically answers any pending structured prompts
    * that the agent emits after each API call:
-   *   - `ask_user_question` → selects the first option (`choice: [0]`)
    *   - `confirmation`      → allows (`allow: true`)
    *
    * The client loops until no unanswered prompts remain, merging all steps
@@ -64,7 +63,7 @@ export class AgentBuilderEvaluationChatClient {
     private readonly fetch: HttpHandler,
     private readonly log: ToolingLog,
     private readonly connectorId: string
-  ) {}
+  ) { }
 
   private async executeWithRetry<T>(operationName: string, fn: () => Promise<T>): Promise<T> {
     return pRetry(fn, {
@@ -91,6 +90,16 @@ export class AgentBuilderEvaluationChatClient {
       },
     });
   }
+
+  private getConfirmationPrompts = (responseMsg: { prompts?: any[] }): Record<string, unknown> => {
+    const autoPrompts: Record<string, unknown> = {};
+    for (const prompt of responseMsg?.prompts ?? []) {
+      if (prompt?.id && prompt.type === 'confirmation') {
+        autoPrompts[prompt.id] = { allow: true };
+      }
+    }
+    return autoPrompts;
+  };
 
   converse: ConverseFunction = async ({ messages, conversationId, options = {} }) => {
     this.log.info('Calling converse');
@@ -127,29 +136,10 @@ export class AgentBuilderEvaluationChatClient {
       let lastResponse = latestResponse;
       let currentConversationId = conversationIdFromResponse;
 
-      // Auto-answer pending structured prompts until none remain.
-      // Pending prompts come from two places:
-      //   - steps[]           → ask_user_question (unanswered)
-      //   - response.prompts  → confirmation / authorization (tool pre-call gates)
       if (autoConfirm) {
-        // autoConfirm only handles tool confirmation gates — it does not auto-answer
-        // user questions or auto-authorize platform permissions.
-        const collectPending = (
-          _responseSteps: any[],
-          responseMsg: { prompts?: any[] }
-        ): Record<string, unknown> => {
-          const autoPrompts: Record<string, unknown> = {};
-          for (const prompt of responseMsg?.prompts ?? []) {
-            if (prompt?.id && prompt.type === 'confirmation') {
-              autoPrompts[prompt.id] = { allow: true };
-            }
-          }
-          return autoPrompts;
-        };
+        let autoConfirmPrompts = this.getConfirmationPrompts(lastResponse);
 
-        let autoPrompts = collectPending(allSteps, lastResponse);
-
-        while (Object.keys(autoPrompts).length > 0) {
+        while (Object.keys(autoConfirmPrompts).length > 0) {
           const continuation = (await this.fetch('/api/agent_builder/converse', {
             method: 'POST',
             version: '2023-10-31',
@@ -157,7 +147,7 @@ export class AgentBuilderEvaluationChatClient {
               agent_id: agentId,
               connector_id: this.connectorId,
               conversation_id: currentConversationId,
-              prompts: autoPrompts,
+              prompts: autoConfirmPrompts,
             }),
           })) as AgentBuilderConverseApiResponse;
 
@@ -165,7 +155,7 @@ export class AgentBuilderEvaluationChatClient {
           lastResponse = continuation.response ?? lastResponse;
           currentConversationId = continuation.conversation_id ?? currentConversationId;
 
-          autoPrompts = collectPending(continuation.steps ?? [], continuation.response);
+          autoConfirmPrompts = this.getConfirmationPrompts(continuation.response);
         }
       }
 

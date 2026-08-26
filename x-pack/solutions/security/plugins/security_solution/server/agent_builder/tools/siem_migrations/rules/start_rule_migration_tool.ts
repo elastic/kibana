@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import { ToolType, ToolResultType, platformCoreTools } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
@@ -23,7 +23,10 @@ import { createSelfClient, type SelfClient } from '../../../../common/self_clien
 import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
-import { SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID } from './tool_ids';
+import {
+  SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
+  SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
+} from './tool_ids';
 
 // Reuse the endpoint's request body schema and add the path param, so the tool input
 // stays in lockstep with the API model (no schema drift). `.extend` on a lazySchema
@@ -47,7 +50,7 @@ const schema = StartRuleMigrationRequestBody.extend({
     })
     .optional()
     .describe(
-      'REPROCESS only, paired with retry: "selected". Omit for START/RESUME. Resolve rule titles to ids via get_migration_rules.'
+      `REPROCESS only, paired with retry: "selected". Omit for START/RESUME. Resolve rule titles to ids via ${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}.`
     ),
 }).omit({ langsmith_options: true });
 
@@ -69,10 +72,10 @@ export const startRuleMigrationTool = (
       openWorldHint: false,
     },
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
-    confirmation: { askUser: 'always' },
+    confirmation: { askUser: 'once' },
     description: `Start or reprocess a SIEM rule migration.
 
-Mutating — confirms with the user and resolves the inference endpoint (AI connector) via list_inference_endpoints first.
+Mutating — confirms with the user and resolves the inference endpoint (AI connector) via ${platformCoreTools.listInferenceEndpoints} first.
 
 See the automatic-migration-rules-start-migration skill for the START vs REPROCESS vs RESUME decision policy.`,
     schema,

@@ -43,26 +43,26 @@ ${NAME_NEVER_ID_BLOCK}
 
 ## Available Tools
 
-- \`security.siem_migration.get_all_rule_migration_stats\` — list task-progress stats for every
+- \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` — list task-progress stats for every
   migration available to the user (id, name, vendor, status, pending/processing/completed/failed
   counts). Start here when the user has no specific migration in mind.
-- \`security.siem_migration.get_rule_migration_stats\` — task-progress stats for ONE migration
+- \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` — task-progress stats for ONE migration
   (id, name, status, per-state rule counts, last_execution). Also the pasted-id fallback (see
   Name→ID block). Returns an empty zero-shape when the migration has no items.
-- \`security.siem_migration.get_rule_migration_translation_stats\` — translation stats for ONE
+- \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\` — translation stats for ONE
   migration: total, full/partial/untranslatable, installable, prebuilt, missing-index, failed.
   Returns an empty zero-shape when the migration has no items.
-- \`security.siem_migration.get_migration_rules\` — list the rules in one migration with their
+- \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` — list the rules in one migration with their
   translation result and status (projected fields only). Supports filtering and pagination.
 
 ## Workflow
 
 1. **Overview**: if the user asks for a summary with no migration in mind, call
-   \`get_all_rule_migration_stats\` and present the list.
+   \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` and present the list.
 2. **Drill in**: if the user names a migration, resolve the name to an id (Name→ID block) and call
-   \`get_rule_migration_stats\` for config and task progress, and
-   \`get_rule_migration_translation_stats\` for translation breakdown.
-3. **Rules**: if the user wants to see the rules inside a migration, call \`get_migration_rules\`
+   \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` for config and task progress, and
+   \`${SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID}\` for translation breakdown.
+3. **Rules**: if the user wants to see the rules inside a migration, call \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\`
    with the resolved id (page is zero-based).
 
 ## Rendering
@@ -71,7 +71,7 @@ ${NAME_NEVER_ID_BLOCK}
   (completed/total). Sort by last-updated descending unless the user asks otherwise.
 - **Single migration**: open with one sentence naming the migration. Show name, vendor, task status,
   and a counts breakdown (pending / processing / completed / failed; full / partial /
-  untranslatable / installable). If \`last_execution\` is present (from \`get_rule_migration_stats\`),
+  untranslatable / installable). If \`last_execution\` is present (from \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\`),
   show connector id, started_at, and any error.
 - **Rules**: a table of original title, translated title (or "—"), translation result, status.
   State the page number and that more pages exist when \`total\` exceeds the rows shown.

@@ -46,7 +46,7 @@ export const stopRuleMigrationTool = (
       idempotentHint: true,
       openWorldHint: false,
     },
-    confirmation: { askUser: 'always' },
+    confirmation: { askUser: 'once' },
     description: `Stop a running Automatic Rule Migration.
 
 Returns { stopped: boolean }. Mutating — confirms with the user before executing.

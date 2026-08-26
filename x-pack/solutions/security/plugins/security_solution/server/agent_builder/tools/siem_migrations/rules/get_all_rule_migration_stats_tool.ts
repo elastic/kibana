@@ -18,7 +18,10 @@ import { createSelfClient, type SelfClient } from '../../../../common/self_clien
 import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createMissingPrivilegeError, createToolErrorResult } from '../common/tool_results';
-import { SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID } from './tool_ids';
+import {
+  SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
+  SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
+} from './tool_ids';
 
 const schema = z.object({}).describe('No parameters. Lists stats for every rule migration.');
 
@@ -58,7 +61,7 @@ Returns { total, migrations: [{ id, name, status, items: { total, pending, proce
 
 Use \`name\` to resolve the user-supplied migration name to \`id\` (names can collide — disambiguate by vendor, then status/created_at/counts; see the active skill for the full hierarchy).
 
-Only migrations with >=1 eligible rule item are returned. If the user names one that is missing, ask them to paste the migration id from the UI and verify it via get_rule_migration_stats.
+Only migrations with >=1 eligible rule item are returned. If the user names one that is missing, ask them to paste the migration id from the UI and verify it via ${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}.
 
 Read-only.`,
     schema,

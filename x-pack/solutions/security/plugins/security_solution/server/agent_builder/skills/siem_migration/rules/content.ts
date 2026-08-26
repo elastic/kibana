@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
+  SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
+  SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
+} from '../../tools/siem_migrations';
+
 /**
  * Shared content blocks for the Automatic Migration sibling skills.
  *
@@ -56,19 +62,19 @@ step below. Never show migration ids in table headers, column values, or example
 the name instead and resolve it to the id internally when calling tools.
 
 1. Resolve a user-provided migration **name** to its **migration id** by calling
-   \`security.siem_migration.get_all_rule_migration_stats\` and matching on the \`name\` field.
+   \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` and matching on the \`name\` field.
 2. If two migrations share the same name, disambiguate using the hierarchy in
    "Disambiguating Same-Name Migrations" below before acting.
 3. Only if every disambiguating attribute still collides, surface the **full migration id** as a
    last resort — present the tied migrations in a numbered list and ask the user to pick by number.
    Never ask the user to type or paste an id voluntarily; this is the fallback, not the default.
-4. **Pasted-id fallback**: \`get_all_rule_migration_stats\` only returns migrations that have at
+4. **Pasted-id fallback**: \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` only returns migrations that have at
    least one eligible rule item. A migration with zero eligible items (or only non-eligible
    items) is invisible to name resolution. If the user pastes a migration id directly (e.g. copied
-   from the UI), verify it with \`security.siem_migration.get_rule_migration_stats\` before acting on it (stats returns the same fields plus status/counts, using fewer tokens).
+   from the UI), verify it with \`${SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID}\` before acting on it (stats returns the same fields plus status/counts, using fewer tokens).
 5. **Rule item ids**: some actions (install specific rules, reprocess a subset) need a **rule item
    id** — never a migration id. Resolve a user-provided rule **title** to its item id by calling
-   \`security.siem_migration.get_migration_rules\` and matching on the original or translated title.
+   \`${SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID}\` and matching on the original or translated title.
    Never ask the user for a rule item id; always work from the title.
 `;
 
@@ -82,7 +88,7 @@ export const MIGRATION_NAME_DISAMBIGUATION_BLOCK = `
 When two or more migrations share the same name, disambiguate in this order (stop at the first
 attribute that separates them):
 
-1. **Vendor** — Splunk vs QRadar vs Sentinel (from \`get_all_rule_migration_stats\` \`vendor\`).
+1. **Vendor** — Splunk vs QRadar vs Sentinel (from \`${SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID}\` \`vendor\`).
 2. **Status** — ready / running / stopped / interrupted / finished.
 3. **Created date** — \`created_at\`, newest first.
 4. **Full migration id** — last resort. Present the still-tied migrations as a numbered list
