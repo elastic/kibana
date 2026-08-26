@@ -49,7 +49,6 @@ import {
   buildRecentContext,
   type RelevantSkillSelection,
 } from './utils/relevant_skills/select_relevant_skills';
-import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildPendingRoundActions } from './utils/build_pending_round_actions';
@@ -65,6 +64,7 @@ import { BackgroundExecutionService } from './background_execution_service';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateType } from './state';
 import { conversationIndexName } from '../../conversation/client/storage';
+import { roundsForContext } from '../../conversation';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -93,7 +93,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     origin,
     author,
     agentConfiguration,
-    capabilities,
     runId = uuidv4(),
     agentId,
     abortSignal,
@@ -149,7 +148,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const subagentTracker = new SubagentTracker(conversation?.state?.subagents);
 
   const model = await modelProvider.getDefaultModel();
-  const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
 
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
@@ -182,10 +180,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   toolManager.setEventEmitter(eventEmitter);
   toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
+  const previousRounds = conversation ? roundsForContext(conversation) : [];
+
   // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
     nextInput,
-    previousRounds: conversation?.rounds ?? [],
+    previousRounds,
+    nextInputAuthor: pendingRound?.author ?? author,
     context,
     action,
     metadata: conversation?.metadata,
@@ -268,7 +269,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     context,
     agentId,
     executionId,
-    capabilities,
     abortSignal,
     backgroundExecutionService,
     updateConversationMetadata,
@@ -346,7 +346,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
-    capabilities: resolvedCapabilities,
+    spaceId: context.spaceId,
     skills: filteredSkills,
     processedConversation,
     toolManager,
@@ -366,7 +366,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     chatModel: model.chatModel,
     toolManager,
     configuration: resolvedConfiguration,
-    capabilities: resolvedCapabilities,
     structuredOutput,
     outputSchema,
     processedConversation,
