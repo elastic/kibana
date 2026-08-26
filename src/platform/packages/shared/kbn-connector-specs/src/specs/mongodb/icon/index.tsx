@@ -8,31 +8,10 @@
  */
 
 import React from 'react';
+import { EuiIcon } from '@elastic/eui';
 import type { ConnectorIconProps } from '../../../types';
+import mongodbIcon from './mongodb.svg';
 
-/**
- * MongoDB leaf logo SVG icon.
- * Derived from MongoDB's brand colors (green #00ED64, dark #001E2B).
- */
 export default (props: ConnectorIconProps) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 32 32"
-      width="32"
-      height="32"
-      aria-label="MongoDB"
-      {...props}
-    >
-      {/* MongoDB leaf mark */}
-      <path
-        d="M16 2C11.5 2 8 7.5 8 13.5c0 4.5 2.5 8.5 6 10.5V28c0 .6.4 1 1 1h2c.6 0 1-.4 1-1v-4c3.5-2 6-6 6-10.5C24 7.5 20.5 2 16 2z"
-        fill="#00ED64"
-      />
-      <path
-        d="M16 2C11.5 2 8 7.5 8 13.5c0 4.5 2.5 8.5 6 10.5V28c0 .6.4 1 1 1h1V2h-1z"
-        fill="#00684A"
-      />
-    </svg>
-  );
+  return <EuiIcon type={mongodbIcon} {...props} />;
 };
