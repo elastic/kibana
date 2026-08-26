@@ -79,4 +79,31 @@ describe('fetchConnector', () => {
 
     expect(result).toMatchObject({ authMode: 'per-user' });
   });
+
+  it('should map connector spec versions from the API response', async () => {
+    http.get.mockResolvedValueOnce({
+      id: 'test-connector',
+      name: 'Test',
+      connector_type_id: 'test',
+      is_preconfigured: false,
+      is_deprecated: false,
+      is_missing_secrets: false,
+      is_system_action: false,
+      referenced_by_count: 0,
+      is_connector_type_deprecated: false,
+      spec_version: '1.0.0',
+      active_spec_version: '2.0.0',
+      secrets: {},
+      config: {},
+    });
+
+    const result = await fetchConnector('test-connector', { http });
+
+    expect(result).toMatchObject({
+      specVersion: '1.0.0',
+      activeSpecVersion: '2.0.0',
+    });
+    expect(result).not.toHaveProperty('spec_version');
+    expect(result).not.toHaveProperty('active_spec_version');
+  });
 });

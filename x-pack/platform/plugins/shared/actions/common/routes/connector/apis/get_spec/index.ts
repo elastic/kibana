@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-export { getConnectorSpecParamsSchema } from './schemas/latest';
-export type { GetConnectorSpecParams } from './types/latest';
+export { getConnectorSpecParamsSchema, getConnectorSpecQuerySchema } from './schemas/latest';
+export type { GetConnectorSpecParams, GetConnectorSpecQuery } from './types/latest';
 
-export { getConnectorSpecParamsSchema as getConnectorSpecParamsSchemaV1 } from './schemas/v1';
-export type { GetConnectorSpecParams as GetConnectorSpecParamsV1 } from './types/v1';
+export {
+  getConnectorSpecParamsSchema as getConnectorSpecParamsSchemaV1,
+  getConnectorSpecQuerySchema as getConnectorSpecQuerySchemaV1,
+} from './schemas/v1';
+export type {
+  GetConnectorSpecParams as GetConnectorSpecParamsV1,
+  GetConnectorSpecQuery as GetConnectorSpecQueryV1,
+} from './types/v1';
 
 export type { GetConnectorSpecResponseV1 } from '../../response';
 export { getConnectorSpecResponseBodySchema as getConnectorSpecResponseBodySchemaV1 } from '../../response';

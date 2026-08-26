@@ -243,5 +243,8 @@ export async function create({
     ...(result.attributes.authMode !== undefined ? { authMode: result.attributes.authMode } : {}),
     ...(specId !== undefined ? { specId } : {}),
     ...(connectorSpec?.version !== undefined ? { specVersion: connectorSpec.version } : {}),
+    ...(specId !== undefined && connectorSpec?.version !== undefined
+      ? { activeSpecVersion: connectorSpec.version }
+      : {}),
   };
 }

@@ -24,6 +24,7 @@ export interface Connector {
   authMode?: ConnectorSchemaType['authMode'];
   specId?: ConnectorSchemaType['specId'];
   specVersion?: ConnectorSchemaType['specVersion'];
+  activeSpecVersion?: ConnectorSchemaType['activeSpecVersion'];
 }
 
 export interface ConnectorWithExtraFindData extends Connector {

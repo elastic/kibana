@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { getConnectorSpecParamsSchema, getConnectorSpecQuerySchema } from './v1';
+export { upgrade } from './upgrade';
+export type {
+  ConnectorUpgradeParams,
+  ConnectorUpgradeResult,
+  ConnectorUpgradeStatus,
+} from './types';

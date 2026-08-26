@@ -246,6 +246,9 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const resolvedAuthMode = getAuthMode(
     result.attributes.authMode as Connector['authMode'] | undefined
   );
+  const activeSpecVersion = attributes.specId
+    ? context.actionTypeRegistry.tryResolveActionType(attributes.specId)?.connectorSpec?.version
+    : undefined;
 
   return {
     id,
@@ -260,5 +263,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     authMode: resolvedAuthMode,
     ...(attributes.specId ? { specId: attributes.specId } : {}),
     ...(attributes.specVersion ? { specVersion: attributes.specVersion } : {}),
+    ...(activeSpecVersion ? { activeSpecVersion } : {}),
   };
 }

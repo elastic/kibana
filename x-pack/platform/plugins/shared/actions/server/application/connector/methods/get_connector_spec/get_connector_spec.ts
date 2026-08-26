@@ -13,6 +13,7 @@ import type { GetConnectorSpecParams } from './types';
 export async function getConnectorSpecAsJsonSchema({
   context,
   id,
+  version,
   configurationUtilities,
 }: GetConnectorSpecParams) {
   try {
@@ -27,9 +28,10 @@ export async function getConnectorSpecAsJsonSchema({
     throw error;
   }
 
-  const spec = context.actionTypeRegistry.tryResolveActionType(id)?.connectorSpec;
+  const spec = context.actionTypeRegistry.tryResolveActionType(id, version)?.connectorSpec;
+  const activeSpec = context.actionTypeRegistry.tryResolveActionType(id)?.connectorSpec;
 
-  if (!spec) {
+  if (!spec || !activeSpec) {
     throw Boom.notFound(`Spec for connector type "${id}" not found.`);
   }
 
@@ -47,6 +49,8 @@ export async function getConnectorSpecAsJsonSchema({
       metadata: serialized.metadata,
       schema: serialized.schema,
       isTestable: Boolean(spec.test.enabled),
+      ...(spec.version ? { version: spec.version } : {}),
+      ...(activeSpec.version ? { activeVersion: activeSpec.version } : {}),
     };
   } catch (error) {
     throw new Error(

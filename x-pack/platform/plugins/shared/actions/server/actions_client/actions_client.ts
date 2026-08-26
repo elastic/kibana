@@ -33,6 +33,7 @@ import { getAuthStatus } from '../application/connector/methods/get_auth_status'
 import { getConnectorSpecAsJsonSchema } from '../application/connector/methods/get_connector_spec';
 import type { GetAuthStatusResult } from '../application/connector/methods/get_auth_status/types';
 import { update } from '../application/connector/methods/update';
+import { upgrade, type ConnectorUpgradeResult } from '../application/connector/methods/upgrade';
 import { listTypes } from '../application/connector/methods/list_types';
 import { create } from '../application/connector/methods/create';
 import { execute } from '../application/connector/methods/execute';
@@ -233,6 +234,10 @@ export class ActionsClient {
     return update({ context: this.context, id, action });
   }
 
+  public async upgrade({ id }: { id: string }): Promise<ConnectorUpgradeResult> {
+    return upgrade({ context: this.context, id });
+  }
+
   /**
    * Get a connector
    */
@@ -271,14 +276,17 @@ export class ActionsClient {
 
   public async getConnectorSpec({
     id,
+    version,
     configurationUtilities,
   }: {
     id: string;
+    version?: string;
     configurationUtilities: ActionsConfigurationUtilities;
   }) {
     return getConnectorSpecAsJsonSchema({
       context: this.context,
       id,
+      version,
       configurationUtilities,
     });
   }
@@ -371,7 +379,8 @@ export class ActionsClient {
         connectorFromSavedObject(
           action,
           isConnectorDeprecated(action.attributes),
-          this.context.actionTypeRegistry.isDeprecated(action.attributes.actionTypeId)
+          this.context.actionTypeRegistry.isDeprecated(action.attributes.actionTypeId),
+          this.context.actionTypeRegistry
         )
       );
     }

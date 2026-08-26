@@ -20,6 +20,7 @@ export const connectorSchema = schema.object({
   authMode: schema.maybe(schema.oneOf([schema.literal('shared'), schema.literal('per-user')])),
   specId: schema.maybe(schema.string()),
   specVersion: schema.maybe(schema.string()),
+  activeSpecVersion: schema.maybe(schema.string()),
 });
 
 export const connectorWithExtraFindDataSchema = connectorSchema.extends({

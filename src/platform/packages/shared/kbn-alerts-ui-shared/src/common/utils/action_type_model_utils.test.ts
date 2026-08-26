@@ -76,6 +76,17 @@ describe('action_type_model_utils', () => {
       );
       expect(result).toEqual(expectedClientSpec());
     });
+
+    it('requests an exact connector spec version when provided', async () => {
+      http.get.mockResolvedValue(mockWireResponse());
+
+      await fetchConnectorSpec(http, 'test-connector', '1.2.3');
+
+      expect(http.get).toHaveBeenCalledWith(
+        '/internal/actions/connector_types/test-connector/spec',
+        expect.objectContaining({ query: { version: '1.2.3' } })
+      );
+    });
   });
 
   describe('transformSpecToActionTypeModel', () => {

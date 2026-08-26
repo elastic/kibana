@@ -47,6 +47,8 @@ import { ConnectorRulesList } from '../connector_rules_list';
 import { useExecuteConnector } from '../../../hooks/use_execute_connector';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './footer';
+import { ConnectorUpgradeCallout } from './connector_upgrade_callout';
+import { useConnectorUpgrade } from './use_connector_upgrade';
 
 export interface EditConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -181,6 +183,23 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const canSave = hasSaveActionsCapability(capabilities);
   const { isLoading: isUpdatingConnector, updateConnector } = useUpdateConnector();
   const { isLoading: isExecutingConnector, executeConnector } = useExecuteConnector();
+  const [currentConnector, setCurrentConnector] = useState(connector);
+  const onConnectorUpgrade = useCallback(
+    (updatedConnector: ActionConnector) => {
+      setCurrentConnector(updatedConnector);
+      onConnectorUpdated?.(updatedConnector);
+    },
+    [onConnectorUpdated]
+  );
+  const {
+    state: connectorUpgradeState,
+    isUpgrading: isUpgradingConnector,
+    upgradeConnector,
+  } = useConnectorUpgrade({
+    connectorId: currentConnector.id,
+    http,
+    onConnectorUpdated: onConnectorUpgrade,
+  });
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
@@ -227,7 +246,8 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const [isSaved, setIsSaved] = useState<boolean>(false);
   const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
   const hasErrors = isFormValid === false;
-  const isSaving = isUpdatingConnector || isSubmitting || isExecutingConnector;
+  const isSaving =
+    isUpdatingConnector || isSubmitting || isExecutingConnector || isUpgradingConnector;
 
   const {
     actionTypeModel,
@@ -236,14 +256,16 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     refetch: refetchConnectorSpec,
   } = useActionTypeModel({
     actionTypeRegistry,
-    actionTypeId: connector.actionTypeId,
+    actionTypeId: currentConnector.actionTypeId,
     http,
     docLinks,
     uiSettings,
+    specVersion: currentConnector.specVersion,
   });
 
-  const isSpecConnector = !actionTypeRegistry.has(connector.actionTypeId);
-  const isTestable = actionTypeModel?.isTestable ?? actionTypeRegistry.has(connector.actionTypeId);
+  const isSpecConnector = !actionTypeRegistry.has(currentConnector.actionTypeId);
+  const isTestable =
+    actionTypeModel?.isTestable ?? actionTypeRegistry.has(currentConnector.actionTypeId);
 
   // Delay the spinner so quick spec loads don't flash a loading state.
   const [showLoadingSpinner, setShowLoadingSpinner] = useState(false);
@@ -254,7 +276,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const showButtons =
     canSave &&
     actionTypeModel &&
-    !connector.isPreconfigured &&
+    !currentConnector.isPreconfigured &&
     !isLoadingActionTypeModel &&
     !actionTypeModelError;
   const disabled =
@@ -268,9 +290,12 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const connectorWithoutSecrets = useMemo(
     () =>
       getConnectorWithoutSecrets(
-        connector as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
+        currentConnector as UserConfiguredActionConnector<
+          Record<string, unknown>,
+          Record<string, unknown>
+        >
       ),
-    [connector]
+    [currentConnector]
   );
 
   const resolvedTestExecutionActionParams = useMemo(
@@ -285,7 +310,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   const onExecutionAction = useCallback(async () => {
     try {
       const res = await executeConnector({
-        connectorId: connector.id,
+        connectorId: currentConnector.id,
         params: resolvedTestExecutionActionParams,
       });
 
@@ -294,13 +319,13 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
       const result: ActionTypeExecutorResult<unknown> = isActionTypeExecutorResult(error)
         ? error
         : {
-            actionId: connector.id,
+            actionId: currentConnector.id,
             status: 'error',
             message: error.message,
           };
       setTestExecutionResult(some(result));
     }
-  }, [connector.id, executeConnector, resolvedTestExecutionActionParams]);
+  }, [currentConnector.id, executeConnector, resolvedTestExecutionActionParams]);
 
   const onFormModifiedChange = useCallback(
     (formModified: boolean) => {
@@ -339,7 +364,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
        */
       const { name, config, secrets } = data;
       const validConnector = {
-        id: connector.id,
+        id: currentConnector.id,
         name: name ?? '',
         config: config ?? {},
         secrets: secrets ?? {},
@@ -370,7 +395,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     onConnectorUpdated,
     submit,
     preSubmitValidator,
-    connector.id,
+    currentConnector.id,
     updateConnector,
     onFormModifiedChange,
   ]);
@@ -383,8 +408,12 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
     };
   }, []);
 
+  useEffect(() => {
+    setCurrentConnector(connector);
+  }, [connector]);
+
   const renderConfigurationTab = useCallback(() => {
-    if (!connector.isPreconfigured && !connector.isSystemAction) {
+    if (!currentConnector.isPreconfigured && !currentConnector.isSystemAction) {
       return (
         <>
           {isEdit && (
@@ -407,6 +436,14 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
                   <EuiSpacer size="m" />
                 </>
               )}
+              <ConnectorUpgradeCallout
+                connector={currentConnector}
+                isSpecConnector={isSpecConnector}
+                isFormModified={isFormModified}
+                isBusy={isSaving}
+                state={connectorUpgradeState}
+                onUpgrade={upgradeConnector}
+              />
               <ConnectorSpecLoadState
                 showLoadingSpinner={showLoadingSpinner}
                 actionTypeModelError={actionTypeModelError}
@@ -416,9 +453,11 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
               {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
                 <>
                   <ConnectorForm
+                    key={currentConnector.specVersion}
                     actionTypeModel={actionTypeModel}
                     connector={connectorWithoutSecrets}
                     isEdit={isEdit}
+                    readOnly={isUpgradingConnector}
                     onChange={setFormState}
                     onFormModifiedChange={onFormModifiedChange}
                   />
@@ -435,23 +474,29 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
       <ReadOnlyConnectorMessage
         href={docLinks.links.alerting.preconfiguredConnectors}
         extraComponent={actionTypeModel?.actionReadOnlyExtraComponent}
-        connectorId={connector.id}
-        connectorName={connector.name}
+        connectorId={currentConnector.id}
+        connectorName={currentConnector.name}
       />
     );
   }, [
-    connector,
+    currentConnector,
     connectorWithoutSecrets,
     docLinks.links.alerting.preconfiguredConnectors,
     actionTypeModel,
     actionTypeModelError,
     isEdit,
     isLoadingActionTypeModel,
+    isUpgradingConnector,
     showLoadingSpinner,
     showFormErrors,
     onFormModifiedChange,
     preSubmitValidationErrorMessage,
     refetchConnectorSpec,
+    connectorUpgradeState,
+    isFormModified,
+    isSaving,
+    isSpecConnector,
+    upgradeConnector,
   ]);
 
   const renderTestTab = useCallback(() => {
@@ -465,8 +510,10 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
 
         {actionTypeModel && !isLoadingActionTypeModel && !actionTypeModelError && (
           <TestConnectorForm
-            connector={connector}
-            executeEnabled={!isFormModified}
+            connector={currentConnector}
+            executeEnabled={
+              !isFormModified && !isUpdatingConnector && !isSubmitting && !isUpgradingConnector
+            }
             actionParams={resolvedTestExecutionActionParams}
             onEditAction={onEditAction}
             onExecutionAction={onExecutionAction}
@@ -479,8 +526,11 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
       </>
     );
   }, [
-    connector,
+    currentConnector,
     isFormModified,
+    isUpdatingConnector,
+    isSubmitting,
+    isUpgradingConnector,
     resolvedTestExecutionActionParams,
     onEditAction,
     onExecutionAction,
@@ -495,26 +545,26 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   ]);
 
   const renderConnectorRulesList = useCallback(() => {
-    return <ConnectorRulesList connector={connector} />;
-  }, [connector]);
+    return <ConnectorRulesList connector={currentConnector} />;
+  }, [currentConnector]);
 
   // This specific logic can be removed once inference connectors are no longer experimental. Tracked here https://github.com/elastic/kibana/issues/244985
   const isExperimental: boolean | undefined = useMemo(() => {
     if (
-      connector &&
-      'config' in connector &&
-      connector.config?.inferenceId === '.rainbow-sprinkles-elastic'
+      currentConnector &&
+      'config' in currentConnector &&
+      currentConnector.config?.inferenceId === '.rainbow-sprinkles-elastic'
     ) {
       return false;
     }
     return actionTypeModel?.isExperimental;
-  }, [actionTypeModel, connector]);
+  }, [actionTypeModel, currentConnector]);
 
   return (
     <>
       <FlyoutHeader
-        isPreconfigured={connector.isPreconfigured}
-        connectorName={connector.name}
+        isPreconfigured={currentConnector.isPreconfigured}
+        connectorName={currentConnector.name}
         connectorTypeDesc={
           actionTypeModel?.selectMessagePreconfigured || actionTypeModel?.selectMessage || ''
         }

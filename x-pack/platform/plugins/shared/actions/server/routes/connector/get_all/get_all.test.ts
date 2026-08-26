@@ -141,6 +141,41 @@ describe('getAllConnectorsRoute', () => {
     expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
   });
 
+  it('returns declarative connector spec versions in list responses', async () => {
+    const router = httpServiceMock.createRouter();
+    const actionsClient = actionsClientMock.create();
+    actionsClient.getAll.mockResolvedValueOnce([
+      {
+        id: '1',
+        name: 'Declarative connector',
+        actionTypeId: '.declarative-example',
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+        referencedByCount: 0,
+        specId: '.declarative-example',
+        specVersion: '1.0.0',
+        activeSpecVersion: '2.0.0',
+      },
+    ]);
+    getAllConnectorsRoute(router, licenseStateMock.create());
+
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {}, ['ok']);
+    await handler(context, req, res);
+
+    expect(res.ok).toHaveBeenCalledWith({
+      body: [
+        expect.objectContaining({
+          connector_type_id: '.declarative-example',
+          spec_version: '1.0.0',
+          active_spec_version: '2.0.0',
+        }),
+      ],
+    });
+  });
+
   it('returns connectors with authMode "per-user"', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

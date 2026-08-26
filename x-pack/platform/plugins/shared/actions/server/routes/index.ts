@@ -21,6 +21,7 @@ import { deleteConnectorRoute } from './connector/delete';
 import { executeConnectorRoute } from './connector/execute';
 import { getConnectorRoute } from './connector/get';
 import { updateConnectorRoute } from './connector/update';
+import { upgradeConnectorRoute } from './connector/upgrade';
 import { getOAuthAccessToken } from './get_oauth_access_token';
 import { oauthAuthorizeRoute } from './oauth_authorize';
 import { oauthCallbackRoute, oauthCallbackScriptRoute } from './oauth_callback';
@@ -66,6 +67,7 @@ export function defineRoutes(opts: RouteOptions) {
   getConnectorRoute(router, licenseState);
   getAllConnectorsRoute(router, licenseState);
   updateConnectorRoute(router, licenseState);
+  upgradeConnectorRoute(router, licenseState);
   listTypesRoute(router, licenseState);
   executeConnectorRoute(router, licenseState);
   getGlobalExecutionLogRoute(router, licenseState);

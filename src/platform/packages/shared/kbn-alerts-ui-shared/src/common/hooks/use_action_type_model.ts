@@ -46,12 +46,14 @@ export function useActionTypeModel({
   http,
   docLinks,
   uiSettings,
+  specVersion,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
   actionTypeId: string | undefined;
   http: HttpSetup;
   docLinks: DocLinksStart;
   uiSettings?: IUiSettingsClient;
+  specVersion?: string;
 }): UseActionTypeModelResult {
   const registeredModel = useMemo(() => {
     if (!actionTypeId) {
@@ -74,9 +76,9 @@ export function useActionTypeModel({
     error,
     refetch,
   } = useQuery<ConnectorSpecResponse, Error>({
-    queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionTypeId],
+    queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionTypeId, specVersion],
     queryFn: async ({ signal }) => {
-      const spec = await fetchConnectorSpec(http, actionTypeId!, signal);
+      const spec = await fetchConnectorSpec(http, actionTypeId!, specVersion, signal);
       // Validate eagerly — fail fast before caching. The schema is re-parsed
       // lazily inside actionConnectorFields when the form component mounts.
       if (!fromConnectorSpecSchema(spec.schema)) {
