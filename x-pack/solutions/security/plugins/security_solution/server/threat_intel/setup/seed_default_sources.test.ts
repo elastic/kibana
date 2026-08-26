@@ -20,11 +20,9 @@ const TOTAL = DEFAULT_SOURCES.length;
 const run = async (bulkImpl: unknown) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   (esClient.bulk as unknown as jest.Mock).mockImplementation(bulkImpl as never);
-  const result = await seedDefaultSources({
-    esClient,
-    logger: loggingSystemMock.createLogger(),
-  });
-  return { esClient, result };
+  const logger = loggingSystemMock.createLogger();
+  const result = await seedDefaultSources({ esClient, logger });
+  return { esClient, result, logger };
 };
 
 /** Bulk response where every item takes the same shape. */
@@ -36,6 +34,48 @@ const itemsFor = (operations: unknown[], item: Record<string, unknown>) => {
     items: Array.from({ length: count }, () => ({ create: item })),
   };
 };
+
+/**
+ * Seeding runs on every boot and the steady state is every source conflicting, so an
+ * unconditional info log reports `0 created, N skipped` forever. bootstrap downgrades the
+ * all-conflicts *result* to debug, but that cannot suppress a log this function already
+ * emitted, so the level has to be decided here.
+ */
+describe('seedDefaultSources completion log level', () => {
+  const summaryOf = (calls: unknown[][]) =>
+    calls.map(([msg]) => String(msg)).filter((msg) => msg.startsWith('Default source seeding'));
+
+  it('logs the steady state at debug, not info', async () => {
+    const { logger } = await run(async ({ operations }: { operations: unknown[] }) =>
+      itemsFor(operations, { error: { status: 409 } })
+    );
+
+    expect(summaryOf(logger.info.mock.calls)).toEqual([]);
+    expect(summaryOf(logger.debug.mock.calls)).toEqual([
+      `Default source seeding finished: 0 created, ${TOTAL} skipped, 0 failed`,
+    ]);
+  });
+
+  it('logs at info when sources were actually created', async () => {
+    const { logger } = await run(async ({ operations }: { operations: unknown[] }) =>
+      itemsFor(operations, { result: 'created' })
+    );
+
+    expect(summaryOf(logger.info.mock.calls)).toEqual([
+      `Default source seeding finished: ${TOTAL} created, 0 skipped, 0 failed`,
+    ]);
+  });
+
+  it('logs at info when a source failed', async () => {
+    const { logger } = await run(async ({ operations }: { operations: unknown[] }) =>
+      itemsFor(operations, { error: { type: 'mapper_parsing_exception' } })
+    );
+
+    expect(summaryOf(logger.info.mock.calls)).toEqual([
+      `Default source seeding finished: 0 created, 0 skipped, ${TOTAL} failed`,
+    ]);
+  });
+});
 
 describe('seedDefaultSources', () => {
   it('counts every created document', async () => {

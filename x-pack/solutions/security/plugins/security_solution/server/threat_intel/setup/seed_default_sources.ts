@@ -184,9 +184,15 @@ export const seedDefaultSources = async ({
     await esClient.indices.refresh({ index: THREAT_INTEL_SOURCES_INDEX });
   }
 
-  log.info(
-    `Default source seeding finished: ${result.created} created, ${result.skipped} skipped, ${result.failed} failed`
-  );
+  // A healthy catalog re-seeds on every boot and every source 409s, so an
+  // unconditional info log would report `0 created, 8 skipped` forever. Only
+  // an actual change or failure is worth an operator's attention.
+  const summary = `Default source seeding finished: ${result.created} created, ${result.skipped} skipped, ${result.failed} failed`;
+  if (result.created > 0 || result.failed > 0) {
+    log.info(summary);
+  } else {
+    log.debug(summary);
+  }
 
   return result;
 };
