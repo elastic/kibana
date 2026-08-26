@@ -121,7 +121,10 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
       // API key, and doing that per iteration meant a fresh key for each of the
       // OBJECTS_TO_SHARE entries, none of which was ever invalidated. This helper runs before
       // every test in the suites that use it, so those add up.
-      const supertestWithScope = isServerless
+      // Kept in its own binding (rather than folded into the ternary below) so it stays
+      // narrowed to the scoped client and can be destroyed in the `finally`. The stateful
+      // `supertest` service is a plain agent with no `destroy`.
+      const scopedClient = isServerless
         ? await spacesSupertest.getSupertestWithRoleScope(
             { role: 'admin' },
             {
@@ -130,7 +133,8 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
               withInternalHeaders: true,
             }
           )
-        : supertest;
+        : null;
+      const supertestWithScope = scopedClient ?? supertest;
 
       try {
         // Adjust spaces for the imported saved objects.
@@ -150,9 +154,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
             .expect(200);
         }
       } finally {
-        if (isServerless) {
-          await supertestWithScope.destroy();
-        }
+        await scopedClient?.destroy();
       }
     },
 
