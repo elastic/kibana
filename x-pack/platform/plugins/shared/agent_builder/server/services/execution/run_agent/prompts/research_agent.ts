@@ -19,8 +19,8 @@ import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/att
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { getFileSystemInstructions } from './utils/filestore';
+import { getAiIndicesInstructions } from './utils/ai_indices';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
-import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
@@ -109,12 +109,12 @@ ${fieldLines}
 };
 
 const getAgentSystemMessage = async ({
-  configuration: { instructions: customInstructions },
+  configuration: { instructions: customInstructions, aiIndices },
   outputSchema,
   skills,
+  spaceId,
   experimentalFeatures,
   relevantSkillsEnabled,
-  capabilities,
   renderers,
   processedConversation,
   conversationTemplates,
@@ -123,7 +123,6 @@ const getAgentSystemMessage = async ({
   const conversationMetadata = processedConversation.metadata as
     | Record<string, SerializedMetadataValue>
     | undefined;
-  const visEnabled = capabilities.visualizations;
 
   const conversationMetadataSection = await getConversationMetadataSection(
     conversationTemplateId,
@@ -196,6 +195,9 @@ ${
 }
 
 ${conversationMetadataSection}
+
+${getAiIndicesInstructions({ enabled: experimentalFeatures.aiIndices, aiIndices, spaceId })}
+
 ## INSTRUCTIONS
 
 ${customInstructions}
@@ -222,8 +224,6 @@ Sub-actions listed in a connector attachment may carry a bracketed scope tag:
 - No tag — the action is read-only and has no external side effects.
 
 ## CUSTOM RENDERING
-
-${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 
 ${renderAttachmentPrompt()}
 
