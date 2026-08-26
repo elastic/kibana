@@ -6,22 +6,15 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { INVESTIGATION_PROGRESS_UI_EVENT } from '@kbn/significant-events-schema';
-import { createMockToolContext, invokeHandler } from '../../../agent_builder/utils/test_helpers';
-import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import {
   createInvestigationProgressReportTool,
   SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
 } from './tool';
 
-jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
-  assertSignificantEventsAccess: jest.fn(),
-}));
-
 const createTool = () =>
   createInvestigationProgressReportTool({
-    server: {} as unknown as StreamsServer,
     logger: loggerMock.create(),
   });
 
@@ -32,27 +25,15 @@ describe('investigation_progress_report tool', () => {
     expect(tool.id).toBe(SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID);
   });
 
-  it('availability returns available when access check succeeds', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockResolvedValueOnce(undefined);
-
+  it('is not gated by an availability check', () => {
     const tool = createTool();
-    const result = await tool.availability!.handler({} as never);
 
-    expect(result).toEqual({ status: 'available' });
-  });
-
-  it('availability returns unavailable when access check throws', async () => {
-    (assertSignificantEventsAccess as jest.Mock).mockRejectedValueOnce(new Error('nope'));
-
-    const tool = createTool();
-    const result = await tool.availability!.handler({} as never);
-
-    expect(result.status).toBe('unavailable');
+    expect(tool.availability).toBeUndefined();
   });
 
   it('emits a tool_ui event with the full reported state and acknowledges', async () => {
     const tool = createTool();
-    const context = createMockToolContext();
+    const context = agentBuilderMocks.tools.createHandlerContext();
 
     const state = {
       summary: 'Latency spike correlates with a deploy at 14:02.',
@@ -71,7 +52,7 @@ describe('investigation_progress_report tool', () => {
       ],
     };
 
-    const result = await invokeHandler(tool as never, state, context);
+    const result = await tool.handler(state, context);
 
     expect(context.events.sendUiEvent).toHaveBeenCalledWith(INVESTIGATION_PROGRESS_UI_EVENT, state);
     if ('results' in result) {
