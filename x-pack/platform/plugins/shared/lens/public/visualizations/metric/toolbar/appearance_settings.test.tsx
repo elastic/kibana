@@ -24,7 +24,11 @@ const palette: PaletteOutput<CustomPaletteParams> = {
 const fullState: Required<
   Omit<
     MetricVisualizationState,
-    'secondaryPrefix' | 'secondaryLabel' | 'valuesTextAlign' | 'titleWeight'
+    | 'secondaryPrefix'
+    | 'valuesTextAlign'
+    | 'titleWeight'
+    | 'secondaryLabel'
+    | 'secondaryLabelPosition'
   >
 > = {
   layerId: 'first',

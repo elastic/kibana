@@ -322,7 +322,7 @@ describe('MetricVisComponent', function () {
 
       expect(spy).toHaveBeenCalled();
 
-      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
+      const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name; // TODO: extract this
       expect(screen.getByText(secondaryLabel)).toBeInTheDocument();
 
       const secondaryValue = `number-${table.rows[0][minPriceColumnId]}`;

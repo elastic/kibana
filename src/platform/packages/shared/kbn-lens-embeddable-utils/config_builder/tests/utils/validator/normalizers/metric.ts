@@ -46,11 +46,7 @@ interface LegacyMetricStyling {
   colorMode?: unknown;
   valuesTextSize?: unknown;
   titlesTextSize?: unknown;
-  /**
-   * Pre-rename name of `secondaryNameVisibility`, still present on real persisted SOs.
-   * @deprecated
-   */
-  secondaryLabelPosition?: MetricVisualizationState['secondaryNameVisibility'];
+  secondaryLabelPosition?: unknown;
 }
 
 // Optional visualization accessors that legacy SOs may persist as explicit `null`; the transform
@@ -153,22 +149,20 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
 
     // Without a secondary metric, the transform resets secondary styling to its defaults.
     if (viz.secondaryMetricAccessor) {
-      viz.secondaryAlign = viz.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT;
-      // The secondary label is the operation name. A leftover visualization-level
-      // custom label is kept as a runtime fallback; here only visibility is normalized.
+      const legacySecondaryLabelPosition =
+        viz.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
       const legacyLabel = viz.secondaryLabel ?? viz.secondaryPrefix;
-      viz.secondaryNameVisibility =
-        legacyLabel === ''
-          ? 'hidden'
-          : viz.secondaryNameVisibility ??
-            legacyViz.secondaryLabelPosition ??
-            DEFAULT_SECONDARY_LABEL_PLACEMENT;
+      const secondaryNameVisibility =
+        legacyLabel === '' ? 'hidden' : viz.secondaryNameVisibility ?? legacySecondaryLabelPosition;
+
+      viz.secondaryAlign = viz.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT;
+      viz.secondaryNameVisibility = secondaryNameVisibility;
     } else {
       viz.secondaryAlign = DEFAULT_SECONDARY_VALUE_ALIGNMENT;
       viz.secondaryNameVisibility = DEFAULT_SECONDARY_LABEL_PLACEMENT;
     }
     delete viz.secondaryLabel;
-    delete viz.secondaryPrefix;
+    // delete viz.secondaryPrefix; // ??
     delete legacyViz.secondaryLabelPosition;
 
     // Absent sizing round-trips through the API as `auto`, which maps back to `valueFontMode: 'default'`.

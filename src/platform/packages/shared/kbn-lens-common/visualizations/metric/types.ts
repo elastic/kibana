@@ -23,12 +23,6 @@ export type MetricStyleTemplatePresetId = Exclude<MetricStyleTemplateId, 'custom
 
 export type SecondaryTrendType = 'none' | 'static' | 'dynamic';
 
-/**
- * Visibility and placement of the secondary metric name.
- * `hidden` has no equivalent in `@elastic/charts`, where it is expressed as an empty label.
- */
-export type SecondaryNameVisibility = 'hidden' | NonNullable<SecondaryMetricProps['labelPosition']>;
-
 export type SecondaryTrend =
   | { type: 'none' }
   | { type: 'static'; color: string }
@@ -39,6 +33,8 @@ export type SecondaryTrend =
       reversed: boolean;
       baselineValue: number | 'primary';
     };
+
+export type SecondaryNameVisibility = 'hidden' | NonNullable<SecondaryMetricProps['labelPosition']>;
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -56,11 +52,7 @@ export interface MetricVisualizationState {
    * @deprecated
    */
   secondaryPrefix?: string;
-  /**
-   * Legacy custom secondary label kept as a render fallback until a future CM
-   * version copies it onto the secondary column. Visibility is `secondaryNameVisibility`.
-   * @deprecated
-   */
+  /** @deprecated */
   secondaryLabel?: string;
   secondaryTrend?: SecondaryTrend;
   progressDirection?: LayoutDirection;
@@ -82,6 +74,8 @@ export interface MetricVisualizationState {
    */
   titleWeight?: Extract<MetricStyle['titleWeight'], string>;
   primaryPosition?: PrimaryMetricPosition;
+  /** @deprecated */
+  secondaryLabelPosition?: SecondaryMetricProps['labelPosition'];
   secondaryNameVisibility?: SecondaryNameVisibility;
   color?: string;
   icon?: string;
@@ -112,8 +106,8 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'valueFontMode'
   | 'density'
   | 'primaryPosition'
-  | 'secondaryNameVisibility'
   | 'applyColorTo'
+  | 'secondaryNameVisibility'
 >;
 
 export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;

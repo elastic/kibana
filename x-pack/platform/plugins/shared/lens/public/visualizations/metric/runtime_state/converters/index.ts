@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { convertSecondaryNameVisibility } from './secondary_name_visibility';
+import { getUpdatedMetricState } from '../../../../../common/content_management/v1/transforms/metric';
 import { removeLegacyTitleWeight } from './remove_legacy_title_weight';
 import { convertApplyColorTo } from './apply_color_to';
 import { convertDensity } from './density';
+import { convertSecondaryNameVisibility } from './secondary_name_visibility';
 
 export const getRuntimeConverters = () => [
-  // secondaryPrefix/secondaryLabel → secondaryNameVisibility (keeps a non-empty
-  // secondaryLabel as a render fallback until a future CM version), valuesTextAlign →
-  // primaryAlign/secondaryAlign
-  convertSecondaryNameVisibility,
+  // v1 CM transform (idempotent): secondaryPrefix → secondaryLabel, valuesTextAlign → primaryAlign/secondaryAlign
+  getUpdatedMetricState,
   removeLegacyTitleWeight,
   convertApplyColorTo,
   convertDensity,
+  // Future v3
+  convertSecondaryNameVisibility,
 ];

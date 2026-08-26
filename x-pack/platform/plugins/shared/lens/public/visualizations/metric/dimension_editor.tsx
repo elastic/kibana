@@ -486,7 +486,6 @@ function SecondaryMetricEditor({
 
   return (
     <div className="lnsIndexPatternDimensionEditor--padded">
-      {/* The name itself is edited in the datasource section of the flyout */}
       <EuiFormRow
         display="columnCompressed"
         fullWidth

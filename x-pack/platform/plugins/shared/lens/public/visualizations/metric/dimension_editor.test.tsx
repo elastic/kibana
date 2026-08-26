@@ -63,7 +63,11 @@ describe('dimension editor', () => {
   const fullState: Required<
     Omit<
       MetricVisualizationState,
-      'secondaryPrefix' | 'secondaryLabel' | 'valuesTextAlign' | 'titleWeight'
+      | 'secondaryPrefix'
+      | 'valuesTextAlign'
+      | 'titleWeight'
+      | 'secondaryLabel'
+      | 'secondaryLabelPosition'
     >
   > = {
     layerId: 'first',

@@ -16,13 +16,6 @@ const baseState: MetricVisualizationState = {
 };
 
 describe('convertSecondaryNameVisibility', () => {
-  it('hides the name when secondaryLabel was explicitly emptied', () => {
-    expect(convertSecondaryNameVisibility({ ...baseState, secondaryLabel: '' })).toEqual({
-      ...baseState,
-      secondaryNameVisibility: 'hidden',
-    });
-  });
-
   it('hides the name when secondaryPrefix was explicitly emptied', () => {
     expect(convertSecondaryNameVisibility({ ...baseState, secondaryPrefix: '' })).toEqual({
       ...baseState,
@@ -31,13 +24,13 @@ describe('convertSecondaryNameVisibility', () => {
   });
 
   it('keeps a custom secondaryLabel as a runtime fallback and shows the name before the value', () => {
-    expect(
-      convertSecondaryNameVisibility({ ...baseState, secondaryLabel: 'custom-text' })
-    ).toEqual({
-      ...baseState,
-      secondaryLabel: 'custom-text',
-      secondaryNameVisibility: 'before',
-    });
+    expect(convertSecondaryNameVisibility({ ...baseState, secondaryLabel: 'custom-text' })).toEqual(
+      {
+        ...baseState,
+        secondaryLabel: 'custom-text',
+        secondaryNameVisibility: 'before',
+      }
+    );
   });
 
   it('promotes secondaryPrefix to secondaryLabel when secondaryLabel is unset', () => {

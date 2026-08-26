@@ -28,6 +28,8 @@ export interface DimensionsVisParam {
 
 export interface MetricVisParam {
   subtitle?: string;
+  /* Runtime fallback for a legacy custom secondary label */
+  secondaryLabel?: string;
   secondaryColor?: string;
   secondaryTrend: {
     visuals?: string;
@@ -49,11 +51,6 @@ export interface MetricVisParam {
   maxCols: number;
   minTiles?: number;
   trends?: TrendlineResult['trends'];
-  /**
-   * Runtime fallback for a legacy custom secondary label until a future CM version
-   * copies it onto the secondary column and deletes this field.
-   */
-  secondaryLabel?: string;
   secondaryNameVisibility: SecondaryNameVisibility;
   /**
    * Determines where the metric color should be applied.

@@ -25,6 +25,14 @@ interface LegacyMetricVisualizationState {
  * - Keep a non-empty `secondaryLabel` as a render fallback until a future CM
  *   version copies it onto the secondary column and deletes the field
  */
+
+/**
+ * This converter:
+ * - maps `secondaryLabelPosition` → `secondaryNameVisibility`
+ * - treats `''` as **hidden**
+ * - keeps a non-empty `secondaryLabel` / `secondaryPrefix` as a **render fallback**
+ * - defaults old charts with no position to **before**
+ */
 export const convertSecondaryNameVisibility = (
   state: MetricVisualizationState
 ): MetricVisualizationState => {

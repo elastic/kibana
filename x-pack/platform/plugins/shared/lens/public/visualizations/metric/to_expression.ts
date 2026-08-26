@@ -203,6 +203,7 @@ export const toExpression = (
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
+    secondaryLabel: state.secondaryLabel ?? undefined, // TODO: investigate if this is fine
     secondaryColor: secondaryTrendConfig.type === 'static' ? secondaryTrendConfig.color : undefined,
     secondaryTrendVisuals:
       secondaryTrendConfig.type === 'dynamic' ? secondaryTrendConfig.visuals : undefined,
@@ -240,7 +241,6 @@ export const toExpression = (
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,
-    secondaryLabel: state.secondaryLabel ?? undefined,
     secondaryNameVisibility:
       state.secondaryNameVisibility ?? LENS_METRIC_STATE_DEFAULTS.secondaryNameVisibility,
     applyColorTo: state.applyColorTo,

@@ -2354,9 +2354,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    /**
-     * Returns `undefined` when the name is hidden, as the chart omits the element for an empty label.
-     */
+    /** Returns `undefined` when the name is hidden, as the chart omits the element for an empty label. */
     async getSecondaryMetricLabel(tile?: WebElementWrapper) {
       const ECH_SECONDARY_METRIC_LABEL_SELECTOR = '.echSecondaryMetric__label';
       if (tile) {

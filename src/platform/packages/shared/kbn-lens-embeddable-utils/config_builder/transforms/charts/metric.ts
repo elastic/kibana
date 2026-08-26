@@ -156,12 +156,6 @@ function isPrimaryMetric(metric: MetricConfig['metrics'][number]): metric is Pri
   return metric.type === 'primary';
 }
 
-/**
- * The secondary label is the operation name, so only its visibility and placement are
- * configurable. An explicit value is always written when there is a secondary metric,
- * otherwise the Lens state migration would read the missing value as a chart predating
- * `Name display` and turn the label on.
- */
 function getSecondaryNameVisibility(
   label: NonNullable<MetricStyling['secondary']>['label']
 ): MetricVisualizationState['secondaryNameVisibility'] {
@@ -179,7 +173,11 @@ function convertStylingToStateFormat(
   if (!styling) {
     return {
       density: DEFAULT_DENSITY,
-      ...(hasSecondary ? { secondaryNameVisibility: getSecondaryNameVisibility(undefined) } : {}),
+      ...(hasSecondary
+        ? {
+            secondaryNameVisibility: getSecondaryNameVisibility(undefined),
+          }
+        : {}),
     };
   }
   const primaryStyling = styling.primary;

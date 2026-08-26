@@ -38,10 +38,6 @@ import type {
 
 export type AvailableMetricIcon = $Values<typeof AvailableMetricIcons>;
 export type MetricDensity = 'compact' | 'default';
-/**
- * Visibility and placement of the secondary metric name.
- * `hidden` has no equivalent in `@elastic/charts`, where it is expressed as an empty label.
- */
 export type SecondaryNameVisibility = 'hidden' | NonNullable<SecondaryMetricProps['labelPosition']>;
 
 export interface MetricArguments {
@@ -51,6 +47,7 @@ export interface MetricArguments {
   breakdownBy?: ExpressionValueVisDimension | string;
   trendline?: TrendlineResult;
   subtitle?: string;
+  secondaryLabel?: string;
   secondaryColor?: string;
   secondaryTrendVisuals?: string;
   secondaryTrendBaseline?: number | string;
@@ -70,11 +67,6 @@ export interface MetricArguments {
   maxCols: number;
   minTiles?: number;
   inspectorTableId: string;
-  /**
-   * Runtime fallback for a legacy custom secondary label until a future CM version
-   * copies it onto the secondary column and deletes this field.
-   */
-  secondaryLabel?: string;
   secondaryNameVisibility: SecondaryNameVisibility;
   applyColorTo?: 'background' | 'value';
 }

@@ -21,10 +21,7 @@ import type {
   LensTransformOut,
 } from './types';
 import { findLensReference } from './utils';
-import {
-  isLensAttributesV0,
-  isLensAttributesV1,
-} from '../content_management/utils';
+import { isLensAttributesV0, isLensAttributesV1 } from '../content_management/utils';
 import { stripInheritedContext } from './helpers';
 
 /**

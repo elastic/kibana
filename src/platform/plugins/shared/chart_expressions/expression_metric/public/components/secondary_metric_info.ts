@@ -13,8 +13,7 @@ import type { TextContextTypeConvert } from '@kbn/field-formats-plugin/common';
 import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 
 import type { DimensionsVisParam } from '../../common';
-import type { FormatOverrides } from './helpers';
-import { getMetricFormatter } from './helpers';
+import { getMetricFormatter, type FormatOverrides } from './helpers';
 
 const TREND_UPWARD = '\u{2191}'; // ↑
 const TREND_DOWNWARD = '\u{2193}'; // ↓
@@ -35,7 +34,6 @@ export interface SecondaryMetricInfoArgs {
   columns: DatatableColumn[];
   secondaryMetric: NonNullable<DimensionsVisParam['secondaryMetric']>;
   secondaryLabel?: string;
-  /** When `false` the label is omitted, e.g. when the name visibility is `hidden` */
   showLabel: boolean;
   trendConfig?: TrendConfig;
   staticColor?: string;

@@ -219,8 +219,6 @@ export const MetricVis = ({
     const { secondaryMetric } = config.dimensions;
     if (secondaryMetric) {
       const { secondaryNameVisibility } = config.metric;
-      // `hidden` has no equivalent in the chart, where it is expressed as an empty label,
-      // so any placement works
       const isLabelHidden = secondaryNameVisibility === 'hidden';
       const labelPosition = isLabelHidden ? 'before' : secondaryNameVisibility;
 

@@ -78,9 +78,10 @@ describe('metric visualization', () => {
       | 'trendlineBreakdownByAccessor'
       | 'secondaryColor'
       | 'secondaryPrefix'
-      | 'secondaryLabel'
       | 'valuesTextAlign'
       | 'titleWeight'
+      | 'secondaryLabel'
+      | 'secondaryLabelPosition'
     >
   > = {
     layerId: 'first',
@@ -121,9 +122,10 @@ describe('metric visualization', () => {
       | 'secondaryTrend'
       | 'secondaryColor'
       | 'secondaryPrefix'
-      | 'secondaryLabel'
       | 'valuesTextAlign'
       | 'titleWeight'
+      | 'secondaryLabel'
+      | 'secondaryLabelPosition'
     >
   > = {
     ...fullState,
