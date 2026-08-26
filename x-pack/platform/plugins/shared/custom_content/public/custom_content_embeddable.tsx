@@ -13,6 +13,7 @@ import type {
   HasTypeDisplayName,
   HasEditCapabilities,
   PublishesDataViews,
+  PublishesDataLoading,
   PublishesEsqlUsage,
 } from '@kbn/presentation-publishing';
 import {
@@ -62,6 +63,7 @@ export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState
   HasTypeDisplayName &
   HasEditCapabilities &
   PublishesDataViews &
+  PublishesDataLoading &
   PublishesEsqlUsage;
 
 export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
@@ -81,6 +83,9 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
     const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+    // Starts true so the panel is not reported as render-complete before its first fetch resolves;
+    // screenshotting would otherwise capture an empty panel.
+    const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
     const serializeState = (): CustomContentEmbeddableState => ({
       ...titleManager.getLatestState(),
@@ -126,6 +131,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       serializeState,
       usesEsql$,
       dataViews$,
+      dataLoading$,
       getTypeDisplayName: () =>
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom content',
@@ -370,6 +376,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           return () => sub.unsubscribe();
         }, []);
 
+        const handleLoadingChange = useCallback((isLoading: boolean) => {
+          dataLoading$.next(isLoading);
+        }, []);
+
         const handleGenerateWithChat = useCallback(() => {
           const { agentBuilder } = getServices();
           if (!agentBuilder) return;
@@ -395,6 +405,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             query={query}
             filters={filters}
             previewHtml={previewHtml}
+            onLoadingChange={handleLoadingChange}
             onGenerateWithChat={handleGenerateWithChat}
           />
         );

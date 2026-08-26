@@ -28,13 +28,16 @@ const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.Mocked
   typeof apiIsPresentationContainer
 >;
 
-let capturedComponentProps: { onGenerateWithChat?: () => void } | undefined;
+let capturedComponentProps:
+  | { onGenerateWithChat?: () => void; onLoadingChange?: (isLoading: boolean) => void }
+  | undefined;
 
 jest.mock('./components/custom_content_component', () => ({
   CustomContentComponent: (props: {
     esqlQuery: string | undefined;
     savedTemplate: string | undefined;
     generationVersion: number;
+    onLoadingChange: (isLoading: boolean) => void;
     onGenerateWithChat?: () => void;
   }) => {
     capturedComponentProps = props;
@@ -178,6 +181,26 @@ describe('customContentEmbeddableFactory', () => {
       expect(readEsqlQuery(embeddable.api.serializeState())).toBe(
         'FROM metrics | STATS avg = AVG(value)'
       );
+    });
+  });
+
+  // Screenshotting marks a panel render-complete as soon as `dataLoading$` is falsy, so reporting
+  // would capture an empty panel if this defaulted to false.
+  describe('dataLoading$', () => {
+    it('starts loading before the first fetch resolves', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      expect(embeddable.api.dataLoading$.getValue()).toBe(true);
+    });
+
+    it('follows the rendered content loading state', async () => {
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(false));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(false);
+
+      await act(async () => capturedComponentProps?.onLoadingChange?.(true));
+      expect(embeddable.api.dataLoading$.getValue()).toBe(true);
     });
   });
 

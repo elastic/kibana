@@ -10,7 +10,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useCustomContentHtml } from '../hooks/use_custom_content_html';
 import { getServices } from '../services';
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
@@ -26,6 +26,7 @@ interface CustomContentComponentProps {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
   previewHtml: string | null;
+  onLoadingChange: (isLoading: boolean) => void;
   onGenerateWithChat?: () => void;
 }
 
@@ -59,6 +60,7 @@ export const CustomContentComponent = ({
   query,
   filters,
   previewHtml,
+  onLoadingChange,
   onGenerateWithChat,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
@@ -79,6 +81,8 @@ export const CustomContentComponent = ({
   const { agentBuilder } = getServices();
   const isAiAvailable = Boolean(agentBuilder);
 
+  useEffect(() => onLoadingChange(isLoading), [isLoading, onLoadingChange]);
+
   const wrapperCss = useMemo(
     () =>
       css({
@@ -93,7 +97,7 @@ export const CustomContentComponent = ({
   );
 
   return (
-    <div css={wrapperCss}>
+    <div css={wrapperCss} data-shared-item>
       {error && (
         <KbnDangerCallout
           title={i18n.translate('xpack.customContent.error.title', {
