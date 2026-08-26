@@ -289,12 +289,7 @@ export const config: PluginConfigDescriptor = {
                 schema.object({
                   certificate: schema.maybe(schema.string()),
                   key: schema.maybe(schema.string()),
-                  // String or list: cluster-internal-cas alone is the ECP cluster
-                  // CA, which is an MKI intermediate. Serverless also needs
-                  // http-certs/ca.crt (that MKI parent) when verify-server is on.
-                  ca: schema.maybe(
-                    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
-                  ),
+                  ca: schema.maybe(schema.string()),
                 })
               ),
             })

@@ -32,8 +32,7 @@ const RENDER_TIMEOUT_MS = 30_000;
 /**
  * Build the CA list for outbound mTLS.
  *
- * A single `tls.ca` path is still valid (local dev, or an explicit bundle).
- * On Serverless the configured file is cluster-internal-cas — the ECP cluster
+ * On Serverless the configured `tls.ca` file is cluster-internal-cas — the ECP
  * CA — which is issued by MKI, not a root. The MKI intermediate sits next to
  * the Kibana client cert at `dirname(certificate)/ca.crt`. Include it when
  * present so `rejectUnauthorized: true` can complete the chain.
@@ -44,10 +43,10 @@ const RENDER_TIMEOUT_MS = 30_000;
  * would replace those roots and fail the handshake.
  */
 const resolveIacProvisionerCertificateAuthorities = (
-  tls: { certificate?: string; ca?: string | string[] } | undefined,
+  tls: { certificate?: string; ca?: string } | undefined,
   { isServerless }: { isServerless: boolean }
 ): string | string[] | undefined => {
-  const configured = tls?.ca == null ? [] : Array.isArray(tls.ca) ? [...tls.ca] : [tls.ca];
+  const configured = tls?.ca ? [tls.ca] : [];
   if (isServerless && configured.length > 0 && tls?.certificate) {
     const siblingCa = path.join(path.dirname(tls.certificate), 'ca.crt');
     if (!configured.includes(siblingCa) && existsSync(siblingCa)) {

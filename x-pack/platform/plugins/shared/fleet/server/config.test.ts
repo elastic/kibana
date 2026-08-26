@@ -142,40 +142,6 @@ describe('Config schema', () => {
     }).not.toThrow();
   });
 
-  it('should allow iacProvisioner.api.tls.ca as a string or an array of paths', () => {
-    expect(() => {
-      config.schema.validate({
-        iacProvisioner: {
-          enabled: true,
-          api: {
-            url: 'https://iac-provisioner.example',
-            tls: {
-              certificate: '/mnt/elastic-internal/http-certs/tls.crt',
-              key: '/mnt/elastic-internal/http-certs/tls.key',
-              ca: '/mnt/elastic-internal/trust-bundle/ca.crt',
-            },
-          },
-        },
-      });
-    }).not.toThrow();
-    expect(() => {
-      config.schema.validate({
-        iacProvisioner: {
-          enabled: true,
-          api: {
-            url: 'https://iac-provisioner.example',
-            tls: {
-              ca: [
-                '/mnt/elastic-internal/trust-bundle/ca.crt',
-                '/mnt/elastic-internal/http-certs/ca.crt',
-              ],
-            },
-          },
-        },
-      });
-    }).not.toThrow();
-  });
-
   it('should allow to specify packageInstallation configuration', () => {
     expect(() => {
       config.schema.validate({

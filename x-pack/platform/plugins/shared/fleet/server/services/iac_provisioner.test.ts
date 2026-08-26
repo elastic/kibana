@@ -271,32 +271,6 @@ describe('IacProvisionerService', () => {
     expect(errorLogged).toContain('unable to get issuer certificate');
   });
 
-  it('passes an array of CA paths through to the TLS agent', async () => {
-    mockConfig({
-      api: {
-        url: 'https://iac-provisioner.example',
-        tls: {
-          certificate: '/path/tls.crt',
-          key: '/path/tls.key',
-          ca: ['/path/trust-bundle/ca.crt', '/path/http-certs/ca.crt'],
-        },
-      },
-    });
-    mockLogger();
-    mockedFetch.mockResolvedValueOnce(
-      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
-    );
-
-    await iacProvisionerService.renderTemplate(RENDER_REQUEST);
-
-    expect(mockedAgent).toHaveBeenCalledWith({
-      connect: expect.objectContaining({
-        ca: ['/path/trust-bundle/ca.crt', '/path/http-certs/ca.crt'],
-        rejectUnauthorized: true,
-      }),
-    });
-  });
-
   it('also trusts ca.crt next to the client certificate when that file exists', async () => {
     // Serverless Kibana mounts the client cert at http-certs/tls.crt and the
     // MKI intermediate at http-certs/ca.crt. cluster-internal-cas (the
