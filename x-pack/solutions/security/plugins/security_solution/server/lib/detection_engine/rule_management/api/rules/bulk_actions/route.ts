@@ -55,6 +55,7 @@ import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
 import { bulkScheduleRuleGapFilling } from './bulk_schedule_rule_gap_filling';
+import { splitAlreadyDeletedRules } from './utils';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 // The alerting layer converts IDs into a KQL "OR" boolean query (one should-clause per ID).
@@ -330,21 +331,12 @@ export const performBulkActionRoute = (
               const ruleIds = rules.map((rule) => rule.id);
               const bulkDeleteResult = await detectionRulesClient.bulkDeleteRules({ ruleIds });
 
-              // A 404 on delete means the rule is already gone, e.g. deleted by a
-              // concurrent bulk delete targeting an overlapping set of rules. The
-              // desired end state is reached, so count it as a successful deletion
-              // instead of failing the whole operation.
-              const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
-              const alreadyDeletedRules: RuleAlertType[] = [];
-              for (const error of bulkDeleteResult.errors) {
-                const alreadyDeletedRule =
-                  error.status === 404 ? rulesById.get(error.rule.id) : undefined;
-                if (alreadyDeletedRule) {
-                  alreadyDeletedRules.push(alreadyDeletedRule);
-                } else {
-                  errors.push(error);
-                }
-              }
+              const { alreadyDeletedRules, remainingErrors } = splitAlreadyDeletedRules({
+                errors: bulkDeleteResult.errors,
+                rules,
+              });
+
+              errors.push(...remainingErrors);
               deleted = [...bulkDeleteResult.rules, ...alreadyDeletedRules];
               break;
             }
