@@ -1,11 +1,11 @@
 {
-  "sha1": "303262bcf45c7b0c4d15d58d65cdad5d15aee1de",
+  "sha1": "",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "12b82be97422403-046d32467ea5d20",
+      "id": "628631388260336-046d32467ea5d20",
       "title": "Task Manager bulkSchedule API keys invalidates only the keys granted for a task omitted during local preparation",
       "expectedStatus": "passed",
       "tags": [
@@ -13,13 +13,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/bulk_schedule_api_keys.spec.ts",
-        "line": 78,
-        "column": 44
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_uiam_local/api/tests/bulk_schedule_api_keys.spec.ts",
+        "line": 123,
+        "column": 46
       }
     },
     {
-      "id": "12b82be97422403-c1457589c675a9b",
+      "id": "628631388260336-c1457589c675a9b",
       "title": "Task Manager bulkSchedule API keys invalidates every granted key when the bulk contains an unsupported task type",
       "expectedStatus": "passed",
       "tags": [
@@ -27,13 +27,27 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/bulk_schedule_api_keys.spec.ts",
-        "line": 130,
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_uiam_local/api/tests/bulk_schedule_api_keys.spec.ts",
+        "line": 176,
         "column": 27
       }
     },
     {
-      "id": "5ce936b95a321a4-ee984c13261a09d",
+      "id": "628631388260336-c5ebff3d7b15175",
+      "title": "Task Manager bulkSchedule API keys keeps separately granted keys correlated with id-less tasks",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_uiam_local/api/tests/bulk_schedule_api_keys.spec.ts",
+        "line": 247,
+        "column": 25
+      }
+    },
+    {
+      "id": "c04558012744074-ee984c13261a09d",
       "title": "Task Manager ensureScheduled API keys grants a single ES + UIAM pair when called repeatedly for the same task",
       "expectedStatus": "passed",
       "tags": [
@@ -41,13 +55,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/ensure_scheduled_api_keys.spec.ts",
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_uiam_local/api/tests/ensure_scheduled_api_keys.spec.ts",
         "line": 30,
         "column": 15
       }
     },
     {
-      "id": "208b6394ca1260b-100a2f007029fdb",
+      "id": "6fa146302be6b38-100a2f007029fdb",
       "title": "Task Manager API Keys scheduled task has both apiKey and uiamApiKey",
       "expectedStatus": "passed",
       "tags": [
@@ -55,13 +69,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/task_api_keys.spec.ts",
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_uiam_local/api/tests/task_api_keys.spec.ts",
         "line": 39,
         "column": 66
       }
     },
     {
-      "id": "208b6394ca1260b-fcb14904c934c2b",
+      "id": "6fa146302be6b38-fcb14904c934c2b",
       "title": "Task Manager API Keys when task is removed, apiKey and uiamApiKey are queued for invalidation",
       "expectedStatus": "passed",
       "tags": [
@@ -69,13 +83,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/task_api_keys.spec.ts",
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_uiam_local/api/tests/task_api_keys.spec.ts",
         "line": 42,
         "column": 47
       }
     },
     {
-      "id": "7b5a2f206f49d25-69ef74b960fb06c",
+      "id": "a847fa2c5055129-69ef74b960fb06c",
       "title": "Task Manager UIAM API key provisioning (background task) provisions UIAM for tasks that still have an ES api key but no UIAM key, and skips tasks with no api key or a user–created api key",
       "expectedStatus": "passed",
       "tags": [
@@ -83,13 +97,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/uiam_api_key_provisioning_background.spec.ts",
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_uiam_local/api/tests/uiam_api_key_provisioning_background.spec.ts",
         "line": 31,
         "column": 27
       }
     },
     {
-      "id": "7b5a2f206f49d25-17fb6e35ed1aa3a",
+      "id": "a847fa2c5055129-17fb6e35ed1aa3a",
       "title": "Task Manager UIAM API key provisioning (background task) on a later run, still provisions new candidate tasks and leaves tasks with a final provisioning status off the UIAM fetch query",
       "expectedStatus": "passed",
       "tags": [
@@ -97,13 +111,13 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/uiam_api_key_provisioning_background.spec.ts",
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_uiam_local/api/tests/uiam_api_key_provisioning_background.spec.ts",
         "line": 142,
         "column": 23
       }
     },
     {
-      "id": "2b8622c17fc479a-4bec8a92839533d",
+      "id": "04d9774abd8f9ea-4bec8a92839533d",
       "title": "[NON-MKI] Task Manager task scheduled with a user-created (external) UIAM API key persists the raw key UIAM-only, executes the task, and never queues the key for invalidation",
       "expectedStatus": "passed",
       "tags": [
@@ -111,8 +125,8 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/user_created_uiam_api_key_task.spec.ts",
-        "line": 64,
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_uiam_local/api/tests/user_created_uiam_api_key_task.spec.ts",
+        "line": 63,
         "column": 5
       }
     }
