@@ -232,6 +232,8 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.payload.results[0].evaluatorName).toBe('Correctness');
     expect(response.payload.results[0].sampleSize).toBe(2);
     expect(response.payload.results[0].direction).toBe('maximize');
+    expect(response.payload.results[0].meanA).toBeCloseTo(0.4);
+    expect(response.payload.results[0].meanB).toBeCloseTo(0.8);
     expect(response.payload.pairing.totalPairs).toBe(2);
     expect(response.payload.pairing.skippedMissingPairs).toBe(0);
     expect(response.payload.pairing.skippedNullScores).toBe(0);
