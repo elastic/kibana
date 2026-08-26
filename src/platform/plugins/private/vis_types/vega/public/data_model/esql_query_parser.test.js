@@ -811,6 +811,20 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     expect(result.params[0]).toEqual({ _tstart: new Date(1000000).toISOString() });
     expect(result.params[1]).toEqual({ fizzbuzz: 'ios' });
   });
+
+  test('dashboard time range wins when spec params try to override _tstart and _tend', () => {
+    const dashboardStart = '2024-01-01T00:00:00.000Z';
+    const dashboardEnd = '2024-12-31T23:59:59.999Z';
+    const { parser } = createParser(Date.parse(dashboardStart), Date.parse(dashboardEnd));
+
+    const query = 'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend';
+    const result = parser._injectNamedParams(query, {
+      query,
+      params: [{ _tstart: '2020-01-01T00:00:00.000Z' }, { _tend: '2020-06-30T23:59:59.999Z' }],
+    });
+
+    expect(result.params).toEqual([{ _tstart: dashboardStart }, { _tend: dashboardEnd }]);
+  });
 });
 
 describe('EsqlQueryParser._transformEsqlRowsToVegaRows', () => {
