@@ -2331,7 +2331,14 @@ paths:
                       delete: true
                       rename: true
                     rounds:
-                      - id: 170ec3b2-0f5a-4538-8b60-549572386d2a
+                      - feedback:
+                          chips:
+                            - accurate
+                            - useful
+                          comment: ''
+                          submitted_at: '2025-09-19T17:46:12.000Z'
+                          vote: up
+                        id: 170ec3b2-0f5a-4538-8b60-549572386d2a
                         input:
                           message: Hello, how are you?
                         response:
