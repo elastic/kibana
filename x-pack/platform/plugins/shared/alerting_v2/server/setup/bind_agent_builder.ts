@@ -75,6 +75,8 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
           resolveRequestScoped(injection, context.request, ActionPolicyExecutionHistoryClient),
         getPrivilegeChecker: (context) =>
           resolveRequestScoped(injection, context.request, PrivilegeChecker),
+        getWorkflowApi: () =>
+          injection.getContainer().get(WorkflowsManagementApiToken),
       }) as AttachmentTypeDefinition,
     [LoggerServiceToken, CoreStart('injection')]
   );

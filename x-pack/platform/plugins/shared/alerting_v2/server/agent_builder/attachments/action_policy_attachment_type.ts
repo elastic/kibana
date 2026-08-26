@@ -21,13 +21,16 @@ import type { LoggerServiceContract } from '../../lib/services/logger_service/lo
 import type { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
 import type { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
 import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { getActionPolicyExecutionHistoryTool } from '../tools/get_action_policy_execution_history';
+import { getWorkflowExecutionHistoryTool } from '../tools/get_workflow_execution_history';
 
 interface CreateActionPolicyAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getActionPolicyClient: (context: AttachmentResolveContext) => ActionPolicyClient;
   getExecutionHistoryClient: (context: { request: import('@kbn/core-http-server').KibanaRequest }) => ActionPolicyExecutionHistoryClient;
   getPrivilegeChecker: (context: { request: import('@kbn/core-http-server').KibanaRequest }) => PrivilegeChecker;
+  getWorkflowApi: () => WorkflowsServerPluginSetup['management'];
 }
 
 const formatActionPolicyDescription = (
@@ -60,6 +63,7 @@ export const createActionPolicyAttachmentType = ({
   getActionPolicyClient,
   getExecutionHistoryClient,
   getPrivilegeChecker,
+  getWorkflowApi,
 }: CreateActionPolicyAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof ACTION_POLICY_ATTACHMENT_TYPE,
   ActionPolicyAttachmentData
@@ -145,6 +149,13 @@ export const createActionPolicyAttachmentType = ({
           policyId,
           logger,
           getExecutionHistoryClient,
+          getPrivilegeChecker,
+        }),
+        getWorkflowExecutionHistoryTool({
+          attachmentId: attachment.id,
+          policyId,
+          logger,
+          getWorkflowApi,
           getPrivilegeChecker,
         }),
       ];

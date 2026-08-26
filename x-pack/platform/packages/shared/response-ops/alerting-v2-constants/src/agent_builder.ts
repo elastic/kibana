@@ -18,6 +18,7 @@ export const ALERTING_TOOL_IDS = {
   manageRule: alertingTool('manage_rule'),
   manageActionPolicy: alertingTool('manage_action_policy'),
   getActionPolicyExecutionHistory: alertingTool('get_action_policy_execution_history'),
+  getWorkflowExecutionHistory: alertingTool('get_workflow_execution_history'),
 } as const;
 
 export const RULE_MANAGEMENT_SKILL_ID = 'rule-management';

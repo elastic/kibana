@@ -520,6 +520,9 @@ export const ALERTING_LOG_CODES = {
   /** `get_action_policy_execution_history` tool failed; returns an error result. */
   AGENT_BUILDER_GET_ACTION_POLICY_EXECUTION_HISTORY_FAILED:
     'AGENT_BUILDER_GET_ACTION_POLICY_EXECUTION_HISTORY_FAILED',
+  /** `get_workflow_execution_history` tool failed; returns an error result. */
+  AGENT_BUILDER_GET_WORKFLOW_EXECUTION_HISTORY_FAILED:
+    'AGENT_BUILDER_GET_WORKFLOW_EXECUTION_HISTORY_FAILED',
   /** Agent Builder skill registration failed; the skill is skipped and Kibana start continues. */
   AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
 
