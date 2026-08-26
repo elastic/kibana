@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
@@ -14,15 +15,36 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 export const DataDedupeStepTypeId = 'data.dedupe' as const;
 
 export const ConfigSchema = z.object({
-  items: z.array(z.unknown()),
-  strategy: z.enum(['keep_first', 'keep_last']).optional().default('keep_first'),
+  items: z.array(z.unknown()).describe(
+    i18n.translate('workflowsExtensions.dataDedupeStep.schema.items', {
+      defaultMessage: 'Source array.',
+    })
+  ),
+  strategy: z
+    .enum(['keep_first', 'keep_last'])
+    .optional()
+    .default('keep_first')
+    .describe(
+      i18n.translate('workflowsExtensions.dataDedupeStep.schema.strategy', {
+        defaultMessage:
+          'keep_first (default) keeps the first occurrence of each unique combination. keep_last keeps the last occurrence of each unique combination.',
+      })
+    ),
 });
 
 export const InputSchema = z.object({
-  keys: z.array(z.string()),
+  keys: z.array(z.string()).describe(
+    i18n.translate('workflowsExtensions.dataDedupeStep.schema.keys', {
+      defaultMessage: 'Fields that determine uniqueness.',
+    })
+  ),
 });
 
-export const OutputSchema = z.array(z.unknown());
+export const OutputSchema = z.array(z.unknown()).describe(
+  i18n.translate('workflowsExtensions.dataDedupeStep.schema.output', {
+    defaultMessage: 'Array with duplicate items removed based on the specified keys.',
+  })
+);
 
 export type DataDedupeStepConfigSchema = typeof ConfigSchema;
 export type DataDedupeStepInputSchema = typeof InputSchema;
@@ -35,44 +57,37 @@ export const dataDedupeStepCommonDefinition: CommonStepDefinition<
 > = {
   id: DataDedupeStepTypeId,
   category: StepCategory.Data,
-  label: 'Deduplicate Collection',
-  description: 'Remove duplicate items from a collection based on unique keys',
+  label: i18n.translate('workflowsExtensions.dataDedupeStep.label', {
+    defaultMessage: 'Deduplicate Collection',
+  }),
+  description: i18n.translate('workflowsExtensions.dataDedupeStep.description', {
+    defaultMessage: 'Remove duplicate items from a collection based on unique keys',
+  }),
   documentation: {
-    details: `# Deduplicate Collection
-
-Remove duplicate items from an array based on one or more unique key fields.
-
-## Basic Usage
-
+    details: i18n.translate('workflowsExtensions.dataDedupeStep.documentation.details', {
+      defaultMessage:
+        'Remove duplicates from an array. The uniqueness fields go in with.keys. Missing keys are treated as undefined for comparison. Empty arrays are returned as-is. Order is preserved relative to the chosen strategy.',
+    }),
+    examples: [
+      `## Unique hosts
 \`\`\`yaml
-- name: unique-users
+- name: unique_hosts
   type: data.dedupe
-  items: "\${{ steps.fetch_users.output }}"
+  items: "\${{ event.alerts }}"
   strategy: "keep_first"
   with:
-    keys: 
-      - "email"
-\`\`\`
-
-## Examples
-
-### Single Key Deduplication
-
-Remove duplicates based on a single field:
-
+    keys: ["host.name"]
+\`\`\``,
+      `## Single key
 \`\`\`yaml
 - name: unique-emails
   type: data.dedupe
   items: "\${{ steps.get_recipients.output }}"
   with:
-    keys: 
+    keys:
       - "email"
-\`\`\`
-
-### Multiple Key Deduplication
-
-Remove duplicates based on a combination of fields:
-
+\`\`\``,
+      `## Multiple keys
 \`\`\`yaml
 - name: unique-user-events
   type: data.dedupe
@@ -82,12 +97,8 @@ Remove duplicates based on a combination of fields:
     keys:
       - "user_id"
       - "event_type"
-\`\`\`
-
-### Keep Last Strategy
-
-Keep the last occurrence instead of the first:
-
+\`\`\``,
+      `## Keep last occurrence
 \`\`\`yaml
 - name: latest-status-per-user
   type: data.dedupe
@@ -96,26 +107,8 @@ Keep the last occurrence instead of the first:
   with:
     keys:
       - "user_id"
-\`\`\`
-
-## Configuration
-
-- **items** (required): Array of items to deduplicate
-- **keys** (required): Array of field names to use for uniqueness check
-- **strategy** (optional): 
-  - \`keep_first\` (default): Keep the first occurrence of each unique combination
-  - \`keep_last\`: Keep the last occurrence of each unique combination
-
-## Output
-
-Returns an array with duplicate items removed based on the specified keys.
-
-## Notes
-
-- If a key doesn't exist in an item, it's treated as \`undefined\` for comparison
-- Empty arrays are returned as-is
-- The order of items is preserved (relative to the chosen strategy)
-`,
+\`\`\``,
+    ],
   },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,

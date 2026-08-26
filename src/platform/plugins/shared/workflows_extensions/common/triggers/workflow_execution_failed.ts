@@ -148,9 +148,18 @@ export const commonWorkflowExecutionFailedTriggerDefinition: CommonTriggerDefini
     details: i18n.translate(
       'workflowsExtensions.triggers.workflowExecutionFailed.documentation.details',
       {
-        defaultMessage: `Emitted when a workflow run fails. The event includes \`workflow\` (id, name, spaceId, isErrorHandler), \`execution\` (id, startedAt, failedAt), and \`error\` (message, stepId, stepName, stepExecutionId). Use KQL in \`on.condition\` to filter by workflow name, failed step, or exclude error-handler workflows to avoid infinite loops.`,
+        defaultMessage: `Fires when any workflow execution reaches the failed terminal state. The event includes \`workflow\` (id, name, spaceId, isErrorHandler), \`execution\` (id, startedAt, failedAt), and \`error\` (message, stepId, stepName, stepExecutionId). Use KQL in \`on.condition\` to filter by workflow name, failed step, or exclude error-handler workflows.`,
       }
     ),
+    notes: [
+      i18n.translate(
+        'workflowsExtensions.triggers.workflowExecutionFailed.documentation.notes.handlerLoop',
+        {
+          defaultMessage:
+            'If a workflows.failed handler fails, it can trigger itself. Filter with event.workflow.isErrorHandler : false, and keep handler workflows simpler than the workflows they monitor.',
+        }
+      ),
+    ],
     examples: [
       i18n.translate(
         'workflowsExtensions.triggers.workflowExecutionFailed.documentation.exampleBasic',

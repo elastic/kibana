@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ALERTING_EPISODE_TRIGGER_EXAMPLES, ALERTING_EPISODE_TRIGGER_NOTES } from './docs';
 import { episodeActionEnvelopeSchema } from './episode_action_envelope';
 
 export const EPISODE_ACTIVATED_TRIGGER_ID = 'alerting.episodeActivated' as const;
@@ -39,6 +40,8 @@ export const episodeActivatedTriggerCommonDefinition: CommonTriggerDefinition<
     defaultMessage: 'Emitted when an alerting episode is activated.',
   }),
   documentation: {
+    notes: ALERTING_EPISODE_TRIGGER_NOTES,
+    examples: ALERTING_EPISODE_TRIGGER_EXAMPLES,
     details: i18n.translate(
       'xpack.alertingVTwo.workflowTriggers.episodeActivated.documentation.details',
       {

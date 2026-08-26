@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ALERTING_EPISODE_TRIGGER_EXAMPLES, ALERTING_EPISODE_TRIGGER_NOTES } from './docs';
 import { episodeActionEnvelopeSchema } from './episode_action_envelope';
 
 export const EPISODE_UNSNOOZED_TRIGGER_ID = 'alerting.episodeUnsnoozed' as const;
@@ -29,6 +30,8 @@ export const episodeUnsnoozedTriggerCommonDefinition: CommonTriggerDefinition<
     defaultMessage: 'Emitted when snooze is removed from an alerting episode.',
   }),
   documentation: {
+    notes: ALERTING_EPISODE_TRIGGER_NOTES,
+    examples: ALERTING_EPISODE_TRIGGER_EXAMPLES,
     details: i18n.translate(
       'xpack.alertingVTwo.workflowTriggers.episodeUnsnoozed.documentation.details',
       {

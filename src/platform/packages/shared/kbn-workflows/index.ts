@@ -88,6 +88,7 @@ export {
   ManualTriggerSchema,
   TriggerSchema,
   getTriggerSchema,
+  CustomTriggerOnSchema,
   TriggerTypes,
   WORKFLOW_EVENTS_VALUES_SET,
   WorkflowEventsSchema,

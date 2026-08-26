@@ -57,6 +57,7 @@ export {
 } from './data_aggregate_step';
 export {
   DataParseJsonStepTypeId,
+  MAX_PARSE_JSON_SOURCE_BYTES,
   dataParseJsonStepCommonDefinition,
   type DataParseJsonStepInputSchema,
   type DataParseJsonStepOutputSchema,
@@ -69,6 +70,7 @@ export {
 } from './data_stringify_json_step';
 export {
   DataConcatStepTypeId,
+  MAX_CONCAT_ITEMS,
   dataConcatStepCommonDefinition,
   type DataConcatStepInputSchema,
   type DataConcatStepOutputSchema,

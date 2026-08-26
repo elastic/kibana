@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ALERTING_RULE_TRIGGER_EXAMPLES, ALERTING_RULE_TRIGGER_NOTES } from './docs';
 import { ruleLifecycleEventSchema } from './schemas';
 
 export const RuleUpdatedTriggerId = 'alerting.ruleUpdated' as const;
@@ -24,11 +25,22 @@ export const ruleUpdatedTriggerCommonDefinition: CommonTriggerDefinition<
     defaultMessage: 'Emitted when an alerting rule is updated.',
   }),
   documentation: {
+    notes: [
+      ...ALERTING_RULE_TRIGGER_NOTES,
+      i18n.translate(
+        'xpack.alertingV2.workflowTriggers.ruleUpdated.documentation.notes.subscribe',
+        {
+          defaultMessage:
+            'When enabled state changes through the dedicated enable or disable action, alerting.ruleEnabled or alerting.ruleDisabled is also emitted. Subscribe to this trigger for configuration updates, or to the enable/disable triggers for state changes only.',
+        }
+      ),
+    ],
     details: i18n.translate('xpack.alertingV2.workflowTriggers.ruleUpdated.documentation.details', {
       defaultMessage:
-        'Emitted after any rule update. The payload includes event.rule with ruleId, spaceId, and tags. When enabled state changes, ruleEnabled or ruleDisabled is also emitted. Subscribe to this trigger for all updates, or to the enable/disable triggers for state changes only.',
+        "Emitted after a rule's configuration is changed using a PATCH or PUT update. Enabling or disabling a rule through the dedicated enable or disable action does not emit this trigger; it emits alerting.ruleEnabled or alerting.ruleDisabled instead. The payload includes event.rule with ruleId, spaceId, and tags.",
     }),
     examples: [
+      ...ALERTING_RULE_TRIGGER_EXAMPLES,
       i18n.translate('xpack.alertingV2.workflowTriggers.ruleUpdated.documentation.example', {
         defaultMessage: `## Run for a specific rule
 \`\`\`yaml

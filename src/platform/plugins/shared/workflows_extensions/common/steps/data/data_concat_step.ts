@@ -15,20 +15,52 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 export const DataConcatStepTypeId = 'data.concat' as const;
 
 const MAX_ARRAYS = 50;
+export const MAX_CONCAT_ITEMS = 100_000;
 
 export const ConfigSchema = z.object({
-  arrays: z.array(z.unknown()).min(1).max(MAX_ARRAYS),
+  arrays: z
+    .array(z.unknown())
+    .min(1)
+    .max(MAX_ARRAYS)
+    .describe(
+      i18n.translate('workflowsExtensions.dataConcatStep.schema.arrays', {
+        defaultMessage:
+          'Array of arrays to concatenate (maximum {max}). Each entry must resolve to an array.',
+        values: { max: MAX_ARRAYS },
+      })
+    ),
 });
 
 export const InputSchema = z.object({
-  dedupe: z.boolean().optional().default(false),
+  dedupe: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe(
+      i18n.translate('workflowsExtensions.dataConcatStep.schema.dedupe', {
+        defaultMessage:
+          'Remove duplicates after concatenation, keeping the first occurrence. Primitives are compared by value; objects by deep equality.',
+      })
+    ),
   flatten: z
     .union([z.boolean(), z.number().int().min(1).max(10)])
     .optional()
-    .default(false),
+    .default(false)
+    .describe(
+      i18n.translate('workflowsExtensions.dataConcatStep.schema.flatten', {
+        defaultMessage:
+          'Flatten nested arrays. true flattens one level. A number (1–10) flattens to that depth.',
+      })
+    ),
 });
 
-export const OutputSchema = z.array(z.unknown());
+export const OutputSchema = z.array(z.unknown()).describe(
+  i18n.translate('workflowsExtensions.dataConcatStep.schema.output', {
+    defaultMessage:
+      'A single array of all items from the input arrays, in order. Maximum {max} items.',
+    values: { max: MAX_CONCAT_ITEMS },
+  })
+);
 
 export type DataConcatStepConfigSchema = typeof ConfigSchema;
 export type DataConcatStepInputSchema = typeof InputSchema;
@@ -48,12 +80,19 @@ export const dataConcatStepCommonDefinition: CommonStepDefinition<
     defaultMessage: 'Combine multiple arrays into a single array',
   }),
   documentation: {
-    details: `# Concat Arrays
-
-Combine multiple arrays into a single array, preserving order.
-
-## Basic Usage
-
+    details: i18n.translate('workflowsExtensions.dataConcatStep.documentation.details', {
+      defaultMessage:
+        'Concatenate arrays. `arrays` is the top-level source field. Null or undefined entries are treated as empty arrays.',
+    }),
+    notes: [
+      i18n.translate('workflowsExtensions.dataConcatStep.documentation.notes.limits', {
+        defaultMessage:
+          'At most {maxArrays} input arrays. The concatenated result cannot exceed {maxItems} items.',
+        values: { maxArrays: MAX_ARRAYS, maxItems: MAX_CONCAT_ITEMS },
+      }),
+    ],
+    examples: [
+      `## Basic usage
 \`\`\`yaml
 - name: merge-tags
   type: data.concat
@@ -61,10 +100,8 @@ Combine multiple arrays into a single array, preserving order.
     - "\${{ inputs.user_tags }}"
     - ["policy:all", "automated"]
     - "\${{ steps.fetch_defaults.output }}"
-\`\`\`
-
-## With Deduplication
-
+\`\`\``,
+      `## With deduplication
 \`\`\`yaml
 - name: unique-recipients
   type: data.concat
@@ -73,10 +110,8 @@ Combine multiple arrays into a single array, preserving order.
     - "\${{ steps.team_b.output.emails }}"
   with:
     dedupe: true
-\`\`\`
-
-## With Flattening
-
+\`\`\``,
+      `## With flattening
 \`\`\`yaml
 - name: flatten-nested
   type: data.concat
@@ -85,23 +120,8 @@ Combine multiple arrays into a single array, preserving order.
     - [["d"]]
   with:
     flatten: true
-\`\`\`
-
-## Configuration
-
-- **arrays** (required): Array of arrays to concatenate (max 50). Each entry must resolve to an array. Null/undefined entries are treated as empty arrays.
-- **dedupe** (optional, default: false): Remove duplicate items, keeping first occurrence. Primitives are compared by value; objects by deep equality.
-- **flatten** (optional, default: false): Flatten nested arrays. Use \`true\` for 1 level, or a number (1-10) for specific depth.
-
-## Output
-
-Returns a single array containing all items from the input arrays in order.
-
-## Limits
-
-- Maximum 50 input arrays
-- Maximum 100,000 total items in the result
-`,
+\`\`\``,
+    ],
   },
   inputSchema: InputSchema,
   outputSchema: OutputSchema,

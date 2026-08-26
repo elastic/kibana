@@ -29,11 +29,11 @@ export const InputSchema = z.object({
   /**
    * output schema for the run agent step, if provided agent will return structured output
    */
-  schema: JsonModelSchema.optional().describe('The schema for the output of the agent.'),
+  schema: JsonModelSchema.optional().describe('JSON Schema for structured output.'),
   /**
    * The user input message to send to the agent.
    */
-  message: z.string().describe('The user input message to send to the agent.'),
+  message: z.string().describe('User message to send to the agent.'),
   /**
    * Optional attachments to provide to the agent.
    */
@@ -68,14 +68,13 @@ export const InputSchema = z.object({
         })
     )
     .optional()
-    .describe('Optional attachments to provide to the agent.'),
+    .describe(
+      'Attachments to provide to the agent. Each attachment has { id?, type, data?, origin?, hidden? }.'
+    ),
   /**
    * Optional existing conversation id to continue a previous conversation.
    */
-  conversation_id: z
-    .string()
-    .optional()
-    .describe('Optional existing conversation ID to continue a previous conversation.'),
+  conversation_id: z.string().optional().describe('Continue an existing conversation by ID.'),
   /**
    * Optional arbitrary key-value tags stored with the underlying agent execution, searchable
    * via the execution service's findExecutions. Lets a caller that doesn't yet know the
@@ -185,7 +184,7 @@ export const ConfigSchema = z
     'agent-id': z
       .string()
       .optional()
-      .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
+      .describe('Agent to invoke. Defaults to the built-in Elastic AI Agent.'),
     /**
      * The ID of the connector to use for model routing. Mutually exclusive with `inference-id`.
      */
@@ -221,7 +220,7 @@ export const ConfigSchema = z
     'create-conversation': z
       .boolean()
       .optional()
-      .describe('When true, creates a conversation for the step.'),
+      .describe('When true, persist the conversation for follow-up steps or later reference.'),
     /**
      * When true, newly created conversations are public so other users who can use the
      * underlying agent can list, view, and continue them. Ignored when continuing an
@@ -318,9 +317,19 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
       'Execute an AgentBuilder AI agent to process input and generate responses. Optionally provide a JSON schema to receive structured output.',
   }),
   documentation: {
+    notes: [
+      i18n.translate('xpack.agentBuilder.runAgentStep.documentation.notes.mutualExclusive', {
+        defaultMessage:
+          'Use connector-id or inference-id, not both. The schema rejects a step that sets both.',
+      }),
+      i18n.translate('xpack.agentBuilder.runAgentStep.documentation.notes.topLevelFields', {
+        defaultMessage:
+          'agent-id, connector-id, inference-id, and create-conversation are top-level kebab-case fields, not nested under with. Since 9.5, Liquid expressions are evaluated in these fields.',
+      }),
+    ],
     details: i18n.translate('xpack.agentBuilder.runAgentStep.documentation.details', {
       defaultMessage:
-        'The agentBuilder.runAgent step allows you to invoke an AI agent within your workflow. The agent will process the input message and return a response, optionally using tools and maintaining conversation context. To receive structured output, provide a JSON schema that defines the expected response format.',
+        'Invoke an Elastic Agent Builder agent as a workflow step. Useful when you want a multi-turn agent loop embedded inside a workflow. The agent handles tool selection, reasoning, and response synthesis, and can maintain conversation context. To receive structured output, provide a JSON schema that defines the expected response format. Use connector-id or inference-id, not both.',
     }),
     examples: [
       `## Basic agent invocation

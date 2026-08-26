@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
+import { ALERTING_EPISODE_TRIGGER_EXAMPLES, ALERTING_EPISODE_TRIGGER_NOTES } from './docs';
 import { episodeActionEnvelopeSchema } from './episode_action_envelope';
 
 export const EPISODE_ASSIGNED_TRIGGER_ID = 'alerting.episodeAssigned' as const;
@@ -39,14 +40,9 @@ export const episodeAssignedTriggerCommonDefinition: CommonTriggerDefinition<
     defaultMessage: 'Emitted when an alerting episode is assigned to a user.',
   }),
   documentation: {
-    details: i18n.translate(
-      'xpack.alertingVTwo.workflowTriggers.episodeAssigned.documentation.details',
-      {
-        defaultMessage:
-          'Emitted after an episode assign action is persisted with a non-null assignee. The payload includes event.episodeId, event.ruleId, event.spaceId, and event.assigneeUid for trigger conditions.',
-      }
-    ),
+    notes: ALERTING_EPISODE_TRIGGER_NOTES,
     examples: [
+      ...ALERTING_EPISODE_TRIGGER_EXAMPLES,
       i18n.translate('xpack.alertingVTwo.workflowTriggers.episodeAssigned.documentation.example', {
         defaultMessage: `## Run for a specific rule
 \`\`\`yaml
@@ -60,6 +56,13 @@ triggers:
         },
       }),
     ],
+    details: i18n.translate(
+      'xpack.alertingVTwo.workflowTriggers.episodeAssigned.documentation.details',
+      {
+        defaultMessage:
+          'Emitted after an episode assign action is persisted with a non-null assignee. The payload includes event.episodeId, event.ruleId, event.spaceId, and event.assigneeUid for trigger conditions.',
+      }
+    ),
   },
   snippets: {
     condition: 'event.assigneeUid: "user-profile-uid"',

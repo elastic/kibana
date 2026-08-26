@@ -15,15 +15,38 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 export const DataFilterStepTypeId = 'data.filter';
 
 export const ConfigSchema = z.object({
-  items: z.unknown(),
+  items: z.unknown().describe(
+    i18n.translate('workflowsExtensions.dataFilterStep.schema.items', {
+      defaultMessage:
+        'Source array. Pass with {rawValue} so it remains an array rather than a string.',
+      values: { rawValue: '${{ ... }}' },
+    })
+  ),
 });
 
 export const InputSchema = z.object({
-  condition: z.string(),
-  limit: z.number().positive().optional(),
+  condition: z.string().describe(
+    i18n.translate('workflowsExtensions.dataFilterStep.schema.condition', {
+      defaultMessage:
+        'KQL predicate evaluated per element. Use item.<field> for element fields and index for the zero-based position.',
+    })
+  ),
+  limit: z
+    .number()
+    .positive()
+    .optional()
+    .describe(
+      i18n.translate('workflowsExtensions.dataFilterStep.schema.limit', {
+        defaultMessage: 'Max matching results. Use for early-exit optimization.',
+      })
+    ),
 });
 
-export const OutputSchema = z.array(z.unknown());
+export const OutputSchema = z.array(z.unknown()).describe(
+  i18n.translate('workflowsExtensions.dataFilterStep.schema.output', {
+    defaultMessage: 'Array of matched items.',
+  })
+);
 
 export type DataFilterStepConfigSchema = typeof ConfigSchema;
 export type DataFilterStepInputSchema = typeof InputSchema;
