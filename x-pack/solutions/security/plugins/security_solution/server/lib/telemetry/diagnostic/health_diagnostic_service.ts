@@ -174,7 +174,7 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       numDocs: 0,
       passed: false,
       fieldNames: [],
-      descriptorVersion: 'version' in query ? query.version : 0,
+      descriptorVersion: 'kind' in query ? (query.kind === 'api' ? 3 : 2) : 0,
       status: 'skipped',
       skipReason: skipped.reason,
     };
@@ -220,7 +220,8 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
     const now = new Date();
 
     return new Promise<HealthDiagnosticQueryStats>((resolve) => {
-      const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now, query.version);
+      const descriptorVersion = query.kind === 'api' ? 3 : 2;
+      const queryStats: HealthDiagnosticQueryStats = queryStat(query.name, now, descriptorVersion);
       let currentPage = 0;
 
       query$
@@ -421,9 +422,14 @@ export class HealthDiagnosticServiceImpl implements HealthDiagnosticService {
       } as LogMeta);
       try {
         if (this.isParseFailureQuery(query)) {
-          // let it pass the filter to send the stats, i.e. this kind of query will be always
-          // skipped in the execution phase, but we want to report it in the stats with the
-          // parse failure reason.
+          if (query.failureReason === 'unknown_version') {
+            this.logger.debug('Skipping query with unknown version (future descriptor)', {
+              queryId: (query as { id?: string }).id,
+              name: query.name,
+            } as LogMeta);
+            return false;
+          }
+          // invalid_descriptor: let it pass so a skipped stat is reported in telemetry.
           return true;
         }
         const { name, scheduleCron, enabled } = query;

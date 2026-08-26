@@ -31,7 +31,12 @@ export type {
   HandleEventsResult,
   ConnectorSpecEvents,
 } from './src/connector_spec_events';
-export { buildEventId, connectorTypeToEventNamespace } from './src/event_type_id';
+export {
+  buildEventId,
+  connectorTypeToEventNamespace,
+  normalizeConnectorTypeId,
+  MAX_CONNECTOR_TYPE_ID_LENGTH,
+} from './src/event_type_id';
 export {
   validateEmittedEvents,
   type ValidateEmittedEventsError,

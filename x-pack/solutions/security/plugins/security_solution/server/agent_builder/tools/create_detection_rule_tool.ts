@@ -149,6 +149,13 @@ The tool stores the result as an attachment (creating new or updating existing).
 Limitations: only ES|QL rules are supported; requires relevant data in existing Elasticsearch indices to generate a query; severity and risk score default to low/21 and are not AI-adapted from threat context.`,
     schema: createDetectionRuleSchema,
     tags: ['security', 'detection', 'rule-creation', 'siem'],
+    annotations: {
+      title: 'Create Detection Rule',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       // Environment-level gates only (flag, space, ES|QL setting), so results are cacheable
       // per space. Per-user rule-edit authz is enforced in the handler — see note there.

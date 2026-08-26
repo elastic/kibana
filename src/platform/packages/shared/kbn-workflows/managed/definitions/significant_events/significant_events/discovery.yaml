@@ -78,11 +78,12 @@ steps:
         | EVAL severity_score = COALESCE(severity_score, 0)
         | EVAL suppressed_age_minutes = DATE_DIFF("minute", oldest_unprocessed, NOW())
         | WHERE recent_detection_count < ?2 OR suppressed_age_minutes >= ?3 OR severity_score >= ?4
+        | EVAL flaky_probe = recent_detection_count >= ?2 AND suppressed_age_minutes >= ?3
         | EVAL staleness_minutes = DATE_DIFF("minute", @timestamp, NOW())
         | EVAL score = severity_score + staleness_minutes
         | SORT score DESC, @timestamp ASC, _id ASC
         | LIMIT ?1
-        | KEEP rule_uuid, _source, score, recent_detection_count
+        | KEEP rule_uuid, _source, score, recent_detection_count, flaky_probe
       params:
         - '${{ inputs.detectionBatchMax }}'
         - '${{ inputs.flakyRuleDetectionThreshold }}'
@@ -158,7 +159,7 @@ steps:
   # -----------------------------------------------------------------------
   - name: run_discovery_agent
     type: ai.agent
-    agent-id: "significant-events.discovery"
+    agent-id: 'significant-events.discovery'
     # Keep connector-id-by-feature/plugin-id/aggregate-by in sync with @kbn/significant-events-schema
     # inference_feature_ids.ts (SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID /
     # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
@@ -181,12 +182,14 @@ steps:
             items:
               type: string
             description: >-
-              rule_uuid of every entry across signals[] whose final events_write
-              result was either written: true or skipped with
-              reason: duplicate_within_window. Failed or unattempted writes must not
-              be included. Used both
-              as a hallucination guardrail (schema validation forces the agent to
-              report real activity) and as the per-rule filter for which detections
+              rule_uuid of every detection that is done this cycle: (1) already-recorded
+              known noise/false-positive that exited after the confirmation query without
+              events_write, or (2) a detection whose events_write result was written: true
+              or skipped with reason existing_active_event or unchanged_outcome.
+              Failed (bulk_error) or unattempted writes (except the already-recorded-noise
+              exit) must not be included.
+              Used both as a hallucination guardrail (schema validation forces the agent
+              to report real activity) and as the per-rule filter for which detections
               get stamped as processed. Full discovery data is written via the
               events_write tool — this is a compact summary only.
           significant_events:
@@ -214,7 +217,7 @@ steps:
                   description: 'true when events_write appended the event version.'
                 reason:
                   type: string
-                  enum: [bulk_error, duplicate_within_window]
+                  enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome]
                   description: 'Failure or skip reason when written is false.'
               required: [event_id, severity, status, written]
         required: [written_rule_uuids, significant_events]

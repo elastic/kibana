@@ -22,8 +22,19 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
         top: 0,
         zIndex: euiTheme.levels.header,
         borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-        backgroundColor: euiTheme.components.headerBackground,
         padding: euiTheme.size.base,
+        overflow: 'hidden',
+        '&:after': {
+          content: '""',
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: `calc(100% - calc(${euiTheme.border.width.thin} * 2))`,
+          height: `calc(100% - calc(${euiTheme.border.width.thin} * 2))`,
+          zIndex: -1,
+          backgroundColor: euiTheme.components.headerBackground,
+        },
       },
     ]);
   },
@@ -31,6 +42,7 @@ export const bodyStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
     width: 'fit-content',
   }),
   bodyContainer: css({
+    height: 'inherit',
     overflowY: 'auto',
     overflowAnchor: 'none',
     scrollbarGutter: 'auto',

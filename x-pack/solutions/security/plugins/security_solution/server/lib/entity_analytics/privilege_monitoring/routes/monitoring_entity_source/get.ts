@@ -25,7 +25,8 @@ import { withMinimumLicense } from '../../../utils/with_minimum_license';
 export const getMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  config: EntityAnalyticsRoutesDeps['config']
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .get({
@@ -45,6 +46,17 @@ export const getMonitoringEntitySourceRoute = (
             params: GetEntitySourceRequestParams,
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       withMinimumLicense(
         async (context, request, response): Promise<IKibanaResponse<GetEntitySourceResponse>> => {

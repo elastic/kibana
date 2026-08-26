@@ -15,6 +15,7 @@ import React, { useMemo } from 'react';
 import { isOpenTelemetryAgentName } from '../../../../../common/agent_name';
 import { ServerlessType } from '../../../../../common/serverless';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { APM_EBT_ACTIONS, SERVICE_HEADER_EBT_ELEMENTS } from '../../../app/ebt_constants';
 import { getContainerIcon } from '../../../shared/service_icons';
 import { ServiceIconBadge } from '../../../shared/service_icons/service_icon_badge';
 
@@ -72,7 +73,7 @@ function useServiceIconCandidates({
     return [
       {
         key: 'service' as const,
-        iconType: getAgentIcon(icons?.agentName, isDarkMode) || 'node',
+        iconType: getAgentIcon(icons?.agentName, isDarkMode) || 'vectorTriangle',
         title: i18n.translate('xpack.apm.serviceIcons.service', {
           defaultMessage: 'Service',
         }),
@@ -98,7 +99,7 @@ function useServiceIconCandidates({
       },
       {
         key: 'serverless' as const,
-        iconType: getServerlessIcon(icons?.serverlessType) || 'node',
+        iconType: getServerlessIcon(icons?.serverlessType) || 'vectorTriangle',
         title: getServerlessTitle(icons?.serverlessType),
         isVisible: !!icons?.serverlessType,
       },
@@ -155,6 +156,11 @@ export function useServiceIconBadges({
           environment={environment}
           start={start}
           end={end}
+          ebt={{
+            action: APM_EBT_ACTIONS.VIEW_SERVICE_METADATA,
+            element: SERVICE_HEADER_EBT_ELEMENTS.ICON_BADGE,
+            detail: item.key,
+          }}
         />
       ),
     }));

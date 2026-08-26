@@ -17,6 +17,7 @@ import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { getLensApiMock } from '@kbn/lens-plugin/public/react_embeddable/mocks';
+import { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
 
 jest.mock('../../../../common/lib/kibana');
 const currentAppId$ = new Subject<string | undefined>();
@@ -183,6 +184,22 @@ describe('createAddToTimelineLensAction', () => {
       ).read = true;
       const _action = createAddToTimelineLensAction({ store, order: 1 });
       expect(await _action.isCompatible(context)).toEqual(false);
+    });
+
+    it('should return true when the lens embeddable is not rendered inside a dashboard', async () => {
+      expect(await addToTimelineAction.isCompatible(context)).toEqual(true);
+    });
+
+    it('should return false when the lens embeddable is rendered inside a dashboard', async () => {
+      expect(
+        await addToTimelineAction.isCompatible({
+          ...context,
+          embeddable: {
+            ...getMockLensApi(),
+            parentApi: { type: DASHBOARD_API_TYPE },
+          },
+        })
+      ).toEqual(false);
     });
   });
 

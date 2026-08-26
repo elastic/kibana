@@ -36,7 +36,7 @@ export interface CascadedDocumentsContext
   esqlQuery: AggregateQuery;
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;
-  isApproximate: boolean;
+  esqlApproximation: boolean;
   renderViewModeToggle: RenderViewModeToggle | undefined;
   expandedDoc$: BehaviorSubject<DataTableRecord | undefined>;
   expandedDocOwner$: BehaviorSubject<string | undefined>;
