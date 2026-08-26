@@ -102,15 +102,19 @@ describe('useValidateIndexPatternTimestamp', () => {
 
     expect(result.current.hasTimestamp).toBe(true);
     expect(mockGetFieldsForWildcard).toHaveBeenCalledTimes(2);
-    expect(mockGetFieldsForWildcard).toHaveBeenCalledWith({ pattern: 'logs-*', fields: ['@timestamp'] });
-    expect(mockGetFieldsForWildcard).toHaveBeenCalledWith({ pattern: 'metrics-*', fields: ['@timestamp'] });
+    expect(mockGetFieldsForWildcard).toHaveBeenCalledWith({
+      pattern: 'logs-*',
+      fields: ['@timestamp'],
+    });
+    expect(mockGetFieldsForWildcard).toHaveBeenCalledWith({
+      pattern: 'metrics-*',
+      fields: ['@timestamp'],
+    });
   });
 
   it('returns false when only some patterns have @timestamp', async () => {
     mockGetFieldsForWildcard.mockImplementation(({ pattern }: { pattern: string }) =>
-      Promise.resolve(
-        pattern === 'logs-*' ? [{ name: '@timestamp', type: 'date' }] : []
-      )
+      Promise.resolve(pattern === 'logs-*' ? [{ name: '@timestamp', type: 'date' }] : [])
     );
 
     const { result } = renderHook(
