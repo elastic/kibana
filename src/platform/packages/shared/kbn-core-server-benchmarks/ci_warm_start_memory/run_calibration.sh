@@ -37,7 +37,6 @@ LEFT_BUILD_DIR="${WORK_DIR}/left"
 RIGHT_BUILD_DIR="${WORK_DIR}/right"
 BENCH_CONFIG_PATH="src/platform/packages/shared/kbn-core-server-benchmarks/ci_warm_start_memory.benchmark.config.ts"
 PIPELINE_SLUG="kibana-on-merge"
-ARTIFACT_FILENAME="kibana-default.tar.zst"
 
 A_BUILD_ID="019f94c0-d0d9-4944-84fc-27beda66beb7"
 A_BUILD_NUMBER="104030"
@@ -413,6 +412,8 @@ main() {
     # shellcheck source=/dev/null
     source .buildkite/scripts/common/util.sh
   fi
+
+  ARTIFACT_FILENAME="$(kibana_test_snapshot_archive)"
 
   ORIENTATION="$(printf '%s' "${ORIENTATION}" | tr '[:upper:]' '[:lower:]')"
   resolve_orientation "${ORIENTATION}"

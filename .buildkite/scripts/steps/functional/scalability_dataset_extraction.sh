@@ -35,7 +35,9 @@ tar -czf "${OUTPUT_DIR}/scalability_traces.tar.gz" -C target scalability_traces
 buildkite-agent artifact upload "${OUTPUT_DIR}/scalability_traces.tar.gz"
 
 echo "--- Downloading Kibana artifacts used in tests"
-download_tmp_artifact kibana-default.tar.zst "${OUTPUT_DIR}/" "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+download_tmp_artifact "$KIBANA_TEST_SNAPSHOT_ARCHIVE" "${OUTPUT_DIR}/" "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+# The benchmarking pipeline reads this dataset back later, possibly at a different version
+mv "${OUTPUT_DIR}/$KIBANA_TEST_SNAPSHOT_ARCHIVE" "${OUTPUT_DIR}/kibana-default.tar.zst"
 
 echo "--- Adding commit info"
 echo "${BUILDKITE_COMMIT}" > "${OUTPUT_DIR}/KIBANA_COMMIT_HASH"
