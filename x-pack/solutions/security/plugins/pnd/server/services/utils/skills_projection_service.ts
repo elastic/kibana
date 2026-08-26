@@ -61,7 +61,7 @@ export class SkillsProjectionService {
   }
 
   private async refresh(request: KibanaRequest, spaceId: string): Promise<void> {
-    const agents = this.agentBuilder
+    const agentLookup = this.agentBuilder
       ? await buildAgentLookup(this.agentBuilder, this.agentTypeMap, request, this.logger)
       : undefined;
 
@@ -74,7 +74,7 @@ export class SkillsProjectionService {
     );
 
     const watches = items
-      .map((item) => projectWorkflowToWatch(item, agents))
+      .map((item) => projectWorkflowToWatch(item, agentLookup))
       .sort(compareWatchesForDisplay);
 
     const previousSkills = this.cacheBySpace.get(spaceId)?.skills ?? [];

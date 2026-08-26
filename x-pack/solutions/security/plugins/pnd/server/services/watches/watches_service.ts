@@ -173,14 +173,14 @@ export class WatchesService {
 
     const managedWorkflows = await this.requireManagedWorkflows();
     const management = this.requireManagement();
-    const [{ items, notInstalledRegistrations }, agents] = await Promise.all([
+    const [{ items, notInstalledRegistrations }, agentLookup] = await Promise.all([
       fetchWatchWorkflows(management, managedWorkflows, spaceId, this.logger, {
         includeExecutionHistory: true,
       }),
       this.buildAgentLookup(request),
     ]);
 
-    const watches = items.map((item) => projectWorkflowToWatch(item, agents));
+    const watches = items.map((item) => projectWorkflowToWatch(item, agentLookup));
     watches.push(...notInstalledRegistrations.map((r) => projectNotInstalledWatch(r.watch)));
 
     return ListWatchesResponse.parse({ watches: watches.sort(compareWatchesForDisplay) });
@@ -273,6 +273,8 @@ export class WatchesService {
 
     const listItem = toWatchListItem(detail);
 
+    const agentLookup = await this.buildAgentLookup(request);
+
     let settings: WatchSettings | undefined;
     let settingsRevision: number | null = null;
     if (registration?.settings) {
@@ -309,10 +311,10 @@ export class WatchesService {
         finishedAt: run.finishedAt,
         duration: run.duration,
       }));
-      const agents = await this.buildAgentLookup(request);
+
       const projectedWatch = projectWorkflowToWatch(
         { ...listItem, history, tags: detail.definition?.tags },
-        agents
+        agentLookup
       );
       const watch = registration ? { ...projectedWatch, id: registration.id } : projectedWatch;
 
@@ -353,7 +355,7 @@ export class WatchesService {
           error instanceof Error ? error.message : String(error)
         }`
       );
-      const projectedWatch = projectWorkflowToWatch(listItem);
+      const projectedWatch = projectWorkflowToWatch(listItem, agentLookup);
       return GetWatchResponse.parse({
         watch: registration ? { ...projectedWatch, id: registration.id } : projectedWatch,
         settings,

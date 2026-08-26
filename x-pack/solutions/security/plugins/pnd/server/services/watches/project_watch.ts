@@ -135,7 +135,7 @@ const collectSkillIdsFromText = (text: string, into: Set<string>): void => {
 export const projectSkillsFromDefinition = (
   definition: WorkflowYaml | null | undefined,
   policy: WatchPolicyAttrs | undefined,
-  agents?: AgentLookup
+  agentLookupCalback?: AgentLookup
 ): WatchCallableRef[] => {
   const skillIds = new Set<string>();
 
@@ -145,10 +145,12 @@ export const projectSkillsFromDefinition = (
       const withBlock = isRecord(step.with) ? step.with : {};
       const agentId = asString(step['agent-id']);
 
-      if (agentId && agents) {
-        const agentDef = agents.getAgent(agentId);
+      if (agentId && agentLookupCalback) {
+        const agentDef = agentLookupCalback.getAgent(agentId);
         if (agentDef) {
-          const agentTypeDef = agentDef.type ? agents.getAgentType(agentDef.type) : undefined;
+          const agentTypeDef = agentDef.type
+            ? agentLookupCalback.getAgentType(agentDef.type)
+            : undefined;
           const baseSkills: readonly string[] = agentTypeDef?.baseConfiguration?.skill_ids ?? [];
           const overridesBlock = isRecord(withBlock.configuration_overrides)
             ? withBlock.configuration_overrides
@@ -188,7 +190,7 @@ export const projectSkillsFromDefinition = (
   for (const id of skillIds) {
     const override = overrides.get(id);
     // Default to skill definition only if UI overrides are not defined
-    const skillDef = override ? undefined : agents?.getSkill(id);
+    const skillDef = override ? undefined : agentLookupCalback?.getSkill(id);
     skills.push({
       id,
       name: override?.name ?? skillDef?.name ?? humanizeId(id),
@@ -214,7 +216,10 @@ export const projectRecentRunsFromHistory = (
   }));
 };
 
-export const projectWorkflowToWatch = (item: WorkflowListItemDto, agents?: AgentLookup): Watch => {
+export const projectWorkflowToWatch = (
+  item: WorkflowListItemDto,
+  agentLookupCallback?: AgentLookup
+): Watch => {
   const definition = item.definition;
   const policy = extractWatchPolicy(definition);
   const triggers = projectTriggers(definition);
@@ -242,7 +247,7 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto, agents?: Agent
     coverage,
     scopeSummary: '',
     scopes: [],
-    skills: projectSkillsFromDefinition(definition, policy, agents),
+    skills: projectSkillsFromDefinition(definition, policy, agentLookupCallback),
     metrics: {
       lastRun,
     },
