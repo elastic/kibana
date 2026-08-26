@@ -6,15 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiSuperSelect, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -22,16 +14,52 @@ import type { DataFormat } from '../../aws_service_matrix';
 
 const DATA_FORMAT_OPTIONS = [
   {
-    value: 'ecs' as DataFormat,
-    text: i18n.translate('xpack.ingestHub.servicesStep.dataFormat.ecs', {
-      defaultMessage: 'ECS-compatible',
-    }),
-  },
-  {
     value: 'otel' as DataFormat,
-    text: i18n.translate('xpack.ingestHub.servicesStep.dataFormat.otel', {
+    inputDisplay: i18n.translate('xpack.ingestHub.servicesStep.dataFormat.otel', {
       defaultMessage: 'OTel-native',
     }),
+    dropdownDisplay: (
+      <>
+        <strong>
+          <FormattedMessage
+            id="xpack.ingestHub.servicesStep.dataFormat.otel"
+            defaultMessage="OTel-native"
+          />
+        </strong>
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedMessage
+              id="xpack.ingestHub.servicesStep.dataFormat.otel.description"
+              defaultMessage="OpenTelemetry semantic conventions. Some services have limited content today."
+            />
+          </p>
+        </EuiText>
+      </>
+    ),
+  },
+  {
+    value: 'ecs' as DataFormat,
+    inputDisplay: i18n.translate('xpack.ingestHub.servicesStep.dataFormat.ecs', {
+      defaultMessage: 'ECS-compatible',
+    }),
+    dropdownDisplay: (
+      <>
+        <strong>
+          <FormattedMessage
+            id="xpack.ingestHub.servicesStep.dataFormat.ecs"
+            defaultMessage="ECS-compatible"
+          />
+        </strong>
+        <EuiText size="s" color="subdued">
+          <p>
+            <FormattedMessage
+              id="xpack.ingestHub.servicesStep.dataFormat.ecs.description"
+              defaultMessage="Elastic Common Schema field mappings — the default, broadest content coverage."
+            />
+          </p>
+        </EuiText>
+      </>
+    ),
   },
 ];
 
@@ -50,65 +78,22 @@ export function DataFormatSelect({ dataFormat, onChange, disabled }: DataFormatS
     }
   );
 
+  const prepend = i18n.translate('xpack.ingestHub.servicesStep.dataFormat.label', {
+    defaultMessage: 'Data format',
+  });
+
   const select = (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <strong>
-            <FormattedMessage
-              id="xpack.ingestHub.servicesStep.dataFormat.label"
-              defaultMessage="Data format"
-            />
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {/* span needed: disabled <select> swallows pointer events; span intercepts for tooltip */}
-        <span
-          tabIndex={disabled ? 0 : undefined}
-          style={disabled ? { display: 'inline-block' } : undefined}
-        >
-          <EuiSelect
-            compressed
-            aria-label={i18n.translate('xpack.ingestHub.servicesStep.dataFormat.ariaLabel', {
-              defaultMessage: 'Data format',
-            })}
-            options={DATA_FORMAT_OPTIONS}
-            value={dataFormat}
-            onChange={(e) => onChange(e.target.value as DataFormat)}
-            disabled={disabled}
-            data-test-subj="servicesStep-dataFormatSelect"
-          />
-        </span>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiSuperSelect
+      compressed
+      prepend={prepend}
+      aria-label={prepend}
+      options={DATA_FORMAT_OPTIONS}
+      valueOfSelected={dataFormat}
+      onChange={onChange}
+      disabled={disabled}
+      data-test-subj="servicesStep-dataFormatSelect"
+    />
   );
 
-  return (
-    <>
-      {disabled ? <EuiToolTip content={disabledTooltip}>{select}</EuiToolTip> : select}
-      {dataFormat === 'otel' && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            iconType="info"
-            title={
-              <FormattedMessage
-                id="xpack.ingestHub.servicesStep.dataFormat.otelCallout.title"
-                defaultMessage="OTel-native coverage is currently limited to log services via the Elastic Cloud Forwarder"
-              />
-            }
-            data-test-subj="servicesStep-otelCallout"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.servicesStep.dataFormat.otelCallout.body"
-              defaultMessage="Switch to ECS-compatible to see metrics services and the full AWS catalog."
-            />
-          </EuiCallOut>
-        </>
-      )}
-    </>
-  );
+  return disabled ? <EuiToolTip content={disabledTooltip}>{select}</EuiToolTip> : select;
 }

@@ -66,14 +66,25 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
 
   return (
     <div data-test-subj="onboardingStep-services">
-      <EuiTitle size="m">
-        <h2>
-          <FormattedMessage
-            id="xpack.ingestHub.servicesStep.title"
-            defaultMessage="Which AWS services do you want to monitor?"
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem>
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                id="xpack.ingestHub.servicesStep.title"
+                defaultMessage="Which AWS services do you want to monitor?"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <DataFormatSelect
+            dataFormat={dataFormat}
+            onChange={setDataFormat}
+            disabled={isFormatDisabled}
           />
-        </h2>
-      </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiText color="subdued">
         <p>
@@ -84,12 +95,6 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
         </p>
       </EuiText>
       <EuiSpacer size="l" />
-      <DataFormatSelect
-        dataFormat={dataFormat}
-        onChange={setDataFormat}
-        disabled={isFormatDisabled}
-      />
-      <EuiSpacer size="m" />
       <ServiceSearchFilter
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
