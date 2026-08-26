@@ -22268,7 +22268,6 @@
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink": "詳しくはこちら",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText": "デフォルトでは、すべてのログとメトリックがホットティアに格納されます。この統合のデータ保持ポリシーの変更については、{learnMore}してください。",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeHelpLabel": "このポリシーのデータストリームのタイプを選択してください。この設定により、統合のデータストリームの名前が変更されます。{learnMore}。",
-    "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeInputLabel": "データストリームタイプ",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel": "説明",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyIlmPolicyText": "この名前空間のすべてのデータストリームに適用するILMポリシーを選択してください。{learnMore}",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditDataStreamTypeHelpLabel": "この統合のデータストリームのタイプは変更できません。別の入力タイプを使用するには、新しい統合ポリシーを作成してください。",

@@ -22154,7 +22154,6 @@
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink": "En savoir plus",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText": "Par défaut, tous les logs et toutes les données d'indicateurs sont stockés au niveau \"hot\". {learnMore} sur la modification de la politique de conservation des données pour cette intégration.",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeHelpLabel": "Sélectionnez un type de flux de données pour cette politique. Ce paramètre modifie le nom du flux de données de l'intégration. {learnMore}.",
-    "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataStreamTypeInputLabel": "Type de flux de données",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDescriptionInputLabel": "Description",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyIlmPolicyText": "Sélectionnez une politique ILM à appliquer à tous les flux de données pour cet espace de noms. {learnMore}",
     "xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyInputOnlyEditDataStreamTypeHelpLabel": "Le type de flux de données ne peut pas être modifié pour cette intégration. Créez une nouvelle politique d'intégration pour utiliser un autre type d'entrée.",
