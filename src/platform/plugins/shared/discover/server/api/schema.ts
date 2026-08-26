@@ -139,12 +139,13 @@ const discoverSessionTabPresentationSchema = z
       .meta({
         description: 'Time interval for the chart histogram on this tab.',
       }),
-    time_restore: z.boolean().default(false).meta({
+    time_range: timeRangeSchema.optional().meta({
       description:
-        "When `true`, Discover applies this tab's `time_range` and `refresh_interval`. When `false`, those fields are ignored and global time settings are used.",
+        'Time range to restore when the tab is opened. When omitted, Discover uses the global time settings.',
     }),
-    time_range: timeRangeSchema.optional(),
-    refresh_interval: refreshIntervalSchema.optional(),
+    refresh_interval: refreshIntervalSchema.optional().meta({
+      description: 'Refresh interval to restore when `time_range` is set.',
+    }),
     vis_context: visContextSchema.optional(),
     control_panels: discoverSessionControlPanelsSchema.optional(),
   })
