@@ -163,7 +163,11 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   const rulesApi = useService(RulesApi);
 
   // TODO: Add pagination or infinite scroll for users with more than 200 rules
-  const { data: rulesData, isLoading: isLoadingRules } = useQuery({
+  const {
+    data: rulesData,
+    isLoading: isLoadingRules,
+    isError: isRulesError,
+  } = useQuery({
     queryKey: ['sequence-builder-available-rules'],
     refetchOnWindowFocus: false,
     queryFn: () =>
@@ -369,6 +373,13 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
             <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '100%' }}>
               <EuiLoadingSpinner size="m" />
             </EuiFlexGroup>
+          ) : isRulesError ? (
+            <EuiText size="s" color="danger">
+              <FormattedMessage
+                id="xpack.alertingV2.sequenceBuilderPage.rulesLoadError"
+                defaultMessage="Failed to load rules"
+              />
+            </EuiText>
           ) : (
             <>
               {availableRules.map((rule) => (
