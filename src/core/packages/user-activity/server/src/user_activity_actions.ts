@@ -90,6 +90,54 @@ export const userActivityActions = {
     groupName: 'Discover',
     versionAddedAt: '9.6',
   },
+  alerting_rule_create: {
+    description: 'User created an alerting rule.',
+    ownerTeam: '@elastic/response-ops',
+    groupName: 'Alerting',
+    versionAddedAt: '9.6',
+  },
+  alerting_rule_update: {
+    description: 'User updated an existing alerting rule.',
+    ownerTeam: '@elastic/response-ops',
+    groupName: 'Alerting',
+    versionAddedAt: '9.6',
+  },
+  alerting_rule_delete: {
+    description: 'User deleted an alerting rule.',
+    ownerTeam: '@elastic/response-ops',
+    groupName: 'Alerting',
+    versionAddedAt: '9.6',
+  },
+  alerting_rule_enable: {
+    description: 'User enabled an alerting rule.',
+    ownerTeam: '@elastic/response-ops',
+    groupName: 'Alerting',
+    versionAddedAt: '9.6',
+  },
+  alerting_rule_disable: {
+    description: 'User disabled an alerting rule.',
+    ownerTeam: '@elastic/response-ops',
+    groupName: 'Alerting',
+    versionAddedAt: '9.6',
+  },
+  alerting_rule_snooze: {
+    description: 'User snoozed notifications for an alerting rule.',
+    ownerTeam: '@elastic/response-ops',
+    groupName: 'Alerting',
+    versionAddedAt: '9.6',
+  },
+  alerting_rule_unsnooze: {
+    description: 'User unsnoozed notifications for an alerting rule.',
+    ownerTeam: '@elastic/response-ops',
+    groupName: 'Alerting',
+    versionAddedAt: '9.6',
+  },
+  alerting_rule_api_key_update: {
+    description: "User updated an alerting rule's API key.",
+    ownerTeam: '@elastic/response-ops',
+    groupName: 'Alerting',
+    versionAddedAt: '9.6',
+  },
 } as const satisfies Record<string, UserActivityActionDefinition>;
 
 /** Closed union derived from the keys of {@link userActivityActions}. @public */

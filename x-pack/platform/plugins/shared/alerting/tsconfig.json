@@ -43,6 +43,8 @@
     "@kbn/safer-lodash-set",
     "@kbn/alerting-types",
     "@kbn/change-history",
+    "@kbn/change-history-service",
+    "@kbn/core-user-activity-server",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/rrule",

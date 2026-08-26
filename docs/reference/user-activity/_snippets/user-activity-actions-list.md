@@ -1,4 +1,17 @@
 <!-- To regenerate, run: node scripts/generate user-activity-actions-docs -->
+### Alerting
+
+| Action | Description |
+| --- | --- |
+| `alerting_rule_api_key_update` {applies_to}`stack: ga 9.6+` | User updated an alerting rule's API key. |
+| `alerting_rule_create` {applies_to}`stack: ga 9.6+` | User created an alerting rule. |
+| `alerting_rule_delete` {applies_to}`stack: ga 9.6+` | User deleted an alerting rule. |
+| `alerting_rule_disable` {applies_to}`stack: ga 9.6+` | User disabled an alerting rule. |
+| `alerting_rule_enable` {applies_to}`stack: ga 9.6+` | User enabled an alerting rule. |
+| `alerting_rule_snooze` {applies_to}`stack: ga 9.6+` | User snoozed notifications for an alerting rule. |
+| `alerting_rule_unsnooze` {applies_to}`stack: ga 9.6+` | User unsnoozed notifications for an alerting rule. |
+| `alerting_rule_update` {applies_to}`stack: ga 9.6+` | User updated an existing alerting rule. |
+
 ### Authentication
 
 | Action | Description |

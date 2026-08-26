@@ -7,9 +7,12 @@
 
 import { every, isUndefined } from 'lodash';
 import type { LogChangeHistoryOptions } from '@kbn/change-history';
+import type { DualWriteUserActivity } from '@kbn/change-history-service';
 import type { RuleChangeTrackingMetadata } from '@kbn/alerting-types';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { Logger, SavedObjectBulkResult } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
+import type { UserActivityActionId, UserActivityEventType } from '@kbn/core-user-activity-server';
 import type {
   RuleChange,
   RuleChangeHistorySnapshot,
@@ -31,6 +34,69 @@ interface EncryptedRuleFields {
   apiKey?: string | null;
   uiamApiKey?: string | null;
 }
+
+interface UserActivityMapping {
+  /** Registered user-activity action id (closed union enforced by core). */
+  actionId: UserActivityActionId;
+  /** ECS event.type for the action. */
+  eventType: UserActivityEventType;
+  /** Past-tense verb phrase used to build the guideline-compliant message. */
+  verbPhrase: string;
+}
+
+/**
+ * Explicit mapping from the change-tracking action to the user-activity registry id.
+ *
+ * `changesContext.action` is a plain string because consumers may pass custom actions
+ * through the `changeTracking` option (e.g. Security's `rule_install` / `rule_upgrade`).
+ * Custom actions have no registered user-activity id, so no `userActivity` block is
+ * attached for them: their changes are logged to change history only.
+ */
+const USER_ACTIVITY_MAPPING: Record<RuleChangeTrackingAction, UserActivityMapping> = {
+  [RuleChangeTrackingAction.ruleCreate]: {
+    actionId: 'alerting_rule_create',
+    eventType: 'creation',
+    verbPhrase: 'created',
+  },
+  [RuleChangeTrackingAction.ruleUpdate]: {
+    actionId: 'alerting_rule_update',
+    eventType: 'change',
+    verbPhrase: 'updated',
+  },
+  [RuleChangeTrackingAction.ruleUpdateApiKey]: {
+    actionId: 'alerting_rule_api_key_update',
+    eventType: 'change',
+    verbPhrase: 'updated the API key of',
+  },
+  [RuleChangeTrackingAction.ruleEnable]: {
+    actionId: 'alerting_rule_enable',
+    eventType: 'change',
+    verbPhrase: 'enabled',
+  },
+  [RuleChangeTrackingAction.ruleDisable]: {
+    actionId: 'alerting_rule_disable',
+    eventType: 'change',
+    verbPhrase: 'disabled',
+  },
+  [RuleChangeTrackingAction.ruleSnooze]: {
+    actionId: 'alerting_rule_snooze',
+    eventType: 'change',
+    verbPhrase: 'snoozed',
+  },
+  [RuleChangeTrackingAction.ruleUnsnooze]: {
+    actionId: 'alerting_rule_unsnooze',
+    eventType: 'change',
+    verbPhrase: 'unsnoozed',
+  },
+  [RuleChangeTrackingAction.ruleDelete]: {
+    actionId: 'alerting_rule_delete',
+    eventType: 'deletion',
+    verbPhrase: 'deleted',
+  },
+};
+
+const getUserActivityMapping = (action: string): UserActivityMapping | undefined =>
+  (USER_ACTIVITY_MAPPING as Record<string, UserActivityMapping>)[action];
 
 interface LogRuleChanges {
   /**
@@ -97,6 +163,14 @@ export async function logRuleChanges({
   // Lazily fetched and memoized: at most one ui settings read per logRuleChanges call,
   // regardless of how many security solution rules are in effectiveRuleSOs.
   let securityRuleChangesHistoryEnabled: boolean | undefined;
+  // Resolved once per call: `action` is constant across the batch. Unmapped (custom)
+  // actions produce no `userActivity` block, so those changes stay change-history-only.
+  const userActivityMapping = getUserActivityMapping(action);
+  if (!userActivityMapping) {
+    logger.debug(
+      `No user-activity action registered for change-tracking action "${action}"; logging to change history only`
+    );
+  }
 
   for (const ruleSO of effectiveRuleSOs) {
     if (isSavedObjectErrorResult(ruleSO)) {
@@ -172,6 +246,14 @@ export async function logRuleChanges({
         // Capture it in object.sequence to be used as a tiebreaker when sorting
         // rule changes history by @timestamp DESC, object.sequence DESC
         sequence: ruleSnapshot.revision,
+        // Opt-in dual write: presence of this block makes the change-history service also
+        // emit one Kibana user-activity entry for this change, independently of whether
+        // the history write happens or succeeds (the two sinks are peers).
+        ...(userActivityMapping
+          ? {
+              userActivity: buildUserActivity(userActivityMapping, ruleSO.id, ruleDomain),
+            }
+          : {}),
       });
     } catch (e) {
       logger.debug(
@@ -200,6 +282,23 @@ export async function logRuleChanges({
   } catch (e) {
     logger.warn(`Unable to log bulk rule changes for action "${action}": ${e}`);
   }
+}
+
+/**
+ * Builds the per-change user-activity payload following the user-activity guidelines:
+ * `User {past-tense verb} rule "Name" (id: x).`, the registered action id, the ECS
+ * event type, and the object shape enriched from the rule domain already in scope.
+ */
+function buildUserActivity(
+  { actionId, eventType, verbPhrase }: UserActivityMapping,
+  ruleId: string,
+  ruleDomain: RuleDomain
+): DualWriteUserActivity {
+  return {
+    message: `User ${verbPhrase} rule "${ruleDomain.name}" (id: ${ruleId}).`,
+    event: { action: actionId, type: eventType, outcome: 'success' },
+    object: { id: ruleId, name: ruleDomain.name, type: 'rule', tags: ruleDomain.tags ?? [] },
+  };
 }
 
 function getRuleType(

@@ -12,11 +12,11 @@ import type {
 } from '@kbn/core/server';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type {
-  ObjectChange,
   GetHistoryResult,
   LogChangeHistoryOptions,
   GetChangeHistoryOptions,
 } from '@kbn/change-history';
+import type { DualWriteObjectChange } from '@kbn/change-history-service';
 import type { RuleDomain } from '../../../application/rule/types';
 
 /**
@@ -42,7 +42,7 @@ export type RuleChangeHistorySnapshot = Omit<
   | 'updatedAt'
 > & { createdAt: string; updatedAt: string };
 
-export interface RuleChange extends Omit<ObjectChange, 'snapshot'> {
+export interface RuleChange extends Omit<DualWriteObjectChange, 'snapshot'> {
   module: RuleTypeSolution;
   /** Post-change rule state; persisted as `object.snapshot` by @kbn/change-history. */
   snapshot: RuleChangeHistorySnapshot;

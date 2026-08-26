@@ -14,12 +14,12 @@ import type {
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { Logger } from '@kbn/logging';
 import type {
-  ObjectChange,
   GetHistoryResult,
   LogChangeHistoryOptions,
   GetChangeHistoryOptions,
 } from '@kbn/change-history';
-import { ChangeHistoryClient } from '@kbn/change-history';
+import type { DualWriteObjectChange, TrackUserAction } from '@kbn/change-history-service';
+import { ChangeHistoryServiceClient } from '@kbn/change-history-service';
 import { RULE_SAVED_OBJECT_TYPE, RuleAttributesToEncrypt } from '../../../saved_objects';
 import type {
   ChangeTrackingServiceInitializeParams,
@@ -34,18 +34,29 @@ const RULE_SO_FIELDS_TO_HASH = Object.fromEntries(
 );
 
 export class ChangeTrackingService implements IChangeTrackingService {
-  private clients: Record<RuleTypeSolution, ChangeHistoryClient>;
+  private clients: Record<RuleTypeSolution, ChangeHistoryServiceClient>;
   private logger: Logger;
   private kibanaVersion: string;
   private modules: RuleTypeSolution[];
   private dataset = ALERTING_RULE_DATASET;
   private authService?: CoreAuthenticationService;
+  private trackUserAction?: TrackUserAction;
 
   constructor(logger: Logger, kibanaVersion: string) {
-    this.clients = {} as Record<RuleTypeSolution, ChangeHistoryClient>;
+    this.clients = {} as Record<RuleTypeSolution, ChangeHistoryServiceClient>;
     this.logger = logger.get('change_tracking');
     this.kibanaVersion = kibanaVersion;
     this.modules = [];
+  }
+
+  /**
+   * Injects the core user-activity tracker (`coreSetup.userActivity.trackUserAction`).
+   * The service is constructed before core setup is available, so the tracker is handed
+   * over here; the per-solution clients receive a lazy closure, making the call order
+   * relative to {@link register} irrelevant.
+   */
+  setTrackUserAction(trackUserAction: TrackUserAction): void {
+    this.trackUserAction = trackUserAction;
   }
 
   register(module: RuleTypeSolution): void {
@@ -54,7 +65,13 @@ export class ChangeTrackingService implements IChangeTrackingService {
     }
     this.modules.push(module);
     const { dataset, logger, kibanaVersion } = this;
-    const client = new ChangeHistoryClient({ module, dataset, logger, kibanaVersion });
+    const client = new ChangeHistoryServiceClient({
+      module,
+      dataset,
+      logger,
+      kibanaVersion,
+      trackUserAction: (params) => this.trackUserAction?.(params),
+    });
     this.clients[module] = client;
     this.logger.debug(`Change tracking registered for [${module}, ${this.dataset}]`);
   }
@@ -128,14 +145,14 @@ export class ChangeTrackingService implements IChangeTrackingService {
     // Group rule changes per solution
     const correlationId = crypto.randomBytes(16).toString('hex');
     const groups = changes.reduce((result, change) => {
-      const { objectId, objectType, snapshot, module } = change;
+      const { objectId, objectType, snapshot, module, userActivity } = change;
       let objects = result.get(module);
       if (!objects) {
         result.set(module, (objects = []));
       }
-      objects.push({ objectType, objectId, snapshot });
+      objects.push({ objectType, objectId, snapshot, userActivity });
       return result;
-    }, new Map<RuleTypeSolution, ObjectChange[]>());
+    }, new Map<RuleTypeSolution, DualWriteObjectChange[]>());
 
     // One bulk call per solution (security, observability, stack, etc.)
     // since each is using different data streams.

@@ -4656,6 +4656,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/change-history-service@link:x-pack/platform/packages/shared/kbn-change-history-service":
+  version "0.0.0"
+  uid ""
+
 "@kbn/change-history-ui@link:x-pack/platform/packages/shared/kbn-change-history-ui":
   version "0.0.0"
   uid ""
