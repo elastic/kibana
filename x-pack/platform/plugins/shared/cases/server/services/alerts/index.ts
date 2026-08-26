@@ -159,10 +159,10 @@ export class AlertService {
     });
     const result = new Map<string, STATUS_VALUES>();
     for (const doc of response.docs) {
-      if ('found' in doc && doc.found && doc._id != null) {
+      if ('found' in doc && doc.found && doc._id != null && doc._index != null) {
         const previousStatus = AlertService.parseWorkflowStatus(doc._source);
         if (previousStatus !== undefined) {
-          result.set(doc._id, previousStatus);
+          result.set(`${doc._index}:${doc._id}`, previousStatus);
         }
       }
     }
@@ -180,7 +180,7 @@ export class AlertService {
     for (const alert of alerts) {
       if (!AlertService.isEmptyAlert(alert)) {
         const translatedStatus = this.translateStatus(alert);
-        const previousStatus = previousStatusMap.get(alert.id);
+        const previousStatus = previousStatusMap.get(`${alert.index}:${alert.id}`);
         // Only emit for alerts the prefetch confirmed exist and whose status is actually changing
         const isActualChange = previousStatus !== undefined && previousStatus !== translatedStatus;
         if (isActualChange) {
@@ -206,7 +206,9 @@ export class AlertService {
         alertIds,
         status,
         previousStatuses: alertIds.flatMap((id) => {
-          const previousStatus = previousStatusMap.get(id);
+          const index = idToIndex.get(id);
+          const previousStatus =
+            index !== undefined ? previousStatusMap.get(`${index}:${id}`) : undefined;
           return previousStatus !== undefined ? [{ id, previousStatus }] : [];
         }),
         alertIdToIndex: Object.fromEntries(idToIndex),

@@ -863,7 +863,14 @@ describe('updateAlertsStatus — event bus', () => {
     bus.onAlertStatusChanged(listener);
 
     esClient.mget.mockResolvedValueOnce({
-      docs: [{ found: true, _id: 'a1', _source: { 'kibana.alert.workflow_status': 'open' } }],
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'open' },
+        },
+      ],
     } as never);
 
     const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
@@ -891,8 +898,18 @@ describe('updateAlertsStatus — event bus', () => {
     // a2 has previous status 'closed' → target 'open': actual change
     esClient.mget.mockResolvedValueOnce({
       docs: [
-        { found: true, _id: 'a1', _source: { 'kibana.alert.workflow_status': 'acknowledged' } },
-        { found: true, _id: 'a2', _source: { 'kibana.alert.workflow_status': 'closed' } },
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'acknowledged' },
+        },
+        {
+          found: true,
+          _id: 'a2',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'closed' },
+        },
       ],
     } as never);
 
@@ -916,8 +933,18 @@ describe('updateAlertsStatus — event bus', () => {
     // Both alerts already at 'closed' (the target)
     esClient.mget.mockResolvedValueOnce({
       docs: [
-        { found: true, _id: 'a1', _source: { 'kibana.alert.workflow_status': 'closed' } },
-        { found: true, _id: 'a2', _source: { 'kibana.alert.workflow_status': 'closed' } },
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'closed' },
+        },
+        {
+          found: true,
+          _id: 'a2',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'closed' },
+        },
       ],
     } as never);
 
@@ -973,7 +1000,12 @@ describe('updateAlertsStatus — event bus', () => {
     // a1 is found with status 'acknowledged', a2 is not found
     esClient.mget.mockResolvedValueOnce({
       docs: [
-        { found: true, _id: 'a1', _source: { 'kibana.alert.workflow_status': 'acknowledged' } },
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'acknowledged' },
+        },
         { found: false, _id: 'a2' },
       ],
     } as never);
@@ -998,7 +1030,14 @@ describe('updateAlertsStatus — event bus', () => {
     bus.onAlertStatusChanged(listener);
 
     esClient.mget.mockResolvedValueOnce({
-      docs: [{ found: true, _id: 'a1', _source: { 'kibana.alert.workflow_status': 'triaged' } }],
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.siem-signals',
+          _source: { 'kibana.alert.workflow_status': 'triaged' },
+        },
+      ],
     } as never);
 
     const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
@@ -1007,6 +1046,46 @@ describe('updateAlertsStatus — event bus', () => {
     ]);
 
     expect(listener).not.toHaveBeenCalled();
+
+    bus.removeAllListeners();
+  });
+
+  it('treats same id with different indices as independent entries (composite key)', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    // 'a1' appears in two indices: security has it 'open' (change), observability has it 'closed' (no-op).
+    // Without composite key, observability's 'closed' would overwrite security's 'open' in the map,
+    // causing the security alert to be incorrectly treated as a no-op and suppressed.
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.alerts-security.alerts-default',
+          _source: { 'kibana.alert.workflow_status': 'open' },
+        },
+        {
+          found: true,
+          _id: 'a1',
+          _index: '.alerts-observability.apm.alerts-default',
+          _source: { 'kibana.alert.workflow_status': 'closed' },
+        },
+      ],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.alerts-security.alerts-default', status: CaseStatuses.closed },
+      { id: 'a1', index: '.alerts-observability.apm.alerts-default', status: CaseStatuses.closed },
+    ]);
+
+    // The security entry (open → closed) is an actual change and must emit.
+    // The observability entry (closed → closed) is a no-op and must not.
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.previousStatuses).toEqual([{ id: 'a1', previousStatus: 'open' }]);
 
     bus.removeAllListeners();
   });
