@@ -475,7 +475,7 @@ export function initializeLayoutManager(
       (serializedState as PinnedControlLayoutState) ?? DEFAULT_PINNED_CONTROL_STATE;
     const newPanelUuid = createPanel({ ...panelPackage, serializedState: panelState });
     const layoutState = {
-      ...(serializedState ? pick(serializedState, 'grow', 'width') : {}),
+      ...(serializedState ? { grow, width } : {}),
       ...prevLayoutState,
     };
     const panelToPin = {
