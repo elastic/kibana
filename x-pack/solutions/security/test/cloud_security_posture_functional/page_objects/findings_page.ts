@@ -25,6 +25,7 @@ const GROUP_SELECTOR_OPTION_TEST_SUBJECTS: Record<string, string> = {
   'Cloud account ID': 'panel-cloud.account.id',
   'Kubernetes cluster ID': 'panel-orchestrator.cluster.id',
   Namespace: 'panel-data_stream.namespace',
+  CVE: 'panel-vulnerability.id',
 };
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
